@@ -1,3 +1,5 @@
+import Callout from "../../../components/Callout"
+
 export const metadata = {
   title: 'Task Delegation Pattern | AI Engineering Wiki',
   description: 'Orchestrator verteilt Tasks an spezialisierte Agenten — Routing, Prioritäten, Deadlines.',
@@ -14,6 +16,16 @@ export default function TaskDelegationPage() {
       </div>
 
       <div className="prose prose-invert max-w-none">
+        <Callout type="summary" title="Auf einen Blick">
+          <p>
+            Task Delegation trennt Orchestrierung von Ausführung. Ein Orchestrator
+            klassifiziert Anfragen (Intent), routet sie an spezialisierte Agenten
+            (Coder, Researcher, Reviewer) und aggregiert die Ergebnisse. Kernkonzepte:
+            Intent Classification, Routing Matrix, Priority Queue mit Deadlines,
+            Result Aggregation. Ohne Delegation wird jeder Agent zum Flaschenhals.
+          </p>
+        </Callout>
+
         <h2 className="text-xl font-semibold text-white mt-8">Das Problem</h2>
         <p>
           Ein einzelner Agent kann nicht alles besser als spezialisierte Tools.
@@ -144,18 +156,71 @@ async def aggregate_results(sub_tasks: list) -> str:
         </pre>
 
         <h2 className="text-xl font-semibold text-white mt-8">Wichtige Aspekte</h2>
-        <ul>
+        <ul className="list-disc list-inside text-gray-300 space-y-2 mt-4">
           <li><strong>Timeout:</strong> Jeder Sub-Agent braucht ein Max-Timeout</li>
           <li><strong>Retry:</strong> Bei Fehlern max. 2x wiederholen</li>
           <li><strong>Fallback:</strong> Was tun, wenn alle Agenten fehlschlagen?</li>
           <li><strong>Cost Control:</strong> Budget-Limits pro Task</li>
         </ul>
 
-        <h2 className="text-xl font-semibold text-white mt-8">Quellen</h2>
-        <ul>
-          <li><a href="https://arxiv.org/abs/2308.11432" target="_blank" className="text-brand-blue hover:underline">Agent Architectures (ArXiv)</a></li>
-          <li><a href="https://www.kore.ai/platform/agent-platform" target="_blank" className="text-brand-blue hover:underline">Kore.ai Agent Orchestration</a></li>
-        </ul>
+        <h2 className="text-xl font-semibold text-white mt-8">Fallback-Strategie</h2>
+        <p className="text-gray-300">
+          Wenn ein Agent fehlschlägt, braucht der Orchestrator einen Plan B.
+          Hier ein bewährtes Pattern mit Retry und Graceful Degradation:
+        </p>
+        <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
+          <code className="text-sm text-gray-300">{`# Fallback mit Retry und Degradation
+import asyncio
+from typing import Optional
+
+async def execute_with_fallback(
+    task: Task,
+    max_retries: int = 2,
+    timeout: int = 30
+) -> Optional[str]:
+    """Execute task with retry and fallback logic"""
+
+    for attempt in range(max_retries + 1):
+        try:
+            result = await asyncio.wait_for(
+                execute_agent(task),
+                timeout=timeout
+            )
+            return result
+
+        except asyncio.TimeoutError:
+            print(f"Attempt {attempt + 1}: Timeout after {timeout}s")
+
+        except Exception as e:
+            print(f"Attempt {attempt + 1}: Error: {e}")
+
+    # Alle Retries fehlgeschlagen — Fallback
+    return await fallback_handler(task)
+
+async def fallback_handler(task: Task) -> str:
+    """Graceful degradation wenn Agent nicht verfügbar"""
+    return f"Task '{task.agent}' konnte nicht ausgeführt werden. " \\
+           f"Bitte manuell prüfen: {task.payload}"`}</code>
+        </pre>
+
+        <Callout type="warning" title="Endlos-Schleifen vermeiden">
+          <p>
+            Ohne Timeout und Retry-Limit kann ein fehlgeschlagener Agent den
+            gesamten Orchestrator blockieren. Setze immer ein Maximum für
+            Retries (2-3) und ein Timeout pro Agent (30-60 Sekunden).
+          </p>
+        </Callout>
+
+        {/* Quellen */}
+        <section className="mt-16 pt-8 border-t border-white/10">
+          <h2 className="text-xl font-bold text-white mb-4">Quellen</h2>
+          <ul className="space-y-2 text-sm text-white/50">
+            <li><a href="https://arxiv.org/abs/2308.11432" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">AutoGen: Multi-Agent Conversations (ArXiv)</a> — Microsoft Research zu Multi-Agent Orchestrierung</li>
+            <li><a href="https://docs.python.org/3/library/asyncio.html" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Python asyncio Dokumentation</a> — Grundlage für async Task-Verarbeitung</li>
+            <li><a href="https://docs.python.org/3/library/heapq.html" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Python heapq</a> — Priority Queue Implementierung</li>
+            <li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Anthropic: Building Effective Agents</a> — Best Practices für Agent-Architekturen</li>
+          </ul>
+        </section>
       </div>
     </div>
   )

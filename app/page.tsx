@@ -259,6 +259,21 @@ export default function Home() {
             title="AI Engineering Shop"
             description="Produkte & Bundles"
           />
+          <ExternalLink
+            href="https://www.wko.at/oe/gruendung/ai-toolbox.pdf"
+            title="WKO AI-Toolbox"
+            description="AI-Leitfäden der Wirtschaftskammer AT"
+          />
+          <ExternalLink
+            href="https://www.rtr.at/rtr/service/ki-servicestelle/projekte-initiativen/Projekte_-_Initiativen.de.html"
+            title="RTR KI-Servicestelle"
+            description="Österreichische KI-Servicestelle"
+          />
+          <ExternalLink
+            href="https://www.ffg.at/"
+            title="FFG Förderungen"
+            description="Forschungsförderung für AI-Projekte"
+          />
         </div>
       </section>
 

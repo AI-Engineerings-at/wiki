@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import Callout from "../../../components/Callout"
 
 export const metadata: Metadata = {
   title: 'Memory Management Pattern | AI Engineering Wiki',
@@ -16,6 +17,17 @@ export default function MemoryManagementPage() {
       </div>
 
       <div className="prose prose-invert max-w-none">
+        <Callout type="summary" title="Auf einen Blick">
+          <p>
+            AI-Agenten vergessen alles zwischen Sessions. Memory Management löst
+            das durch 3 Stufen: CLAUDE.md (einfach, 0ms Latenz), Topic Files
+            (mittlere Komplexität, ~50K Tokens), Knowledge Graphs mit
+            Vektordatenbanken (unbegrenzt, ~200ms Latenz). Für 90% der Projekte
+            reicht CLAUDE.md. Erst bei großen Wissensbasen brauchst du ChromaDB
+            oder pgvector.
+          </p>
+        </Callout>
+
         <figure className="my-8">
           <img src="/images/diagrams/patterns-memory-3tier.png" alt="Memory Management 3-Tier Modell — Session, Project, Knowledge" className="rounded-xl border border-white/10 w-full" />
           <figcaption className="text-center text-white/40 text-sm mt-2">3-Tier Memory: Session Memory, Project Memory und Knowledge Graph</figcaption>
@@ -134,18 +146,66 @@ def load_session(agent_id):
           </tbody>
         </table>
 
-        <h2 className="text-xl font-semibold text-white mt-8">Praxis-Tipp</h2>
-        <p>
-          Beginne mit CLAUDE.md. Das reicht für 90% der Projekte. Erst wenn du
-          wirklich eine Wissensbasis aufbaust, die größer als 50K Tokens ist,
-          brauchst du Vektordatenbanken.
+        <h2 className="text-xl font-semibold text-white mt-8">Beispiel: ChromaDB für Vektorspeicher</h2>
+        <p className="text-gray-300">
+          Wenn dein Wissen über 50K Tokens hinausgeht, speichere Dokumente
+          als Embeddings und suche per Ähnlichkeit:
         </p>
+        <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
+          <code className="text-sm text-gray-300">{`# ChromaDB: Vektorspeicher für Agent-Memory
+import chromadb
 
-        <h2 className="text-xl font-semibold text-white mt-8">Quellen</h2>
-        <ul>
-          <li><a href="https://docs.anthropic.com/en/docs/claude-code/memory" target="_blank" className="text-brand-blue hover:underline">Anthropic Memory Docs</a></li>
-          <li><a href="https://github.com/anthropics/claude-code" target="_blank" className="text-brand-blue hover:underline">CLAUDE.md Specification</a></li>
-        </ul>
+# Client erstellen (persistent)
+client = chromadb.PersistentClient(path="./chroma_data")
+
+# Collection anlegen
+collection = client.get_or_create_collection(
+    name="agent_knowledge",
+    metadata={"hnsw:space": "cosine"}
+)
+
+# Dokumente speichern
+collection.add(
+    documents=[
+        "PostgreSQL läuft auf Port 5432 im Docker Swarm",
+        "Ollama braucht GPU-Node docker-swarm3",
+        "Backup läuft täglich um 02:00 via Restic",
+    ],
+    ids=["doc1", "doc2", "doc3"],
+    metadatas=[
+        {"category": "infra"},
+        {"category": "ai"},
+        {"category": "ops"},
+    ]
+)
+
+# Ähnlichkeitssuche
+results = collection.query(
+    query_texts=["Wo läuft die Datenbank?"],
+    n_results=2
+)
+print(results["documents"])
+# → [["PostgreSQL läuft auf Port 5432 im Docker Swarm", ...]]`}</code>
+        </pre>
+
+        <Callout type="tip" title="Praxis-Tipp">
+          <p>
+            Beginne mit CLAUDE.md. Das reicht für 90% der Projekte. Erst wenn du
+            wirklich eine Wissensbasis aufbaust, die größer als 50K Tokens ist,
+            brauchst du Vektordatenbanken wie ChromaDB oder pgvector.
+          </p>
+        </Callout>
+
+        {/* Quellen */}
+        <section className="mt-16 pt-8 border-t border-white/10">
+          <h2 className="text-xl font-bold text-white mb-4">Quellen</h2>
+          <ul className="space-y-2 text-sm text-white/50">
+            <li><a href="https://docs.anthropic.com/en/docs/claude-code/memory" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Anthropic: Claude Code Memory</a> — Offizielle Dokumentation zu CLAUDE.md</li>
+            <li><a href="https://github.com/anthropics/claude-code" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Claude Code Repository</a> — CLAUDE.md Spezifikation und Beispiele</li>
+            <li><a href="https://docs.trychroma.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">ChromaDB Dokumentation</a> — Open-Source Vektordatenbank</li>
+            <li><a href="https://github.com/pgvector/pgvector" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">pgvector</a> — Vektor-Extension für PostgreSQL</li>
+          </ul>
+        </section>
       </div>
     </div>
   )

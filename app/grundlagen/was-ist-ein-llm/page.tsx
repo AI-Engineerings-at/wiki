@@ -526,6 +526,8 @@ llm --> out3
             <li><a href="https://corelab.tech/llmgpu/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">CoreLab: LLM GPU Benchmarks</a> — 8B Modelle ~112 tok/s auf RTX 3090</li>
             <li><a href="https://www.globalpetrolprices.com/Austria/electricity_prices/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">GlobalPetrolPrices: Austria Electricity Prices</a> — Strompreis AT Privat EUR 0,34/kWh (2026)</li>
             <li><a href="https://bestvaluegpu.com/en-eu/history/new-and-used-rtx-3090-price-history-and-specs/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">BestValueGPU: RTX 3090 Preisentwicklung</a> — Gebrauchtpreise EUR 750-1.123</li>
+            <li><a href="https://www.wko.at/oe/gruendung/ai-toolbox.pdf" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">WKO AI-Toolbox</a> — Praktische AI-Tools und Leitfäden der Wirtschaftskammer Österreich</li>
+            <li><a href="https://www.wko.at/oe/oesterreich/wkoe-gewerbe-und-handwerk-nuetzliche-ki-helfer" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">WKO KI-Handbuch Gewerbe & Handwerk</a> — Nützliche KI-Helfer für Gewerbe und Handwerk</li>
           </ul>
         </section>
 

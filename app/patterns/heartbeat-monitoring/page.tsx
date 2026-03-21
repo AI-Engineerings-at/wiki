@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import Callout from "../../../components/Callout"
 
 export const metadata: Metadata = {
   title: 'Heartbeat & Monitoring Pattern | AI Engineering Wiki',
@@ -16,6 +17,15 @@ export default function HeartbeatMonitoringPage() {
       </div>
 
       <div className="prose prose-invert max-w-none">
+        <Callout type="summary" title="Auf einen Blick">
+          <p>
+            Heartbeat Monitoring stellt sicher, dass AI-Agenten laufen und reagieren.
+            Jeder Agent sendet regelmäßig ein Signal (Heartbeat). Bleibt es aus,
+            greift Alerting. Implementierung mit Prometheus + Grafana, Alerting über
+            Alertmanager. Ohne Monitoring merkst du Ausfälle erst, wenn es zu spät ist.
+          </p>
+        </Callout>
+
         <h2 className="text-xl font-semibold text-white mt-8">Das Problem</h2>
         <p>
           Wenn ein Agent hängen bleibt oder unkontrolliert Token verbraucht,
@@ -147,18 +157,51 @@ groups:
           <li><strong>n8n Webhook Monitor:</strong> Built-in Error Tracking</li>
         </ul>
 
-        <h2>Praxis-Tipp</h2>
-        <p>
-          Beginne mit einfachen Health-Endpoint Checks (HTTP 200 OK).
-          Erst wenn das läuft, erweiterst du auf detaillierte Metrics.
-          Alles andere ist Over-Engineering.
-        </p>
+        <Callout type="tip" title="Praxis-Tipp">
+          <p>
+            Beginne mit einfachen Health-Endpoint Checks (HTTP 200 OK).
+            Erst wenn das läuft, erweiterst du auf detaillierte Metrics.
+            Alles andere ist Over-Engineering.
+          </p>
+        </Callout>
 
-        <h2 className="text-xl font-semibold text-white mt-8">Quellen</h2>
-        <ul>
-          <li><a href="https://prometheus.io/docs/alerting/latest/alertmanager/" target="_blank" className="text-brand-blue hover:underline">Prometheus Alerting</a></li>
-          <li><a href="https://grafana.com/docs/grafana/latest/" target="_blank" className="text-brand-blue hover:underline">Grafana Docs</a></li>
-        </ul>
+        <h2 className="text-xl font-semibold text-white mt-8">Uptime Kuma als einfache Alternative</h2>
+        <p>
+          Nicht jedes Setup braucht Prometheus. Uptime Kuma ist ein
+          Self-hosted Monitoring Tool mit Web-UI, das HTTP-Checks,
+          TCP-Checks und Docker-Container überwachen kann:
+        </p>
+        <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
+          <code className="text-sm text-gray-300">{`# Uptime Kuma als Docker Container
+docker run -d \\
+  --name uptime-kuma \\
+  --restart=always \\
+  -p 3001:3001 \\
+  -v uptime-kuma:/app/data \\
+  louislam/uptime-kuma:1
+
+# Danach erreichbar unter http://localhost:3001
+# Monitors anlegen:
+# - HTTP(s) Check auf deine Agent-Endpoints
+# - TCP Check auf Ollama Port 11434
+# - Docker Container Check (Socket einbinden)
+
+# Notifications konfigurieren:
+# - Mattermost Webhook
+# - E-Mail
+# - Telegram Bot`}</code>
+        </pre>
+
+        {/* Quellen */}
+        <section className="mt-16 pt-8 border-t border-white/10">
+          <h2 className="text-xl font-bold text-white mb-4">Quellen</h2>
+          <ul className="space-y-2 text-sm text-white/50">
+            <li><a href="https://prometheus.io/docs/alerting/latest/alertmanager/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Prometheus Alertmanager</a> — Alerting und Notification-Routing</li>
+            <li><a href="https://grafana.com/docs/grafana/latest/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Grafana Dokumentation</a> — Dashboards und Visualisierung</li>
+            <li><a href="https://github.com/louislam/uptime-kuma" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Uptime Kuma</a> — Self-hosted Monitoring Tool</li>
+            <li><a href="https://prometheus.io/docs/concepts/metric_types/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Prometheus Metric Types</a> — Gauges, Counters, Histograms</li>
+          </ul>
+        </section>
       </div>
     </div>
   )

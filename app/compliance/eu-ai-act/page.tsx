@@ -308,6 +308,10 @@ Verarbeitet das System biometrische Daten?
             <li><a href="https://artificialintelligenceact.eu/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">AI Act Explorer</a> — Interaktive Aufbereitung aller Artikel</li>
             <li><a href="https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">EU-Kommission: Regulatory Framework for AI</a> — Offizielle Übersicht</li>
             <li><a href="https://www.ris.bka.gv.at/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">RIS — Rechtsinformationssystem des Bundes</a> — Österreichische Umsetzung</li>
+            <li><a href="https://www.wko.at/oe/gruendung/ai-toolbox.pdf" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">WKO AI-Toolbox</a> — Praktische AI-Tools und Leitfäden der Wirtschaftskammer Österreich</li>
+            <li><a href="https://www.rtr.at/rtr/service/ki-servicestelle/projekte-initiativen/Projekte_-_Initiativen.de.html" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">RTR KI-Servicestelle</a> — Österreichische KI-Servicestelle, Projekte und Initiativen</li>
+            <li><a href="https://www.ffg.at/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">FFG — Österreichische Forschungsförderungsgesellschaft</a> — Förderungen für AI-Projekte und Digitalisierung</li>
+            <li><a href="https://caralegal.eu/blog/ki-richtlinie-guide-und-vorlage/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">caralegal KI-Richtlinie Guide & Vorlage</a> — Praktischer Guide für unternehmenseigene KI-Richtlinien</li>
           </ul>
         </section>
       </div>

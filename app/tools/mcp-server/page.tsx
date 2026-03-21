@@ -1,3 +1,5 @@
+import Callout from "../../../components/Callout"
+
 export const metadata = {
   title: 'MCP Server | AI Engineering Wiki',
   description:
@@ -13,6 +15,15 @@ export default function McpServer() {
       </div>
 
       <div className="prose prose-invert max-w-none">
+        <Callout type="summary" title="Auf einen Blick">
+          <p>
+            MCP ist ein offener Standard von Anthropic, der Claude Desktop mit
+            externen Tools verbindet. Du kannst eigene Server schreiben (Python,
+            TypeScript), die Docker, Proxmox, Grafana oder Ollama steuern —
+            alles per natürlicher Sprache. Setup in unter 10 Minuten mit FastMCP.
+          </p>
+        </Callout>
+
         <p className="text-lg text-gray-300">
           Model Context Protocol (MCP) verbindet Claude Desktop mit deiner Infrastruktur.
         </p>
