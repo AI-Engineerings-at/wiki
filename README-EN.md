@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="docs/images/hero-banner.png" alt="AI Engineering Wiki" width="100%" />
+</div>
+
 # >_< AI Engineering Wiki
 
 The German-language knowledge base for Agent Orchestration, Multi-Agent Systems and GDPR-compliant AI stacks.

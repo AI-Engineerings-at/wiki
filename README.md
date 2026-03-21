@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="docs/images/hero-banner.png" alt="AI Engineering Wiki" width="100%" />
+</div>
+
 # >_< AI Engineering Wiki
 
 Die deutschsprachige Wissensdatenbank zu Agent Orchestration, Multi-Agent Systemen und DSGVO-konformem AI-Stack.
