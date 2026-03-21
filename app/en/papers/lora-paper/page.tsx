@@ -1,4 +1,5 @@
 import { Metadata } from "next"
+import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { RelatedArticles } from "../../../../components/RelatedArticles"
 
 export const metadata: Metadata = {
@@ -89,6 +90,35 @@ export default function LoRAPaperPage() {
             trained. With rank r=16 and dimension d=4096, you train 131,072 parameters
             per layer instead of 16.7 million — a reduction by a factor of 128.
           </p>
+
+          <PlantUMLDiagram diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam RectangleBorderColor #4262FF
+skinparam RectangleBackgroundColor #1E293B
+
+title LoRA Architecture
+
+rectangle "Input x" as input #334155
+
+package "Original Path (frozen)" as orig {
+  rectangle "W\\n(d x d)\\nFrozen" as W #2D1B69
+}
+
+package "LoRA Path (trainable)" as lora {
+  rectangle "A\\n(r x d)\\nTrainable" as A #065F46
+  rectangle "B\\n(d x r)\\nTrainable" as B #065F46
+}
+
+rectangle "h = Wx + BAx" as output #334155
+
+input --> W : Wx
+input --> A : Ax
+A --> B : BAx
+W --> output
+B --> output : + (Addition)
+@enduml`} caption="LoRA Architecture: Original weights W stay frozen, only the small matrices A and B are trained" />
         </section>
 
         {/* How LoRA Works */}
@@ -149,6 +179,34 @@ export default function LoRAPaperPage() {
               the same base model.
             </li>
           </ul>
+
+          <PlantUMLDiagram diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam RectangleBorderColor #4262FF
+skinparam RectangleBackgroundColor #1E293B
+
+title Fine-Tuning Comparison: Parameters & Memory
+
+rectangle "Full Fine-Tuning" as full #7C3AED {
+  rectangle "7B parameters trained" as fp #2D1B69
+  rectangle "~28 GB VRAM" as fm #2D1B69
+  rectangle "Full model copy\\nper task" as fc #2D1B69
+}
+
+rectangle "LoRA (r=16)" as lora #065F46 {
+  rectangle "~4M parameters trained" as lp #065F46
+  rectangle "~16 GB VRAM" as lm #065F46
+  rectangle "Adapter: ~10-50 MB\\nper task" as lc #065F46
+}
+
+rectangle "QLoRA (r=16, 4-bit)" as qlora #1E3A5F {
+  rectangle "~4M parameters trained" as qp #1E3A5F
+  rectangle "~6 GB VRAM" as qm #1E3A5F
+  rectangle "Base model in 4-bit\\n+ 16-bit adapters" as qc #1E3A5F
+}
+@enduml`} caption="Fine-tuning methods compared: QLoRA enables training on consumer hardware" />
         </section>
 
         {/* Variants */}

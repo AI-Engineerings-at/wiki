@@ -1,5 +1,6 @@
 import { Metadata } from "next"
 import Callout from "../../../components/Callout"
+import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 import { RelatedArticles } from "../../../components/RelatedArticles"
 
 export const metadata: Metadata = {
@@ -85,6 +86,40 @@ export default function ReActPaperPage() {
           <p className="text-white/70 leading-relaxed mt-4">
             Dieser Zyklus wiederholt sich, bis die Aufgabe gelöst ist.
           </p>
+
+          <PlantUMLDiagram diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam ActivityBackgroundColor #1E293B
+skinparam ActivityBorderColor #4262FF
+skinparam ActivityDiamondBackgroundColor #2D1B69
+skinparam ActivityDiamondBorderColor #4262FF
+
+title ReAct Loop: Thought → Action → Observation
+
+start
+:Aufgabe / Frage;
+
+repeat
+  :💭 **Thought**
+  Situation analysieren,
+  nächsten Schritt planen;
+
+  :⚡ **Action**
+  Tool aufrufen
+  (Suche, API, Code...);
+
+  :👁️ **Observation**
+  Ergebnis der Aktion
+  interpretieren;
+
+repeat while (Aufgabe gelöst?) is (Nein)
+->Ja;
+
+:✅ **Finale Antwort**;
+stop
+@enduml`} caption="Der ReAct-Loop: Abwechselndes Denken und Handeln, bis die Aufgabe gelöst ist" />
         </section>
 
         {/* Beispiel */}
@@ -159,6 +194,40 @@ export default function ReActPaperPage() {
               Code-Ausführung.
             </li>
           </ul>
+
+          <PlantUMLDiagram diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam RectangleBorderColor #4262FF
+skinparam RectangleBackgroundColor #1E293B
+skinparam PackageBorderColor #4262FF
+skinparam PackageBackgroundColor #0F172A
+
+title Standard LLM vs. ReAct Agent
+
+package "Standard LLM" as std {
+  rectangle "Frage" as q1 #334155
+  rectangle "LLM generiert\\nAntwort direkt" as gen1 #2D1B69
+  rectangle "Antwort\\n(kann halluziniert sein)" as a1 #7C3AED
+  q1 --> gen1
+  gen1 --> a1
+}
+
+package "ReAct Agent" as react {
+  rectangle "Frage" as q2 #334155
+  rectangle "Thought:\\nWas muss ich wissen?" as t1 #1E3A5F
+  rectangle "Action:\\nTool aufrufen" as act1 #065F46
+  rectangle "Observation:\\nEchte Daten" as obs1 #065F46
+  rectangle "Thought:\\nDaten interpretieren" as t2 #1E3A5F
+  rectangle "Antwort\\n(faktenbasiert)" as a2 #065F46
+  q2 --> t1
+  t1 --> act1
+  act1 --> obs1
+  obs1 --> t2
+  t2 --> a2
+}
+@enduml`} caption="Standard LLM antwortet direkt (Halluzinationsrisiko) — ReAct Agent nutzt Tools für faktenbasierte Antworten" />
         </section>
 
         {/* ReAct in heutigen Frameworks */}

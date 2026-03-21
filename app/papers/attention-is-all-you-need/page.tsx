@@ -1,5 +1,6 @@
 import { Metadata } from "next"
 import Callout from "../../../components/Callout"
+import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 import { RelatedArticles } from "../../../components/RelatedArticles"
 
 export const metadata: Metadata = {
@@ -86,6 +87,43 @@ export default function AttentionPaperPage() {
             bei großen Dimensionen zu groß werden. Softmax wandelt die Scores in
             Wahrscheinlichkeiten um.
           </p>
+
+          <PlantUMLDiagram diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam RectangleBorderColor #4262FF
+skinparam RectangleBackgroundColor #1E293B
+skinparam ActivityBackgroundColor #1E293B
+skinparam ActivityBorderColor #4262FF
+
+title Self-Attention Mechanismus
+
+rectangle "Eingabe-Token" as input #334155
+rectangle "Query (Q)" as q #1E3A5F
+rectangle "Key (K)" as k #1E3A5F
+rectangle "Value (V)" as v #1E3A5F
+rectangle "Lineare\\nProjektion" as proj1 #334155
+rectangle "Lineare\\nProjektion" as proj2 #334155
+rectangle "Lineare\\nProjektion" as proj3 #334155
+rectangle "QK^T / √d_k" as dot #2D1B69
+rectangle "Softmax" as soft #2D1B69
+rectangle "Gewichtete\\nSumme" as weighted #2D1B69
+rectangle "Attention Output" as output #065F46
+
+input --> proj1
+input --> proj2
+input --> proj3
+proj1 --> q
+proj2 --> k
+proj3 --> v
+q --> dot
+k --> dot
+dot --> soft
+soft --> weighted
+v --> weighted
+weighted --> output
+@enduml`} caption="Self-Attention: Jedes Token erzeugt Q, K, V — die Attention-Gewichte bestimmen, welche Tokens relevant sind" />
         </section>
 
         {/* Multi-Head Attention */}
@@ -130,6 +168,54 @@ export default function AttentionPaperPage() {
             während BERT nur den Encoder-Teil verwendet. Das zeigt, wie flexibel die
             Architektur ist.
           </p>
+
+          <PlantUMLDiagram diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam RectangleBorderColor #4262FF
+skinparam RectangleBackgroundColor #1E293B
+skinparam PackageBorderColor #4262FF
+skinparam PackageBackgroundColor #0F172A
+
+title Transformer Encoder-Decoder Architektur
+
+package "Encoder (6x)" as enc {
+  rectangle "Input Embedding\\n+ Positional Encoding" as ie #334155
+  rectangle "Multi-Head\\nSelf-Attention" as mhsa #2D1B69
+  rectangle "Add & Norm" as an1 #334155
+  rectangle "Feed-Forward\\nNetzwerk" as ff1 #1E3A5F
+  rectangle "Add & Norm" as an2 #334155
+}
+
+package "Decoder (6x)" as dec {
+  rectangle "Output Embedding\\n+ Positional Encoding" as oe #334155
+  rectangle "Maskierte Multi-Head\\nSelf-Attention" as mmhsa #2D1B69
+  rectangle "Add & Norm" as an3 #334155
+  rectangle "Multi-Head\\nCross-Attention" as mhca #7C3AED
+  rectangle "Add & Norm" as an4 #334155
+  rectangle "Feed-Forward\\nNetzwerk" as ff2 #1E3A5F
+  rectangle "Add & Norm" as an5 #334155
+}
+
+rectangle "Lineare Schicht\\n+ Softmax" as linear #065F46
+rectangle "Ausgabe-\\nWahrscheinlichkeiten" as outp #065F46
+
+ie --> mhsa
+mhsa --> an1
+an1 --> ff1
+ff1 --> an2
+
+oe --> mmhsa
+mmhsa --> an3
+an3 --> mhca
+an2 ..> mhca : Encoder Output
+mhca --> an4
+an4 --> ff2
+ff2 --> an5
+an5 --> linear
+linear --> outp
+@enduml`} caption="Transformer-Architektur: Encoder verarbeitet den Input, Decoder generiert den Output mit Cross-Attention zum Encoder" />
         </section>
 
         {/* Positional Encoding */}

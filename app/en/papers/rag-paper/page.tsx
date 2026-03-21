@@ -1,4 +1,5 @@
 import { Metadata } from "next"
+import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { RelatedArticles } from "../../../../components/RelatedArticles"
 
 export const metadata: Metadata = {
@@ -87,6 +88,32 @@ export default function RAGPaperPage() {
               an answer based on both the question AND the provided documents.
             </li>
           </ul>
+
+          <PlantUMLDiagram diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam RectangleBorderColor #4262FF
+skinparam RectangleBackgroundColor #1E293B
+
+title RAG Pipeline
+
+rectangle "User Question" as q #334155
+rectangle "Embedding\\nModel" as emb #2D1B69
+rectangle "Vector\\nDatabase" as vdb #1E3A5F
+rectangle "Top-K\\nDocuments" as docs #1E3A5F
+rectangle "Merge\\nContext" as ctx #334155
+rectangle "LLM\\n(Generator)" as llm #7C3AED
+rectangle "Answer with\\nSource Citations" as ans #065F46
+
+q --> emb : 1. Embedding
+emb --> vdb : 2. Similarity Search
+vdb --> docs : 3. Relevant Documents
+q --> ctx : Original Question
+docs --> ctx : Context
+ctx --> llm : 4. Augmented Prompt
+llm --> ans : 5. Generation
+@enduml`} caption="RAG Pipeline: Question is embedded, relevant documents retrieved, and passed to the LLM alongside the question" />
         </section>
 
         {/* Two Variants */}
@@ -106,6 +133,43 @@ export default function RAGPaperPage() {
               combine information from multiple sources.
             </li>
           </ul>
+
+          <PlantUMLDiagram diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam RectangleBorderColor #4262FF
+skinparam RectangleBackgroundColor #1E293B
+
+title Dense Retrieval vs. Sparse Retrieval
+
+rectangle "Search Query" as query #334155
+
+package "Sparse Retrieval (BM25)" as sparse {
+  rectangle "Keyword\\nMatching" as kw #7C3AED
+  rectangle "TF-IDF /\\nBM25 Score" as tfidf #2D1B69
+  rectangle "Exact Word\\nMatch" as exact #1E3A5F
+}
+
+package "Dense Retrieval (Vector)" as dense {
+  rectangle "Semantic\\nEmbedding" as semb #7C3AED
+  rectangle "Cosine\\nSimilarity" as cos #2D1B69
+  rectangle "Meaning-Based\\nSearch" as meaning #1E3A5F
+}
+
+rectangle "Hybrid Search:\\nCombination of Both Approaches" as hybrid #065F46
+
+query --> kw
+kw --> tfidf
+tfidf --> exact
+
+query --> semb
+semb --> cos
+cos --> meaning
+
+exact --> hybrid
+meaning --> hybrid
+@enduml`} caption="Dense vs. Sparse Retrieval: Modern RAG systems often use Hybrid Search combining both approaches" />
         </section>
 
         {/* Why RAG Matters */}

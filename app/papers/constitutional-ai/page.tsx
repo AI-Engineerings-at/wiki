@@ -1,5 +1,6 @@
 import { Metadata } from "next"
 import Callout from "../../../components/Callout"
+import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 import { RelatedArticles } from "../../../components/RelatedArticles"
 
 export const metadata: Metadata = {
@@ -71,6 +72,40 @@ export default function ConstitutionalAIPaperPage() {
               in den Bewertungsdaten.
             </li>
           </ul>
+
+          <PlantUMLDiagram diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam RectangleBorderColor #4262FF
+skinparam RectangleBackgroundColor #1E293B
+skinparam PackageBorderColor #4262FF
+skinparam PackageBackgroundColor #0F172A
+
+title RLHF vs. Constitutional AI
+
+package "RLHF (traditionell)" as rlhf {
+  rectangle "Modell generiert\\nAntworten" as r1 #2D1B69
+  rectangle "Menschen bewerten\\nAntworten" as r2 #7C3AED
+  rectangle "Reward Model\\nlernt Bewertungen" as r3 #2D1B69
+  rectangle "RL-Training" as r4 #334155
+  r1 --> r2 : Antwort-Paare
+  r2 --> r3 : Menschliches Feedback
+  r3 --> r4
+}
+
+package "Constitutional AI" as cai {
+  rectangle "Modell generiert\\nAntworten" as c1 #2D1B69
+  rectangle "Modell kritisiert\\neigene Antworten" as c2 #065F46
+  rectangle "Modell überarbeitet\\nbasierend auf Prinzipien" as c3 #065F46
+  rectangle "AI bewertet\\nAntwort-Paare" as c4 #065F46
+  rectangle "RLAIF-Training" as c5 #334155
+  c1 --> c2 : Verfassungs-Prinzipien
+  c2 --> c3 : Self-Critique
+  c3 --> c4 : AI Feedback
+  c4 --> c5
+}
+@enduml`} caption="RLHF braucht teure menschliche Bewertungen — CAI nutzt die eigenen Prinzipien des Modells für Feedback" />
         </section>
 
         {/* Die CAI-Methode */}
@@ -115,6 +150,43 @@ export default function ConstitutionalAIPaperPage() {
             Das Modell vergleicht Antwort-Paare und wählt die bessere basierend auf den
             Verfassungs-Prinzipien. Dieses AI-Feedback-Modell wird dann für RLHF verwendet.
           </p>
+
+          <PlantUMLDiagram diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam ActivityBackgroundColor #1E293B
+skinparam ActivityBorderColor #4262FF
+
+title CAI Feedback Loop: Generieren → Kritisieren → Überarbeiten
+
+start
+:📝 **Generieren**
+Modell erzeugt Antwort
+auf problematische Frage;
+
+:🔍 **Kritisieren (Self-Critique)**
+Modell prüft eigene Antwort
+anhand der Verfassungs-Prinzipien;
+
+if (Verstößt gegen Prinzipien?) then (Ja)
+  :✏️ **Überarbeiten (Revision)**
+  Modell verbessert die Antwort
+  basierend auf der Kritik;
+  :📊 **Trainingsdaten**
+  Überarbeitete Antwort wird
+  als Trainingsbeispiel genutzt;
+else (Nein)
+  :✅ **Antwort OK**
+  Wird direkt als
+  Trainingsbeispiel genutzt;
+endif
+
+:🔄 **Nächste Runde**
+Prozess wiederholt sich
+für weitere Beispiele;
+stop
+@enduml`} caption="Der CAI Feedback Loop: Das Modell kritisiert und überarbeitet sich selbst anhand expliziter Prinzipien" />
         </section>
 
         {/* Die Verfassung */}

@@ -1,4 +1,5 @@
 import { Metadata } from "next"
+import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { RelatedArticles } from "../../../../components/RelatedArticles"
 
 export const metadata: Metadata = {
@@ -70,6 +71,40 @@ export default function ConstitutionalAIPaperPage() {
               the model has actually learned. The criteria are implicit in the rating data.
             </li>
           </ul>
+
+          <PlantUMLDiagram diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam RectangleBorderColor #4262FF
+skinparam RectangleBackgroundColor #1E293B
+skinparam PackageBorderColor #4262FF
+skinparam PackageBackgroundColor #0F172A
+
+title RLHF vs. Constitutional AI
+
+package "RLHF (Traditional)" as rlhf {
+  rectangle "Model generates\\nresponses" as r1 #2D1B69
+  rectangle "Humans rate\\nresponses" as r2 #7C3AED
+  rectangle "Reward model\\nlearns ratings" as r3 #2D1B69
+  rectangle "RL Training" as r4 #334155
+  r1 --> r2 : Response pairs
+  r2 --> r3 : Human Feedback
+  r3 --> r4
+}
+
+package "Constitutional AI" as cai {
+  rectangle "Model generates\\nresponses" as c1 #2D1B69
+  rectangle "Model critiques\\nown responses" as c2 #065F46
+  rectangle "Model revises\\nbased on principles" as c3 #065F46
+  rectangle "AI rates\\nresponse pairs" as c4 #065F46
+  rectangle "RLAIF Training" as c5 #334155
+  c1 --> c2 : Constitutional Principles
+  c2 --> c3 : Self-Critique
+  c3 --> c4 : AI Feedback
+  c4 --> c5
+}
+@enduml`} caption="RLHF requires expensive human ratings — CAI uses the model's own principles for feedback" />
         </section>
 
         {/* The CAI Method */}
@@ -113,6 +148,43 @@ export default function ConstitutionalAIPaperPage() {
             selects the better one based on the constitutional principles. This AI feedback
             model is then used for RLHF.
           </p>
+
+          <PlantUMLDiagram diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam ActivityBackgroundColor #1E293B
+skinparam ActivityBorderColor #4262FF
+
+title CAI Feedback Loop: Generate > Critique > Revise
+
+start
+:📝 **Generate**
+Model produces response
+to problematic question;
+
+:🔍 **Critique (Self-Critique)**
+Model evaluates own response
+against constitutional principles;
+
+if (Violates principles?) then (Yes)
+  :✏️ **Revise**
+  Model improves the response
+  based on the critique;
+  :📊 **Training Data**
+  Revised response is used
+  as training example;
+else (No)
+  :✅ **Response OK**
+  Used directly as
+  training example;
+endif
+
+:🔄 **Next Round**
+Process repeats
+for more examples;
+stop
+@enduml`} caption="The CAI Feedback Loop: The model critiques and revises itself based on explicit principles" />
         </section>
 
         {/* The Constitution */}
