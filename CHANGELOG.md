@@ -2,6 +2,43 @@
 
 Alle wesentlichen Änderungen an der AI Engineering Wiki.
 
+## [1.2.0] — 2026-03-22
+
+### Hinzugefügt
+- Österreich-Portal: RTR, WKO, FFG, aws, Digital Austria, AI Tinkerers (DE+EN)
+- Praxis-Downloads: 8 Templates & Checklisten verlinkt (DE+EN)
+- Open-Source-Tools: 58 kuratierte Tools in 9 Kategorien (DE+EN)
+- AI OS Setup Guide (DE+EN) — aus Produkt-Guides
+- Agent Team Skalierung (DE+EN) — aus Produkt-Guides
+- 10 PlantUML-Diagramme in Papers (Transformer, RAG, LoRA, ReAct, CAI)
+- sitemap.xml (60+ URLs) + robots.txt
+- Skip-to-Content Link + main Landmark
+- Custom 404-Seite bilingual
+
+### Verbessert
+- AI Act Timeline korrigiert: Art. 4 gilt seit 02.02.2025
+- 5 Artikel mit Produkt-Guide-Content angereichert
+- 14 Blog-Posts mit visuellen Elementen (ASCII, Tabellen)
+- 4 kurze Posts erweitert (186→434, 320→653, 453→853, 479→914)
+- 36 Blog-Umlaut-Fixes + 14 Frontmatter vereinheitlicht
+- Version-Badges in 9 Tool-Artikeln
+- LangChain Code: ChatOllama statt legacy OllamaLLM
+- OG-Image in Metadata referenziert
+- EN layout lang="en"
+- 2 kaputte Links gefixt
+- aria-labels für Barrierefreiheit
+
+### Entfernt
+- Stripe-CTAs aus 23 Wiki-Artikeln (Wissen/Verkauf sauber getrennt)
+- "S9" internes Jargon von Homepage
+
+### Infrastruktur
+- GitHub Actions CI/CD für Cloudflare Pages
+- 5 Repos PUBLIC mit Enterprise-Grade READMEs
+- legal-scraper PII-bereinigt und PUBLIC
+- Alle Repo-Descriptions gesetzt
+- 3 Firecrawl API Keys im Vault
+
 ## [1.1.0] — 2026-03-21
 
 ### Hinzugefügt

@@ -62,7 +62,7 @@ export function SiteFooter() {
   return (
     <footer className="border-t border-slate-800 mt-16 bg-slate-900/50">
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-12">
-        <div className="grid md:grid-cols-4 gap-8">
+        <nav aria-label="Footer Navigation" className="grid md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-10 h-8 bg-[#31F1A8] rounded-lg flex items-center justify-center">
@@ -99,7 +99,7 @@ export function SiteFooter() {
             </ul>
           </div>
 
-          <div>
+          <div aria-label={isEn ? 'Legal' : 'Rechtliches'}>
             <h4 className="text-white font-bold mb-4">{legal.title}</h4>
             <ul className="space-y-2 text-sm text-slate-400">
               <li>
@@ -119,7 +119,7 @@ export function SiteFooter() {
               </li>
             </ul>
           </div>
-        </div>
+        </nav>
 
         <div className="border-t border-slate-800 mt-8 pt-8 text-center text-sm text-slate-500">
           <p>{copyright}</p>

@@ -66,7 +66,7 @@ export function SiteHeader() {
           <SearchBar />
         </div>
 
-        <nav className="hidden lg:flex items-center gap-6">
+        <nav className="hidden lg:flex items-center gap-6" aria-label={isEn ? 'Main navigation' : 'Hauptnavigation'}>
           {nav.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
             return (
@@ -110,7 +110,7 @@ export function SiteHeader() {
         </nav>
 
         {/* Mobile Nav */}
-        <nav className="flex lg:hidden items-center gap-3 text-sm">
+        <nav className="flex lg:hidden items-center gap-3 text-sm" aria-label="Mobile Navigation">
           <Link href={nav[1].href} className="text-slate-400 hover:text-white">
             {nav[1].label}
           </Link>

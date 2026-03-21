@@ -67,6 +67,7 @@ export function SearchBar({ className = '' }: { className?: string }) {
           value={query}
           onChange={(e) => handleSearch(e.target.value)}
           onFocus={() => query.length >= 2 && setIsOpen(true)}
+          aria-label="Wiki durchsuchen"
           placeholder="Artikel suchen..."
           className="w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
         />
