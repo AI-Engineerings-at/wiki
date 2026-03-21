@@ -30,6 +30,9 @@ export default function AiStackSetupPage() {
           <span className="w-1 h-1 rounded-full bg-white/20" />
           <span>Zuletzt aktualisiert: März 2026</span>
         </div>
+        <div className="flex flex-wrap gap-2 mt-2 mb-4">
+          <span className="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded">Stand: März 2026</span>
+        </div>
       </div>
 
       <div className="prose prose-invert max-w-none">
@@ -341,12 +344,12 @@ docker compose ps
               Anleitung mit Hardware-Empfehlungen, Network Setup, Backup-Strategie
               und Produktionshärtung — unser{" "}
               <a
-                href="https://buy.stripe.com/8x28wP7VBbapbdQgs4fQI00"
+                href="https://www.ai-engineering.at"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-400 hover:underline"
               >
-                Der Lokale AI-Stack Playbook (EUR 49)
+                Der Lokale AI-Stack Playbook
               </a>{" "}
               führt dich durch den gesamten Prozess.
             </p>

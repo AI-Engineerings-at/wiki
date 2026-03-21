@@ -1,7 +1,7 @@
 export const metadata = {
   title: 'AI Literacy under Art. 4 EU AI Act | AI Engineering Wiki',
   description:
-    'Art. 4 EU AI Act: AI literacy obligation for all companies. Deadline Aug 2, 2026, training requirements, penalties up to EUR 35M. Practical guide for SMEs.',
+    'Art. 4 EU AI Act: AI literacy obligation applies since Feb 2, 2025. Enforcement from Aug 2026, penalties up to EUR 15M. Practical guide for SMEs.',
 }
 
 export default function AILiteracyArt4Page() {
@@ -13,11 +13,15 @@ export default function AILiteracyArt4Page() {
       </div>
 
       <div className="prose prose-invert max-w-none">
-        <div className="bg-red-900/30 border border-red-700 rounded-lg p-4 mt-4">
-          <p className="text-red-300 text-sm">
-            <strong>Deadline: August 2, 2026</strong> — From this date, all companies using
-            AI systems must demonstrate that their staff has sufficient AI literacy.
-            Penalties up to <strong>EUR 35 million</strong> or 7% of global annual turnover.
+        <div className="bg-orange-900/30 border border-orange-700 rounded-lg p-4 mt-4">
+          <p className="text-orange-300 text-sm">
+            <strong>ATTENTION: Art. 4 AI Literacy applies since 2 February 2025!</strong> The AI
+            literacy obligation is not a future deadline — it is already in force.
+            Companies using AI systems must <strong>now</strong> ensure that their staff has
+            sufficient AI literacy. There is no single certification, no mandatory AI Officer
+            role, and no one-size-fits-all training requirement.
+            <strong> Enforcement with penalties up to EUR 15 million or 3% of global annual
+            turnover</strong> starts from <strong>August 2026</strong>.
           </p>
         </div>
 
@@ -171,6 +175,7 @@ export default function AILiteracyArt4Page() {
         <ul className="list-disc list-inside text-gray-300 space-y-1">
           <li><a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689" target="_blank" className="text-blue-400 hover:underline">EU AI Act Full Text (EUR-Lex)</a></li>
           <li><a href="https://artificialintelligenceact.eu/article/4/" target="_blank" className="text-blue-400 hover:underline">Art. 4 AI Literacy (AI Act Explorer)</a></li>
+          <li><a href="https://digital-strategy.ec.europa.eu/en/faqs/ai-literacy-questions-answers" target="_blank" className="text-blue-400 hover:underline">EU Commission: AI Literacy — Questions and Answers</a></li>
         </ul>
       </div>
     </div>

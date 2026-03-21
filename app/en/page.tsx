@@ -57,8 +57,8 @@ export default function HomePage() {
               <div className="text-slate-400">Free</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-white">S9</div>
-              <div className="text-slate-400">No fake data</div>
+              <div className="text-2xl font-bold text-white">Real</div>
+              <div className="text-slate-400">Verified sources</div>
             </div>
           </div>
         </div>
@@ -73,7 +73,7 @@ export default function HomePage() {
             href="/en/compliance/eu-ai-act"
             icon="⚖️"
             title="EU AI Act"
-            subtitle="Deadline 02 Aug 2026 — What you need to do now"
+            subtitle="In force since Aug 2024 — Art. 4 applies since Feb 2025"
           />
           <QuickLink
             href="/en/compliance/dsgvo-grundlagen"
@@ -281,13 +281,13 @@ export default function HomePage() {
       <section className="bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/20 rounded-2xl p-8">
         <div className="flex flex-col md:flex-row items-center gap-6">
           <div className="flex-1">
-            <div className="text-xs font-bold text-red-400 mb-2">DEADLINE</div>
+            <div className="text-xs font-bold text-red-400 mb-2">ATTENTION</div>
             <h2 className="text-2xl font-bold text-white mb-2">
-              EU AI Act — 2 August 2026
+              EU AI Act — Art. 4 AI Literacy applies since 2 Feb 2025
             </h2>
             <p className="text-slate-400 text-sm">
-              Art. 4 AI Competence is mandatory for every company using AI.
-              Our compliance templates help you with documentation.
+              The AI literacy obligation is already in force. Enforcement with penalties
+              starts from August 2026. Our compliance templates help you with documentation.
             </p>
           </div>
           <div className="flex flex-col gap-3">

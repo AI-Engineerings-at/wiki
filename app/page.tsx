@@ -57,8 +57,8 @@ export default function Home() {
               <div className="text-slate-400">Kostenlos</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-white">S9</div>
-              <div className="text-slate-400">Keine Fake-Daten</div>
+              <div className="text-2xl font-bold text-white">Echt</div>
+              <div className="text-slate-400">Geprüfte Quellen</div>
             </div>
           </div>
         </div>
@@ -73,7 +73,7 @@ export default function Home() {
             href="/compliance/eu-ai-act"
             icon="⚖️"
             title="EU AI Act"
-            subtitle="Deadline 02.08.2026 — Was du jetzt tun musst"
+            subtitle="In Kraft seit 08.2024 — Art. 4 gilt seit 02.2025"
           />
           <QuickLink
             href="/compliance/dsgvo-grundlagen"
@@ -281,13 +281,13 @@ export default function Home() {
       <section className="bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/20 rounded-2xl p-8">
         <div className="flex flex-col md:flex-row items-center gap-6">
           <div className="flex-1">
-            <div className="text-xs font-bold text-red-400 mb-2">DEADLINE</div>
+            <div className="text-xs font-bold text-red-400 mb-2">ACHTUNG</div>
             <h2 className="text-2xl font-bold text-white mb-2">
-              EU AI Act — 2. August 2026
+              EU AI Act — Art. 4 KI-Kompetenz gilt seit 02.02.2025
             </h2>
             <p className="text-slate-400 text-sm">
-              Art. 4 KI-Kompetenz ist Pflicht für jedes Unternehmen das AI einsetzt.
-              Unsere Compliance-Templates helfen dir bei der Dokumentation.
+              Die Pflicht zur KI-Kompetenz ist bereits in Kraft. Enforcement mit Strafen
+              startet ab August 2026. Unsere Compliance-Templates helfen dir bei der Dokumentation.
             </p>
           </div>
           <div className="flex flex-col gap-3">

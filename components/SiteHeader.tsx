@@ -12,6 +12,8 @@ const navDe = [
   { href: '/security', label: 'Security' },
   { href: '/compliance', label: 'Compliance' },
   { href: '/papers', label: 'Papers' },
+  { href: '/downloads', label: 'Downloads' },
+  { href: '/oesterreich', label: 'Österreich' },
   { href: '/blog', label: 'Blog' },
 ]
 
@@ -23,6 +25,8 @@ const navEn = [
   { href: '/en/security', label: 'Security' },
   { href: '/en/compliance', label: 'Compliance' },
   { href: '/en/papers', label: 'Papers' },
+  { href: '/en/downloads', label: 'Downloads' },
+  { href: '/en/austria', label: 'Austria' },
   { href: '/blog', label: 'Blog' },
 ]
 

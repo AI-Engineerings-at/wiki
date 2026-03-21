@@ -267,7 +267,7 @@ sudo mount /dev/mapper/encrypted-data /mnt/secure-data`}</code>
               </a>{" "}
               article and the{" "}
               <a
-                href="https://buy.stripe.com/bJe7sLb7N92ha9MejWfQI02"
+                href="https://www.ai-engineering.at"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-400 hover:underline"

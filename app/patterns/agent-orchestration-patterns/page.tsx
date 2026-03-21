@@ -24,8 +24,6 @@ export default function AgentOrchestrationPatterns() {
           tool="ein 5-Agenten-Team"
           stat="5 spezialisierte AI Agents"
           description="die Tasks delegieren, Code schreiben und Infrastruktur verwalten"
-          productLink="https://buy.stripe.com/00w3cv1xdemBgyadfSfQI05"
-          productName="AI Agent Blueprint (EUR 19)"
         />
 
         <figure className="my-8">

@@ -264,31 +264,16 @@ ollama pull mistral`}</code>
         </section>
       </div>
 
-      <div className="bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-500/30 rounded-2xl p-6 mt-8">
-        <div className="flex flex-col md:flex-row items-center gap-6">
-          <div className="flex-1">
-            <h3 className="text-xl font-bold text-white mb-2">Der Lokale AI-Stack — Playbook</h3>
-            <p className="text-slate-300 mb-4">
-              120+ Seiten praxiserprobte Anleitungen. Docker Swarm Setup, Ollama + LLM Integration, 
-              Hybrid RAG, Monitoring, DSGVO-Templates — alles copy-paste ready.
-            </p>
-            <ul className="text-sm text-slate-400 space-y-1 mb-4">
-              <li>✓ 8 Kapitel, 120+ Seiten</li>
-              <li>✓ Docker Swarm Multi-Node</li>
-              <li>✓ DSGVO-Dokumentations-Templates</li>
-            </ul>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-black text-white mb-1">EUR 49</div>
-            <div className="text-sm text-slate-500 line-through mb-3">EUR 79</div>
-            <a 
-              href="https://buy.stripe.com/8x28wP7VBbapbdQgs4fQI00" 
-              className="inline-block bg-[#4262FF] hover:bg-[#3550DD] text-slate-950 font-bold py-3 px-8 rounded-full transition-all hover:scale-105 shadow-lg shadow-blue-500/30"
-            >
-              Jetzt kaufen — EUR 49
-            </a>
-          </div>
-        </div>
+      <div className="mt-12 pt-8 border-t border-white/10 text-center">
+        <p className="text-sm text-slate-500">
+          Alle Wiki-Artikel sind kostenlos. Wenn du fertige Templates und Bundles suchst:
+        </p>
+        <a
+          href="https://www.ai-engineering.at"
+          className="text-sm text-blue-400 hover:text-blue-300 transition-colors mt-2 inline-block"
+        >
+          Produkte & Bundles ansehen →
+        </a>
       </div>
     </div>
   )

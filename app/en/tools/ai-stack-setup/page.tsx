@@ -338,12 +338,12 @@ docker compose ps
               with hardware recommendations, network setup, backup strategy, and
               production hardening — our{" "}
               <a
-                href="https://buy.stripe.com/8x28wP7VBbapbdQgs4fQI00"
+                href="https://www.ai-engineering.at"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-400 hover:underline"
               >
-                The Local AI Stack Playbook (EUR 49)
+                The Local AI Stack Playbook
               </a>{" "}
               walks you through the entire process.
             </p>

@@ -5,7 +5,7 @@ import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 export const metadata = {
   title: 'EU AI Act | AI Engineering Wiki',
   description:
-    'EU AI Act ab 2. August 2026: Risikoklassen, Pflichten, Transparenz und Strafen. Praxis-Guide für Unternehmen mit AI-Systemen.',
+    'EU AI Act seit 1. August 2024 in Kraft. Art. 4 KI-Kompetenz gilt seit 02.02.2025, vollständige Anwendung ab 02.08.2026. Risikoklassen, Pflichten, Strafen.',
 }
 
 export default function EuAiActLeitfaden() {
@@ -28,11 +28,22 @@ export default function EuAiActLeitfaden() {
         </Callout>
 
         <p className="text-lg text-gray-300">
-          Der EU AI Act tritt am <strong>2. August 2026</strong> in Kraft. Er ist der
-          weltweit strengste Regelungsrahmen für Künstliche Intelligenz. Für Unternehmen,
-          die AI einsetzen, gelten ab diesem Datum neue Pflichten — mit empfindlichen
-          Strafen bei Nichteinhaltung.
+          Der EU AI Act (Verordnung 2024/1689) wurde am <strong>12. Juli 2024</strong> im
+          EU-Amtsblatt veröffentlicht und ist am <strong>1. August 2024</strong> in Kraft
+          getreten. Er ist der weltweit strengste Regelungsrahmen für Künstliche Intelligenz.
+          Einige Pflichten — wie die Verbote (Art. 5) und die KI-Kompetenz (Art. 4) — gelten
+          bereits seit <strong>2. Februar 2025</strong>. Die vollständige Anwendung mit
+          Enforcement und Strafen startet ab <strong>2. August 2026</strong>.
         </p>
+
+        <Callout type="warning" title="Art. 4 KI-Kompetenz gilt BEREITS">
+          <p>
+            Die Pflicht zur KI-Kompetenz (Art. 4) gilt seit <strong>2. Februar 2025</strong>.
+            Es gibt keine Einheitszertifizierung, keine Pflicht zu einem AI Officer und keine
+            One-size-fits-all-Schulung. Die Überwachung und Durchsetzung (Enforcement)
+            startet ab <strong>August 2026</strong>.
+          </p>
+        </Callout>
 
         <Callout type="warning" title="Strafen">
           <p>
@@ -207,23 +218,27 @@ end note
             </thead>
             <tbody className="text-gray-300">
               <tr className="border-b border-gray-800">
-                <td className="py-2">12. Juli 2024</td>
-                <td className="py-2">AI Act im EU-Amtsblatt veröffentlicht, 01. Aug 2024 in Kraft getreten</td>
+                <td className="py-2 font-mono text-gray-400">12. Juli 2024</td>
+                <td className="py-2">Im EU-Amtsblatt veröffentlicht</td>
               </tr>
               <tr className="border-b border-gray-800">
-                <td className="py-2">02. Feb 2025</td>
-                <td className="py-2">Verbote (Art. 5) und KI-Kompetenz (Art. 4) gelten</td>
+                <td className="py-2 font-mono text-gray-400">01. Aug 2024</td>
+                <td className="py-2">In Kraft getreten</td>
               </tr>
               <tr className="border-b border-gray-800">
-                <td className="py-2">02. Aug 2025</td>
-                <td className="py-2">GPAI-Modelle (Transparenz, Copyright)</td>
+                <td className="py-2 font-mono text-green-400 font-semibold">02. Feb 2025</td>
+                <td className="py-2 font-semibold">Verbote (Art. 5) + KI-Kompetenz (Art. 4) gelten BEREITS</td>
               </tr>
               <tr className="border-b border-gray-800">
-                <td className="py-2 font-semibold text-red-400">02. Aug 2026</td>
-                <td className="py-2 font-semibold">Vollständig anwendbar. Strafen möglich.</td>
+                <td className="py-2 font-mono text-blue-400">02. Aug 2025</td>
+                <td className="py-2">Governance-Regeln + GPAI-Modelle (Transparenz, Copyright)</td>
+              </tr>
+              <tr className="border-b border-gray-800">
+                <td className="py-2 font-mono text-red-400 font-semibold">02. Aug 2026</td>
+                <td className="py-2 font-semibold">Vollständige Anwendung (High-Risk etc.) + Enforcement/Überwachung startet</td>
               </tr>
               <tr>
-                <td className="py-2">02. Aug 2027</td>
+                <td className="py-2 font-mono text-gray-500">02. Aug 2027</td>
                 <td className="py-2">Hochrisiko-KI in regulierten Produkten</td>
               </tr>
             </tbody>
@@ -343,6 +358,7 @@ Verarbeitet das System biometrische Daten?
             <li><a href="https://www.rtr.at/rtr/service/ki-servicestelle/projekte-initiativen/Projekte_-_Initiativen.de.html" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">RTR KI-Servicestelle</a> — Österreichische KI-Servicestelle, Projekte und Initiativen</li>
             <li><a href="https://www.ffg.at/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">FFG — Österreichische Forschungsförderungsgesellschaft</a> — Förderungen für AI-Projekte und Digitalisierung</li>
             <li><a href="https://caralegal.eu/blog/ki-richtlinie-guide-und-vorlage/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">caralegal KI-Richtlinie Guide & Vorlage</a> — Praktischer Guide für unternehmenseigene KI-Richtlinien</li>
+            <li><a href="https://digital-strategy.ec.europa.eu/en/faqs/ai-literacy-questions-answers" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">EU-Kommission: AI Literacy — Questions and Answers</a> — Offizielle FAQ zu Art. 4 KI-Kompetenz</li>
           </ul>
         </section>
       </div>

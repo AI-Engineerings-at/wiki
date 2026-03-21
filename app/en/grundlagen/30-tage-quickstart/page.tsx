@@ -65,22 +65,16 @@ export default function Quickstart30TagePage() {
         </ul>
       </div>
 
-      <div className="bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-500/30 rounded-2xl p-6 mt-8">
-        <div className="flex flex-col md:flex-row items-center gap-6">
-          <div className="flex-1">
-            <h3 className="text-xl font-bold text-white mb-2">Playbook 01 — The Local AI Stack</h3>
-            <p className="text-slate-300 mb-4">
-              120+ pages of tested setups. Docker Swarm, Ollama + LLM Integration, 
-              Hybrid RAG, Monitoring, GDPR templates — everything copy-paste ready.
-            </p>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-black text-white mb-1">EUR 49</div>
-            <a href="https://buy.stripe.com/8x28wP7VBbapbdQgs4fQI00" className="inline-block bg-[#4262FF] text-slate-950 font-bold py-3 px-8 rounded-full">
-              Buy now — EUR 49
-            </a>
-          </div>
-        </div>
+      <div className="mt-12 pt-8 border-t border-white/10 text-center">
+        <p className="text-sm text-slate-500">
+          All wiki articles are free. Looking for ready-made templates and bundles?
+        </p>
+        <a
+          href="https://www.ai-engineering.at"
+          className="text-sm text-blue-400 hover:text-blue-300 transition-colors mt-2 inline-block"
+        >
+          View Products & Bundles →
+        </a>
       </div>
     </div>
   )

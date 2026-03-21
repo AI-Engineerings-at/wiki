@@ -292,7 +292,7 @@ sudo fail2ban-client status sshd`}</code>
               logins, API error rates, and disk usage at a glance. You can see
               in 5 seconds if something is off. Our{" "}
               <a
-                href="https://buy.stripe.com/3cIdR95Nt2DT81E0t6fQI03"
+                href="https://www.ai-engineering.at"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-400 hover:underline"

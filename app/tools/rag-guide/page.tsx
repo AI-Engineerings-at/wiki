@@ -10,6 +10,10 @@ export default function RagGuide() {
       <div>
         <h1 className="text-3xl font-bold text-white">RAG Complete Guide</h1>
         <p className="text-gray-400 mt-2">Tools · 10 min</p>
+        <div className="flex flex-wrap gap-2 mt-2 mb-4">
+          <span className="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded">Stand: März 2026</span>
+          <span className="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded">LangChain 0.3.x</span>
+        </div>
       </div>
 
       <div className="prose prose-invert max-w-none">
@@ -175,7 +179,7 @@ from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.vectorstores import Chroma
-from langchain.llms import Ollama
+from langchain_ollama import ChatOllama
 from langchain.chains import RetrievalQA
 
 # Dokumente laden
@@ -191,7 +195,7 @@ embeddings = OllamaEmbeddings(model="nomic-embed-text")
 vectorstore = Chroma.from_documents(chunks, embeddings)
 
 # QA Chain
-llm = Ollama(model="llama3.2")
+llm = ChatOllama(model="llama3.2")
 qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", 
                                    retriever=vectorstore.as_retriever())
 
@@ -231,7 +235,7 @@ vector_retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
 
 # Beide kombinieren
 from langchain.retrievers import EnsembleRetriever
-ensemble = EnsembleRetrievers(
+ensemble = EnsembleRetriever(
     retrievers=[bm25_retriever, vector_retriever],
     weights=[0.5, 0.5]
 )

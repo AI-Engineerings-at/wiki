@@ -3,7 +3,7 @@
 export const metadata = {
   title: 'KI-Kompetenz nach Art. 4 EU AI Act | AI Engineering Wiki',
   description:
-    'Art. 4 EU AI Act: KI-Kompetenz Pflicht für alle Unternehmen. Deadline 02.08.2026, Schulungspflichten, Strafen bis EUR 35 Mio. Praxis-Guide für DACH-KMUs.',
+    'Art. 4 EU AI Act: KI-Kompetenz Pflicht gilt seit 02.02.2025 für alle Unternehmen. Enforcement ab 08.2026, Strafen bis EUR 15 Mio. Praxis-Guide für DACH-KMUs.',
 }
 
 export default function KIKompetenzArt4Page() {
@@ -15,12 +15,16 @@ export default function KIKompetenzArt4Page() {
       </div>
 
       <div className="prose prose-invert max-w-none">
-        <div className="bg-red-900/30 border border-red-700 rounded-lg p-4 mt-4">
-          <p className="text-red-300 text-sm">
-            <strong>Deadline: 2. August 2026</strong> — Ab diesem Datum müssen alle Unternehmen,
-            die KI-Systeme einsetzen, nachweisen, dass ihre Mitarbeitenden über ausreichende
-            KI-Kompetenz verfügen. Strafen bis zu <strong>EUR 35 Millionen</strong> oder
-            7% des weltweiten Jahresumsatzes.
+        <div className="bg-orange-900/30 border border-orange-700 rounded-lg p-4 mt-4">
+          <p className="text-orange-300 text-sm">
+            <strong>ACHTUNG: Art. 4 KI-Kompetenz gilt seit 2. Februar 2025!</strong> Die Pflicht
+            zur KI-Kompetenz ist keine zukünftige Deadline — sie ist bereits in Kraft.
+            Unternehmen, die KI-Systeme einsetzen, müssen <strong>jetzt</strong> sicherstellen,
+            dass ihre Mitarbeitenden über ausreichende KI-Kompetenz verfügen. Es gibt keine
+            Einheitszertifizierung, keine Pflicht zu einem AI Officer und keine
+            One-size-fits-all-Schulung. Die <strong>Überwachung und Durchsetzung (Enforcement)
+            mit Strafen bis EUR 15 Mio. oder 3% des weltweiten Jahresumsatzes</strong> startet
+            ab <strong>August 2026</strong>.
           </p>
         </div>
 
@@ -95,7 +99,7 @@ export default function KIKompetenzArt4Page() {
 
         <figure className="my-8">
           <img src="/images/infographics/art4-timeline.png" alt="Art. 4 EU AI Act Timeline — Fristen und Pflichten" className="rounded-xl border border-white/10 w-full" />
-          <figcaption className="text-center text-white/40 text-sm mt-2">Art. 4 Timeline: Von der Verabschiedung bis zur Deadline am 2. August 2026</figcaption>
+          <figcaption className="text-center text-white/40 text-sm mt-2">Art. 4 Timeline: Pflicht seit 02.02.2025 — Enforcement ab August 2026</figcaption>
         </figure>
 
         <figure className="my-8">
@@ -193,16 +197,24 @@ export default function KIKompetenzArt4Page() {
             </thead>
             <tbody className="text-gray-300">
               <tr className="border-b border-gray-800">
-                <td className="py-2 font-mono text-blue-400">01.08.2024</td>
+                <td className="py-2 font-mono text-gray-400">12.07.2024</td>
+                <td className="py-2">Im EU-Amtsblatt veröffentlicht</td>
+              </tr>
+              <tr className="border-b border-gray-800">
+                <td className="py-2 font-mono text-gray-400">01.08.2024</td>
                 <td className="py-2">EU AI Act in Kraft getreten</td>
               </tr>
               <tr className="border-b border-gray-800">
-                <td className="py-2 font-mono text-blue-400">02.02.2025</td>
-                <td className="py-2">Verbote (Art. 5) gelten, KI-Kompetenz Pflicht beginnt</td>
+                <td className="py-2 font-mono text-green-400 font-semibold">02.02.2025</td>
+                <td className="py-2 font-semibold">Verbote (Art. 5) + KI-Kompetenz (Art. 4) GELTEN BEREITS</td>
               </tr>
               <tr className="border-b border-gray-800">
-                <td className="py-2 font-mono text-red-400">02.08.2026</td>
-                <td className="py-2">Vollständige Anwendbarkeit, Strafen möglich</td>
+                <td className="py-2 font-mono text-blue-400">02.08.2025</td>
+                <td className="py-2">Governance-Regeln gelten</td>
+              </tr>
+              <tr className="border-b border-gray-800">
+                <td className="py-2 font-mono text-red-400 font-semibold">02.08.2026</td>
+                <td className="py-2 font-semibold">Vollständige Anwendung + Enforcement/Überwachung startet, Strafen möglich</td>
               </tr>
               <tr>
                 <td className="py-2 font-mono text-gray-500">02.08.2027</td>
@@ -272,6 +284,7 @@ export default function KIKompetenzArt4Page() {
           <li><a href="https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX:32024R1689" target="_blank" className="text-blue-400 hover:underline">EU AI Act Volltext (EUR-Lex, DE)</a></li>
           <li><a href="https://artificialintelligenceact.eu/article/4/" target="_blank" className="text-blue-400 hover:underline">Art. 4 AI Literacy (AI Act Explorer)</a></li>
           <li><a href="https://www.wko.at/digitalisierung/künstliche-intelligenz" target="_blank" className="text-blue-400 hover:underline">WKO: Künstliche Intelligenz im Unternehmen</a></li>
+          <li><a href="https://digital-strategy.ec.europa.eu/en/faqs/ai-literacy-questions-answers" target="_blank" className="text-blue-400 hover:underline">EU-Kommission: AI Literacy — Questions and Answers</a></li>
         </ul>
       </div>
     </div>

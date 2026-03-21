@@ -14,6 +14,10 @@ export default function N8nAnfänger() {
       <div>
         <h1 className="text-3xl font-bold text-white">n8n: Workflow-Automatisierung</h1>
         <p className="text-gray-400 mt-2">Tools · 8 min</p>
+        <div className="flex flex-wrap gap-2 mt-2 mb-4">
+          <span className="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded">Stand: März 2026</span>
+          <span className="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded">n8n 2.x</span>
+        </div>
       </div>
 
       <div className="prose prose-invert max-w-none">
@@ -36,8 +40,6 @@ export default function N8nAnfänger() {
           stat="36 aktiven Workflows"
           description="für Revenue-Pipeline, Content-Automation und Infrastruktur-Monitoring"
           blogLink="/blog/2026-03-08-36-n8n-workflows"
-          productLink="https://buy.stripe.com/8x2fZh7VB2DT2Hk1xafQI01"
-          productName="n8n AI Workflow Bundle (EUR 29)"
         />
 
         <figure className="my-8">
@@ -213,32 +215,16 @@ Webhook -> Ollama -> Notion -> Slack`}</code>
         </section>
       </div>
 
-      <div className="bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-500/30 rounded-2xl p-6 mt-8">
-        <div className="flex flex-col md:flex-row items-center gap-6">
-          <div className="flex-1">
-            <h3 className="text-xl font-bold text-white mb-2">n8n AI Workflow Bundle</h3>
-            <p className="text-gray-300 mb-4">
-              13 fertige Workflow-JSONs: Stripe Payment, Ollama LLM Integration, AIOps Alert Pipeline, 
-              Daily Status Report — alles ready-to-use.
-            </p>
-            <ul className="text-sm text-gray-400 space-y-1 mb-4">
-              <li>✓ Stripe Payment Fulfillment</li>
-              <li>✓ AIOps Alert Pipeline</li>
-              <li>✓ Ollama LLM Integration</li>
-              <li>✓ Sofort importierbar (30s)</li>
-            </ul>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-black text-white mb-1">€29</div>
-            <div className="text-sm text-slate-500 line-through mb-3">€49</div>
-            <a 
-              href="https://buy.stripe.com/8x2fZh7VB2DT2Hk1xafQI01" 
-              className="inline-block bg-[#4262FF] hover:bg-[#3550DD] text-slate-950 font-bold py-3 px-8 rounded-full transition-all hover:scale-105 shadow-lg shadow-blue-500/30"
-            >
-              Jetzt kaufen
-            </a>
-          </div>
-        </div>
+      <div className="mt-12 pt-8 border-t border-white/10 text-center">
+        <p className="text-sm text-slate-500">
+          Alle Wiki-Artikel sind kostenlos. Wenn du fertige Templates und Bundles suchst:
+        </p>
+        <a
+          href="https://www.ai-engineering.at"
+          className="text-sm text-blue-400 hover:text-blue-300 transition-colors mt-2 inline-block"
+        >
+          Produkte & Bundles ansehen →
+        </a>
       </div>
     </div>
   )

@@ -87,6 +87,14 @@ const securityArticles: Article[] = [
   { title: 'Backup Strategie', description: '3-2-1 Regel, automatisierte Backups für Ollama, n8n, PostgreSQL.', href: '/security/backup-strategie', category: 'security', categoryLabel: 'Security', date: '2026-02-28' },
 ]
 
+const oesterreichArticles: Article[] = [
+  { title: 'KI in Österreich', description: 'Behörden, Förderungen, Community und Rechtslage: Alle relevanten österreichischen KI-Ressourcen.', href: '/oesterreich', category: 'oesterreich', categoryLabel: 'Österreich', date: '2026-03-22', popular: true },
+]
+
+const downloadsArticles: Article[] = [
+  { title: 'Praxis-Downloads', description: 'Kostenlose Vorlagen für KI-Compliance, Dokumentation und Betrieb: Templates, Checklisten und Leitfäden.', href: '/downloads', category: 'downloads', categoryLabel: 'Downloads', date: '2026-03-22' },
+]
+
 export const categories: Category[] = [
   {
     slug: 'grundlagen',
@@ -135,6 +143,22 @@ export const categories: Category[] = [
     icon: '\u{1F4C4}',
     href: '/papers',
     articles: papersArticles,
+  },
+  {
+    slug: 'oesterreich',
+    label: 'Österreich',
+    description: 'Behörden, Förderungen, Community, Rechtslage',
+    icon: '\u{1F1E6}\u{1F1F9}',
+    href: '/oesterreich',
+    articles: oesterreichArticles,
+  },
+  {
+    slug: 'downloads',
+    label: 'Downloads',
+    description: 'Templates, Checklisten, Vorlagen für KI im Unternehmen',
+    icon: '\u{1F4E5}',
+    href: '/downloads',
+    articles: downloadsArticles,
   },
 ]
 

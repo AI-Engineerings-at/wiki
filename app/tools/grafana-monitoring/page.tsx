@@ -14,6 +14,11 @@ export default function GrafanaMonitoring() {
       <div>
         <h1 className="text-3xl font-bold text-white">Grafana: Monitoring für Homelab</h1>
         <p className="text-gray-400 mt-2">Tools · 7 min</p>
+        <div className="flex flex-wrap gap-2 mt-2 mb-4">
+          <span className="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded">Stand: März 2026</span>
+          <span className="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded">Grafana 11.x</span>
+          <span className="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded">Prometheus 2.x</span>
+        </div>
       </div>
 
       <div className="prose prose-invert max-w-none">
@@ -37,8 +42,6 @@ export default function GrafanaMonitoring() {
           stat="6 Dashboards auf 6 Nodes"
           description="die 31 Docker Services, GPU-Auslastung und LLM-Requests überwachen"
           blogLink="/blog/2026-03-08-31-docker-services-monitoring"
-          productLink="https://buy.stripe.com/3cIdR95Nt2DT81E0t6fQI03"
-          productName="Grafana Dashboard Pack (EUR 39)"
         />
 
         <h2 className="text-xl font-semibold text-white mt-8">Warum Grafana?</h2>
@@ -355,32 +358,16 @@ nvidia_gpu_power_draw_watts`}</code>
         </section>
       </div>
 
-      <div className="bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-500/30 rounded-2xl p-6 mt-8">
-        <div className="flex flex-col md:flex-row items-center gap-6">
-          <div className="flex-1">
-            <h3 className="text-xl font-bold text-white mb-2">Grafana Homelab Dashboard Pack</h3>
-            <p className="text-slate-300 mb-4">
-              22 vorkonfigurierte Dashboards für Docker Swarm, Proxmox VE, Node Exporter Full, 
-              Pi-hole, Traefik, NGINX. Alert Rules bereits konfiguriert.
-            </p>
-            <ul className="text-sm text-slate-400 space-y-1 mb-4">
-              <li>✓ Docker Swarm + Proxmox VE</li>
-              <li>✓ Node Exporter Full</li>
-              <li>✓ Pi-hole, Traefik, NGINX</li>
-              <li>✓ Alert Rules vorkonfiguriert</li>
-            </ul>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-black text-white mb-1">€39</div>
-            <div className="text-sm text-slate-500 line-through mb-3">€59</div>
-            <a 
-              href="https://buy.stripe.com/3cIdR95Nt2DT81E0t6fQI03" 
-              className="inline-block bg-[#4262FF] hover:bg-[#3550DD] text-slate-950 font-bold py-3 px-8 rounded-full transition-all hover:scale-105 shadow-lg shadow-blue-500/30"
-            >
-              Jetzt kaufen
-            </a>
-          </div>
-        </div>
+      <div className="mt-12 pt-8 border-t border-white/10 text-center">
+        <p className="text-sm text-slate-500">
+          Alle Wiki-Artikel sind kostenlos. Wenn du fertige Templates und Bundles suchst:
+        </p>
+        <a
+          href="https://www.ai-engineering.at"
+          className="text-sm text-blue-400 hover:text-blue-300 transition-colors mt-2 inline-block"
+        >
+          Produkte & Bundles ansehen →
+        </a>
       </div>
     </div>
   )

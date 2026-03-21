@@ -14,6 +14,9 @@ export default function ModelSelectionPage() {
         <p className="text-gray-400 mt-2">
           Wähle das richtige AI-Modell für deinen Anwendungsfall.
         </p>
+        <div className="flex flex-wrap gap-2 mt-2 mb-4">
+          <span className="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded">Stand: März 2026</span>
+        </div>
       </div>
 
       <div className="prose prose-invert max-w-none">

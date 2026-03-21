@@ -306,7 +306,7 @@ sudo fail2ban-client status sshd`}</code>
               SSH-Logins, API-Fehlerraten und Disk-Nutzung auf einen Blick. So
               siehst du in 5 Sekunden ob etwas nicht stimmt. Unser{" "}
               <a
-                href="https://buy.stripe.com/3cIdR95Nt2DT81E0t6fQI03"
+                href="https://www.ai-engineering.at"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-400 hover:underline"

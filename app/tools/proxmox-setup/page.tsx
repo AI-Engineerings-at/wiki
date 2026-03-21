@@ -12,6 +12,10 @@ export default function ProxmoxSetup() {
       <div>
         <h1 className="text-3xl font-bold text-white">Proxmox: Homelab Virtualisierung</h1>
         <p className="text-gray-400 mt-2">Tools · 7 min</p>
+        <div className="flex flex-wrap gap-2 mt-2 mb-4">
+          <span className="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded">Stand: März 2026</span>
+          <span className="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded">Proxmox VE 8.x</span>
+        </div>
       </div>
 
       <div className="prose prose-invert max-w-none">
