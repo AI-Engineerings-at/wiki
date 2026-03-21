@@ -11,6 +11,15 @@ seriesStep: 3
 
 # Ollama installieren in 5 Minuten — Schritt für Schritt (Windows, Mac, Linux)
 
+| Schritt | Aktion | Dauer |
+|---------|--------|-------|
+| 1 | Ollama installieren (winget / brew / curl) | 1 Min |
+| 2 | Ollama startet als Hintergrund-Service | automatisch |
+| 3 | `ollama run qwen3.5:4b` — Modell herunterladen | 2-3 Min |
+| 4 | Interaktive Chat-Session im Terminal | bereit |
+| 5 | API verfügbar unter `localhost:11434` | bereit |
+| 6 | Prüfen mit `curl localhost:11434/api/tags` | 10 Sek |
+
 5 Minuten. Dann läuft qwen3.5:4b auf deiner eigenen Hardware.
 
 Kein Cloud-Account, keine API-Kosten, keine Daten die irgendwo hochgeladen werden. Getestet auf Windows 11, macOS Sonoma und Ubuntu 24.04.

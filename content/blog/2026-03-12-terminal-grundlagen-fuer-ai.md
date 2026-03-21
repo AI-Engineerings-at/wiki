@@ -11,6 +11,14 @@ seriesStep: 2
 
 # Terminal-Grundlagen für AI-Entwickler — die 10 Befehle die du wirklich brauchst
 
+| Kategorie | Befehle | Einsatzgebiet |
+|-----------|---------|---------------|
+| Navigation | `cd`, `ls`, `pwd` | Bewegen, Dateien finden |
+| Netzwerk | `curl`, `ssh` | API-Tests, Remote-Zugriff |
+| Docker | `docker ps`, `docker logs` | Container-Verwaltung |
+| Entwicklung | `git pull`, `cat`, `grep` | Code und Config verwalten |
+| Pakete | `pip` / `uv` | Python-Abhängigkeiten installieren |
+
 10 Befehle. Das ist alles was zwischen dir und deinem ersten lokalen LLM steht.
 
 Kein Informatikstudium, kein Linux-Expertenwissen. Wer Ollama starten, Docker-Container prüfen und Modelle herunterladen will, braucht genau diese 10 Befehle — mehr nicht.
@@ -36,13 +44,53 @@ Auf Windows empfehlen wir [Windows Terminal](https://aka.ms/terminal) + [WSL2](h
 | `grep` | Text in Dateien oder Output suchen | `docker logs ollama \| grep "error"` |
 | `pip` / `uv` | Python-Pakete installieren (`uv` ist deutlich schneller) | `uv pip install ollama` |
 
+## Befehle in der Praxis — echte Beispiele
+
+Jeder Befehl hier zeigt mindestens zwei reale Anwendungsfälle, die dir beim Betrieb eines lokalen AI-Stacks begegnen werden.
+
+**`cd` — zu deinem Projekt navigieren:**
+```bash
+cd ~/projects/ai-stack          # zum AI-Projekt springen
+cd ..                           # eine Ebene hoch
+cd -                            # zurück zum vorherigen Verzeichnis
+```
+
+**`ls` — sehen was in einem Verzeichnis liegt:**
+```bash
+ls -la                          # alle Dateien inkl. versteckte, mit Details
+ls -lh ~/.ollama/models/        # Modelldateien mit lesbaren Größenangaben
+ls *.yml                        # nur YAML-Dateien auflisten (z.B. docker-compose)
+```
+
+**`curl` — APIs direkt aus dem Terminal testen:**
+```bash
+curl http://localhost:11434/api/tags                    # Ollama-Modelle auflisten
+curl -X POST http://localhost:11434/api/generate \
+  -d '{"model":"qwen3.5:4b","prompt":"Hallo"}'         # einen Prompt senden
+curl -s http://localhost:3000/health | python -m json.tool  # Open WebUI Health prüfen
+```
+
+**`grep` — das Wichtige im Rauschen finden:**
+```bash
+docker logs ollama | grep "error"              # Fehler in Ollama-Logs finden
+grep -r "OLLAMA_HOST" ~/projects/              # Config-Referenzen im Projekt suchen
+docker logs open-webui | grep -i "warning"     # Warnungen suchen (Groß/Klein egal)
+```
+
+**`docker ps` — wissen was läuft:**
+```bash
+docker ps                                              # laufende Container
+docker ps -a                                           # alle Container inkl. gestoppte
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"  # saubere Übersicht
+```
+
 ## Drei Dinge die sofort helfen
 
-**Tab-Completion nutzen.** Fang mit `cd pro` an und drück Tab — das Terminal vervollständigt `projects/` automatisch. Spart tipperei und verhindert Tippfehler.
+**Tab-Completion nutzen.** Fang mit `cd pro` an und drück Tab — das Terminal vervollständigt `projects/` automatisch. Spart Tipperei und verhindert Tippfehler.
 
-**Pfeiltaste hoch.** Der letzte Befehl kommt mit ↑ zurück. Kein nochmal eintippen.
+**Pfeiltaste hoch.** Der letzte Befehl kommt mit ↑ zurück. Kein nochmal eintippen. Drück Strg+R um durch deine Befehlshistorie zu suchen.
 
-**`|` (Pipe) verbindet Befehle.** `docker logs ollama | grep error` gibt nur Zeilen mit "error" aus — statt durch hunderte Logzeilen zu scrollen.
+**`|` (Pipe) verbindet Befehle.** `docker logs ollama | grep error` gibt nur Zeilen mit "error" aus — statt durch hunderte Logzeilen zu scrollen. Du kannst mehrere Pipes verketten: `docker logs ollama | grep error | tail -5` zeigt nur die letzten 5 Fehlerzeilen.
 
 ## Windows-Nutzer: WSL2 einrichten lohnt sich
 

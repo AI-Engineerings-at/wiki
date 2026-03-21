@@ -37,4 +37,16 @@ Die EU AI Act Deadline rückt naeher (2. August 2026). Unternehmen müssen nachw
 - **ComfyUI** auf RTX 3090 (GPU-Server) — Bild-Generierung
 - **Social Poster** auf Fedora (Worker-Node) — CDP Browser-Automation
 
+## Wie die Pipeline konkret funktioniert
+
+Die RSS-Aggregation läuft als n8n-Workflow, der alle 6 Stunden 10 vordefinierte Quellen abfragt — darunter Fachblogs, GitHub Trending und Branchen-Newsletter. Neue Einträge werden dedupliziert und in eine Warteschlange geschrieben.
+
+Aus dieser Warteschlange zieht der AI Humanizer einzelne Artikel. Ollama erhält den Originaltext zusammen mit einem System-Prompt, der Tonalität, Zielgruppe und Länge vorgibt. Das Ergebnis ist kein umgeschriebener Artikel, sondern ein eigenständiger Text, der das Thema aus unserer Perspektive behandelt. Mistral Small 3.1 24B ist dafür das bevorzugte Modell — schnell genug für Batch-Verarbeitung und qualitativ ausreichend für Social-Media-Texte.
+
+Die Bildgenerierung über ComfyUI nutzt FLUX.1-schnell als Basis-Modell. Jeder generierte Text bekommt automatisch ein passendes Bild zugewiesen, basierend auf einem Prompt, den Ollama aus dem fertigen Text ableitet. Das Bild wird lokal gespeichert und dem Post zugeordnet.
+
+Der Social Poster ist ein Node.js-Service, der über das Chrome DevTools Protocol (CDP) Beiträge auf LinkedIn, Twitter und Facebook veröffentlicht. Keine offiziellen APIs — stattdessen Browser-Automation, weil die API-Zugänge für organische Posts bei den meisten Plattformen eingeschränkt oder kostenpflichtig sind.
+
+Die gesamte Kette — vom RSS-Feed bis zum veröffentlichten Social-Media-Post — läuft ohne manuellen Eingriff. Fehler werden über Grafana-Alerts gemeldet. Die durchschnittliche Verarbeitungszeit pro Artikel liegt bei 4-6 Minuten, davon ca. 90 Sekunden für die Bildgenerierung.
+
 Mehr Details in unserem [n8n Workflow Bundle](/tools/n8n).

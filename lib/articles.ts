@@ -59,6 +59,8 @@ const toolsArticles: Article[] = [
   { title: 'Proxmox: Homelab Virtualisierung', description: 'Installation, VMs, LXC, GPU-Passthrough, Backup-Strategie.', href: '/tools/proxmox-setup', category: 'tools', categoryLabel: 'Tools', date: '2026-03-01' },
   { title: 'Model Selection Guide', description: 'Waehle das richtige AI-Modell für deinen Anwendungsfall — von Llama bis Mistral.', href: '/tools/model-selection', category: 'tools', categoryLabel: 'Tools', date: '2026-03-01' },
   { title: 'MCP Server Setup', description: 'Model Context Protocol Server für AI-Integrationen aufsetzen.', href: '/tools/mcp-server', category: 'tools', categoryLabel: 'Tools', date: '2026-03-01' },
+  { title: 'Open Source Tools & Projekte', description: 'Kuratierte Liste der besten Open-Source-Tools für lokale AI: LLM Runtimes, Agent Frameworks, RAG, Automation und Security.', href: '/tools/open-source-projekte', category: 'tools', categoryLabel: 'Tools', date: '2026-03-22' },
+  { title: 'AI OS Setup Guide', description: 'Claude Code als AI-Betriebssystem einrichten: Ordnerstruktur, Business-Wizard, Context-Dateien und erste Befehle.', href: '/tools/ai-os-setup', category: 'tools', categoryLabel: 'Tools', date: '2026-03-22' },
 ]
 
 const patternsArticles: Article[] = [
@@ -69,6 +71,7 @@ const patternsArticles: Article[] = [
   { title: 'Heartbeat & Monitoring Pattern', description: 'Wie du erkennst, ob Agenten laufen — Health Checks, Status-Updates, Alerting.', href: '/patterns/heartbeat-monitoring', category: 'patterns', categoryLabel: 'Patterns', date: '2026-03-01' },
   { title: 'AI Agent als digitaler Mitarbeiter', description: 'Agent-Onboarding: Credential-Isolation, Network Policy, Skill-System und EU AI Act Kennzeichnung.', href: '/patterns/ai-agent-digitaler-mitarbeiter', category: 'patterns', categoryLabel: 'Patterns', date: '2026-03-21', popular: true },
   { title: 'Self-Improving Agents', description: '3-Tier Memory, corrections.md, Pre-Action Gates und Self-Eskalation — das NemoClaw Pattern.', href: '/patterns/self-improving-agents', category: 'patterns', categoryLabel: 'Patterns', date: '2026-03-21' },
+  { title: 'Agent Team skalieren', description: 'Neue Agenten hinzufügen, Multi-Agent Workflows erstellen und ein Agent-Team skalieren.', href: '/patterns/agent-skalierung', category: 'patterns', categoryLabel: 'Patterns', date: '2026-03-22' },
 ]
 
 const papersArticles: Article[] = [
@@ -247,6 +250,12 @@ export const relatedArticlesMap: Record<string, string[]> = {
   '/papers/lora-paper': ['/papers/attention-is-all-you-need', '/tools/model-selection', '/tools/ollama-tutorial'],
   '/papers/react-paper': ['/patterns/agent-orchestration-patterns', '/papers/rag-paper', '/papers/constitutional-ai'],
   '/papers/constitutional-ai': ['/papers/react-paper', '/compliance/eu-ai-act', '/patterns/self-improving-agents'],
+  // Open Source Tools
+  '/tools/open-source-projekte': ['/tools/ollama-tutorial', '/tools/rag-guide', '/tools/mcp-server'],
+  // AI OS Setup
+  '/tools/ai-os-setup': ['/patterns/memory-management', '/grundlagen/agent-rollen', '/patterns/agent-skalierung'],
+  // Agent Skalierung
+  '/patterns/agent-skalierung': ['/grundlagen/agent-rollen', '/grundlagen/ai-agent-team', '/patterns/memory-management'],
 }
 
 export function getRelatedArticles(href: string): Article[] {

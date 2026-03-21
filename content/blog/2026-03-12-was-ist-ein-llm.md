@@ -11,6 +11,37 @@ seriesStep: 0
 
 # Was ist ein Large Language Model? Erklärt ohne Buzzwords
 
+```
+┌─────────────────────────────────────────────────────────┐
+│                 Transformer-Architektur                  │
+│                                                         │
+│   Input: "Die Hauptstadt von Österreich ist"            │
+│       │                                                 │
+│       ▼                                                 │
+│   ┌──────────────┐                                      │
+│   │  Tokenizer   │  Text → Token-IDs                    │
+│   └──────┬───────┘                                      │
+│          ▼                                              │
+│   ┌──────────────┐                                      │
+│   │  Embedding   │  Token-IDs → Vektoren                │
+│   └──────┬───────┘                                      │
+│          ▼                                              │
+│   ┌──────────────┐  ×N Schichten (z.B. 32 bei 7B)       │
+│   │  Attention   │  "Welche Tokens sind relevant?"       │
+│   │  + FFN       │  Gewichtete Verknüpfungen             │
+│   └──────┬───────┘                                      │
+│          ▼                                              │
+│   ┌──────────────┐                                      │
+│   │  Output Head │  Wahrscheinlichkeiten für             │
+│   └──────┬───────┘  nächstes Token                      │
+│          ▼                                              │
+│   Output: "Wien" (p=0.97)                               │
+│                                                         │
+│   Parameter = Gewichte in Attention + FFN Schichten      │
+│   7B = 7 Milliarden Gewichte ≈ 4-8 GB VRAM              │
+└─────────────────────────────────────────────────────────┘
+```
+
 ChatGPT benutzt es. Karpathy baut es. Die meisten können nicht erklären was es ist.
 
 Das ist kein Vorwurf — die meisten Erklärungen sind entweder zu simpel ("es denkt wie ein Mensch") oder zu abstrakt ("es ist ein stochastischer Papagei"). Beides hilft nicht weiter.

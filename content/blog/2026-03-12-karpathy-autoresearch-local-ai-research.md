@@ -9,6 +9,43 @@ author: "AI Engineering"
 
 # Karpathy's autoresearch: Autonomous AI Research on Your Local GPU
 
+```
+ ┌──────────────────── autoresearch Pipeline ────────────────────┐
+ │                                                               │
+ │   program.md          train.py          val_data.bin          │
+ │       │                   │                  │                │
+ │       ▼                   ▼                  │                │
+ │  ┌─────────┐    ┌──────────────────┐         │                │
+ │  │   LLM   │───>│  Code Modifier   │         │                │
+ │  │ (local/ │    │  (architecture,  │         │                │
+ │  │  cloud) │    │   hyperparams)   │         │                │
+ │  └─────────┘    └────────┬─────────┘         │                │
+ │                          │                   │                │
+ │                          ▼                   ▼                │
+ │                 ┌──────────────────────────────┐              │
+ │                 │     Training (5 min)         │              │
+ │                 │     GPU: RTX 3090            │              │
+ │                 └──────────────┬───────────────┘              │
+ │                                │                              │
+ │                                ▼                              │
+ │                      ┌─────────────────┐                      │
+ │                      │  Measure val_bpb │                     │
+ │                      └────────┬────────┘                      │
+ │                               │                               │
+ │                    ┌──────────┴──────────┐                    │
+ │                    │                     │                    │
+ │               val_bpb better?       val_bpb worse?           │
+ │                    │                     │                    │
+ │                    ▼                     ▼                    │
+ │              KEEP change          REVERT to last             │
+ │              next iteration       good state                 │
+ │                    │                     │                    │
+ │                    └──────────┬──────────┘                    │
+ │                               │                               │
+ │                          Loop forever                         │
+ └───────────────────────────────────────────────────────────────┘
+```
+
 26,469 GitHub stars in 6 days. Published on March 6, 2026 — right in the middle of GTC week — and it immediately became the most-discussed open-source project in the LLM space. [Source](https://github.com/karpathy/autoresearch)
 
 What is it? And why does it matter for anyone running AI locally?

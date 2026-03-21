@@ -11,6 +11,37 @@ seriesStep: 0
 
 # What Is a Large Language Model? Explained Without Buzzwords
 
+```
+┌─────────────────────────────────────────────────────────┐
+│                 Transformer Architecture                 │
+│                                                         │
+│   Input: "The capital of Austria is"                    │
+│       │                                                 │
+│       ▼                                                 │
+│   ┌──────────────┐                                      │
+│   │  Tokenizer   │  Text → Token IDs                    │
+│   └──────┬───────┘                                      │
+│          ▼                                              │
+│   ┌──────────────┐                                      │
+│   │  Embedding   │  Token IDs → Vectors                 │
+│   └──────┬───────┘                                      │
+│          ▼                                              │
+│   ┌──────────────┐  ×N layers (e.g. 32 for 7B)          │
+│   │  Attention   │  "Which tokens are relevant?"         │
+│   │  + FFN       │  Weighted connections                 │
+│   └──────┬───────┘                                      │
+│          ▼                                              │
+│   ┌──────────────┐                                      │
+│   │  Output Head │  Probabilities for                    │
+│   └──────┬───────┘  next token                          │
+│          ▼                                              │
+│   Output: "Vienna" (p=0.97)                             │
+│                                                         │
+│   Parameters = weights in Attention + FFN layers         │
+│   7B = 7 billion weights ≈ 4-8 GB VRAM                  │
+└─────────────────────────────────────────────────────────┘
+```
+
 ChatGPT uses it. Karpathy builds it. Most people can't explain what it actually is.
 
 That's not a criticism — most explanations are either too simplistic ("it thinks like a human") or too abstract ("it's a stochastic parrot"). Neither is useful.

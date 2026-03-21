@@ -69,6 +69,49 @@ export default function EUAIActPage() {
           </tbody>
         </table>
 
+        <h2>Typical Business AI Scenarios</h2>
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-slate-700">
+              <th className="text-left py-2 text-slate-400">Scenario</th>
+              <th className="text-left py-2 text-slate-400">Risk Level</th>
+              <th className="text-left py-2 text-slate-400">Obligations</th>
+            </tr>
+          </thead>
+          <tbody className="text-slate-300">
+            <tr className="border-b border-slate-800">
+              <td className="py-2">LLM for content creation</td>
+              <td className="py-2">Minimal to Limited</td>
+              <td className="py-2">Transparency when publishing without human review</td>
+            </tr>
+            <tr className="border-b border-slate-800">
+              <td className="py-2">AI customer support chatbot</td>
+              <td className="py-2">Limited</td>
+              <td className="py-2">Users must know they are talking to AI. If it makes service decisions, may be high-risk.</td>
+            </tr>
+            <tr className="border-b border-slate-800">
+              <td className="py-2">Internal productivity (email, code, summaries)</td>
+              <td className="py-2">Minimal</td>
+              <td className="py-2">No specific obligations, but documentation recommended</td>
+            </tr>
+            <tr>
+              <td className="py-2">AI for recruiting (CV screening, candidate ranking)</td>
+              <td className="py-2 text-red-400 font-semibold">High</td>
+              <td className="py-2">Full compliance: documentation, risk management, human oversight</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2>High-Risk Requirements Detail</h2>
+        <ul className="list-disc list-inside text-slate-300 space-y-2">
+          <li><strong>Risk management system:</strong> Documented, ongoing process to identify, analyze, and mitigate risks — not a one-time assessment</li>
+          <li><strong>Data governance:</strong> Training and test data must meet quality criteria. Document data sources, preparation methods, and potential biases</li>
+          <li><strong>Technical documentation:</strong> Detailed documentation before market placement including intended purpose, design methodology, and test results</li>
+          <li><strong>Record-keeping:</strong> Automatic logging of AI system operations for traceability. Provide to authorities on request</li>
+          <li><strong>Transparency:</strong> Clear information about capabilities, limitations, and intended use</li>
+          <li><strong>Human oversight:</strong> Humans can understand capabilities and limits, intervene in decisions, and choose not to use the system</li>
+        </ul>
+
         <h2>Timeline</h2>
         <ul className="list-disc list-inside text-slate-300 space-y-1">
           <li><strong>12 Jul 2024:</strong> Published in EU Official Journal</li>

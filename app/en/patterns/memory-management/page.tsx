@@ -20,11 +20,53 @@ export default function MemoryManagementPage() {
           Memory Management solves this through structured persistence.
         </p>
 
-        <h2 className="text-xl font-semibold text-white mt-8">Solutions</h2>
+        <h2 className="text-xl font-semibold text-white mt-8">The Three-Tier Memory System in Practice</h2>
+        <p className="text-slate-300">
+          A productive memory system solves the forgetting problem with three tiers that work
+          together: core knowledge (always loaded), daily logs (session history), and optional
+          vector memory (semantic search).
+        </p>
+
+        <h3 className="text-lg font-semibold text-white mt-6">Tier 1: MEMORY.md — The Core Brain</h3>
+        <p className="text-slate-300">
+          The most important file in the system. Think of it as the essential briefing loaded at
+          every single start. What goes in? Active projects and their status, important decisions,
+          current business priorities, links to important resources. Rule: Keep it under two hundred
+          lines — a bloated memory file wastes tokens and dilutes important information.
+        </p>
+
+        <h3 className="text-lg font-semibold text-white mt-6">Tier 2: Daily Logs — The Activity Record</h3>
+        <p className="text-slate-300">
+          While MEMORY.md stores "what matters now", daily logs store "what happened each day". A
+          work journal that writes itself: completed tasks, decisions made, content created. Daily
+          logs enable searchable history, feed weekly review skills, and ensure continuity — the
+          next session can pick up exactly where the last one left off.
+        </p>
+
+        <h3 className="text-lg font-semibold text-white mt-6">Tier 3: Vector Memory — Semantic Search</h3>
+        <p className="text-slate-300">
+          Optional but powerful. Vector memory enables semantic search across accumulated knowledge
+          — based on meaning, not just keywords. You can ask "What was our approach to customer
+          onboarding?" and the system finds relevant information even when the exact words do not
+          match.
+        </p>
+
+        <h2 className="text-xl font-semibold text-white mt-8">Context Files: Permanent Foundation Knowledge</h2>
+        <p className="text-slate-300">
+          Memory stores what happens over time. Context files store the permanent foundations — the
+          things about your business that do not change day to day:
+        </p>
+        <ul className="list-disc list-inside text-slate-300 space-y-1 mt-2">
+          <li><strong>my-business.md</strong> — Company profile, mission, target customers, revenue model</li>
+          <li><strong>my-voice.md</strong> — Communication style, tone, example content</li>
+          <li><strong>my-products.md</strong> — Product catalog, pricing, features, differentiation</li>
+        </ul>
+
+        <h2 className="text-xl font-semibold text-white mt-8">Technical Implementations</h2>
 
         <h3 className="text-lg font-semibold text-white mt-6">1. CLAUDE.md / PROJECT.md</h3>
         <p className="text-slate-300">
-          The simplest method: A Markdown file in the project root containing all important info. 
+          The simplest method: A Markdown file in the project root containing all important info.
           Loaded automatically on every run.
         </p>
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
@@ -85,8 +127,29 @@ export default function MemoryManagementPage() {
 
         <h2 className="text-xl font-semibold text-white mt-8">Practice Tip</h2>
         <p className="text-slate-300">
-          Start with CLAUDE.md. That works for 90% of projects. Only when you 
+          Start with CLAUDE.md. That works for 90% of projects. Only when you
           really build a knowledge base larger than 50K tokens do you need vector databases.
+        </p>
+
+        <h2 className="text-xl font-semibold text-white mt-8">Keeping Memory Clean</h2>
+        <p className="text-slate-300">
+          Memory maintenance is like keeping a tidy desk. Without regular cleanup, important
+          things get buried under piles of outdated information.
+        </p>
+        <ul className="list-disc list-inside text-slate-300 space-y-2 mt-2">
+          <li>The two-hundred-line rule for MEMORY.md is the most important — move older entries to the daily logs archive</li>
+          <li>Keep MEMORY.md focused on current priorities, active projects, and essential reference information</li>
+          <li>Daily logs are automatically organized by date — archive older logs once a month</li>
+          <li>Never store secrets, credentials, or API keys in memory files</li>
+        </ul>
+
+        <h2 className="text-xl font-semibold text-white mt-8">The Real Benefit: Continuity</h2>
+        <p className="text-slate-300">
+          This is what memory management looks like in practice: Monday you tell the system about
+          a new client project — details get stored in the daily log and the project is marked
+          active in MEMORY.md. Tuesday you ask for a proposal — the system already knows the
+          details and writes in your brand voice. Wednesday client feedback arrives, Thursday
+          you can ask for the project status and get a complete summary across all days.
         </p>
 
         <h2 className="text-xl font-semibold text-white mt-8">Sources</h2>

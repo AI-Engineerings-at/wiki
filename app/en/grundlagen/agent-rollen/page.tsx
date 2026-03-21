@@ -58,6 +58,31 @@ export default function AgentRollen() {
           </div>
         </div>
 
+        <h2 className="text-xl font-semibold text-white mt-8">Why Agents Need Tool Restrictions</h2>
+        <p className="text-gray-300">
+          Why not just give every agent access to every tool? The answer is security. You would not
+          give your intern the keys to the production server. Restricting access is not about mistrust
+          — it is about preventing accidents.
+        </p>
+        <p className="text-gray-300 mt-2">
+          A Researcher agent is a perfect example: Its job is to investigate and analyze. It reads
+          files, searches for information, and compiles reports. But it cannot write files or execute
+          system commands. A research task should never accidentally overwrite an important file. The
+          restriction makes the agent safer without making it less useful for its actual job.
+        </p>
+
+        <h2 className="text-xl font-semibold text-white mt-8">Context Loading: Why Each Agent Reads Different Files</h2>
+        <p className="text-gray-300">
+          When an agent is activated, it does not load every file in the system. It loads only the
+          files relevant to its role. The Shop Manager loads the product catalog and pricing
+          information. The Content Writer loads the brand voice guide and the editorial calendar.
+        </p>
+        <p className="text-gray-300 mt-2">
+          This selective context loading serves two purposes: First, it keeps the agent focused —
+          an agent with less but more relevant context delivers better results. Second, it saves
+          token usage, meaning faster responses and lower API costs.
+        </p>
+
         <h2 className="text-xl font-semibold text-white mt-8">Extended Roles</h2>
         <p className="text-gray-300">
           For more complex setups, these roles can be added:
@@ -181,6 +206,20 @@ export default function AgentRollen() {
             </tbody>
           </table>
         </div>
+
+        <h2 className="text-xl font-semibold text-white mt-8">Agent Collaboration and Handoffs</h2>
+        <p className="text-gray-300">
+          Sometimes a task requires more than one agent. For example: "Research our top competitor
+          and then write a blog post comparing our product with theirs." This involves the Researcher
+          agent gathering information and the Content Writer agent creating the blog post.
+        </p>
+        <p className="text-gray-300 mt-2">
+          The system handles this through handoffs: The first agent completes its part of the work
+          and stores the result. The second agent picks up that result as input and continues. Each
+          agent works within its own boundaries, but the outcome is seamless collaboration — the
+          security benefits of restricted specialists combined with the flexibility of multi-agent
+          cooperation.
+        </p>
 
         <h2 className="text-xl font-semibold text-white mt-8">Defining Boundaries</h2>
         <p className="text-gray-300">

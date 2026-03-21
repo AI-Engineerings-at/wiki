@@ -14,9 +14,28 @@ export default function GrafanaMonitoringPage() {
       </div>
 
       <div className="prose prose-invert max-w-none">
-        <p className="text-lg text-slate-300">
-          Grafana is the dashboard tool for everything with metrics. 
-          Whether Docker containers, server resources or your own applications - 
+        <h2 className="text-xl font-semibold text-white mt-8">The Blind Flight Problem</h2>
+        <p className="text-slate-300">
+          Imagine you run a homelab with ten, twenty, or thirty services. Everything seems to be
+          running fine. Then one day a customer tells you your website has been offline for six
+          hours. Or you realize your backup disk has been full for two weeks. Or a Docker container
+          has been silently restarting every fifteen minutes for hours — and nobody noticed.
+        </p>
+        <p className="text-slate-300 mt-2">
+          That happens without monitoring. You are flying blind. Monitoring is the difference between
+          "finding problems before anyone is affected" and "learning about problems from angry users."
+        </p>
+
+        <h2 className="text-xl font-semibold text-white mt-8">What Good Monitoring Does</h2>
+        <ul className="list-disc list-inside text-slate-300 space-y-2">
+          <li><strong>Shows current state:</strong> Is everything healthy right now? Which services are running? How much disk space is left? You should be able to answer these in under ten seconds.</li>
+          <li><strong>Shows trends over time:</strong> Your disk was at sixty percent last month and is now at eighty. At this rate, it will be full in six weeks. Trends tell you what is coming.</li>
+          <li><strong>Alerts you to problems:</strong> When a threshold is exceeded — disk over ninety percent, service down for more than two minutes — monitoring sends you a notification in seconds, not hours.</li>
+        </ul>
+
+        <p className="text-lg text-slate-300 mt-6">
+          Grafana is the dashboard tool for everything with metrics.
+          Whether Docker containers, server resources or your own applications -
           Grafana visualizes everything.
         </p>
 

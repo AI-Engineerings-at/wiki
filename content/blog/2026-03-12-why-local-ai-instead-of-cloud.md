@@ -11,6 +11,17 @@ seriesStep: 1
 
 # Why You Shouldn't Use ChatGPT at Work — and What to Use Instead
 
+| Criterion | Cloud AI (ChatGPT) | Local AI (Ollama) |
+|-----------|--------------------|--------------------|
+| Data storage | US servers (OpenAI) | Your own server |
+| GDPR compliance | DPA + SCCs + DPIA required | Out of the box |
+| EU AI Act control | Black box, no access | Full transparency |
+| API costs | Per token, ongoing | One-time hardware |
+| Model quality | GPT-4 (top tier) | 7B-27B (solid) |
+| Latency | Network dependent | Local, instant |
+| Availability | Depends on OpenAI | Your infrastructure |
+| US data transfer | Yes (Schrems II risk) | No byte leaves the network |
+
 Every time your employee uses ChatGPT, company data leaves EU jurisdiction.
 
 That's not an exaggeration. That's what happens when someone types a customer document, an internal email, or a contract draft into the input box. The text goes to OpenAI servers in the US. What happens there — for training, logging, compliance — is not in your hands.

@@ -76,7 +76,63 @@ warm -[#22c55e]-> hot : Promotion\\n(3x in 7 Tagen)
           caption="Memory Tiers: HOT (immer geladen), WARM (bei Bedarf), COLD (auf Anfrage) mit automatischer Promotion/Demotion"
         />
 
-        <h2 className="text-xl font-semibold text-white mt-8">Lösungsansätze</h2>
+        <h2 className="text-xl font-semibold text-white mt-8">Das Drei-Stufen-Memory-System in der Praxis</h2>
+        <p>
+          Ein produktives Memory-System löst das Vergessens-Problem mit drei Stufen, die
+          zusammenspielen: Kernwissen (immer geladen), Tagesprotokolle (Session-Historie)
+          und optionale Vector Memory (semantische Suche).
+        </p>
+
+        <h3 className="text-lg font-semibold text-white mt-6">Stufe 1: MEMORY.md — Das Kerngehirn</h3>
+        <p>
+          Die wichtigste Datei im System. Stell sie dir als das essentielle Briefing vor, das bei
+          jedem einzelnen Start geladen wird. Was kommt hinein? Aktive Projekte und deren Status,
+          wichtige Entscheidungen, aktuelle Business-Prioritäten, Links zu wichtigen Ressourcen.
+        </p>
+        <p className="mt-2">
+          Eine gute Faustregel: Wenn du ein neues Teammitglied in sechzig Sekunden briefen müsstest,
+          was würdest du ihm sagen? Das gehört in MEMORY.md. Wichtige Regel: Unter zweihundert
+          Zeilen halten — eine aufgeblähte Memory-Datei verschwendet Tokens und verwässert die
+          wichtigen Informationen.
+        </p>
+
+        <h3 className="text-lg font-semibold text-white mt-6">Stufe 2: Tagesprotokolle — Die Aktivitätsaufzeichnung</h3>
+        <p>
+          Während MEMORY.md das "was jetzt wichtig ist" speichert, speichern Tagesprotokolle das
+          "was an jedem Tag passiert ist". Ein Arbeitstagebuch, das sich von selbst schreibt:
+          Erledigte Aufgaben, getroffene Entscheidungen, erstellte Inhalte.
+        </p>
+        <p className="mt-2">
+          Tagesprotokolle ermöglichen eine durchsuchbare Historie ("Woran habe ich letzten Dienstag
+          gearbeitet?"), füttern Weekly-Review-Skills und sorgen für Kontinuität — die nächste
+          Session kann genau dort weitermachen, wo die letzte aufgehört hat.
+        </p>
+
+        <h3 className="text-lg font-semibold text-white mt-6">Stufe 3: Vector Memory — Semantische Suche</h3>
+        <p>
+          Optional, aber leistungsfähig. Vector Memory ermöglicht semantische Suche über
+          angesammeltes Wissen — basierend auf Bedeutung, nicht nur auf Schlüsselwörtern. Du kannst
+          fragen "Was war unser Ansatz für Kunden-Onboarding?" und das System findet relevante
+          Informationen, selbst wenn die genauen Worte nicht übereinstimmen.
+        </p>
+
+        <h2 className="text-xl font-semibold text-white mt-8">Context-Dateien: Permanentes Grundwissen</h2>
+        <p>
+          Memory speichert, was im Laufe der Zeit passiert. Context-Dateien speichern die permanenten
+          Grundlagen — die Dinge am Business, die sich nicht von Tag zu Tag ändern:
+        </p>
+        <ul className="list-disc list-inside text-gray-300 space-y-1 mt-2">
+          <li><strong>my-business.md</strong> — Firmenprofil, Mission, Zielkunden, Umsatzmodell</li>
+          <li><strong>my-voice.md</strong> — Kommunikationsstil, Ton, Beispiel-Inhalte</li>
+          <li><strong>my-products.md</strong> — Produktkatalog, Preise, Features, Differenzierung</li>
+        </ul>
+        <p className="mt-2">
+          Die Voice-Datei löst die grösste Beschwerde über AI-generierten Content: dass er generisch
+          und roboterhaft klingt. Je mehr Details du hineinsteckst — einschliesslich Beispielen deines
+          tatsächlichen Schreibstils — desto authentischer wird der Output.
+        </p>
+
+        <h2 className="text-xl font-semibold text-white mt-8">Technische Implementierungen</h2>
 
         <h3 className="text-lg font-semibold text-white mt-6">1. CLAUDE.md / PROJECT.md</h3>
         <p>
@@ -226,6 +282,32 @@ print(results["documents"])
             brauchst du Vektordatenbanken wie ChromaDB oder pgvector.
           </p>
         </Callout>
+
+        <h2 className="text-xl font-semibold text-white mt-8">Memory sauber halten</h2>
+        <p className="text-gray-300">
+          Memory-Pflege ist wie einen aufgeräumten Schreibtisch zu halten. Ohne regelmässiges
+          Aufräumen werden wichtige Dinge unter Stapeln veralteter Informationen begraben.
+        </p>
+        <ul className="list-disc list-inside text-gray-300 space-y-2 mt-2">
+          <li>Die Zweihundert-Zeilen-Regel für MEMORY.md ist die wichtigste — ältere Einträge ins Tagesprotokolle-Archiv verschieben</li>
+          <li>MEMORY.md fokussiert auf aktuelle Prioritäten, aktive Projekte und essentielle Referenzinformationen halten</li>
+          <li>Tagesprotokolle werden automatisch nach Datum organisiert — einmal im Monat ältere Protokolle archivieren</li>
+          <li>Keine Secrets, Credentials oder API Keys in Memory-Dateien speichern</li>
+        </ul>
+
+        <h2 className="text-xl font-semibold text-white mt-8">Der echte Nutzen: Kontinuität</h2>
+        <p className="text-gray-300">
+          So sieht Memory Management in der Praxis aus: Montag erzählst du dem System von einem
+          neuen Kundenprojekt — die Details werden im Tagesprotokoll gespeichert und das Projekt
+          als aktiv in MEMORY.md markiert. Dienstag bittest du um ein Angebot — das System kennt
+          die Details bereits und schreibt in deiner Markenstimme. Mittwoch kommt Kundenfeedback,
+          Donnerstag kannst du nach dem Projektstatus fragen und bekommst eine komplette
+          Zusammenfassung über alle Tage hinweg.
+        </p>
+        <p className="text-gray-300 mt-2">
+          Kontinuität, Kontext und Erinnerung — die drei Dinge, die eine AI vom Tool zum
+          verlässlichen Teammitglied machen.
+        </p>
 
         {/* Quellen */}
         <section className="mt-16 pt-8 border-t border-white/10">

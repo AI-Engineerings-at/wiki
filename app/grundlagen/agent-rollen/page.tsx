@@ -68,6 +68,33 @@ export default function AgentRollen() {
           <figcaption className="text-center text-white/40 text-sm mt-2">Minimum Viable Team: Die drei Rollen die jedes Agent-System braucht</figcaption>
         </figure>
 
+        <h2 className="text-xl font-semibold text-white mt-8">Warum Agenten Tool-Einschränkungen brauchen</h2>
+        <p className="text-gray-300">
+          Warum nicht einfach jedem Agent Zugang zu jedem Tool geben? Die Antwort ist Sicherheit.
+          Du würdest deinem Praktikanten nicht die Schlüssel zum Produktionsserver geben. Zugang
+          einschränken ist keine Frage von Misstrauen — es geht darum, Unfälle zu verhindern.
+        </p>
+        <p className="text-gray-300 mt-2">
+          Ein Researcher-Agent ist ein gutes Beispiel: Sein Job ist es, zu untersuchen und zu
+          analysieren. Er liest Dateien, sucht nach Informationen und stellt Reports zusammen.
+          Aber er kann keine Dateien schreiben oder Systembefehle ausführen. Eine Rechercheaufgabe
+          sollte nie versehentlich eine wichtige Datei überschreiben. Die Einschränkung macht den
+          Agent sicherer, ohne ihn für seinen eigentlichen Job weniger nützlich zu machen.
+        </p>
+
+        <h2 className="text-xl font-semibold text-white mt-8">Context Loading: Warum jeder Agent andere Dateien liest</h2>
+        <p className="text-gray-300">
+          Wenn ein Agent aktiviert wird, lädt er nicht jede Datei im System. Er lädt nur die
+          Dateien, die für seine Rolle relevant sind. Der Shop Manager lädt den Produktkatalog
+          und Preisinformationen. Der Content Writer lädt den Brand-Voice-Guide und den
+          Redaktionskalender.
+        </p>
+        <p className="text-gray-300 mt-2">
+          Dieses selektive Context Loading dient zwei Zwecken: Erstens hält es den Agent fokussiert —
+          ein Agent mit weniger, aber relevanterem Kontext liefert bessere Ergebnisse. Zweitens spart
+          es Token-Nutzung, was schnellere Antworten und niedrigere API-Kosten bedeutet.
+        </p>
+
         <h2 className="text-xl font-semibold text-white mt-8">Erweiterte Rollen</h2>
         <p className="text-gray-300">
           Für komplexere Setups können diese Rollen hinzukommen:
@@ -191,6 +218,21 @@ export default function AgentRollen() {
             </tbody>
           </table>
         </div>
+
+        <h2 className="text-xl font-semibold text-white mt-8">Agent-Zusammenarbeit und Handoffs</h2>
+        <p className="text-gray-300">
+          Manchmal erfordert eine Aufgabe mehr als einen Agent. Zum Beispiel: "Recherchiere unseren
+          Top-Konkurrenten und schreib dann einen Blogpost, der unser Produkt mit ihrem vergleicht."
+          Das beinhaltet, dass der Researcher-Agent Informationen sammelt und der Content-Writer-Agent
+          den Blogpost erstellt.
+        </p>
+        <p className="text-gray-300 mt-2">
+          Das System löst das durch Handoffs: Der erste Agent erledigt seinen Teil der Arbeit und
+          speichert das Ergebnis. Der zweite Agent nimmt dieses Ergebnis als Input und macht weiter.
+          Jeder Agent arbeitet innerhalb seiner eigenen Grenzen, aber das Ergebnis ist eine nahtlose
+          Zusammenarbeit — die Sicherheitsvorteile eingeschränkter Spezialisten kombiniert mit der
+          Flexibilität von Multi-Agent-Zusammenarbeit.
+        </p>
 
         <h2 className="text-xl font-semibold text-white mt-8">Boundaries definieren</h2>
         <p className="text-gray-300">

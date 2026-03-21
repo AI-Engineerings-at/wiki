@@ -11,6 +11,15 @@ seriesStep: 4
 
 # Your First Local AI Chatbot: Set Up Open WebUI in 10 Minutes
 
+| Step | What happens | Result |
+|------|-------------|--------|
+| 1 | Install Docker (if not already present) | Docker Engine running |
+| 2 | `docker run` with Open WebUI image | Container starts |
+| 3 | Open browser: `localhost:3000` | Login page appears |
+| 4 | Create admin account | Access secured |
+| 5 | Select model from dropdown | Chat ready |
+| 6 | Type your first message | Response from local LLM |
+
 You have Ollama installed. Now you want a real interface — not just the command line.
 
 `ollama run llama3.2` works, but it is not a chat interface. No history, no model switching with a click, no file upload. Open WebUI fixes that.

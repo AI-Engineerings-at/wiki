@@ -11,6 +11,14 @@ seriesStep: 2
 
 # Terminal Basics for AI Developers — the 10 Commands You Actually Need
 
+| Category | Commands | Use Case |
+|----------|----------|----------|
+| Navigation | `cd`, `ls`, `pwd` | Move around, find files |
+| Networking | `curl`, `ssh` | API testing, remote access |
+| Docker | `docker ps`, `docker logs` | Container management |
+| Development | `git pull`, `cat`, `grep` | Code and config management |
+| Packages | `pip` / `uv` | Install Python dependencies |
+
 10 commands. That's all that stands between you and your first local LLM.
 
 No CS degree, no Linux expertise required. Anyone who wants to run Ollama, check Docker containers, and download models needs exactly these 10 commands — nothing more.
@@ -36,13 +44,53 @@ On Windows we recommend [Windows Terminal](https://aka.ms/terminal) + [WSL2](htt
 | `grep` | Search text in files or output | `docker logs ollama \| grep "error"` |
 | `pip` / `uv` | Install Python packages (`uv` is significantly faster) | `uv pip install ollama` |
 
+## Commands in Practice — Real Examples
+
+Each command below shows at least two real-world use cases you will encounter when running a local AI stack.
+
+**`cd` — navigate to your project:**
+```bash
+cd ~/projects/ai-stack          # jump to your AI project
+cd ..                           # go up one level
+cd -                            # jump back to previous directory
+```
+
+**`ls` — see what's in a directory:**
+```bash
+ls -la                          # show all files including hidden, with details
+ls -lh ~/.ollama/models/        # show model files with human-readable sizes
+ls *.yml                        # list only YAML files (e.g., docker-compose)
+```
+
+**`curl` — test APIs directly from the terminal:**
+```bash
+curl http://localhost:11434/api/tags                    # list Ollama models
+curl -X POST http://localhost:11434/api/generate \
+  -d '{"model":"qwen3.5:4b","prompt":"Hello"}'         # send a prompt
+curl -s http://localhost:3000/health | python -m json.tool  # check Open WebUI health
+```
+
+**`grep` — find what matters in noisy output:**
+```bash
+docker logs ollama | grep "error"              # find errors in Ollama logs
+grep -r "OLLAMA_HOST" ~/projects/              # find config references in your project
+docker logs open-webui | grep -i "warning"     # case-insensitive warning search
+```
+
+**`docker ps` — know what's running:**
+```bash
+docker ps                                              # running containers
+docker ps -a                                           # all containers including stopped
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"  # clean overview
+```
+
 ## Three Things That Help Immediately
 
 **Use Tab completion.** Start typing `cd pro` and press Tab — the terminal completes `projects/` automatically. Saves typing and prevents typos.
 
-**Arrow key up.** The last command comes back with ↑. No retyping needed.
+**Arrow key up.** The last command comes back with ↑. No retyping needed. Press Ctrl+R to search through your command history.
 
-**`|` (pipe) connects commands.** `docker logs ollama | grep error` shows only lines containing "error" — instead of scrolling through hundreds of log lines.
+**`|` (pipe) connects commands.** `docker logs ollama | grep error` shows only lines containing "error" — instead of scrolling through hundreds of log lines. You can chain multiple pipes: `docker logs ollama | grep error | tail -5` shows only the last 5 error lines.
 
 ## Windows Users: WSL2 Is Worth It
 

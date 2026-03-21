@@ -9,6 +9,43 @@ author: "AI Engineering"
 
 # Karpathy's autoresearch: Autonome AI-Forschung auf deiner lokalen GPU
 
+```
+ ┌──────────────── autoresearch Pipeline ────────────────────────┐
+ │                                                               │
+ │   program.md          train.py          val_data.bin          │
+ │       │                   │                  │                │
+ │       ▼                   ▼                  │                │
+ │  ┌─────────┐    ┌──────────────────┐         │                │
+ │  │   LLM   │───>│  Code-Änderungen │         │                │
+ │  │ (lokal/ │    │  (Architektur,   │         │                │
+ │  │  Cloud) │    │   Hyperparams)   │         │                │
+ │  └─────────┘    └────────┬─────────┘         │                │
+ │                          │                   │                │
+ │                          ▼                   ▼                │
+ │                 ┌──────────────────────────────┐              │
+ │                 │     Training (5 Min)         │              │
+ │                 │     GPU: RTX 3090            │              │
+ │                 └──────────────┬───────────────┘              │
+ │                                │                              │
+ │                                ▼                              │
+ │                      ┌─────────────────┐                      │
+ │                      │ val_bpb messen  │                      │
+ │                      └────────┬────────┘                      │
+ │                               │                               │
+ │                    ┌──────────┴──────────┐                    │
+ │                    │                     │                    │
+ │              val_bpb besser?       val_bpb schlechter?       │
+ │                    │                     │                    │
+ │                    ▼                     ▼                    │
+ │              BEHALTEN              ZURÜCKSETZEN              │
+ │              nächste Iteration     auf letzten guten Stand   │
+ │                    │                     │                    │
+ │                    └──────────┬──────────┘                    │
+ │                               │                               │
+ │                         Loop endlos                           │
+ └───────────────────────────────────────────────────────────────┘
+```
+
 26.469 GitHub Stars in 6 Tagen. Das Projekt wurde am 6. März 2026 veröffentlicht — mitten in der GTC-Woche — und ist seitdem das meistdiskutierte Open-Source-Projekt im LLM-Bereich. [Quelle](https://github.com/karpathy/autoresearch)
 
 Was ist das? Und warum ist es für alle relevant, die AI lokal betreiben?

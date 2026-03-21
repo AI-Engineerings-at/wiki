@@ -11,6 +11,25 @@ seriesStep: 5
 
 # Docker for AI: Why Containers Make Your Stack Production-Ready
 
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Docker Image Layers                       │
+├─────────────────────────────────────────────────────────────┤
+│  Layer 5  │  YOUR CONFIG        .env, docker-compose.yml    │
+│  Layer 4  │  APP CODE           ollama, open-webui, n8n     │
+│  Layer 3  │  DEPENDENCIES       Python, CUDA libs, Node.js  │
+│  Layer 2  │  RUNTIME            Ubuntu 22.04 / Alpine       │
+│  Layer 1  │  BASE IMAGE         FROM ubuntu:22.04            │
+├─────────────────────────────────────────────────────────────┤
+│  HOST OS  │  Shared Kernel  ──  No full VM overhead         │
+└─────────────────────────────────────────────────────────────┘
+
+  Image  ──build──>  Container  ──run──>  Service
+  (blueprint)        (instance)           (accessible)
+
+  Volume ──mount──>  Persistent Data (survives container restart)
+```
+
 Without Docker, your AI stack does not work on another machine. With Docker: `docker compose up`.
 
 That is not an exaggeration. If you run Ollama, Open WebUI, and related services without containers, they depend on the specific drivers, paths, and dependencies of your local installation. On another machine, on a server, after an OS update — broken. Docker solves this structurally.

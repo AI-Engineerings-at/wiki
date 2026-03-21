@@ -31,7 +31,31 @@ export default function GrafanaMonitoring() {
           </p>
         </Callout>
 
-        <p className="text-lg text-gray-300">
+        <h2 className="text-xl font-semibold text-white mt-8">Das Blindflug-Problem</h2>
+        <p className="text-gray-300">
+          Stell dir vor, du betreibst ein Homelab mit zehn, zwanzig oder dreissig Services.
+          Alles scheint zu laufen. Dann sagt dir ein Kunde, dass deine Website seit sechs Stunden
+          offline ist. Oder du merkst, dass deine Backup-Festplatte seit zwei Wochen voll ist.
+          Oder ein Docker Container startet seit Stunden alle fünfzehn Minuten still und leise
+          neu — und niemand hat es bemerkt.
+        </p>
+        <p className="text-gray-300 mt-2">
+          Das passiert ohne Monitoring. Du fliegst blind. Monitoring ist der Unterschied zwischen
+          "Probleme finden, bevor jemand betroffen ist" und "Probleme von genervten Nutzern
+          erfahren".
+        </p>
+
+        <h2 className="text-xl font-semibold text-white mt-8">Was gutes Monitoring leistet</h2>
+        <p className="text-gray-300">
+          Gutes Monitoring macht drei Dinge:
+        </p>
+        <ul className="list-disc list-inside text-gray-300 space-y-2 mt-2">
+          <li><strong>Aktuellen Zustand zeigen:</strong> Ist gerade alles gesund? Welche Services laufen? Wie viel Festplattenplatz ist noch frei? Du solltest diese Fragen in unter zehn Sekunden beantworten können.</li>
+          <li><strong>Trends über die Zeit:</strong> Deine Festplatte war letzten Monat bei sechzig Prozent und ist jetzt bei achtzig. Bei diesem Tempo ist sie in sechs Wochen voll. Trends sagen dir, was kommt, bevor es soweit ist.</li>
+          <li><strong>Bei Problemen warnen:</strong> Wenn ein Schwellenwert überschritten wird — Festplatte über neunzig Prozent, Service länger als zwei Minuten down — schickt dir das Monitoring eine Benachrichtigung. Du erfährst von Problemen in Sekunden, nicht in Stunden.</li>
+        </ul>
+
+        <p className="text-lg text-gray-300 mt-6">
           Grafana ist das Dashboard-Tool schlechthin, wenn es um Metriken geht.
           Egal ob Docker-Container, Server-Ressourcen oder deine eigenen Anwendungen —
           Grafana visualisiert alles, was du reingibst.
@@ -97,26 +121,54 @@ alert --> notify : Notification
           <div className="bg-gray-900 border border-gray-700 rounded-lg p-4">
             <h3 className="font-semibold text-white">Prometheus</h3>
             <p className="text-gray-300 text-sm mt-1">
-              Time-Series-Datenbank. Sammelt Metriken von Exporters.
+              Time-Series-Datenbank. Fragt in regelmässigen Abständen Metriken von Exportern ab —
+              braucht keine überall installierten Agenten. Abfragen mit PromQL, einer Sprache die
+              für Metriken entwickelt wurde. "Durchschnittliche CPU der letzten Stunde" sind
+              Einzeiler.
             </p>
           </div>
           <div className="bg-gray-900 border border-gray-700 rounded-lg p-4">
             <h3 className="font-semibold text-white">Grafana</h3>
             <p className="text-gray-300 text-sm mt-1">
-              Visualisierung. Dashboards, Alerts, Benachrichtigungen.
+              Nimmt Prometheus-Daten und macht visuelle Dashboards daraus. Panels zeigen Graphen,
+              Anzeigen, Tabellen und Stat-Displays. Dashboards kombinieren mehrere Panels zu einer
+              Gesamtansicht, die eine vollständige Geschichte über ein System erzählt.
             </p>
           </div>
           <div className="bg-gray-900 border border-gray-700 rounded-lg p-4">
             <h3 className="font-semibold text-white">Exporters</h3>
             <p className="text-gray-300 text-sm mt-1">
-              Node Exporter, cAdvisor, custom Metrics.
+              Node Exporter (Linux-Systemmetriken), cAdvisor (Container-Metriken), NVIDIA Exporter
+              (GPU). Die meisten beliebten Services — Traefik, Nginx, Pi-hole — haben eingebaute
+              Prometheus-Endpoints oder Community-Exporter.
             </p>
           </div>
           <div className="bg-gray-900 border border-gray-700 rounded-lg p-4">
             <h3 className="font-semibold text-white">Alertmanager</h3>
             <p className="text-gray-300 text-sm mt-1">
-              Routing von Alerts. Slack, Email, PagerDuty.
+              Routing von Alerts. Slack, Email, PagerDuty. Wenn etwas schiefgeht, erfährst du
+              es in Sekunden statt Stunden.
             </p>
+          </div>
+        </div>
+
+        <h2 className="text-xl font-semibold text-white mt-8">Was du damit überwachen kannst</h2>
+        <div className="grid md:grid-cols-2 gap-4 mt-4">
+          <div className="bg-gray-900 border border-gray-700 rounded-lg p-4">
+            <h3 className="font-semibold text-white text-sm">System-Infrastruktur</h3>
+            <p className="text-gray-300 text-xs mt-1">CPU, Memory, Disk und Netzwerk für jede Linux-Maschine. Übersichts- und Detail-Dashboards.</p>
+          </div>
+          <div className="bg-gray-900 border border-gray-700 rounded-lg p-4">
+            <h3 className="font-semibold text-white text-sm">Docker und Container</h3>
+            <p className="text-gray-300 text-xs mt-1">Container-Anzahl, Ressourcenverbrauch, Image-Grössen, Restart-Zähler, Netzwerk-Traffic.</p>
+          </div>
+          <div className="bg-gray-900 border border-gray-700 rounded-lg p-4">
+            <h3 className="font-semibold text-white text-sm">Proxmox-Virtualisierung</h3>
+            <p className="text-gray-300 text-xs mt-1">VM-Status, Ressourcenzuweisung, Speichernutzung, Cluster-Gesundheit, HA-Status.</p>
+          </div>
+          <div className="bg-gray-900 border border-gray-700 rounded-lg p-4">
+            <h3 className="font-semibold text-white text-sm">Netzwerk und Services</h3>
+            <p className="text-gray-300 text-xs mt-1">HTTP-Endpoints, Antwortzeiten, SSL-Zertifikat-Ablauf, DNS-Queries, Reverse-Proxy-Metriken.</p>
           </div>
         </div>
 

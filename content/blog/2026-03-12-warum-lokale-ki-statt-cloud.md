@@ -11,6 +11,17 @@ seriesStep: 1
 
 # Warum du kein ChatGPT im Unternehmen nutzen solltest — und was stattdessen
 
+| Kriterium | Cloud AI (ChatGPT) | Lokale AI (Ollama) |
+|-----------|--------------------|--------------------|
+| Datenspeicherung | US-Server (OpenAI) | Dein eigener Server |
+| DSGVO-Konformität | AVV + SCCs + DSFA nötig | Out of the box |
+| EU AI Act Kontrolle | Blackbox, kein Zugriff | Volle Transparenz |
+| API-Kosten | Pro Token, laufend | Einmalig Hardware |
+| Modellqualität | GPT-4 (Spitze) | 7B-27B (solide) |
+| Latenz | Netzwerkabhängig | Lokal, sofort |
+| Verfügbarkeit | Abhängig von OpenAI | Deine Infrastruktur |
+| Datentransfer USA | Ja (Schrems-II Risiko) | Kein Byte verlässt das Netz |
+
 Jedes Mal wenn dein Mitarbeiter ChatGPT nutzt, verlassen Firmendaten den EU-Rechtsraum.
 
 Das ist keine Übertreibung. Das ist was passiert, wenn jemand ein Kundendokument, eine interne E-Mail oder einen Vertragsentwurf in die Eingabemaske tippt. Der Text geht an OpenAI-Server in den USA. Was dort damit passiert — für Training, Logging, Compliance — liegt nicht in deiner Hand.

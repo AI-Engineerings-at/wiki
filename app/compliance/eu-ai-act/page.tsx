@@ -140,6 +140,42 @@ end note
           </div>
         </div>
 
+        <h2 className="text-xl font-semibold text-white mt-8">Was das für typische Business-KI-Nutzung bedeutet</h2>
+
+        <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-700">
+                <th className="text-left py-2 text-gray-400">Szenario</th>
+                <th className="text-left py-2 text-gray-400">Risikostufe</th>
+                <th className="text-left py-2 text-gray-400">Pflichten</th>
+              </tr>
+            </thead>
+            <tbody className="text-gray-300">
+              <tr className="border-b border-gray-800">
+                <td className="py-2">LLM für Content-Erstellung</td>
+                <td className="py-2">Minimal bis Begrenzt</td>
+                <td className="py-2">Transparenz bei Veröffentlichung ohne menschliche Prüfung</td>
+              </tr>
+              <tr className="border-b border-gray-800">
+                <td className="py-2">KI-Kundensupport-Chatbot</td>
+                <td className="py-2">Begrenzt</td>
+                <td className="py-2">Nutzer müssen wissen, dass sie mit KI sprechen. Bei Entscheidungen über Leistungserbringung evtl. Hochrisiko.</td>
+              </tr>
+              <tr className="border-b border-gray-800">
+                <td className="py-2">Interne Produktivität (E-Mail, Code, Zusammenfassungen)</td>
+                <td className="py-2">Minimal</td>
+                <td className="py-2">Keine spezifischen Pflichten, aber Dokumentation empfohlen</td>
+              </tr>
+              <tr>
+                <td className="py-2">KI für Recruiting (Lebensläufe, Kandidaten-Ranking)</td>
+                <td className="py-2 text-red-400 font-semibold">Hoch</td>
+                <td className="py-2">Volle Compliance: Doku, Risikomanagement, menschliche Aufsicht</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
         <h2 className="text-xl font-semibold text-white mt-8">Für wen gilt der AI Act?</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
@@ -180,19 +216,27 @@ end note
             <tbody className="text-gray-300">
               <tr className="border-b border-gray-800">
                 <td className="py-2">Dokumentation</td>
-                <td className="py-2">Technische Dokumentation aller Systeme</td>
+                <td className="py-2">Detaillierte technische Dokumentation vor Markteinführung: Verwendungszweck, Design, Methodik, Testergebnisse</td>
               </tr>
               <tr className="border-b border-gray-800">
                 <td className="py-2">Risikomanagement</td>
-                <td className="py-2">Kontinuierlicher Prozess zur Risikobewertung</td>
+                <td className="py-2">Dokumentierter, fortlaufender Prozess zur Identifizierung, Analyse und Minderung von Risiken — kein einmaliges Assessment</td>
+              </tr>
+              <tr className="border-b border-gray-800">
+                <td className="py-2">Data Governance</td>
+                <td className="py-2">Trainings- und Testdaten müssen Qualitätskriterien erfüllen. Datenquellen, Aufbereitungsmethoden und potenzielle Verzerrungen dokumentieren</td>
               </tr>
               <tr className="border-b border-gray-800">
                 <td className="py-2">Transparenz</td>
-                <td className="py-2">Nutzern mitteilen, dass sie mit AI interagieren</td>
+                <td className="py-2">Klare Informationen über Fähigkeiten, Einschränkungen und Verwendungszweck. Nutzungsanweisungen bereitstellen</td>
               </tr>
               <tr className="border-b border-gray-800">
                 <td className="py-2">Menschliche Aufsicht</td>
-                <td className="py-2">Menschen können Entscheidungen überprüfen und eingreifen</td>
+                <td className="py-2">Menschen können Fähigkeiten und Grenzen verstehen, in Entscheidungen eingreifen und das System nicht nutzen oder Ergebnisse ignorieren</td>
+              </tr>
+              <tr className="border-b border-gray-800">
+                <td className="py-2">Aufzeichnungspflicht</td>
+                <td className="py-2">Automatische Protokollierung des Betriebs zur Nachverfolgbarkeit. Auf Anfrage den Behörden bereitstellen</td>
               </tr>
               <tr className="border-b border-gray-800">
                 <td className="py-2">Genauigkeit</td>
@@ -244,6 +288,37 @@ end note
             </tbody>
           </table>
         </div>
+
+        <h2 className="text-xl font-semibold text-white mt-8">Dreistufiges Sanktionssystem</h2>
+        <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-700">
+                <th className="text-left py-2 text-gray-400">Verstoss</th>
+                <th className="text-left py-2 text-gray-400">Maximale Strafe</th>
+              </tr>
+            </thead>
+            <tbody className="text-gray-300">
+              <tr className="border-b border-gray-800">
+                <td className="py-2">Verbotene KI-Praktiken</td>
+                <td className="py-2 text-red-400 font-semibold">35 Mio. EUR oder 7% des weltweiten Jahresumsatzes</td>
+              </tr>
+              <tr className="border-b border-gray-800">
+                <td className="py-2">Hochrisiko-KI-Anforderungen</td>
+                <td className="py-2">15 Mio. EUR oder 3% des Umsatzes</td>
+              </tr>
+              <tr>
+                <td className="py-2">Falsche Angaben gegenüber Behörden</td>
+                <td className="py-2">7,5 Mio. EUR oder 1% des Umsatzes</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p className="text-gray-300 mt-2">
+          Für kleine und mittlere Unternehmen werden die Bussgelder verhältnismässig angepasst,
+          aber sie sind immer noch erheblich genug, um die Existenz eines kleinen Unternehmens
+          zu gefährden.
+        </p>
 
         <h2 className="text-xl font-semibold text-white mt-8">Was bedeutet das für Self-Hosted AI?</h2>
 
