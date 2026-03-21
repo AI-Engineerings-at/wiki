@@ -24,12 +24,23 @@ const navEn = [
   { href: '/blog', label: 'Blog' },
 ]
 
+function getToggleHref(pathname: string, isEn: boolean): string {
+  if (isEn) {
+    // EN → DE: remove /en prefix
+    const dePath = pathname.replace(/^\/en\/?/, '/')
+    return dePath === '' ? '/' : dePath
+  }
+  // DE → EN: add /en prefix
+  return pathname === '/' ? '/en' : `/en${pathname}`
+}
+
 export function SiteHeader() {
   const pathname = usePathname() || '/'
   const isEn = pathname === '/en' || pathname.startsWith('/en/')
   const nav = isEn ? navEn : navDe
   const homeHref = isEn ? '/en' : '/'
   const shopLabel = 'Shop'
+  const toggleHref = getToggleHref(pathname, isEn)
 
   return (
     <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-sm sticky top-0 z-50">
@@ -66,6 +77,24 @@ export function SiteHeader() {
               </Link>
             )
           })}
+          <div className="flex items-center border border-slate-700 rounded-full overflow-hidden text-sm font-medium">
+            <Link
+              href={isEn ? toggleHref : pathname}
+              className={`px-3 py-1 transition-all ${
+                !isEn ? 'bg-[#4262FF]/20 text-blue-400' : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+            >
+              DE
+            </Link>
+            <Link
+              href={isEn ? pathname : toggleHref}
+              className={`px-3 py-1 transition-all ${
+                isEn ? 'bg-[#4262FF]/20 text-blue-400' : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+            >
+              EN
+            </Link>
+          </div>
           <Link
             href="https://www.ai-engineering.at"
             className="bg-[#4262FF] hover:bg-[#3550DD] text-white font-bold py-2 px-5 rounded-full transition-all hover:scale-105 text-sm"
@@ -82,6 +111,20 @@ export function SiteHeader() {
           <Link href={nav[5].href} className="text-slate-400 hover:text-white">
             {nav[5].label}
           </Link>
+          <div className="flex items-center border border-slate-700 rounded-full overflow-hidden text-xs font-medium">
+            <Link
+              href={isEn ? toggleHref : pathname}
+              className={`px-2 py-0.5 ${!isEn ? 'bg-[#4262FF]/20 text-blue-400' : 'text-slate-400'}`}
+            >
+              DE
+            </Link>
+            <Link
+              href={isEn ? pathname : toggleHref}
+              className={`px-2 py-0.5 ${isEn ? 'bg-[#4262FF]/20 text-blue-400' : 'text-slate-400'}`}
+            >
+              EN
+            </Link>
+          </div>
           <Link href="https://www.ai-engineering.at" className="text-blue-400 font-bold">
             {shopLabel} &rarr;
           </Link>
