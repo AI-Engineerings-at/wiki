@@ -1,4 +1,5 @@
 import Callout from "../../../components/Callout"
+import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 
 export const metadata = {
   title: 'MCP Server | AI Engineering Wiki',
@@ -27,6 +28,47 @@ export default function McpServer() {
         <p className="text-lg text-gray-300">
           Model Context Protocol (MCP) verbindet Claude Desktop mit deiner Infrastruktur.
         </p>
+
+        <PlantUMLDiagram
+          diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam rectangleBorderColor #334155
+skinparam rectangleBackgroundColor #0F172A
+skinparam componentBorderColor #334155
+skinparam componentBackgroundColor #0F172A
+
+title MCP (Model Context Protocol) Architektur
+
+rectangle "Claude Desktop" as claude #1E3A5F
+rectangle "MCP Protokoll\\n(stdio / SSE)" as proto #4a4a00
+
+rectangle "MCP Server" as servers #1E3A5F {
+  rectangle "Portainer Server\\n(Docker Container)" as s1 #0F172A
+  rectangle "Proxmox Server\\n(VMs, LXCs)" as s2 #0F172A
+  rectangle "n8n Server\\n(Workflows)" as s3 #0F172A
+  rectangle "Ollama Server\\n(LLM Modelle)" as s4 #0F172A
+  rectangle "Grafana Server\\n(Dashboards)" as s5 #0F172A
+}
+
+rectangle "Infrastruktur" as infra #22543d {
+  rectangle "Docker Swarm" as d1 #0F172A
+  rectangle "Proxmox VE" as d2 #0F172A
+  rectangle "n8n Instance" as d3 #0F172A
+  rectangle "Ollama GPU" as d4 #0F172A
+  rectangle "Grafana" as d5 #0F172A
+}
+
+claude --> proto : Natürliche Sprache
+proto --> servers : Tool Calls
+servers --> infra : API Requests
+infra --> servers : Responses
+servers --> proto : Ergebnisse
+proto --> claude : Antwort
+@enduml`}
+          caption="MCP Architektur: Claude Desktop kommuniziert über MCP-Server mit der gesamten Infrastruktur"
+        />
 
         <h2 className="text-xl font-semibold text-white mt-8">Was ist MCP?</h2>
         <p className="text-gray-300 mt-2">

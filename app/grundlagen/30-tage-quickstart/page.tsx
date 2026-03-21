@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import Callout from "../../../components/Callout"
+import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 
 export const metadata: Metadata = {
   title: '30-Tage Local AI-Stack Quickstart | AI Engineering Wiki',
@@ -33,6 +34,49 @@ export default function Quickstart30TagePage() {
           <img src="/images/infographics/30-tage-quickstart-timeline.png" alt="30 Tage Quickstart Timeline — Von Null zum produktiven AI-Stack" className="rounded-xl border border-white/10 w-full" />
           <figcaption className="text-center text-white/40 text-sm mt-2">30-Tage Timeline: Schritt für Schritt zum eigenen lokalen AI-Stack</figcaption>
         </figure>
+
+        <PlantUMLDiagram
+          diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam rectangleBorderColor #334155
+skinparam rectangleBackgroundColor #0F172A
+skinparam activityBorderColor #334155
+skinparam activityBackgroundColor #0F172A
+
+title 30-Tage Lernpfad: Vier Phasen
+
+|Phase 1: Foundation|
+:Tag 1-7;
+:Hardware-Check;
+:Docker Installation;
+:Netzwerk & Security;
+:Docker Compose lernen;
+
+|Phase 2: AI Core|
+:Tag 8-14;
+:Ollama installieren;
+:Modelle herunterladen;
+:Chat Interface aufsetzen;
+:RAG (optional);
+
+|Phase 3: Automation|
+:Tag 15-21;
+:n8n Installation;
+:AI-Workflows erstellen;
+:Eigene Automationen;
+
+|Phase 4: Production|
+:Tag 22-30;
+:Prometheus + Grafana;
+:Alerting einrichten;
+:Security Hardening;
+:Backup & Recovery;
+:Review & Dokumentation;
+@enduml`}
+          caption="30-Tage Lernpfad: Von Foundation über AI Core und Automation bis Production"
+        />
 
         <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-6">
           <h2 className="text-xl font-bold text-white mt-0 mb-2">Was du am Ende hast</h2>

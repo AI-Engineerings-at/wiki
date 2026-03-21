@@ -71,6 +71,14 @@ const patternsArticles: Article[] = [
   { title: 'Self-Improving Agents', description: '3-Tier Memory, corrections.md, Pre-Action Gates und Self-Eskalation — das NemoClaw Pattern.', href: '/patterns/self-improving-agents', category: 'patterns', categoryLabel: 'Patterns', date: '2026-03-21' },
 ]
 
+const papersArticles: Article[] = [
+  { title: 'Attention Is All You Need (2017)', description: 'Das Transformer-Paper: Warum Self-Attention die gesamte AI-Landschaft verändert hat.', href: '/papers/attention-is-all-you-need', category: 'papers', categoryLabel: 'Papers', date: '2026-03-21', popular: true },
+  { title: 'Retrieval-Augmented Generation (2020)', description: 'RAG erklärt: Wie LLMs durch externe Wissensquellen besser und zuverlässiger werden.', href: '/papers/rag-paper', category: 'papers', categoryLabel: 'Papers', date: '2026-03-21', popular: true },
+  { title: 'LoRA: Low-Rank Adaptation (2021)', description: 'Parameter-effizientes Fine-Tuning: Große Modelle anpassen ohne alles neu zu trainieren.', href: '/papers/lora-paper', category: 'papers', categoryLabel: 'Papers', date: '2026-03-21' },
+  { title: 'ReAct: Reasoning and Acting (2022)', description: 'Das Agent-Pattern ReAct: Wie LLMs durch abwechselndes Denken und Handeln Aufgaben lösen.', href: '/papers/react-paper', category: 'papers', categoryLabel: 'Papers', date: '2026-03-21' },
+  { title: 'Constitutional AI (2022)', description: 'AI Safety von Anthropic: Wie man AI-Systeme durch Prinzipien statt durch Menschen aligned.', href: '/papers/constitutional-ai', category: 'papers', categoryLabel: 'Papers', date: '2026-03-21' },
+]
+
 const securityArticles: Article[] = [
   { title: 'Self-Hosted Sicherheit', description: '6-Layer Security Modell: Netzwerk, SSH, Firewall, Container, Anwendung, Monitoring für lokale AI.', href: '/security/self-hosted-sicherheit', category: 'security', categoryLabel: 'Security', date: '2026-03-21', popular: true },
   { title: 'Verschluesselung', description: 'Encryption At Rest, In Transit, In Use — LUKS, TLS, Confidential Computing für Self-Hosted AI.', href: '/security/verschluesselung', category: 'security', categoryLabel: 'Security', date: '2026-03-21' },
@@ -119,6 +127,14 @@ export const categories: Category[] = [
     icon: '\u{1F512}',
     href: '/security',
     articles: securityArticles,
+  },
+  {
+    slug: 'papers',
+    label: 'Papers',
+    description: 'Transformer, RAG, LoRA, ReAct, Constitutional AI',
+    icon: '\u{1F4C4}',
+    href: '/papers',
+    articles: papersArticles,
   },
 ]
 
@@ -201,6 +217,12 @@ export const relatedArticlesMap: Record<string, string[]> = {
   '/patterns/self-improving-agents': ['/patterns/memory-management', '/patterns/safety-hooks', '/patterns/ai-agent-digitaler-mitarbeiter'],
   // Compliance (new)
   '/compliance/ai-agent-legal-framework': ['/compliance/eu-ai-act', '/compliance/dpia', '/patterns/ai-agent-digitaler-mitarbeiter'],
+  // Papers
+  '/papers/attention-is-all-you-need': ['/grundlagen/was-ist-ein-llm', '/papers/lora-paper', '/papers/rag-paper'],
+  '/papers/rag-paper': ['/tools/rag-guide', '/papers/attention-is-all-you-need', '/papers/react-paper'],
+  '/papers/lora-paper': ['/papers/attention-is-all-you-need', '/tools/model-selection', '/tools/ollama-tutorial'],
+  '/papers/react-paper': ['/patterns/agent-orchestration-patterns', '/papers/rag-paper', '/papers/constitutional-ai'],
+  '/papers/constitutional-ai': ['/papers/react-paper', '/compliance/eu-ai-act', '/patterns/self-improving-agents'],
 }
 
 export function getRelatedArticles(href: string): Article[] {

@@ -1,4 +1,5 @@
 import Callout from "../../../components/Callout"
+import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 
 export const metadata = {
   title: 'Task Delegation Pattern | AI Engineering Wiki',
@@ -37,6 +38,41 @@ export default function TaskDelegationPage() {
           <img src="/images/diagrams/patterns-task-delegation.png" alt="Task Delegation Pattern — Orchestrator verteilt an spezialisierte Agenten" className="rounded-xl border border-white/10 w-full" />
           <figcaption className="text-center text-white/40 text-sm mt-2">Task Delegation: Wie der Orchestrator Aufgaben an spezialisierte Agenten verteilt</figcaption>
         </figure>
+
+        <PlantUMLDiagram
+          diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam activityBorderColor #334155
+skinparam activityBackgroundColor #0F172A
+
+title Task Delegation Pattern — Ablauf
+
+start
+:Benutzer-Anfrage\\nempfangen;
+:Intent Classification\\n(Code, Research, Review, Deploy);
+switch (Intent?)
+case (Code)
+  :Coder Agent\\nausführen;
+case (Research)
+  :Research Agent\\nausführen;
+case (Review)
+  :Review Agent\\nausführen;
+case (Deploy)
+  :Deploy Agent\\nausführen;
+endswitch
+:Ergebnis in\\nPriority Queue;
+if (Timeout überschritten?) then (ja)
+  :Fallback Handler;
+else (nein)
+  :Result Aggregation;
+endif
+:Finale Antwort\\nan Benutzer;
+stop
+@enduml`}
+          caption="Task Delegation: Intent erkennen, an spezialisierten Agent routen, Ergebnisse aggregieren"
+        />
 
         <h2 className="text-xl font-semibold text-white mt-8">Architektur</h2>
         <pre className="bg-gray-900 p-4 rounded-lg text-sm overflow-x-auto">

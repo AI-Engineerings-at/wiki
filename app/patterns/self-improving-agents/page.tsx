@@ -2,6 +2,7 @@ import { Metadata } from "next"
 import Callout from "../../../components/Callout"
 import KeyTakeaway from "../../../components/KeyTakeaway"
 import ComparisonTable from "../../../components/ComparisonTable"
+import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 import { RelatedArticles } from "../../../components/RelatedArticles"
 
 export const metadata: Metadata = {
@@ -268,6 +269,46 @@ VOR API-Call          → Docs der API gelesen?`}</code>
             </p>
           </Callout>
         </section>
+
+        <PlantUMLDiagram
+          diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam activityBorderColor #334155
+skinparam activityBackgroundColor #0F172A
+
+title NemoClaw 3-Tier Self-Improving Zyklus
+
+start
+:Task empfangen;
+:Pre-Action Gate prüfen;
+if (Gate bestanden?) then (ja)
+  :Task ausführen;
+  if (Erfolg?) then (ja)
+    :corrections.md\\nNutzungszähler erhöhen;
+    if (3x in 7 Tagen?) then (ja)
+      :Promotion zu HOT;
+    else (nein)
+    endif
+  else (nein)
+    :Fehler in corrections.md\\neintragen;
+    if (2. Fehler in Session?) then (ja)
+      #FF6347:SELF-ESKALATION\\nPAUSE — auf Freigabe warten;
+      stop
+    else (nein)
+    endif
+  endif
+else (nein)
+  :corrections.md prüfen;
+  :Gate-Bedingung erfüllen;
+endif
+:Self-Reflection;
+:Heartbeat senden;
+stop
+@enduml`}
+          caption="NemoClaw Zyklus: Pre-Action Gate, Ausführung, corrections.md, Self-Eskalation bei 2 Fehlern"
+        />
 
         {/* Section 8: Zusammenspiel */}
         <section className="mt-10">

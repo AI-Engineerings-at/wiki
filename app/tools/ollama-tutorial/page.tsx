@@ -1,5 +1,6 @@
 import { CaseStudyBox } from '../../../components/CaseStudyBox'
 import Callout from "../../../components/Callout"
+import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 
 export const metadata = {
   title: 'Ollama Tutorial | AI Engineering Wiki',
@@ -47,6 +48,37 @@ export default function OllamaTutorial() {
           <img src="/images/diagrams/tools-ollama-architektur.png" alt="Ollama Architektur — CLI, REST API, GPU und Modell-Management" className="rounded-xl border border-white/10 w-full" />
           <figcaption className="text-center text-white/40 text-sm mt-2">Ollama Architektur: Wie CLI, REST API und GPU zusammenspielen</figcaption>
         </figure>
+
+        <PlantUMLDiagram
+          diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam rectangleBorderColor #334155
+skinparam rectangleBackgroundColor #0F172A
+skinparam componentBorderColor #334155
+skinparam componentBackgroundColor #0F172A
+
+title Ollama Setup und Architektur
+
+rectangle "Benutzer" as user
+rectangle "CLI\\nollama run" as cli #0F172A
+rectangle "REST API\\nlocalhost:11434" as api #0F172A
+rectangle "Ollama Server" as server #1E3A5F
+rectangle "Modell-Registry\\n(ollama.com/library)" as registry #0F172A
+rectangle "GPU\\n(NVIDIA CUDA)" as gpu #22543d
+rectangle "Modell-Speicher\\n~/.ollama/models" as storage #0F172A
+
+user --> cli : Chat
+user --> api : HTTP Requests
+cli --> server
+api --> server
+server --> gpu : Inferenz
+server --> storage : Modelle laden
+registry --> storage : ollama pull
+@enduml`}
+          caption="Ollama Architektur: CLI und REST API kommunizieren mit dem Server, der GPU und Modelle verwaltet"
+        />
 
         <h2 className="text-xl font-semibold text-white mt-8">Was ist Ollama?</h2>
         <p className="text-gray-300">

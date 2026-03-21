@@ -1,4 +1,5 @@
 import Callout from "../../../components/Callout"
+import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 
 export const metadata = {
   title: 'Multi-Agent Systeme erklärt | AI Engineering Wiki',
@@ -67,6 +68,39 @@ export default function MultiAgentSysteme() {
           <figcaption className="text-center text-white/40 text-sm mt-2">Multi-Agent Architektur: Hierarchisch, Peer-to-Peer und Pipeline im Vergleich</figcaption>
         </figure>
 
+        <PlantUMLDiagram
+          diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam rectangleBorderColor #334155
+skinparam rectangleBackgroundColor #0F172A
+skinparam activityBorderColor #334155
+skinparam activityBackgroundColor #0F172A
+
+title Agent-Kommunikation in einem Multi-Agent System
+
+rectangle "Benutzer" as user
+rectangle "Manager Agent\\n(@jim)" as manager #1E3A5F
+rectangle "Coder Agent\\n(@jim01)" as coder #0F172A
+rectangle "Review Agent\\n(@lisa01)" as reviewer #0F172A
+rectangle "Test Agent\\n(@john01)" as tester #0F172A
+rectangle "Mattermost\\n(Kommunikationsbus)" as mm #1a1a2e
+
+user --> manager : Anfrage
+manager --> mm : Task verteilen
+mm --> coder : Code schreiben
+mm --> reviewer : Code prüfen
+mm --> tester : Tests ausführen
+coder --> mm : PR erstellt
+reviewer --> mm : Approved
+tester --> mm : Tests bestanden
+mm --> manager : Ergebnisse
+manager --> user : Fertig
+@enduml`}
+          caption="Agent-Kommunikation: Manager delegiert über Mattermost an spezialisierte Worker"
+        />
+
         <h2 className="text-xl font-semibold text-white mt-8">Architektur-Muster</h2>
         
         <h3 className="text-lg font-medium text-white mt-4">1. Hierarchisches Modell</h3>
@@ -86,6 +120,48 @@ export default function MultiAgentSysteme() {
           Agenten arbeiten sequenziell — die Ausgabe von Agent A wird zur Eingabe 
           von Agent B. Gut für linear aufgebaute Workflows.
         </p>
+
+        <PlantUMLDiagram
+          diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam rectangleBorderColor #334155
+skinparam rectangleBackgroundColor #0F172A
+skinparam componentBorderColor #334155
+skinparam componentBackgroundColor #0F172A
+
+title Architektur-Muster im Vergleich
+
+rectangle "Hierarchisch" {
+  rectangle "Manager" as h_mgr #1E3A5F
+  rectangle "Worker A" as h_wa #0F172A
+  rectangle "Worker B" as h_wb #0F172A
+  rectangle "Worker C" as h_wc #0F172A
+  h_mgr --> h_wa
+  h_mgr --> h_wb
+  h_mgr --> h_wc
+}
+
+rectangle "Peer-to-Peer" {
+  rectangle "Agent X" as p_x #0F172A
+  rectangle "Agent Y" as p_y #0F172A
+  rectangle "Agent Z" as p_z #0F172A
+  p_x <--> p_y
+  p_y <--> p_z
+  p_x <--> p_z
+}
+
+rectangle "Pipeline" {
+  rectangle "Schritt 1" as s1 #0F172A
+  rectangle "Schritt 2" as s2 #0F172A
+  rectangle "Schritt 3" as s3 #0F172A
+  s1 --> s2
+  s2 --> s3
+}
+@enduml`}
+          caption="Drei Architektur-Muster: Hierarchisch, Peer-to-Peer und Pipeline"
+        />
 
         <h2 className="text-xl font-semibold text-white mt-8">Kommunikationsparadigmen</h2>
         

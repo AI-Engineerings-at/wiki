@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import Callout from "../../../components/Callout"
+import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 
 export const metadata: Metadata = {
   title: 'Heartbeat & Monitoring Pattern | AI Engineering Wiki',
@@ -32,6 +33,66 @@ export default function HeartbeatMonitoringPage() {
           merkst du es meist erst, wenn die Rechnung kommt. Du brauchst
           Überwachung.
         </p>
+
+        <PlantUMLDiagram
+          diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam activityBorderColor #334155
+skinparam activityBackgroundColor #0F172A
+
+title Heartbeat Monitoring Flow
+
+start
+repeat
+  :Agent sendet Heartbeat\\n(alle 60 Sekunden);
+  :Health Check ausführen;
+  if (Status = healthy?) then (ja)
+    :Metrik an Prometheus\\npublizieren;
+  else (nein)
+    :Status = unhealthy;
+    :Alert an Alertmanager;
+    :Benachrichtigung\\n(Slack, E-Mail);
+  endif
+  :60 Sekunden warten;
+repeat while (Agent aktiv?)
+:Agent gestoppt;
+stop
+@enduml`}
+          caption="Heartbeat Flow: Agent sendet regelmäßig Signale, bei Ausbleiben greift Alerting"
+        />
+
+        <PlantUMLDiagram
+          diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam rectangleBorderColor #334155
+skinparam rectangleBackgroundColor #0F172A
+
+title Monitoring Stack Übersicht
+
+rectangle "AI Agenten" as agents #1E3A5F {
+  rectangle "Agent 1\\n(Heartbeat)" as a1 #0F172A
+  rectangle "Agent 2\\n(Heartbeat)" as a2 #0F172A
+  rectangle "Agent 3\\n(Heartbeat)" as a3 #0F172A
+}
+
+rectangle "Prometheus" as prom #1E3A5F
+rectangle "Alertmanager" as alert #0F172A
+rectangle "Grafana\\n(Dashboards)" as grafana #22543d
+rectangle "Uptime Kuma\\n(HTTP Checks)" as kuma #0F172A
+rectangle "Slack / E-Mail" as notify #0F172A
+
+agents --> prom : Metriken
+prom --> grafana : Visualisierung
+prom --> alert : Alert Rules
+alert --> notify : Benachrichtigung
+kuma --> notify : Status-Alerts
+@enduml`}
+          caption="Monitoring Stack: Agenten liefern Metriken, Prometheus speichert, Grafana zeigt, Alertmanager warnt"
+        />
 
         <h2 className="text-xl font-semibold text-white mt-8">Heartbeat Pattern</h2>
         <p>

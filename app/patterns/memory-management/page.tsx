@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import Callout from "../../../components/Callout"
+import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 
 export const metadata: Metadata = {
   title: 'Memory Management Pattern | AI Engineering Wiki',
@@ -44,6 +45,36 @@ export default function MemoryManagementPage() {
           <img src="/images/diagrams/patterns-memory-flow.png" alt="Memory Flow — Wie Daten zwischen Sessions persistiert werden" className="rounded-xl border border-white/10 w-full" />
           <figcaption className="text-center text-white/40 text-sm mt-2">Memory Flow: So wird Wissen zwischen Sessions gespeichert und abgerufen</figcaption>
         </figure>
+
+        <PlantUMLDiagram
+          diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam rectangleBorderColor #334155
+skinparam rectangleBackgroundColor #0F172A
+
+title Memory Tiers: 3-Stufen-Modell
+
+rectangle "HOT Memory" as hot #8B0000 {
+  rectangle "CLAUDE.md / memory.md\\n~8K Tokens, 0ms Latenz\\nImmer geladen" as hot_desc #0F172A
+}
+
+rectangle "WARM Memory" as warm #4a4a00 {
+  rectangle "Topic Files (docs/)\\n~50K Tokens, ~50ms Latenz\\nBei Kontext-Match geladen" as warm_desc #0F172A
+}
+
+rectangle "COLD Memory" as cold #1E3A5F {
+  rectangle "Knowledge Graph / Vektordatenbank\\nUnbegrenzt, ~200ms Latenz\\nNur auf explizite Query" as cold_desc #0F172A
+}
+
+hot -[#4262FF]-> warm : Demotion\\n(30 Tage ungenutzt)
+warm -[#4262FF]-> cold : Demotion\\n(90 Tage ungenutzt)
+cold -[#22c55e]-> warm : Promotion\\n(wieder relevant)
+warm -[#22c55e]-> hot : Promotion\\n(3x in 7 Tagen)
+@enduml`}
+          caption="Memory Tiers: HOT (immer geladen), WARM (bei Bedarf), COLD (auf Anfrage) mit automatischer Promotion/Demotion"
+        />
 
         <h2 className="text-xl font-semibold text-white mt-8">Lösungsansätze</h2>
 

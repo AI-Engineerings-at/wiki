@@ -1,4 +1,5 @@
 import Callout from "../../../components/Callout"
+import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 
 export const metadata = {
   title: 'API Keys sicher speichern | AI Engineering Wiki',
@@ -35,6 +36,45 @@ export default function ApiKeysSicher() {
             bleibt er in der Git-History.
           </p>
         </Callout>
+
+        <PlantUMLDiagram
+          diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam activityBorderColor #334155
+skinparam activityBackgroundColor #0F172A
+
+title API Key Management Flow
+
+start
+:Neuen API Key erstellen;
+if (Speicherort?) then (Production)
+  :In Vault verschlüsselt\\nspeichern (vault.py);
+else (Development)
+  :In .env Datei\\nspeichern (lokal);
+endif
+:.gitignore prüfen\\n(.env, .vault.key);
+:Minimale Rechte\\nvergeben;
+:Rotation-Timer setzen\\n(alle 3-6 Monate);
+repeat
+  :Key verwenden;
+  :Nutzung monitoren;
+  if (Leak erkannt?) then (ja)
+    #FF6347:SOFORT revoken!;
+    :Neuen Key erstellen;
+  else (nein)
+  endif
+  if (Rotation fällig?) then (ja)
+    :Key rotieren;
+    :Alten Key revoken;
+  else (nein)
+  endif
+repeat while (Key aktiv?)
+stop
+@enduml`}
+          caption="API Key Lifecycle: Erstellen, sicher speichern, regelmäßig rotieren, bei Leak sofort revoken"
+        />
 
         <h2 className="text-xl font-semibold text-white mt-8">Was ist ein Vault?</h2>
 

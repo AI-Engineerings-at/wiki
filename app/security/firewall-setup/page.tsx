@@ -1,4 +1,5 @@
 import Callout from "../../../components/Callout"
+import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 
 export const metadata = {
   title: 'Firewall Setup | AI Engineering Wiki',
@@ -28,6 +29,48 @@ export default function FirewallSetup() {
           Netzwerksicherheit ist die erste Verteidigungslinie. Ohne Firewall und
           Segmentierung ist ein kompromittierter Service der Einstieg für alles andere.
         </p>
+
+        <PlantUMLDiagram
+          diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam rectangleBorderColor #334155
+skinparam rectangleBackgroundColor #0F172A
+
+title Netzwerk-Sicherheitsschichten
+
+rectangle "Internet" as inet #8B0000
+
+rectangle "Äußere Verteidigung" as outer #1E3A5F {
+  rectangle "UFW Firewall\\n(Port-Filterung)" as ufw #0F172A
+  rectangle "Fail2ban\\n(Brute-Force-Schutz)" as f2b #0F172A
+}
+
+rectangle "Reverse Proxy" as proxy #4a4a00 {
+  rectangle "Traefik\\n(TLS, Routing, Rate Limiting)" as traefik #0F172A
+}
+
+rectangle "Internes Netzwerk" as internal #22543d {
+  rectangle "Public Network" as pub #0F172A
+  rectangle "Internal Network\\n(kein Internet-Zugang)" as priv #0F172A
+}
+
+rectangle "Services" as services #1E3A5F {
+  rectangle "Ollama\\n(nur intern)" as oll #0F172A
+  rectangle "Grafana\\n(via Traefik)" as graf #0F172A
+  rectangle "PostgreSQL\\n(nur intern)" as pg #0F172A
+  rectangle "Prometheus\\n(nur intern)" as prom #0F172A
+}
+
+inet --> outer : nur Port 80, 443
+outer --> proxy
+proxy --> pub
+pub --> services
+priv --> services
+@enduml`}
+          caption="Sicherheitsschichten: Internet → Firewall → Reverse Proxy → Netzwerksegmentierung → Services"
+        />
 
         <h2 className="text-xl font-semibold text-white mt-8">Grundprinzipien</h2>
 

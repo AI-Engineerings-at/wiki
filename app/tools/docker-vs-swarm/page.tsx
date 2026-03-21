@@ -1,5 +1,6 @@
 import { CaseStudyBox } from '../../../components/CaseStudyBox'
 import Callout from "../../../components/Callout"
+import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 
 export const metadata = {
   title: 'Docker Compose vs Docker Swarm | AI Engineering Wiki',
@@ -78,6 +79,43 @@ export default function DockerVsSwarm() {
           <li>Service-Skalierung und Load Balancing</li>
           <li>Infrastruktur, die Node-Ausfälle überlebt</li>
         </ul>
+
+        <PlantUMLDiagram
+          diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam rectangleBorderColor #334155
+skinparam rectangleBackgroundColor #0F172A
+skinparam componentBorderColor #334155
+skinparam componentBackgroundColor #0F172A
+
+title Docker Compose vs Docker Swarm
+
+rectangle "Docker Compose" as compose #1E3A5F {
+  rectangle "Ein Host" as host1 #0F172A
+  rectangle "Ollama" as c_oll #0F172A
+  rectangle "n8n" as c_n8n #0F172A
+  rectangle "Grafana" as c_graf #0F172A
+  rectangle "PostgreSQL" as c_pg #0F172A
+  host1 --> c_oll
+  host1 --> c_n8n
+  host1 --> c_graf
+  host1 --> c_pg
+}
+
+rectangle "Docker Swarm" as swarm #22543d {
+  rectangle "Manager Node" as mgr #1E3A5F
+  rectangle "Worker 1\\n(GPU)" as w1 #0F172A
+  rectangle "Worker 2" as w2 #0F172A
+  rectangle "Worker 3" as w3 #0F172A
+  mgr --> w1 : Ollama
+  mgr --> w2 : n8n, Grafana
+  mgr --> w3 : PostgreSQL
+}
+@enduml`}
+          caption="Compose: alles auf einem Host. Swarm: Services verteilt über mehrere Nodes"
+        />
 
         <h2 className="text-xl font-semibold text-white mt-8">Der direkte Vergleich</h2>
 

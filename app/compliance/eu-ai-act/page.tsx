@@ -1,5 +1,6 @@
 // PlantUML via Kroki ersetzt Mermaid — Infografik-PNGs sind besser
 import Callout from "../../../components/Callout"
+import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 
 export const metadata = {
   title: 'EU AI Act | AI Engineering Wiki',
@@ -39,6 +40,36 @@ export default function EuAiActLeitfaden() {
             Für KMU gelten etwas mildere Regeln, aber die Pflichten bleiben.
           </p>
         </Callout>
+
+        <PlantUMLDiagram
+          diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam rectangleBorderColor #334155
+skinparam rectangleBackgroundColor #0F172A
+
+title EU AI Act — Risikoklassen Pyramide
+
+rectangle "VERBOTEN\\n(Unacceptable Risk)\\nSoziales Scoring, Manipulation,\\nbiometrische Fernidentifikation" as r1 #8B0000
+
+rectangle "HOCH\\n(High Risk)\\nGesundheit, Bildung, Beschäftigung,\\nStrafverfolgung — strenge Pflichten" as r2 #1E3A5F
+
+rectangle "BEGRENZT\\n(Limited Risk)\\nChatbots, Deepfakes —\\nTransparenzpflicht" as r3 #4a4a00
+
+rectangle "MINIMAL\\n(Minimal Risk)\\nSpam-Filter, Empfehlungen,\\nHomelab AI — keine Pflichten" as r4 #22543d
+
+r1 -[hidden]-> r2
+r2 -[hidden]-> r3
+r3 -[hidden]-> r4
+
+note right of r4
+  Die meisten Self-Hosted
+  AI-Systeme fallen hierunter
+end note
+@enduml`}
+          caption="EU AI Act Risikoklassen: Von verboten (oben) bis minimal (unten)"
+        />
 
         <h2 className="text-xl font-semibold text-white mt-8">Was regelt der EU AI Act?</h2>
 

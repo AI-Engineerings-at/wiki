@@ -1,4 +1,5 @@
 import { CaseStudyBox } from '../../../components/CaseStudyBox'
+import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 
 export const metadata = {
   title: 'Agent Orchestration Patterns | AI Engineering Wiki',
@@ -31,6 +32,51 @@ export default function AgentOrchestrationPatterns() {
           <img src="/images/diagrams/patterns-orchestration-overview.png" alt="Agent Orchestration Patterns Übersicht — Sequential, Parallel, Hierarchical, Router, Supervisor" className="rounded-xl border border-white/10 w-full" />
           <figcaption className="text-center text-white/40 text-sm mt-2">Orchestration Patterns: Die 5 wichtigsten Muster für Multi-Agent Systeme</figcaption>
         </figure>
+
+        <PlantUMLDiagram
+          diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam rectangleBorderColor #334155
+skinparam rectangleBackgroundColor #0F172A
+
+title Orchestration Patterns Übersicht
+
+rectangle "Sequential" as seq {
+  rectangle "A" as sa #0F172A
+  rectangle "B" as sb #0F172A
+  rectangle "C" as sc #0F172A
+  sa --> sb
+  sb --> sc
+}
+
+rectangle "Parallel" as par {
+  rectangle "  " as ps #1E3A5F
+  rectangle "X" as px #0F172A
+  rectangle "Y" as py #0F172A
+  rectangle "Z" as pz #0F172A
+  rectangle "Aggregator" as pa #22543d
+  ps --> px
+  ps --> py
+  ps --> pz
+  px --> pa
+  py --> pa
+  pz --> pa
+}
+
+rectangle "Router" as rtr {
+  rectangle "Classifier" as rc #1E3A5F
+  rectangle "Code" as r1 #0F172A
+  rectangle "Research" as r2 #0F172A
+  rectangle "QA" as r3 #0F172A
+  rc --> r1
+  rc --> r2
+  rc --> r3
+}
+@enduml`}
+          caption="Drei Orchestration Patterns: Sequential, Parallel und Router"
+        />
 
         <h2 className="text-xl font-semibold text-white mt-8">1. Sequential Pattern</h2>
         <p className="text-gray-300">

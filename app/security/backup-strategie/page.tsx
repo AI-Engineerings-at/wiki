@@ -1,4 +1,5 @@
 import Callout from "../../../components/Callout"
+import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 
 export const metadata = {
   title: 'Backup Strategie | AI Engineering Wiki',
@@ -28,6 +29,45 @@ export default function BackupStrategie() {
           Backups sind langweilig bis du sie brauchst. Dann sind sie lebensrettend.
           Hier ist unsere Strategie.
         </p>
+
+        <PlantUMLDiagram
+          diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam rectangleBorderColor #334155
+skinparam rectangleBackgroundColor #0F172A
+
+title Backup Pipeline: 3-2-1 Strategie
+
+rectangle "Produktionsdaten" as prod #1E3A5F {
+  rectangle "Docker Volumes" as dv #0F172A
+  rectangle "Configs" as cfg #0F172A
+  rectangle "Git Repos" as git #0F172A
+}
+
+rectangle "Kopie 1: Lokal" as local #22543d {
+  rectangle "Restic auf NAS\\n(täglich, verschlüsselt)" as nas #0F172A
+}
+
+rectangle "Kopie 2: Offsite" as offsite #1E3A5F {
+  rectangle "Rclone → Backblaze B2\\n(wöchentlich, verschlüsselt)" as cloud #0F172A
+}
+
+rectangle "Kopie 3: Git" as gitcopy #4a4a00 {
+  rectangle "GitHub\\n(automatisch bei Push)" as gh #0F172A
+}
+
+prod --> local : Restic Backup
+prod --> offsite : Rclone Sync
+prod --> gitcopy : git push
+
+rectangle "Restore Test\\n(monatlich)" as test #8B0000
+local --> test : Verify
+offsite --> test : Verify
+@enduml`}
+          caption="3-2-1 Backup: 3 Kopien, 2 Medien (NAS + Cloud), 1 Offsite — mit regelmäßigem Restore-Test"
+        />
 
         <h2 className="text-xl font-semibold text-white mt-8">3-2-1 Regel</h2>
 

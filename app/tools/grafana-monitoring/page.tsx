@@ -1,5 +1,6 @@
 import { CaseStudyBox } from '../../../components/CaseStudyBox'
 import Callout from "../../../components/Callout"
+import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 
 export const metadata = {
   title: 'Grafana Monitoring | AI Engineering Wiki',
@@ -54,6 +55,38 @@ export default function GrafanaMonitoring() {
           <img src="/images/diagrams/tools-grafana-stack.png" alt="Grafana Monitoring Stack — Prometheus, Exporters, Alertmanager" className="rounded-xl border border-white/10 w-full" />
           <figcaption className="text-center text-white/40 text-sm mt-2">Grafana Stack: Prometheus, Exporters und Alertmanager im Zusammenspiel</figcaption>
         </figure>
+
+        <PlantUMLDiagram
+          diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam rectangleBorderColor #334155
+skinparam rectangleBackgroundColor #0F172A
+skinparam componentBorderColor #334155
+skinparam componentBackgroundColor #0F172A
+
+title Monitoring Stack: Prometheus + Grafana
+
+rectangle "Datenquellen" as sources #1E3A5F {
+  rectangle "Node Exporter\\n(CPU, RAM, Disk)" as node #0F172A
+  rectangle "cAdvisor\\n(Container Metriken)" as cadvisor #0F172A
+  rectangle "NVIDIA Exporter\\n(GPU Metriken)" as nvidia #0F172A
+  rectangle "Ollama\\n(LLM Metriken)" as ollama #0F172A
+}
+
+rectangle "Prometheus\\n(Sammlung & Speicherung)" as prom #1E3A5F
+rectangle "Alertmanager\\n(Benachrichtigungen)" as alert #0F172A
+rectangle "Grafana\\n(Dashboards)" as grafana #22543d
+rectangle "Benachrichtigung\\n(Slack, E-Mail)" as notify #0F172A
+
+sources --> prom : Scrape alle 15s
+prom --> grafana : PromQL Queries
+prom --> alert : Alert Rules
+alert --> notify : Notification
+@enduml`}
+          caption="Monitoring Stack: Exporter liefern Metriken an Prometheus, Grafana visualisiert, Alertmanager benachrichtigt"
+        />
 
         <h2 className="text-xl font-semibold text-white mt-8">Komponenten</h2>
 

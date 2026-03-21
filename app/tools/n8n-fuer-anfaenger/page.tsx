@@ -1,5 +1,6 @@
 import { CaseStudyBox } from '../../../components/CaseStudyBox'
 import Callout from "../../../components/Callout"
+import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 
 export const metadata = {
   title: 'n8n für Anfänger | AI Engineering Wiki',
@@ -43,6 +44,70 @@ export default function N8nAnfänger() {
           <img src="/images/diagrams/tools-n8n-architektur.png" alt="n8n Architektur — Nodes, Workflows, Trigger und Integrationen" className="rounded-xl border border-white/10 w-full" />
           <figcaption className="text-center text-white/40 text-sm mt-2">n8n Architektur: Wie Nodes, Workflows und Integrationen zusammenspielen</figcaption>
         </figure>
+
+        <PlantUMLDiagram
+          diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam rectangleBorderColor #334155
+skinparam rectangleBackgroundColor #0F172A
+skinparam activityBorderColor #334155
+skinparam activityBackgroundColor #0F172A
+
+title n8n Workflow Architektur
+
+rectangle "Trigger" as trigger #1E3A5F {
+  rectangle "Webhook" as wh #0F172A
+  rectangle "Cron / Schedule" as cron #0F172A
+  rectangle "E-Mail Eingang" as email #0F172A
+}
+
+rectangle "Verarbeitung" as processing #1E3A5F {
+  rectangle "IF / Switch" as logic #0F172A
+  rectangle "Ollama LLM" as llm #0F172A
+  rectangle "Code Node" as code #0F172A
+  rectangle "Set / Transform" as transform #0F172A
+}
+
+rectangle "Ausgabe" as output #1E3A5F {
+  rectangle "Mattermost / Slack" as chat #0F172A
+  rectangle "Datenbank" as db #0F172A
+  rectangle "E-Mail senden" as send #0F172A
+  rectangle "HTTP Request" as http #0F172A
+}
+
+trigger --> processing
+processing --> output
+@enduml`}
+          caption="n8n Workflow: Trigger lösen Verarbeitung aus, Ergebnisse gehen an Ausgabe-Nodes"
+        />
+
+        <PlantUMLDiagram
+          diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam activityBorderColor #334155
+skinparam activityBackgroundColor #0F172A
+
+title Beispiel-Workflow: Stripe Payment Fulfillment
+
+start
+:Stripe Webhook empfangen;
+if (Payment erfolgreich?) then (ja)
+  :Bestelldaten extrahieren;
+  :Ollama: Bestätigungsmail generieren;
+  :E-Mail an Kunden senden;
+  :Mattermost Notification;
+else (nein)
+  :Fehler loggen;
+  :Alert an Admin;
+endif
+stop
+@enduml`}
+          caption="Beispiel: Stripe Payment Webhook triggert AI-generierte Bestätigungsmail"
+        />
 
         <h2 className="text-xl font-semibold text-white mt-8">Warum n8n?</h2>
 

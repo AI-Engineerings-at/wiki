@@ -1,5 +1,6 @@
 import Callout from "../../../components/Callout"
 import ComparisonTable from "../../../components/ComparisonTable"
+import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 
 export const metadata = {
   title: 'AI Kosten Vergleich | AI Engineering Wiki',
@@ -24,6 +25,42 @@ export default function AiKostenVergleich() {
           <img src="/images/infographics/ai-kosten-vergleich-balken.png" alt="AI Kosten Vergleich — Cloud vs Lokal vs Hybrid Balkendiagramm" className="rounded-xl border border-white/10 w-full" />
           <figcaption className="text-center text-white/40 text-sm mt-2">AI Kosten 2026: Cloud, Lokal und Hybrid im direkten Vergleich</figcaption>
         </figure>
+
+        <PlantUMLDiagram
+          diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam rectangleBorderColor #334155
+skinparam rectangleBackgroundColor #0F172A
+skinparam activityBorderColor #334155
+skinparam activityBackgroundColor #0F172A
+
+title Kosten-Vergleich: Cloud vs Lokal vs Hybrid
+
+rectangle "Cloud API" as cloud #1E3A5F {
+  rectangle "EUR 0 Hardware" as c1 #0F172A
+  rectangle "EUR 100-500/Monat" as c2 #0F172A
+  rectangle "Beste Qualität" as c3 #0F172A
+}
+
+rectangle "Lokal (RTX 3090)" as lokal #1E3A5F {
+  rectangle "EUR 750-1.123 einmalig" as l1 #0F172A
+  rectangle "EUR 49/Monat Strom" as l2 #0F172A
+  rectangle "Bis 34B Modelle" as l3 #0F172A
+}
+
+rectangle "Hybrid (Empfehlung)" as hybrid #22543d {
+  rectangle "EUR 750-1.123 einmalig" as h1 #0F172A
+  rectangle "EUR 70-90/Monat" as h2 #0F172A
+  rectangle "Lokal + Cloud Backup" as h3 #0F172A
+}
+
+cloud -[hidden]-> lokal
+lokal -[hidden]-> hybrid
+@enduml`}
+          caption="Kosten-Vergleich 2026: Cloud, Lokal und Hybrid im Überblick"
+        />
 
         <h2 className="text-xl font-semibold text-white mt-8">Kostenübersicht 2026 (ehrlich)</h2>
 

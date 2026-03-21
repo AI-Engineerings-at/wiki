@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 
 export const metadata: Metadata = {
   title: 'Model Selection Guide | AI Engineering Wiki',
@@ -20,6 +21,46 @@ export default function ModelSelectionPage() {
           <img src="/images/diagrams/tools-model-entscheidungsbaum.png" alt="Modell-Entscheidungsbaum — Welches AI-Modell für welchen Use Case" className="rounded-xl border border-white/10 w-full" />
           <figcaption className="text-center text-white/40 text-sm mt-2">Modell-Entscheidungsbaum: So findest du das richtige AI-Modell</figcaption>
         </figure>
+
+        <PlantUMLDiagram
+          diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam activityBorderColor #334155
+skinparam activityBackgroundColor #0F172A
+
+title Modell-Entscheidungsbaum
+
+start
+if (VRAM verfügbar?) then (< 8 GB)
+  :Small Models\\n(1-3B Parameter);
+  :Gemma 2 2B\\nPhi-3.5 Mini;
+elseif (8-16 GB) then
+  :Medium Models\\n(7-14B Parameter);
+  :Llama 3.3 8B\\nQwen3 14B;
+elseif (16-24 GB) then
+  :Large Models\\n(24-34B Parameter);
+  :Mistral Small 3.1 24B\\nQwen 2.5 32B;
+else (48 GB+)
+  :XL Models\\n(70B Parameter);
+  :Llama 3.3 70B;
+endif
+
+if (Deutsch wichtig?) then (ja)
+  :Mistral Small 3.1\\noder Qwen3 14B;
+else (nein)
+endif
+
+if (Komplexes Reasoning?) then (ja)
+  :Cloud API empfohlen\\n(Claude, GPT-4o);
+else (nein)
+  :Lokal reicht aus;
+endif
+stop
+@enduml`}
+          caption="Entscheidungsbaum: VRAM bestimmt Modellgröße, Sprache und Reasoning bestimmen lokal vs. Cloud"
+        />
 
         <h2 className="text-xl font-semibold text-white mt-8">Die Entscheidung</h2>
         <p className="text-gray-300">

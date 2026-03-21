@@ -1,5 +1,6 @@
 import { CaseStudyBox } from '../../../components/CaseStudyBox'
 import Callout from "../../../components/Callout"
+import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 
 export const metadata = {
   title: 'DSGVO Grundlagen | AI Engineering Wiki',
@@ -54,6 +55,39 @@ export default function DsgvoGrundlagen() {
           <img src="/images/infographics/dsgvo-6-grundsaetze.png" alt="DSGVO 6 Grundsaetze — Rechtmaessigkeit, Zweckbindung, Datenminimierung, Richtigkeit, Speicherbegrenzung, Integritaet" className="rounded-xl border border-white/10 w-full" />
           <figcaption className="text-center text-white/40 text-sm mt-2">Die 6 DSGVO-Grundsaetze nach Art. 5: Basis für jeden Datenschutz</figcaption>
         </figure>
+
+        <PlantUMLDiagram
+          diagram={`@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam activityBorderColor #334155
+skinparam activityBackgroundColor #0F172A
+
+title DSGVO Prozess für AI-Systeme
+
+start
+:Personenbezogene Daten\\nidentifizieren;
+:Rechtsgrundlage prüfen\\n(Art. 6 DSGVO);
+if (Hochrisiko-Verarbeitung?) then (ja)
+  :DPIA durchführen\\n(Datenschutz-Folgenabschätzung);
+else (nein)
+endif
+:Verarbeitungsverzeichnis\\nerstellen (Art. 30);
+:Technische Maßnahmen\\numsetzen (Art. 32);
+:Betroffenenrechte\\nsicherstellen (Art. 15-22);
+:Auftragsverarbeitung\\nprüfen (AVV);
+if (Cloud-API genutzt?) then (ja)
+  :Drittlandtransfer\\nprüfen (Kap. V);
+  :AVV mit Anbieter\\nabschließen;
+else (nein / Self-Hosted)
+  :Volle Kontrolle —\\nkein Drittlandtransfer;
+endif
+:Regelmäßige\\nÜberprüfung;
+stop
+@enduml`}
+          caption="DSGVO-Prozess für AI-Systeme: Von der Datenidentifikation bis zur regelmäßigen Überprüfung"
+        />
 
         <h2 className="text-xl font-semibold text-white mt-8">Die 6 Grundsätze (Art. 5)</h2>
 

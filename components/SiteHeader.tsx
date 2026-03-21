@@ -11,6 +11,7 @@ const navDe = [
   { href: '/patterns', label: 'Patterns' },
   { href: '/security', label: 'Security' },
   { href: '/compliance', label: 'Compliance' },
+  { href: '/papers', label: 'Papers' },
   { href: '/blog', label: 'Blog' },
 ]
 
@@ -21,6 +22,7 @@ const navEn = [
   { href: '/en/patterns', label: 'Patterns' },
   { href: '/en/security', label: 'Security' },
   { href: '/en/compliance', label: 'Compliance' },
+  { href: '/en/papers', label: 'Papers' },
   { href: '/blog', label: 'Blog' },
 ]
 
