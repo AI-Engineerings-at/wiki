@@ -2,6 +2,7 @@
 title: "Terminal-Grundlagen für AI-Entwickler — die 10 Befehle die du wirklich brauchst"
 date: "2026-03-12"
 description: "Kein Informatikstudium nötig. Diese 10 Terminal-Befehle reichen um deinen eigenen AI-Stack zu starten."
+summary: "Kein Informatikstudium nötig. Diese 10 Terminal-Befehle reichen um deinen eigenen AI-Stack zu starten."
 tags: ["Terminal", "Grundlagen", "CLI", "Anfänger", "Setup"]
 author: "AI Engineering"
 series: "Lokaler AI-Stack: Von 0 bis Production"

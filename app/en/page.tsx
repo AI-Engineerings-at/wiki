@@ -163,7 +163,7 @@ export default function HomePage() {
           <ToolLink href="/en/patterns/memory-management" label="Memory Management" tag="Context" />
           <ToolLink href="/en/patterns/task-delegation" label="Task Delegation" tag="Workflow" />
           <ToolLink href="/en/patterns/self-improving-agents" label="Self-Improving Agents" tag="NemoClaw" />
-          <ToolLink href="/en/patterns/ai-agent-digitaler-mitarbeiter" label="Agent as Employee" tag="Concept" />
+          <ToolLink href="/en/patterns/ai-agent-digital-employee" label="Agent as Employee" tag="Concept" />
         </div>
       </section>
 

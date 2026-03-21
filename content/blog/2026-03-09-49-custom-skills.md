@@ -30,7 +30,7 @@ version: "1.2.0"
 ---
 ```
 
-Der Body beschreibt Schritt für Schritt, was Claude tun soll. Fehlerfaelle inklusive.
+Der Body beschreibt Schritt für Schritt, was Claude tun soll. Fehlerfälle inklusive.
 
 ## Die 6 Kategorien
 
@@ -41,7 +41,7 @@ Der Body beschreibt Schritt für Schritt, was Claude tun soll. Fehlerfaelle inkl
 
 Die Basis. Deploy-Automation, Swarm Recovery, VM Management, n8n Workflow-Operationen.
 
-**Highlight: `swarm-raft-recovery`** — Wenn das Docker Swarm Quorum verloren geht (ist uns am 08.03 passiert), führt dieser Skill durch die Recovery: `--force-new-cluster`, Node Rejoin, Label-Restore, Service-Verifikation. Was frueher 3 Stunden gedauert hat, geht jetzt in 15 Minuten.
+**Highlight: `swarm-raft-recovery`** — Wenn das Docker Swarm Quorum verloren geht (ist uns am 08.03 passiert), führt dieser Skill durch die Recovery: `--force-new-cluster`, Node Rejoin, Label-Restore, Service-Verifikation. Was früher 3 Stunden gedauert hat, geht jetzt in 15 Minuten.
 
 ### Agent Management (7 Skills)
 
@@ -49,7 +49,7 @@ Jeder der 11 Agents braucht Credential-Zugriff, Task-Tracking, und Mattermost-Po
 
 ### Documentation & Orchestration (4 Skills)
 
-`full-sync` ist der maechtiste hier: Eine 10-Schritt Pipeline die Docs aktualisiert, ERPNext Tasks synchronisiert, open-notebook beschickt, Git Commits macht, und das Ergebnis in Mattermost postet. Ein Befehl, alles synchron.
+`full-sync` ist der mächtigste hier: Eine 10-Schritt Pipeline die Docs aktualisiert, ERPNext Tasks synchronisiert, open-notebook beschickt, Git Commits macht, und das Ergebnis in Mattermost postet. Ein Befehl, alles synchron.
 
 ### Content & Creative (5 Skills)
 
@@ -57,7 +57,7 @@ Diagramme via Kroki, Content Quality Gates, ComfyUI Workflow-Design für Bildgen
 
 ### Marketing (10 Skills)
 
-Die größte Kategorie. SEO-Analyse, Ad Copy, Sales Funnel Mapping, Landing Page CRO, Marketing-Audits mit Score 0-100. Der `market-audit` Skill prüft 5 Dimensionen und gibt eine Gesamtnote mit konkreten Verbesserungsvorschlaegen.
+Die größte Kategorie. SEO-Analyse, Ad Copy, Sales Funnel Mapping, Landing Page CRO, Marketing-Audits mit Score 0-100. Der `market-audit` Skill prüft 5 Dimensionen und gibt eine Gesamtnote mit konkreten Verbesserungsvorschlägen.
 
 ### Organisation & Firma (5 Skills)
 
@@ -75,7 +75,7 @@ Erstellen, aktivieren, deaktivieren, importieren. Kennt die n8n 2.x Gotchas (Lux
 
 ### 3. `content-quality` — Der Humanizer
 
-Prueft Texte gegen 24 Anti-AI-Writing-Regeln. Keine "pivotal", "landscape", "tapestry" Wörter. Kein "serves as" wenn "ist" reicht. Score unter 85 = automatischer Rewrite.
+Prüft Texte gegen 24 Anti-AI-Writing-Regeln. Keine "pivotal", "landscape", "tapestry" Wörter. Kein "serves as" wenn "ist" reicht. Score unter 85 = automatischer Rewrite.
 
 ### 4. `jim-manager` — Team-Delegation
 

@@ -37,7 +37,7 @@ Spamfilter, AI in Videospielen, einfache Empfehlungssysteme. Keine besonderen Pf
 
 ## Was das für Unternehmen bedeutet
 
-Die meisten Unternehmen in der DACH-Region fallen in die Kategorien "begrenztes Risiko" und "hohes Risiko". Konkret heisst das:
+Die meisten Unternehmen in der DACH-Region fallen in die Kategorien "begrenztes Risiko" und "hohes Risiko". Konkret heißt das:
 
 ### Dokumentationspflicht
 
@@ -57,7 +57,7 @@ Für Hochrisiko-Systeme (HR-Software, Kreditscoring, medizinische Anwendungen) w
 
 Hochrisiko-Systeme müssen Logs führen, die eine Nachverfolgung ermöglichen. Welche Eingaben hat das System erhalten? Welche Ausgaben hat es produziert? Wann wurde das Modell zuletzt aktualisiert?
 
-Bei Cloud-Anbietern ist das oft intransparent — man weiss nicht, welche Modellversion gerade läuft. Bei einem lokalen Setup kontrolliert man das selbst.
+Bei Cloud-Anbietern ist das oft intransparent — man weiß nicht, welche Modellversion gerade läuft. Bei einem lokalen Setup kontrolliert man das selbst.
 
 ## Der Vorteil von Local-First
 
@@ -69,7 +69,7 @@ Unternehmen, die ihre AI-Systeme lokal betreiben, haben es bei der Compliance de
 - **Transparenz:** Man weiss genau, was das Modell kann und was nicht
 - **Kosten:** Keine laufenden API-Gebühren, Hardware amortisiert sich schnell
 
-Das heisst nicht, dass Cloud-AI verboten ist. Aber der Compliance-Aufwand ist bei lokaler Verarbeitung wesentlich geringer.
+Das heißt nicht, dass Cloud-AI verboten ist. Aber der Compliance-Aufwand ist bei lokaler Verarbeitung wesentlich geringer.
 
 ## 5-Punkte-Checkliste für Unternehmen
 
@@ -85,11 +85,11 @@ Jedes identifizierte AI-System einer der vier Kategorien zuordnen. Im Zweifel: h
 
 Für jedes System mit begrenztem oder hohem Risiko: technische Dokumentation, Datenfluss-Diagramm, Risikobeurteilung. Für Hochrisiko-Systeme zusätzlich: Qualitätsmanagementsystem, Genauigkeitsmetriken, Bias-Analyse.
 
-### 4. Transparenzmassnahmen umsetzen
+### 4. Transparenzmaßnahmen umsetzen
 
 Chatbots kennzeichnen, AI-generierten Content markieren, Nutzer informieren. Das ist oft der einfachste Schritt, wird aber am häufigsten vergessen.
 
-### 5. Datenstrategie überpruefen
+### 5. Datenstrategie überprüfen
 
 Wo werden AI-Daten verarbeitet? Wenn extern: welche Verträge bestehen? Wenn intern: ist die Infrastruktur dokumentiert? Ein lokaler AI-Stack löst viele dieser Fragen automatisch.
 

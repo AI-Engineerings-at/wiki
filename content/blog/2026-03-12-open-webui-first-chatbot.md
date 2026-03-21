@@ -2,6 +2,7 @@
 title: "Your First Local AI Chatbot: Set Up Open WebUI in 10 Minutes"
 date: "2026-03-12"
 description: "Ollama is running, but you want a browser interface. Here's how to set up Open WebUI — the ChatGPT-like interface for your local stack."
+summary: "Ollama is running, but you want a browser interface. Here's how to set up Open WebUI — the ChatGPT-like interface for your local stack."
 tags: ["Open WebUI", "Chatbot", "Interface", "Ollama", "Beginner"]
 author: "AI Engineering"
 series: "Local AI Stack: From 0 to Production"

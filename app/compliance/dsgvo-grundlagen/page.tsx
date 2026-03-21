@@ -321,7 +321,7 @@ Email: max@musterfirma.at
           <h3 className="font-semibold text-white mb-2">Weiterführend</h3>
           <ul className="text-slate-300 space-y-1">
             <li>• <strong>Art. 30 Template:</strong>{" "}
-              <a href="/compliance/art30" className="text-blue-400 hover:underline">Verarbeitungsverzeichnis →</a>
+              <a href="/downloads" className="text-blue-400 hover:underline">Verarbeitungsverzeichnis (Downloads) →</a>
             </li>
             <li>• <strong>DPIA für KI:</strong>{" "}
               <a href="/compliance/dpia" className="text-blue-400 hover:underline">Datenschutz-Folgenabschätzung →</a>

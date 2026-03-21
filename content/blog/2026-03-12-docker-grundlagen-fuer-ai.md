@@ -2,6 +2,7 @@
 title: "Docker für AI: Warum Container deinen Stack production-ready machen"
 date: "2026-03-12"
 description: "Ohne Docker läuft dein AI-Stack nur auf deinem Rechner. Mit Docker läuft er überall. Der Einstieg für AI-Entwickler."
+summary: "Ohne Docker läuft dein AI-Stack nur auf deinem Rechner. Mit Docker läuft er überall. Der Einstieg für AI-Entwickler."
 tags: ["Docker", "Container", "Production", "Setup", "Anfänger"]
 author: "AI Engineering"
 series: "Lokaler AI-Stack: Von 0 bis Production"

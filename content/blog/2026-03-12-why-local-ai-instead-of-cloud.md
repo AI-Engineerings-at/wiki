@@ -2,6 +2,7 @@
 title: "Why You Shouldn't Use ChatGPT at Work — and What to Use Instead"
 date: "2026-03-12"
 description: "GDPR Art. 5, EU AI Act, data transfer to the US: three reasons why self-hosted AI is mandatory for European companies."
+summary: "GDPR Art. 5, EU AI Act, data transfer to the US: three reasons why self-hosted AI is mandatory for European companies."
 tags: ["GDPR", "Local AI", "ChatGPT", "Compliance", "Beginner"]
 author: "AI Engineering"
 series: "Local AI Stack: From 0 to Production"

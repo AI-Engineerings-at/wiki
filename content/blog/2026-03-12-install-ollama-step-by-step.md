@@ -2,6 +2,7 @@
 title: "Install Ollama in 5 Minutes — Step by Step (Windows, Mac, Linux)"
 date: "2026-03-12"
 description: "From zero to running local LLM in 5 minutes. Tested on Windows 11, macOS Sonoma and Ubuntu 24.04."
+summary: "From zero to running local LLM in 5 minutes. Tested on Windows 11, macOS Sonoma and Ubuntu 24.04."
 tags: ["Ollama", "Installation", "LLM", "Beginner", "Local AI"]
 author: "AI Engineering"
 series: "Local AI Stack: From 0 to Production"

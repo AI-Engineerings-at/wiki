@@ -13,9 +13,9 @@ author: "AI Engineering"
   <figcaption style="text-align: center; color: rgba(255,255,255,0.4); font-size: 0.875rem; margin-top: 0.5rem;">Unser DSGVO-konformer AI-Stack: LLM, STT, TTS und Bildgenerierung — alles lokal</figcaption>
 </figure>
 
-Wenn ein Unternehmen ChatGPT nutzt, verlassen die eingegebenen Daten das eigene Netzwerk. Bei jeder Anfrage. Bei jedem Prompt. Bei jedem Dokument, das man zur Analyse hochlaedt. Für viele Firmen in der DACH-Region ist das ein Problem — nicht nur aus Überzeugung, sondern weil die DSGVO und ab August 2026 der EU AI Act klare Regeln setzen.
+Wenn ein Unternehmen ChatGPT nutzt, verlassen die eingegebenen Daten das eigene Netzwerk. Bei jeder Anfrage. Bei jedem Prompt. Bei jedem Dokument, das man zur Analyse hochlädt. Für viele Firmen in der DACH-Region ist das ein Problem — nicht nur aus Überzeugung, sondern weil die DSGVO und ab August 2026 der EU AI Act klare Regeln setzen.
 
-Wir zeigen, wie ein kompletter AI-Stack aussieht, der nichts nach aussen schickt.
+Wir zeigen, wie ein kompletter AI-Stack aussieht, der nichts nach außen schickt.
 
 ## Die vier Säulen unseres Stacks
 
@@ -40,7 +40,7 @@ curl -s http://<ollama-host>:11434/api/tags | jq '.models[].name'
 
 OpenAI's Whisper läuft als Docker Container auf einem dedizierten Swarm-Node, erreichbar über das Wyoming-Protokoll. Modell: `small`, Sprache: Deutsch.
 
-Jedes Audio-File wird lokal transkribiert. Keine Cloud-API, kein Upload zu externen Servern. Das ist besonders relevant für Firmen, die Meetings oder Kundengespraeche transkribieren wollen. Die Daten bleiben dort, wo sie hingehören: im eigenen Netzwerk.
+Jedes Audio-File wird lokal transkribiert. Keine Cloud-API, kein Upload zu externen Servern. Das ist besonders relevant für Firmen, die Meetings oder Kundengespräche transkribieren wollen. Die Daten bleiben dort, wo sie hingehören: im eigenen Netzwerk.
 
 ### 3. Piper — Text-to-Speech lokal
 

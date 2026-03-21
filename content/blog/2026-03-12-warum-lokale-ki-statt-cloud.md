@@ -2,6 +2,7 @@
 title: "Warum du kein ChatGPT im Unternehmen nutzen solltest — und was stattdessen"
 date: "2026-03-12"
 description: "DSGVO Art. 5, EU AI Act, Datentransfer in die USA: Die drei Gründe warum Self-Hosted AI für Unternehmen Pflicht ist."
+summary: "DSGVO Art. 5, EU AI Act, Datentransfer in die USA: Die drei Gründe warum Self-Hosted AI für Unternehmen Pflicht ist."
 tags: ["DSGVO", "Local AI", "ChatGPT", "Compliance", "Anfänger"]
 author: "AI Engineering"
 series: "Lokaler AI-Stack: Von 0 bis Production"

@@ -2,6 +2,7 @@
 title: "Terminal Basics for AI Developers — the 10 Commands You Actually Need"
 date: "2026-03-12"
 description: "No CS degree needed. These 10 terminal commands are all you need to start your own AI stack."
+summary: "No CS degree needed. These 10 terminal commands are all you need to start your own AI stack."
 tags: ["Terminal", "Basics", "CLI", "Beginner", "Setup"]
 author: "AI Engineering"
 series: "Local AI Stack: From 0 to Production"

@@ -16,6 +16,7 @@ export const metadata: Metadata = {
     siteName: 'AI Engineering Wiki',
     locale: 'de_AT',
     type: 'website',
+    images: [{ url: '/images/og-image.png', width: 1200, height: 630, alt: 'AI Engineering Wiki' }],
   },
 }
 
@@ -27,9 +28,14 @@ export default function RootLayout({
   return (
     <html lang="de">
       <body className="min-h-screen flex flex-col">
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:bg-[#4262FF] focus:text-white focus:px-4 focus:py-2 focus:rounded">
+          Zum Inhalt springen
+        </a>
         <SiteHeader />
 
-        <ClientLayout>{children}</ClientLayout>
+        <main id="main-content">
+          <ClientLayout>{children}</ClientLayout>
+        </main>
 
         <SiteFooter />
       </body>

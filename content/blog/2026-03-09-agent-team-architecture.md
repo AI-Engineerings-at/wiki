@@ -29,7 +29,7 @@ Jeder Agent hat genau eine Rolle. Keiner kann alles, aber zusammen decken sie de
 
 Ein Agent der nicht selbst arbeitet, sondern koordiniert. In unserem Fall: **@jim**.
 
-- Empfaengt alle eingehenden Tasks
+- Empfängt alle eingehenden Tasks
 - Priorisiert nach Dringlichkeit und Abhängigkeiten
 - Delegiert an den passenden Worker
 - Trackt Fortschritt und prüft Ergebnisse
@@ -74,9 +74,9 @@ Der Unterschied zum Worker: Specialists werden nicht für allgemeine Tasks einge
 
 ```
 CEO gibt Richtung → @jim priorisiert
-  → @jim delegiert an Worker → Worker fuehrt aus
-  → Worker meldet Ergebnis → @jim prueft
-  → @jim meldet an CEO → Naechster Task
+  → @jim delegiert an Worker → Worker führt aus
+  → Worker meldet Ergebnis → @jim prüft
+  → @jim meldet an CEO → Nächster Task
 ```
 
 ### Was passiert bei Problemen?
@@ -84,7 +84,7 @@ CEO gibt Richtung → @jim priorisiert
 | Situation | Aktion |
 |-----------|--------|
 | Worker antwortet nicht | @jim: 3x Retry, dann CEO informieren |
-| Task braucht Daten löschen | @jim fragt CEO — nie eigenmaechtig |
+| Task braucht Daten löschen | @jim fragt CEO — nie eigenmächtig |
 | Zwei Worker brauchen gleiche Ressource | @jim koordiniert Reihenfolge |
 | Unbekannter Task-Typ | @jim fragt CEO statt zu raten |
 
@@ -92,18 +92,18 @@ CEO gibt Richtung → @jim priorisiert
 
 - Kein Worker delegiert an einen anderen Worker
 - Kein Worker kommuniziert direkt mit dem CEO
-- Kein Agent loescht Daten ohne CEO-Freigabe
+- Kein Agent löscht Daten ohne CEO-Freigabe
 - Kein Agent postet mit dem Token eines anderen Agents
 
 ## Kommunikation
 
 ### Mattermost als Single Backbone
 
-Alle Agent-Kommunikation läuft über ein self-hosted Mattermost. Warum nicht Slack oder Discord? Drei Gruende:
+Alle Agent-Kommunikation läuft über ein self-hosted Mattermost. Warum nicht Slack oder Discord? Drei Gründe:
 
 1. **Self-hosted** — keine Daten verlassen das Netzwerk
 2. **Keine Rate Limits** — wir konfigurieren selbst
-3. **Kostenlos** — bei 11 Agents waeren das bei Slack EUR 88/Monat
+3. **Kostenlos** — bei 11 Agents wären das bei Slack EUR 88/Monat
 
 ### Channel-Architektur
 
@@ -128,7 +128,7 @@ Unsere Lösung: 6 Schutzschichten.
 3. **Tool-Call Dedup** — gleiche Tool-Calls werden nicht zweimal ausgeführt
 4. **Keyword-Router** — nur explizite @mentions triggern Aktionen, nicht Namensnennungen
 5. **STOP-Signals** — bei Fehlern wird sofort gestoppt
-6. **Mention-Entschaerfung** — `@echo_log` wird in Antworten zu `@echo-log` (kein Retrigger)
+6. **Mention-Entschärfung** — `@echo_log` wird in Antworten zu `@echo-log` (kein Retrigger)
 
 Das war nötig. Ohne diese Schichten hatten wir in der ersten Woche mehrere Endlosschleifen. Ein Agent hat 45 Nachrichten in 2 Minuten gepostet — der CEO war nicht begeistert.
 
@@ -155,15 +155,15 @@ In der ersten Version hat jeder Agent "Verstanden, ich fange an!" gepostet. Bei 
 
 ### 2. CEO ist kein Dispatcher
 
-Frueh haben Worker direkt beim CEO nachgefragt. Das skaliert nicht. Der Orchestrator muss alle Routing-Entscheidungen treffen. Der CEO gibt Richtung, nicht Einzelanweisungen.
+Früh haben Worker direkt beim CEO nachgefragt. Das skaliert nicht. Der Orchestrator muss alle Routing-Entscheidungen treffen. Der CEO gibt Richtung, nicht Einzelanweisungen.
 
-### 3. Identitaet ist Pflicht
+### 3. Identität ist Pflicht
 
-Jeder Agent hat seinen eigenen Mattermost-Token. Nie teilen, nie tauschen. Sonst ist der Audit Trail wertlos — du weisst nicht mehr wer was getan hat.
+Jeder Agent hat seinen eigenen Mattermost-Token. Nie teilen, nie tauschen. Sonst ist der Audit Trail wertlos — du weißt nicht mehr wer was getan hat.
 
 ### 4. Observer dürfen nicht eingreifen
 
-@alerts meldet "Disk voll". @alerts darf NICHT eigenmaechtig aufraumen. Melden → Orchestrator entscheidet → Worker führt aus → Observer verifiziert.
+@alerts meldet "Disk voll". @alerts darf NICHT eigenmächtig aufräumen. Melden → Orchestrator entscheidet → Worker führt aus → Observer verifiziert.
 
 ### 5. STOP muss sofort wirken
 

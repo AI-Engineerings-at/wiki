@@ -2,6 +2,7 @@
 title: "Docker for AI: Why Containers Make Your Stack Production-Ready"
 date: "2026-03-12"
 description: "Without Docker, your AI stack only runs on your machine. With Docker, it runs everywhere. The entry point for AI developers."
+summary: "Without Docker, your AI stack only runs on your machine. With Docker, it runs everywhere. The entry point for AI developers."
 tags: ["Docker", "Container", "Production", "Setup", "Beginner"]
 author: "AI Engineering"
 series: "Local AI Stack: From 0 to Production"

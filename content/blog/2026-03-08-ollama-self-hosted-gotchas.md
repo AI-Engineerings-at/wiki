@@ -1,7 +1,7 @@
 ---
 title: "Self-Hosted Ollama: 7 Gotchas die jeder kennen muss"
 date: "2026-03-08"
-summary: "Ollama lokal betreiben klingt einfach. Ist es auch — bis du auf OOM-Crashes, VRAM-Konflikte und stille Fehler stoesst. Hier sind 7 Probleme und ihre Lösungen."
+summary: "Ollama lokal betreiben klingt einfach. Ist es auch — bis du auf OOM-Crashes, VRAM-Konflikte und stille Fehler stößt. Hier sind 7 Probleme und ihre Lösungen."
 tags: ["ollama", "self-hosted", "gotchas", "gpu", "vram", "homelab", "local-first", "docker"]
 author: "AI Engineering"
 ---
@@ -17,7 +17,7 @@ Ollama auf dem eigenen Server betreiben ist der erste Schritt zu einem unabhäng
 
 ## 1. OOM-Kills sind leise und tödlich
 
-**Problem:** Dein 24GB-Modell braucht ~28GB RAM. Windows Desktop-Apps belegen schon 25GB. Der OOM-Killer schlaegt zu — ohne Warnung, ohne Log-Eintrag.
+**Problem:** Dein 24GB-Modell braucht ~28GB RAM. Windows Desktop-Apps belegen schon 25GB. Der OOM-Killer schlägt zu — ohne Warnung, ohne Log-Eintrag.
 
 **Symptom:** `signal: killed` oder `llama runner process has terminated` in der API-Response. HTTP 500, aber kein hilfreicher Error.
 
@@ -52,7 +52,7 @@ Der Code probiert jeden Endpoint der Reihe nach. Timeout pro Versuch: 30 Sekunde
 
 ## 4. API Keys und Tokens veralten still
 
-**Problem:** Du hast den Ollama-Endpoint in deinem Workflow hardcoded. Drei Wochen später aenderst du was — der alte Key funktioniert noch (HTTP 200), aber Änderungen werden nicht persistent.
+**Problem:** Du hast den Ollama-Endpoint in deinem Workflow hardcoded. Drei Wochen später änderst du was — der alte Key funktioniert noch (HTTP 200), aber Änderungen werden nicht persistent.
 
 **Lösung:**
 - API Keys IMMER frisch aus einem Credential-Store holen

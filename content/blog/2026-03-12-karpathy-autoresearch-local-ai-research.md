@@ -2,6 +2,7 @@
 title: "Karpathy's autoresearch: Autonomous AI Research on Your Local GPU"
 date: "2026-03-12"
 description: "26,000 GitHub stars in 6 days — what Andrej Karpathy's new project actually does, and how to run it on an RTX 3090."
+summary: "26,000 GitHub stars in 6 days — what Andrej Karpathy's new project actually does, and how to run it on an RTX 3090."
 tags: ["Local AI", "Research", "GPU", "Open Source", "Karpathy"]
 author: "AI Engineering"
 ---

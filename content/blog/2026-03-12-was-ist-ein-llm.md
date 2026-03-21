@@ -2,6 +2,7 @@
 title: "Was ist ein Large Language Model? Erklärt ohne Buzzwords"
 date: "2026-03-12"
 description: "LLM, GPT, Transformer — was steckt wirklich dahinter? Eine ehrliche Erklärung ohne Marketing-Sprache."
+summary: "LLM, GPT, Transformer — was steckt wirklich dahinter? Eine ehrliche Erklärung ohne Marketing-Sprache."
 tags: ["Grundlagen", "LLM", "AI Basics", "Anfänger"]
 author: "AI Engineering"
 series: "Lokaler AI-Stack: Von 0 bis Production"
