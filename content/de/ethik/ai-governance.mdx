@@ -1,0 +1,288 @@
+---
+title: "KI Governance & Model Risk Management"
+description: "AI governance frameworks, model risk management. Documentation requirements, audit trails, model cards. Internal AI policies, responsible AI guidelines."
+section: "ethik"
+---
+
+# KI Governance & Model Risk Management
+
+Governance ist die Struktur, um KI-Systeme verantwortungsvoll zu bauen und zu betreiben. Diese Seite behandelt Frameworks, Model Cards und Policies.
+
+---
+
+## 1. Model Card Template
+
+Ein Model Card dokumentiert vollständig ein ML-Modell:
+
+```yaml
+# Model Card for [Model Name]
+
+## Model Details
+  - Model name: [e.g., "Spam Classifier v2.1"]
+  - Developed by: [Organization]
+  - Model date: [YYYY-MM-DD]
+  - Model version: [Version number]
+  - Model type: [Classification/Regression/etc]
+  - Framework: [PyTorch/TensorFlow/etc]
+
+## Model Use
+  - Primary use: [What it does]
+  - Intended users: [Who should use it]
+  - Upstream models: [Models it depends on]
+  - Downstream uses: [How it might be used]
+  - Out-of-scope uses: [What NOT to use it for]
+
+## Data
+  - Training data: [Data source, size, characteristics]
+  - Evaluation data: [Holdout test set info]
+  - Data preprocessing: [Cleaning, normalization, etc]
+
+## Performance
+  - Evaluation metrics:
+    - Accuracy: 92.5%
+    - Precision: 94.2%
+    - Recall: 90.1%
+  - Performance by demographic group:
+    - [Include fairness metrics]
+  - Failure modes: [Where model performs poorly]
+
+## Limitations & Biases
+  - Known limitations: [What model can't do]
+  - Ethical considerations: [Potential harms]
+  - Bias: [Known biases, mitigation strategies]
+
+## Trade-offs & Recommendations
+  - Speed vs accuracy: [How they vary]
+  - False positive vs false negative: [Tradeoff]
+  - Recommendations: [Best practices for use]
+
+## Caveats & Recommendations
+  - Updates: [How often model is retrained]
+  - Citation: [How to cite if using paper]
+  - License: [Model license]
+  - Contact: [Who to contact with questions]
+```
+
+---
+
+## 2. Model Risk Management Framework
+
+```python
+from enum import Enum
+from datetime import datetime
+
+class RiskLevel(Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+class ModelRiskAssessment:
+    """Assesses and tracks model risks"""
+
+    def __init__(self, model_name: str):
+        self.model_name = model_name
+        self.risks = []
+        self.mitigations = []
+
+    def add_risk(self, category: str, description: str, level: RiskLevel):
+        """Adds a risk"""
+        self.risks.append({
+            "category": category,
+            "description": description,
+            "risk_level": level,
+            "identified_date": datetime.now(),
+        })
+
+    def add_mitigation(self, risk_id: int, mitigation: str):
+        """Adds mitigation for a risk"""
+        self.mitigations.append({
+            "risk_id": risk_id,
+            "mitigation": mitigation,
+            "status": "in_progress",
+        })
+
+    def generate_rmf_report(self) -> str:
+        """Generates Risk Management Framework report"""
+        report = f"# Model Risk Management Report\n"
+        report += f"Model: {self.model_name}\n"
+        report += f"Report Date: {datetime.now().isoformat()}\n\n"
+
+        report += "## Identified Risks\n"
+        for i, risk in enumerate(self.risks):
+            report += f"\n### Risk {i+1}: {risk['category']}\n"
+            report += f"- Description: {risk['description']}\n"
+            report += f"- Level: {risk['risk_level'].value}\n"
+
+        report += "\n## Mitigations\n"
+        for mit in self.mitigations:
+            report += f"- Risk {mit['risk_id']}: {mit['mitigation']} ({mit['status']})\n"
+
+        return report
+
+# Verwendung:
+assessment = ModelRiskAssessment("Loan Approval Model")
+
+assessment.add_risk(
+    category="Fairness",
+    description="Model may discriminate against protected groups",
+    level=RiskLevel.HIGH
+)
+
+assessment.add_risk(
+    category="Data Quality",
+    description="Training data contains biased samples",
+    level=RiskLevel.MEDIUM
+)
+
+assessment.add_mitigation(0, "Add fairness constraints to training")
+assessment.add_mitigation(1, "Collect additional balanced samples")
+
+print(assessment.generate_rmf_report())
+```
+
+---
+
+## 3. Internal AI Policy Template
+
+```yaml
+# Internal AI Policy
+
+## Purpose
+  Establish guidelines for responsible development and deployment of AI systems
+
+## Scope
+  All AI/ML projects developed or deployed by [Organization]
+
+## Core Principles
+  1. Fairness: Minimize bias and discrimination
+  2. Transparency: Explain decisions where possible
+  3. Accountability: Clear ownership and audit trails
+  4. Privacy: Protect user data
+  5. Security: Protect against misuse
+
+## Governance Structure
+  - AI Ethics Board: Reviews high-risk projects
+  - Model Owners: Responsible for specific models
+  - Data Stewards: Manage training data
+  - Auditors: Independent review
+
+## Model Approval Process
+  - Phase 1: Development
+    - Document model card
+    - Run fairness assessment
+    - Security review
+  - Phase 2: Testing
+    - Human evaluation
+    - Performance validation
+    - Bias testing
+  - Phase 3: Deployment
+    - Audit trail setup
+    - Monitoring configured
+    - Stakeholder approval
+  - Phase 4: Monitoring
+    - Weekly performance checks
+    - Quarterly fairness audits
+    - Immediate escalation if thresholds crossed
+
+## High-Risk Categories
+  Automatic decisions affecting:
+  - Credit/lending
+  - Employment
+  - Criminal justice
+  - Healthcare
+  - Education
+
+  For high-risk: Requires ethics review + human approval
+
+## Data Governance
+  - Data minimization: Collect only necessary data
+  - Data quality: Regular audits
+  - Retention limits: Delete after purpose fulfilled
+  - GDPR compliance: Right to deletion, consent
+  - Anonymization: Remove PII where possible
+
+## Incident Response
+  - Critical issue: Immediate model takedown
+  - Bug discovered: 48-hour patch deadline
+  - Fairness issue: Escalate to ethics board
+  - Security breach: Follow incident response plan
+```
+
+---
+
+## 4. Audit Trail Implementation
+
+```python
+import json
+from datetime import datetime
+from pathlib import Path
+
+class AuditTrail:
+    """Maintains complete audit trail for compliance"""
+
+    def __init__(self, model_id: str, audit_file: str = None):
+        self.model_id = model_id
+        self.audit_file = audit_file or f"audit_trail_{model_id}.jsonl"
+
+    def log_event(self, event_type: str, details: dict, actor: str = None):
+        """Logs an event to audit trail"""
+        entry = {
+            "timestamp": datetime.now().isoformat(),
+            "model_id": self.model_id,
+            "event_type": event_type,
+            "actor": actor,
+            "details": details,
+        }
+
+        with open(self.audit_file, "a") as f:
+            f.write(json.dumps(entry) + "\n")
+
+    def log_model_training(self, training_config: dict):
+        """Logs model training event"""
+        self.log_event("model_training", training_config)
+
+    def log_performance_eval(self, metrics: dict):
+        """Logs performance evaluation"""
+        self.log_event("performance_eval", metrics)
+
+    def log_fairness_audit(self, fairness_results: dict):
+        """Logs fairness audit"""
+        self.log_event("fairness_audit", fairness_results)
+
+    def get_audit_log(self) -> list:
+        """Retrieves complete audit trail"""
+        entries = []
+        with open(self.audit_file, "r") as f:
+            for line in f:
+                entries.append(json.loads(line))
+        return entries
+
+# Verwendung:
+audit = AuditTrail(model_id="loan_approval_v2")
+
+audit.log_model_training({
+    "training_date": "2024-03-15",
+    "dataset_size": 50000,
+    "validation_accuracy": 0.925,
+})
+
+audit.log_fairness_audit({
+    "demographic_parity_diff": 0.05,
+    "equalized_odds_tpr_diff": 0.08,
+    "status": "approved",
+})
+
+# View complete trail
+trail = audit.get_audit_log()
+for entry in trail:
+    print(f"{entry['timestamp']}: {entry['event_type']}")
+```
+
+---
+
+## 5. Quellen und Links
+
+- **Model Cards for Model Reporting**: https://arxiv.org/abs/1810.03993
+- **AI RMF (NIST)**: https://airc.nist.gov/
+- **Responsible AI Practice**: https://www.microsoft.com/en-us/ai/responsible-ai

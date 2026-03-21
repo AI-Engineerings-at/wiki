@@ -1,0 +1,345 @@
+---
+title: "LLM Models: Cloud vs Local"
+date: 2026-03-21
+summary: "Comprehensive comparison of language models: cloud APIs (Claude, GPT, Gemini) vs self-hosted (Llama, Mistral, Qwen, Gemma)"
+tags: ["llm", "models", "comparison", "cloud", "self-hosted", "ai"]
+author: "AI Engineering"
+---
+
+# LLM Models: Cloud vs Local
+
+Choosing an LLM is a trade-off between cost, speed, privacy, and capability. This guide covers all major options.
+
+## Cloud APIs (Hosted Models)
+
+### Anthropic Claude
+
+| Metric | Value |
+|--------|-------|
+| **Models** | Claude 3 Opus, Sonnet, Haiku |
+| **Context** | 200K tokens |
+| **Training cutoff** | April 2024 |
+| **Speed** | Opus: 4s/1K tokens, Haiku: 0.5s/1K tokens |
+| **Cost** | Opus: $15/1M in, $75/1M out; Haiku: $0.80/$4 |
+| **API** | REST, MCP support |
+| **Best for** | Complex reasoning, long context, code |
+
+**Strengths:**
+- Best reasoning ability (Opus)
+- Excellent code understanding
+- Handles ambiguous prompts well
+- Good at following complex instructions
+
+**Weaknesses:**
+- Most expensive for volume usage
+- Opus slower than GPT-4
+- No fine-tuning available
+
+**Use when:** You need accuracy over cost (analysis, code review, strategy)
+
+### OpenAI GPT
+
+| Metric | Value |
+|--------|-------|
+| **Models** | GPT-4 Turbo, GPT-4, GPT-3.5 |
+| **Context** | GPT-4: 128K tokens |
+| **Training cutoff** | April 2024 |
+| **Speed** | GPT-4 Turbo: 2-3s/1K tokens |
+| **Cost** | GPT-4 Turbo: $10/1M in, $30/1M out |
+| **API** | REST, WebSocket streaming |
+| **Best for** | Balanced performance, broad tasks |
+
+**Strengths:**
+- Fastest API response time
+- Cheapest for raw throughput (3.5)
+- Largest ecosystem (integrations everywhere)
+- Fine-tuning available
+
+**Weaknesses:**
+- GPT-4 expensive for high volume
+- 3.5 lower quality than recent alternatives
+- API sometimes rate-limited
+
+**Use when:** You need speed and integrations (customer chat, high-volume tasks)
+
+### Google Gemini
+
+| Metric | Value |
+|--------|-------|
+| **Models** | Gemini Pro, Ultra, Flash |
+| **Context** | 1M tokens (Ultra, Flash) |
+| **Training cutoff** | April 2024 |
+| **Speed** | Flash: 0.1s/1K tokens |
+| **Cost** | Pro: $0.50/$1.50/1M; Flash: free for limited use |
+| **API** | REST, gRPC |
+| **Best for** | Long documents, cost-conscious |
+
+**Strengths:**
+- Longest context (1M tokens = 100+ documents)
+- Cheapest option (Flash often free)
+- Good multimodal (vision + text)
+- Fastest inference
+
+**Weaknesses:**
+- Reasoning weaker than Claude/GPT-4
+- Smaller ecosystem
+- Free tier limited to 15 requests/min
+
+**Use when:** You have large documents or tiny budget (summarization, extraction)
+
+### Other Cloud APIs
+
+**Meta Llama via API** (AWS Bedrock, Together AI)
+- 70B: Best free option quality-wise
+- Cost: $0.70/$0.95/1M tokens (Together AI)
+- Good for cost-sensitive use
+
+**Mistral (via Mistral API)**
+- 8B: Ultra-fast, mobile friendly
+- Cost: $0.14/$0.42/1M tokens
+- Low latency (<100ms)
+
+## Self-Hosted Models (Local)
+
+### Llama 2/3
+
+| Metric | Value |
+|--------|-------|
+| **Sizes** | 7B, 13B, 70B parameters |
+| **Context** | 4K-8K tokens |
+| **Speed** | 7B: 10-20 tokens/sec on 3090, 70B: 2-3 tokens/sec |
+| **Memory** | 7B: 16GB VRAM, 70B: 48GB VRAM |
+| **License** | Open (commercial use allowed) |
+| **Best for** | General purpose, cost at scale |
+
+**Strengths:**
+- Truly open source
+- Can fine-tune locally
+- Low cost after initial GPU investment
+- Good reasoning for size
+
+**Weaknesses:**
+- Slower than cloud (tokens/sec)
+- Requires 16GB+ GPU
+- Lower quality than Claude/GPT-4
+- No external knowledge (static training data)
+
+**Use when:** High-volume inference, privacy critical, fine-tuning needed
+
+### Mistral
+
+| Metric | Value |
+|--------|-------|
+| **Sizes** | 7B, 8x7B (MoE), 8x22B |
+| **Context** | 32K tokens |
+| **Speed** | 7B: 30-40 tokens/sec on 3090 |
+| **Memory** | 7B: 16GB, 8x7B: 60GB+ |
+| **License** | Apache 2.0 (commercial) |
+| **Best for** | Balanced speed/quality |
+
+**Strengths:**
+- Very fast (2x Llama 7B)
+- Good code understanding
+- 8B: best small model
+- Extended context (32K)
+
+**Weaknesses:**
+- Smaller context than Gemini
+- Quality gap vs closed-source models
+- MoE version needs more VRAM
+
+**Use when:** Speed matters, 7B sufficient (customer support, content generation)
+
+### Qwen (Alibaba)
+
+| Metric | Value |
+|--------|-------|
+| **Sizes** | 1.8B, 7B, 32B, 72B, 110B |
+| **Context** | 32K tokens (up to 100K for some) |
+| **Speed** | 7B: 25-35 tokens/sec |
+| **Memory** | 7B: 14GB, 72B: 144GB |
+| **Language** | Excellent Chinese + English |
+| **License** | Qianwen License |
+| **Best for** | Multilingual, long documents |
+
+**Strengths:**
+- Best for Chinese language
+- Very small models available (1.8B)
+- Long context versions
+- Competitive with Mistral at same size
+
+**Weaknesses:**
+- License restrictions for commercial
+- Less community adoption
+- Harder to find good prompts
+
+**Use when:** Chinese language needed, tiny models for edge devices
+
+### Gemma (Google)
+
+| Metric | Value |
+|--------|-------|
+| **Sizes** | 2B, 7B |
+| **Context** | 8K tokens |
+| **Speed** | 7B: 20-25 tokens/sec on 3090 |
+| **Memory** | 2B: 6GB, 7B: 16GB |
+| **License** | Gemma Terms (commercial allowed) |
+| **Best for** | Edge, mobile, cost-sensitive |
+
+**Strengths:**
+- Tiny model (2B) for edge devices
+- Clean architecture, easy to run
+- Good for its size
+- Google-backed quality
+
+**Weaknesses:**
+- Smaller context than Mistral/Llama
+- Less adoption/community
+- 7B: similar cost to Mistral, slower
+
+**Use when:** Mobile/edge device, tiny VRAM budget
+
+## Comparison Table
+
+| Model | Size | Speed (3090) | Memory | Quality | Cost ($/1M) | Context |
+|-------|------|--------------|--------|---------|-------------|---------|
+| **Claude Opus** | Cloud | 4s | N/A | ★★★★★ | $75 | 200K |
+| **GPT-4 Turbo** | Cloud | 2-3s | N/A | ★★★★★ | $30 | 128K |
+| **Gemini Flash** | Cloud | 0.1s | N/A | ★★★☆☆ | Free | 1M |
+| **Llama 3 70B** | 70B | 3 tok/s | 48GB | ★★★★☆ | Self | 8K |
+| **Mistral 8x22B** | 176B | 4 tok/s | 100GB | ★★★★☆ | Self | 32K |
+| **Qwen 72B** | 72B | 2 tok/s | 144GB | ★★★★☆ | Self | 32K |
+| **Mistral 7B** | 7B | 35 tok/s | 16GB | ★★★☆☆ | Self | 32K |
+| **Llama 3 7B** | 7B | 20 tok/s | 16GB | ★★★☆☆ | Self | 8K |
+| **Qwen 7B** | 7B | 25 tok/s | 14GB | ★★★☆☆ | Self | 32K |
+| **Gemma 7B** | 7B | 22 tok/s | 16GB | ★★☆☆☆ | Self | 8K |
+| **Mistral 8B** | 8B | 40 tok/s | 16GB | ★★★☆☆ | Self | 32K |
+
+## Cost Analysis
+
+### Scenario 1: Customer Support (1M prompts/month)
+
+```
+Cloud (GPT-3.5):  1M × $0.0005 = $500/month
+Cloud (Claude):   1M × $0.003  = $3,000/month
+Self-hosted 7B:   1 × $3000 GPU amortized over 12 months = ~$250/month
+```
+
+**Winner:** Self-hosted at scale
+
+### Scenario 2: Ad-hoc Analysis (10K prompts/month)
+
+```
+Cloud (Gemini):   10K × $0.05/1M = $0.50/month
+Cloud (Claude):   10K × $3/1M    = $30/month
+Self-hosted:      Fixed $3000/12 = $250/month
+
+Winner: Cloud (Gemini)
+```
+
+## Decision Tree
+
+**Start here:** Do you have a GPU?
+
+### No GPU → Use Cloud
+
+1. **Budget < $100/month?**
+   - Use: **Gemini Flash** (mostly free)
+   - Task: Summarization, extraction
+
+2. **Need reasoning?**
+   - Use: **Claude Opus** (best reasoning)
+   - Task: Analysis, strategy, code review
+
+3. **Need speed?**
+   - Use: **GPT-4 Turbo**
+   - Task: Customer chat, real-time
+
+4. **Balanced?**
+   - Use: **GPT-3.5** (cost) or **Mistral API** (speed)
+
+### Yes, GPU (8GB) → Consider Self-Hosted
+
+1. **High volume (>100K prompts/month)?**
+   - Use: **Mistral 7B or Llama 7B**
+   - ROI breaks even after ~5,000 prompts
+
+2. **Privacy critical?**
+   - Use: **Llama 70B** (best local quality)
+   - Only if 48GB VRAM available
+
+3. **Speed important?**
+   - Use: **Mistral 8B** (fastest 8B model)
+   - 40 tokens/sec on 3090
+
+4. **Tiny device (mobile)?**
+   - Use: **Qwen 1.8B or Gemma 2B**
+   - Quantized to 4-bit
+
+## Running Models Locally
+
+### Ollama (Easiest)
+
+```bash
+# Install: ollama.ai
+# Run Mistral
+ollama run mistral
+
+# Or in docker-compose
+docker-compose up ollama
+```
+
+Models run at: http://localhost:11434
+
+### vLLM (Fast Serving)
+
+```bash
+pip install vllm
+
+# Serve Llama 70B with 4-bit quantization
+vllm serve meta-llama/Llama-2-70b-chat-hf \
+  --quantization awq \
+  --tensor-parallel-size 2
+```
+
+### LM Studio (GUI)
+
+- Download: lmstudio.ai
+- Browse models, download, chat
+- No terminal required
+
+## Hybrid Approach (Recommended)
+
+Use both cloud and local:
+
+```
+User Request
+  ├─ Small/fast → Local Mistral 7B (instant)
+  ├─ Complex/slow → Cloud Claude (wait)
+  ├─ Long document → Gemini Flash (free)
+  └─ Time-sensitive → GPT-3.5 (quick)
+```
+
+In n8n:
+
+```yaml
+Trigger
+  ├─ If prompt < 100 tokens: Use local Ollama
+  ├─ Else if document > 10K tokens: Use Gemini
+  └─ Else: Use Claude
+```
+
+## Checklist
+
+- [ ] Identify your constraints (budget, latency, privacy)
+- [ ] Estimate monthly prompt volume
+- [ ] Check available GPU VRAM
+- [ ] Test 2-3 models locally (Ollama)
+- [ ] Benchmark cloud APIs (cost vs quality)
+- [ ] Design hybrid strategy
+- [ ] Document model selection in project README
+- [ ] Set up fallback (if primary model fails)
+
+## Sources and Links
+
+- [Hugging Face Models](https://huggingface.co/models)

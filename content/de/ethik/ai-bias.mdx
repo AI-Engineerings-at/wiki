@@ -1,0 +1,325 @@
+---
+title: "KI Bias: Arten, Messung, Debiasing"
+description: "Typen von Bias: Selection, Confirmation, Automation, Representation. Fairness-Metriken messen, Debiasing-Techniken. Fairlearn, AIF360 Tools, praktische Beispiele."
+section: "ethik"
+---
+
+# KI Bias: Arten, Messung, Debiasing
+
+Bias ist der Feind von Fairness. Ein biased KI-Modell diskriminiert systematisch gegen bestimmte Gruppen. Diese Seite behandelt Bias-Typen, Messung und Korrektur.
+
+---
+
+## 1. Arten von Bias
+
+```yaml
+REPRESENTATION BIAS
+  Definition: Training-Daten unterrepräsentieren bestimmte Gruppen
+  Example: Gesichtserkennungs-Modell trainiert zu 90% mit weißen Männern
+  Impact: Modell funktioniert schlecht für andere Ethnien/Geschlechter
+  Fix: Balanced training data collection
+
+SELECTION BIAS
+  Definition: Wie Trainings-Daten gesammelt werden ist fehlerhaft
+  Example: Bewerbungsdaten nur von erfolgreichen Kandidaten
+  Impact: Modell bevorzugt bereits begünstigte Gruppen
+  Fix: Unbiased sampling strategies
+
+MEASUREMENT BIAS
+  Definition: Feature definitions sind unfair
+  Example: "Quality of life score" gemessen nur durch Gehalt
+  Impact: Marginalisierte Gruppen werden systematisch niedriger bewertet
+  Fix: Fairness-aware feature engineering
+
+ALGORITHMIC BIAS
+  Definition: Das Modell verstärkt Bias in den Daten
+  Example: Rekidivismus-Vorhersage-Modell: schwarze Defendant werden höher bewertet
+  Impact: Feedforward loop: mehr Inhaftierung → mehr Training Data → mehr Bias
+  Fix: Fairness constraints during training
+
+CONFIRMATION BIAS
+  Definition: Teams wählen Modelle, die ihre bestehenden Annahmen bestätigen
+  Example: Team bevorzugt Modell das sagt "diese Gruppe ist riskant"
+  Impact: Bias wird institutionalisiert
+  Fix: Blind model evaluation, diverse teams
+
+AUTOMATION BIAS
+  Definition: Humans übertrauen sich Modellen blind
+  Example: Judge implements Modell recommendation ohne zu prüfen
+  Impact: Unfaire Entscheidungen werden skaliert
+  Fix: Human-in-the-loop review
+```
+
+---
+
+## 2. Fairness-Metriken
+
+### 2.1 Klassische Fairness-Definitionen
+
+```python
+from typing import Dict
+import numpy as np
+
+class FairnessMetrics:
+    """Computes fairness metrics for models"""
+
+    @staticmethod
+    def demographic_parity(predictions: np.array, protected_attribute: np.array) -> float:
+        """
+        Demographic Parity: Selection rate should be same across groups
+        P(Ŷ=1 | A=0) should ≈ P(Ŷ=1 | A=1)
+
+        Args:
+            predictions: Model predictions (binary: 0/1)
+            protected_attribute: Protected group labels (0/1)
+
+        Returns:
+            Difference between selection rates (0 = perfect fairness)
+        """
+        group_0_positive = np.mean(predictions[protected_attribute == 0])
+        group_1_positive = np.mean(predictions[protected_attribute == 1])
+
+        return abs(group_0_positive - group_1_positive)
+
+    @staticmethod
+    def equalized_odds(predictions: np.array, true_labels: np.array, protected_attribute: np.array) -> Dict:
+        """
+        Equalized Odds: True positive rate and false positive rate
+        should be equal across groups
+
+        Returns:
+            {
+                "tpr_difference": TPR_difference,
+                "fpr_difference": FPR_difference,
+            }
+        """
+        # Separate by group
+        group_0_mask = protected_attribute == 0
+        group_1_mask = protected_attribute == 1
+
+        # Group 0
+        tp_0 = np.sum((predictions[group_0_mask] == 1) & (true_labels[group_0_mask] == 1))
+        fp_0 = np.sum((predictions[group_0_mask] == 1) & (true_labels[group_0_mask] == 0))
+        fn_0 = np.sum((predictions[group_0_mask] == 0) & (true_labels[group_0_mask] == 1))
+        tn_0 = np.sum((predictions[group_0_mask] == 0) & (true_labels[group_0_mask] == 0))
+
+        tpr_0 = tp_0 / (tp_0 + fn_0) if (tp_0 + fn_0) > 0 else 0
+        fpr_0 = fp_0 / (fp_0 + tn_0) if (fp_0 + tn_0) > 0 else 0
+
+        # Group 1
+        tp_1 = np.sum((predictions[group_1_mask] == 1) & (true_labels[group_1_mask] == 1))
+        fp_1 = np.sum((predictions[group_1_mask] == 1) & (true_labels[group_1_mask] == 0))
+        fn_1 = np.sum((predictions[group_1_mask] == 0) & (true_labels[group_1_mask] == 1))
+        tn_1 = np.sum((predictions[group_1_mask] == 0) & (true_labels[group_1_mask] == 0))
+
+        tpr_1 = tp_1 / (tp_1 + fn_1) if (tp_1 + fn_1) > 0 else 0
+        fpr_1 = fp_1 / (fp_1 + tn_1) if (fp_1 + tn_1) > 0 else 0
+
+        return {
+            "tpr_difference": abs(tpr_0 - tpr_1),
+            "fpr_difference": abs(fpr_0 - fpr_1),
+        }
+
+    @staticmethod
+    def calibration(predictions: np.array, true_labels: np.array, protected_attribute: np.array) -> float:
+        """
+        Calibration: Predicted probability should match actual probability
+        across groups
+
+        P(Y=1 | Ŷ=p, A=0) ≈ P(Y=1 | Ŷ=p, A=1) ≈ p
+        """
+        # Simplified: check expected calibration error
+        group_0_mask = protected_attribute == 0
+        group_1_mask = protected_attribute == 1
+
+        calibration_0 = np.mean(np.abs(predictions[group_0_mask] - true_labels[group_0_mask]))
+        calibration_1 = np.mean(np.abs(predictions[group_1_mask] - true_labels[group_1_mask]))
+
+        return abs(calibration_0 - calibration_1)
+
+# Verwendung:
+metrics = FairnessMetrics()
+
+# Example data
+predictions = np.array([0, 1, 1, 0, 1, 1, 0, 0])
+true_labels = np.array([0, 1, 1, 0, 1, 0, 0, 0])
+protected_attr = np.array([0, 0, 0, 0, 1, 1, 1, 1])
+
+dp = metrics.demographic_parity(predictions, protected_attr)
+print(f"Demographic Parity Difference: {dp:.3f} (0 = fair)")
+
+eo = metrics.equalized_odds(predictions, true_labels, protected_attr)
+print(f"TPR Difference: {eo['tpr_difference']:.3f}")
+print(f"FPR Difference: {eo['fpr_difference']:.3f}")
+
+cal = metrics.calibration(predictions, true_labels, protected_attr)
+print(f"Calibration Difference: {cal:.3f}")
+```
+
+---
+
+## 3. Debiasing-Techniken
+
+### 3.1 Pre-Processing: Balanced Data Collection
+
+```python
+from collections import Counter
+import random
+
+class BalancedDataCollector:
+    """Helps collect balanced training data"""
+
+    @staticmethod
+    def stratified_sample(data: list, protected_attribute_key: str, sample_size: int) -> list:
+        """
+        Stratified sampling: ensure each group is represented proportionally
+
+        Args:
+            data: List of samples with attributes
+            protected_attribute_key: Key of protected attribute
+            sample_size: Total samples to collect
+        """
+        # Group by protected attribute
+        groups = {}
+        for sample in data:
+            attr_val = sample[protected_attribute_key]
+            if attr_val not in groups:
+                groups[attr_val] = []
+            groups[attr_val].append(sample)
+
+        # Calculate proportions
+        group_sizes = {k: int(len(v) / len(data) * sample_size) for k, v in groups.items()}
+
+        # Sample from each group
+        balanced_sample = []
+        for group_val, size in group_sizes.items():
+            balanced_sample.extend(random.sample(groups[group_val], min(size, len(groups[group_val]))))
+
+        return balanced_sample[:sample_size]
+
+    @staticmethod
+    def oversample_minority_class(data: list, protected_attribute_key: str, target_key: str):
+        """
+        Oversampling: duplicate minority group samples
+
+        Use with caution: can cause overfitting
+        """
+        # Count groups
+        group_counts = Counter(s[protected_attribute_key] for s in data)
+        max_count = max(group_counts.values())
+
+        # Oversample
+        oversampled = data.copy()
+        for sample in data:
+            attr_val = sample[protected_attribute_key]
+            shortage = max_count - group_counts[attr_val]
+
+            if shortage > 0:
+                # Add random copies of this group
+                oversampled.extend([sample] * shortage)
+
+        return oversampled
+
+# Verwendung:
+data = [
+    {"age": 25, "gender": "M", "income": 50000},
+    {"age": 30, "gender": "F", "income": 60000},
+    {"age": 35, "gender": "M", "income": 70000},
+    # ... more samples
+]
+
+balanced = BalancedDataCollector.stratified_sample(data, "gender", sample_size=100)
+print(f"Collected {len(balanced)} balanced samples")
+```
+
+### 3.2 In-Processing: Fairness-Constrained Training
+
+```python
+import numpy as np
+from sklearn.linear_model import LogisticRegression
+
+class FairTrainingLoss:
+    """Custom loss for fairness-aware training"""
+
+    def __init__(self, fairness_weight: float = 0.5):
+        """
+        Args:
+            fairness_weight: How much to weight fairness vs accuracy
+                           0 = only accuracy, 1 = only fairness
+        """
+        self.fairness_weight = fairness_weight
+
+    def compute_loss(self, predictions, true_labels, protected_attribute):
+        """
+        Combined loss: accuracy loss + fairness penalty
+
+        Loss = (1 - w) * accuracy_loss + w * fairness_penalty
+        """
+        # Accuracy loss (cross-entropy)
+        epsilon = 1e-7
+        accuracy_loss = -np.mean(
+            true_labels * np.log(predictions + epsilon) +
+            (1 - true_labels) * np.log(1 - predictions + epsilon)
+        )
+
+        # Fairness penalty (demographic parity)
+        group_0_mean = np.mean(predictions[protected_attribute == 0])
+        group_1_mean = np.mean(predictions[protected_attribute == 1])
+        fairness_penalty = abs(group_0_mean - group_1_mean)
+
+        # Combined
+        total_loss = (1 - self.fairness_weight) * accuracy_loss + \
+                     self.fairness_weight * fairness_penalty
+
+        return total_loss
+
+# Verwendung:
+fair_loss = FairTrainingLoss(fairness_weight=0.3)
+
+predictions = np.array([0.2, 0.8, 0.7, 0.1])
+true_labels = np.array([0, 1, 1, 0])
+protected_attr = np.array([0, 0, 1, 1])
+
+loss = fair_loss.compute_loss(predictions, true_labels, protected_attr)
+print(f"Fairness-aware loss: {loss:.4f}")
+```
+
+---
+
+## 4. Tools: Fairlearn, AIF360
+
+```python
+# Installation
+# pip install fairlearn aif360
+
+# FAIRLEARN example:
+from fairlearn.metrics import demographic_parity_difference
+
+dpd = demographic_parity_difference(true_labels, predictions, sensitive_features=protected_attr)
+print(f"Demographic Parity Difference (Fairlearn): {dpd:.3f}")
+
+# AIF360 example:
+from aif360.datasets import BinaryLabelDataset
+from aif360.algorithms.postprocessing.eq_odds_post_processor import EqOddsPostprocessor
+
+# Create AIF360 dataset
+dataset = BinaryLabelDataset(
+    df=df,  # Your dataframe
+    label_names=['target'],
+    protected_attribute_names=['protected_attr']
+)
+
+# Apply post-processing
+mitigator = EqOddsPostprocessor(unprivileged_groups=[{'protected_attr': 0}],
+                                 privileged_groups=[{'protected_attr': 1}])
+mitigated_dataset = mitigator.fit_predict(dataset)
+```
+
+---
+
+## 5. Quellen und Links
+
+- **Fairlearn (Microsoft)**: https://fairlearn.org/
+- **AIF360 (IBM)**: https://aif360.mybluemix.net/
+- **Fairness Definitions**: https://fairml-book.org/
+- **Algorithmic Fairness Resources**: https://algorithmicjustice.mit.edu/

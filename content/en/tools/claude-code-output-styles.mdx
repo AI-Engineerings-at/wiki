@@ -1,0 +1,563 @@
+---
+title: "Output Styles — Claude Code Reference"
+date: "2026-03-21"
+summary: "Customize Claude Code for different use cases — Output styles modify the system prompt to use Claude as different kinds of agents."
+tags: ["claude-code", "output-styles", "reference", "customization"]
+author: "AI Engineering"
+---
+
+# Output Styles in Claude Code
+
+Output styles customize Claude Code's system prompt so you can use Claude Code for different roles — not just software engineering. Styles are Markdown files that add new instructions to the system prompt.
+
+## Built-In Output Styles
+
+Claude Code comes with these styles:
+
+### Default
+
+The standard system prompt optimized for software engineering tasks.
+
+- Build and test code
+- Read and modify files
+- Git workflows
+- Debugging
+
+### Explanatory
+
+Shifts focus to _teaching_ — Claude explains while helping you code.
+
+- Provides "insights" between code steps
+- Explains design decisions
+- Documents patterns being used
+- Provides educational context
+
+**Use this when:** You want to learn how code is built.
+
+### Learning
+
+Interactive "learn-by-doing" mode — Claude gives you tasks to implement.
+
+- Claude writes 70% of the code
+- Marks 30% with `TODO(human)` comments
+- Explains what you should implement
+- Reviews your code
+
+**Use this when:** You want to learn while actively participating.
+
+## Switch Styles
+
+### Using /config
+
+```bash
+/config
+# Select "Output style"
+# Choose a style from the list
+```
+
+The selection is saved in `.claude/settings.local.json`.
+
+### Set in settings.json Manually
+
+```json
+{
+  "outputStyle": "Explanatory"
+}
+```
+
+**Important:** Style change takes effect in the next session, not immediately in the current one.
+
+### Available Values
+
+- `"Default"` (or not set)
+- `"Explanatory"`
+- `"Learning"`
+- Custom style name (see below)
+
+## Create Custom Output Styles
+
+Create your own styles as Markdown files.
+
+### File Structure
+
+**User level** (all projects):
+```
+~/.claude/output-styles/
+  └── my-custom-style.md
+```
+
+**Project level** (this project only):
+```
+.claude/output-styles/
+  └── my-custom-style.md
+```
+
+### Format
+
+```markdown
+---
+name: My Custom Style
+description: "Brief description shown in /config picker"
+keep-coding-instructions: false
+---
+
+# Your Custom Style Instructions
+
+You are an AI assistant specialized in [your domain].
+
+## Key Behaviors
+
+1. [Behavior 1]
+2. [Behavior 2]
+3. [Behavior 3]
+
+## When to use this style
+
+This style is best for [use case].
+```
+
+### Frontmatter Options
+
+| Field | Description | Default |
+|------|-------------|---------|
+| `name` | Display name in /config | Filename |
+| `description` | Brief description | None |
+| `keep-coding-instructions` | Keep coding parts of default style | false |
+
+**`keep-coding-instructions`:**
+- `true`: Use custom instructions PLUS all default coding instructions
+- `false`: Replace all coding instructions with your custom ones
+
+### Example 1: Research Style
+
+Use Claude Code for market research and analysis:
+
+```markdown
+---
+name: Research Agent
+description: "Specialized for market research and competitive analysis"
+keep-coding-instructions: false
+---
+
+# Research Agent
+
+You are a business research specialist. Your goal is analyzing markets, competitors, and trends.
+
+## Your Capabilities
+
+- Analyze documents and websites
+- Extract key insights
+- Create research summaries
+- Identify patterns and opportunities
+
+## Research Process
+
+1. Clarify the research question
+2. Gather relevant information
+3. Analyze findings
+4. Present structured insights
+5. Highlight actionable recommendations
+
+## Communication Style
+
+- Be analytical and precise
+- Use evidence from sources
+- Avoid speculation without data
+- Structure findings clearly
+```
+
+**Usage:**
+```bash
+/config
+# Select "Research Agent"
+claude -p "Research the market for AI engineering tools"
+```
+
+### Example 2: Content Writer Style
+
+For content creation:
+
+```markdown
+---
+name: Content Writer
+description: "Optimized for blog posts, marketing copy, and documentation"
+keep-coding-instructions: false
+---
+
+# Content Writer
+
+You are a professional content writer specializing in technical content.
+
+## Writing Principles
+
+- Write for your audience (developers, marketers, etc.)
+- Use clear, concise language
+- Break content into scannable sections
+- Include examples and use cases
+- Follow SEO best practices
+
+## Content Types You Create
+
+1. **Blog Posts** — Tutorials, insights, announcements
+2. **Marketing Copy** — Product descriptions, landing pages
+3. **Documentation** — API docs, guides, FAQs
+
+## Quality Standards
+
+- Proofread for errors
+- Ensure consistency with brand voice
+- Verify all claims
+- Add CTAs where appropriate
+```
+
+### Example 3: Operations Style
+
+For DevOps and infrastructure:
+
+```markdown
+---
+name: Operations Engineer
+description: "Focused on infrastructure, monitoring, and reliability"
+keep-coding-instructions: false
+---
+
+# Operations Engineer
+
+You are a DevOps and operations specialist.
+
+## Responsibilities
+
+- Maintain system health and availability
+- Monitor performance
+- Respond to incidents
+- Implement reliability improvements
+- Document operational procedures
+
+## Workflow
+
+1. Assess current state (health checks, logs)
+2. Identify issues
+3. Implement fixes
+4. Monitor for side effects
+5. Document changes
+6. Plan preventive measures
+
+## Tools You Use
+
+- Container orchestration (Docker, Kubernetes)
+- Monitoring (Prometheus, Grafana)
+- Log aggregation (ELK, Loki)
+- Infrastructure as Code
+```
+
+## Style Comparisons
+
+### Output Styles vs CLAUDE.md
+
+| Aspect | Output Style | CLAUDE.md |
+|--------|-------------|----------|
+| **Scope** | Modifies system prompt | Loaded as user message |
+| **When Loaded** | Session start | Dynamically when needed |
+| **Persistence** | During session | Only if relevant |
+| **Best For** | Global behavior change | Project-specific context |
+
+### Output Styles vs Agents/Subagents
+
+| Aspect | Output Style | Agent |
+|--------|-------------|-------|
+| **What** | Modifies system prompt globally | Specialized role |
+| **Scope** | Entire session | Single task |
+| **When Invoked** | Session start | Delegated or manual |
+| **Tools** | All available | Configurable |
+| **Best For** | "Who am I?" | "Who does this task?" |
+
+### Output Styles vs Skills
+
+| Aspect | Output Style | Skill |
+|--------|-------------|-------|
+| **Frequency** | Always active | Only when invoked |
+| **What** | "How Claude responds" | "What Claude can do" |
+| **Modifies** | System prompt | Task/context |
+| **Best For** | Fundamentally new agent type | Reusable workflows |
+
+## Tips for Custom Styles
+
+### 1. Keep Focus
+
+A style should have one clear role:
+- Research agent
+- Content writer
+- DevOps engineer
+- Project manager
+
+Not: "Everything-in-one style".
+
+### 2. Clear Instructions
+
+Write concrete instructions:
+
+```markdown
+# CORRECT
+When reviewing code, check for:
+1. Security vulnerabilities
+2. Performance issues
+3. Test coverage
+
+# WRONG
+Review the code thoroughly
+```
+
+### 3. Define Output Format
+
+Tell Claude how to structure output:
+
+```markdown
+Always format your analysis as:
+
+## Executive Summary
+[2-3 sentences]
+
+## Findings
+- Finding 1
+- Finding 2
+
+## Recommendations
+1. Action 1
+2. Action 2
+```
+
+### 4. Set Communication Style
+
+```markdown
+## Communication Style
+
+- Be concise and direct
+- Use numbered lists for procedures
+- Provide evidence for claims
+- Ask clarifying questions if needed
+```
+
+## Switching Styles in Workflow
+
+```bash
+# Start in Default
+claude
+
+# Realize you need Research mode
+/config
+# Select "Research Agent"
+# But it takes effect next session
+
+# So either:
+claude  # Exit current session
+# Then start new session:
+/config → select "Research Agent" → work
+
+# OR
+# Just continue and remember for next session
+```
+
+## Style Stack
+
+Styles are **exclusive** — you can only use one style per session. This is intentional to use system prompt caching (faster, cheaper).
+
+If you need multiple styles:
+- Use subagents with their own styles
+- Switch between sessions
+
+## Advanced Style Patterns
+
+### Combining Styles with Agents
+
+You can create specialized agents that use custom styles:
+
+```yaml
+---
+name: security-auditor
+model: opus
+tools: Read, Grep
+disallowedTools: Write, Edit
+---
+
+# Security Auditor Agent
+
+You are a security specialist reviewing code for vulnerabilities...
+```
+
+Apply a custom "Security Review" style to this agent for enhanced analysis.
+
+### Style Persistence Across Sessions
+
+Remember that style changes take effect in the next session:
+
+1. Current session: Uses previously selected style
+2. Next session: Uses newly selected style
+3. Override: Use `/config` to change before next session starts
+
+### Debugging Style Selection
+
+If your style changes don't seem to apply:
+
+1. Check `.claude/settings.local.json` for `outputStyle` field
+2. Verify style file exists at configured path
+3. Check for syntax errors in YAML frontmatter
+4. Try `/config` to re-select from GUI
+
+If problems persist, reset to default:
+
+```bash
+# Remove local settings
+rm .claude/settings.local.json
+
+# Restart Claude Code
+claude
+```
+
+## Real-World Use Cases
+
+### Use Case 1: Educational Codebases
+
+Using the Explanatory style:
+
+```bash
+# Git clone a learning repository
+git clone https://github.com/educational/coding-patterns
+cd coding-patterns
+
+# Configure for learning
+/config
+# Select "Explanatory"
+
+# Now claude will explain as you work
+> Show me how this Observer pattern works
+```
+
+Claude explains the pattern, draws diagrams, and teaches concepts alongside code.
+
+### Use Case 2: Production DevOps Work
+
+Using a custom Operations style:
+
+```bash
+# Configure operations style
+/config
+# Select "Operations Engineer"
+
+# Now work with production systems
+> Check health of all services and prepare incident report
+```
+
+Claude focuses on reliability, health checks, and incident response procedures.
+
+### Use Case 3: Content Production Pipeline
+
+Using a Content Writer style:
+
+```bash
+# Configure for content
+/config
+# Select "Content Writer"
+
+# Collaborate on content
+> Write a technical blog post about Claude Code deployment patterns
+```
+
+Claude follows writing principles, breaks content into scannable sections, and ensures SEO best practices.
+
+## Style Migration & Upgrading
+
+When Claude Code updates include new default styles, your custom styles may become stale.
+
+**Migration checklist:**
+
+- [ ] Review updated default styles
+- [ ] Compare with your custom styles
+- [ ] Update if defaults now cover your use case
+- [ ] If custom style is still needed, update version field
+- [ ] Test in new session
+
+## Performance Implications
+
+Different styles have different performance characteristics:
+
+| Style | System Prompt Size | Caching | Token Cost |
+|-------|-------------------|---------|-----------|
+| Default | ~8KB | Excellent | Low |
+| Explanatory | ~12KB | Good | Medium |
+| Learning | ~15KB | Good | Medium |
+| Custom | Variable | Depends | Variable |
+
+System prompt caching means you pay once per session. Switch styles only when needed to maximize cache hits.
+
+## Sharing Custom Styles
+
+To share styles with teammates:
+
+1. Store in version control: `.claude/output-styles/`
+2. Document in README: what the style does, when to use
+3. Include examples: show expected behavior
+4. Test: verify in their environments
+
+Example repository structure:
+
+```
+project-styles/
+├── README.md              # Style guide
+├── .claude/
+│   └── output-styles/
+│       ├── research.md
+│       ├── devops.md
+│       ├── content.md
+│       └── security.md
+└── docs/
+    ├── research-examples.md
+    ├── devops-guide.md
+    └── content-standards.md
+```
+
+## Troubleshooting Custom Styles
+
+### Style Not Appearing in /config
+
+**Check:**
+- File is in `.claude/output-styles/` directory
+- Filename matches the `name` field (kebab-case + `.md`)
+- YAML frontmatter is valid (no syntax errors)
+- `name` field is present and quoted
+
+### Style Loads But Behaves Unexpectedly
+
+**Check:**
+- `keep-coding-instructions` setting matches intention
+- Instructions are clear and specific
+- No conflicting instructions in body
+- Test in fresh session (sometimes needs reload)
+
+### Custom Styles Too Large
+
+**Optimize:**
+- Remove redundant instructions
+- Keep examples brief and focused
+- Use references instead of repeating concepts
+- Consider breaking into separate styles
+
+## Further Resources
+
+- [Agents/Subagents](/tools/subagents)
+- [Skills](/tools/skills)
+- [System Prompt](/tools/system-prompt-reference)
+- [Settings](/tools/settings) — Configure defaults
+
+---
+
+*Last updated: 2026-03-21 | Claude Code Output Styles Reference*
+
+## Sources and Links
+
+- [Output Styles](https://code.claude.com/docs/en/output-styles)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

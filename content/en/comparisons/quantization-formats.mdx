@@ -1,0 +1,86 @@
+---
+title: Quantization Formats — Technical Comparison
+date: 2026-03-21
+summary: GGUF vs GPTQ vs AWQ vs EXL2 vs BitsAndBytes. Quality at different bit-widths, speed, compatibility, tool support.
+tags: [quantization, gguf, gptq, awq, bitsandbytes]
+author: AI Engineering
+---
+
+# Quantization Formats — Detailed Comparison
+
+## Format Overview
+
+| Format | Best Tool | Size (7B) | Speed | Quality | CPU | GPU |
+|--------|-----------|-----------|-------|---------|-----|-----|
+| **GGUF** | LM Studio, Ollama | 3.6GB (q4) | ⭐⭐⭐ | ⭐⭐⭐ | ✅ | ✅ |
+| **GPTQ** | AutoGPTQ | 3.5GB | ⭐⭐⭐ | ⭐⭐ | ❌ | ✅ |
+| **AWQ** | AWQ-Quantizer | 3.5GB | ⭐⭐⭐ | ⭐⭐ | ❌ | ✅ |
+| **EXL2** | ExLlamav2 | 2.8GB (3-bit) | ⭐⭐⭐⭐ | ⭐ | ❌ | ✅ |
+| **BNB** | bitsandbytes | Dynamic | ⭐⭐ | ⭐⭐ | ✅ | ✅ |
+
+## GGUF (Best for Local)
+
+```
+7B Model Sizes:
+- q8:    7.0GB (best quality)
+- q6_k:  5.2GB (excellent)
+- q5_k:  4.3GB (good)
+- q4_k:  3.6GB (good, fast) ← Standard
+- q3_k:  2.6GB (ok, very fast)
+```
+
+Advantages:
+- CPU and GPU support
+- Universal compatibility
+- Easy to load
+
+## GPTQ (Fast, GPU-only)
+
+10-20% faster than GGUF on GPU
+
+Drawback: GPU-only, higher VRAM on load
+
+## AWQ (GPTQ Alternative)
+
+Similar to GPTQ, slightly faster in some cases
+
+## EXL2 (Extremely Fast)
+
+ExLlama V2 format, best speed but reduced quality
+
+Best for: High-throughput API servers
+
+## BitsAndBytes (Flexible)
+
+4-bit/8-bit on-the-fly quantization for fine-tuning
+
+```python
+from transformers import AutoModelForCausalLM
+model = AutoModelForCausalLM.from_pretrained(
+    "Qwen/Qwen2.5-7b",
+    load_in_4bit=True
+)
+```
+
+## Decision Guide
+
+```
+Local (LM Studio, Ollama)? → GGUF
+GPU API Server? → GPTQ or EXL2
+Fine-tuning? → BitsAndBytes
+Multi-format compatibility? → GGUF (safe fallback)
+```
+
+## Size Reference (7B Model)
+
+```
+Full (fp32):        28GB
+fp16:               14GB
+GGUF q8:            7.0GB
+GGUF q6_k:          5.2GB
+GGUF q5_k:          4.3GB
+GGUF q4_k (std):    3.6GB  ← Recommended
+GPTQ 4-bit:         3.5GB
+AWQ 4-bit:          3.5GB
+EXL2 3-bit:         2.8GB
+```

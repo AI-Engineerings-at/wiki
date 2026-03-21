@@ -1,0 +1,563 @@
+---
+title: "Ollama Setup Guide"
+date: 2026-03-21
+summary: "Install and configure Ollama on Windows, macOS, and Linux; pull models, optimize performance, enable GPU"
+tags: ["ollama", "llm", "local-models", "mistral", "llama", "setup", "gpu"]
+author: "AI Engineering"
+---
+
+# Ollama Setup Guide
+
+Ollama runs LLMs locally. One command to start, minimal setup.
+
+## What is Ollama?
+
+```
+Ollama = LLM Server
+├─ Downloads models (Llama, Mistral, etc.)
+├─ Runs on your GPU/CPU
+├─ Exposes HTTP API
+└─ Compatible with OpenAI API
+```
+
+Example:
+```bash
+ollama run mistral
+# Interactive chat with Mistral running locally
+```
+
+## Installation
+
+### Windows
+
+1. Download: https://ollama.ai/download/windows
+2. Run installer (Administrator)
+3. Restart computer
+4. Open terminal
+
+Verify:
+```powershell
+ollama --version
+ollama serve  # Start server (runs in background after)
+```
+
+### macOS
+
+```bash
+# Homebrew
+brew install ollama
+
+# OR download: https://ollama.ai/download/mac
+# Then drag to Applications folder
+
+# Start
+ollama serve
+```
+
+Verify:
+```bash
+ollama --version
+```
+
+Ollama runs in background as `~/.ollama` service.
+
+### Linux (Ubuntu/Debian)
+
+```bash
+# Install
+curl https://ollama.ai/install.sh | sh
+
+# Start
+ollama serve
+```
+
+Or with systemd:
+```bash
+# Starts automatically
+sudo systemctl start ollama
+sudo systemctl status ollama
+```
+
+Verify:
+```bash
+ollama --version
+curl http://localhost:11434
+# Response: "Ollama is running"
+```
+
+## Pull Your First Model
+
+### Mistral (Recommended for beginners)
+
+```bash
+ollama pull mistral
+# Downloads 4.1GB model
+# Time: 2-5 minutes (depends on internet)
+```
+
+### Llama 2 (More capable, slower)
+
+```bash
+ollama pull llama2
+# Downloads 3.8GB model
+```
+
+### Other Models
+
+```bash
+ollama pull neural-chat        # Small, fast
+ollama pull llama2:13b         # Larger Llama
+ollama pull mistral:7b-instruct  # Instruct version
+ollama pull orca-mini          # Small, reasonably smart
+```
+
+### List Installed Models
+
+```bash
+ollama list
+
+# Output:
+# NAME              ID          SIZE  MODIFIED
+# mistral:latest    abc123...   4.1GB 2 minutes ago
+# llama2:latest     def456...   3.8GB 1 hour ago
+```
+
+### Check Model Size
+
+```bash
+# Before downloading
+# Visit: https://ollama.ai/library
+
+# Model sizes:
+# mistral        4.1GB (fast, good quality)
+# llama2         3.8GB (slower, good reasoning)
+# neural-chat    1.3GB (small, responsive)
+# orca-mini      1.7GB (small, decent)
+# tinyllama      369MB (tiny, for edge devices)
+```
+
+## Running Models
+
+### Interactive Chat
+
+```bash
+ollama run mistral
+
+# Type a question:
+> What is Docker?
+
+# Model responds, hit Enter for new question
+# Ctrl+C to exit
+```
+
+### Batch Processing
+
+```bash
+# Send request via API
+curl http://localhost:11434/api/generate \
+  -d '{
+    "model": "mistral",
+    "prompt": "What is Kubernetes?",
+    "stream": false
+  }'
+
+# Response:
+# {
+#   "response": "Kubernetes is an open-source container...",
+#   "done": true
+# }
+```
+
+### Streaming (get response as it's generated)
+
+```bash
+curl http://localhost:11434/api/generate \
+  -d '{
+    "model": "mistral",
+    "prompt": "Explain Docker",
+    "stream": true
+  }'
+
+# Streams chunks as model generates:
+# {"response":"Docker","done":false}
+# {"response":" is","done":false}
+# {"response":" a...","done":true}
+```
+
+## API Endpoints
+
+### POST /api/generate
+
+Generate text.
+
+```bash
+curl -X POST http://localhost:11434/api/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "mistral",
+    "prompt": "Hello, how are you?",
+    "stream": false,
+    "temperature": 0.7
+  }'
+```
+
+Parameters:
+- **model:** Model name (e.g., "mistral", "llama2")
+- **prompt:** Input text
+- **stream:** true = streaming, false = wait for full response
+- **temperature:** 0.0-1.0 (lower = more focused, higher = more creative)
+- **top_p:** Nucleus sampling (0.5 = sample from top 50% of tokens)
+- **top_k:** Top-k sampling (select top k tokens)
+
+### GET /api/tags
+
+List available models.
+
+```bash
+curl http://localhost:11434/api/tags
+
+# Response:
+# {
+#   "models": [
+#     {"name": "mistral:latest", "size": 4400000000},
+#     {"name": "llama2:latest", "size": 3950000000}
+#   ]
+# }
+```
+
+### GET /api/ps
+
+Show running models.
+
+```bash
+curl http://localhost:11434/api/ps
+
+# Response: [{"name": "mistral", "model": "mistral", ...}]
+```
+
+### DELETE /api/delete
+
+Remove model.
+
+```bash
+curl -X DELETE http://localhost:11434/api/delete \
+  -d '{"name": "mistral:latest"}'
+
+# Frees up ~4GB disk space
+```
+
+### POST /api/pull
+
+Download model via API.
+
+```bash
+curl -X POST http://localhost:11434/api/pull \
+  -d '{"name": "llama2"}'
+
+# Streams download progress
+```
+
+## Performance Tuning
+
+### GPU Acceleration
+
+**NVIDIA (CUDA):**
+
+Ollama auto-detects NVIDIA GPU.
+
+```bash
+# Verify GPU is used
+ollama run mistral
+
+# In another terminal:
+nvidia-smi
+
+# Watch VRAM usage increase
+# GPU-Memory: should show model size
+```
+
+**AMD (ROCm):**
+
+```bash
+# Install rocm-platform
+sudo apt-get install rocm-platform
+
+# Tell Ollama to use GPU
+OLLAMA_NUM_GPU=1 ollama serve
+```
+
+**Apple Silicon (M1/M2/M3):**
+
+Ollama automatically uses Metal (GPU acceleration). No config needed.
+
+### Control GPU Usage
+
+```bash
+# Use all GPUs
+export OLLAMA_NUM_GPU=-1  # or: OLLAMA_NUM_GPU=all
+ollama serve
+
+# Use 1 GPU
+export OLLAMA_NUM_GPU=1
+ollama serve
+
+# Use CPU only (slower)
+export OLLAMA_NUM_GPU=0
+ollama serve
+```
+
+### Memory Management
+
+```bash
+# Limit VRAM usage (keep other apps responsive)
+export OLLAMA_MAX_LOADED_MODELS=1  # Keep only 1 model in VRAM
+# Others stay on disk, slower to switch
+
+export OLLAMA_VRAM_OVERHEAD=4000000000  # Reserve 4GB for OS
+```
+
+### Optimize for Throughput (Batching)
+
+For serving many requests:
+
+```bash
+# Increase context size (uses more VRAM but better quality)
+export OLLAMA_NUM_PARALLEL=4  # Process 4 requests simultaneously
+
+# But requires more VRAM:
+# 1 model × 4 parallel = 4x VRAM usage
+```
+
+## Model Selection by Hardware
+
+### 4GB VRAM
+- tinyllama (369MB) — very small, acceptable quality
+- orca-mini (1.7GB) — good balance
+- neural-chat (1.3GB) — small but decent
+
+### 8GB VRAM (RTX 3060)
+- mistral:7b (4.1GB) — recommended
+- neural-chat (1.3GB)
+- orca-mini (1.7GB)
+- Can load 2-3 small models
+
+### 16GB VRAM (RTX 4060 Ti)
+- mistral:7b (4.1GB)
+- llama2:13b (7.3GB)
+- mistral:8x7b-moe (not quantized — too big)
+- Can load 2-3 models simultaneously
+
+### 24GB VRAM (RTX 4090)
+- llama2:70b (38GB base, 13GB quantized) ✓
+- mistral:8x7b-moe (47GB base, 26GB quantized) ✓
+- mistral:8x22b (176B parameters, huge)
+- Can load multiple large models
+
+### 48GB+ VRAM (Professional)
+- Any model
+- Run multiple models simultaneously
+- Batch processing
+
+## Docker Setup
+
+```yaml
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_NUM_GPU=1  # Enable GPU
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+```
+
+Start:
+```bash
+docker-compose up -d ollama
+docker exec ollama ollama pull mistral
+```
+
+## Quantization
+
+Quantized models use less VRAM (4x smaller) but slightly lower quality.
+
+| Model | Quantization | Size | VRAM | Speed |
+|-------|--------------|------|------|-------|
+| llama2 | Full (FP16) | 13GB | 16GB | Slow |
+| llama2:q5 | 5-bit | 4GB | 8GB | Good |
+| llama2:q4 | 4-bit | 2.7GB | 5GB | Fast |
+
+Ollama auto-quantizes. You choose with tag:
+
+```bash
+ollama pull llama2:q4_0  # 4-bit quantization
+# Results in ~2.7GB model
+# Still very capable, much faster
+```
+
+## Integration with Applications
+
+### Python
+
+```python
+import requests
+import json
+
+def query_ollama(prompt, model="mistral"):
+    response = requests.post(
+        'http://localhost:11434/api/generate',
+        json={
+            'model': model,
+            'prompt': prompt,
+            'stream': False
+        }
+    )
+    return response.json()['response']
+
+result = query_ollama("What is machine learning?")
+print(result)
+```
+
+### Node.js / JavaScript
+
+```javascript
+async function queryOllama(prompt, model = "mistral") {
+  const response = await fetch('http://localhost:11434/api/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: model,
+      prompt: prompt,
+      stream: false
+    })
+  });
+
+  const data = await response.json();
+  return data.response;
+}
+
+queryOllama("Explain quantum computing").then(console.log);
+```
+
+### n8n Workflow
+
+```yaml
+Trigger: Webhook
+  ↓
+Ollama Node:
+├─ Base URL: http://ollama:11434
+├─ Model: mistral
+├─ Prompt: {{ $json.question }}
+└─ Output: {{ $json.response }}
+  ↓
+Send Email: {{ $json.response }}
+```
+
+## Troubleshooting
+
+**"Connection refused"**
+```bash
+# Ollama not running
+ollama serve  # Start it
+# Or: systemctl start ollama (Linux)
+```
+
+**"Model not found"**
+```bash
+ollama pull mistral
+# Re-download the model
+```
+
+**"Out of memory"**
+```bash
+# Use smaller model
+ollama run orca-mini  # Instead of llama2:70b
+
+# Or quantized version
+ollama pull mistral:q4_0
+```
+
+**Slow responses**
+```bash
+# Check if using GPU
+ollama run mistral
+
+# In another terminal: nvidia-smi
+# GPU-Memory should show usage
+# If 0%, set: export OLLAMA_NUM_GPU=1
+```
+
+**Model file corrupted**
+```bash
+ollama rm mistral  # Remove
+ollama pull mistral  # Re-download
+```
+
+## Model Benchmarks
+
+On RTX 3090:
+
+| Model | Tokens/sec | Quality | Size |
+|-------|-----------|---------|------|
+| tinyllama | 80 | ★★☆ | 369MB |
+| neural-chat | 45 | ★★★ | 1.3GB |
+| mistral:q4 | 35 | ★★★☆ | 2.7GB |
+| mistral:fp16 | 25 | ★★★★ | 4.1GB |
+| llama2:13b | 15 | ★★★★ | 7.3GB |
+| llama2:70b | 3 | ★★★★★ | 38GB |
+
+**Recommendation:** Mistral for best balance (quality + speed).
+
+## Monitoring
+
+### Check Resource Usage
+
+```bash
+# Terminal 1: Run model
+ollama run mistral
+
+# Terminal 2: Watch resources
+watch nvidia-smi  # VRAM usage
+# or: top (CPU)
+# or: free (RAM)
+```
+
+### Log Configuration
+
+```bash
+# Increase log level (debug)
+OLLAMA_DEBUG=1 ollama serve
+
+# Logs go to:
+# Windows: C:\Users\<user>\AppData\Local\Ollama\logs
+# macOS: ~/.ollama/logs
+# Linux: ~/.ollama/logs
+```
+
+## Checklist
+
+- [ ] Ollama installed on your OS
+- [ ] `ollama --version` works
+- [ ] At least one model pulled (mistral or llama2)
+- [ ] Interactive chat tested: `ollama run mistral`
+- [ ] GPU enabled (if available)
+- [ ] API endpoint working: `curl http://localhost:11434`
+- [ ] Performance acceptable (tokens/sec > 10)
+- [ ] Integrated with n8n or Python app
+- [ ] Monitoring dashboard set up
+- [ ] Backup model data location documented
+- [ ] Team wiki updated with setup steps
+
+## Sources and Links
+
+- [Ollama](https://github.com/ollama/ollama)
+- [Ollama.com](https://ollama.com)

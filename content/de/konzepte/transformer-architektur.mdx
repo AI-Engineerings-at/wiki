@@ -1,0 +1,537 @@
+---
+title: Transformer-Architektur
+date: 2026-03-21
+summary: Wie Self-Attention funktioniert, warum Transformers RNNs ablösten, und die praktischen Parameter die Modelle definieren
+tags: [architektur, attention, selbstaufmerksamkeit, transformer, deep-learning]
+author: AI Engineering
+---
+
+# Transformer-Architektur verstehen
+
+Die Transformer-Architektur ist das Fundament aller modernen Large Language Models. Sie löste 2017 die bis dahin dominanten RNNs (Recurrent Neural Networks) ab, weil sie parallelisierbar, skalierbarer und effizienter ist.
+
+## Das Kernproblem: Warum Transformers besser sind als RNNs
+
+RNNs verarbeiteten Sequenzen Wort für Wort, hintereinander. Das bedeutet:
+- **Sequenzielle Abhängigkeit**: Das Token Nr. 500 konnte erst verarbeitet werden, nachdem alle vorherigen Tokens durch das Netzwerk flossen
+- **Lange Abhängigkeiten verblassen**: Information von Token 1 zu Token 1000 geht aufgrund von "Vanishing Gradients" verloren
+- **Langsame Berechnung**: Keine Parallelisierung möglich
+
+Transformers lösten das durch **Selbstaufmerksamkeit (Self-Attention)**:
+- Alle Tokens werden **gleichzeitig** verarbeitet
+- Jedes Token kann sich **direkt auf jedes andere Token konzentrieren**, unabhängig von Distanz
+- Alles läuft parallel → **massive Speedup**
+
+---
+
+## Self-Attention Mechanismus (Schritt für Schritt)
+
+### Input-Setup
+Angenommen wir haben einen Satz: `["Der", "Hund", "springt", "schnell"]`
+
+Jedes Wort wird erst zu einem **Embedding** konvertiert (z.B. 512-dimensionaler Vektor). Das ist eine numerische Darstellung der Wortbedeutung.
+
+```
+Input: ["Der", "Hund", "springt", "schnell"]
+           ↓      ↓       ↓        ↓
+Embeddings (512-dim each)
+```
+
+### Die drei Matrizen: Q, K, V
+
+Self-Attention nutzt drei lineare Transformationen:
+
+1. **Query (Q)**: "Worauf achte ich?" - Was möchte dieses Token verstehen?
+2. **Key (K)**: "Ich bin relevant für..." - Was kann ich beitragen?
+3. **Value (V)**: "Mein Inhalt ist..." - Was gebe ich anderen?
+
+```
+For Token i:
+Q_i = W_Q × Embedding_i    (512 → 64 dimensional, für single head)
+K = W_K × all_Embeddings   (for all tokens)
+V = W_V × all_Embeddings   (for all tokens)
+```
+
+### Attention-Scores berechnen
+
+```
+Similarity scores = Q_i · K^T / √(d_k)
+
+Für "Hund": Wie ähnlich ist meine Query der Key von "Der"?
+            Wie ähnlich ist meine Query der Key von "Hund"?
+            etc.
+
+Beispiel (vereinfacht):
+"Der"      : 0.1
+"Hund"     : 0.8    ← Highest, makes sense!
+"springt"  : 0.05
+"schnell"  : 0.05
+```
+
+Die Division durch √(d_k) = √64 = 8 stabilisiert die Gradienten.
+
+### Softmax Normalisierung
+
+```
+Attention_weights = softmax(similarity_scores)
+
+Ergebnis:
+"Der"      : 0.05   (5%)
+"Hund"     : 0.85   (85%)
+"springt"  : 0.07   (7%)
+"schnell"  : 0.03   (3%)
+
+Summe = 1.0 (ist ein Wahrscheinlichkeits-Verteilung)
+```
+
+### Values kombinieren
+
+```
+Output = Σ(Attention_weight_j × Value_j)
+
+= 0.05×V_Der + 0.85×V_Hund + 0.07×V_springt + 0.03×V_schnell
+```
+
+Das Ergebnis ist eine **gewichtete Kombination** aller Wörter, fokussiert auf "Hund" (85%).
+
+### Multi-Head Attention
+
+Ein einzelner Attention-Head fokussiert auf **eine Art von Beziehung**. Um mehrere Beziehungen parallel zu erfassen, nutzt man **multiple Heads** (z.B. 8 oder 16):
+
+```
+Head 1: Grammatikalische Beziehungen lernen
+Head 2: Semantische Ähnlichkeiten lernen
+Head 3: Positionsinformation tracken
+...
+Head 8: Andere Aspekte
+
+Dann: Concatenate all heads → Linear layer → Output
+```
+
+**GPT-4** hat z.B. 80 Attention-Heads in seinen Transformer-Layern. Das ermöglicht extrem differenzierte Aufmerksamkeitsmuster.
+
+---
+
+## Encoder-Decoder Architektur
+
+### Encoder-Only Modelle (z.B. BERT)
+```
+Input Text → Transformer Encoder → Contextualized Embeddings
+
+Gut für: Classification, Named Entity Recognition, Sentence Similarity
+```
+
+### Decoder-Only Modelle (z.B. GPT, Llama)
+```
+Partial Output → Masked Self-Attention → Predictions → Next Token
+
+"Der Hund" → [predict next token] → "springt"
+"Der Hund springt" → [predict next token] → "schnell"
+
+Alle modernen LLMs sind Decoder-only!
+```
+
+### Encoder-Decoder Modelle (z.B. T5, BART)
+```
+Input (Encoder) → Cross-Attention (Decoder reads Encoder output) → Output
+
+"Übersetze zu Englisch: Der Hund springt"
+     ↓
+  Encoder liest Input
+     ↓
+  Decoder nutzt Encoder-Output um englischen Text zu generieren
+     ↓
+"The dog jumps"
+
+Gut für: Machine Translation, Summarization, Question-Answering
+```
+
+---
+
+## Positional Encoding
+
+Ein großes Problem: Self-Attention hat keine angeborene Positionsinformation. Der Satz:
+- "Der Hund springt schnell"
+- "Schnell springt Hund der"
+
+würden die gleichen Attention-Muster erzeugen (da die Operationen permutations-invariant sind).
+
+**Lösung: Positional Encoding**
+
+Man addiert zu jedem Embedding einen Positions-Vektor:
+
+```
+Final_Embedding = Word_Embedding + Position_Encoding
+
+Position 0 (Der):     [0.00, 1.00, 0.00, 1.00, ...]
+Position 1 (Hund):   [0.84, 0.54, 0.00, 1.00, ...]
+Position 2 (springt): [0.91, 0.41, 0.00, 1.00, ...]
+Position 3 (schnell): [0.14, 0.99, 0.00, 1.00, ...]
+
+Formel (Original "Attention is All You Need"):
+PE[pos, 2i]   = sin(pos / 10000^(2i/d))
+PE[pos, 2i+1] = cos(pos / 10000^(2i/d))
+```
+
+**RoPE (Rotary Position Embedding)** ist eine modernere Variante, die besser bei langem Kontext skaliert. Llama 3 und aktuelle Modelle nutzen RoPE statt der klassischen Variante.
+
+---
+
+## Transformer-Schichten Stack
+
+Ein vollständiger Transformer-Layer besteht aus:
+
+```
+┌─────────────────────────────┐
+│   Input Embedding           │
+└────────────┬────────────────┘
+             │
+     ┌───────▼────────┐
+     │ Self-Attention │
+     │  (Multi-Head)  │
+     └───────┬────────┘
+             │
+     ┌───────▼────────────────┐
+     │   Add & Norm           │
+     │ (Residual + LayerNorm) │
+     └───────┬────────────────┘
+             │
+     ┌───────▼────────────────┐
+     │   Feed-Forward Net     │
+     │  (2 Dense Layers)      │
+     └───────┬────────────────┘
+             │
+     ┌───────▼────────────────┐
+     │   Add & Norm           │
+     │ (Residual + LayerNorm) │
+     └───────┬────────────────┘
+             │
+        Output Token
+```
+
+**Residual Connections** (die +) sind kritisch: Sie erlauben Gradienten, tief durch 1000+ Layer zu fließen, ohne zu verblassen.
+
+---
+
+## Wichtige Parameter erklärt
+
+### Model Size
+
+| Parameter | Bedeutung | Beispiele |
+|-----------|-----------|-----------|
+| **d_model** | Embedding-Dimension | 768 (BERT), 2048 (Llama 3 8B), 4096 (Llama 3 70B) |
+| **num_layers** | Wie viele Transformer-Blöcke | 12 (BERT), 32 (Llama 3 8B), 80 (Llama 3 70B) |
+| **num_heads** | Attention-Heads | 12 (BERT), 32 (Llama 3 8B), 80 (Llama 3 70B) |
+| **d_ff** | Feed-Forward Dimension | Meist 4× d_model |
+
+### Total Parameter Berechnung
+
+Grobe Formel (vereinfacht):
+
+```
+Total Params ≈ 4 × d_model² × num_layers
+
+Beispiel (Llama 3 8B):
+d_model = 4096, num_layers = 32
+4 × 4096² × 32 = 2.1 Milliarden (davon ~8B wegen Vocab-Layer)
+```
+
+---
+
+## Größenvergleiche (2026 aktuell)
+
+| Modell | Parameters | d_model | num_layers | Kontext | Release |
+|--------|-----------|---------|-----------|---------|---------|
+| **Llama 3 8B** | 8B | 4096 | 32 | 8K | April 2024 |
+| **Llama 3 70B** | 70B | 8192 | 80 | 8K | April 2024 |
+| **GPT-4** | ~1.8T (Fallzahl) | Unknown | Unknown | 128K | Nov 2023 |
+| **Claude 3.5 Sonnet** | Proprietary | Proprietary | Proprietary | 200K | June 2024 |
+| **Mistral 7B** | 7B | 4096 | 32 | 32K | Sept 2023 |
+| **Mixtral 8x7B** | 56B (12.9B active) | 4096 | 32 | 32K | Dec 2023 |
+
+---
+
+## Scaling Laws: Warum größer oft besser ist
+
+**Chinchilla Scaling (2022)**: Optimale Balance ist, wenn Model-Größe und Datenmenge gleich viel "kosten" in Compute.
+
+```
+Compute-optimale Config:
+- Verdopple Model Parameter → Verdopple auch Trainings-Tokens
+- Nicht: "Größeres Modell mit gleichen Tokens"
+
+GPT-3 (2020): 175B params, 300B tokens
+        → Undertrained nach Chinchilla Standard
+
+GPT-3.5 / GPT-4: Viel mehr Tokens pro Param
+        → Better Performance
+```
+
+**Empirische Beobachtung (Scaling Laws)**:
+
+```
+Loss(N) ∝ N^(-α)
+α ≈ 0.07 (Power Law)
+
+Doubling Model Size → ~5-7% besser Performance
+Doubling Data → ~5-7% besser Performance
+
+Aber: Diminishing Returns!
+2 Trillionen Token → GPT-4 Level
+20 Trillionen Token → Nicht 10× besser
+```
+
+---
+
+## Warum Transformers die Zukunft sind
+
+1. **Parallelisierbar**: Alle Tokens gleichzeitig verarbeitet
+2. **Long-Range Dependencies**: Selbst 128K Token Distanz möglich (Claude)
+3. **Skalierbar**: 7B bis 1.8T Parameter untersucht
+4. **Transfer Learning**: Vortraining + Fine-tuning funktioniert hervorragend
+5. **Hardware-freundlich**: Optimiert für GPUs/TPUs mit Batch-Operationen
+
+Die Transformer-Architektur ist nicht perfekt (z.B. quadratische Attention-Komplexität bei langen Sequenzen), aber es ist das beste was wir haben und alle aktuellen Fortschritte (RAG, LoRA, Quantisierung) bauen darauf auf.
+
+---
+
+## Attention ist alles: Intuitive Erklärung
+
+Self-Attention funktioniert wie ein "konzentriertere Mensch":
+
+```
+Satz: "Der Hund springt schnell"
+
+Normale Person (RNN):
+- Liest Wort für Wort
+- Fokus auf aktuelle Wort + ein bisschen Memory
+- Kann lange Abhängigkeiten vergessen
+
+Mit Self-Attention (Transformer):
+- Schaut auf ALLE Wörter gleichzeitig
+- "Hund" konzentriert sich auf "Der" (Artikel) + "springt" (Verb)
+- "springt" konzentriert sich auf "Hund" (Subjekt) + "schnell" (Adverb)
+- Jedes Wort kann jedes andere Wort "sehen"
+```
+
+Das ist warum Transformers "Attention is All You Need" heißt.
+
+---
+
+## Praktische Komplexität verstehen
+
+### Quadratische Komplexität Problem
+
+Warum wird Attention langsam bei langen Texten?
+
+```
+Satz Länge: 1000 Tokens
+Attention berechnet für jedes Token die Ähnlichkeit zu
+JEDEM anderen Token:
+
+Komplexität = 1000 × 1000 = 1.000.000 Operationen
+
+Satz Länge: 10.000 Tokens (long context)
+10.000 × 10.000 = 100.000.000 Operationen (100× mehr!)
+
+Bei 128K Context (Claude):
+128K × 128K = 16 Milliarden Operationen
+→ Dauert mehrere Sekunden
+```
+
+**Lösungen:**
+1. **FlashAttention** (optimierte GPU-Kernel) → 3× schneller
+2. **Sparse Attention** (nicht alle Verbindungen) → weniger Operationen
+3. **RoPE** (besseres Positional Encoding) → längere Sequences möglich
+
+### Real-World Latency Messung (März 2026)
+
+| Model | Context | Time/1000 Tokens | Praktisch |
+|-------|---------|------------------|----------|
+| GPT-4 (128K) | 128K | ~800ms | 8 Sekunden für 10K Tokens |
+| Claude 3.5 (200K) | 200K | ~1.2s | 12 Sekunden für 10K Tokens |
+| Llama 3.1 (128K) | 128K | ~600ms | 6 Sekunden für 10K Tokens |
+| Local vLLM (8B) | 8K | ~100ms | 1 Sekunde für 10K Tokens |
+
+Längerer Context = Exponentiell höher Latency.
+
+---
+
+## Fine-Tuning mit LoRA
+
+Statt das ganze Modell zu trainieren (teuer), nutze **Low-Rank Adaptation**:
+
+```
+Ursprünglich Modell Größe: 7B Parameter
+
+Normal Fine-Tuning:
+→ Trainiere alle 7B Parameter
+→ Speicher: 7B × 4 bytes = 28GB
+→ Zeit: Mehrere Tage auf A100
+
+Mit LoRA:
+→ Trainiere nur "kleine Adapter" (~50K Parameter)
+→ Speicher: 50K × 4 bytes = 200KB (!!)
+→ Zeit: 1-2 Stunden auf GPU
+
+Qualität: ~95% genauso gut wie vollständiges Training
+```
+
+**Praktisch:**
+```python
+from peft import LoraConfig, get_peft_model
+
+config = LoraConfig(
+    r=16,  # Rank (wie viel trainieren?)
+    lora_alpha=32,
+    target_modules=["q_proj", "v_proj"],  # Welche Layer?
+)
+
+model = get_peft_model(pretrained_model, config)
+# Jetzt trainieren mit ~1000× weniger Speicher
+```
+
+---
+
+## Interpretability: Was denkt das Modell?
+
+Neurowissenschaftler nutzen Attention-Visualisierung um zu verstehen warum Modelle so antworten:
+
+```
+Satz: "Bank hat ein Darlehen gegeben"
+
+Attention-Map für "Bank":
+- 95% fokussiert auf "Darlehen" (Zusammenhang!)
+- 3% fokussiert auf "gegeben" (Verb)
+- 2% fokussiert auf "ein" (Artikel)
+
+→ Modell versteht dass "Bank" (Institution) + "Darlehen"
+   zusammenhängen!
+
+Satz: "Die Bank des Flusses war schön"
+
+Attention-Map für "Bank":
+- 70% fokussiert auf "Flusses" (Ortsangabe)
+- 20% fokussiert auf "schön" (Eigenschaft)
+- 10% fokussiert auf andere
+
+→ Modell unterscheidet Bank=Fluss-Ufer vs. Bank=Bank!
+```
+
+Das ist wie Modelle Mehrdeutigkeit auflösen.
+
+---
+
+## Mixture of Experts (MoE): Das nächste Level
+
+Nicht alle Parameter werden für alle Inputs genutzt:
+
+```
+Normales Modell:
+[Dense 7B Params] → Alles für jeden Input
+
+Mixture of Experts (z.B. Mixtral 8x7B):
+[Expert 1: 7B]
+[Expert 2: 7B]
+[Expert 3: 7B]
+...
+[Expert 8: 7B]
+[Router: "Welche Experten brauchst du?"]
+
+Pro Input: Nutze nur 2-3 Experten (~2-3B Parameters)
+Effective: 56B total, aber nur 12.9B aktiv = schneller & billiger
+
+Benefit:
+- 56B Kapazität
+- 12.9B Durchsatz
+- Speicher/Speed wie 12.9B Modell
+```
+
+Mixtral 8x7B ist ein echtes MoE-Modell. Andere sind nicht wirklich MoE trotz Claims.
+
+---
+
+## Modern Improvements (2024+)
+
+### ALiBi (Attention with Linear Biases)
+Statt Positional Encoding zu addieren, füge Bias direkt in Attention ein:
+- ✅ Bessere Extrapolation zu längeren Sequenzen
+- ✅ Einfacher zu implementieren
+- ❌ Noch nicht überall übernommen
+
+### Grouped Query Attention (GQA)
+Statt jedem Head seine eigenen K,V zu geben, teile die:
+- ✅ Speicher-Effizienz
+- ✅ Schneller (weniger KV-Cache)
+- ✅ Kaum Qualitätsverlust
+- Llama 3: Nutzt GQA
+
+### Multi-Head Latent Attention
+Komprimiere Attention auf latente Dimensionen:
+- ✅ Noch schneller
+- ✅ Noch speicherefficenter
+- ❌ Noch experimentell
+
+---
+
+## Production Debugging: "Mein Modell gibt Nonsense"
+
+Wenn dein finetuned Transformer Blödsinn generiert:
+
+### Checklist
+
+1. **Ist das Basis-Modell OK?**
+   ```bash
+   # Teste Original-Modell ohne Fine-Tuning
+   ollama run llama2 "Hi"
+   # Funktioniert? → Problem liegt im Fine-Tuning
+   ```
+
+2. **Ist dein Training-Dataset OK?**
+   - Qualität checken (5% manuelle Review)
+   - Duplikate entfernen
+   - Outliers filtern
+
+3. **Ist Learning Rate OK?**
+   ```
+   Zu hoch: Model converges aber oscillates (schwingt)
+   Zu niedrig: Training braucht ewig
+
+   Start: 2e-5 für Fine-Tuning
+   Adjust: Basierend auf Validation Loss Kurve
+   ```
+
+4. **Ist Batch Size OK?**
+   ```
+   Zu groß: Speicher über, Out-of-Memory
+   Zu klein: Noise, instabiles Training
+
+   Start: 8 oder 16
+   Adjust: Basierend auf GPU Memory
+   ```
+
+5. **Ist dein Modell overfitting?**
+   ```
+   Training Loss: 0.5 (sinkt gut)
+   Validation Loss: 5.0 (steigt!)
+
+   → Overfitting!
+   Fix: Dropout, Regularization, kleinerer Learning Rate
+   ```
+
+---
+
+## Ressourcen & Weiterlernen
+
+- "Attention is All You Need" Paper (Vaswani et al., 2017)
+- "An Image is Worth 16x16 Words" (ViT, Vision Transformers)
+- "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness" (Dao, 2022)
+- Hugging Face Transformers Documentation
+- Andrej Karpathy "Let's build GPT" (YouTube)
+
+**Letzte Aktualisierung**: 21.03.2026
+
+## Quellen und Links
+
+- [Transformers GitHub](https://github.com/huggingface/transformers)
+- [Attention Is All You Need](https://arxiv.org/abs/1706.03762)

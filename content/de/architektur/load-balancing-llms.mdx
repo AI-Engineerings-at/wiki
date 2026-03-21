@@ -1,0 +1,608 @@
+---
+title: "Load Balancing für LLMs: Routing-Strategien"
+description: "Round-Robin vs. Token-Aware Routing, Multi-Model Deployment, A/B Testing, Failover Strategien."
+section: "architektur"
+---
+
+# Load Balancing für LLMs: Routing-Strategien
+
+Load Balancing ist nicht nur "verteile Requests auf Server". Für LLMs ist es eine strategische Entscheidung: Welcher Server für welcher Request?
+
+## Das Problem: Naive Round-Robin
+
+```
+LB verteilt REQUESTS (nicht LOAD):
+
+Request 1 (10 Tokens): → Server A
+Request 2 (1000 Tokens): → Server B
+Request 3 (50 Tokens): → Server C
+
+Server A: 10 Tokens (1% CPU)
+Server B: 1000 Tokens (100% CPU) ← BOTTLENECK!
+Server C: 50 Tokens (5% CPU)
+
+Result: Server B ist überlastet, A und C sind idle.
+```
+
+Besser: **Token-Aware Load Balancing**
+
+```
+Token-Count zählen VOR Routing:
+
+Request 1 (10 Tokens):
+  → Server C (niedrigste Last)
+
+Request 2 (1000 Tokens):
+  → Aufteilen auf A, B, C
+  oder Queue bis Server frei
+
+Request 3 (50 Tokens):
+  → Server A
+
+Result: Alle Server gleichmäßig belastet.
+```
+
+## 1. Routing Strategien
+
+### Strategy 1: Least Connections
+
+Einfachste Strategy:
+
+```python
+class LeastConnectionsRouter:
+    def __init__(self, servers: list[Server]):
+        self.servers = servers
+        self.active_connections = {s.id: 0 for s in servers}
+
+    def route(self, request: dict) -> Server:
+        """Schicke zu Server mit wenigsten aktiven Connections"""
+        best_server = min(
+            self.servers,
+            key=lambda s: self.active_connections[s.id]
+        )
+
+        self.active_connections[best_server.id] += 1
+        return best_server
+
+    def release(self, server_id: str):
+        """Request fertig — decremente Counter"""
+        self.active_connections[server_id] -= 1
+
+# Nutzung
+router = LeastConnectionsRouter([
+    Server("gpu-1", "http://gpu-1:8000"),
+    Server("gpu-2", "http://gpu-2:8000"),
+    Server("gpu-3", "http://gpu-3:8000")
+])
+
+server = router.route(request)
+response = server.call(request)
+router.release(server.id)
+```
+
+Problem: Ignoriert dass Request 2 1000 Tokens und Request 1 nur 10 Tokens hat.
+
+### Strategy 2: Token-Aware Routing
+
+Besser: Beachte wieviel Tokens gebraucht werden:
+
+```python
+class TokenAwareRouter:
+    def __init__(self, servers: list[Server]):
+        self.servers = servers
+        self.current_load = {s.id: 0 for s in servers}
+        self.max_token_load = 100000  # Max Tokens gleichzeitig
+
+    def estimate_tokens(self, request: dict) -> int:
+        """Schätze Tokens für Request"""
+        prompt_tokens = len(request["prompt"].split()) * 1.3
+        output_tokens = request.get("max_tokens", 200)
+        return int(prompt_tokens + output_tokens)
+
+    def route(self, request: dict) -> Server:
+        """Schicke zu Server mit niedrigster Token-Last"""
+        tokens = self.estimate_tokens(request)
+
+        # Finde Server mit Platz
+        available = [
+            s for s in self.servers
+            if self.current_load[s.id] + tokens <= self.max_token_load
+        ]
+
+        if not available:
+            # Alle überlastet — queue oder fallback
+            return self.servers[0]  # Fallback
+
+        # Nutze Server mit niedrigster Last
+        best_server = min(
+            available,
+            key=lambda s: self.current_load[s.id]
+        )
+
+        self.current_load[best_server.id] += tokens
+        return best_server
+
+    def update_load(self, server_id: str, tokens_used: int):
+        """Update nach Request Abschluss"""
+        self.current_load[server_id] = max(
+            0,
+            self.current_load[server_id] - tokens_used
+        )
+
+# Nutzung
+router = TokenAwareRouter([...])
+
+tokens = router.estimate_tokens(request)
+server = router.route(request)
+
+response = server.call(request)
+
+# Aktualisiere echte Token-Count
+actual_tokens = response["usage"]["total_tokens"]
+router.update_load(server.id, actual_tokens)
+```
+
+### Strategy 3: Latency-Aware Routing
+
+Berücksichtige gemessene Latenz:
+
+```python
+class LatencyAwareRouter:
+    def __init__(self, servers: list[Server]):
+        self.servers = servers
+        self.latency_history = {s.id: [] for s in servers}
+        self.window_size = 100  # Last 100 requests
+
+    def get_p95_latency(self, server_id: str) -> float:
+        """P95 Latenz für Server"""
+        latencies = self.latency_history[server_id]
+        if not latencies:
+            return 0
+
+        sorted_lat = sorted(latencies)
+        p95_idx = int(len(sorted_lat) * 0.95)
+        return sorted_lat[p95_idx]
+
+    def route(self, request: dict) -> Server:
+        """Schicke zu schnellstem Server (weniger P95 Latenz)"""
+        best_server = min(
+            self.servers,
+            key=lambda s: self.get_p95_latency(s.id)
+        )
+
+        return best_server
+
+    def record_latency(self, server_id: str, latency_ms: float):
+        """Speichere Latenz"""
+        latencies = self.latency_history[server_id]
+        latencies.append(latency_ms)
+
+        # Keep only last N
+        if len(latencies) > self.window_size:
+            latencies.pop(0)
+
+# Nutzung
+router = LatencyAwareRouter([...])
+
+server = router.route(request)
+
+start = time.time()
+response = server.call(request)
+elapsed_ms = (time.time() - start) * 1000
+
+router.record_latency(server.id, elapsed_ms)
+```
+
+### Strategy 4: Weighted Load Balancing
+
+Verschiedene Server haben unterschiedliche Kapazität:
+
+```python
+class WeightedRouter:
+    def __init__(self, servers: list[tuple[Server, float]]):
+        """
+        servers = [
+            (Server("gpu-1", "..."), 0.5),  # Schwächer
+            (Server("gpu-2", "..."), 1.0),  # Referenz
+            (Server("gpu-3", "..."), 2.0),  # Doppelte Kapazität
+        ]
+        """
+        self.servers = servers
+        self.total_weight = sum(w for _, w in servers)
+        self.request_counts = {s.id: 0 for s, _ in servers}
+
+    def route(self, request: dict) -> Server:
+        """Verteile Requests nach Gewicht"""
+        # Finde Server mit niedrigstem weight-adjusted load
+        best_server = min(
+            self.servers,
+            key=lambda sw: (
+                self.request_counts[sw[0].id] / sw[1]
+            )
+        )
+
+        server, _ = best_server
+        self.request_counts[server.id] += 1
+        return server
+
+# Nutzung
+# GPU-1 (2GB vRAM) bekommt 20% der Last
+# GPU-2 (8GB vRAM) bekommt 40%
+# GPU-3 (24GB vRAM) bekommt 40%
+router = WeightedRouter([
+    (Server("gpu-1", "..."), 0.5),
+    (Server("gpu-2", "..."), 1.0),
+    (Server("gpu-3", "..."), 1.0)
+])
+```
+
+## 2. Multi-Model Deployment
+
+Nicht alle Models auf jedem Server (zu große VRAM):
+
+```python
+class MultiModelRouter:
+    def __init__(self):
+        self.server_capabilities = {
+            "gpu-1": {
+                "models": ["llama-7b", "llama-13b"],
+                "vram_total": 16,  # GB
+                "vram_used": 14
+            },
+            "gpu-2": {
+                "models": ["llama-70b"],
+                "vram_total": 80,
+                "vram_used": 70
+            },
+            "gpu-3": {
+                "models": ["gpt-4", "claude"],  # Via API
+                "vram_total": 0,
+                "vram_used": 0
+            }
+        }
+
+    def find_server_for_model(self, model: str) -> str | None:
+        """Finde Server der diesen Model hat"""
+        for server_id, capability in self.server_capabilities.items():
+            if model in capability["models"]:
+                available_vram = (
+                    capability["vram_total"] - capability["vram_used"]
+                )
+                if available_vram > 2:  # Mindestens 2GB frei
+                    return server_id
+
+        return None
+
+    def route(self, request: dict) -> str | None:
+        """Route zu richtigem Server für Model"""
+        model = request.get("model")
+
+        server = self.find_server_for_model(model)
+        if not server:
+            raise ValueError(f"Model {model} nicht verfügbar")
+
+        return server
+
+# Nutzung
+router = MultiModelRouter()
+
+server_id = router.route({"model": "llama-70b"})
+print(f"Routing zu {server_id}")
+
+# Ergebnis: gpu-2 (einziger mit 70b)
+```
+
+## 3. A/B Testing auf Inference Layer
+
+Teste zwei Model-Versions parallel:
+
+```python
+import random
+from dataclasses import dataclass
+
+@dataclass
+class ABTestConfig:
+    model_a: str
+    model_b: str
+    split_ratio: float = 0.5  # 50/50 split
+
+class ABTestingRouter:
+    def __init__(self, config: ABTestConfig):
+        self.config = config
+        self.results = {
+            "model_a": [],
+            "model_b": []
+        }
+
+    def route(self, request: dict) -> tuple[str, str]:
+        """
+        Entscheide welches Model testen und return (model_name, test_group)
+        """
+        rand = random.random()
+
+        if rand < self.config.split_ratio:
+            model = self.config.model_a
+            test_group = "A"
+        else:
+            model = self.config.model_b
+            test_group = "B"
+
+        return model, test_group
+
+    def record_result(
+        self,
+        test_group: str,
+        latency_ms: float,
+        tokens: int,
+        quality_score: float  # User feedback, 0-1
+    ):
+        """Speichere Testergebnis"""
+        self.results[f"model_{test_group.lower()}"].append({
+            "latency": latency_ms,
+            "tokens": tokens,
+            "quality": quality_score
+        })
+
+    def get_stats(self) -> dict:
+        """Compare Models"""
+        stats = {}
+
+        for group in ["model_a", "model_b"]:
+            results = self.results[group]
+            if not results:
+                continue
+
+            latencies = [r["latency"] for r in results]
+            qualities = [r["quality"] for r in results]
+
+            stats[group] = {
+                "requests": len(results),
+                "avg_latency_ms": sum(latencies) / len(latencies),
+                "avg_quality": sum(qualities) / len(qualities),
+                "quality_wins": len([q for q in qualities if q > 0.7])
+            }
+
+        return stats
+
+# Nutzung
+config = ABTestConfig(
+    model_a="llama-70b",
+    model_b="llama-70b-optimized"
+)
+router = ABTestingRouter(config)
+
+model, test_group = router.route(request)
+response = call_model(model, request)
+
+# Record feedback
+user_feedback = get_user_feedback(response)
+router.record_result(
+    test_group,
+    response["latency"],
+    response["tokens"],
+    user_feedback
+)
+
+# Nach 1000 Requests: Compare
+if len(router.results["model_a"]) > 1000:
+    stats = router.get_stats()
+    print(f"Model A avg quality: {stats['model_a']['avg_quality']:.2f}")
+    print(f"Model B avg quality: {stats['model_b']['avg_quality']:.2f}")
+    # → Model B gewinnt? → Rollout zu 100%
+```
+
+## 4. Failover und Health Checks
+
+```python
+import httpx
+import asyncio
+from enum import Enum
+
+class ServerStatus(Enum):
+    HEALTHY = "healthy"
+    DEGRADED = "degraded"
+    DEAD = "dead"
+
+class ResilientRouter:
+    def __init__(self, servers: list[str]):
+        self.servers = servers
+        self.status = {s: ServerStatus.HEALTHY for s in servers}
+        self.consecutive_failures = {s: 0 for s in servers}
+        self.failure_threshold = 3
+
+    async def health_check(self, server: str) -> bool:
+        """Prüfe ob Server noch lebt"""
+        try:
+            async with httpx.AsyncClient(timeout=2) as client:
+                response = await client.get(f"{server}/health")
+                return response.status_code == 200
+        except Exception:
+            return False
+
+    async def monitor_health(self):
+        """Background Task: Monitore alle Server"""
+        while True:
+            tasks = [self.health_check(s) for s in self.servers]
+            results = await asyncio.gather(*tasks)
+
+            for server, is_healthy in zip(self.servers, results):
+                if is_healthy:
+                    self.status[server] = ServerStatus.HEALTHY
+                    self.consecutive_failures[server] = 0
+                else:
+                    self.consecutive_failures[server] += 1
+
+                    if (
+                        self.consecutive_failures[server]
+                        >= self.failure_threshold
+                    ):
+                        self.status[server] = ServerStatus.DEAD
+                    else:
+                        self.status[server] = ServerStatus.DEGRADED
+
+            await asyncio.sleep(10)  # Check alle 10s
+
+    def route_with_failover(self, request: dict) -> str:
+        """Route mit Failover Chain"""
+        healthy = [
+            s for s in self.servers
+            if self.status[s] in [
+                ServerStatus.HEALTHY,
+                ServerStatus.DEGRADED
+            ]
+        ]
+
+        if not healthy:
+            raise Exception("All servers dead!")
+
+        # Prefer healthy über degraded
+        healthy.sort(
+            key=lambda s: self.status[s].value,
+            reverse=True
+        )
+
+        return healthy[0]
+
+    async def call_with_retries(
+        self,
+        request: dict,
+        max_retries: int = 3
+    ) -> dict:
+        """Rufe mit automatischen Retries auf verschiedenen Servern"""
+        async with httpx.AsyncClient() as client:
+            for attempt in range(max_retries):
+                try:
+                    server = self.route_with_failover(request)
+
+                    response = await client.post(
+                        f"{server}/v1/completions",
+                        json=request,
+                        timeout=30
+                    )
+
+                    if response.status_code == 200:
+                        return response.json()
+
+                    # 5xx Error → mark degraded, retry
+                    if response.status_code >= 500:
+                        self.consecutive_failures[server] += 1
+                        if (
+                            self.consecutive_failures[server]
+                            >= self.failure_threshold
+                        ):
+                            self.status[server] = ServerStatus.DEAD
+
+                        continue  # Retry next server
+
+                    # 4xx Error → client error, dont retry
+                    raise Exception(f"Client error: {response.status_code}")
+
+                except Exception as e:
+                    if attempt == max_retries - 1:
+                        raise
+                    continue
+
+        raise Exception("All retry attempts failed")
+
+# Nutzung
+router = ResilientRouter([
+    "http://gpu-1:8000",
+    "http://gpu-2:8000",
+    "http://gpu-3:8000"
+])
+
+# Start monitoring background task
+asyncio.create_task(router.monitor_health())
+
+# Call mit Failover
+response = await router.call_with_retries(request)
+```
+
+## 5. Dynamic Scaling mit Load Balancer
+
+Für Kubernetes:
+
+```yaml
+# Service + HPA
+apiVersion: v1
+kind: Service
+metadata:
+  name: llm-service-lb
+spec:
+  type: LoadBalancer
+  selector:
+    app: llm-service
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 3600  # Sticky sessions
+
+---
+apiVersion: autoscaling.k8s.io/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: llm-service-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: llm-service
+
+  minReplicas: 2
+  maxReplicas: 20
+
+  metrics:
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 75
+
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300  # Warte 5min vor scale down
+      policies:
+      - type: Percent
+        value: 50  # Max 50% scale down pro Schritt
+        periodSeconds: 60
+
+    scaleUp:
+      stabilizationWindowSeconds: 0  # Sofort scale up
+      policies:
+      - type: Percent
+        value: 100  # Doppel die Replicas
+        periodSeconds: 15
+```
+
+## Zusammenfassung: Routing Strategien
+
+| Strategie | Komplexität | Best For | Overhead |
+|-----------|-------------|----------|----------|
+| **Round Robin** | Niedrig | Homogene Server | None |
+| **Least Conn** | Niedrig | Viele kurze Requests | 1% |
+| **Token-Aware** | Mittel | LLM Inference | 2% |
+| **Latency-Aware** | Mittel | Performance sensitive | 3% |
+| **Weighted** | Mittel | Heterogene Hardware | 2% |
+| **A/B Testing** | Hoch | Model Optimization | 5% |
+
+Die richtige Strategy hängt ab von:
+1. Wie unterschiedlich sind Request-Größen? → Token-Aware
+2. Wie unterschiedlich ist Hardware? → Weighted
+3. Willst du testen? → A/B Testing
+4. Brauchst du Failover? → Health Checks
+
+**Start mit Token-Aware + Health Checks. Das reicht für 90% der Fälle.**
+
+## Quellen und Links
+
+- [NGINX Load Balancing](https://nginx.org/en/docs/http/load_balancing.html) — Production Load Balancer
+- [Traefik AI Gateway](https://traefik.io/blog/traefik-ai-gateway/) — LLM-aware LB
+- [Kubernetes HPA](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) — Auto Scaling
+- [LiteLLM Load Balancing](https://docs.litellm.ai/docs/routing) — LLM Router
+- [Token-Aware Routing](https://www.anyscale.com/blog/how-to-serve-large-language-models-with-cluster-apis) — AnyscaleResearch
+- [Consistent Hashing](https://en.wikipedia.org/wiki/Consistent_hashing) — Advanced Technique

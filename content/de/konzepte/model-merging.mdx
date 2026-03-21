@@ -1,0 +1,444 @@
+---
+title: Model Merging
+date: 2026-03-21
+summary: SLERP, TIES, DARE, Linear Merge, mergekit Tool, Praktische Merge-Rezepte — wann Merging funktioniert
+tags: [model-merging, weight-merging, lora-merge, slerp, ties, dare, mergekit]
+author: AI Engineering
+section: Konzepte
+---
+
+# Model Merging verstehen
+
+Model Merging kombiniert mehrere trainierte Modelle in eines. Statt von Grund auf neu zu trainieren, nehme Features von verschiedenen spezialisierten Modellen und kombiniere sie.
+
+```
+Beispiel:
+Model A: Gut in Code-Generierung
+Model B: Gut in Kreativität
+Model C: Gut in Mathematik
+
+Merge(A, B, C) → Ein Modell mit allen Fähigkeiten!
+```
+
+---
+
+## Merge-Algorithmen
+
+### 1. Linear Merge (einfach)
+
+```python
+# Einfaches Durchschnitt der Gewichte
+merged_weight = 0.5 * model_a.weight + 0.5 * model_b.weight
+
+# Mit unterschiedlichen Proportionen
+merged_weight = 0.3 * model_a.weight + 0.7 * model_b.weight
+```
+
+**Vorteil:** Einfach zu implementieren
+**Nachteil:** Oft Qualitätsverlust, Weight Space ist hochdimensional
+
+### 2. SLERP (Spherical Linear Interpolation)
+
+```
+Standard Linear:
+  x_0 = [1.0, 0.0, 0.0]
+  x_1 = [0.0, 1.0, 0.0]
+  Linear(0.5) = [0.5, 0.5, 0.0]  ← Mag verkürzt sein!
+
+SLERP (Sphärisch):
+  Interpoliere auf Einheitssphäre
+  Erhält Magnitude des Vektors
+```
+
+```python
+import numpy as np
+
+def slerp(v0, v1, t):
+    """
+    Spherical Linear Interpolation
+    t: 0-1, wie viel von v1
+    """
+    # Normalize
+    v0_norm = v0 / np.linalg.norm(v0)
+    v1_norm = v1 / np.linalg.norm(v1)
+
+    # Winkel zwischen Vektoren
+    dot = np.clip(np.dot(v0_norm, v1_norm), -1.0, 1.0)
+    omega = np.arccos(dot)
+
+    if abs(omega) < 1e-6:
+        return v0 * (1 - t) + v1 * t
+
+    # Sphärische Interpolation
+    return np.sin((1.0 - t) * omega) / np.sin(omega) * v0 + \
+           np.sin(t * omega) / np.sin(omega) * v1
+```
+
+**Anwendung auf Modell-Gewichte:**
+```python
+# Für jeden Layer
+for layer in model_a.layers:
+    merged_weight = slerp(
+        model_a.layer.weight,
+        model_b.layer.weight,
+        t=0.5
+    )
+```
+
+### 3. TIES (Task-specific Importance based Estimate of Selection)
+
+Intelligente Auswahl: Welche Gewichte von welchem Modell?
+
+```
+Idee: Behalte die wichtigsten Gewichte jedes Modells
+
+1. Berechne für jedes Modell: Welche Gewichte sind wichtig?
+   (Durch Absolu
+tveite oder Ablation)
+
+2. Für jeden Weight:
+   - Wenn wichtig in A und nicht in B: Nutze A
+   - Wenn wichtig in B und nicht in A: Nutze B
+   - Wenn wichtig in beiden: Merge mit SLERP
+   - Wenn unwichtig in beiden: Ignorieren
+```
+
+```python
+def ties_merge(model_a, model_b, density_threshold=0.05):
+    """
+    model_a, model_b: PyTorch Modelle
+    density_threshold: Was ist "wichtig"?
+    """
+    merged_state = {}
+
+    for key in model_a.state_dict():
+        w_a = model_a.state_dict()[key]
+        w_b = model_b.state_dict()[key]
+
+        # Berechne Importance als Absolutwert (vereinfacht)
+        imp_a = torch.abs(w_a).flatten()
+        imp_b = torch.abs(w_b).flatten()
+
+        # Top density_threshold% Gewichte
+        threshold_a = torch.quantile(imp_a, 1 - density_threshold)
+        threshold_b = torch.quantile(imp_b, 1 - density_threshold)
+
+        mask_a = (torch.abs(w_a) > threshold_a).float()
+        mask_b = (torch.abs(w_b) > threshold_b).float()
+
+        # Merge Logik
+        merged = torch.zeros_like(w_a)
+        both = (mask_a * mask_b)  # Wichtig in beiden
+        only_a = (mask_a * (1 - mask_b))
+        only_b = ((1 - mask_a) * mask_b)
+
+        # Wo wichtig in A: Nutze A
+        merged += w_a * only_a
+        # Wo wichtig in B: Nutze B
+        merged += w_b * only_b
+        # Wo wichtig in beiden: Average (oder SLERP)
+        merged += 0.5 * (w_a + w_b) * both
+
+        merged_state[key] = merged
+
+    return merged_state
+```
+
+### 4. DARE (Drops And REscale)
+
+Statt Mittelwert: Drop unimportante Gewichte, rescale wichtige.
+
+```
+Idee: Viele Gewichte sind Rauschen
+      Entferne (~90%) davon, rescale die verbleibenden
+
+1. Pro Modell: Markiere ~10% der wichtigsten Gewichte
+2. Setze den Rest auf 0
+3. Rescale übrig gebliebene
+4. Merge die rescaled Modelle
+```
+
+```python
+def dare_merge(model_a, model_b, drop_rate=0.9):
+    """
+    Drop unimportant weights, keep important ones
+    """
+    merged_state = {}
+
+    for key in model_a.state_dict():
+        w_a = model_a.state_dict()[key]
+        w_b = model_b.state_dict()[key]
+
+        # Importance: Absolutwert
+        imp_a = torch.abs(w_a)
+        imp_b = torch.abs(w_b)
+
+        # Top (1-drop_rate)% Gewichte behalten
+        threshold_a = torch.quantile(imp_a.flatten(), drop_rate)
+        threshold_b = torch.quantile(imp_b.flatten(), drop_rate)
+
+        mask_a = (torch.abs(w_a) > threshold_a).float()
+        mask_b = (torch.abs(w_b) > threshold_b).float()
+
+        # Rescale: Wenn 10% behalten, rescale um 10x
+        w_a_masked = w_a * mask_a / (1 - drop_rate)
+        w_b_masked = w_b * mask_b / (1 - drop_rate)
+
+        # Average masked Gewichte
+        merged_state[key] = 0.5 * w_a_masked + 0.5 * w_b_masked
+
+    return merged_state
+```
+
+---
+
+## mergekit Tool (praktisch)
+
+Populäres Open-Source Tool zum Mergen von Modellen.
+
+```bash
+# Installation
+pip install mergekit
+
+# Konfiguration: merge_config.yaml
+models:
+  - model_name: model_a_hf_path
+    parameters:
+      weight: 0.5
+  - model_name: model_b_hf_path
+    parameters:
+      weight: 0.5
+
+merge_method: ties
+base_model: model_a_hf_path
+parameters:
+  normalize_weights: true
+  int8_mask: true
+```
+
+```bash
+# Merge durchführen
+mergekit-cai --copy-tokenizer --allow-patterns "*.safetensors" \
+  --cuda --low-ram merge_config.yaml ./output
+```
+
+---
+
+## Praktische Merge-Rezepte
+
+### Rezept 1: Chat + Coding Modelle
+
+```yaml
+# Code Llama + ChatGLM Merge
+models:
+  - model_name: codellama/CodeLlama-7b-Instruct-hf
+    parameters:
+      weight: 0.6
+  - model_name: THUDM/chatglm2-6b
+    parameters:
+      weight: 0.4
+
+merge_method: slerp
+base_model: codellama/CodeLlama-7b-Instruct-hf
+parameters:
+  t: 0.5
+```
+
+**Ergebnis:** Modell mit Code-Skill (60%) + Chat-Fähigkeiten (40%)
+
+### Rezept 2: Multiple Task Experts
+
+```yaml
+# 3-Way Merge: Math + Code + Chat
+models:
+  - model_name: math_expert_7b  # Gemalt vom Math-Tuning
+    parameters:
+      weight: 0.33
+  - model_name: code_expert_7b
+    parameters:
+      weight: 0.33
+  - model_name: chat_base_7b
+    parameters:
+      weight: 0.34
+
+merge_method: ties
+parameters:
+  density: 0.1  # Behalte nur 10% wichtigster Gewichte
+```
+
+### Rezept 3: LoRA Merge vor Mergen
+
+```bash
+# Schritt 1: LoRA in Basis-Modell mergen
+python merge_lora.py \
+  --base_model meta-llama/Llama-2-7b \
+  --lora_model your_lora_checkpoint \
+  --output_dir ./merged_base
+
+# Schritt 2: Merged Modelle kombinieren
+mergekit-cai merge_config.yaml ./final_output
+```
+
+---
+
+## Wann Merging funktioniert / nicht funktioniert
+
+### ✅ Merging funktioniert gut
+
+```
+1. Diverse Modelle (unterschiedliche Tasks)
+   Code + Chat + Math → Gutes Ergebnis
+   Grund: Weniger Konflikt zwischen Gewichten
+
+2. Ähnliche Architektur
+   Llama-7b + Llama-7b → Perfekt
+   Reason: Gleiche Netzwerk-Struktur
+
+3. Ähnliche Größe
+   7B + 7B → Gut
+   7B + 13B → Schlecht (unterschiedliche Dimensionen)
+
+4. Fine-tuned auf Basis
+   Base Model (Pretrain)
+   + Model A (Fine-tune auf Base)
+   + Model B (Fine-tune auf Base)
+   → Gutes Ergebnis
+```
+
+### ❌ Merging funktioniert schlecht
+
+```
+1. Zu ähnliche Modelle (redundant)
+   Llama Chat v1 + Llama Chat v2 → Nur marginal besser
+   Grund: Zu viel Überlap, Merging macht keinen Sinn
+
+2. Gegensätzliche Ziele
+   Instruction-tuned (Chat) + Uncensored → Konflikt
+   Result: Unpredictable Behavior
+
+3. Sehr unterschiedliche Größen
+   3B + 70B → Funktioniert nicht (dimensionale Mismatches)
+
+4. Keine gemeinsame Base
+   RandomModel A + RandomModel B → Chaos
+```
+
+---
+
+## Evaluierung nach Merge
+
+```python
+from datasets import load_dataset
+from transformers import pipeline
+
+# Merged Model testen
+merged = pipeline("text-generation", model="./merged_model")
+
+# Test 1: Code
+code_test = "def quicksort"
+result = merged(code_test, max_length=50)
+print("Code Quality:", result)
+
+# Test 2: Math
+math_test = "Was ist 2**10?"
+result = merged(math_test, max_length=20)
+print("Math Quality:", result)
+
+# Test 3: Chat
+chat_test = "Hallo, wie heißt du?"
+result = merged(chat_test, max_length=30)
+print("Chat Quality:", result)
+```
+
+### Metriken-Basierte Evaluation
+
+```python
+# Auf Standard Benchmarks testen
+from lm_eval.evaluator import evaluate
+
+results = evaluate(
+    model="hf",
+    model_args=f"pretrained=./merged_model",
+    tasks=["hellaswag", "arc_easy", "truthfulqa_mc"],
+    num_fewshot=0
+)
+
+print(results)
+# Vergleiche mit Base Modellen
+```
+
+---
+
+## Best Practices
+
+### 1. Merge mit ähnlichen Modellen
+
+```
+✅ Llama-7b mit anderem Llama-7b
+✅ Mistral-7b mit anderem Mistral-7b
+❌ Llama-7b mit Falcon-7b (unterschiedliche Architekturen)
+```
+
+### 2. Einige Gewichte frieren
+
+```python
+# Nicht alle Gewichte mergen, nur bestimmte Layer
+# z.B. nur Attention-Layer mergen, FFN frozenhalten
+
+for name, param in merged_model.named_parameters():
+    if "mlp" in name:
+        param.requires_grad = False  # Freeze
+    elif "self_attn" in name:
+        param.requires_grad = True   # Merge
+```
+
+### 3. Post-Merge Fine-tuning
+
+```python
+# Nach dem Merge: Fine-tune auf Mix-Daten
+# 30% Math, 30% Code, 40% Chat
+
+merged_model.train()
+optimizer = torch.optim.AdamW(merged_model.parameters())
+
+for batch in mixed_dataset:
+    outputs = merged_model(**batch)
+    loss = outputs.loss
+    loss.backward()
+    optimizer.step()
+```
+
+---
+
+## Häufige Fehler
+
+### 1. Zu viele Modelle mergen
+
+```
+❌ Merge von 5+ Modellen → Qualitätsverlust
+✅ 2-3 Modelle → Balance
+```
+
+### 2. Falsche Gewichte-Verhältnisse
+
+```
+❌ 0.95 + 0.05 → Effektiv nur ein Modell
+✅ 0.5 + 0.5 oder 0.6 + 0.4 → Guter Balance
+```
+
+### 3. Keine Evaluation
+
+```
+❌ Merge durchführen, hoffen dass es gut ist
+✅ Auf Benchmarks testen, mit Base vergleichen
+```
+
+---
+
+## Quellen und Links
+
+- [TIES Merge (Yadav et al. 2023)](https://arxiv.org/abs/2306.01708)
+- [DARE Merge (Wettig et al. 2023)](https://arxiv.org/abs/2311.03099)
+- [mergekit GitHub](https://github.com/cg123/mergekit)
+- [Model Soups (Wortsman et al. 2022)](https://arxiv.org/abs/2003.02821)
+- [Git Re-Basin (Garipov et al. 2023)](https://arxiv.org/abs/2209.04173)

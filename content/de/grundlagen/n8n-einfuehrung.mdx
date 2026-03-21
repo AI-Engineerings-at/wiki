@@ -1,0 +1,400 @@
+---
+title: n8n Einführung
+date: 2026-03-21
+summary: Workflow-Automation mit n8n. Von Installation über Nodes bis zu AI-Integrationen. Praktisches Setup für Anfänger.
+tags: [n8n, automation, workflow, integration, ai]
+author: AI Engineering
+---
+
+# n8n Einführung
+
+n8n ist ein Automation Tool für Workflows zwischen Apps und Services. Du verbindest Nodes (Actions) visual miteinander und lässt sie automatisiert laufen—ohne Code zu schreiben.
+
+Beispiel: Neue Gmail → Parse Email → Frag Ollama AI → Antworte in Slack. Ein Workflow, kein Code.
+
+## Installation
+
+### Option 1: Docker (empfohlen)
+
+```bash
+# docker-compose.yml
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD: n8n-password
+      POSTGRES_DB: n8n
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PASSWORD=n8n-password
+      - DB_POSTGRESDB_DATABASE=n8n
+      - WEBHOOK_TUNNEL_URL=https://dein-server:5678
+      - N8N_HOST=0.0.0.0
+      - N8N_PORT=5678
+    depends_on:
+      - postgres
+    volumes:
+      - n8n_data:/home/node/.n8n
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  n8n_data:
+```
+
+Starten:
+```bash
+docker compose up -d
+```
+
+Öffne http://localhost:5678 und richte deinen Admin-Account ein.
+
+### Option 2: npm (lokal, Development)
+
+```bash
+# Node.js >= 18 vorausgesetzt
+npm install -g n8n
+
+# Starten
+n8n
+# oder mit DB: n8n start --db=sqlite
+```
+
+http://localhost:5678
+
+### Option 3: n8n Desktop App
+
+Herunterlade von https://n8n.io/download—für schnelles Testen ohne Docker.
+
+## Kernkonzepte
+
+### Nodes
+
+Ein Node ist eine Action: "Hole Daten", "Schreib eine Nachricht", "Frag KI".
+
+**Triggerig-Nodes** (starten den Workflow):
+- **Webhook:** Reagiere auf HTTP-Request
+- **Cron:** Zeitgesteuert (z.B. täglich um 9 Uhr)
+- **Poll:** Frage regelmäßig Daten ab
+- **Listen:** Warte auf Event in App (Gmail, Slack, etc.)
+
+**Daten-Nodes:**
+- **HTTP Request:** API aufrufen
+- **Postgres:** Datenbankabfrage
+- **File:** Datei lesen/schreiben
+
+**Logic-Nodes:**
+- **If:** Bedingung (nur weitermachen wenn...)
+- **Loop:** Über mehrere Items wiederholen
+- **Set:** Neue Daten erstellen/transformieren
+
+**Output-Nodes:**
+- **HTTP Response:** Antworte auf Request
+- **Send Email:** E-Mail versenden
+- **Slack Message:** Nachricht an Slack
+
+### Connections
+
+Nodes werden mit Pfeilen verbunden. Der Ausgang eines Nodes ist der Input des nächsten.
+
+Beispiel:
+```
+[Webhook] → [Set] → [HTTP Request] → [HTTP Response]
+```
+
+Der Webhook empfängt Daten, Set bearbeitet sie, HTTP Request sendet die Daten, Response sendet Ergebnis zurück.
+
+### Inputs und Outputs
+
+Jeder Node hat Input und Output. Der Output eines Nodes wird Input für den nächsten.
+
+**Set-Node Beispiel:**
+Input: `{ "name": "Alice", "age": 30 }`
+Feld hinzufügen: `greeting = "Hello, " + name`
+Output: `{ "name": "Alice", "age": 30, "greeting": "Hello, Alice" }`
+
+## Expression Syntax in n8n 2.x
+
+n8n verwendet Expressions um Daten zu transformieren.
+
+**WICHTIG: = Prefix!**
+
+In jedem Textfeld das Dynamik braucht, beginne mit `=`:
+
+```
+Falsch:  { "text": "{{ $json.message }}" }
+Richtig: ={ "text": "{{ $json.message }}" }
+```
+
+**Häufige Expressions:**
+
+```
+{{ $json.fieldname }}              # Zugriff auf Input-Feld
+{{ $json.user.name }}              # Nested Field
+{{ $json }}                        # Ganzer Input
+{{ $now }}                         # Aktuelle Zeit
+{{ $now.format('yyyy-MM-dd') }}   # Luxon Format (NICHT YYYY!)
+{{ $json.items.length }}           # Array-Länge
+{{ $json.items[0] }}              # Erstes Element
+{{ $json.items.map(i => i.name) }} # Array transformieren
+```
+
+**DateTime Formatierung (Luxon, nicht Moment!):**
+```
+yyyy-MM-dd         → 2026-03-21
+HH:mm:ss           → 14:30:45
+yyyy-MM-dd'T'HH:mm → 2026-03-21T14:30
+
+FALSCH: YYYY-MM-DD (YYYY ist literal Text!)
+```
+
+**Conditions:**
+```
+{{ $json.status === 'active' }}           # Gleich
+{{ $json.price > 100 }}                   # Größer
+{{ $json.name.includes('test') }}         # Text enthält
+{{ $json.items.length > 0 }}              # Array nicht leer
+{{ $json.email && $json.name }}           # Beide Felder existieren
+```
+
+## Webhook-Nodes
+
+Webhooks lassen externe Systeme den Workflow triggern.
+
+### Inbound Webhook (Workflow empfängt Daten)
+
+1. Node erstellen: `+ → Network → Webhook`
+2. HTTP Method: GET, POST, PUT, DELETE wählen
+3. Webhook URL wird angezeigt: `https://dein-server:5678/webhook/abc123`
+4. Diese URL bei externem Service (Zapier, GitHub, etc.) eintragen
+5. Wenn externe App diese URL aufruft, startet der Workflow
+
+**Test:**
+```bash
+curl -X POST https://dein-server:5678/webhook/abc123 \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Alice", "action": "login"}'
+```
+
+Output Node zeigt dann `{ "name": "Alice", "action": "login" }`.
+
+### Outbound Webhook (Workflow sendet Daten)
+
+HTTP Request Node nutzen um zu externer API zu sprechen:
+
+```
+HTTP Request Node:
+- URL: https://api.example.com/endpoint
+- Method: POST
+- Headers: { "Authorization": "Bearer token123" }
+- Body: = { "message": "{{ $json.text }}" }
+```
+
+## HTTP Request Nodes
+
+Für API-Calls.
+
+**Konfiguration:**
+```
+URL:      https://api.ollama.ai/generate
+Method:   POST
+Headers:  Authorization: Bearer abc123
+          Content-Type: application/json
+Body:     = {
+             "model": "llama2",
+             "prompt": "{{ $json.user_query }}",
+             "stream": false
+           }
+```
+
+**Response parsen:**
+```
+JSON.stringify(parse(data))  # Response in JSON konvertieren
+Object.keys(data)            # Alle Keys aus Response
+data.result.text             # Nested Value
+```
+
+## Error Handling
+
+Fehler treten immer auf. n8n hat mehrere Strategien:
+
+### 1. Error Workflow (global)
+
+Erstelle einen Workflow der bei JEDEM Fehler aufgerufen wird:
+1. Neue Workflow erstellen: "Error Handler"
+2. Trigger: `+ → Logic → On Error`
+3. Im Haupt-Workflow: Workflow Settings → Error Handling → diesen Workflow wählen
+
+Error-Workflow sieht dann:
+```json
+{
+  "workflow": "name-des-failed-workflow",
+  "error": "connection timeout",
+  "timestamp": "2026-03-21T14:30:00Z"
+}
+```
+
+### 2. Try-Catch Pattern (pro Node)
+
+```
+[Node A] → On Error → [Node B - Error Handler]
+       ↘ (falls erfolgreich) → [Node C - Continue]
+```
+
+Node A mit Error Handler verbinden:
+1. Verbindung hinzufügen
+2. "Add Node" → Node wählen
+3. Auf der Verbindung: "Error" einschalten
+
+### 3. Conditional Error Response
+
+Mit If-Node Fehler abfangen:
+
+```
+[HTTP Request] → [If]
+  ├─ {{ $node["HTTP Request"].status === 200 }}
+  │  → [Success Handler]
+  └─ {{ $node["HTTP Request"].status !== 200 }}
+     → [Error Handler]
+```
+
+## AI-Integrationen
+
+### Ollama lokal
+
+```yaml
+HTTP Request Node:
+  URL:    http://ollama:11434/api/generate
+  Method: POST
+  Body:   = {
+             "model": "llama2",
+             "prompt": "{{ $json.question }}",
+             "stream": false
+           }
+```
+
+Parse Response:
+```
+Set Node:
+  Key: answer
+  Value: = {{ $json.response }}
+```
+
+### OpenAI / GPT
+
+```yaml
+HTTP Request Node:
+  URL:        https://api.openai.com/v1/chat/completions
+  Method:     POST
+  Headers:    Authorization: Bearer {{ $env.OPENAI_API_KEY }}
+  Body:       = {
+                 "model": "gpt-4",
+                 "messages": [
+                   { "role": "user", "content": "{{ $json.query }}" }
+                 ]
+               }
+```
+
+### Community Nodes (pre-built)
+
+n8n Marketplace hat über 500 vorgefertigte Integrationen:
+
+```
+Workflows → Nodes → Community Nodes (oben rechts)
+Suche nach "OpenAI" oder "Slack" etc.
+Install → Node ist sofort verfügbar
+```
+
+Beliebte Community Nodes:
+- OpenAI
+- Anthropic Claude
+- Langchain
+- Notion
+- Google Sheets
+- Discord
+
+## Tipps für Anfänger
+
+**1. Workflows testen ohne Auto-Execution:**
+Button "Test Workflow" klicken → nur einmal ausführen.
+
+**2. Debug-Output:**
+Set Node am Ende hinzufügen und alle Daten anzeigen:
+```
+Key: debug
+Value: = {{ $json }}
+```
+
+**3. Logs prüfen:**
+```bash
+docker compose logs -f n8n
+```
+
+**4. Credentials sicher speichern:**
+Nicht Tokens/Keys direkt in Nodes. Stattdessen:
+1. Credentials → + → App wählen
+2. Token eintragen
+3. Credentials speichern
+4. In Node: Credentials Dropdown nutzen (nicht Manual)
+
+**5. Aktivierte Workflows automatisch starten:**
+Workflow speichern → Oben rechts: Toggle "Active"
+
+Jetzt läuft der Workflow nach Trigger (z.B. Webhook) automatisch.
+
+**6. Größere Datenmengen:**
+Bei >1000 Items nutze Batch-Processing:
+```
+Loop Node → Batch Size setzen → nur X Items pro Iteration
+```
+
+## Häufige Fehler
+
+**"{{ $json.field }} undefined"**
+- Feld existiert nicht im Input
+- Überprüfen: Input vom vorherigen Node prüfen
+- Expression debuggen: Set Node hinzufügen mit `{{ $json }}` um alle Felder zu sehen
+
+**"ECONNREFUSED" bei HTTP Request**
+- Service läuft nicht
+- Firewall blockiert Port
+- Hostname falsch (intern: `http://ollama:11434`, nicht localhost)
+
+**"Cannot find module"**
+- Community Node nicht installiert
+- Docker-Image neu bauen: `docker compose up --build`
+
+**API Key nicht akzeptiert**
+- Credentials-Format falsch
+- Key ist abgelaufen
+- Credentials in Logs nie zeigen—nur in Credentials UI
+
+## Checkliste
+
+- [ ] n8n installiert (Docker oder lokal)
+- [ ] Admin-Account erstellt
+- [ ] Erstes Test-Workflow gebaut (z.B. Webhook → Set → HTTP Response)
+- [ ] Webhook getestet mit curl
+- [ ] Datenbank-Node getestet (falls Postgres/MySQL in Einsatz)
+- [ ] Error Handling eingebaut (Error Workflow oder Try-Catch)
+- [ ] Credentials für externe Services hinzugefügt (kein Hardcoding!)
+- [ ] Luxon DateTime Format verstanden (yyyy-MM-dd!)
+- [ ] Community Nodes installiert für deine Use-Cases
+- [ ] Logs verstanden wie man sie liest
+
+## Quellen und Links
+
+- [n8n](https://github.com/n8n-io/n8n)
+- [n8n Docs](https://docs.n8n.io)

@@ -1,0 +1,775 @@
+---
+title: CLAUDE.md Masterclass — Projekt-Konfiguration
+date: 2026-03-21
+summary: Der komplette Guide zu CLAUDE.md — Inheritance Hierarchy, Rule-Verzeichnisse, Dynamic Content, Real-world Beispiele für verschiedene Projekt-Typen, Team-Workflows und Anti-Patterns.
+tags: [claude-code, claude-md, konfiguration, teams, documentation]
+author: AI Engineering
+---
+
+# CLAUDE.md Masterclass — Projekt-Konfiguration
+
+CLAUDE.md ist die **Single Source of Truth** für deinen Projekt-Kontext. Es ist nicht optional — es ist der Unterschied zwischen "Claude versteht mein Projekt" und "Claude macht Fehler".
+
+Dieser Guide zeigt dir nicht nur HOW, sondern auch WHY und WHEN.
+
+## Was ist CLAUDE.md?
+
+CLAUDE.md ist eine Markdown-Datei, die Claude Code **automatisch** beim Session-Start liest. Sie wird zu Part deines System Prompts — Claude sieht dein Projekt-Kontext, bevor du auch nur etwas schreibst.
+
+**Ohne CLAUDE.md:**
+```
+Du: "Schreib einen Unit Test"
+Claude: "Hier ist ein Jest Test..."
+Du: "Wir nutzen Vitest, nicht Jest!"
+```
+
+**Mit CLAUDE.md:**
+```
+# Testing
+Wir nutzen Vitest mit den Scripts im Makefile.
+```
+
+Claude weiß das schon, bevor du fragst.
+
+## Die Inheritance Hierarchy
+
+Es gibt VIER Ebenen, wo CLAUDE.md existieren kann:
+
+```
+1. ~/.claude/CLAUDE.md
+   ↓ (wird geladen)
+2. PROJECT_ROOT/CLAUDE.md
+   ↓ (wird geladen)
+3. PROJECT_ROOT/.claude/CLAUDE.md
+   ↓ (wird geladen)
+4. PROJECT_ROOT/.claude/rules/*.md
+   ↓ (alle werden geladen)
+```
+
+**Alle Ebenen werden CONCATENIERT.** Das bedeutet:
+
+- Ebene 1 gilt für ALLE Projekte (global)
+- Ebenen 2-4 gelten nur für diesen Projekt (spezifisch)
+- Spezifischere Einträge überschreiben globale
+
+### Praktisches Beispiel
+
+**~/.claude/CLAUDE.md (Global):**
+```markdown
+# Global Conventions
+
+- All code must have docstrings
+- Use type hints (Python 3.10+)
+- Logging über `logging` modul, nicht print()
+```
+
+**my-project/CLAUDE.md (Projekt-Level):**
+```markdown
+# My Project
+
+Das ist ein FastAPI Backend.
+
+## Testing
+
+Wir nutzen pytest + Faker für Test-Daten.
+Run: `make test`
+```
+
+**my-project/.claude/CLAUDE.md (Projekt-Spezifisch):**
+```markdown
+# Team-Secrets (nicht ins Git!)
+
+Server Details, API Keys, URLs...
+Dieses File ist in .gitignore.
+```
+
+**Result:** Claude sieht alles in dieser Reihenfolge.
+
+## Was in welches CLAUDE.md gehört?
+
+### Ebene 1: ~/.claude/CLAUDE.md (Global)
+
+Dinge, die für ALLE deine Projekte gelten:
+
+```markdown
+# Global Development Guidelines
+
+## Language Preferences
+- Deutsch für interne Kommunikation, English für Code-Comments
+- Code Style: follow PEP 8 (Python), Prettier (JS)
+
+## Never Do This
+- NIEMALS sensible Daten in Logs
+- NIEMALS hardcoded API Keys
+- NIEMALS Production Credentials testen ohne Approval
+
+## Common Commands I Use
+- `git status` = check working tree
+- `make test` = run tests
+- `make lint` = check code style
+
+## File Structure Pattern
+Alle Projekte folgen diesem Pattern:
+```
+src/
+tests/
+docs/
+Makefile
+.env.example
+```
+
+## Testing Philosophy
+- Unit Tests für Business Logic
+- Integration Tests für APIs
+- E2E Tests nur für kritische User Flows
+```
+
+### Ebene 2: PROJECT_ROOT/CLAUDE.md (Geteilt)
+
+Projekt-spezifisch, wird ins Git committed:
+
+```markdown
+# My-Project: FastAPI User Management Service
+
+## What This Project Does
+Backend API für User Registration, Login, Profile Management.
+Tech Stack: FastAPI, PostgreSQL, JWT Auth, Alembic Migrations.
+
+## Getting Started
+```bash
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+python -m alembic upgrade head
+uvicorn app.main:app --reload
+```
+
+## Project Structure
+```
+src/
+  ├── app/
+  │   ├── main.py          # FastAPI app
+  │   ├── models.py        # SQLAlchemy models
+  │   ├── schemas.py       # Pydantic schemas
+  │   ├── database.py      # DB connection
+  │   └── routes/
+  │       ├── users.py
+  │       ├── auth.py
+  │       └── profiles.py
+  └── tests/
+      ├── test_users.py
+      ├── test_auth.py
+      └── conftest.py      # pytest fixtures
+```
+
+## Code Conventions
+- Type hints everywhere: `def create_user(name: str) -> User:`
+- Docstrings: Google style
+- Max line length: 88 (Black formatter)
+- Database: All migrations MUST be reversible
+
+## Testing
+```
+make test              # Run all tests
+make test-coverage    # With coverage
+make test -- -k test_auth   # Spezific test
+```
+
+## Deployment
+- Staging: `make deploy-staging` → runs migrations, then deploys
+- Production: `make deploy-prod` → REQUIRES approval in Slack
+
+## Gotchas
+- Database: Always create migrations BEFORE schema changes
+- Alembic: Never edit migration files after they're committed
+- Secrets: .env is NOT in git, .env.example IS
+- Auth: JWT secret rotates monthly — check VAULT
+
+## Known Issues
+- Email sending is slow on Staging (5-10 seconds)
+  → Expected because we use a testing SMTP server
+- User deletion is SOFT delete (status='deleted')
+  → Don't SELECT without `status != 'deleted'`
+```
+
+### Ebene 3: PROJECT_ROOT/.claude/CLAUDE.md (Team-Secrets)
+
+Alles, was NICHT ins Git gehört:
+
+```markdown
+# Team Secrets & Internal Docs
+
+## Credentials (VAULT)
+```bash
+# Alle in Vault, nicht hier!
+vault kv get shared/my-project/PROD_DATABASE_URL
+vault kv get shared/my-project/JWT_SECRET
+```
+
+## Server Details
+- Staging Server: x.x.x.x (SSH via bastion)
+- Prod Server: x.x.x.x (NO SSH, nur über CI/CD)
+- Database Replica: x.x.x.x (read-only)
+
+## Team Members & Permissions
+- Alice (alice@example.com): Full Prod Access
+- Bob (bob@example.com): Staging Only
+- Charlie (charlie@example.com): Code Review Only
+
+## Recent Incidents & Workarounds
+- 2026-03-15: Database lock storm. Workaround: `PRAGMA busy_timeout=5000;`
+- 2026-03-10: Cache invalidation bug. Fixed in v1.2.3
+```
+
+### Ebene 4: PROJECT_ROOT/.claude/rules/*.md (Modulare Rules)
+
+Große Dokumentation, aufgeteilt in Dateien:
+
+```
+.claude/rules/
+  ├── 01-safety.md              # Sicherheits-Regeln
+  ├── 02-git-workflow.md        # Git Best Practices
+  ├── 03-testing-standards.md   # Test-Anforderungen
+  ├── 04-api-design.md          # API Design Guide
+  └── 05-database-rules.md      # DB Migration Rules
+```
+
+Claude lädt ALLE automatisch.
+
+## Effektives CLAUDE.md schreiben
+
+### Rule 1: Mit Kontext starten
+
+```markdown
+# Project Name — 1-Zeile Beschreibung
+
+Das ist ein [Type] Projekt für [Zweck].
+Tech Stack: [Stack]
+Team: [Wer arbeitet dran]
+
+## Quick Start
+[3 Befehle um zum Laufen zu bringen]
+```
+
+### Rule 2: Command-Referenz
+
+```markdown
+## Common Commands
+
+| Command | What | When |
+|---------|------|------|
+| `make build` | Kompiliert Code | Vor commit |
+| `make test` | Lauft Tests | Nach änderungen |
+| `make lint` | Prüft Style | Vor push |
+| `make deploy` | Deployed zu Staging | Vor PR merge |
+```
+
+Claude findet die richtige Command schnell.
+
+### Rule 3: Datei-Struktur visualisieren
+
+```markdown
+## File Structure
+
+```
+src/
+  ├── components/     # React components
+  │   ├── Button.tsx
+  │   └── Form.tsx
+  ├── pages/          # Next.js pages
+  │   ├── index.tsx
+  │   └── about.tsx
+  ├── styles/         # Global styles
+  │   └── globals.css
+  └── utils/          # Helper functions
+      └── helpers.ts
+```
+
+Wenn Claude Code ändern soll, sieht es gleich wo.
+
+### Rule 4: "NEVER DO THIS"
+
+```markdown
+## Anti-Patterns (Never Do This)
+
+- ❌ `import * from './utils'` → Use named imports
+- ❌ `<div onClick={...}>` → Use <button> for clickable
+- ❌ Hardcode URLs → Use environment variables
+- ❌ Console.log() in production → Use logger
+```
+
+Claude vermeidet diese automatisch.
+
+### Rule 5: Testing-Anforderungen
+
+```markdown
+## Testing Expectations
+
+Every file with business logic MUST have tests.
+
+| Type | Coverage | Location |
+|------|----------|----------|
+| Unit Tests | >80% | `tests/unit/` |
+| Integration | >60% | `tests/integration/` |
+| E2E | Critical paths only | `tests/e2e/` |
+
+Run: `pytest --cov=src tests/`
+```
+
+### Rule 6: Deployment-Prozess
+
+```markdown
+## Deployment Checklist
+
+1. [ ] All tests pass locally: `make test`
+2. [ ] Linter clean: `make lint`
+3. [ ] Create release notes: `docs/CHANGELOG.md`
+4. [ ] Tag commit: `git tag v1.2.3`
+5. [ ] Push to main: `git push origin main --tags`
+6. [ ] CI/CD starts automatically
+7. [ ] Check Staging: https://staging.example.com
+8. [ ] Approve Production in Slack bot
+```
+
+## Real-World Beispiele
+
+### Beispiel 1: Node.js REST API
+
+```markdown
+# User API — TypeScript REST Service
+
+Backend für Mobile & Web Apps. Express + TypeScript + MongoDB.
+
+## Getting Started
+
+```bash
+npm install
+npm run dev           # Lokaler Server auf :3000
+npm test              # Run tests
+npm run build         # Productive build
+```
+
+## API Routes
+
+```
+GET    /users              # List all users
+GET    /users/:id          # Get user by ID
+POST   /users              # Create user
+PUT    /users/:id          # Update user
+DELETE /users/:id          # Delete user (soft)
+POST   /users/:id/profile  # Update profile
+```
+
+## Code Style
+
+- TypeScript strict mode REQUIRED
+- ESLint + Prettier
+- Max 100 chars per line
+- Function signatures MUST have return types
+- NEVER `any` type (use `unknown` + narrowing)
+
+## Database
+
+- MongoDB on MongoDB Atlas
+- Mongoose for ODM
+- Migrations: Use custom scripts in `db/migrations/`
+- Seeding: `npm run seed` (development only)
+
+## Testing
+
+- Jest + Supertest
+- Unit Tests: `tests/unit/`
+- Integration: `tests/integration/` (uses test DB)
+- Coverage: Min 70%
+
+Run: `npm test -- --watch`
+
+## Deployment
+
+Environment: Heroku (free tier)
+Process: Merge to `main` → GitHub Actions runs tests → Auto-deploys to staging
+
+To Production: Tag with `v*.*.*` → manually approve in Slack
+
+## Known Issues
+
+- Slow startup (30s) on cold Heroku dyno — expected
+- MongoDB connection pooling sometimes fails in tests — retry works
+```
+
+### Beispiel 2: Python Django Backend
+
+```markdown
+# Store API — Django REST Service
+
+E-Commerce Backend. Django + DRF + PostgreSQL + Celery.
+
+## Setup
+
+```bash
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+```
+
+## Django Structure
+
+```
+store/
+  ├── settings.py          # Main config
+  ├── urls.py              # URL routing
+  ├── wsgi.py              # WSGI entry
+  ├── apps/
+  │   ├── products/        # Product CRUD
+  │   │   ├── models.py
+  │   │   ├── views.py
+  │   │   ├── serializers.py
+  │   │   ├── urls.py
+  │   │   └── tests.py
+  │   ├── orders/          # Order management
+  │   └── users/           # User auth
+  └── tests/
+      └── factories.py     # Test data factories
+```
+
+## Key Commands
+
+| Command | Purpose |
+|---------|---------|
+| `python manage.py makemigrations` | Create migrations |
+| `python manage.py migrate` | Apply migrations |
+| `python manage.py createsuperuser` | Create admin user |
+| `pytest` | Run all tests |
+| `pytest --pdb` | Debug failed test |
+| `black store/` | Format code |
+
+## Coding Rules
+
+- Use Django ORM (NO raw SQL)
+- Serializers MUST validate input
+- Views MUST have docstrings
+- APIView classes for complex logic, Viewsets for CRUD
+- Never use `select_related()` without necessity (N+1 queries!)
+
+## Testing
+
+- Factory Boy for test data: `from tests.factories import UserFactory`
+- Mock external services (payment, email, etc.)
+- Test both success and error cases
+- Min 75% coverage for critical paths
+
+## Database
+
+PostgreSQL in production. Migrations tracked in git.
+
+RULES:
+- Migrations are immutable once deployed
+- AddField with default=... must specify it
+- Always provide data migration if changing existing column
+
+## Celery Tasks
+
+Long-running tasks (emails, reports) run async.
+
+```python
+# task.py
+@app.task
+def send_order_confirmation(order_id):
+    # ...
+```
+
+Run with: `celery -A store worker`
+
+## Deployment
+
+- Staging: Docker on DigitalOcean
+- Prod: Managed PostgreSQL + Gunicorn on App Platform
+- Database backups: Daily at 2 AM UTC
+- Monitoring: DataDog + alerts on errors
+
+## Common Issues
+
+- Migrations stuck? → Check `django_migrations` table
+- Celery tasks not running? → Check Redis connection
+- Slow queries? → Use Django Silk for profiling: `pip install django-silk`
+```
+
+### Beispiel 3: React Frontend
+
+```markdown
+# Dashboard — Next.js React SPA
+
+Customer-facing dashboard für Echtzeit-Analytics.
+Tech: Next.js 14 + TypeScript + TailwindCSS + SWR.
+
+## Getting Started
+
+```bash
+npm install
+npm run dev              # Dev server on :3000
+npm run build           # Production build
+npm test                # Run tests
+npm run lint            # Check code style
+```
+
+## Project Structure
+
+```
+app/
+  ├── layout.tsx         # Root layout
+  ├── page.tsx           # Home page
+  ├── dashboard/
+  │   └── page.tsx       # /dashboard route
+  ├── api/               # API routes (Next.js API)
+  │   └── analytics/
+  │       └── route.ts   # GET /api/analytics
+  └── components/
+      ├── Header.tsx
+      ├── Sidebar.tsx
+      └── Chart.tsx
+lib/
+  ├── hooks/
+  │   └── useAnalytics.ts
+  ├── api.ts             # API client (fetch)
+  └── utils.ts
+
+public/
+  └── logo.png
+
+tests/
+  ├── components/
+  │   └── Header.test.tsx
+  └── lib/
+      └── utils.test.ts
+```
+
+## Styling
+
+TailwindCSS exclusively. No CSS-in-JS.
+
+```tsx
+// ✓ Good
+<div className="flex gap-4 p-2">
+
+// ✗ Bad
+<div style={{display: 'flex', gap: '16px'}}>
+```
+
+## Data Fetching
+
+Use SWR for client-side data:
+
+```typescript
+import useSWR from 'swr';
+
+function Analytics() {
+  const { data, error, isLoading } = useSWR('/api/analytics', fetch);
+
+  if (isLoading) return <div>Lädt...</div>;
+  if (error) return <div>Fehler!</div>;
+
+  return <Chart data={data} />;
+}
+```
+
+## Testing
+
+Jest + React Testing Library.
+
+```bash
+npm test                    # Watch mode
+npm test -- --coverage      # Coverage report
+```
+
+Every component MUST have tests for:
+- Render when data loads
+- Error state
+- Empty state
+- User interactions
+
+## Deployment
+
+Vercel (automatic on push to `main`):
+
+```
+Merge to main → Vercel detects → npm run build → auto-deploy
+```
+
+Preview deployments on every PR.
+
+## Performance
+
+- Next.js Image component for all images (auto-optimization)
+- Code splitting: Lazy load heavy components
+- Monitor Core Web Vitals in Vercel dashboard
+
+## Environment Variables
+
+```bash
+# .env.local (NOT in git)
+NEXT_PUBLIC_API_URL=http://localhost:3001
+API_SECRET_KEY=xxxxx
+```
+
+`NEXT_PUBLIC_*` are visible in browser (public), others are server-only.
+```
+
+## Dynamic Content mit Shell-Commands
+
+Du kannst Shell-Commands in CLAUDE.md einbetten, die bei Session-Start laufen:
+
+```markdown
+## Current Build Status
+
+!`cd /project && npm run build:check || echo "Build failed"`!
+
+## Test Coverage
+
+!`cd /project && npm test -- --coverage | tail -5`!
+
+## Latest Commits
+
+!`git log --oneline -5`!
+```
+
+Das Output des Commands wird **inline** eingefügt, bevor Claude den Rest liest.
+
+Beispiel: Wenn dein Test-Coverage 82% ist, sieht Claude:
+```markdown
+## Test Coverage
+
+Coverage: 82%
+```
+
+## Anti-Patterns (Was NICHT in CLAUDE.md gehört)
+
+### ❌ NICHT: Komplette API-Dokumentation
+
+```markdown
+# API Documentation
+
+## GET /users/:id
+Returns user with ID.
+
+Response:
+{
+  "id": 1,
+  "name": "John",
+  ...
+}
+```
+
+**Warum nicht?** Das ist zu ausführlich. Stattdessen:
+- Verlinke auf `API.md` im Projekt
+- Kurze URL-Referenz: "API Docs: `docs/API.md`"
+
+### ❌ NICHT: Hunderte Zeilen Code-Beispiele
+
+```markdown
+# How to Use the Database
+
+```python
+def create_user(name):
+    # ...full 50-line function
+```
+```
+
+**Besser:** "Siehe `src/db/user_operations.py` für Beispiele."
+
+### ❌ NICHT: VersionHistory & Changelog
+
+```markdown
+# Version History
+- v1.0.0: Initial release
+- v1.0.1: Fixed bug #123
+- v1.0.2: Added feature X
+- v1.1.0: Refactored DB layer
+...
+```
+
+**Besser:** "Changelog in `CHANGELOG.md`"
+
+### ❌ NICHT: Sensible Daten direkt
+
+```markdown
+# Database Connection
+
+Host: prod.example.com
+User: admin
+Password: super-secret-123  ← NIEMALS!
+```
+
+**Besser:** "Nutze `vault kv get shared/my-project/DATABASE_URL`"
+
+## CLAUDE.md in Teams
+
+### Setup für ein Team
+
+**Repo-Struktur:**
+```
+.
+├── CLAUDE.md              # Geteilt, ins Git
+├── .claude/
+│   ├── CLAUDE.md          # Team-Secrets, in .gitignore
+│   ├── settings.json      # Hooks, Rules, geteilt
+│   ├── settings.local.json # Personal, nicht geteilt
+│   ├── rules/             # Modulare Rules
+│   │   ├── 01-git-workflow.md
+│   │   ├── 02-testing.md
+│   │   └── 03-secrets.md
+│   ├── agents/            # Custom Agents
+│   │   └── code-reviewer.md
+│   └── skills/            # Custom Skills
+│       └── deploy-prod/
+│           └── SKILL.md
+```
+
+### Onboarding neuer Entwickler
+
+Neuer Dev klont das Repo:
+
+```bash
+git clone https://github.com/myteam/my-project
+cd my-project
+```
+
+Claude Code startet und liest:
+1. `~/.claude/CLAUDE.md` (global)
+2. `CLAUDE.md` (Projekt)
+3. `.claude/CLAUDE.md` (Team-Secrets, falls vorhanden)
+4. `.claude/rules/` (alle Dateien)
+
+**Result:** Neuer Dev hat sofort alle Informationen, ohne umständliches Onboarding!
+
+## Checkliste: CLAUDE.md Governance
+
+- [ ] `.claude/CLAUDE.md` ist in `.gitignore` (Team-Secrets)
+- [ ] `CLAUDE.md` im Root ist committet (geteilt)
+- [ ] `.claude/rules/` folgt Nummern-Konvention (01-*, 02-*, ...)
+- [ ] CLAUDE.md < 500 Zeilen (Lesbarkeit)
+- [ ] Commands sind aktuell (nicht outdated)
+- [ ] Keine API Keys oder Passwörter in committetem CLAUDE.md
+- [ ] File Paths sind relativ zum Projekt-Root (nicht hardcoded)
+- [ ] Team hat regelmäßig CLAUDE.md synchronisiert (z.B. Monthly Review)
+- [ ] Neue Members lesen CLAUDE.md vor dem ersten Commit
+- [ ] CLAUDE.md wird aktualisiert bei großen Änderungen (nicht-trivial)
+
+---
+
+**Sources:**
+- [Claude Code Quickstart - Claude Code Docs](https://code.claude.com/docs/en/quickstart)
+- [How I use Claude Code - Builder.io](https://www.builder.io/blog/claude-code)
+- [Claude Code Configuration Guide](https://claudelog.com/configuration/)
+- [Using CLAUDE.MD files - Claude Blog](https://claude.com/blog/using-claude-md-files)
+
+## Quellen und Links
+
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

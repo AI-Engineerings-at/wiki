@@ -1,0 +1,701 @@
+---
+title: "Claude Code AI OS einrichten"
+date: 2026-03-21
+summary: "Installation, .claude/ Struktur, Projekt-Config, Skills, Hooks, MCP-Server, IDE-Integration."
+tags: ["claude-code", "ai-os", "automation", "skills", "mcp"]
+author: "AI Engineering"
+---
+
+# Claude Code AI OS einrichten
+
+Du wirst Claude Code CLI installieren und als AI Operating System für deinen Stack konfigurieren. Das erlaubt dir Code-Analysen, Automation, Skill-Management und MCP-Integration — alles lokal.
+
+**Voraussetzung**: Claude API Key (von Anthropic), Node.js 18+, Python 3.9+
+
+## Was ist Claude Code?
+
+Claude Code ist eine CLI + SDK für:
+- **Codebase Exploration**: Durchsuche deinen Code mit Natural Language
+- **Automated Refactoring**: Change Suggestions direkt anwenden
+- **Skill System**: Wiederverwendbare Automation bauen
+- **MCP Integration**: Externe Tools (GitHub, Linear, etc.) anbinden
+- **Hooks System**: Pre/Post Workflows
+
+## Schritt 1: Installation
+
+### 1.1 Claude API Key besorgen
+
+1. Geh zu: https://console.anthropic.com/
+2. Registriere dich oder logge dich ein
+3. Geh zu "API Keys"
+4. Klick "+ Create API Key"
+5. Copy den Key
+
+### 1.2 Claude Code CLI installieren
+
+```bash
+npm install -g @anthropic-ai/claude-code
+
+# Verify installation
+claude --version
+```
+
+### 1.3 API Key konfigurieren
+
+```bash
+export ANTHROPIC_API_KEY="sk-ant-..."
+```
+
+Oder persistent (in `~/.bashrc` oder `~/.zshrc`):
+
+```bash
+echo 'export ANTHROPIC_API_KEY="sk-ant-..."' >> ~/.bashrc
+source ~/.bashrc
+```
+
+## Schritt 2: `.claude/` Verzeichnis Struktur
+
+Geh in dein Projekt-Verzeichnis (z.B. `ai-stack`):
+
+```bash
+cd ai-stack
+mkdir -p .claude
+```
+
+Erstelle die Struktur:
+
+```
+.claude/
+├── CLAUDE.md              # Projekt-Identität + Regeln
+├── claude.config.json     # Konfiguration (optional)
+├── agents/                # Agent-Definitionen
+│   ├── builder.md
+│   ├── researcher.md
+│   └── ...
+├── skills/                # Wiederverwendbare Automationen
+│   ├── skill-name/
+│   │   ├── SKILL.md
+│   │   └── scripts/
+│   │       └── main.py
+│   └── ...
+├── rules/                 # Verhaltensregeln
+│   ├── 01-safety.md
+│   ├── 02-code-standards.md
+│   └── ...
+└── hooks/                 # Git + Workflow Hooks
+    ├── pre-commit.json
+    └── post-merge.json
+```
+
+## Schritt 3: CLAUDE.md (Projekt-Identität)
+
+Datei: `.claude/CLAUDE.md`
+
+```markdown
+# AI Stack Projekt
+
+> Eine vollständige Self-Hosted AI Infrastruktur mit Ollama, n8n, und Monitoring.
+> Dieses Dokument beschreibt das Projekt für Claude Code.
+
+## Projekt-Infos
+
+- **Name**: ai-stack
+- **Owner**: [Dein Name]
+- **Purpose**: Local AI Automation + Monitoring
+- **Tech Stack**: Docker, Ollama, n8n, PostgreSQL, Prometheus, Grafana
+- **Main Language**: Python 3.11, JavaScript (n8n)
+
+## Directory Structure
+
+```
+.
+├── docker-compose.yml     # Service-Definition
+├── prometheus.yml         # Monitoring Config
+├── alerts.yml             # Alert Rules
+├── n8n-workflows/         # n8n Backup (JSONs)
+├── monitoring/            # Prometheus Scripts
+├── dsgvo/                 # Compliance Docs
+└── wiki/                  # Dokumentation
+```
+
+## Key Concepts
+
+### Services
+- **Ollama** (Port 11434): LLM Engine
+- **Open WebUI** (Port 3000): Chat Interface
+- **n8n** (Port 5678): Workflow Automation
+- **PostgreSQL** (Port 5432): Data Store
+- **Prometheus** (Port 9090): Metrics
+- **Grafana** (Port 3001): Dashboards
+
+### Important Tasks
+- Backup PG Database daily
+- Monitor Ollama health
+- Rotate API credentials monthly
+
+## For Claude Code
+
+### What Claude can do
+- Analyze Docker Compose for security issues
+- Suggest n8n Workflow optimizations
+- Generate monitoring scripts
+- Write Python automation
+
+### What Claude should NOT do
+- Commit secrets (API keys, passwords)
+- Delete production backups
+- Change Ollama models without testing
+
+### Questions to Ask
+- "Is this Prometheus query optimized?"
+- "Refactor this n8n Workflow for readability"
+- "Generate a backup script for PostgreSQL"
+
+---
+Last Updated: 2026-03-21
+```
+
+## Schritt 4: claude.config.json (Konfiguration)
+
+Datei: `.claude/claude.config.json`
+
+```json
+{
+  "project": {
+    "name": "ai-stack",
+    "description": "Self-Hosted AI Stack",
+    "version": "1.0.0"
+  },
+  "claude": {
+    "model": "claude-opus-4-1",
+    "max_tokens": 8000,
+    "timeout": 120
+  },
+  "context": {
+    "codebaseSize": "medium",
+    "complexity": "high",
+    "domains": ["devops", "automation", "monitoring"]
+  },
+  "workspace": {
+    "languages": ["python", "javascript", "yaml"],
+    "tools": ["docker", "n8n", "ollama"],
+    "ignorePatterns": [
+      "node_modules",
+      ".git",
+      "__pycache__",
+      "*.pyc"
+    ]
+  },
+  "mcp": {
+    "servers": [
+      {
+        "name": "filesystem",
+        "enabled": true
+      },
+      {
+        "name": "github",
+        "enabled": false,
+        "config": {
+          "token": "${GITHUB_TOKEN}"
+        }
+      }
+    ]
+  }
+}
+```
+
+## Schritt 5: Agent-Definitionen
+
+Datei: `.claude/agents/builder.md`
+
+```yaml
+---
+name: builder
+description: Baut Features und schreibt Code
+model: claude-opus-4-1
+tools: [Read, Glob, Grep, Bash, Write, Edit]
+---
+
+# Builder Agent
+
+## Identität
+Ich baue Features, schreibe Code, optimiere Workflows.
+
+## Fähigkeiten
+- Python Scripting
+- Docker + docker-compose
+- n8n Workflow Design
+- SQL Queries
+
+## Regeln
+1. Testet jeden Code lokal vor Commit
+2. Dokumentiert Breaking Changes
+3. Erstellt Pull Requests statt Direct-Commits
+4. Secrets geht nie in Code
+
+## Workflow
+1. Lies das Feature Request
+2. Analysiere bestehenden Code
+3. Schreib neuen Code
+4. Teste es lokal
+5. Committed mit aussagekräftiger Message
+6. Öffne PR für Review
+
+---
+```
+
+Datei: `.claude/agents/researcher.md`
+
+```yaml
+---
+name: researcher
+description: Recherchiert Probleme und Best Practices
+model: claude-opus-4-1
+tools: [Read, Glob, Grep]
+disallowedTools: [Bash, Write, Edit]
+---
+
+# Researcher Agent
+
+## Identität
+Ich analysiere Code, finde Probleme, gebe Empfehlungen.
+
+## Fähigkeiten
+- Code Analysis
+- Security Review
+- Performance Profiling
+- Documentation Check
+
+## Workflow
+1. Analysiere das Problem
+2. Durchsuche Codebase
+3. Mache Vorschläge
+4. Dokumentiere Findings
+5. Eskaliere kritische Issues
+
+---
+```
+
+## Schritt 6: Erste Skill erstellen
+
+Datei: `.claude/skills/backup-postgres/SKILL.md`
+
+```yaml
+---
+name: backup-postgres
+description: >
+  Erstellt ein PostgreSQL Backup und speichert es lokal.
+  Trigger: postgres, backup, database
+version: 1.0.0
+requires: [docker]
+produces: [backup-file]
+model: haiku
+user-invocable: true
+last-verified: 2026-03-21
+---
+
+# PostgreSQL Backup Skill
+
+## Was macht er
+
+Erstellt einen PostgreSQL Dump mit docker-compose exec, speichert ihn mit Timestamp, prüft ob erfolgreich.
+
+## Argumente
+
+- `--output-dir`: Wo speichern? Default: `./backups/`
+- `--compress`: Gzip komprimieren? Default: true
+
+## Ausführung
+
+```bash
+/backup-postgres --output-dir ./backups --compress true
+```
+
+## Implementation
+
+### 1. Datei: `.claude/skills/backup-postgres/scripts/backup.sh`
+
+```bash
+#!/bin/bash
+
+set -e
+
+OUTPUT_DIR="${1:-.}/backups"
+COMPRESS="${2:-true}"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+BACKUP_FILE="$OUTPUT_DIR/postgres_backup_$TIMESTAMP.sql"
+
+if [ "$COMPRESS" = "true" ]; then
+  BACKUP_FILE="${BACKUP_FILE}.gz"
+fi
+
+# Erstelle Verzeichnis falls nicht existent
+mkdir -p "$OUTPUT_DIR"
+
+echo "⏳ Starting PostgreSQL backup..."
+
+# Dump Datenbank
+if [ "$COMPRESS" = "true" ]; then
+  docker-compose exec -T postgres pg_dump \
+    -U n8n \
+    -d n8n | gzip > "$BACKUP_FILE"
+else
+  docker-compose exec -T postgres pg_dump \
+    -U n8n \
+    -d n8n > "$BACKUP_FILE"
+fi
+
+# Prüfe Dateigröße
+SIZE=$(du -h "$BACKUP_FILE" | cut -f1)
+echo "✅ Backup erfolgreich: $BACKUP_FILE ($SIZE)"
+
+# Beende mit Exit Code 0
+exit 0
+```
+
+### 2. Python Wrapper: `.claude/skills/backup-postgres/scripts/main.py`
+
+```python
+#!/usr/bin/env python3
+import json
+import subprocess
+import sys
+import os
+from pathlib import Path
+
+def backup_postgres(output_dir="./backups", compress=True):
+    """Wrapper für backup.sh"""
+    script_path = Path(__file__).parent / "backup.sh"
+
+    try:
+        result = subprocess.run(
+            [str(script_path), output_dir, str(compress).lower()],
+            capture_output=True,
+            text=True,
+            timeout=300
+        )
+
+        if result.returncode != 0:
+            return {
+                "success": False,
+                "error": result.stderr
+            }
+
+        # Finde die neueste Backup-Datei
+        backup_dir = Path(output_dir)
+        backups = sorted(backup_dir.glob("postgres_backup_*.sql*"))
+
+        return {
+            "success": True,
+            "backup_file": str(backups[-1]) if backups else None,
+            "size": backups[-1].stat().st_size if backups else 0,
+            "stdout": result.stdout
+        }
+
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+if __name__ == "__main__":
+    output_dir = sys.argv[1] if len(sys.argv) > 1 else "./backups"
+    compress = sys.argv[2].lower() == "true" if len(sys.argv) > 2 else True
+
+    result = backup_postgres(output_dir, compress)
+    print(json.dumps(result))
+```
+
+---
+```
+
+## Schritt 7: Hooks konfigurieren
+
+Datei: `.claude/hooks/pre-commit.json`
+
+```json
+{
+  "name": "pre-commit",
+  "description": "Läuft vor jedem Git Commit",
+  "triggers": ["git.pre-commit"],
+  "rules": [
+    {
+      "name": "no-secrets",
+      "pattern": "ANTHROPIC_API_KEY|PASSWORD|SECRET",
+      "action": "fail",
+      "message": "Secrets dürfen nicht committed werden!"
+    },
+    {
+      "name": "yaml-syntax",
+      "files": "*.yml,*.yaml",
+      "check": "yaml-lint",
+      "action": "warn"
+    },
+    {
+      "name": "python-format",
+      "files": "*.py",
+      "check": "black --check",
+      "action": "auto-fix"
+    }
+  ]
+}
+```
+
+Datei: `.claude/hooks/post-merge.json`
+
+```json
+{
+  "name": "post-merge",
+  "description": "Läuft nach Git Merge",
+  "triggers": ["git.post-merge"],
+  "rules": [
+    {
+      "name": "update-deps",
+      "check": "check if requirements.txt changed",
+      "action": "run: pip install -r requirements.txt"
+    },
+    {
+      "name": "docker-rebuild",
+      "check": "check if docker-compose.yml changed",
+      "action": "run: docker-compose build"
+    }
+  ]
+}
+```
+
+## Schritt 8: MCP (Model Context Protocol) Integrationen
+
+MCP erlaubt Claude Code externe Services anzubinden.
+
+### 8.1 GitHub MCP (optional)
+
+```bash
+npm install -g @modelcontextprotocol/github
+```
+
+Datei: `.claude/mcp-servers.json`
+
+```json
+{
+  "servers": [
+    {
+      "name": "github",
+      "command": "github-mcp-server",
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "enabled": true,
+      "config": {
+        "owner": "dein-username",
+        "repo": "ai-stack"
+      }
+    },
+    {
+      "name": "filesystem",
+      "command": "filesystem-mcp-server",
+      "enabled": true,
+      "config": {
+        "root": "/Users/dein-user/ai-stack"
+      }
+    }
+  ]
+}
+```
+
+Start MCP Server:
+
+```bash
+claude mcp start
+```
+
+Dann kannst du sagen:
+
+```
+"Schau auf GitHub Issue #42 und schreib die Lösung"
+```
+
+### 8.2 Docker MCP (wenn vorhanden)
+
+Falls du ein Docker MCP Server gebaut hast:
+
+```json
+{
+  "name": "docker",
+  "command": "docker-mcp-server",
+  "env": {
+    "DOCKER_HOST": "unix:///var/run/docker.sock"
+  },
+  "enabled": true
+}
+```
+
+Dann: `"Zeig mir Status aller laufenden Container"`
+
+## Schritt 9: IDE Integration (VS Code)
+
+Installiere die Anthropic Extension:
+
+```bash
+code --install-extension anthropic.claude-code
+```
+
+Oder manuell:
+1. Open VS Code
+2. Extensions (Ctrl+Shift+X)
+3. Search: "Claude Code"
+4. Install von Anthropic
+
+Konfiguriere API Key in VS Code Settings:
+
+```json
+{
+  "claude.apiKey": "sk-ant-...",
+  "claude.model": "claude-opus-4-1"
+}
+```
+
+Jetzt kannst du im Editor:
+- Select Code → Right-Click → "Ask Claude"
+- Ganz unten: "Claude Code" Panel öffnen
+- Chat Interface für Codebase Queries
+
+## Schritt 10: Erste Ausführungen testen
+
+### Test 1: Codebase-Abfrage
+
+```bash
+cd ai-stack
+claude --model opus-4-1
+
+# Im Chat:
+> "Zeig mir alle n8n Workflows mit Fehler-Handling"
+```
+
+Claude durchsucht `n8n-workflows/` und gibt Vorschläge.
+
+### Test 2: Skill ausführen
+
+```bash
+claude skill run backup-postgres --output-dir ./backups
+```
+
+Output:
+```json
+{
+  "success": true,
+  "backup_file": "./backups/postgres_backup_20260321_120000.sql.gz",
+  "size": 2048576
+}
+```
+
+### Test 3: Agent Orchestration
+
+```bash
+claude agent assign researcher "Analysiere die n8n Workflows auf Security-Lücken"
+```
+
+Researcher Agent durchsucht Code, gibt Bericht.
+
+## Best Practices
+
+### Rule: Keine Geheimnisse in Code
+
+```bash
+# FALSCH:
+docker-compose exec postgres PGPASSWORD=secret123 pg_dump
+
+# RICHTIG:
+docker-compose exec postgres PGPASSWORD=$POSTGRES_PASSWORD pg_dump
+
+# In .env:
+POSTGRES_PASSWORD="secret123"
+```
+
+### Rule: Skills sind idempotent
+
+Backup-Skill sollte zweimal hintereinander laufen und beide Male funktionieren:
+
+```bash
+claude skill run backup-postgres
+claude skill run backup-postgres  # 2x
+
+# Beide sollten erfolgreich sein, ohne Conflicts
+```
+
+### Rule: Teste lokal vor Commit
+
+```bash
+# Lokal:
+/backup-postgres --output-dir ./test-backups
+
+# Prüfe Ergebnis
+ls -la ./test-backups
+
+# Wenn OK: git add, commit, push
+```
+
+## Troubleshooting
+
+### Claude kann Codebase nicht durchsuchen
+
+```bash
+# Prüfe .claude/CLAUDE.md existiert
+ls .claude/CLAUDE.md
+
+# Prüfe Codebase-Größe
+du -sh .
+
+# Zu groß? Verkleinern mit ignorePatterns in claude.config.json
+```
+
+### Skill läuft nicht
+
+```bash
+# Prüfe Script ist ausführbar
+chmod +x .claude/skills/backup-postgres/scripts/backup.sh
+
+# Teste Script direkt
+./.claude/skills/backup-postgres/scripts/backup.sh ./test-backups
+
+# Prüfe Python Version
+python3 --version  # Sollte 3.9+
+```
+
+### API Key funktioniert nicht
+
+```bash
+# Prüfe Key ist gesetzt
+echo $ANTHROPIC_API_KEY  # Sollte "sk-ant-..." zeigen
+
+# Teste Connection
+curl -H "Authorization: Bearer $ANTHROPIC_API_KEY" \
+  https://api.anthropic.com/v1/models
+```
+
+## Nächste Schritte
+
+- Baue **Skills für deine Workflows** (z.B. "deploy-workflow")
+- Integriere **GitHub Actions** mit Claude Code Review
+- Erstelle **Custom Agents** für spezifische Aufgaben
+- Baue **MCP Server** für deine Services
+
+## Checkliste
+
+- [ ] Claude Code CLI installiert
+- [ ] API Key konfiguriert
+- [ ] `.claude/` Verzeichnis struktur erstellt
+- [ ] `CLAUDE.md` geschrieben
+- [ ] `claude.config.json` erstellt
+- [ ] Mindestens 2 Agents definiert
+- [ ] Erstes Skill (backup-postgres) gebaut
+- [ ] Hooks konfiguriert
+- [ ] MCP Server (GitHub oder Custom) integriert
+- [ ] VS Code Extension installiert
+- [ ] Erste Abfrage getestet ("Zeig mir..."Codebase-Query)
+- [ ] Skill manuell getestet
+- [ ] Agent manuell getestet
+
+## Quellen und Links
+
+- [Claude Code](https://code.claude.com)
+- [Claude Docs](https://docs.claude.com)

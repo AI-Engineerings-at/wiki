@@ -1,0 +1,325 @@
+---
+title: Claude Code — Interaktiver Modus & Tastaturkürzel
+date: 2026-03-21
+summary: Vollständige Referenz für Tastaturkürzel, Slash-Befehle, Vim-Modus, Multi-Line-Input, @File-Mentions, Task-Listen, Voice-Eingabe, Bash-Modus und weitere interaktive Features.
+tags: [claude-code, tastaturkürzel, shortcuts, interaktiv, vim, bash]
+author: "AI Engineering"
+---
+
+# Claude Code — Interaktiver Modus & Tastaturkürzel
+
+Dieser Guide dokumentiert alle Tastaturkürzel, Befehle und interaktiven Features in Claude Code Sessions.
+
+## Allgemeine Tastenanschläge
+
+| Shortcut | Beschreibung | Kontext |
+|----------|-------------|---------|
+| `Ctrl+C` | Aktuelle Eingabe oder Generierung abbrechen | Standardmäßig |
+| `Ctrl+F` | Alle Background-Agents beenden (2x in 3 Sekunden zur Bestätigung) | Background-Kontrolle |
+| `Ctrl+D` | Claude Code Session beenden | EOF-Signal |
+| `Ctrl+G` | In Standard-Editor öffnen | Prompt oder Custom Response bearbeiten |
+| `Ctrl+L` | Terminal-Bildschirm löschen | Gesprächsverlauf bleibt |
+| `Ctrl+O` | Verbose-Ausgabe aktivieren/deaktivieren | Detaillierte Tool-Nutzung anzeigen |
+| `Ctrl+R` | Reverse-Suche im Befehlsverlauf | Interaktiv durch bisherige Befehle suchen |
+| `Ctrl+V` oder `Cmd+V` (iTerm2) oder `Alt+V` (Windows) | Bild aus Zwischenablage einfügen | Bild oder Pfad zu Bild einfügen |
+| `Ctrl+B` | Bash-Befehle im Hintergrund ausführen | Laufen lassen, während du weitermachst. Tmux-Nutzer: 2x drücken |
+| `Ctrl+T` | Task-Liste umschalten | Task-Liste im Terminal anzeigen/verbergen |
+| `Left/Right Arrows` | Durch Dialog-Tabs navigieren | Permission-Dialoge und Menüs |
+| `Up/Down Arrows` | Befehlsverlauf navigieren | Vorherige Eingaben abrufen |
+| `Esc` + `Esc` | Zurückspulen oder Zusammenfassen | Code/Konversation zu vorherigem Punkt zurücksetzen |
+| `Shift+Tab` oder `Alt+M` | Permission-Modi wechseln | Zwischen Auto-Accept, Plan Mode und Normal Mode wechseln |
+| `Option+P` (macOS) oder `Alt+P` (Windows/Linux) | Modell wechseln | Modelle ohne Prompt-Löschen umschalten |
+| `Option+T` (macOS) oder `Alt+T` (Windows/Linux) | Extended Thinking umschalten | Erweiterte Thinking aktivieren/deaktivieren. Führ `/terminal-setup` aus |
+
+## Text-Bearbeitung
+
+| Shortcut | Beschreibung | Kontext |
+|----------|-------------|---------|
+| `Ctrl+K` | Bis zum Zeilenende löschen | Speichert gelöschten Text zum Einfügen |
+| `Ctrl+U` | Ganze Zeile löschen | Speichert gelöschten Text zum Einfügen |
+| `Ctrl+Y` | Gelöschten Text einfügen | Pastet Text der mit `Ctrl+K` oder `Ctrl+U` gelöscht wurde |
+| `Alt+Y` (nach `Ctrl+Y`) | Durch Paste-Verlauf zyklus | Nach dem Einfügen, cycle durch früher gelöschten Text. Benötigt Option als Meta auf macOS |
+| `Alt+B` | Cursor eine Wort nach hinten | Wort-Navigation. Benötigt Option als Meta auf macOS |
+| `Alt+F` | Cursor eine Wort nach vorne | Wort-Navigation. Benötigt Option als Meta auf macOS |
+
+## Thema und Anzeige
+
+| Shortcut | Beschreibung | Kontext |
+|----------|-------------|---------|
+| `Ctrl+T` | Syntax-Highlighting für Code-Blöcke umschalten | NUR im `/theme` Picker-Menü. Kontrolliert ob Code mit Syntax-Farbgebung angezeigt wird |
+
+Syntax-Highlighting nur im nativen Build verfügbar.
+
+## Multi-Line Input (Mehrzeilige Eingabe)
+
+Mehrere Zeilen eingeben bevor du drückst:
+
+| Methode | Shortcut | Kontext |
+|---------|----------|---------|
+| Quick escape | `\` + `Enter` | Funktioniert in allen Terminals |
+| macOS Standard | `Option+Enter` | macOS Standard |
+| Shift+Enter | `Shift+Enter` | Funktioniert out-of-the-box in iTerm2, WezTerm, Ghostty, Kitty |
+| Control sequence | `Ctrl+J` | Line-Feed-Zeichen für Mehrzeiliges |
+| Paste mode | Direkt einfügen | Für Code-Blöcke, Logs |
+
+**Tipp**: `Shift+Enter` funktioniert ohne Konfiguration in iTerm2, WezTerm, Ghostty und Kitty. Für andere Terminals (VS Code, Alacritty, Zed, Warp): `/terminal-setup` ausführen.
+
+## Quick Commands (Schnellbefehle)
+
+| Shortcut | Beschreibung | Noten |
+|----------|-------------|-------|
+| `/` am Anfang | Befehl oder Skill | Siehe [Built-in Commands](#befehle) und [Skills](/de/tools/claude-code-skills) |
+| `!` am Anfang | Bash-Modus | Befehle direkt ausführen und Ausgabe zur Session hinzufügen |
+| `@` | Dateipath erwähnen | Trigger Dateipfad-Autocomplete |
+
+## Voice Input (Sprach-Eingabe)
+
+| Shortcut | Beschreibung | Noten |
+|----------|-------------|-------|
+| Hold `Space` | Push-to-Talk Diktieren | Benötigt [Voice Diktation](/de/tools/claude-code-voice) aktiviert. Transkription wird am Cursor eingefügt. [Rebindbar](/de/tools/claude-code-voice#rebind-push-to-talk-key) |
+
+## Built-in Commands (Eingebaute Befehle)
+
+Tippe `/` in Claude Code um alle verfügbaren Befehle zu sehen, oder tippe `/` gefolgt von Buchstaben zum Filtern. Das `/` Menü zeigt sowohl eingebaute Befehle als auch [Bundled Skills](/de/tools/claude-code-skills#bundled-skills) wie `/simplify`.
+
+### Häufigste Befehle
+
+| Befehl | Beschreibung |
+|--------|-------------|
+| `/help` | Hilfe anzeigen |
+| `/model` | Modell ändern mit Picker |
+| `/effort` | Reasoning-Level setzen: `/effort low`, `/effort medium`, `/effort high`, `/effort max`, `/effort auto` |
+| `/compact` | Context komprimieren um Speicher freizugeben |
+| `/clear` | Neue Session starten (erhält vorherige Konversation für Resume) |
+| `/resume` | Zu letzter Session zurückkehren |
+| `/status` | Aktuellen Status zeigen (Modell, Auth, Konfiguration) |
+| `/config` | Einstellungs-Editor öffnen |
+| `/terminal-setup` | Terminal-Konfiguration für Shell-Shortcuts einrichten |
+| `/doctor` | System-Diagnose ausführen |
+| `/debug` | Debug-Modus aktivieren |
+| `/vim` | Vim-Editor-Modus aktivieren/deaktivieren |
+| `/theme` | Theme-Auswahl anzeigen |
+| `/sandbox` | Sandboxing konfigurieren |
+| `/permissions` | Berechtigungen verwalten |
+| `/btw` | Side Question — schnelle Frage ohne Konversations-Verlauf |
+| `/feedback` | Feedback zu Claude Code senden |
+| `/init` | Neues Projekt initialisieren |
+| `/logout` | Von Konto abmelden |
+| `/login` | Neu anmelden |
+
+Siehe [Commands Reference](/de/tools/claude-code-commands) für vollständige Liste.
+
+## Bash Mode mit `!` Prefix
+
+Bash-Befehle direkt ausführen ohne Claude dazwischen:
+
+```bash
+! npm test
+! git status
+! ls -la
+```
+
+**Features**:
+- Befehl und Ausgabe werden zur Konversation hinzugefügt
+- Echtzeit-Ausgabe
+- Unterstützt `Ctrl+B` Backgrounding
+- Benötigt keine Claude-Genehmigung
+- Unterstützt History-basierte Autocomplete: tippe partielle Befehl und drücke **Tab**
+- Exit mit `Escape`, `Backspace`, oder `Ctrl+U` auf leerem Prompt
+
+## File Mentions mit `@`
+
+Dateien mit `@` erwähnen um sie direkt zu referenzieren:
+
+```
+@src/utils.ts
+@docs/README.md
+@package.json
+```
+
+Autocomplete zeigt verfügbare Dateien an. Claude erhält den kompletten Dateiverlauf wenn du eine Datei erwähnst.
+
+## Task-Liste
+
+Multi-Step Arbeiten werden automatisch als Task-Liste erfasst:
+
+- Drücke `Ctrl+T` um Task-Liste anzuzeigen/zu verbergen
+- Tasks zeigen Pending, In Progress, Complete Status
+- Frag Claude direkt: "show me all tasks" oder "clear all tasks"
+- Tasks bleiben über Context-Kompressionen hinweg
+- Share Task-Liste über Sessions mit `CLAUDE_CODE_TASK_LIST_ID=my-project claude`
+
+## Vim Editor Mode
+
+Vim-ähnliche Bearbeitung aktivieren mit `/vim` oder permanent via `/config`.
+
+### Mode-Wechsel
+
+| Befehl | Aktion | Von Mode |
+|--------|--------|----------|
+| `Esc` | NORMAL Mode betreten | INSERT |
+| `i` | Vor Cursor einfügen | NORMAL |
+| `I` | Am Zeilenanfang einfügen | NORMAL |
+| `a` | Nach Cursor einfügen | NORMAL |
+| `A` | Am Zeilenende einfügen | NORMAL |
+| `o` | Zeile darunter öffnen | NORMAL |
+| `O` | Zeile darüber öffnen | NORMAL |
+
+### Navigation (NORMAL Mode)
+
+| Befehl | Aktion |
+|--------|--------|
+| `h`/`j`/`k`/`l` | Links/Unten/Oben/Rechts |
+| `w` | Nächstes Wort |
+| `e` | Wort-Ende |
+| `b` | Vorheriges Wort |
+| `0` | Zeilenanfang |
+| `$` | Zeilenende |
+| `^` | Erstes nicht-Leerzeichen |
+| `gg` | Eingabe-Anfang |
+| `G` | Eingabe-Ende |
+| `f{char}` | Zu nächstem Zeichen springen |
+| `F{char}` | Zu vorherigem Zeichen springen |
+| `t{char}` | Knapp vor nächstem Zeichen |
+| `T{char}` | Knapp nach vorherigem Zeichen |
+| `;` | Letzte f/F/t/T Motion wiederholen |
+| `,` | Letzte f/F/t/T Motion rückwärts wiederholen |
+
+### Editing (NORMAL Mode)
+
+| Befehl | Aktion |
+|--------|--------|
+| `x` | Zeichen löschen |
+| `dd` | Zeile löschen |
+| `D` | Bis Zeilenende löschen |
+| `dw`/`de`/`db` | Wort/bis-Ende/zurück löschen |
+| `cc` | Zeile ändern |
+| `C` | Bis Zeilenende ändern |
+| `cw`/`ce`/`cb` | Wort/bis-Ende/zurück ändern |
+| `yy`/`Y` | Zeile yanken (kopieren) |
+| `yw`/`ye`/`yb` | Wort/bis-Ende/zurück yanken |
+| `p` | Nach Cursor einfügen |
+| `P` | Vor Cursor einfügen |
+| `>>` | Zeile einrücken |
+| `<<` | Zeile ausrücken |
+| `J` | Zeilen verbinden |
+| `.` | Letzte Änderung wiederholen |
+
+### Text Objects (NORMAL Mode)
+
+Text Objects funktionieren mit Operatoren wie `d`, `c`, `y`:
+
+| Befehl | Aktion |
+|--------|--------|
+| `iw`/`aw` | Inner/Around Wort |
+| `iW`/`aW` | Inner/Around WORD (Whitespace-delimited) |
+| `i"`/`a"` | Inner/Around Doppelzitate |
+| `i'`/`a'` | Inner/Around Einfachzitate |
+| `i(`/`a(` | Inner/Around Klammern |
+| `i[`/`a[` | Inner/Around eckige Klammern |
+| `i{`/`a{` | Inner/Around geschweifte Klammern |
+
+## Befehlsverlauf
+
+Claude Code verwaltet Befehlsverlauf für aktuelle Session:
+
+- Eingabeverlauf ist pro Arbeitsverzeichnis gespeichert
+- Wird zurückgesetzt mit `/clear` aber vorherige Session bleibt (kann mit `/resume` fortgesetzt werden)
+- Up/Down Pfeile zum Navigieren
+
+### Reverse Search mit Ctrl+R
+
+Drücke `Ctrl+R` um interaktiv durch Befehlsverlauf zu suchen:
+
+1. **Suche starten**: `Ctrl+R` zum Aktivieren
+2. **Query eingeben**: Text zum Suchen in bisherigen Befehlen eingeben
+3. **Matches navigieren**: `Ctrl+R` erneut um ältere Matches anzusehen
+4. **Accept Match**:
+   - `Tab` oder `Esc` um Accept und weiter bearbeiten
+   - `Enter` um Accept und sofort ausführen
+5. **Suche abbrechen**:
+   - `Ctrl+C` um abzubrechen und Original zurückzustellen
+   - `Backspace` auf leerer Suche um zu abbrechen
+
+## Side Questions mit /btw
+
+Schnelle Frage stellen über aktuellen Work ohne Konversations-Verlauf zu polluten:
+
+```
+/btw what was the name of that config file again?
+```
+
+**Features**:
+- Sichtbar auf aktuelle Konversation
+- Keine Tools — nur antwortet aus existentem Kontext
+- Keine Follow-Up-Turns — nur Single Response
+- Niedrige Kosten — renutzt Parent Session Prompt Cache
+- Ephemeral — erscheint in Overlay, nie im Verlauf
+
+Drücke **Space**, **Enter**, oder **Escape** um zu dismisssen.
+
+## Background Bash Commands (Hintergrund-Befehle)
+
+Bash-Befehle im Hintergrund ausführen:
+
+```
+/claude
+! npm run build &  # oder
+Ctrl+B während regulärer Bash-Invocation
+```
+
+**Features**:
+- Asynchrone Ausführung, sofortige Rückgabe
+- Background Task ID zum Tracking
+- Output wird gepuffert
+- Auto-Cleanup beim Exit
+- Auto-Terminate wenn Output > 5GB
+
+Disable mit `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1`
+
+## Prompt Suggestions (Suggestions)
+
+Session-Start zeigt grayed-out Example-Befehl basierend auf Git-History.
+
+Nach Claude Response erscheinen weitere Suggestions basierend auf Konversations-Verlauf.
+
+**Bedienung**:
+- **Tab** um zu accepten oder **Enter** um zu accepten und submit
+- **Tippen** um zu dismisssen
+
+Disable mit:
+```bash
+export CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION=false
+```
+
+Oder in `/config`.
+
+## macOS Terminal Konfiguration
+
+**Option/Alt Key als Meta-Key einstellen** (benötigt für Alt-Shortcuts):
+
+**iTerm2**:
+- Settings → Profiles → Keys → Left/Right Option key auf "Esc+" setzen
+
+**Terminal.app**:
+- Settings → Profiles → Keyboard → Check "Use Option as Meta Key"
+
+**VS Code**:
+- Settings → Profiles → Keys → Left/Right Option key auf "Esc+" setzen
+
+## Siehe auch
+
+- [Claude Code Befehle](/de/tools/claude-code-commands)
+- [Claude Code Skills](/de/tools/claude-code-skills)
+- [Claude Code Configuration](/de/tools/claude-code-configuration)
+
+## Quellen und Links
+
+- [Interactive Mode](https://code.claude.com/docs/en/interactive-mode)
+- [Voice Dictation](https://code.claude.com/docs/en/voice-dictation)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

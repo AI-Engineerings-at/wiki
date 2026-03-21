@@ -1,0 +1,259 @@
+---
+title: LLaMA — Meta's Open-Source Sprachmodelle
+date: 2026-03-21
+summary: Von LLaMA 1 bis LLaMA 3. Training-Strategien, Architektur-Entscheidungen, RLHF in LLaMA 2, und warum Meta diese Modelle open-source stellte.
+tags: [llama, meta, llm, open-source, rlhf, scaling, paper]
+author: AI Engineering
+section: papers
+---
+
+# LLaMA — Meta's Open-Source Sprachmodelle
+
+Die LLaMA-Serie (Large Language Model Meta AI) ist eine der wichtigsten Entwicklungen im Open-Source KI-Bereich. Meta demonstrierte, dass man mit weniger Rechenressourcen als OpenAI gute Modelle bauen kann—und stellte sie der Community zur Verfügung.
+
+## LLaMA 1: Der Open-Source Moment (2023)
+
+**Paper:** "LLaMA: Open and Efficient Foundation Language Models" (Touvron et al., Meta)
+
+### Die provokative Aussage
+Meta behauptete: **Ein kleineres, gut trainiertes Modell ist besser als ein großes, schlecht trainiertes.**
+
+```
+Hypothese:
+GPT-3 (175B): Untertrainiert (nur 300B Tokens)
+LLaMA-13B: Übertrainiert (1 Billionen Tokens)
+→ LLaMA-13B könnte besser sein als GPT-3
+```
+
+Sie hatten Recht.
+
+### LLaMA Familien
+| Größe | Parameter | Training-Tokens | FLOPS | Kosten |
+|-------|-----------|-----------------|-------|--------|
+| LLaMA-7B | 7B | 1T | 3.3e+18 | ~$100k |
+| LLaMA-13B | 13B | 1T | 6.2e+18 | ~$200k |
+| LLaMA-33B | 33B | 1.5T | 1.5e+19 | ~$500k |
+| LLaMA-65B | 65B | 1.4T | 2.9e+19 | ~$1M |
+
+### Architektur-Besonderheiten
+- **RMSNorm statt LayerNorm**: Einfacher, schneller (nur RMS normalisieren)
+- **SwiGLU Activation**: Bessere Perfomance als GELU
+- **Rotary Position Embeddings (RoPE)**: Bessere Positional Encoding als Standard
+- **Grouped Query Attention**: Schnellere Inferenz ohne Qualitätsverlust
+
+### Training
+- 1 Billion Tokens mit verschiedenen Datenquellen
+  - Common Crawl (67%)
+  - C4 (15%)
+  - GitHub (4.5%)
+  - Wikipedia, Books, ArXiv, Q&A (13.5%)
+- Batch Size: 4 Millionen Tokens
+- Learning Rate: 1.5e-4 (mit Cosine Decay)
+
+### Ergebnisse
+```
+Performance auf Common Benchmarks:
+
+Task: MMLU (Wissen)
+LLaMA-65B: 63.4%
+GPT-3: 54.9%
+→ LLaMA-65B besser, obwohl GPT-3 größer war
+
+Task: Common Sense Reasoning
+LLaMA-13B: 78.5%
+GPT-3: 79.9%
+→ Vergleichbar, aber LLaMA-13B 13x kleiner
+```
+
+## LLaMA 2: Die Alignment-Revolution (2023)
+
+**Paper:** "Llama 2: Open Foundation and Fine-Tuned Chat Models" (Touvron et al., Meta)
+
+LLaMA 2 war nicht nur größer—es war auch sicherer und hilfreicher. Meta führte RLHF für LLaMA ein.
+
+### Was ist neu?
+1. **Größere Modelle**: 70B Parameter (up from 65B)
+2. **Längerer Context**: 4096 Tokens statt 2048
+3. **RLHF Fine-Tuning**: Mit Reward-Modellen
+4. **Chat-Versionen**: LLaMA 2-Chat für Konversationen
+
+### RLHF in LLaMA 2
+```
+SCHRITT 1: Sammle Human Comparisons
+- Zwei Outputs für denselben Prompt
+- Human ratet: Welcher ist besser?
+- Sammle ~27,500 Vergleiche
+
+SCHRITT 2: Trainiere Reward Model
+- Input: Prompt + Output
+- Output: Reward Score (1.0 bis 10.0)
+- Versuche, das Human Judgment vorherzusagen
+
+SCHRITT 3: Optimiere mit Reward Model
+- Nutze PPO (Proximal Policy Optimization)
+- Sample Outputs vom Model
+- Belohne Outputs mit höheren Reward Scores
+- Bestrafe sehr niedriger Rewards
+```
+
+### Ergebnisse der RLHF
+```
+Helpfulness Score (von Humans):
+LLaMA 2 7B: 60.2%
+LLaMA 2 13B: 70.1%
+LLaMA 2 70B: 78.4%
+GPT-3.5: 71.3%
+Claude 1: 75.3%
+
+Harmlessness Score:
+LLaMA 2 7B: 92.1%
+LLaMA 2 13B: 95.5%
+LLaMA 2 70B: 96.8%
+```
+
+### Context Length: Attention mit längeren Sequences
+
+LLaMA 2 trainierte auf 4096-Token Context statt 2048:
+
+```python
+# Wie macht man das sicher?
+# Problem: Positional Encodings trainiert auf 2048
+# Musst du auf 4096 extrapolieren
+
+# Lösung: Interpolation
+# Verkürze die Positional Encoding Frequenzen
+# So wird 4096 Positions "in den gleichen Raum" wie 2048
+# Dann kannst du weitertrainieren
+
+# Ergebnis: Works, braucht aber ~4000 weitere Schritte Training
+```
+
+## LLaMA 3: Die aktuelle Generation (2024)
+
+**Paper:** "The Llama 3 Instruction Tuned Models" (Meta)
+
+### Größen
+- LLaMA 3 8B
+- LLaMA 3 70B
+- (Gerüchte über 400B, noch nicht released)
+
+### Bedeutende Unterschiede
+1. **Tokenizer überarbeitet**: Neuer BPE Tokenizer mit 128K Vocab (vs. 32K in LLaMA 2)
+   - Effizientere Encoding
+   - Bessere Non-English Support
+
+2. **Training-Daten**: 15 Billionen Tokens
+   - Deutlich mehr als LLaMA 2 (2 Billionen)
+   - Höhere Data Quality (mehr kuratierte Quellen)
+
+3. **Group Query Attention Standard**: Schnellere Inferenz für alle Größen
+
+4. **Instruction Tuning überarbeitet**:
+   - Größeres, besseres Human Feedback
+   - Bessere Safety Guidelines
+   - Multilingual Instruction Tuning
+
+### Performance-Vergleiche (auf beliebten Benchmarks)
+
+```
+MMLU (Knowledge):
+LLaMA 3 8B: 66%
+LLaMA 2 70B: 69%
+GPT-3.5: 71%
+Claude 3 Sonnet: 71%
+
+Coding (HumanEval):
+LLaMA 3 8B: 62.2%
+LLaMA 3 70B: 81.7%
+GPT-4: 92%
+```
+
+## Wichtige Architektur-Fortschritte über die Serie
+
+### Attention Mechanismen
+```
+LLaMA 1:
+- Standard Multi-Head Attention
+- 8 oder 16 Heads
+- Vollständige Attention Matrix
+
+LLaMA 2:
+- Grouped Query Attention (GQA)
+- Weniger Key-Value Heads
+- ~2x schnellere Inferenz
+
+LLaMA 3:
+- GQA standard
+- Flash Attention 2 im Training
+```
+
+### Positional Encoding Evolution
+```
+LLaMA 1:
+- RoPE (Rotary Position Embeddings)
+- Gut für Extrapolation
+
+LLaMA 2:
+- RoPE mit Interpolation für längere Context
+- Braucht Fine-Tuning für 4K context
+
+LLaMA 3:
+- RoPE mit verbesserter Interpolation
+- Einfacher auf längere Sequences zu skalieren
+```
+
+## Warum Meta Open-Source?
+
+Das ist die wichtigste strategische Entscheidung:
+
+1. **Sättigung des Closed-Source Markts**: OpenAI, Google, Anthropic haben bereits gute Modelle
+2. **Unterschied ist klein**: Bei gleicher Trainingsgröße und Data sind die Modelle ähnlich
+3. **Ecosystem-Effekt**: Indem Meta die Modelle freilässt, bauen andere Dinge darauf
+4. **Long-Tail Revenue**: Meta verdient über Infra (Llama models auf Meta's cloud), nicht durch Modell-Zugang
+
+## Die Chinchilla Connection
+
+LLaMA-Training folgte dem Chinchilla-Ratio:
+```
+Chinchilla Optimum:
+Model Size N = Token Count D
+
+LLaMA umsetzt:
+- 7B Model → 1 Billionen Tokens
+- 13B Model → 1 Billionen Tokens
+- 65B Model → 1.4 Billionen Tokens
+```
+
+Das ist **nicht perfekt**, aber nah genug. Meta hätte sagen können:
+- "Wir trainieren 140B mit 1T Tokens" (optimal)
+- Stattdessen: "Wir trainieren mehrere kleinere Modelle"
+
+**Das war ein Geschäfts-Entscheidung, nicht technisch optimal.**
+
+## Praktische Auswirkungen
+
+Die LLaMA-Serie hat:
+1. **Fintuning-Ökosystem gestartet**: Alpaca, Vicuña, Mistral basieren auf LLaMA
+2. **Local-Inference populär gemacht**: llama.cpp macht LLaMA-7B auf CPU möglich
+3. **Quantization vorangetrieben**: GGUF-Format wurde für LLaMA optimiert
+4. **Smaller Model Era gestartet**: Nicht alle brauchen 175B Parameter
+
+## Vergleich: LLaMA vs. GPT vs. Claude
+
+| Kriterium | LLaMA | GPT | Claude |
+|-----------|-------|-----|--------|
+| Open Source | Ja | Nein | Nein |
+| Trainings-Effizienz | Hoch (Chinchilla) | Mittel | Hoch |
+| RLHF Quality | LLaMA 2+ gut | Sehr gut | Sehr gut |
+| Sicherheit | LLaMA 2+ solid | Mittel | Sehr gut |
+| Multimodal | Nein (noch) | Ja (GPT-4) | Nein |
+| Fine-tuning freundlich | Ja | Über API | Über API |
+
+## Quellen und Links
+
+- [LLaMA 1 Paper (ArXiv)](https://arxiv.org/abs/2302.13971)
+- [LLaMA 2 Paper (ArXiv)](https://arxiv.org/abs/2307.09288)
+- [LLaMA 2 Chat Release (Meta Blog)](https://ai.meta.com/llama/)
+- [LLaMA 3 Announcement (Meta Blog)](https://www.meta.com/research/publications/the-llama-3-instruction-tuned-models/)
+- [Grouped Query Attention Paper](https://arxiv.org/abs/2305.13245)
+- [RoPE Position Embeddings](https://arxiv.org/abs/2104.09864)

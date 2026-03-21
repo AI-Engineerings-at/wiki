@@ -1,0 +1,254 @@
+---
+title: "API Security for AI Systems"
+description: "Securing AI API endpoints: authentication, rate limiting, token management. API key rotation, OAuth for AI services, audit logging. DDoS protection for inference endpoints."
+section: "security"
+---
+
+# API Security for AI Systems
+
+AI systems are typically accessed via APIs. These APIs must be secure. This page covers authentication, rate limiting, token management, and DDoS protection.
+
+---
+
+## 1. API Authentication
+
+### 1.1 API Key Management
+
+```python
+import secrets
+import hashlib
+from datetime import datetime, timedelta
+from typing import Dict, Optional
+
+class APIKeyManager:
+    """Manages API keys for AI endpoints"""
+
+    def __init__(self):
+        self.keys: Dict[str, Dict] = {}
+
+    def generate_api_key(self, client_name: str, scopes: list = None, ttl_days: int = 90) -> str:
+        """Generates a new API key"""
+        raw_key = secrets.token_hex(32)
+        api_key = f"sk-{raw_key}"
+
+        # Hash for storage (never store plaintext)
+        key_hash = hashlib.sha256(api_key.encode()).hexdigest()
+
+        self.keys[key_hash] = {
+            "client_name": client_name,
+            "created_at": datetime.now(),
+            "expires_at": datetime.now() + timedelta(days=ttl_days),
+            "scopes": scopes or ["inference"],
+            "active": True,
+        }
+
+        return api_key
+
+    def verify_api_key(self, api_key: str) -> Optional[Dict]:
+        """Verifies an API key"""
+        key_hash = hashlib.sha256(api_key.encode()).hexdigest()
+
+        if key_hash not in self.keys:
+            return None
+
+        key_data = self.keys[key_hash]
+
+        if key_data["expires_at"] < datetime.now():
+            key_data["active"] = False
+            return None
+
+        return key_data if key_data["active"] else None
+
+    def rotate_api_key(self, old_key: str, client_name: str) -> str:
+        """Rotates an API key"""
+        old_hash = hashlib.sha256(old_key.encode()).hexdigest()
+
+        if old_hash in self.keys:
+            self.keys[old_hash]["active"] = False
+
+        return self.generate_api_key(client_name)
+
+# Usage:
+key_mgr = APIKeyManager()
+api_key = key_mgr.generate_api_key("Analytics Corp")
+verified = key_mgr.verify_api_key(api_key)
+print(f"Key valid: {verified is not None}")
+```
+
+---
+
+## 2. Rate Limiting
+
+### 2.1 Token Bucket Algorithm
+
+```python
+from time import time
+
+class TokenBucket:
+    """Token Bucket algorithm for rate limiting"""
+
+    def __init__(self, capacity: int, refill_rate: float):
+        self.capacity = capacity
+        self.refill_rate = refill_rate
+        self.tokens = capacity
+        self.last_refill = time()
+
+    def allow_request(self, tokens_needed: int = 1) -> bool:
+        """Checks if request is allowed"""
+        self._refill()
+
+        if self.tokens >= tokens_needed:
+            self.tokens -= tokens_needed
+            return True
+        return False
+
+    def _refill(self):
+        """Refills tokens based on elapsed time"""
+        now = time()
+        elapsed = now - self.last_refill
+        tokens_to_add = elapsed * self.refill_rate
+
+        self.tokens = min(self.capacity, self.tokens + tokens_to_add)
+        self.last_refill = now
+
+# Usage:
+bucket = TokenBucket(capacity=100, refill_rate=1.67)
+
+for i in range(150):
+    if bucket.allow_request():
+        print(f"Request {i}: ALLOWED")
+    else:
+        print(f"Request {i}: RATE LIMITED")
+```
+
+### 2.2 Per-User Quotas
+
+```python
+from datetime import datetime, timedelta
+from typing import Dict, Tuple
+
+class QuotaManager:
+    """Manages per-user quotas"""
+
+    def __init__(self):
+        self.quotas: Dict[str, Dict] = {}
+
+    def set_quota(self, user_id: str, daily_limit: int, monthly_limit: int):
+        """Sets quota for a user"""
+        self.quotas[user_id] = {
+            "daily_limit": daily_limit,
+            "daily_used": 0,
+            "daily_reset_at": datetime.now() + timedelta(days=1),
+            "monthly_limit": monthly_limit,
+            "monthly_used": 0,
+            "monthly_reset_at": datetime.now() + timedelta(days=30),
+        }
+
+    def check_quota(self, user_id: str, tokens_needed: int = 1) -> Tuple[bool, Dict]:
+        """Checks if user has quota available"""
+        if user_id not in self.quotas:
+            return False, {"error": "user not found"}
+
+        quota = self.quotas[user_id]
+        now = datetime.now()
+
+        # Reset if period expired
+        if now > quota["daily_reset_at"]:
+            quota["daily_used"] = 0
+            quota["daily_reset_at"] = now + timedelta(days=1)
+
+        # Check limits
+        daily_ok = quota["daily_used"] + tokens_needed <= quota["daily_limit"]
+        monthly_ok = quota["monthly_used"] + tokens_needed <= quota["monthly_limit"]
+
+        allowed = daily_ok and monthly_ok
+
+        if allowed:
+            quota["daily_used"] += tokens_needed
+            quota["monthly_used"] += tokens_needed
+
+        return allowed, {
+            "daily_used": quota["daily_used"],
+            "daily_limit": quota["daily_limit"],
+            "allowed": allowed,
+        }
+
+# Usage:
+qm = QuotaManager()
+qm.set_quota("user123", daily_limit=1000, monthly_limit=50000)
+allowed, info = qm.check_quota("user123", tokens_needed=100)
+print(f"Request allowed: {allowed}")
+```
+
+---
+
+## 3. Audit Logging
+
+```python
+import json
+from datetime import datetime
+
+class APIAuditLog:
+    """Logs all API requests"""
+
+    def __init__(self, log_file: str = "api_audit.jsonl"):
+        self.log_file = log_file
+
+    def log_request(
+        self,
+        client_id: str,
+        endpoint: str,
+        method: str,
+        status_code: int,
+        tokens_used: int,
+        error: str = None
+    ):
+        """Logs an API request"""
+        log_entry = {
+            "timestamp": datetime.now().isoformat(),
+            "client_id": client_id,
+            "endpoint": endpoint,
+            "method": method,
+            "status_code": status_code,
+            "tokens_used": tokens_used,
+            "error": error,
+        }
+
+        with open(self.log_file, "a") as f:
+            f.write(json.dumps(log_entry) + "\n")
+
+    def analyze_suspicious_activity(self) -> list:
+        """Analyzes logs for suspicious patterns"""
+        suspicious = []
+
+        with open(self.log_file, "r") as f:
+            entries = [json.loads(line) for line in f]
+
+        # Pattern: High error rate
+        for client_id in set(e["client_id"] for e in entries):
+            client_entries = [e for e in entries if e["client_id"] == client_id]
+            error_rate = sum(1 for e in client_entries if e["error"]) / len(client_entries)
+
+            if error_rate > 0.5:
+                suspicious.append({
+                    "client_id": client_id,
+                    "issue": "high_error_rate",
+                    "error_rate": error_rate,
+                })
+
+        return suspicious
+
+# Usage:
+audit = APIAuditLog()
+audit.log_request("client1", "/inference", "POST", 200, 100)
+suspicious = audit.analyze_suspicious_activity()
+```
+
+---
+
+## 4. Sources and Links
+
+- **OWASP API Security**: https://owasp.org/www-project-api-security/
+- **JWT.io**: https://jwt.io/
+- **OAuth 2.0**: https://oauth.net/
+- **Cloudflare DDoS**: https://www.cloudflare.com/ddos/

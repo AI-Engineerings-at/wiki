@@ -1,0 +1,446 @@
+---
+title: Docker für AI-Stacks
+date: 2026-03-21
+summary: Container-Setup für reproducible AI Umgebungen. Docker Compose mit GPU-Support, Networking und Volume-Verwaltung praktisch erklärt.
+tags: [docker, container, gpu, compose, infrastructure]
+author: AI Engineering
+---
+
+# Docker für AI-Stacks
+
+Docker isoliert deine AI-Anwendungen und macht sie reproduzierbar. Mit GPU-Support laufen große Modelle auf dein-server genauso wie auf deinem Laptop—nur schneller.
+
+## Warum Container für AI?
+
+**Isolation:** Jeder Service (Ollama, n8n, Postgres) läuft in seiner eigenen Umgebung. Kein Versions-Chaos mehr.
+
+**Reproducibility:** `docker-compose up` startet die exakte gleiche Konfiguration überall.
+
+**GPU-Passthrough:** Container greifen direkt auf deine Grafikkarte zu. Kein Performance-Loss.
+
+**Networking:** Services finden sich intern über Hostnamen. `http://ollama:11434` funktioniert ohne IP-Adressen.
+
+**Volume-Verwaltung:** Datenban-Daten und Model-Dateien bleiben erhalten, wenn der Container stoppt.
+
+## Docker und Docker Compose installieren
+
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt-get update
+sudo apt-get install docker.io docker-compose-v2
+sudo usermod -aG docker $USER
+# Neu anmelden damit die Gruppe aktiv ist
+```
+
+**macOS/Windows:** Nutze Docker Desktop (mit eingebautem Compose).
+
+Verifizierung:
+```bash
+docker --version
+docker compose version
+```
+
+## docker-compose.yml Struktur
+
+```yaml
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_MODELS=/root/.ollama/models
+    # GPU-Support (NVIDIA)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:latest
+    container_name: open-webui
+    ports:
+      - "3000:8080"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_PASSWORD: dev-password
+      POSTGRES_DB: mydb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
+  postgres_data:
+```
+
+**Was hier passiert:**
+- `services:` Listet alle Container auf
+- `image:` Welches Docker Image nutzen
+- `ports:` Host-Port → Container-Port (z.B. localhost:11434 → Container:11434)
+- `volumes:` Persistente Datenträger (bleiben nach Container-Stop)
+- `environment:` Umgebungsvariablen die der Container sieht
+- `depends_on:` Service B wartet bis Service A gestartet ist
+- `restart: unless-stopped` Container wird automatisch neugestartet bei Crash
+
+## GPU-Support: NVIDIA Container Toolkit
+
+Für GPU-Zugriff brauchst du die nvidia-container-toolkit.
+
+**Linux Installation:**
+```bash
+# NVIDIA GPU-Treiber installieren
+sudo apt-get install nvidia-driver-545
+
+# NVIDIA Container Toolkit
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
+
+# Docker Daemon neustarten
+sudo systemctl restart docker
+```
+
+**Überprüfung:**
+```bash
+docker run --rm --gpus all nvidia/cuda:12.2.0-base-ubuntu22.04 nvidia-smi
+```
+
+Sollte deine GPU(s) anzeigen.
+
+**In docker-compose.yml:**
+```yaml
+services:
+  ollama:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1  # Anzahl GPUs (1 = erste GPU, all = alle)
+              capabilities: [gpu]
+```
+
+## Networking zwischen Services
+
+Services im selben Netzwerk sprechen über ihre Container-Namen:
+
+```yaml
+services:
+  ollama:
+    # Erreichbar als "ollama" und "ollama:11434"
+
+  n8n:
+    environment:
+      OLLAMA_API_URL: http://ollama:11434
+    depends_on:
+      - ollama
+```
+
+**Wichtig:** `depends_on` garantiert nur dass der Container startet, nicht dass der Service bereit ist. Nutze Health Checks:
+
+```yaml
+services:
+  ollama:
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  n8n:
+    depends_on:
+      ollama:
+        condition: service_healthy
+```
+
+## Volume-Verwaltung
+
+**Named Volumes (empfohlen):**
+```yaml
+volumes:
+  ollama_data:
+  postgres_data:
+
+services:
+  ollama:
+    volumes:
+      - ollama_data:/root/.ollama  # Container-Pfad: /root/.ollama
+```
+
+Named Volumes werden von Docker verwaltet. Speicherort: `/var/lib/docker/volumes/`
+
+**Bind Mounts (für lokale Ordner):**
+```yaml
+services:
+  data-service:
+    volumes:
+      - ./local-folder:/container-folder  # lokaler Ordner → Container
+      - /data/models:/root/models         # absolute Pfade möglich
+```
+
+**Read-Only Volumes:**
+```yaml
+volumes:
+  - ollama_data:/data:ro  # :ro = read-only
+```
+
+## Common Pattern: Ollama + Open WebUI
+
+```yaml
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama-ai
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+    volumes:
+      - ollama_models:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:latest
+    container_name: open-webui
+    ports:
+      - "3000:8080"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama-ai:11434
+    volumes:
+      - open-webui_data:/app/backend/data
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  ollama_models:
+  open-webui_data:
+```
+
+Starten:
+```bash
+docker compose up -d
+```
+
+Ollama: http://localhost:11434
+Open WebUI: http://localhost:3000
+
+## Common Pattern: n8n + PostgreSQL
+
+```yaml
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: n8n-postgres
+    environment:
+      POSTGRES_USER: n8n
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secure-password}
+      POSTGRES_DB: n8n
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U n8n"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n-app
+    ports:
+      - "5678:5678"
+    environment:
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_USER=n8n
+      - DB_POSTGRESDB_PASSWORD=${DB_PASSWORD:-secure-password}
+      - DB_POSTGRESDB_DATABASE=n8n
+      - WEBHOOK_TUNNEL_URL=http://dein-server:5678
+    volumes:
+      - n8n_data:/home/node/.n8n
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  n8n_data:
+```
+
+## Troubleshooting
+
+### Out of Memory (OOM) Errors
+
+Der Container nutzt zu viel RAM.
+
+```bash
+# Speicher begrenzen
+docker compose up -d
+
+# oder im YAML:
+deploy:
+  resources:
+    limits:
+      memory: 8G  # Max 8GB
+    reservations:
+      memory: 4G  # Min 4GB reservieren
+```
+
+Überprüfung:
+```bash
+docker stats
+```
+
+### GPU nicht gefunden
+
+Container sieht die GPU nicht.
+
+```bash
+# 1. Treiber installiert?
+nvidia-smi
+
+# 2. nvidia-container-toolkit installiert?
+docker run --rm --gpus all nvidia/cuda:12.2.0-base-ubuntu22.04 nvidia-smi
+
+# 3. Docker Daemon neu starten
+sudo systemctl restart docker
+
+# 4. Im Compose: count: all statt count: 1
+```
+
+### Port-Konflikte
+
+Ein Port ist bereits in Benutzung.
+
+```bash
+# Welcher Prozess nutzt Port 5678?
+sudo lsof -i :5678
+
+# Lsg 1: Andere Portnummer
+ports:
+  - "5679:5678"
+
+# Lsg 2: Container die Port-Nutzer stoppen
+docker compose down <service>
+```
+
+### Service startet nicht, Volume-Fehler
+
+Volume existiert nicht oder ist nicht beschreibbar.
+
+```bash
+# Volumes auflisten
+docker volume ls
+
+# Volume löschen (wenn neu erstellen möglich)
+docker volume rm <volume-name>
+
+# oder: Berechtigungen prüfen
+ls -la /var/lib/docker/volumes/<volume-name>/_data/
+```
+
+### Network-Fehler zwischen Services
+
+Services können sich nicht erreichen.
+
+```bash
+# In Container rein und testen
+docker compose exec n8n bash
+curl http://ollama:11434/api/tags
+
+# 1. Service läuft?
+docker compose ps
+
+# 2. Service-Name korrekt?
+docker network inspect <network-name>
+
+# 3. Externe Ports vs interne:
+# - Extern: localhost:11434 (von deinem Host)
+# - Intern: http://ollama:11434 (von anderen Containern)
+```
+
+## Best Practices
+
+- **Env-Variablen:** Nutze `.env` Datei statt Hardcoding
+  ```bash
+  # .env
+  DB_PASSWORD=secure-password
+  OLLAMA_API_KEY=token123
+  ```
+  ```yaml
+  # docker-compose.yml
+  environment:
+    - DB_PASSWORD=${DB_PASSWORD}
+  ```
+
+- **Health Checks:** Immer einbauen für abhängige Services
+
+- **Restart Policies:** `unless-stopped` ist Standard für Production
+
+- **Logs prüfen:**
+  ```bash
+  docker compose logs -f <service-name>
+  ```
+
+- **Cleanup:**
+  ```bash
+  # Alle Container, Images, Volumes löschen (VORSICHT!)
+  docker compose down -v
+  ```
+
+## Checkliste
+
+- [ ] Docker und Docker Compose installiert
+- [ ] GPU-Treiber und nvidia-container-toolkit (falls GPU-Einsatz)
+- [ ] docker-compose.yml Datei erstellt mit deinen Services
+- [ ] Alle Ports dokumentiert (welcher Service auf welchem Port)
+- [ ] Volumes für persistente Daten definiert
+- [ ] Environment-Variablen in .env Datei
+- [ ] Health Checks für kritische Services
+- [ ] `docker compose up -d` startet ohne Fehler
+- [ ] `docker compose logs` zeigt keine ERROR-Meldungen
+- [ ] Services sind erreichbar (curl, Browser, etc.)
+
+## Quellen und Links
+
+- [Docker CE](https://github.com/docker/docker-ce)
+- [Docker Docs](https://docs.docker.com)

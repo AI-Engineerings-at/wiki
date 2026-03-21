@@ -1,0 +1,359 @@
+---
+title: LM Studio — Desktop App für lokale LLMs
+date: 2026-03-21
+summary: LM Studio ist ein Desktop-Anwendung (Windows, Mac, Linux) zur einfachen Verwaltung und Ausführung von lokalen LLMs. GGUF-Modelle laden, lokaler Server-Modus, GPU-Optimierung, Vergleich mit Ollama.
+tags: [lm-studio, llm, gguf, desktop, local, gpu]
+author: AI Engineering
+---
+
+# LM Studio — Desktop App für lokale LLMs
+
+LM Studio ist eine native Desktop-Anwendung für macOS, Windows und Linux, die den Einstieg in lokale LLMs erheblich vereinfacht. Im Gegensatz zu Ollama (terminal/server-fokussiert) bietet LM Studio eine intuitive GUI und dezentrales Model-Management.
+
+Stand März 2026: Version 0.3.x, über 1 Million Downloads.
+
+## Installation
+
+### Systemanforderungen
+
+| OS | RAM | GPU | Disk |
+|----|----|-----|------|
+| Windows 11 | 16GB+ | RTX 3060+ oder CPU | 60GB+ |
+| macOS | 16GB+ | M1/M2/M3 oder CPU | 60GB+ |
+| Linux | 16GB+ | RTX 4090 oder CPU | 60GB+ |
+
+### Download & Setup
+
+1. Gehe zu [lmstudio.ai](https://lmstudio.ai)
+2. Lade für dein OS herunter
+3. Installiere (click-and-go)
+4. Öffne LM Studio
+5. Gehe zu Search Models
+6. Suche `qwen2.5:7b` und klick "Download"
+
+Download dauert 5-20 Minuten (je nach Internet).
+
+## Benutzeroberfläche
+
+LM Studio hat drei Haupt-Bereiche:
+
+### 1. Search & Download
+
+- Durchsuche Hugging Face Hub direkt
+- Filter nach Größe, Quantization, Rating
+- 1-Click Download in `~/.cache/lm-studio/models/`
+
+### 2. Chat Interface
+
+Integrierter Chat ähnlich ChatGPT:
+
+- Modell wählen (wenn heruntergeladen)
+- Temperature/Top-P anpassen
+- System Prompt definieren
+- Konversations-Historie
+
+### 3. Local Server
+
+Starte lokalen OpenAI-kompatiblen API Server:
+
+```
+Port: 1234 (lokal)
+OpenAI API Format: ja
+GPU Offloading: konfigurierbar
+```
+
+## GGUF vs andere Formate
+
+LM Studio verwendet hauptsächlich **GGUF** (Optimiertes Format von Georgi Gerganov):
+
+| Format | GGUF | GPTQ | BNB | AWQ |
+|--------|------|------|-----|-----|
+| Größe | Mittel | Klein | Klein | Klein |
+| Speed | Sehr schnell | Schnell | Mittel | Schnell |
+| Qualität | Top | Gut | Gut | Gut |
+| GPU Memory | Flexibel | Fest | Fest | Fest |
+| LM Studio? | ✅ Ja | ❌ Nein | ❌ Nein | ❌ Nein |
+| Ollama? | ✅ Ja | ✅ (teilweise) | ✅ (teilweise) | ❌ |
+
+**Fazit**: GGUF ist für LM Studio ideal, da es RAM-effizient und GPU-freundlich ist.
+
+## Model-Empfehlungen für LM Studio
+
+### Für 8GB VRAM
+
+```
+qwen2.5:3b-q4_k_m.gguf    (Schnell, Deutsch-freundlich)
+phi3:4b-q4_k_m.gguf       (Überraschend gut)
+```
+
+### Für 12GB VRAM
+
+```
+qwen2.5:7b-q4_k_m.gguf    (Beste Balance)
+mistral:7b-q4_k_m.gguf    (Good reasoning)
+llama2:7b-q4_k_m.gguf     (Zuverlässig)
+```
+
+### Für 16GB+ VRAM
+
+```
+qwen2.5:14b-q4_k_m.gguf   (Hohe Qualität)
+mistral:7b-instruct       (Instruktionen-Modell)
+neural-chat:7b            (Spezialisiert für Chats)
+```
+
+## GPU vs CPU Konfiguration
+
+### GPU Setup (empfohlen)
+
+1. Öffne LM Studio Settings
+2. Unter "GPU Settings":
+   - **GPU Device**: Wähle deine GPU (z.B. "RTX 4090")
+   - **GPU Layer Offloading**: 20-40 Layers (je nach VRAM)
+3. Test: Starte Chat, überprüfe dass Inferenz-Speed >10 tokens/s ist
+
+Typische Speeds (mit GPU):
+- 7B Model: 40-80 tokens/s
+- 14B Model: 20-40 tokens/s
+- 70B Model: 5-10 tokens/s (braucht 48GB VRAM)
+
+### CPU Fallback
+
+Falls GPU nicht unterstützt:
+
+1. Settings → GPU Layer Offloading = 0
+2. Inferenz läuft auf CPU (langsamer, aber funktioniert)
+3. Typisch: 5-15 tokens/s (moderne CPUs)
+
+## Local Server starten
+
+### Kurz-Version
+
+1. Models wählen
+2. Im linken Menu: "Local Server"
+3. Klick "Start Server"
+4. API verfügbar unter `http://localhost:1234`
+
+### Advanced: Server-Konfiguration
+
+Nach Klick auf "Start Server" öffnet sich Konfiguration:
+
+```
+Server Port: 1234
+Cross-Origin Requests (CORS): aktiviert
+Request Timeout: 300s
+Context Window: (Modell-Abhängig, z.B. 4096)
+GPU Layers: (Auto oder manuell setzen)
+```
+
+## REST API Beispiele
+
+Einmal der Server läuft, nutze OpenAI-kompatible API:
+
+### Chat Completion
+
+```bash
+curl http://localhost:1234/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "qwen2.5:7b",
+    "messages": [
+      {"role": "system", "content": "Du sprichst Deutsch."},
+      {"role": "user", "content": "Was ist KI?"}
+    ],
+    "temperature": 0.7,
+    "max_tokens": 200
+  }'
+```
+
+Response:
+
+```json
+{
+  "id": "cmpl-...",
+  "object": "text_completion",
+  "created": 1710000000,
+  "model": "qwen2.5:7b",
+  "choices": [{
+    "index": 0,
+    "message": {
+      "role": "assistant",
+      "content": "KI (Künstliche Intelligenz) ist..."
+    },
+    "finish_reason": "stop"
+  }],
+  "usage": {
+    "prompt_tokens": 23,
+    "completion_tokens": 145,
+    "total_tokens": 168
+  }
+}
+```
+
+### Streaming
+
+```bash
+curl http://localhost:1234/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "qwen2.5:7b",
+    "messages": [{"role": "user", "content": "Hallo"}],
+    "stream": true
+  }' | grep -oP 'data: \K.*' | jq .choices[0].delta.content
+```
+
+### Models auflisten
+
+```bash
+curl http://localhost:1234/v1/models | jq '.data[].id'
+```
+
+## Ollama vs LM Studio
+
+| Kriterium | LM Studio | Ollama |
+|-----------|-----------|--------|
+| **Installation** | GUI Installer | CLI/Docker |
+| **Modelle verwalten** | GUI mit Suche | CLI-Kommandos |
+| **Server** | GUI-Button zum Starten | `ollama serve` |
+| **Platform** | Desktop (lokal) | Server/Cloud-ready |
+| **Model-Zugang** | ~50 beliebte Modelle | 100+ Modelle |
+| **Performance** | Sehr schnell (optimiert) | Sehr schnell (optimiert) |
+| **API-Kompatibilität** | OpenAI-kompatibel | OpenAI-kompatibel |
+| **Automation** | Begrenzt | Bash-Scripts, APIs |
+| **Multi-User** | Nein | Ja (mehrere Clients) |
+| **Docker-Ready** | Nein | Ja |
+
+**Empfehlung**:
+- **Einzelnutzer, Desktop**: LM Studio
+- **Server, Multi-User, Automatisierung**: Ollama
+
+## Integration mit Tools
+
+### VS Code Integration
+
+1. Installiere Extension: "LM Studio" (Marketplace)
+2. Extension verbindet sich automatisch zu `localhost:1234`
+3. Code-Completion nutzt lokales LLM
+
+### Mattermost Chatbot
+
+n8n Webhook → LM Studio:
+
+```json
+{
+  "method": "POST",
+  "url": "http://localhost:1234/v1/chat/completions",
+  "body": {
+    "model": "qwen2.5:7b",
+    "messages": [{"role": "user", "content": "{{ $json.message }}"}]
+  }
+}
+```
+
+### Python Script
+
+```python
+import requests
+
+response = requests.post(
+    "http://localhost:1234/v1/chat/completions",
+    json={
+        "model": "qwen2.5:7b",
+        "messages": [
+            {"role": "user", "content": "Explain AI"}
+        ],
+        "temperature": 0.7
+    }
+)
+
+print(response.json()["choices"][0]["message"]["content"])
+```
+
+## Troubleshooting
+
+### Problem: GPU wird nicht erkannt
+
+**Symptom**: "GPU not detected" oder "Running on CPU only"
+
+**Lösung**:
+1. Stelle sicher NVIDIA Driver installiert ist: `nvidia-smi`
+2. Settings → GPU Settings → Force GPU Detected = on
+3. Starte LM Studio neu
+
+### Problem: Sehr langsame Inference
+
+**Symptom**: <5 tokens/sec
+
+**Lösungen**:
+1. Reduziere GPU Layer Offloading (zu viel = Bottleneck)
+2. Nutze kleineres Modell (z.B. phi3:4b statt qwen2.5:14b)
+3. Starte LM Studio neu (Memory-Leak möglich)
+4. Prüfe andere GPU-Last: `nvidia-smi`
+
+### Problem: Out of Memory beim Model-Load
+
+**Symptom**: "CUDA out of memory" oder Crash
+
+**Lösungen**:
+1. Reduziere Context Window: Model-Settings → Context = 2048
+2. Nutze quantisiertes Modell (q4 statt q8)
+3. Nutze kleineres Modell
+
+### Problem: Model downloaded aber nicht sichtbar
+
+**Symptom**: Model ist in "~/.cache/lm-studio/models/" aber nicht in GUI
+
+**Lösung**:
+1. LM Studio neu starten
+2. Falls weiterhin nicht sichtbar: Manuell in `~/.cache/lm-studio/models/` verschieben
+3. Refresh in GUI
+
+## Quantization verstehen
+
+GGUF-Modelle gibt es in verschiedenen "Quantisierungen":
+
+| Format | Größe (7B) | VRAM | Speed | Qualität |
+|--------|---|---|---|---|
+| **q8** | 7.0GB | 8GB | Sehr schnell | Beste |
+| **q6_k** | 5.2GB | 6GB | Schnell | Sehr gut |
+| **q5_k** | 4.3GB | 5GB | Schnell | Gut |
+| **q4_k** | 3.6GB | 4GB | Sehr schnell | Gut (Default) |
+| **q3_k** | 2.6GB | 3GB | Extrem schnell | OK |
+
+**Recommendation**: Nutze `q4_k_m` (beste Balance).
+
+## Best Practices
+
+### 1. Model-Größe an Hardware anpassen
+
+```
+4GB VRAM  → 3B Modelle (phi3:4b)
+8GB VRAM  → 7B Modelle (qwen2.5:7b)
+16GB VRAM → 14B Modelle (qwen2.5:14b)
+24GB VRAM → 30B Modelle
+48GB VRAM → 70B Modelle
+```
+
+### 2. Temperature richtig einstellen
+
+- **0.0** = Deterministisch (same answer every time)
+- **0.3-0.5** = Präzise Antworten (gut für Code)
+- **0.7** = Balanced (Standard)
+- **1.0+** = Kreativ aber manchmal Unsinn
+
+### 3. System Prompt definieren
+
+Setze einen guten System Prompt in Settings:
+
+```
+"Du bist ein hilfreicher deutscher Assistent.
+Antworte präzise, strukturiert und hilfreich."
+```
+
+## Quellen und Links
+
+- [LM Studio Webseite](https://lmstudio.ai)
+- [Hugging Face Hub](https://huggingface.co/models)
+- [GGUF Format Dokumentation](https://github.com/ggerganov/ggml)
+- [OpenAI API Kompatibilität](https://platform.openai.com/docs/api-reference)
+- [Ollama vs LM Studio Vergleich](https://www.reddit.com/r/LocalLLaMA/)

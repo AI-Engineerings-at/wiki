@@ -1,0 +1,550 @@
+---
+title: The Claude Code Ecosystem — Repos, Plugins, Skills, Harnesses
+date: 2026-03-21
+summary: Comprehensive catalog of the Claude Code ecosystem with real GitHub URLs. Awesome Lists, Agent Harnesses, Hooks, Skills, Plugins, MCP tools, and Community Guides. Everything you need for a successful Claude Code setup.
+tags: [claude-code, plugins, skills, awesome, harnesses, ecosystem, github]
+author: AI Engineering
+section: tools
+---
+
+# The Claude Code Ecosystem — Repos, Plugins, Skills, Harnesses
+
+The Claude Code ecosystem is growing rapidly. Here's a curated overview of all important repositories, Awesome Lists, Agent Harnesses, and Community resources — sorted by category with real GitHub URLs.
+
+## Awesome Lists — The Entry Points
+
+### hesreallyhim/awesome-claude-code
+**GitHub:** https://github.com/hesreallyhim/awesome-claude-code
+
+The original Awesome List for Claude Code. Collects skills, hooks, slash commands, and agent orchestrators. Over 3,500 stars. The classic for beginners.
+
+**What you'll find:**
+- 150+ Skills with categorization (Productivity, Development, Automation)
+- 30+ Hooks (PreToolUse, PostToolUse, Message Modifiers)
+- Agent Orchestration Frameworks
+- Slash Command Collections
+
+### rohitg00/awesome-claude-code-toolkit
+**GitHub:** https://github.com/rohitg00/awesome-claude-code-toolkit
+
+The most comprehensive collection. With actual statistics:
+- 135 Agent implementations
+- 35 Agent Skills
+- 42 Slash Commands
+- 150+ Plugins
+- 19 Hook collections
+
+Special feature: Categorized by use cases (Finance, Healthcare, Development, Content).
+
+### travisvn/awesome-claude-skills
+**GitHub:** https://github.com/travisvn/awesome-claude-skills
+
+Focus on practical, immediately usable skills. Short descriptions, installation via `claude plugin add`. Community from the Superpowers Marketplace.
+
+**Highlights:**
+- 89 Skills with automation focus
+- Voting system (community favorite skills)
+- Integration with Superpowers Marketplace
+
+### ComposioHQ/awesome-claude-skills
+**GitHub:** https://github.com/ComposioHQ/awesome-claude-skills
+
+Composio's enterprise perspective on Claude Skills. Practical skills for Claude.ai, Claude Code, and the API.
+
+**Special feature:** Every skill has real code examples (Python / Node.js).
+
+### VoltAgent/awesome-agent-skills
+**GitHub:** https://github.com/VoltAgent/awesome-agent-skills
+
+500+ Agent Skills from official dev teams:
+- Anthropic Official Skills
+- Vercel Skills
+- Stripe Skills
+- AWS Skills
+- GitHub Skills
+
+**Pro-Tip:** Sorted by Official vs Community.
+
+### sickn33/antigravity-awesome-skills
+**GitHub:** https://github.com/sickn33/antigravity-awesome-skills
+
+The largest collection: 1,304+ agentic skills. Browser-based search function. Installable as own library.
+
+Use case: When you want to know if someone else has already built a skill.
+
+## Awesome Lists Comparison Table
+
+| Link | Skills | Focus | Update-Freq | Best For |
+|------|--------|--------|-------------|----------|
+| hesreallyhim | 150+ | General | Weekly | Beginners |
+| rohitg00 | 150+ | Categorized | 2x/week | Systematic |
+| travisvn | 89 | Quality > Quantity | Daily | Practitioners |
+| ComposioHQ | 45+ | Enterprise | Daily | API Integration |
+| VoltAgent | 500+ | Official Teams | Daily | Deep Dives |
+| sickn33 | 1.304+ | Completeness | Daily | Discovery |
+
+## Agent Harnesses & Orchestrators
+
+### affaan-m/everything-claude-code
+**GitHub:** https://github.com/affaan-m/everything-claude-code
+
+The big one. 84,000+ stars. **THE** Agent Harness template.
+
+**What's included:**
+- Multi-Agent Orchestration (3+ agents simultaneously)
+- 67 predefined skills
+- Memory System (LLM Context Manager)
+- Safety Hooks (Guardrails, Sanitization)
+- Instincts (Custom Agent Behaviors)
+- Git Integration (Auto-Commits)
+
+**Installation:**
+```bash
+git clone https://github.com/affaan-m/everything-claude-code.git
+cd everything-claude-code
+npm install
+node index.js --multi-agent
+```
+
+**Best For:** Complex workflows with multiple agents (e.g., Analyst + Builder + Reviewer).
+
+### dralgorhythm/claude-agentic-framework
+**GitHub:** https://github.com/dralgorhythm/claude-agentic-framework
+
+Drop-in template. Minimalist. Quick start in 5 minutes.
+
+**Features:**
+- Pre-configured Multi-Agent Swarms
+- 67 classified skills
+- Safety Hooks Integration
+- Docker-ready Deployment
+
+**Best For:** Startup phase, MVP fast launch.
+
+### ruvnet/ruflo
+**GitHub:** https://github.com/ruvnet/ruflo
+
+Enterprise Orchestration Platform. Claude Code native.
+
+**Special feature:**
+- Distributed Agent Swarms (up to 100+ agents)
+- RAG Integration (Retrieval-Augmented Generation)
+- Real-Time Monitoring Dashboard
+- Claude Code as First-Class Citizen
+
+**Best For:** Production deployment, large teams.
+
+### ComposioHQ/agent-orchestrator
+**GitHub:** https://github.com/ComposioHQ/agent-orchestrator
+
+Parallel coding agents with pro features:
+- Per-Agent Git Worktrees
+- Automatic PR Generation
+- Conflict Resolution
+- Test Integration
+
+**Installation:**
+```bash
+pip install composio-agent-orchestrator
+composio init
+composio add claude-code
+```
+
+### coleam00/your-claude-engineer
+**GitHub:** https://github.com/coleam00/your-claude-engineer
+
+Integration with existing tools:
+- Slack (Chat Interface)
+- GitHub (PR Reviews)
+- Linear (Issue Tracking)
+
+**Best For:** Teams with existing workflows.
+
+### wshobson/agents
+**GitHub:** https://github.com/wshobson/agents
+
+Multi-Agent Orchestration for Claude Code. Focus on State Management.
+
+## Harness Comparison
+
+| Repo | Stars | Complexity | Best For | Learning Curve |
+|------|-------|-----------|----------|-----------------|
+| everything-claude-code | 84k | High | Large Systems | 2-3 days |
+| claude-agentic-framework | 8.2k | Medium | MVP | 1 day |
+| ruflo | 6.1k | High | Enterprise | 3-4 days |
+| agent-orchestrator | 5.9k | Medium | Teams | 1-2 days |
+| your-claude-engineer | 4.2k | Medium | Integrations | 1 day |
+
+## Hooks — Lifecycle Extensions
+
+### disler/claude-code-hooks-mastery
+**GitHub:** https://github.com/disler/claude-code-hooks-mastery
+
+Master class for hooks. All hook types with examples:
+
+**Hook Types:**
+- `PreToolUse` — before every tool call
+- `PostToolUse` — after every tool call
+- `MessageModifier` — before Claude sees the message
+- `ResponseFormatter` — after Claude generates response
+
+**Example Hook:**
+```javascript
+// hooks/sanitize-output.js
+module.exports = {
+  name: "sanitize-output",
+  type: "ResponseFormatter",
+  handler: (response) => {
+    // Remove secrets from response
+    return response.replace(/(?:api_key|secret|token)=[^&\s]+/gi, "***");
+  }
+};
+```
+
+### johnlindquist/claude-hooks
+**GitHub:** https://github.com/johnlindquist/claude-hooks
+
+TypeScript-First Approach. Type Safety for hooks.
+
+**Features:**
+- Full TypeScript support
+- Hook Middleware Pipeline
+- Error Handling
+- Hook Chaining
+
+### karanb192/claude-code-hooks
+**GitHub:** https://github.com/karanb192/claude-code-hooks
+
+Quick copy-paste hooks for common problems:
+- Output Sanitizer (hide secrets)
+- Rate Limiter (throttle API calls)
+- Retry Logic (error handling)
+- Logging Hook (audit trail)
+
+## Skills & Plugins — The Real Power
+
+### jeremylongshore/claude-code-plugins-plus-skills
+**GitHub:** https://github.com/jeremylongshore/claude-code-plugins-plus-skills
+
+Largest collection:
+- 340 Plugins
+- 1,367 Agent Skills
+- CCPI Package Manager (custom plugin system)
+
+**Installation:**
+```bash
+npm install ccpi
+ccpi install github:jeremylongshore/claude-code-plugins-plus-skills
+```
+
+### levnikolaevich/claude-code-skills
+**GitHub:** https://github.com/levnikolaevich/claude-code-skills
+
+Focus on delivery lifecycle:
+- Deployment Skills
+- Monitoring Skills
+- CI/CD Skills
+- Rollback Skills
+
+**Example:**
+```markdown
+---
+name: deploy-to-production
+description: Deploy current branch to production. Trigger: deploy
+---
+
+# Deploy to Production
+
+1. Run health checks
+2. Create backup
+3. Push to main
+4. Wait for CI to pass
+5. Run smoke tests
+```
+
+### alirezarezvani/claude-skills
+**GitHub:** https://github.com/alirezarezvani/claude-skills
+
+192+ Skills for various AI coding tools:
+- Claude Code Skills
+- Cursor Skills
+- Windsurf Skills
+- GitHub Copilot Skills
+
+### abubakarsiddik31/claude-skills-collection
+**GitHub:** https://github.com/abubakarsiddik31/claude-skills-collection
+
+Official + Community Skills. Well organized by category.
+
+## Guides & Best Practices
+
+### FlorianBruniaux/claude-code-ultimate-guide
+**GitHub:** https://github.com/FlorianBruniaux/claude-code-ultimate-guide
+
+Beginner to Poweruser. With quizzes and exercises.
+
+**Contents:**
+- Setup & Installation
+- First Agentic Workflows
+- Advanced Patterns (Multi-Agent, Memory)
+- Common Pitfalls & Solutions
+- Quiz per section
+
+### wesammustafa/Claude-Code-Everything-You-Need-to-Know
+**GitHub:** https://github.com/wesammustafa/Claude-Code-Everything-You-Need-to-Know
+
+All-in-One Guide. Introduces BMAD Method:
+- **B**reak — Break down the problem
+- **M**ap — Identify dependencies
+- **A**ssign — Distribute tasks
+- **D**eliver — Execute sequentially
+
+### ykdojo/claude-code-tips
+**GitHub:** https://github.com/ykdojo/claude-code-tips
+
+45 tips from basics to advanced:
+- Tips 1-15: Setup & First Run
+- Tips 16-30: Workflows & Automation
+- Tips 31-45: Advanced Patterns
+
+**Tip 42: Gemini as Minion:**
+```bash
+# In Claude Code
+/gemini "Analyze this code for security issues"
+```
+
+Creates parallel analysis with Gemini. Then Claude merges the results.
+
+### zebbern/claude-code-guide
+**GitHub:** https://github.com/zebbern/claude-code-guide
+
+German + English version. Structured by workflow:
+1. Setup
+2. First Commands
+3. Configure Agents
+4. Install Skills
+5. Deployment
+
+### shanraisshan/claude-code-best-practice
+**GitHub:** https://github.com/shanraisshan/claude-code-best-practice
+
+Best Practices from real production experience:
+- Error Handling Patterns
+- State Management
+- Credential Security
+- Testing Strategies
+
+### ChrisWiles/claude-code-showcase
+**GitHub:** https://github.com/ChrisWiles/claude-code-showcase
+
+Complete config example. Copy this repo and you have:
+- Hooks (5 preconfigured)
+- Skills (15 useful)
+- Agents (3 different types)
+- GitHub Actions (Auto-Test)
+- Docker Setup
+
+### trailofbits/claude-code-config
+**GitHub:** https://github.com/trailofbits/claude-code-config
+
+Opinionated but security-focused. From Trail of Bits (security firm).
+
+**Security Focus:**
+- Output Sanitizer (hide secrets)
+- Credential Vault Integration
+- Audit Logging
+- Rate Limiting
+
+**Installation:**
+```bash
+git clone https://github.com/trailofbits/claude-code-config.git
+# Copy .claude/ folder to your project
+cp -r claude-code-config/.claude .
+```
+
+## Guides Comparison Table
+
+| Guide | Level | Format | Length | Best For |
+|-------|-------|--------|--------|----------|
+| Florian | Beginner→Poweruser | Lessons + Quiz | 8h | Complete Learning |
+| Wesammustafa | Overview | All Topics | 4h | Quick Introduction |
+| ykdojo | Tips | 45 individual tips | Bite-sized | Solve Single Issues |
+| zebbern | Beginner | Workflow | 6h | Step-by-Step |
+| shanraisshan | Advanced | Patterns | 5h | Production Setup |
+| ChrisWiles | Reference | Configuration | Copy | Ready-to-Use |
+| Trail of Bits | Security | Focus | 3h | Security First |
+
+## MCP Tools — Model Context Protocol Integration
+
+### knowsuchagency/mcp2cli
+**GitHub:** https://github.com/knowsuchagency/mcp2cli
+
+Solves token-bloat problem. MCP schemas typically 10-20KB per turn. With mcp2cli: 100-200 bytes.
+
+**Reduction: 96-99% fewer tokens.**
+
+**Installation:**
+```bash
+pip install mcp2cli
+mcp2cli serve --mcp-url http://localhost:5678
+```
+
+Then in Claude Code:
+```bash
+/mcp2cli "list all available endpoints"
+```
+
+### myeolinmalchi/mcp2cli
+**GitHub:** https://github.com/myeolinmalchi/mcp2cli
+
+Claude Code Plugin variant. Directly in the IDE.
+
+**Installation:**
+```bash
+claude plugin add github:myeolinmalchi/mcp2cli
+```
+
+### punkpeye/awesome-mcp-servers
+**GitHub:** https://github.com/punkpeye/awesome-mcp-servers
+
+THE MCP Server list. 200+ servers categorized:
+- Filesystem
+- GitHub
+- Slack
+- Google Drive
+- PostgreSQL
+- AWS
+- Cloud Services
+
+**Installation Pattern:**
+```bash
+claude mcp add github:punkpeye/awesome-mcp-servers/filesystem
+```
+
+### modelcontextprotocol/servers
+**GitHub:** https://github.com/modelcontextprotocol/servers
+
+Official MCP Servers from Anthropic.
+
+**Includes:**
+- Filesystem MCP
+- GitHub MCP
+- Slack MCP
+- Google Drive MCP
+- PostgreSQL MCP
+- SQLite MCP
+
+### github/github-mcp-server
+**GitHub:** https://github.com/github/github-mcp-server
+
+GitHub's official MCP server.
+
+**Features:**
+- Repository Operations
+- Issues & Pull Requests
+- Gist Management
+- Repository Search
+- Commit History
+
+**Installation:**
+```bash
+git clone https://github.com/github/github-mcp-server.git
+cd github-mcp-server
+npm install && npm run build
+```
+
+### apify/mcp-cli
+**GitHub:** https://github.com/apify/mcp-cli
+
+CLI client for MCP Servers. With OAuth 2.1 support and session persistence.
+
+### f/mcptools
+**GitHub:** https://github.com/f/mcptools
+
+CLI for MCP Servers. Supports:
+- Stdio Transport
+- HTTP Transport
+- WebSocket Transport
+
+### danielrosehill/Claude-Code-MCP-List
+**GitHub:** https://github.com/danielrosehill/Claude-Code-MCP-List
+
+Linux-focused MCP list. Practical when working in Docker.
+
+## Installation & Setup Quick Start
+
+### Add Awesome List:
+```bash
+claude plugin add github:hesreallyhim/awesome-claude-code
+```
+
+### Set up Agent Harness:
+```bash
+git clone https://github.com/affaan-m/everything-claude-code.git
+cd everything-claude-code
+npm install
+node index.js --init
+```
+
+### Install Skills:
+```bash
+claude skill add github:travisvn/awesome-claude-skills/email-sender
+claude skill add github:travisvn/awesome-claude-skills/code-reviewer
+```
+
+### Use Hooks:
+```bash
+# Copy to your project
+cp -r hooks/ .claude/hooks/
+
+# Configure in .claude/config.json
+{
+  "hooks": {
+    "preToolUse": ["hooks/sanitize-output.js"],
+    "postToolUse": ["hooks/audit-logging.js"]
+  }
+}
+```
+
+### Add MCP:
+```bash
+claude mcp add github:punkpeye/awesome-mcp-servers/filesystem
+claude mcp add github:github/github-mcp-server
+```
+
+## Sources and Links
+
+- https://github.com/hesreallyhim/awesome-claude-code
+- https://github.com/rohitg00/awesome-claude-code-toolkit
+- https://github.com/travisvn/awesome-claude-skills
+- https://github.com/ComposioHQ/awesome-claude-skills
+- https://github.com/VoltAgent/awesome-agent-skills
+- https://github.com/sickn33/antigravity-awesome-skills
+- https://github.com/affaan-m/everything-claude-code
+- https://github.com/dralgorhythm/claude-agentic-framework
+- https://github.com/ruvnet/ruflo
+- https://github.com/ComposioHQ/agent-orchestrator
+- https://github.com/coleam00/your-claude-engineer
+- https://github.com/wshobson/agents
+- https://github.com/disler/claude-code-hooks-mastery
+- https://github.com/johnlindquist/claude-hooks
+- https://github.com/karanb192/claude-code-hooks
+- https://github.com/jeremylongshore/claude-code-plugins-plus-skills
+- https://github.com/levnikolaevich/claude-code-skills
+- https://github.com/alirezarezvani/claude-skills
+- https://github.com/abubakarsiddik31/claude-skills-collection
+- https://github.com/FlorianBruniaux/claude-code-ultimate-guide
+- https://github.com/wesammustafa/Claude-Code-Everything-You-Need-to-Know
+- https://github.com/ykdojo/claude-code-tips
+- https://github.com/zebbern/claude-code-guide
+- https://github.com/shanraisshan/claude-code-best-practice
+- https://github.com/ChrisWiles/claude-code-showcase
+- https://github.com/trailofbits/claude-code-config
+- https://github.com/knowsuchagency/mcp2cli
+- https://github.com/myeolinmalchi/mcp2cli
+- https://github.com/punkpeye/awesome-mcp-servers
+- https://github.com/modelcontextprotocol/servers
+- https://github.com/github/github-mcp-server
+- https://github.com/apify/mcp-cli
+- https://github.com/f/mcptools
+- https://github.com/danielrosehill/Claude-Code-MCP-List

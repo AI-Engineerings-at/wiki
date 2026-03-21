@@ -1,0 +1,515 @@
+---
+title: "Plugins & Marketplaces — Claude Code Reference"
+date: "2026-03-21"
+summary: "Complete reference for Claude Code plugin system — Plugin structure, marketplaces, installation, trust, and custom plugins with skills, agents, hooks, and MCP servers."
+tags: ["claude-code", "plugins", "marketplace", "extension", "reference"]
+author: "AI Engineering"
+---
+
+# Claude Code Plugins & Marketplaces
+
+Claude Code is extended through a flexible plugin system. Plugins can contain skills (agent capabilities), custom agents, hooks (automation), and MCP servers. Marketplaces allow you to share and distribute plugins.
+
+## What Are Plugins?
+
+A plugin is a package of extensions — any combination of:
+
+- **Skills**: Reusable prompt templates that Claude auto-loads
+- **Agents**: Custom agents for specialized roles
+- **Hooks**: Event handlers that react to changes
+- **MCP Servers**: External tool integrations (REST APIs, databases, etc.)
+
+Plugins are organized in structured directories with a `plugin.json` manifest file.
+
+## Plugin Structure
+
+A minimal plugin:
+
+```
+my-plugin/
+├── .claude-plugin/
+│   └── plugin.json              # Manifest (REQUIRED)
+├── skills/                       # Skills (optional)
+│   └── hello/
+│       └── SKILL.md
+├── agents/                       # Custom agents (optional)
+│   └── specialist.md
+├── hooks/                        # Event handlers (optional)
+│   └── hooks.json
+├── .mcp.json                     # MCP servers (optional)
+└── README.md                     # Documentation
+```
+
+### Plugin Manifest (plugin.json)
+
+The manifest defines your plugin:
+
+```json
+{
+  "name": "my-awesome-plugin",
+  "description": "Brief description",
+  "version": "1.0.0",
+  "author": {
+    "name": "Your Name",
+    "email": "email@example.com"
+  },
+  "homepage": "https://github.com/user/my-plugin",
+  "repository": "https://github.com/user/my-plugin",
+  "license": "MIT",
+  "keywords": ["automation", "productivity"],
+  "skills": [
+    "./skills"
+  ],
+  "agents": [
+    "./agents/specialist.md"
+  ],
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npm run lint:fix"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Required fields:**
+- `name`: Unique plugin ID (kebab-case)
+- `description`: What the plugin does
+
+**Optional fields:**
+- `version`: Semantic versioning
+- `author`, `license`, `homepage`, `repository`
+- `keywords`: For discovery
+- `skills`, `agents`, `hooks`, `mcpServers`: Component paths
+
+## Install Plugins
+
+### From a Marketplace
+
+```bash
+/plugin marketplace add https://github.com/user/my-plugins
+/plugin install my-plugin@my-plugins
+```
+
+### From a Local Path
+
+```bash
+/plugin install ./my-plugin
+```
+
+### Using --plugin-dir Flag
+
+For development:
+
+```bash
+claude --plugin-dir ./my-plugin
+```
+
+This loads the plugin for a single session without installing it.
+
+## Plugin Marketplaces
+
+A marketplace is a Git repository with multiple plugins.
+
+### Create a Marketplace
+
+Structure:
+
+```
+my-plugins-marketplace/
+├── .claude-plugin/
+│   └── marketplace.json          # Marketplace catalog
+├── plugins/
+│   ├── plugin-1/
+│   ├── plugin-2/
+│   └── plugin-3/
+└── README.md
+```
+
+### marketplace.json Example
+
+```json
+{
+  "name": "my-tools",
+  "owner": {
+    "name": "Team Name",
+    "email": "team@example.com"
+  },
+  "plugins": [
+    {
+      "name": "code-formatter",
+      "source": "./plugins/code-formatter",
+      "description": "Auto-format code",
+      "version": "1.0.0"
+    },
+    {
+      "name": "security-checker",
+      "source": {
+        "source": "github",
+        "repo": "org/security-plugin"
+      },
+      "description": "Check code for security issues"
+    }
+  ]
+}
+```
+
+### Plugin Sources in Marketplace
+
+Plugins can come from various sources:
+
+**Local path (relative):**
+```json
+{ "source": "./plugins/my-plugin" }
+```
+
+**GitHub:**
+```json
+{
+  "source": {
+    "source": "github",
+    "repo": "owner/plugin-repo",
+    "ref": "v2.0.0",
+    "sha": "abc123..."
+  }
+}
+```
+
+**Git URL:**
+```json
+{
+  "source": {
+    "source": "url",
+    "url": "https://gitlab.com/team/plugin.git",
+    "ref": "main"
+  }
+}
+```
+
+**Git Subdirectory (sparsely cloned):**
+```json
+{
+  "source": {
+    "source": "git-subdir",
+    "url": "https://github.com/company/monorepo.git",
+    "path": "tools/claude-plugin"
+  }
+}
+```
+
+**NPM Package:**
+```json
+{
+  "source": {
+    "source": "npm",
+    "package": "@company/plugin",
+    "version": "^2.0.0",
+    "registry": "https://npm.example.com"
+  }
+}
+```
+
+## Skills in Plugins
+
+Skills are reusable prompt templates.
+
+### Skill Structure in Plugins
+
+```
+my-plugin/
+├── .claude-plugin/
+│   └── plugin.json
+└── skills/
+    ├── skill-1/
+    │   ├── SKILL.md           # Main definition
+    │   ├── template.md        # Template for Claude
+    ├── skill-2/
+    │   └── SKILL.md
+```
+
+### SKILL.md Format
+
+```yaml
+---
+name: my-skill
+description: "What this skill does. Trigger: keyword1, keyword2"
+disable-model-invocation: false
+---
+
+## Task
+
+$ARGUMENTS and then...
+
+1. Step 1
+2. Step 2
+```
+
+**Important fields:**
+- `name`: Skill name (lowercase)
+- `description`: Claude uses this for auto-invocation
+- `disable-model-invocation`: true = only manual invocation
+
+**String substitutions:**
+- `$ARGUMENTS`: User input
+- `${CLAUDE_SKILL_DIR}`: Absolute path to skill directory
+- `${CLAUDE_SESSION_ID}`: Current session ID
+
+## Custom Agents in Plugins
+
+Agents are specialized Claude Code instances with custom system prompts.
+
+### Agent Definition
+
+```markdown
+---
+name: security-reviewer
+description: "Reviews code for security vulnerabilities"
+model: sonnet
+tools: Read, Grep, Glob
+disallowedTools: Write, Edit
+maxTurns: 50
+---
+
+# Security Reviewer Agent
+
+You are a security specialist. Your job is:
+
+1. Scan code for security issues
+2. Identify vulnerabilities
+3. Suggest fixes
+
+Use only read tools — make no changes.
+```
+
+**Fields:**
+- `name`: Agent ID
+- `model`: haiku|sonnet|opus
+- `tools`/`disallowedTools`: Tool restrictions
+- `maxTurns`: Limit on number of turns
+
+## Hooks in Plugins
+
+Hooks are event handlers that trigger on specific changes.
+
+### hooks.json Format
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npm run lint:fix"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Available hooks:**
+- `PreToolUse`: Before a tool is called
+- `PostToolUse`: After a tool completes
+- `SessionStart`: At session start
+- `SessionEnd`: At session end
+
+**Hook types:**
+- `command`: Execute a shell command
+- `script`: Call a script
+
+## MCP Servers in Plugins
+
+MCP (Model Context Protocol) servers integrate external tools.
+
+### .mcp.json Format
+
+```json
+{
+  "my-database": {
+    "command": "${CLAUDE_PLUGIN_ROOT}/servers/db-server",
+    "args": [
+      "--config",
+      "${CLAUDE_PLUGIN_ROOT}/db-config.json"
+    ]
+  }
+}
+```
+
+**Available variables:**
+- `${CLAUDE_PLUGIN_ROOT}`: Plugin directory
+- `${CLAUDE_PLUGIN_DATA}`: Persistent data directory for data that survives updates
+
+### Start MCP Server
+
+The MCP server starts automatically when the plugin loads. Claude can then access tools offered by the server.
+
+## Plugin Trust & Security
+
+### Plugin Validation
+
+Plugins are validated before loading:
+
+```bash
+/plugin validate ./my-plugin
+```
+
+This checks:
+- `plugin.json` syntax
+- Referenced files exist
+- Skills/agents/hooks are valid
+
+### Marketplace Trust
+
+Two modes:
+
+**Unrestricted (default):**
+- Users can add any marketplace
+- Users install any plugin
+
+**Managed (organizations):**
+- Admins define whitelist of approved marketplaces
+- Users can only install from approved marketplaces
+
+```json
+// managed-settings.json
+{
+  "strictKnownMarketplaces": [
+    {
+      "source": "github",
+      "repo": "company/approved-plugins"
+    }
+  ]
+}
+```
+
+## Plugin Lifecycle
+
+### Development
+
+1. Create plugin structure
+2. Write `plugin.json`
+3. Test with `--plugin-dir`
+4. Use `/reload-plugins` during development to load changes
+
+### Distribution
+
+1. Version with semantic versioning
+2. Push to Git (GitHub, GitLab, etc.)
+3. Create marketplace or add to existing one
+4. Users install with `/plugin install`
+
+### Updates
+
+1. Change version in `plugin.json`
+2. Push changes
+3. Users update with `/plugin update`
+
+Auto-updates can be enabled — plugins are periodically checked and updated.
+
+## Plugin Example: Code Formatter
+
+Here's a complete example:
+
+```
+code-formatter-plugin/
+├── .claude-plugin/
+│   └── plugin.json
+├── skills/
+│   └── format-code/
+│       └── SKILL.md
+└── README.md
+```
+
+**plugin.json:**
+```json
+{
+  "name": "code-formatter-plugin",
+  "description": "Format code across your project",
+  "version": "1.0.0",
+  "author": { "name": "Your Name" }
+}
+```
+
+**skills/format-code/SKILL.md:**
+```yaml
+---
+name: format-code
+description: "Format code files automatically"
+---
+
+Format the code in $ARGUMENTS using project conventions:
+
+1. Detect file type and language
+2. Apply formatter (prettier for JS, black for Python, etc.)
+3. Verify formatting didn't break code
+4. Report what was formatted
+```
+
+**Installation:**
+```bash
+/plugin install ./code-formatter-plugin
+```
+
+**Usage:**
+```bash
+/code-formatter-plugin src/
+```
+
+## Troubleshooting
+
+### Plugin Not Loading
+
+**Problem:** Plugin doesn't appear in `/help`
+
+**Solutions:**
+- Check `plugin.json` syntax: `/plugin validate .`
+- Make sure file is `./plugin.json` (NOT `.claude-plugin/plugin.json`)
+- Wait after install: `/reload-plugins`
+
+### Marketplace Error
+
+**Problem:** "Unable to add marketplace"
+
+**Solutions:**
+- Check that marketplace URL is reachable
+- Verify `marketplace.json` exists
+- Validate with `/plugin validate .`
+
+### Plugin Install Timeout
+
+**Problem:** "Git clone timed out"
+
+**Solutions:**
+- Large repos need more time — use `git-subdir` source
+- Increase timeout: `export CLAUDE_CODE_PLUGIN_GIT_TIMEOUT_MS=300000`
+
+## Further Resources
+
+- [Plugin Marketplace Guide](/tools/claude-code-plugins-marketplace)
+- [Skills Reference](/tools/skills)
+- [Hooks Documentation](/tools/hooks)
+
+---
+
+*Last updated: 2026-03-21 | Claude Code Plugin System Reference*
+
+## Sources and Links
+
+- [Plugin Marketplaces](https://code.claude.com/docs/en/plugin-marketplaces)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

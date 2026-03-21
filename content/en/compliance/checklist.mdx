@@ -1,0 +1,405 @@
+---
+title: EU AI Act Compliance Checklist
+date: 2026-03-21
+summary: Actionable compliance checklist for SMBs to prepare for August 2, 2026 enforcement
+tags: [eu-ai-act, checklist, compliance, 2026-deadline]
+author: AI Engineering
+---
+
+# EU AI Act Compliance Checklist
+
+Use this checklist to track your compliance progress toward the August 2, 2026 deadline.
+
+## Phase 1: Discovery & Classification (Target: March 31, 2026)
+
+### Audit All AI Systems
+
+- [ ] List every AI tool, service, or system your company uses
+- [ ] Include vendor tools (Zapier, n8n, ChatGPT, etc.)
+- [ ] Include internal AI development
+- [ ] Include research/experimental AI
+- [ ] Document: System name, purpose, who uses it, data involved
+
+**Deliverable**: Spreadsheet with all AI systems (see example below)
+
+| System Name | Category | Purpose | Data | Risk Level | Status |
+|-------------|----------|---------|------|------------|--------|
+| Resume Screener | Internal | Filter job applications | Candidate names, education, experience | HIGH-RISK | To Do |
+| ChatGPT | Vendor | Customer support | Customer issues | TRANSPARENCY | To Do |
+| n8n Workflows | Vendor | Data processing | Customer data | LOW-RISK | To Do |
+
+### Classify Each System
+
+- [ ] Is it prohibited? (If yes: STOP USING IMMEDIATELY)
+- [ ] Does it make automated decisions about people? (HIGH-RISK)
+- [ ] Does it use biometrics? (HIGH-RISK)
+- [ ] Does it involve employment/hiring? (HIGH-RISK)
+- [ ] Does it involve financial/credit decisions? (HIGH-RISK)
+- [ ] Does it involve legal/justice decisions? (HIGH-RISK)
+- [ ] Does it involve education/grading? (HIGH-RISK)
+- [ ] Does it involve benefits/welfare? (HIGH-RISK)
+- [ ] Is it a chatbot? (TRANSPARENCY)
+- [ ] Does it generate/manipulate content? (TRANSPARENCY)
+- [ ] Does it do emotion recognition? (TRANSPARENCY)
+- [ ] Otherwise? (LOW-RISK)
+
+**Deliverable**: Risk classification for each system
+
+### Identify Data Flows
+
+- [ ] What personal data goes into each AI system?
+- [ ] Who can see AI's output (internal? customers? public)?
+- [ ] Where is data stored (EU? US? Other)?
+- [ ] How long is data retained?
+- [ ] Who has access (employees, vendors, public)?
+
+**Deliverable**: Data flow diagram or spreadsheet
+
+## Phase 2: High-Risk Compliance Planning (Target: April 30, 2026)
+
+### If You Have NO High-Risk Systems
+
+- [ ] Skip to Phase 3
+
+### If You Have HIGH-RISK Systems
+
+- [ ] Decide: Keep? Modify? Replace?
+- [ ] For each high-risk system to keep, plan full compliance
+
+### Risk Management Plan (Article 9)
+
+**For each high-risk system**:
+
+- [ ] Document potential harms this AI could cause
+- [ ] Identify vulnerable groups it could affect
+- [ ] Plan risk mitigation strategies
+- [ ] Define who's responsible for what
+- [ ] Set up monitoring for failures
+- [ ] Create incident response procedures
+
+**Deliverable**: Risk Management Plan document (5-15 pages typically)
+
+Example structure:
+```
+1. System Overview
+   - What does it do?
+   - Who uses it?
+   - What data?
+
+2. Identified Risks
+   - Technical risks (bias, errors)
+   - Operational risks (misuse, failure)
+   - Human rights risks (discrimination, unfairness)
+
+3. Mitigation Strategies
+   - For each risk: How do you reduce it?
+   - Testing and validation
+   - Human oversight
+   - Monitoring
+
+4. Responsibilities
+   - Who's responsible for what?
+   - Escalation procedures
+
+5. Monitoring & Audit
+   - How do you track performance?
+   - When do you review?
+   - What data do you log?
+```
+
+### Fundamental Rights Impact Assessment (FRIA)
+
+**For each high-risk system**:
+
+- [ ] How could this AI affect fundamental rights?
+  - Right to work?
+  - Right to fair trial?
+  - Right to privacy?
+  - Right to non-discrimination?
+  - Right to education?
+- [ ] How could it discriminate?
+- [ ] How could vulnerable groups be harmed?
+- [ ] What safeguards are in place?
+- [ ] Is there human oversight?
+- [ ] Can decisions be appealed?
+
+**Deliverable**: FRIA document (overlaps with GDPR's DPIA)
+
+### Data Documentation
+
+**For each high-risk system**:
+
+- [ ] Document all training data sources
+- [ ] Document data quality (errors, biases)
+- [ ] Document data limitations
+- [ ] Describe data cleaning/preprocessing
+- [ ] Document data retention and deletion
+- [ ] Show data is representative (not biased)
+
+**Deliverable**: Data documentation (technical document)
+
+### Testing for Bias
+
+**For each high-risk system** (especially hiring, credit, criminal justice):
+
+- [ ] Test for gender bias (same data, different gender)
+- [ ] Test for age bias
+- [ ] Test for ethnic/national origin bias
+- [ ] Test for disability bias
+- [ ] Test for false positive/negative rates
+- [ ] Test on edge cases and vulnerable groups
+- [ ] Document results
+- [ ] Plan mitigation if biases found
+
+**Deliverable**: Bias testing report with results
+
+### Human Oversight
+
+**For each high-risk system**:
+
+- [ ] Who reviews AI decisions?
+- [ ] What's their training?
+- [ ] Can they override AI?
+- [ ] How are override decisions tracked?
+- [ ] What's the escalation process?
+- [ ] Is oversight logged?
+
+**Deliverable**: Human oversight procedures document
+
+### Technical Documentation
+
+**For each high-risk system**:
+
+- [ ] System architecture
+- [ ] Model details (if applicable)
+- [ ] Input/output specifications
+- [ ] Known limitations
+- [ ] Performance metrics
+- [ ] Failure modes
+- [ ] Maintenance procedures
+
+**Deliverable**: Technical documentation
+
+## Phase 3: Transparency & Low-Risk Compliance (Target: May 31, 2026)
+
+### For TRANSPARENCY-Risk Systems (Chatbots, Content)
+
+- [ ] Chatbots: Add disclosure ("You're talking to an AI")
+- [ ] Generated content: Label as "AI-generated"
+- [ ] Emotion recognition: Document limitations
+- [ ] Test disclosure implementation
+- [ ] Document system capabilities
+
+**Deliverable**: Disclosure implementation in code/systems
+
+### For LOW-RISK Systems
+
+- [ ] Document what each system does
+- [ ] List data inputs
+- [ ] Confirm GDPR compliance (if personal data)
+- [ ] Keep records of decisions
+
+**Deliverable**: Basic documentation
+
+### For ALL Systems
+
+- [ ] Confirm vendor contracts have Data Processing Agreements (DPAs)
+- [ ] Confirm vendors are GDPR-compliant
+- [ ] Document vendor compliance status
+
+**Deliverable**: DPA checklist
+
+## Phase 4: EU Registry Preparation (Target: June 30, 2026)
+
+### Create EU Registry Account
+
+- [ ] Go to https://ec.europa.eu/info/index_en
+- [ ] Access AI Act registry (when live)
+- [ ] Create account for your organization
+- [ ] Verify contact details
+
+**Note**: Registry goes live in Q2 2026
+
+### For Each High-Risk System
+
+- [ ] Register system on EU registry
+- [ ] Provide system name and description
+- [ ] Upload technical documentation
+- [ ] Upload risk management plan
+- [ ] Confirm human oversight
+- [ ] Confirm testing and monitoring
+- [ ] Confirm GDPR compliance
+- [ ] Submit for registration
+
+**Deliverable**: All systems registered
+
+## Phase 5: Final Preparation (July 2026)
+
+### Staff Training
+
+- [ ] Train staff on new procedures
+- [ ] Explain what changed (Aug 2)
+- [ ] Document who's responsible for what
+- [ ] Create procedures for handling:
+  - Customer inquiries about AI
+  - Complaints about AI decisions
+  - Data subject rights requests
+
+**Deliverable**: Training materials and records
+
+### Quality Assurance
+
+- [ ] Do final review of all documentation
+- [ ] Check all systems are properly registered
+- [ ] Verify disclosures are in place
+- [ ] Test human oversight procedures
+- [ ] Confirm logging is working
+- [ ] Do test audit (internal or external)
+
+**Deliverable**: QA report and sign-off
+
+### Legal Review
+
+- [ ] Get legal counsel to review:
+  - Risk assessments
+  - Documentation
+  - Procedures
+  - DPAs
+- [ ] Make any requested corrections
+- [ ] Get signed-off
+
+**Deliverable**: Legal review memo
+
+## Ongoing (After August 2, 2026)
+
+### Monitoring & Reporting
+
+- [ ] Monitor all high-risk systems daily
+- [ ] Log significant decisions
+- [ ] Track errors and failures
+- [ ] Monitor for discrimination/bias
+- [ ] Quarterly review of performance
+- [ ] Annual update to authorities (as required)
+
+**Frequency**: Daily (monitoring) → Quarterly (review) → Annually (reporting)
+
+### Incident Response
+
+- [ ] If AI causes serious harm: Document immediately
+- [ ] Investigate root cause
+- [ ] Notify affected individuals (if required)
+- [ ] Notify authorities (if required)
+- [ ] Fix the system
+- [ ] Prevent recurrence
+
+### Continuous Improvement
+
+- [ ] Stay updated on AI Act guidance
+- [ ] Review regulations quarterly
+- [ ] Update risk assessments
+- [ ] Improve human oversight
+- [ ] Reduce false positives/negatives
+- [ ] Close found gaps
+
+## Budget & Timeline
+
+### Low Complexity (No High-Risk Systems)
+
+| Phase | Time | Cost |
+|-------|------|------|
+| Discovery | 2-3 days | Free (internal) |
+| Documentation | 3-5 days | Free-EUR 1000 |
+| Testing | 2-3 days | Free |
+| Registry | 1-2 days | Free |
+| **Total** | **1-2 weeks** | **EUR 0-1,000** |
+
+### Medium Complexity (1-2 High-Risk Systems)
+
+| Phase | Time | Cost |
+|-------|------|------|
+| Discovery | 1 week | Free |
+| Planning | 1 week | EUR 1,000 |
+| Compliance | 4-6 weeks | EUR 5,000-10,000 |
+| Testing | 2-3 weeks | EUR 2,000-5,000 |
+| Registry | 1 week | Free |
+| **Total** | **2-3 months** | **EUR 8,000-15,000** |
+
+### High Complexity (Multiple High-Risk Systems)
+
+| Phase | Time | Cost |
+|-------|------|------|
+| Discovery | 2 weeks | Free |
+| Planning | 2-3 weeks | EUR 2,000 |
+| Compliance | 8-12 weeks | EUR 10,000-20,000 |
+| Testing | 4-6 weeks | EUR 5,000-10,000 |
+| Legal review | 2-3 weeks | EUR 5,000-10,000 |
+| Registry | 1-2 weeks | Free |
+| **Total** | **4-6 months** | **EUR 22,000-42,000** |
+
+## Red Flags — Escalate Immediately
+
+If you discover:
+
+- [ ] System is on prohibited list → Remove immediately
+- [ ] High-risk system with no testing → Pause use
+- [ ] No human oversight → Add before using
+- [ ] Evidence of discrimination → Investigate
+- [ ] Data breaches → Notify authorities
+- [ ] Vendor without DPA → Switch vendor
+
+## Success Criteria
+
+By August 2, 2026, you've succeeded if:
+
+✓ All AI systems classified
+✓ No prohibited systems in use
+✓ All high-risk systems have:
+  - Risk management plan
+  - Fundamental rights assessment
+  - Bias testing results
+  - Human oversight procedures
+  - Technical documentation
+  - EU registry registration
+✓ All transparency systems have disclosures
+✓ All systems comply with GDPR
+✓ Staff trained on procedures
+✓ Monitoring and logging in place
+✓ Incident procedures documented
+✓ Legal counsel approved
+
+## Checklist Summary
+
+**Immediate (This Month)**:
+- [ ] Audit all AI systems
+- [ ] Classify by risk
+- [ ] Get legal consultation
+
+**Next 2 Months**:
+- [ ] Create risk management plans (high-risk)
+- [ ] Conduct bias testing
+- [ ] Implement disclosures (transparency systems)
+- [ ] Finalize documentation
+
+**Next 3 Months**:
+- [ ] Register high-risk systems
+- [ ] Train staff
+- [ ] Final QA and legal review
+- [ ] Set up monitoring
+
+**Ongoing**:
+- [ ] Daily monitoring
+- [ ] Quarterly reviews
+- [ ] Annual updates
+- [ ] Continuous improvement
+
+---
+
+**Resources**:
+- EU AI Act: https://artificialintelligenceact.eu/
+- Timeline: https://artificialintelligenceact.eu/implementation-timeline/
+- Service Desk: https://ai-act-service-desk.ec.europa.eu/
+
+## Sources and Links
+
+- [EU AI Act](https://eur-lex.europa.eu/eli/reg/2024/1689/oj)
+- [GDPR](https://eur-lex.europa.eu/eli/reg/2016/679/oj)

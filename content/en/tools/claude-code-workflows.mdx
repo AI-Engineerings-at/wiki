@@ -1,0 +1,596 @@
+---
+title: Claude Code Workflows & Patterns — Practical Guide
+date: 2026-03-21
+summary: Real-world patterns for using Claude Code in daily development. Covers git workflows, code migration, refactoring, testing, documentation, debugging, and multi-file operations with practical examples.
+tags: [claude-code, workflows, patterns, development, git]
+author: AI Engineering
+---
+
+# Claude Code Workflows & Patterns — Practical Guide
+
+Claude Code accelerates development when you work WITH it intentionally. This guide covers proven patterns for daily tasks: code reviews, migrations, refactoring, testing, and debugging.
+
+## Daily Development Workflow
+
+### Morning: Context & Orientation
+
+Start each session by grounding Claude in your project:
+
+```bash
+# 1. Open the project
+cd ~/my-project
+
+# 2. Start Claude Code
+claude-code
+
+# 3. First message: ask for orientation
+> Summarize the current state of this repo. What are the main components?
+> What's the status of open issues? Check TASK_BOARD.md if it exists.
+
+# Claude reads CLAUDE.md, explores structure, reports back
+```
+
+Claude now understands the architecture and can assist more effectively.
+
+### During Development: Keep Context Focused
+
+Don't try to handle 10 things at once. Work in focused sprints:
+
+```bash
+# Focused task: Fix one bug
+> Let's focus on the bug reported in issues/42.
+> Read the bug description from issues/issue-42.md
+> Trace the root cause
+> Write a test that reproduces it
+> Fix the code
+> Verify the test now passes
+
+# Claude stays focused, doesn't drift to other issues
+```
+
+### End of Day: Commit & Document
+
+Always end with proper commits:
+
+```bash
+> Summarize all the changes you made today
+> Generate a commit message that would be appropriate for each change
+> Suggest if we should create individual commits or squash into one
+
+# Claude suggests commits matching your project style
+```
+
+## Git Workflow Patterns
+
+### Pattern 1: Feature Branch with Atomic Commits
+
+You want clean git history, not a mess of "fix" and "oops" commits.
+
+```bash
+# Start feature
+> Create a feature branch for the new user auth system
+> Branch name should be: feat/user-auth-system
+
+# Work
+> Add the login form component in frontend/components/LoginForm.tsx
+> Write the backend route /api/auth/login in src/api/auth.py
+> Create integration test in tests/test_auth.py
+
+# After each logical chunk
+> Commit these changes with a message: "Add login form with email validation"
+
+# Before pushing
+> Review all commits. Do they tell a coherent story?
+> Reorder if needed, squash unrelated changes
+
+> Suggest which commits should be combined and why
+```
+
+Claude helps organize commits BEFORE pushing (when rewriting is cheap).
+
+### Pattern 2: PR Review with Claude
+
+Have Claude review your own code before requesting human review:
+
+```bash
+# After pushing to branch
+> Compare my branch against main
+> Act as a senior code reviewer
+> Check for: bugs, security issues, performance, test coverage, style violations
+> Report severity for each finding
+
+# Claude does a thorough code review
+```
+
+This catches obvious issues before wasting human reviewer time.
+
+### Pattern 3: Conflict Resolution
+
+When git merge conflicts arise:
+
+```bash
+> Show me the merge conflict in [filename]
+> Analyze what each side is trying to do
+> Suggest the correct resolution
+
+# Example output:
+# Main branch added authentication middleware
+# Your branch added request logging
+# Both modify the same import section
+# Resolution: Import both together, middleware first
+```
+
+## Code Migration Patterns
+
+### Pattern 1: Language Migration (Python → Go)
+
+Migrating a service from Python to Go:
+
+```bash
+# Step 1: Analysis
+> Read through the Python service in src/api.py
+> Identify all endpoints, database queries, external calls
+> Create a mapping: Python function → Go function
+
+# Step 2: Skeleton
+> Create the Go project structure
+> Create all function signatures in Go (no implementation yet)
+> Add imports we'll need
+
+# Step 3: Incremental Implementation
+> Implement the database layer first (queries are easy to verify)
+> Then implement endpoints, testing each one
+
+# Step 4: Testing
+> Run Python service against test suite (establish baseline)
+> Run Go service against same test suite
+> Compare outputs
+
+# Step 5: Validation
+> Implement stress test: same request load on both
+> Compare response times, memory usage
+> Go should be 2-3x faster
+```
+
+Why this works: Breaking migrations into steps makes them reversible. You test at each stage.
+
+### Pattern 2: Framework Upgrade (Django 3 → Django 4)
+
+Major framework upgrades are risky. Use a staged approach:
+
+```bash
+# Step 1: Create a branch for the upgrade
+> Create branch: upgrade/django-4
+
+# Step 2: Identify breaking changes
+> Read the Django 4 migration guide
+> Search our codebase for deprecated patterns
+> List all changes required
+
+# Step 3: Make changes incrementally
+> Update imports and syntax that changed
+> Fix deprecated function calls
+> Test after each batch of changes
+
+# Step 4: Run full test suite
+> pytest tests/ --tb=short
+> Fix any test failures
+> Check for deprecation warnings
+
+# Step 5: Manual QA
+> Start the dev server
+> Walk through key user workflows manually
+> Check error logs for warnings
+```
+
+## Refactoring Patterns
+
+### Pattern 1: Extract Repeated Code into Function
+
+```bash
+> Search for repeated patterns in src/ using grep
+> Show me all places where we manually sort user lists
+> Extract into a function that handles all cases
+> Update call sites to use the new function
+> Verify all tests still pass
+```
+
+Claude can find subtle repetitions humans miss.
+
+### Pattern 2: Large File Decomposition
+
+A 500-line Python file is hard to work with. Split it logically:
+
+```bash
+# Before: src/api.py (500 lines, mixed concerns)
+# After: Separate files
+
+> Analyze src/api.py
+> Identify the main responsibilities (routes, auth, validation, etc)
+> Create separate files: routes.py, auth.py, models.py, etc
+> Move code to appropriate files
+> Update imports everywhere
+> Test that API still works
+```
+
+### Pattern 3: Rename Everything (Large Refactor)
+
+Renaming variables/functions across a large codebase:
+
+```bash
+> I want to rename the 'User' class to 'AuthUser' everywhere
+> Find all occurrences of 'User' that need updating
+> Rename carefully (don't break references to the table name)
+> Search for "class User" not "user" in strings
+> Update after each change
+
+# Claude keeps track of what's been renamed, prevents mistakes
+```
+
+## Testing Patterns
+
+### Pattern 1: TDD (Test-First Development)
+
+Write tests before code:
+
+```bash
+# 1. Write failing test
+> Create a test file: tests/test_user_registration.py
+> Write test: test_user_can_register_with_valid_email
+> Test should verify: new user created, email confirmed, password hashed
+
+# 2. Watch it fail
+pytest tests/test_user_registration.py -v
+# FAIL: RegistrationError (not implemented yet)
+
+# 3. Implement minimum to pass
+> Implement the register_user function
+> Make test pass with simplest possible implementation
+
+# 4. Refine
+> Add edge cases: invalid email, duplicate email, weak password
+> Write test for each, implement
+
+# 5. Done
+> All tests pass, code is clean, behavior is documented
+```
+
+### Pattern 2: Test Coverage
+
+Identify untested code:
+
+```bash
+# Run with coverage
+> pytest tests/ --cov=src --cov-report=html
+
+# Claude analyzes report
+> Read the coverage report at htmlcov/index.html
+> What code is untested (red)?
+> Prioritize: test code that handles errors or edge cases
+> Write 5 tests that would increase coverage to 80%
+
+# Write each test with explanation
+```
+
+### Pattern 3: Parameterized Tests
+
+Test many inputs with one test:
+
+```bash
+# Manual way (bad): Write 10 nearly identical tests
+
+# Good way: Use parameterization
+
+> Write a parameterized test for validate_email
+> Should test: valid emails, invalid formats, edge cases (very long, special chars)
+> Use pytest.mark.parametrize to avoid code duplication
+
+# Output: 1 test function, 10+ test cases
+```
+
+## Documentation Patterns
+
+### Pattern 1: Auto-Generate API Documentation
+
+```bash
+> Read all endpoints from src/api/routes.py
+> Generate OpenAPI specification (3.0 format)
+> Include: all endpoints, parameters, responses, error codes
+> Save as openapi.yaml
+
+# Can then use: Swagger UI, ReDoc, client generation
+```
+
+### Pattern 2: README with Examples
+
+```bash
+> Read README.md
+> Add sections: Installation, Quick Start, Examples, Troubleshooting
+> For "Examples", create 5 realistic use cases with code
+
+# Example format:
+# ### Example: Fetch all users
+# ```bash
+# curl http://localhost/api/users
+# ```
+# Response:
+# ```json
+# [{"id": 1, "name": "Alice"}]
+# ```
+```
+
+### Pattern 3: Inline Code Documentation
+
+```bash
+> Review src/complex_algorithm.py
+> Add docstrings explaining: what it does, why, inputs, outputs
+> Include examples in docstrings
+
+# Use pydoc or pdoc to generate HTML docs
+```
+
+## Debugging Patterns
+
+### Pattern 1: Trace Execution Path
+
+When a bug happens, trace where execution went:
+
+```bash
+# Symptom: API returns 404, but endpoint should exist
+
+> Read the error logs from logs/error.log
+> Identify the request: POST /api/users/123
+
+> Trace the execution path:
+> 1. Find route handler in src/api/routes.py
+> 2. What function gets called?
+> 3. Read that function
+> 4. What could cause 404?
+
+# Output: "The route handler expects /api/users/:id but request was /api/users/123?v=1"
+```
+
+### Pattern 2: Isolate Failing Component
+
+Component fails? Narrow it down:
+
+```bash
+# Test API in isolation (no database)
+> Mock the database
+> Call the API endpoint directly
+> Does it work with mocked data?
+
+# If yes: Database is the problem
+# If no: API logic is the problem
+
+# This narrows the search space dramatically
+```
+
+### Pattern 3: Reproduce in Minimal Test
+
+```bash
+> Create a minimal test that reproduces the bug
+> Should be: as small as possible, deterministic (always fails same way)
+> Can run standalone, no setup needed
+
+# Once you have a failing test:
+> Fix the code to make test pass
+> Verify test now passes
+> Run full test suite to ensure no regression
+```
+
+## Multi-File Operations
+
+### Pattern 1: Atomic Multi-File Edit
+
+Edit multiple files as a single logical change:
+
+```bash
+# Bad: Make 5 separate edits over time, hard to track what's related
+
+# Good: Group related changes
+> I need to add a new field 'last_login' to User
+> This affects:
+> 1. Database migration
+> 2. User model definition
+> 3. Serializer (for API)
+> 4. Tests
+>
+> Make all 4 changes together, as a single logical unit
+> Then test once (everything works together)
+```
+
+### Pattern 2: Rename + Update Imports
+
+Renaming a module requires updating 20 places:
+
+```bash
+> I'm renaming src/utils/helpers.py to src/utils/formatting.py
+>
+> Find all files that import from helpers
+> Update import statements (use the new module name)
+> Check nothing broke: run tests
+
+# Claude tracks all the changes, ensures consistency
+```
+
+### Pattern 3: Cross-Cutting Changes
+
+Example: Add error tracking to all API endpoints
+
+```bash
+> I want to add Datadog error tracking to all endpoints
+>
+> Find all @app.route() decorators
+> Add error tracking to each one
+> Show me the diff for each file
+> Make sure I understand the pattern before applying everywhere
+```
+
+## Performance Debugging
+
+### Pattern 1: Identify Slow Code
+
+```bash
+# Instrument the code
+> Add timing around major functions using timeit or cProfile
+> Run the slow operation
+> Which function takes most time?
+
+# Example output:
+# function_a: 0.5s (most of the time!)
+# function_b: 0.1s
+# function_c: 0.05s
+
+> Focus on function_a
+> What's it doing? Can we optimize?
+```
+
+### Pattern 2: Database Query Optimization
+
+```bash
+> Enable query logging: see all SQL queries executed
+> Run the slow operation
+> Which query is slow?
+
+# Options:
+> 1. Add an index
+> 2. Fetch less data
+> 3. Batch requests
+> 4. Cache the result
+
+> Implement the option that makes sense
+> Measure before and after
+```
+
+## Complex Workflows
+
+### Workflow 1: Deploy New Service (Multi-Step)
+
+```bash
+# 1. Create service skeleton
+> Create directory structure for new service
+> Set up basic app.py and requirements.txt
+
+# 2. Implement core features
+> Implement database models
+> Implement API endpoints
+> Implement authentication
+
+# 3. Write tests
+> Write unit tests for each endpoint
+> Test error cases
+
+# 4. Docker setup
+> Create Dockerfile
+> Create docker-compose.yml for local dev
+
+# 5. Deploy
+> Push to registry
+> Update k8s manifests
+> Deploy to staging first
+> Verify works
+> Deploy to production
+
+# This workflow might take hours. Claude helps at each step.
+```
+
+### Workflow 2: Fix Critical Bug in Production
+
+```bash
+# 1. Understand the bug
+> Read bug report and reproduce locally
+
+# 2. Find root cause
+> Trace execution path
+> Check logs
+
+# 3. Write test that reproduces bug
+> Test should fail right now
+
+# 4. Fix
+> Make minimal change to fix issue
+> Test now passes
+
+# 5. Verify no regression
+> Run full test suite
+> Check related code didn't break
+
+# 6. Deploy
+> Push to release branch
+> Deploy to production
+```
+
+## Anti-Patterns to Avoid
+
+### Anti-Pattern 1: "Do Everything at Once"
+
+```bash
+# Bad:
+> Refactor the entire User model, add new fields, migrate database,
+> update all tests, change API response format, update docs, deploy
+
+# This creates one giant commit that's hard to review or revert
+
+# Good: Smaller steps
+> Step 1: Add field to model (commit)
+> Step 2: Database migration (commit)
+> Step 3: API serializer update (commit)
+> Step 4: Tests (commit)
+> Step 5: Deploy (commit)
+```
+
+### Anti-Pattern 2: "Make Assumptions"
+
+```bash
+# Bad:
+> I'll assume the API returns JSON with 'name' field
+> Write code based on assumption
+# Breaks when API actually returns 'full_name'
+
+# Good: Verify
+> Read the API schema first
+> Write test with real API response
+> Then write code
+```
+
+### Anti-Pattern 3: "No Testing"
+
+```bash
+# Bad:
+> Write 200 lines of code, hope it works
+
+# Good: Test as you go
+> Write 10 lines
+> Test
+> Write 10 more
+> Test
+```
+
+## Checklist
+
+- [ ] Start each session by grounding Claude in project context
+- [ ] Keep work focused (one task at a time)
+- [ ] Commit regularly with clear messages
+- [ ] Use Claude to review your own code before asking humans
+- [ ] Break large migrations into steps (build → test → deploy)
+- [ ] Write tests BEFORE implementing (TDD)
+- [ ] Use parameterized tests to avoid duplication
+- [ ] Document complex code with examples
+- [ ] Trace execution path when debugging
+- [ ] Isolate failing components (divide and conquer)
+- [ ] Make multi-file changes as atomic units
+- [ ] Measure performance before and after optimization
+- [ ] Avoid large monolithic changes (prefer smaller commits)
+- [ ] Verify assumptions against real data/APIs
+- [ ] Test at each step of complex workflows
+
+## Sources and Links
+
+- [Common Workflows](https://code.claude.com/docs/en/common-workflows)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

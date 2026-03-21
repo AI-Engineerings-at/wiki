@@ -1,0 +1,377 @@
+---
+title: Claude Cowork — Agent Mode
+date: 2026-03-21
+summary: Anleitung zu Claude Cowork - autonome Agent-Mode im Claude Desktop, Skills, Plugins und Task-Ausführung
+tags: [cowork, agents, skills, plugins, desktop, automation]
+author: AI Engineering
+---
+
+# Claude Cowork — Agent Mode
+
+Claude Cowork ist der Agent-Modus im Claude Desktop (seit Januar 2026). Claude arbeitet hier autonom — liest Dateien, führt Code aus, macht Git-Commits, ohne ständig auf Bestätigung zu warten.
+
+## Was ist Cowork?
+
+Cowork läuft in einer **isolierten Linux-VM** auf deinem Computer. Claude hat darin:
+- Zugriff auf deine bereitgestellten Verzeichnisse (über Mounts)
+- Fähigkeit, Dateien zu lesen/schreiben/löschen
+- Fähigkeit, Shell-Befehle auszuführen
+- Fähigkeit, Git-Operationen durchzuführen
+- Fähigkeit, Code zu interpretieren
+
+**Unterschied zu Chat-Mode:**
+- **Chat:** Claude antwortet dir immer — du fragst, er antwortet
+- **Cowork:** Claude arbeitet autonom — du gibst eine Aufgabe, er macht sie
+
+## VM & Mounts
+
+Wenn du Cowork startest, wird eine leichte Linux-VM hochgefahren. Du musst Verzeichnisse **mounted** haben damit Claude sie sieht.
+
+### Verzeichnis hinzufügen
+
+Über Claude Desktop UI:
+1. ⚙️ Settings → Files
+2. "Add folder" klicken
+3. Verzeichnis auswählen (z.B. `/Users/joe/projects/myapp`)
+
+Claude sieht es jetzt als `/home/user/myapp` (oder ähnlich).
+
+### Verzeichnis-Struktur in der VM
+```
+/home/user/
+  ├── myapp/          # dein Projekt
+  ├── documents/      # deine Dokumente
+  └── data/           # deine Daten
+```
+
+## Skills System
+
+Skills sind vordefinierte Aufgaben, die Claude ausführen kann. Ein Skill ist eine `.md`-Datei mit YAML-Frontmatter und Anleitung.
+
+### Skill-Struktur
+
+```yaml
+---
+name: test-suite
+description: >
+  Führt Unit Tests aus und zeigt Ergebnisse.
+  Trigger: test, run tests, unit testing
+version: 1.0.0
+requires: [jest, npm]
+produces: [test-report]
+model: sonnet
+user-invocable: true
+---
+
+# Test Suite ausführen
+
+Starte die Test-Suite mit:
+```bash
+npm test
+```
+
+Danach: Fehlgeschlagene Tests auflisten und Suggestions geben.
+```
+
+### Trigger & Auto-Invocation
+Die `description` enthält Keywords unter "Trigger:". Claude erkennt diese automatisch:
+
+```yaml
+description: >
+  Testet den Code.
+  Trigger: test, unit test, verify functionality
+```
+
+Wenn der User sagt "führe Tests durch", erkennt Claude den **test**-Skill automatisch.
+
+### Skill-Verzeichnis
+```
+.claude/skills/
+  ├── test-suite/
+  │   ├── SKILL.md
+  │   ├── scripts/
+  │   │   ├── main.py
+  │   │   └── helpers.py
+  │   └── templates/
+  │       └── report.html
+```
+
+### Wichtigste YAML-Felder
+
+| Feld | Beispiel | Beschreibung |
+|------|----------|-------------|
+| `name` | `test-suite` | Eindeutige Skill-ID (kebab-case) |
+| `description` | "Testet Code. Trigger: test, unit" | Was der Skill tut + Keywords |
+| `version` | `1.0.0` | Semantic Versioning |
+| `requires` | `[jest, npm]` | Dependencies |
+| `produces` | `[test-report]` | Output-Typen |
+| `model` | `sonnet` | haiku/sonnet/opus |
+| `user-invocable` | `true` | Darf Benutzer triggern? |
+| `context` | `fork` | Isolierter Subagent (optional) |
+| `allowed-tools` | `[Read, Bash]` | Nur diese Tools (Sicherheit) |
+
+### Skill explizit aufrufen
+```
+@claude: /test-suite
+@claude: /deploy --production
+@claude: /code-review src/main.py
+```
+
+## Plugins System
+
+Plugins sind Erweiterungen, die Cowork neue Funktionen geben — z.B. GitHub-Integration, Slack-Notifications, etc.
+
+### Plugin-Manifest (plugin.json)
+
+```json
+{
+  "name": "github-integration",
+  "description": "GitHub Issues, PRs, Commits auslesen",
+  "version": "1.0.0",
+  "commands": [
+    {
+      "name": "create-issue",
+      "description": "Erstelle ein GitHub Issue",
+      "parameters": {
+        "title": "string (required)",
+        "body": "string (optional)"
+      }
+    }
+  ],
+  "permissions": [
+    "read:repo",
+    "write:issues"
+  ]
+}
+```
+
+### Plugin installieren
+
+Aus Marketplace:
+```
+Claude Desktop → Extensions → Plugin Marketplace
+→ "Github Integration" → Install
+```
+
+Oder lokal:
+```
+.claude/plugins/
+  └── my-plugin/
+      ├── plugin.json
+      └── main.py
+```
+
+### Plugin mit Credentials
+
+Plugins brauchen oft API-Keys. Speichere die im Vault:
+
+```bash
+# Auf dein-server:
+vault.py set shared/github GITHUB_TOKEN ghp_...
+```
+
+Im Plugin auslesen:
+```python
+from vault import get
+
+token = get("shared/github", "GITHUB_TOKEN")
+```
+
+## Task-Ausführung
+
+Cowork führt Aufgaben sequenziell aus. Du startest mit einer Aufgabe-Beschreibung:
+
+```
+Aufgabe: Schreibe einen Unit Test für die login() Funktion
+und stelle sicher, dass alle Edge Cases geabdeckt sind.
+Danach: Git Commit.
+```
+
+Claude wird:
+1. Datei lesen (`src/auth.py`)
+2. Unit Test schreiben
+3. Test lokal ausführen
+4. Bei Fehler: Bug fixen
+5. Git Commit erstellen
+
+## File-Operationen
+
+Claude kann Dateien erstellen/lesen/bearbeiten — ABER:
+
+```
+Nur in bereitgestellten (mounted) Verzeichnissen
+NICHT außerhalb der VM
+```
+
+### Beispiel: Datei erstellen
+```python
+# Claude will das tun:
+with open("/home/user/myapp/src/new_function.py", "w") as f:
+    f.write("def new_function():\n    return 42\n")
+
+# Das ist OK — liegt im mounted /myapp/ Verzeichnis
+
+# Das ist NICHT OK:
+with open("/etc/passwd", "w") as f:  # SystemFile — blockiert
+```
+
+## Code-Ausführung
+
+Claude kann Code interpretieren und ausführen — Python, JavaScript, Bash:
+
+```bash
+# Bash
+ls -la /home/user/myapp/
+
+# Python
+python3 -c "print('Hello from Cowork')"
+
+# Node.js
+node -e "console.log('Hello')"
+```
+
+Alle Befehle laufen in der isolierten VM — nicht auf dem Host.
+
+## MCP-Integration (Advanced)
+
+Cowork kann MCP-Server nutzen um externe Services zu verbinden (GitHub, Slack, Databases):
+
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_..."
+      }
+    }
+  }
+}
+```
+
+Dann kann Claude:
+```
+Erstelle ein GitHub Issue für den Login-Bug
+```
+
+Und das läuft automatisch via MCP.
+
+## Limitations
+
+1. **Nur gemountete Verzeichnisse:** Claude sieht nur was du freigibst
+2. **Keine GUI-Apps:** Cowork kann keine Browser-Interaktion oder Desktop-Apps steuern
+3. **Netzwerk-begrenzt:** VM ist isoliert — kein direkter Zugriff auf interne Services ohne Tunnel
+4. **Keine Credential-Eingabe:** Claude kann dich nicht um ein Passwort fragen
+5. **File Size:** Sehr große Binärdateien sollten nicht mounted werden
+
+## Workarounds
+
+### Interner Service-Zugriff
+```bash
+# In .claude/CLAUDE.md:
+# Tunnel erstellen:
+ssh -L 8082:dein-server:8082 dein-server
+
+# Dann in Script:
+curl http://localhost:8082/api/users
+```
+
+### Credential-Verwaltung
+```bash
+# Vault-Integration (lokal):
+from vault import get
+token = get("shared/service", "API_TOKEN")
+```
+
+### Große Dateien
+Nutze Symlinks statt Copies:
+```bash
+ln -s /mnt/large-dataset.tar.gz /home/user/myapp/data/
+```
+
+## Best Practices
+
+### 1. Skill mit klarer Beschreibung schreiben
+```yaml
+description: >
+  Führt Performance-Tests aus und zeigt Bottlenecks.
+  Trigger: performance, benchmark, profile, optimization
+```
+
+### 2. Dependencies in Skill dokumentieren
+```yaml
+requires: [pytest, locust, jq]
+```
+
+Claude installiert sie bei Bedarf.
+
+### 3. Output in Standard-Format
+Skills sollten strukturierten Output geben:
+```json
+{
+  "status": "success",
+  "test_count": 42,
+  "failed": 2,
+  "errors": [...]
+}
+```
+
+### 4. Fehlerbehandlung
+```python
+try:
+    result = run_tests()
+except Exception as e:
+    print(f"ERROR: {e}")
+    exit(1)
+```
+
+### 5. Logs & Audit Trail
+```bash
+echo "[$(date)] Started test suite" >> /home/user/myapp/.audit.log
+```
+
+## Sicherheit
+
+### Principle of Least Privilege
+```yaml
+# Skill sollte nur Tools haben die er braucht:
+allowed-tools: [Read, Bash, Write]
+# NICHT alles erlauben
+```
+
+### Secrets Management
+```
+NIEMALS Secrets in SKILL.md hardcoden
+IMMER: vault.py oder Environment Variables
+```
+
+### Berechtigungen prüfen
+```bash
+# Vor sensiblem Skill
+claude /permissions
+
+# Zeigt welche Tools verfügbar sind
+```
+
+## Checkliste
+
+- [ ] Cowork installiert (Claude Desktop aktuell)
+- [ ] Verzeichnisse gemountet (Settings → Files)
+- [ ] `.claude/skills/` Verzeichnis erstellt
+- [ ] Erste Skill geschrieben mit vollständigem Frontmatter
+- [ ] Skill getestet (explizit aufgerufen)
+- [ ] MCP-Server konfiguriert (falls relevant)
+- [ ] Vault für Credentials eingerichtet
+- [ ] Error-Handling in Scripts vorhanden
+
+## Quellen und Links
+
+- [Claude Cowork](https://claude.com/cowork)
+- [Cowork Documentation](https://docs.claude.com/en/docs/cowork)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

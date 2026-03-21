@@ -1,0 +1,408 @@
+---
+title: "Cloud GPU Vergleich 2026 — Preise & Performance"
+date: "2026-03-21"
+summary: "Cloud GPU Pricing: Lambda Labs, RunPod, Vast.ai, CoreWeave. Spot vs On-Demand, Inference vs Training, Kostenoptimierung"
+tags: ["cloud-gpu", "lambda", "runpod", "vast.ai", "pricing", "gpu", "vergleich"]
+author: "AI Engineering"
+---
+
+# Cloud GPU Vergleich 2026 — Pricing & Performance
+
+Cloud GPU-Kosten 2026: EUR 0.20-3.00 pro Stunde (je nach GPU, Provider, Spot/On-Demand). Unterschied zwischen "Richtig wählen" und "EUR 10k/month Overkill" ist ~10 Minuten Entscheidung. Wir zeigen die Echten Preise + Fallstricke.
+
+## Live Pricing März 2026
+
+### A100 40GB PCIe
+
+| Provider | Typ | EUR/Hour | EUR/Day (24h) | EUR/Month (30d) |
+|----------|-----|----------|--------------|-----------------|
+| **Lambda Labs** | On-Demand | EUR 1,10 | EUR 26,40 | EUR 792 |
+| **RunPod** | On-Demand | EUR 0,60 | EUR 14,40 | EUR 432 |
+| **RunPod** | Spot | EUR 0,25 | EUR 6,00 | EUR 180 |
+| **Vast.ai** | Marketplace | EUR 0,52 | EUR 12,48 | EUR 374 |
+| **CoreWeave** | Dedicated | EUR 0,80 | EUR 19,20 | EUR 576 |
+
+**Winner für A100 PCIe:** RunPod Spot (EUR 0,25/h), aber nicht immer verfügbar.
+
+### A100 80GB SXM
+
+| Provider | Typ | EUR/Hour | EUR/Day (24h) | EUR/Month (30d) |
+|----------|-----|----------|--------------|-----------------|
+| **Lambda Labs** | On-Demand | EUR 1,50 | EUR 36,00 | EUR 1080 |
+| **RunPod** | On-Demand | EUR 0,79 | EUR 18,96 | EUR 568 |
+| **Vast.ai** | Marketplace | EUR 0,67 | EUR 16,08 | EUR 482 |
+| **CoreWeave** | Dedicated | EUR 1,10 | EUR 26,40 | EUR 792 |
+
+**Winner:** Vast.ai Marketplace (EUR 0,67/h), aber P2P-Risiken.
+
+### H100 80GB
+
+| Provider | Typ | EUR/Hour | EUR/Day (24h) | EUR/Month (30d) |
+|----------|-----|----------|--------------|-----------------|
+| **Lambda Labs** | On-Demand | EUR 2,99 | EUR 71,76 | EUR 2153 |
+| **RunPod** | On-Demand | EUR 1,99 | EUR 47,76 | EUR 1433 |
+| **RunPod** | Spot | EUR 0,89 | EUR 21,36 | EUR 640 |
+| **Vast.ai** | Marketplace | EUR 1,87 | EUR 44,88 | EUR 1346 |
+
+**Winner:** RunPod Spot (EUR 0,89/h), aber Interruption-Risk (wenn preempted, training bricht).
+
+### Consumer GPUs (RTX 4090, RTX 4080)
+
+| Provider | GPU | EUR/Hour | Use Case |
+|----------|-----|----------|----------|
+| **RunPod** | RTX 4090 | EUR 0,34 | Inference, Small Finetuning |
+| **Vast.ai** | RTX 4090 | EUR 0,18 | Inference, Prototyping |
+| **RunPod** | RTX 4080 | EUR 0,22 | Small FT, Inference |
+
+**Best for Budget-Conscious:** Vast.ai RTX 4090 (EUR 0,18/h = EUR 130/month 24/7).
+
+## Provider Deep-Dive
+
+### RunPod
+
+**Positioning:** "Managed Simplicity"
+
+**Strengths:**
+- Einfache UI (Pods, Templates)
+- Stabil (uptime 99%+)
+- Spot GPUs Verfügbar (70% Discount)
+- Serverless (pay-per-second inference)
+- Community Templates (für Training)
+- Good Documentation
+
+**Weaknesses:**
+- Nicht immer die günstigsten (vs Vast.ai Marketplace)
+- Spot Instances können interrupted werden (< 1% chance aber frustrierend)
+
+**Best For:**
+- Einsteiger (einfachste UI)
+- Production Services (Uptime ist Priorität)
+- Hybrid Approach (Spot für Dev, On-Demand für Production)
+
+**Pricing Beispiel:**
+- RTX 4090: EUR 0,34/h (On-Demand), EUR 0,10/h (Spot)
+- A100 40GB: EUR 0,60/h (On-Demand), EUR 0,25/h (Spot)
+- H100: EUR 1,99/h (On-Demand), EUR 0,89/h (Spot)
+
+**Serverless Inference:** EUR 0,0035/1000 tokens (sehr billig).
+
+### Vast.ai
+
+**Positioning:** "Lowest Price Marketplace"
+
+**Strengths:**
+- **Günstigste Preise** (oft 30-50% unter RunPod)
+- P2P Marketplace (Providers bieten GPUs an)
+- Flexible (viele GPU Models)
+- Keine Minuten-Limits (zahl pro Sekunde)
+
+**Weaknesses:**
+- **Marketplace Risiken:** Provider kann dich disconnecten (selten, aber möglich)
+- Uptime nicht garantiert (Best Effort)
+- UI ist kompliziert (Marketplace browsing)
+- Security: Deine Data ist auf fremdem Rechner (P2P)
+
+**Best For:**
+- Price-Sensitive (Research, Prototyping)
+- Batch Jobs (Training, nicht real-time)
+- Nicht für Production-Critical (braucht Uptime-Garantie)
+
+**Pricing Beispiel:**
+- RTX 4090: EUR 0,18-0,25/h (Marketplace Varianz)
+- A100 40GB: EUR 0,45-0,55/h
+- H100: EUR 1,50-2,00/h
+
+### Lambda Labs
+
+**Positioning:** "Enterprise Stability"
+
+**Strengths:**
+- **Guaranteed Uptime** (SLA 99,5%)
+- No Interruptions (dedicated Instance)
+- Per-Second Billing (no waste)
+- Good Support (Enterprise-Grade)
+
+**Weaknesses:**
+- **Teuerste** Preise (20-30% über RunPod)
+- Weniger Features (keine Spot)
+- Smaller Community (weniger Templates)
+
+**Best For:**
+- Production (Uptime ist kritisch)
+- Enterprise (braucht SLA)
+- Wenn Stabilitäts-Cost < Interruption-Kosten
+
+**Pricing Beispiel:**
+- A100 40GB: EUR 1,10/h (2x RunPod)
+- H100: EUR 2,99/h (1.5x RunPod)
+
+### CoreWeave
+
+**Positioning:** "Balanced (Price + Stability)"
+
+**Strengths:**
+- Moderate Preise (zwischen RunPod + Lambda)
+- Gute Uptime (nicht so streng wie Lambda)
+- Auto-Scaling (für Kubernetes)
+- Europe-Friendly (Datenschutz)
+
+**Weaknesses:**
+- Weniger Brand Recognition (kleiner)
+- Docs nicht so umfangreich
+
+**Best For:**
+- EU Data-Residency (GDPR-konforme Locs)
+- Kubernetes Deployments
+- Wenn Lambda zu teuer, RunPod-Uptime reicht
+
+## Inference vs Training
+
+### Inference (Niedrige Kosten, High-Volume)
+
+**Problem:** LLM Inference braucht viel VRAM, aber wenig Rechenzeit.
+
+**Lösung:** Smaller GPUs (RTX 4090) sind ausreichend.
+
+**Kostenbeispiel (1M API Calls/Monat):**
+```
+Assumption: 100 tokens input, 50 tokens output = 150 tokens/call
+1M calls × 150 = 150M tokens/month
+
+RunPod Serverless:
+  150M tokens × EUR 0,0035/1000 = EUR 525/month
+
+Self-Hosted (RTX 4090):
+  RTX 4090: EUR 0,34/h
+  Inference 24/7: EUR 0,34 × 24 × 30 = EUR 245/month
+  Plus: dein Electricity, cooling
+  Total: ~EUR 300/month
+
+Winner: Self-Hosted (wenn 24/7 usage)
+```
+
+### Training (Hohe Kosten, aber One-Time)
+
+**Problem:** Fine-Tuning 1000 Examples braucht viel VRAM + GPU Time.
+
+**Kostenbeispiel (Training 1000 Examples):**
+```
+Time: 4 hours (je nach Modell, Batch Size)
+
+RunPod RTX 4090:
+  EUR 0,34/h × 4h = EUR 1,36
+
+RunPod A100 40GB:
+  EUR 0,60/h × 4h = EUR 2,40
+
+RunPod Spot A100:
+  EUR 0,25/h × 4h = EUR 1,00 (aber risk of interruption)
+
+Vast.ai Marketplace A100:
+  EUR 0,52/h × 4h = EUR 2,08
+
+Cheapest: Vast.ai (EUR 2,08) oder RunPod Spot (EUR 1,00 mit Risk)
+```
+
+**Praktisch:** Training ist meist 1-2 mal, nicht täglich. EUR 2-5 difference ist egal. Prioritize Uptime (use RunPod On-Demand oder Lambda).
+
+## Decision Matrix: Welcher Provider?
+
+```
+Fragst du: "Ist mir Uptime wichtig?"
+  JA → RunPod (Spot für Dev, On-Demand für Prod) oder Lambda
+  NEIN → Vast.ai (cheapest)
+
+"Brauche ich viele GPUs gleichzeitig (Multi-GPU Training)?"
+  JA → RunPod (einfaches Setup) oder CoreWeave (Kubernetes)
+  NEIN → Jeder Provider OK
+
+"EU Data-Residency Pflicht?"
+  JA → CoreWeave (EU Locations)
+  NEIN → Jeder Provider OK
+
+"Brauche ich Inference Serverless?"
+  JA → RunPod Serverless
+  NEIN → Jeder Provider OK
+```
+
+## Kostenoptimierung Tipps
+
+### Tip 1: Nutze Spot GPUs für Development
+
+```
+Development: Vast.ai oder RunPod Spot (70% Discount)
+  EUR 0,10-0,18/h statt EUR 0,34/h
+  Overkill aber: Interruptions sind SeltenSehr selten
+
+Production: On-Demand oder Lambda (Uptime Garantie)
+  EUR 0,34-1,10/h, aber 99%+ Uptime
+
+Hybrid: 95% Dev auf Spot, 5% Prod auf On-Demand
+```
+
+### Tip 2: Shared GPU (wenn Workload klein)
+
+RunPod hat "Shared GPUs" — teile eine RTX 4090 mit anderen.
+
+```
+Shared RTX 4090: EUR 0,07/h (50% von Dedicated)
+  Problem: Nicht deterministisch (Variable Latency)
+  Okay für: Batch Jobs, Nicht für Real-Time Inference
+```
+
+### Tip 3: Reserved Instances
+
+Lambda & RunPod bieten "Reservierungen" (ähnlich AWS):
+
+```
+On-Demand RTX 4090: EUR 0,34/h
+Reserved 1-Month: EUR 0,30/h (-12%)
+Reserved 1-Year: EUR 0,24/h (-30%)
+
+Wenn 24/7 guaranteed usage: Reserve!
+```
+
+### Tip 4: Auto-Scaling (Dev → Prod)
+
+```
+Dev Phase (sporadic usage):
+  → Spot GPU, trigger on-demand wenn nötig
+  → EUR 50-100/month
+
+Prod Phase (high volume):
+  → Mixed: 80% Spot, 20% On-Demand
+  → Auto-scale up wenn demand hoch
+  → EUR 200-500/month (vs EUR 2000+ if always On-Demand)
+```
+
+## Fallstricke
+
+### Fallstrick 1: "Vast.ai ist billigst, immer wählen"
+
+Falsch wenn:
+- Production system (Provider kann dich disconnecten)
+- Real-time Inference (latency variabel)
+
+Richtig für: Research, Batch Training, Prototyping.
+
+### Fallstrick 2: "Spot Instances sind immer Risiko"
+
+Reality: Interruption rate ist <1%, aber Kosten-Saving ist 70%. Risk mitigation: Checkpointing.
+
+```python
+# Save Checkpoint bei training
+if step % 100 == 0:
+    model.save_checkpoint(f"./ckpt_{step}.pt")
+
+# If interrupted, resume from checkpoint
+if os.path.exists(latest_checkpoint):
+    model.load_checkpoint(latest_checkpoint)
+```
+
+### Fallstrick 3: "GPU Size ist egal, mehr besser"
+
+Falsch. A100 80GB ist nicht 2x schneller als A100 40GB (für die meisten Tasks).
+
+```
+Training 10k Examples:
+  A100 40GB: 8 hours
+  A100 80GB: 7 hours (10% faster, wegen höherer Batch-Size)
+  Kosten Differenz: EUR 200+ extra für 8% Savings = nicht worth it
+```
+
+### Fallstrick 4: "Ich vergess GPU Running, Kosten explodieren"
+
+RunPod Pro Tip: Auto-Shutdown nach inactivity.
+
+```
+Settings → Pod Configuration → Auto-Shutdown
+  Set to: 15 minutes inactivity
+  → Pod stops automatically
+  → Saves unintended EUR 500+ bills
+```
+
+## Real-World Budget Planning
+
+### Startup (Prototyping)
+
+```
+Month 1: Vast.ai Spot RTX 4090
+  2-3 hours/day × 30 days × EUR 0,18/h = EUR 32
+  Total Budget: EUR 32
+
+Month 2-3: RunPod On-Demand A100 (Training starts)
+  5 days/month training × EUR 0,60/h × 8h = EUR 24
+  Total Budget: EUR 50/month
+```
+
+### SMB (Production)
+
+```
+Inference: RunPod Serverless
+  1M API calls × EUR 0,0035/1000 tokens (assume 200 tokens/call)
+  1M × 200 × EUR 0,0035/1000 = EUR 700/month
+
+Periodic Training: RunPod On-Demand
+  4x/year × EUR 2 = EUR 8/year
+
+Total: EUR 708/year
+```
+
+### Enterprise (High-Volume)
+
+```
+Inference: Reserved Instances (1-Year)
+  4x RTX 4090 Reserved @ EUR 0,24/h × 24 × 30 × 4 = EUR 6912/month
+  OR: 2x A100 Reserved @ EUR 0,40/h × 24 × 30 × 2 = EUR 5760/month
+
+Training: On-Demand A100 für Batch Jobs
+  EUR 2000/month (estimate)
+
+Total: EUR 7000-8000/month
+```
+
+## Roadmap 2026-2027
+
+- **Q2 2026:** Neue GPUs (RTX 6000 Ada) kommen zu CloudProviders (besseres Price/Perf)
+- **Q3 2026:** ARM-based AI Chips (Cerebras, Groq) werden competitive
+- **Q4 2026:** Quantum GPUs (?) möglich aber wahrscheinlich mente noch nicht production
+
+## Benchmark: Training 10k Examples Kosten
+
+| Provider | GPU | Cost | Time | $/hour |
+|----------|-----|------|------|--------|
+| **Vast.ai** | A100 40GB | EUR 2,50 | 5h | EUR 0,50 |
+| **RunPod Spot** | A100 40GB | EUR 1,25 | 5h | EUR 0,25 |
+| **RunPod On-Demand** | A100 40GB | EUR 3,00 | 5h | EUR 0,60 |
+| **Lambda** | A100 40GB | EUR 5,50 | 5h | EUR 1,10 |
+
+**Winner:** RunPod Spot (EUR 1,25), aber Risk.
+**Safe Winner:** Vast.ai (EUR 2,50).
+**Enterprise:** Lambda (EUR 5,50, aber SLA).
+
+## Praktischer Start
+
+1. **Entwicklung:** Vast.ai, RTX 4090, EUR 0,18/h. Kosten: EUR 50-100/Monat (sporadic).
+2. **Training:** RunPod Spot A100, EUR 0,25/h. Kosten: EUR 1-3 pro Training.
+3. **Production:** RunPod On-Demand oder Lambda. Kosten: EUR 300-1000/Monat (je nach Volume).
+
+## Fazit
+
+**Cloud GPU 2026:**
+- **Cheapest:** Vast.ai (aber Risiko)
+- **Best Value:** RunPod (Stabilität + Preis)
+- **Enterprise:** Lambda (Garantierte Uptime)
+- **EU:** CoreWeave (GDPR-konform)
+
+**Budgetplanning:**
+- Prototyping: EUR 50-100/month
+- Production: EUR 300-1000/month
+- Enterprise: EUR 5000+/month
+
+**Start:** Vast.ai für Lernens, dann RunPod wenn produktiv.
+
+## Quellen und Links
+
+- [RunPod](https://www.runpod.io)
+- [Vast.ai](https://vast.ai)
+- [Lambda Labs](https://www.lambdalabs.com)

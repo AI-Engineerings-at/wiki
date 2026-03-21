@@ -1,0 +1,631 @@
+---
+title: Transformer Architecture
+date: 2026-03-21
+summary: Self-Attention mechanism step-by-step, encoder/decoder patterns, positional encoding, scaling laws, and practical parameters that define modern LLMs
+tags: [architecture, attention, self-attention, transformer, deep-learning]
+author: AI Engineering
+---
+
+# Understanding Transformer Architecture
+
+The Transformer architecture is the foundation of all modern Large Language Models. It replaced RNNs in 2017 because it's parallelizable, more scalable, and fundamentally more efficient.
+
+---
+
+## The Core Problem: Why Transformers Beat RNNs
+
+RNNs processed sequences token-by-token, sequentially. This meant:
+- **Sequential dependency**: Token #500 couldn't be processed until all previous tokens flowed through the network
+- **Long dependencies fade**: Information from token 1 to token 1000 gets lost due to "vanishing gradients"
+- **Slow computation**: No parallelization possible
+
+Transformers solved this with **Self-Attention**:
+- All tokens processed **simultaneously**
+- Each token can **directly attend to every other token**, regardless of distance
+- Everything runs in parallel → **massive speedup**
+
+---
+
+## Self-Attention Mechanism (Step by Step)
+
+### Input Setup
+```
+Sentence: ["The", "dog", "jumps", "quickly"]
+            ↓      ↓       ↓        ↓
+Embeddings (512-dim each)
+```
+
+### Three Matrices: Q, K, V
+
+Self-Attention uses three linear transformations:
+
+1. **Query (Q)**: "What do I want to understand?"
+2. **Key (K)**: "I'm relevant for..."
+3. **Value (V)**: "My content is..."
+
+```
+For Token i:
+Q_i = W_Q × Embedding_i    (512 → 64 dimensional for single head)
+K = W_K × all_Embeddings   (for all tokens)
+V = W_V × all_Embeddings   (for all tokens)
+```
+
+### Calculate Attention Scores
+
+```
+Similarity = Q_i · K^T / √(d_k)
+
+For "dog": How similar is my Query to the Key of "The"?
+          How similar is my Query to the Key of "dog"?
+          etc.
+
+Example (simplified):
+"The"      : 0.1
+"dog"      : 0.8    ← Highest!
+"jumps"    : 0.05
+"quickly"  : 0.05
+```
+
+Division by √(d_k) = √64 = 8 stabilizes gradients.
+
+### Softmax Normalization
+
+```
+Attention_weights = softmax(similarity_scores)
+
+Result:
+"The"      : 0.05   (5%)
+"dog"      : 0.85   (85%)
+"jumps"    : 0.07   (7%)
+"quickly"  : 0.03   (3%)
+
+Sum = 1.0 (probability distribution)
+```
+
+### Combine Values
+
+```
+Output = Σ(Attention_weight_j × Value_j)
+
+= 0.05×V_The + 0.85×V_dog + 0.07×V_jumps + 0.03×V_quickly
+```
+
+Result is a weighted combination of all words, focused on "dog" (85%).
+
+### Multi-Head Attention
+
+A single attention head focuses on **one type of relationship**. To capture multiple relationships, use **multiple heads** (e.g., 8 or 16):
+
+```
+Head 1: Learn grammatical relationships
+Head 2: Learn semantic similarities
+Head 3: Track positional information
+...
+Head 8: Other aspects
+
+Then: Concatenate all heads → Linear layer → Output
+```
+
+**GPT-4** has 80 attention heads in its transformer layers, enabling extremely differentiated attention patterns.
+
+---
+
+## Encoder-Decoder Patterns
+
+### Encoder-Only (e.g., BERT)
+```
+Input Text → Transformer Encoder → Contextualized Embeddings
+
+Good for: Classification, NER, Sentence Similarity
+```
+
+### Decoder-Only (e.g., GPT, Llama)
+```
+Partial Output → Masked Self-Attention → Predictions → Next Token
+
+"The dog" → [predict next token] → "jumps"
+"The dog jumps" → [predict next token] → "quickly"
+
+All modern LLMs are decoder-only!
+```
+
+### Encoder-Decoder (e.g., T5, BART)
+```
+Input (Encoder) → Cross-Attention (Decoder reads Encoder) → Output
+
+"Translate to English: Der Hund springt"
+     ↓
+  Encoder reads input
+     ↓
+  Decoder uses Encoder output to generate English text
+     ↓
+"The dog jumps"
+
+Good for: Machine Translation, Summarization, QA
+```
+
+---
+
+## Positional Encoding
+
+Problem: Self-Attention has no inherent position information. These sentences would get identical patterns:
+- "The dog jumps quickly"
+- "Quickly jumps dog the"
+
+**Solution: Positional Encoding**
+
+Add a position vector to each embedding:
+
+```
+Final_Embedding = Word_Embedding + Position_Encoding
+
+Position 0 (The):     [0.00, 1.00, 0.00, 1.00, ...]
+Position 1 (dog):    [0.84, 0.54, 0.00, 1.00, ...]
+Position 2 (jumps):  [0.91, 0.41, 0.00, 1.00, ...]
+Position 3 (quickly):[0.14, 0.99, 0.00, 1.00, ...]
+
+Formula (Original "Attention is All You Need"):
+PE[pos, 2i]   = sin(pos / 10000^(2i/d))
+PE[pos, 2i+1] = cos(pos / 10000^(2i/d))
+```
+
+**RoPE (Rotary Position Embedding)** is more modern, scaling better with long context. Llama 3 and current models use RoPE.
+
+---
+
+## Complete Transformer Layer Stack
+
+```
+┌─────────────────────────────┐
+│   Input Embedding           │
+└────────────┬────────────────┘
+             │
+     ┌───────▼────────┐
+     │ Self-Attention │
+     │  (Multi-Head)  │
+     └───────┬────────┘
+             │
+     ┌───────▼────────────────┐
+     │   Add & Norm           │
+     │ (Residual + LayerNorm) │
+     └───────┬────────────────┘
+             │
+     ┌───────▼────────────────┐
+     │   Feed-Forward Net     │
+     │  (2 Dense Layers)      │
+     └───────┬────────────────┘
+             │
+     ┌───────▼────────────────┐
+     │   Add & Norm           │
+     │ (Residual + LayerNorm) │
+     └───────┬────────────────┘
+             │
+        Output Token
+```
+
+**Residual Connections** enable gradients to flow deep through 1000+ layers without vanishing.
+
+---
+
+## Key Parameters Explained
+
+| Parameter | Meaning | Examples |
+|-----------|---------|----------|
+| **d_model** | Embedding dimension | 768 (BERT), 4096 (Llama 3 8B), 8192 (Llama 3 70B) |
+| **num_layers** | Transformer blocks | 12 (BERT), 32 (Llama 3 8B), 80 (Llama 3 70B) |
+| **num_heads** | Attention heads | 12 (BERT), 32 (Llama 3 8B), 80 (Llama 3 70B) |
+| **d_ff** | Feed-Forward dimension | Typically 4× d_model |
+
+### Total Parameters (rough formula)
+
+```
+Total Params ≈ 4 × d_model² × num_layers
+
+Example (Llama 3 8B):
+d_model = 4096, num_layers = 32
+4 × 4096² × 32 = 2.1 Billion (≈8B with vocab layer)
+```
+
+---
+
+## Size Comparisons (2026 Current)
+
+| Model | Parameters | d_model | num_layers | Context | Release |
+|-------|-----------|---------|-----------|---------|---------|
+| **Llama 3 8B** | 8B | 4096 | 32 | 8K | April 2024 |
+| **Llama 3 70B** | 70B | 8192 | 80 | 8K | April 2024 |
+| **GPT-4** | ~1.8T (reported) | Unknown | Unknown | 128K | Nov 2023 |
+| **Claude 3.5 Sonnet** | Proprietary | Proprietary | Proprietary | 200K | June 2024 |
+| **Mistral 7B** | 7B | 4096 | 32 | 32K | Sept 2023 |
+| **Mixtral 8x7B** | 56B (12.9B active) | 4096 | 32 | 32K | Dec 2023 |
+
+---
+
+## Scaling Laws: Why Bigger Often Better
+
+**Chinchilla Scaling (2022)**: Optimal balance is when Model Size and Data Amount cost equally in compute.
+
+```
+Compute-optimal Config:
+- Double Model Parameters → Double Training Tokens
+- NOT: "Bigger model with same tokens"
+
+GPT-3 (2020): 175B params, 300B tokens
+        → Undertrained by Chinchilla standards
+
+GPT-3.5 / GPT-4: Much more tokens per param
+        → Better Performance
+```
+
+**Empirical Observation (Scaling Laws)**:
+
+```
+Loss(N) ∝ N^(-α)
+α ≈ 0.07 (Power Law)
+
+Doubling Model Size → ~5-7% better Performance
+Doubling Data → ~5-7% better Performance
+
+But: Diminishing Returns!
+2 Trillion tokens → GPT-4 level
+20 Trillion tokens → NOT 10× better
+```
+
+---
+
+## Why Transformers are the Future
+
+1. **Parallelizable**: All tokens processed simultaneously
+2. **Long-Range Dependencies**: Even 128K token distance possible (Claude)
+3. **Scalable**: 7B to 1.8T parameters explored
+4. **Transfer Learning**: Pretraining + fine-tuning works excellently
+5. **Hardware-friendly**: Optimized for GPUs/TPUs with batched operations
+
+The Transformer architecture isn't perfect (quadratic attention complexity for long sequences), but it's the best we have and all current advances (RAG, LoRA, Quantization) build on it.
+
+---
+
+## Self-Attention Mathematics (Complete)
+
+### Full Attention Computation
+
+```python
+import torch
+import torch.nn.functional as F
+
+def scaled_dot_product_attention(Q, K, V, mask=None):
+    """
+    Q: Query [batch, seq_len, d_k]
+    K: Key   [batch, seq_len, d_k]
+    V: Value [batch, seq_len, d_v]
+    """
+
+    # 1. Compute attention scores
+    scores = torch.matmul(Q, K.transpose(-2, -1)) / math.sqrt(d_k)
+    # Shape: [batch, seq_len, seq_len]
+
+    # 2. Apply mask (optional, for decoder-only)
+    if mask is not None:
+        scores = scores.masked_fill(mask == 0, -1e9)
+
+    # 3. Softmax to get attention weights
+    attention_weights = F.softmax(scores, dim=-1)
+    # Shape: [batch, seq_len, seq_len]
+
+    # 4. Apply to values
+    output = torch.matmul(attention_weights, V)
+    # Shape: [batch, seq_len, d_v]
+
+    return output, attention_weights
+
+# Complexity Analysis:
+# Q × K^T: O(seq_len²) multiplications
+# Softmax: O(seq_len)
+# × V: O(seq_len²)
+# Total: O(seq_len²) ← The bottleneck!
+```
+
+**Problem**: For 128K context (Claude, Llama 3), this becomes:
+- 128K × 128K = 16 billion operations per token
+- For 8K-token context: manageable
+- For 128K context: expensive (but possible with flash-attn optimization)
+
+### Causal Masking (For Decoder-Only Models)
+
+```python
+def create_causal_mask(seq_len):
+    """
+    Mask future tokens (token at position i can't attend to i+1, i+2, ...)
+    """
+
+    # Lower triangular matrix
+    mask = torch.tril(torch.ones((seq_len, seq_len)))
+    #
+    # For seq_len=4:
+    # [1, 0, 0, 0]
+    # [1, 1, 0, 0]
+    # [1, 1, 1, 0]
+    # [1, 1, 1, 1]
+    #
+    # Token 0 can attend to: [0]
+    # Token 1 can attend to: [0, 1]
+    # Token 2 can attend to: [0, 1, 2]
+    # Token 3 can attend to: [0, 1, 2, 3]
+
+    return mask.unsqueeze(0).unsqueeze(0)  # For broadcasting
+
+# Usage in attention
+scores_masked = scores.masked_fill(mask == 0, -inf)
+attention = softmax(scores_masked)
+```
+
+This ensures autoregressive generation (left-to-right).
+
+---
+
+## Multi-Head Attention in Detail
+
+```python
+class MultiHeadAttention(torch.nn.Module):
+    def __init__(self, d_model, num_heads):
+        super().__init__()
+
+        self.d_model = d_model
+        self.num_heads = num_heads
+        assert d_model % num_heads == 0  # Must divide evenly
+
+        self.d_k = d_model // num_heads  # 512 / 8 = 64
+
+        # Linear projections for Q, K, V (for ALL heads at once)
+        self.W_q = torch.nn.Linear(d_model, d_model)
+        self.W_k = torch.nn.Linear(d_model, d_model)
+        self.W_v = torch.nn.Linear(d_model, d_model)
+        self.W_o = torch.nn.Linear(d_model, d_model)  # Output projection
+
+    def forward(self, Q, K, V, mask=None):
+        batch_size = Q.shape[0]
+
+        # 1. Linear projection and reshape for multiple heads
+        Q = self.W_q(Q)  # [batch, seq, d_model]
+        Q = Q.view(batch_size, -1, self.num_heads, self.d_k)
+        Q = Q.transpose(1, 2)  # [batch, num_heads, seq, d_k]
+
+        K = self.W_k(K).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
+        V = self.W_v(V).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
+
+        # 2. Apply scaled dot-product attention
+        attn_output, attn_weights = scaled_dot_product_attention(Q, K, V, mask)
+        # attn_output: [batch, num_heads, seq, d_k]
+
+        # 3. Concatenate heads
+        attn_output = attn_output.transpose(1, 2).contiguous()
+        # [batch, seq, num_heads, d_k]
+        attn_output = attn_output.view(batch_size, -1, self.d_model)
+        # [batch, seq, d_model]
+
+        # 4. Final linear projection
+        output = self.W_o(attn_output)
+
+        return output, attn_weights
+```
+
+**Why multiple heads?**
+
+Head 1 might learn: "focus on adjacent words (grammatical structure)"
+Head 2 might learn: "focus on semantically similar words"
+Head 3 might learn: "focus on articles and nouns"
+...
+Head 8 might learn: "focus on sentence-ending markers"
+
+Together, they capture multiple linguistic patterns simultaneously.
+
+---
+
+## Position Encoding Alternatives
+
+### Original Sinusoidal (Transformer, 2017)
+
+```python
+def positional_encoding(seq_len, d_model):
+    """
+    PE[pos, 2i]   = sin(pos / 10000^(2i/d))
+    PE[pos, 2i+1] = cos(pos / 10000^(2i/d))
+    """
+
+    pos = torch.arange(0, seq_len).unsqueeze(1)  # [seq_len, 1]
+    div_term = torch.exp(
+        torch.arange(0, d_model, 2) * -(math.log(10000.0) / d_model)
+    )
+
+    pe = torch.zeros((seq_len, d_model))
+    pe[:, 0::2] = torch.sin(pos * div_term)  # Even dimensions
+    pe[:, 1::2] = torch.cos(pos * div_term)  # Odd dimensions
+
+    return pe
+
+# Problem: Doesn't scale well to very long sequences (>100K)
+```
+
+### RoPE (Rotary Position Embedding, 2021)
+
+Modern approach used by Llama, GPT-4:
+
+```python
+def apply_rope(x, pos):
+    """
+    Apply rotations based on position.
+    Scales naturally to very long sequences.
+    """
+
+    d = x.shape[-1]
+    theta = 1.0 / (10000 ** (torch.arange(0, d, 2).float() / d))
+
+    # Rotation matrix (2D)
+    m = torch.einsum('...n, d -> ...nd', pos, theta)
+    # Apply to every 2D rotation
+
+    # Real and complex parts
+    cos_m = torch.cos(m)
+    sin_m = torch.sin(m)
+
+    # Rotate (complex multiplication)
+    x_rot = (x[..., :d//2] * cos_m - x[..., d//2:] * sin_m)
+    x_rot = x_rot.cat([..., x[..., :d//2] * sin_m + x[..., d//2:] * cos_m], dim=-1)
+
+    return x_rot
+
+# Advantage: RoPE generalizes to longer sequences without retraining!
+# Llama 2 (8K context) → Fine-tune with RoPE → 32K context works
+```
+
+---
+
+## Understanding Attention Bottlenecks
+
+### Complexity Breakdown
+
+```python
+# For a single Transformer layer with:
+# - seq_len = 4096 tokens
+# - d_model = 4096 (embedding dim)
+# - num_heads = 32 (attention heads)
+
+FLOPs = 2 × seq_len × d_model × seq_len  # Attention
+      + 2 × seq_len × d_model × d_ff     # Feed-Forward
+
+Attention: 2 × 4096 × 4096 × 4096 = 137 billion FLOPs
+Feed-Forward: 2 × 4096 × 4096 × 16384 = 549 billion FLOPs
+
+Total: ~700 billion FLOPs per layer
+
+For 32 layers: 22.4 trillion FLOPs
+For 64 layers: 44.8 trillion FLOPs
+
+On A100 (312 TFLOPS): ~72 seconds for 1 token
+```
+
+This is why long context is expensive!
+
+---
+
+## Variants and Improvements
+
+### Flash-Attention
+
+```
+Standard Attention: Read all Q,K,V from HBM (GPU memory) → Compute → Write output
+(Lots of I/O overhead)
+
+Flash-Attention: Keep Q,K,V in fast SRAM → Compute locally → Write output
+(Better memory locality)
+
+Result: 2-4× speedup with same numerical result!
+Implementation: Used in torch.nn.functional.scaled_dot_product_attention()
+```
+
+### Sparse Attention
+
+```
+Standard: Every token attends to every other token O(n²)
+Sparse: Each token only attends to nearby tokens O(n log n)
+
+Patterns:
+1. Local attention: Token i attends to [i-k, i+k]
+2. Strided attention: Token i attends to [0, k, 2k, 3k, ...]
+3. Combination: Mix local + strided
+
+Tradeoff: Faster but loses some information
+Used in: Longformer, BigBird
+```
+
+---
+
+## Context Window Scaling Laws
+
+Current empirical evidence (2026):
+
+```
+Model          | Context | Performance on Long Sequences
+---------------|---------|----------------------------
+Llama 2 7B     | 4K      | 100% (trained on this)
+               | 8K      | 95-98% (extended)
+               | 16K     | 70-80% (extrapolation, degrades)
+
+Llama 3 8B     | 8K      | 100%
+               | 32K     | 95% (extended during training)
+
+Claude 3.5     | 200K    | ~95% (maintained quality)
+GPT-4          | 128K    | ~95% (maintained quality)
+
+Rule of Thumb:
+- Within trained context: 95%+ quality
+- 2× trained context: ~80% quality
+- 4× trained context: ~60% quality
+- 10× trained context: Breaks down
+```
+
+**Extending context at inference time**:
+
+```python
+# Interpolate position embeddings
+def interpolate_rope_freqs(base_freqs, scale_factor):
+    """Extend RoPE to longer sequences."""
+
+    # If trained on 8K, extend to 32K
+    # Modify rotation frequency to fit into longer sequence
+
+    extended_freqs = base_freqs * (1 / scale_factor)
+    return extended_freqs
+
+# Llama 2: Trained on 4K → Can extend to 8-16K with interpolation
+# Mostly works, but quality degrades beyond trained context
+```
+
+---
+
+## Design Patterns for Efficient Transformers
+
+### Mixture-of-Experts (Sparse Activation)
+
+```
+Standard: All parameters always active
+MoE: Only subset activate based on input
+Speedup: 2-4× without parameter reduction
+Example: Mixtral 8×7B (56B params, 14B active)
+```
+
+### Grouped Query Attention (GQA)
+
+```
+Multi-Head: Each head has own K, V
+            8 heads × [K, V] = large memory
+
+GQA: Heads share K, V
+     8 heads share same [K, V] = 75% memory reduction
+     Quality: Same as Multi-Head in practice
+Example: Llama 3 (reduces KV cache size)
+```
+
+### Parameter Sharing Across Layers
+
+```
+Standard: 32 unique transformer layers
+Shared: Fewer unique layers, cycled/repeated
+Reduction: 50-80% fewer parameters
+Tradeoff: Slightly lower quality, more stable training
+```
+
+---
+
+## Key Takeaways
+
+1. **Attention is the core**: Everything else is supporting infrastructure
+2. **Quadratic complexity**: O(seq_len²) is the fundamental limit (flash-attn helps, but doesn't change asymptotic complexity)
+3. **Scaling works**: 7B → 70B → 1.8T shows clear improvement
+4. **Long context ≠ automatic**: Extended context needs architectural support (RoPE, ALiBi, etc.)
+5. **No silver bullet**: Trade-offs between speed, memory, quality. Choose based on your constraints
+
+## Sources and Links
+
+- [Attention Is All You Need](https://arxiv.org/abs/1706.03762)
+- [Hugging Face Transformers Library](https://github.com/huggingface/transformers)

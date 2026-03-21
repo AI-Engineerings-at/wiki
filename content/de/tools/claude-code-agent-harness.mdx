@@ -1,0 +1,460 @@
+---
+title: Agent Harnesses für Claude Code — Enterprise Orchestration
+date: 2026-03-21
+summary: Deep Reference zu Agent Harnesses. Everything Claude Code vs Framework vs Ruflo vs Composio. Vergleich, Architektur, Installation. Welcher Harness passt zu deinem Use Case.
+tags: [claude-code, agent-harness, orchestration, multi-agent, architecture]
+author: AI Engineering
+section: tools
+---
+
+# Agent Harnesses für Claude Code — Enterprise Orchestration
+
+Ein Agent Harness ist nicht Claude Code selbst. Es ist die **Schicht drumherum**, die Multi-Agent Workflows orchestriert, State Management handhabt, und Production-Ready macht.
+
+## Was ist ein Agent Harness?
+
+Claude Code allein kann:
+- Eine Task abarbeiten
+- Eine Datei bearbeiten
+- Ein Shell-Kommando ausführen
+
+Ein Harness kann:
+- 5+ Agents gleichzeitig coordinieren
+- State zwischen Agents synchronisieren
+- Fehler automatisch beheben
+- Git Branches isolieren
+- Test-Suites ausführen
+- Monitoring & Logging
+- Retry Logic
+
+## Die Top 5 Harnesses
+
+### 1. Everything Claude Code (affaan-m)
+**GitHub:** https://github.com/affaan-m/everything-claude-code
+
+**Stats:** 84.000+ Stars. Die Production-Battle-Tested Lösung.
+
+**Architektur:**
+
+```
++-------------------+
+| Multi-Agent Swarm |  (bis 50 Agents parallel)
++-------------------+
+         ↓
++-------------------+
+| Memory Manager    |  (LLM Context History)
++-------------------+
+         ↓
++-------------------+
+| Skill Registry    |  (67 vordefinierte Skills)
++-------------------+
+         ↓
++-------------------+
+| Safety Hooks      |  (Guardrails, Sanitization)
++-------------------+
+         ↓
++-------------------+
+| Git Integration   |  (Auto Worktrees, Commits)
++-------------------+
+```
+
+**Features:**
+- Multi-Agent Orchestration (Analyst → Builder → Reviewer)
+- Memory System (Context Window Manager)
+- 67 Skills vorinstalliert
+- Safety Hooks (Output Sanitizer, Credential Vault)
+- Instincts (Agent Personality Config)
+- Auto-Git Integration
+
+**Installation:**
+```bash
+git clone https://github.com/affaan-m/everything-claude-code.git
+cd everything-claude-code
+npm install
+node index.js --config config.prod.json
+```
+
+**Wann nutzen:**
+- Große Teams (5+ Developer)
+- Production Deployment
+- Komplexe Workflows
+- Enterprise Security Requirements
+
+**Lernkurve:** 2-3 Tage (robust, aber komplex)
+
+### 2. Claude Agentic Framework (dralgorhythm)
+**GitHub:** https://github.com/dralgorhythm/claude-agentic-framework
+
+**Stats:** 8.200 Stars. Das MVP-Template.
+
+**Architektur:**
+```
++---------------------------+
+| Agent Config (YAML)       |
++---------------------------+
+         ↓
++---------------------------+
+| Pre-configured Swarms     |  (3 vordefiniert)
++---------------------------+
+         ↓
++---------------------------+
+| 67 Skills Library         |
++---------------------------+
+         ↓
++---------------------------+
+| Minimal Orchestrator      |
++---------------------------+
+```
+
+**Features:**
+- Drop-in Template (Copy & Go)
+- 3 vorkonfigurierte Agent-Teams
+- 67 klassifizierte Skills
+- Safety Hooks inklusive
+- Docker-ready
+
+**Installation:**
+```bash
+git clone https://github.com/dralgorhythm/claude-agentic-framework.git
+cd claude-agentic-framework
+npm install && npm run start
+```
+
+**Wann nutzen:**
+- MVP Phase
+- Schneller Go-to-Market
+- 1-3 Agents
+- Begrenzte Infrastructure
+
+**Lernkurve:** 1 Tag (sehr accessible)
+
+### 3. Ruflo (ruvnet)
+**GitHub:** https://github.com/ruvnet/ruflo
+
+**Stats:** 6.100 Stars. Enterprise Platform.
+
+**Besonderheit:** Verteilte Agent Swarms über mehrere Nodes.
+
+**Architektur:**
+```
++-------------------------------------+
+| Agent Swarm Manager                 |
+|  - up to 100+ agents distributed   |
++-------------------------------------+
+         ↓
++-------------------------------------+
+| RAG (Retrieval-Augmented Gen)      |
+|  - Knowledge Base Integration      |
++-------------------------------------+
+         ↓
++-------------------------------------+
+| Real-Time Dashboard               |
+|  - Agent Status, Resource Monitor |
++-------------------------------------+
+         ↓
++-------------------------------------+
+| Claude Code as First-Class          |
++-------------------------------------+
+```
+
+**Features:**
+- Verteilte Multi-Agent Orchestration
+- RAG Integration (Knowledge Bases)
+- Real-Time Monitoring Dashboard
+- Claude Code native (kein Wrapper)
+- Horizontal Scaling
+
+**Installation:**
+```bash
+git clone https://github.com/ruvnet/ruflo.git
+cd ruflo
+docker-compose up -d
+# Dashboard: http://localhost:3000
+```
+
+**Wann nutzen:**
+- Große Scale (50+ Agents)
+- Knowledge-Base Integration
+- Real-Time Monitoring notwendig
+- Enterprise Deployment
+
+**Lernkurve:** 3-4 Tage (anspruchsvoll)
+
+### 4. Composio Agent Orchestrator
+**GitHub:** https://github.com/ComposioHQ/agent-orchestrator
+
+**Stats:** 5.900 Stars. Developer-Friendly.
+
+**Besonderheit:** Parallele Agents mit automatischen PRs.
+
+**Architektur:**
+```
++------------------------+
+| Parallel Agents        |  (3+ gleichzeitig)
++------------------------+
+         ↓
++------------------------+
+| Git Worktree Manager   |  (pro Agent separate Branch)
++------------------------+
+         ↓
++------------------------+
+| Conflict Resolver      |  (automatisch)
++------------------------+
+         ↓
++------------------------+
+| PR Generator           |  (auto-create PRs)
++------------------------+
+         ↓
++------------------------+
+| Test Integration       |  (run tests before merge)
++------------------------+
+```
+
+**Features:**
+- Parallele Agent-Ausführung
+- Per-Agent Git Worktrees
+- Automatische PR-Generierung
+- Conflict Resolution
+- Test Integration
+
+**Installation:**
+```bash
+pip install composio-agent-orchestrator
+composio init
+composio add claude-code
+composio run --agents 3 --parallel
+```
+
+**Wann nutzen:**
+- Parallel Development notwendig
+- Git-native Teams
+- Auto-PR Workflows
+- Entwickler-orientiert
+
+**Lernkurve:** 1-2 Tage
+
+### 5. Your Claude Engineer (coleam00)
+**GitHub:** https://github.com/coleam00/your-claude-engineer
+
+**Stats:** 4.200 Stars. Integrations-Focus.
+
+**Besonderheit:** Slack, GitHub, Linear Integration.
+
+**Architektur:**
+```
++--------------------+
+| Slack Interface    |
++--------------------+
+         ↓
++--------------------+
+| Claude Code Agent  |
++--------------------+
+         ↓
++--------------------+
+| GitHub Integration |
++--------------------+
+         ↓
++--------------------+
+| Linear Integration |
++--------------------+
+```
+
+**Features:**
+- Slack Chat Interface
+- GitHub Issue/PR Integration
+- Linear Integration (Tasks)
+- Natural Language Commands
+
+**Installation:**
+```bash
+git clone https://github.com/coleam00/your-claude-engineer.git
+cd your-claude-engineer
+# Config: SLACK_TOKEN, GITHUB_TOKEN, LINEAR_TOKEN
+npm run start
+```
+
+**Wann nutzen:**
+- Slack-first Teams
+- GitHub Issues Management
+- Linear Workspace Integration
+- Nicht-technische User Interface
+
+**Lernkurve:** 1 Tag
+
+## Harness Vergleichstabelle
+
+| Kriterium | Everything | Framework | Ruflo | Composio | Your Claude |
+|-----------|-----------|-----------|-------|----------|------------|
+| **Agents (parallel)** | 50+ | 3-5 | 100+ | Beliebig | 1-3 |
+| **Komplexität** | Hoch | Niedrig | Sehr Hoch | Mittel | Mittel |
+| **Setup Time** | 3 Tage | 4h | 1-2 Tage | 1 Tag | 1-2 Tage |
+| **Production Ready** | Ja | Mit Tweaks | Ja | Ja | Ja |
+| **Slack Integration** | Nein | Nein | Optional | Nein | Ja |
+| **GitHub Integration** | Stark | Mittel | Mittel | Stark | Stark |
+| **Monitoring** | Minimal | Nein | Umfangreich | Einfach | Minimal |
+| **RAG Support** | Nein | Nein | Ja | Ja | Nein |
+| **Beste Für** | Scale | MVP | Enterprise | Developer | Team Collaboration |
+
+## Architektur-Entscheidung: Welcher Harness?
+
+### Entscheidungsbaum:
+
+```
+START
+  ↓
+Wie viele Agents brauchst du?
+  ├─ 1-2 Agents        → Your Claude Engineer oder Framework
+  ├─ 3-10 Agents       → Everything Claude Code oder Composio
+  └─ 50+ Agents        → Ruflo
+
+  ↓
+Parallel oder Sequential?
+  ├─ Sequential        → Everything Claude Code
+  └─ Parallel          → Composio oder Ruflo
+
+  ↓
+Brauchst du Knowledge Base / RAG?
+  ├─ Ja                → Ruflo oder Composio
+  └─ Nein              → Everything Claude Code oder Framework
+
+  ↓
+Wer sind die User?
+  ├─ Entwickler        → Composio oder GitHub Integration
+  ├─ Nicht-technisch   → Your Claude Engineer + Slack
+  └─ System-Admin      → Ruflo mit Monitoring
+```
+
+## Installation Quick-Start
+
+### Scenario 1: MVP (schnell starten)
+
+```bash
+# Claude Agentic Framework
+git clone https://github.com/dralgorhythm/claude-agentic-framework.git
+cd claude-agentic-framework
+npm install
+npm run start
+
+# ✓ In 30 min: 3 Agents working
+```
+
+### Scenario 2: Production (skalierbar)
+
+```bash
+# Everything Claude Code
+git clone https://github.com/affaan-m/everything-claude-code.git
+cd everything-claude-code
+npm install
+node index.js --config config.prod.json
+
+# ✓ In 3 Tagen: 50+ Agents ready for Enterprise
+```
+
+### Scenario 3: Team Collaboration (Slack-first)
+
+```bash
+# Your Claude Engineer
+git clone https://github.com/coleam00/your-claude-engineer.git
+cd your-claude-engineer
+export SLACK_TOKEN=...
+export GITHUB_TOKEN=...
+npm run start
+
+# ✓ In 1 Tag: Team kann via Slack arbeiten
+```
+
+## Common Patterns
+
+### Pattern 1: Analyst → Builder → Reviewer
+
+```javascript
+// Everything Claude Code Config
+const agents = [
+  {
+    name: "analyst",
+    role: "Analyse Requirements & Design",
+    skills: ["code-analysis", "architecture-review"]
+  },
+  {
+    name: "builder",
+    role: "Implementiert Code",
+    skills: ["code-generation", "testing"]
+  },
+  {
+    name: "reviewer",
+    role: "Code Review & QA",
+    skills: ["code-review", "security-scan"]
+  }
+];
+
+// Workflow: analyst → builder → reviewer
+```
+
+### Pattern 2: Parallel Workers + Coordinator
+
+```python
+# Composio Framework
+agents = [
+  ParallelAgent("worker-1", tasks["module-a"]),
+  ParallelAgent("worker-2", tasks["module-b"]),
+  ParallelAgent("worker-3", tasks["module-c"]),
+  SequentialAgent("coordinator", ["merge", "test", "deploy"])
+]
+```
+
+### Pattern 3: Slack-Driven
+
+```javascript
+// Your Claude Engineer
+slack.onMessage("@claude build feature X", () => {
+  agent.run("Build feature X");
+  // Posts to GitHub issues
+  // Responds in Slack
+});
+```
+
+## Häufige Fehler
+
+### Fehler 1: Zu viele Agents für falschem Harness
+- **Problem:** 50 Agents mit Framework = Chaos
+- **Lösung:** Everything Claude Code oder Ruflo für Scale
+
+### Fehler 2: Kein State Management
+- **Problem:** Agents arbeiten aneinander vorbei
+- **Lösung:** Memory System wie in Everything Claude Code
+
+### Fehler 3: Credentials hardcoded
+- **Problem:** Git enthält API Keys
+- **Lösung:** Vault Integration (alle Harnesses unterstützen)
+
+## Monitoring & Debugging
+
+Jeder Harness hat unterschiedliche Debugging-Tools:
+
+**Everything Claude Code:**
+```bash
+node index.js --debug
+# → Logs: Agent State, Memory, Tool Calls
+```
+
+**Ruflo:**
+```
+Dashboard: http://localhost:3000
+→ Real-Time Agent Status, Resource Usage
+```
+
+**Composio:**
+```bash
+composio status
+# → Parallel Agents, PR Status, Test Results
+```
+
+## Quellen und Links
+
+- https://github.com/affaan-m/everything-claude-code
+- https://github.com/dralgorhythm/claude-agentic-framework
+- https://github.com/ruvnet/ruflo
+- https://github.com/ComposioHQ/agent-orchestrator
+- https://github.com/coleam00/your-claude-engineer
+- https://github.com/wshobson/agents
+- https://anthropic.com/docs/claude-code

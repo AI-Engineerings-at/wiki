@@ -1,0 +1,541 @@
+---
+title: Attention-Mechanismen
+date: 2026-03-21
+summary: Self-Attention, Cross-Attention, Multi-Head, Flash Attention, Multi-Query, Grouped-Query, Sliding Window, Sparse Patterns — komplett erklärt
+tags: [attention, transformer, self-attention, cross-attention, flash-attention, multi-query, grouped-query]
+author: AI Engineering
+section: Konzepte
+---
+
+# Attention-Mechanismen verstehen
+
+Attention ist der Kern von Transformern. Das Modell "achtet auf" (pays attention to) die relevantesten Teile der Eingabe.
+
+---
+
+## Scaled Dot-Product Attention (Basis)
+
+Das ist die fundamentale Operation hinter allem.
+
+### Mathematik
+
+```
+Attention(Q, K, V) = softmax(Q * K^T / sqrt(d_k)) * V
+
+wobei:
+- Q (Query) = "Was such ich?"
+- K (Key) = "Worum geht es hier?"
+- V (Value) = "Wie wichtig ist dieser Part?"
+- d_k = Dimensions-Größe der Keys
+- sqrt(d_k) = Skalierung (verhindert exploding softmax)
+```
+
+### Praktisches Beispiel
+
+```
+Satz: "Das Katze sitzt auf Matte"
+
+Punkt 1: Token "Katze"
+  Query (Katze):  "Was modifiziert mich?"
+
+  Berechne Ähnlichkeit zu jedem Token:
+  - "Das": 0.1 (low)
+  - "sitzt": 0.7 (high!) ← "Katze sitzt"
+  - "auf": 0.5 (medium)
+  - "Matte": 0.3 (low)
+
+  Softmax Gewichte: [0.1, 0.7, 0.5, 0.3] → normalisiert
+
+  Output: Gewichtete Kombination aller Werte
+```
+
+### Code-Beispiel
+
+```python
+import torch
+import torch.nn.functional as F
+
+def scaled_dot_product_attention(Q, K, V):
+    """
+    Q, K, V Shape: (batch, seq_len, d_k)
+    """
+    d_k = Q.shape[-1]
+
+    # 1. Berechne Ähnlichkeiten
+    scores = torch.matmul(Q, K.transpose(-2, -1)) / math.sqrt(d_k)
+    # Shape: (batch, seq_len, seq_len)
+
+    # 2. Normalisiere mit Softmax
+    attention_weights = F.softmax(scores, dim=-1)
+    # Shape: (batch, seq_len, seq_len)
+
+    # 3. Wende auf Values an
+    output = torch.matmul(attention_weights, V)
+    # Shape: (batch, seq_len, d_k)
+
+    return output, attention_weights
+```
+
+---
+
+## Self-Attention
+
+Self-Attention bedeutet: Das Token achtet auf sich selbst und andere Tokens in der gleichen Sequenz.
+
+### Der Unterschied
+
+```
+Self-Attention:  Token achtet auf andere Tokens im gleichen Satz
+  Eingabe: "Das Katze sitzt auf"
+  Token "sitzt" kann alle Tokens sehen
+
+Cross-Attention:  Token aus Sequenz A achtet auf Sequenz B
+  Beispiel: Image Caption
+    Q = Bild-Features
+    K, V = Satz-Tokens
+```
+
+### Causality (Kausale Attention)
+
+In Sprach-Modellen (GPT) darf ein Token nur auf frühere Tokens achten, nicht auf zukünftige.
+
+```
+Veränderung: Masking
+
+Token 0 kann sehen: [0]
+Token 1 kann sehen: [0, 1]
+Token 2 kann sehen: [0, 1, 2]  ← (nicht 3, 4, 5!)
+
+Masking-Code:
+mask = torch.triu(torch.ones(seq_len, seq_len), diagonal=1).bool()
+scores.masked_fill(mask, -float('inf'))
+```
+
+---
+
+## Multi-Head Attention
+
+Ein Head allein ist begrenzt. Multi-Head ermöglicht mehrere "Perspektiven" gleichzeitig.
+
+### Konzept
+
+```
+Eingabe (512-dim)
+  ├─ Head 1 (64-dim): Achtet auf "Subjekt-Verb" Beziehungen
+  ├─ Head 2 (64-dim): Achtet auf "Zeitliche Struktur"
+  ├─ Head 3 (64-dim): Achtet auf "Abhängigkeiten"
+  └─ Head 4 (64-dim): Achtet auf "Tokens weit entfernt"
+
+  (8 Heads insgesamt)
+
+Alle Heads kombinieren → Finale Output
+```
+
+### Implementation
+
+```python
+class MultiHeadAttention(nn.Module):
+    def __init__(self, d_model=512, num_heads=8):
+        super().__init__()
+        self.d_model = d_model
+        self.num_heads = num_heads
+        self.d_k = d_model // num_heads  # 512 / 8 = 64
+
+        # Linear Transformationen
+        self.W_q = nn.Linear(d_model, d_model)
+        self.W_k = nn.Linear(d_model, d_model)
+        self.W_v = nn.Linear(d_model, d_model)
+        self.W_o = nn.Linear(d_model, d_model)  # Output
+
+    def forward(self, Q, K, V):
+        batch_size = Q.shape[0]
+
+        # 1. Linear Transformationen
+        Q = self.W_q(Q)  # (batch, seq, 512)
+        K = self.W_k(K)
+        V = self.W_v(V)
+
+        # 2. Split in Multiple Heads
+        Q = Q.view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
+        # (batch, 8, seq, 64)
+        K = K.view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
+        V = V.view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
+
+        # 3. Scaled Dot-Product Attention für jeden Head
+        output, _ = scaled_dot_product_attention(Q, K, V)
+        # (batch, 8, seq, 64)
+
+        # 4. Kombiniere Heads
+        output = output.transpose(1, 2).contiguous()
+        # (batch, seq, 8, 64)
+        output = output.view(batch_size, -1, self.d_model)
+        # (batch, seq, 512)
+
+        # 5. Final Linear
+        output = self.W_o(output)
+
+        return output
+```
+
+---
+
+## Cross-Attention
+
+Encoder-Decoder-Aufmerksamkeit: Ein Sequence achtet auf eine andere.
+
+### Anwendungen
+
+```
+1. Text-to-Image (Stable Diffusion)
+   Q = Bild-Features (was ich generiere)
+   K, V = Text-Embedding (worüber ich lese)
+
+2. Machine Translation
+   Q = Target Language (was ich schreibe)
+   K, V = Source Language (was ich übersetze)
+
+3. Question Answering
+   Q = Question
+   K, V = Dokument
+```
+
+### Code-Beispiel (Stable Diffusion)
+
+```python
+# Im U-Net Diffusion Model
+class CrossAttentionBlock(nn.Module):
+    def __init__(self, hidden_dim=768):
+        super().__init__()
+        self.mha = MultiHeadAttention(hidden_dim)
+
+    def forward(self, x, context):
+        """
+        x (image features): (batch, height*width, 768)
+        context (text): (batch, max_tokens, 768)  # von CLIP
+        """
+        # Q kommt vom Bild, K,V vom Text
+        attn_output = self.mha(
+            Q=x,           # Bild: "Was soll ich zeichnen?"
+            K=context,     # Text: "Ein Hund sitzt"
+            V=context      # Text: "Ein Hund sitzt"
+        )
+        return x + attn_output
+```
+
+---
+
+## Flash Attention
+
+Flash Attention ist eine Optimierung der Standard Attention, die schneller und speicherhungriger ist (Dao et al. 2022).
+
+### Problem der Standard Attention
+
+```
+Speicher-Bottleneck:
+
+Q*K^T berechnet:         (seq_len, seq_len) Matrix
+Mit seq_len=4096:        4096 * 4096 = 16M Einträge
+Bei float32:            ~64 MB nur für diese Matrix
+
+Bei transformer.forward mit vielen Layers:
+Speicher explodiert → OOM (Out of Memory)
+```
+
+### Flash Attention Lösung
+
+```
+Idee: Mach Attention in Blöcken statt global
+
+Standard:    seq_len=4096
+             Q,K,V: (4096, 64)
+             Berechne: 4096*4096 Attention Matrix
+
+Flash:       Teile in Blöcke: Block_size=128
+             Berechne: 128*128 statt 4096*4096
+             Loop über Blöcke, akkumuliere Ergebnisse
+
+Speicher:    64x weniger (bei 4096)
+Speed:       2-4x schneller
+```
+
+### Impact in der Praxis
+
+```
+Beispiel: Transformers ohne Flash Attention
+Seq_len = 2048, Batch = 8, Heads = 12
+→ OOM bei Standard GPU (24GB VRAM)
+
+Mit Flash Attention:
+→ Läuft problemlos
+→ 2-3x schneller
+→ Ermöglicht längere Kontexte
+```
+
+### Verwendung
+
+```python
+# Automatisch in torch 2.0+
+import torch
+torch.nn.functional.scaled_dot_product_attention  # Nutzt Flash wenn verfügbar
+
+# Oder explizit
+from flash_attn import flash_attn_func
+
+# In transformers Library
+from transformers import AutoModelForCausalLM
+model = AutoModelForCausalLM.from_pretrained(
+    "meta-llama/Llama-2-7b",
+    attn_implementation="flash_attention_2"  # ← Flash Attention
+)
+```
+
+---
+
+## Multi-Query Attention (MQA)
+
+MQA reduziert die Anzahl der Key/Value Heads — schnellere Inference, weniger Speicher.
+
+### Unterschied zu Multi-Head
+
+```
+Standard Multi-Head Attention (8 Heads):
+  Q: 8 Heads × (seq_len, 64)
+  K: 8 Heads × (seq_len, 64)  ← Viel Speicher!
+  V: 8 Heads × (seq_len, 64)
+
+Multi-Query Attention:
+  Q: 8 Heads × (seq_len, 64)
+  K: 1 Head × (seq_len, 512)  ← Geteilt über alle Queries!
+  V: 1 Head × (seq_len, 512)
+```
+
+### Praktischer Effekt
+
+```
+Speed bei Inference:
+  Standard MHA:    100 Tokens/sec
+  MQA:            300 Tokens/sec (3x schneller!)
+
+KV-Cache beim Generieren:
+  MHA:    seq_len * num_heads * head_dim
+  MQA:    seq_len * head_dim (8x kleiner!)
+```
+
+### Wo es verwendet wird
+
+- Google PaLM 2
+- Meta LLaMA 2
+- Zusammenfassung: "Cache ist klein, Inference ist schnell"
+
+---
+
+## Grouped-Query Attention (GQA)
+
+GQA ist ein Hybrid zwischen Multi-Head und Multi-Query.
+
+### Der Kompromiss
+
+```
+Multi-Head:    8 Q-Heads, 8 K-Heads, 8 V-Heads
+                → Beste Qualität, höchster Speicher
+
+Grouped-Query:  8 Q-Heads, 2 K-Heads, 2 V-Heads
+                → Kompromiss: 4x Speicher + 4x Qualität
+
+Multi-Query:    8 Q-Heads, 1 K-Head, 1 V-Head
+                → Schnellste, aber schlechtere Qualität
+```
+
+### Implementation
+
+```python
+class GroupedQueryAttention(nn.Module):
+    def __init__(self, num_q_heads=8, num_kv_heads=2):
+        self.num_q_heads = num_q_heads
+        self.num_kv_heads = num_kv_heads
+
+        # Q: viele Heads
+        self.W_q = nn.Linear(d_model, d_model)
+
+        # K,V: weniger Heads
+        self.W_k = nn.Linear(d_model, d_model // 4)  # 1/4 der Dims
+        self.W_v = nn.Linear(d_model, d_model // 4)
+
+    def forward(self, Q, K, V):
+        # Q: (batch, seq, d_model)
+        # K, V: (batch, seq, d_model // 4)  ← Mehr komprimiert!
+
+        # Repeat K,V um in Multi-Head Format zu passen
+        # ...repeat logic...
+```
+
+---
+
+## Sliding Window Attention
+
+Statt globaler Attention nur auf nahe Tokens schauen — für lange Sequenzen.
+
+### Motivation
+
+```
+Satz: "Der Mann mit dem Hut geht zur Schule und kauft einen Kaffee."
+
+Standard Attention: "Der" achtet auf "kauft" (weit weg)
+Sliding Window:     "Der" achtet nur auf nächste 64 Tokens
+                   → Spart 95% Berechnung!
+```
+
+### Implementation
+
+```python
+def sliding_window_attention(Q, K, V, window_size=64):
+    seq_len = Q.shape[1]
+
+    # Erstelle Window-Mask
+    window_mask = torch.ones(seq_len, seq_len)
+
+    for i in range(seq_len):
+        # Token i kann nur Tokens [i-window_size, i+window_size] sehen
+        window_mask[i, :max(0, i-window_size)] = 0
+        window_mask[i, min(seq_len, i+window_size):] = 0
+
+    # Standard Attention mit Window-Mask
+    scores = torch.matmul(Q, K.transpose(-2, -1))
+    scores.masked_fill(~window_mask.bool(), -float('inf'))
+    attention = F.softmax(scores, dim=-1)
+
+    return torch.matmul(attention, V)
+```
+
+### Wo verwendet
+
+- Llama 2
+- Mistral 7B (window_size=4096)
+- Local Attention in Vision Transformers
+
+---
+
+## Sparse Attention Patterns
+
+Für sehr lange Sequenzen nur auf ausgewählte Tokens achten.
+
+### Pattern-Typen
+
+```
+1. Local Attention (Sliding Window)
+   Achtet nur auf nahe Tokens
+
+2. Strided Attention
+   Achtet auf jeden n-ten Token
+   Pattern: [0, n, 2n, 3n, ...]
+
+3. Fixed Attention
+   Token "achtet auf" bestimmte fixe Positionen
+
+4. Longformer Pattern
+   Mischung aus Local + Global (für wichtige Tokens)
+```
+
+### Vergleich
+
+| Pattern | Komplexität | Qualität | Anwendung |
+|---------|------------|----------|-----------|
+| Global | O(n²) | Beste | Standard |
+| Sliding | O(n*w) | Gut | Lange Sequenzen |
+| Strided | O(n²/k) | Mittel | Sehr lange Sequenzen |
+| Fixed | O(n) | Mittel | Spezielle Patterns |
+
+---
+
+## Attention Visualisierungen
+
+### Beispiel: Machine Translation
+
+```
+Satz: "Je suis heureux" → "I am happy"
+
+Attention Matrix:
+       Je  suis heureux
+  I    0.8  0.15  0.05
+  am   0.1  0.7   0.2
+  happy 0.05 0.15  0.8
+
+Interpretation:
+- "I" achtet hauptsächlich auf "Je" (Pronomen)
+- "am" achtet auf "suis" (Verb)
+- "happy" achtet auf "heureux" (Adjektiv)
+```
+
+### Visualisierung in Transformers
+
+```python
+from transformers import AutoTokenizer, AutoModel
+
+model_name = "bert-base-uncased"
+model = AutoModel.from_pretrained(model_name, output_attentions=True)
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+text = "The cat sat on the mat"
+inputs = tokenizer.encode(text, return_tensors="pt")
+
+outputs = model(inputs)
+attention = outputs[-1]  # Attention weights
+
+# attention shape: (layer, head, seq_len, seq_len)
+# Visualisiere mit matplotlib
+```
+
+---
+
+## Performance-Tipps
+
+### 1. Verwende Flash Attention wo möglich
+
+```python
+# Automat in torch 2.0+
+# Oder mit transformers:
+from transformers import AutoModelForCausalLM
+
+model = AutoModelForCausalLM.from_pretrained(
+    "meta-llama/Llama-2-7b",
+    attn_implementation="flash_attention_2"
+)
+```
+
+### 2. Länge begrenzen bei Inference
+
+```python
+# Nicht: max_new_tokens=4096 bei Batch Inference
+# Sondern: max_length=512
+
+outputs = model.generate(
+    input_ids,
+    max_new_tokens=256,  # Kürzer = schneller
+    do_sample=False      # Deterministisch
+)
+```
+
+### 3. KV-Cache nutzen
+
+```python
+# Mit KV-Cache
+outputs = model(input_ids, use_cache=True, past_key_values=None)
+
+# Dann bei nächsten Token:
+outputs = model(
+    next_token,
+    use_cache=True,
+    past_key_values=outputs.past_key_values  # ← Cache reuse!
+)
+```
+
+---
+
+## Quellen und Links
+
+- [Attention Is All You Need (Vaswani et al. 2017)](https://arxiv.org/abs/1706.03762)
+- [Flash Attention (Dao et al. 2022)](https://arxiv.org/abs/2205.14135)
+- [Multi-Query Attention (Shazeer 2019)](https://arxiv.org/abs/1911.02727)
+- [Grouped-Query Attention (Ainslie et al. 2023)](https://arxiv.org/abs/2305.13245)
+- [Longformer (Beltagy et al. 2020)](https://arxiv.org/abs/2004.05150)
+- [Efficient Transformers Survey](https://efficient-transformers.github.io/)

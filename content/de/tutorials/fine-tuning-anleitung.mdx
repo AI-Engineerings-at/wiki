@@ -1,0 +1,564 @@
+---
+title: Fine-Tuning mit Unsloth QLoRA — Praktischer Guide
+date: 2026-03-21
+summary: Schritt-für-Schritt QLoRA Fine-Tuning mit Unsloth für Llama 3, Dataset-Vorbereitung, Training, Evaluation, VRAM-Anforderungen, ROI-Berechnung
+tags: [Fine-Tuning, QLoRA, Unsloth, Llama, LoRA, Model Training]
+author: "AI Engineering"
+---
+
+# Fine-Tuning mit Unsloth QLoRA — Praktischer Guide
+
+Fine-Tuning macht ein allgemeines Modell zu einem Experten auf deine Domäne. Mit QLoRA auch auf günstiger Hardware möglich.
+
+## Grundlagen
+
+**Warum Fine-Tuning?**
+- Generisches Modell: "Das ist ein Text"
+- Fein-justiertes Modell: "Das ist ein Support-Ticket → Priorität: Hoch, Kategorie: Bug"
+
+**Kosten-Vergleich:**
+- Claude API für Millionen Support-Tickets: $50.000+
+- Fine-Tuned Llama 3 lokal: $300 (eine Zeit)
+
+## Teil 1: Hardware-Check
+
+QLoRA braucht weniger VRAM als Standard Fine-Tuning.
+
+| Szenario | VRAM | Empfehlung |
+|----------|------|-----------|
+| Llama 3.2 3B | 4 GB | OK mit q4 Quantisierung |
+| Llama 3.2 7B | 8 GB | Ideal |
+| Llama 3.2 13B | 12 GB | Notwendig |
+| Llama 3 70B | 24 GB | RTX 4090 / A10G |
+
+### VRAM prüfen
+
+```bash
+# Linux
+nvidia-smi
+# Output: "GPU 0: NVIDIA RTX 3090 Ti ... Memory: 24576 MB"
+
+# Oder kurz
+nvidia-smi --query-gpu=memory.total --format=csv,noheader
+# Output: 24576 MB
+```
+
+Hast du <8 GB? Dann:
+1. Kleineres Modell (3B statt 7B)
+2. Kleinere batch_size (1 statt 4)
+3. Kleinere context-Länge (512 statt 2048)
+
+## Teil 2: Installation
+
+### PyTorch + CUDA (GPU)
+
+```bash
+# NVIDIA GPU (CUDA 12.1)
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+# AMD GPU (ROCm)
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm5.7
+
+# CPU Only (sehr langsam)
+pip install torch
+```
+
+Test:
+
+```python
+import torch
+print(torch.cuda.is_available())  # True wenn GPU erkannt
+print(torch.cuda.device_count())  # Anzahl GPUs
+```
+
+### Unsloth + Dependencies
+
+```bash
+pip install unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git
+pip install xformers transformers datasets peft trl bitsandbytes
+```
+
+Test:
+
+```python
+from unsloth import FastLanguageModel
+print("Unsloth installiert ✓")
+```
+
+## Teil 3: Dataset vorbereiten
+
+Fine-Tuning braucht gute Daten.
+
+### Dataset-Struktur
+
+Die beste Format ist JSON Lines (eine JSON-Zeile pro Beispiel):
+
+```jsonl
+{"text": "User: Was ist RAG?\nAssistant: RAG ist Retrieval Augmented Generation..."}
+{"text": "User: Erkläre QLoRA\nAssistant: QLoRA kombiniert..."}
+{"text": "User: Was kostet Fine-Tuning?\nAssistant: Fine-Tuning kostet..."}
+```
+
+Alternativ: CSV mit "instruction" + "output" Spalten:
+
+```csv
+instruction,output
+"Was ist RAG?","RAG ist Retrieval Augmented Generation..."
+"Erkläre QLoRA","QLoRA kombiniert LoRA mit 4-Bit Quantisierung..."
+```
+
+### Dataset erstellen (Dummy)
+
+```python
+# create_dataset.py
+import json
+import random
+
+# Deine Trainings-Beispiele
+examples = [
+    ("Was ist Machine Learning?", "Machine Learning ist ein Bereich der KI..."),
+    ("Erkläre Neural Networks", "Neural Networks sind Modelle inspiriert von..."),
+    ("Was ist ein Gradient?", "Ein Gradient beschreibt..."),
+    ("Wie funktioniert Backpropagation?", "Backpropagation ist..."),
+    ("Was ist Overfitting?", "Overfitting tritt auf wenn..."),
+]
+
+# Zu JSONL konvertieren
+with open("training_data.jsonl", "w") as f:
+    for instruction, output in examples:
+        record = {
+            "text": f"User: {instruction}\nAssistant: {output}"
+        }
+        f.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+print(f"Dataset erstellt: {len(examples)} Beispiele")
+```
+
+**Wichtig:** Je mehr Qualitäts-Beispiele, desto besser.
+- 10-100 Beispiele: Test/POC
+- 100-1000 Beispiele: Gut für spezifische Tasks
+- 1000+ Beispiele: State-of-the-art Qualität
+
+### Dataset-Größe berechnen
+
+```python
+# data_check.py
+import json
+
+example_count = 0
+total_tokens = 0
+
+with open("training_data.jsonl") as f:
+    for line in f:
+        example_count += 1
+        data = json.loads(line)
+        tokens = len(data["text"].split())  # Grobe Schätzung
+        total_tokens += tokens
+
+avg_tokens = total_tokens / example_count
+print(f"Beispiele: {example_count}")
+print(f"Ø Tokens pro Beispiel: {avg_tokens:.0f}")
+print(f"Total Tokens: {total_tokens:,}")
+print(f"Training-Epohe: {total_tokens / 1000:.1f}k Tokens")
+```
+
+## Teil 4: Fine-Tuning mit Unsloth
+
+### Basis-Training (einfach)
+
+```python
+# train_simple.py
+from unsloth import FastLanguageModel
+from datasets import load_dataset
+from trl import SFTTrainer
+from transformers import TrainingArguments
+
+# 1. Modell laden (4-Bit quantisiert)
+model, tokenizer = FastLanguageModel.from_pretrained(
+    model_name="unsloth/Llama-3.2-7B-Instruct-bnb-4bit",
+    max_seq_length=2048,
+    dtype=None,  # Auto detect
+    load_in_4bit=True
+)
+
+# 2. LoRA konfigurieren
+model = FastLanguageModel.get_peft_model(
+    model,
+    r=16,  # LoRA Rank (mehr = bessere Qualität, mehr VRAM)
+    lora_alpha=16,
+    lora_dropout=0.05,
+    bias="none",
+    use_gradient_checkpointing="unsloth",
+    random_state=42,
+)
+
+# 3. Dataset laden
+dataset = load_dataset("json", data_files="training_data.jsonl")
+
+# 4. Training konfigurieren
+training_args = TrainingArguments(
+    per_device_train_batch_size=4,  # VRAM-limitiert
+    gradient_accumulation_steps=1,
+    warmup_steps=5,
+    num_train_epochs=3,
+    learning_rate=2e-4,
+    fp16=True,  # Mixed precision
+    logging_steps=1,
+    output_dir="./outputs",
+    optim="paged_adamw_8bit",
+    save_strategy="epoch"
+)
+
+# 5. Trainer
+trainer = SFTTrainer(
+    model=model,
+    tokenizer=tokenizer,
+    args=training_args,
+    train_dataset=dataset["train"],
+    dataset_text_field="text",
+    max_seq_length=2048,
+)
+
+# 6. Training starten
+trainer.train()
+
+print("✓ Training fertig!")
+
+# 7. Speichern
+model.save_pretrained("my-finetuned-model")
+tokenizer.save_pretrained("my-finetuned-model")
+```
+
+Laufen:
+
+```bash
+python train_simple.py
+# Epoch 1/3: 100%|████| [00:45<00:00, ...]
+# Loss: 2.341 → 1.892 → 1.234
+```
+
+### Advanced: Mit Validierung & Early Stopping
+
+```python
+# train_advanced.py
+from unsloth import FastLanguageModel
+from datasets import load_dataset
+from trl import SFTTrainer
+from transformers import TrainingArguments
+import numpy as np
+
+# Daten laden und teilen
+dataset = load_dataset("json", data_files="training_data.jsonl")
+split = dataset["train"].train_test_split(test_size=0.1, seed=42)
+train_dataset = split["train"]
+eval_dataset = split["test"]
+
+# Modell
+model, tokenizer = FastLanguageModel.from_pretrained(
+    model_name="unsloth/Llama-3.2-7B-Instruct-bnb-4bit",
+    max_seq_length=2048,
+    dtype=None,
+    load_in_4bit=True
+)
+
+# LoRA mit höherem Rank (bessere Qualität)
+model = FastLanguageModel.get_peft_model(
+    model,
+    r=32,      # Höher = bessere Qualität (aber mehr VRAM)
+    lora_alpha=32,
+    lora_dropout=0.05,
+    bias="none",
+    use_gradient_checkpointing="unsloth",
+    random_state=42,
+)
+
+# Training mit Eval
+training_args = TrainingArguments(
+    per_device_train_batch_size=4,
+    per_device_eval_batch_size=4,
+    gradient_accumulation_steps=1,
+    warmup_steps=10,
+    num_train_epochs=5,
+    learning_rate=5e-4,  # Etwas höher
+    lr_scheduler_type="cosine",
+    fp16=True,
+    logging_steps=5,
+    output_dir="./outputs-advanced",
+    save_strategy="steps",
+    save_steps=20,
+    eval_strategy="steps",  # Evals während Training
+    eval_steps=20,
+    load_best_model_at_end=True,
+    metric_for_best_model="eval_loss",
+    greater_is_better=False,
+    # Early Stopping
+    early_stopping_patience=3,
+    optim="paged_adamw_8bit",
+    seed=42,
+    report_to=[]  # Kein Logging zu W&B
+)
+
+trainer = SFTTrainer(
+    model=model,
+    tokenizer=tokenizer,
+    args=training_args,
+    train_dataset=train_dataset,
+    eval_dataset=eval_dataset,
+    dataset_text_field="text",
+    max_seq_length=2048,
+)
+
+trainer.train()
+
+# Beste Checkpoint laden
+model = trainer.model
+
+# Speichern
+model.save_pretrained("my-finetuned-model-best")
+tokenizer.save_pretrained("my-finetuned-model-best")
+
+print("✓ Advanced Training fertig!")
+```
+
+## Teil 5: Inferenz — Modell nutzen
+
+### Einfache Inferenz
+
+```python
+# inference.py
+from unsloth import FastLanguageModel
+from transformers import TextStreamer
+
+# Trainiertes Modell laden
+model, tokenizer = FastLanguageModel.from_pretrained(
+    model_name="./my-finetuned-model",
+    max_seq_length=2048,
+    dtype=None,
+    load_in_4bit=True,
+)
+
+# Für schnellere Inferenz
+FastLanguageModel.for_inference(model)
+
+# Chat
+prompt = "User: Was ist RAG?\nAssistant:"
+
+inputs = tokenizer(prompt, return_tensors="pt").to("cuda")
+
+# Stream output (live Anzeige)
+streamer = TextStreamer(tokenizer)
+
+outputs = model.generate(
+    **inputs,
+    streamer=streamer,
+    max_new_tokens=200,
+    temperature=0.3,
+    do_sample=True,
+)
+
+response = tokenizer.decode(outputs[0])
+print(f"\n\nFull Response:\n{response}")
+```
+
+### Mit Ollama (für einfache Deployment)
+
+```bash
+# GGUF exportieren
+python -m llama_cpp.server --model ./my-finetuned-model \
+  --quantization Q4_K_M \
+  --port 8000
+
+# Dann wie Ollama nutzen
+curl http://localhost:8000/v1/completions \
+  -d '{"model": "model", "prompt": "Was ist..."}'
+```
+
+## Teil 6: Evaluation
+
+Wie gut ist dein Modell?
+
+### Automatische Metriken
+
+```python
+# evaluate.py
+from unsloth import FastLanguageModel
+from datasets import load_dataset
+from rouge import Rouge
+import numpy as np
+
+# Modell
+model, tokenizer = FastLanguageModel.from_pretrained(
+    model_name="./my-finetuned-model",
+    max_seq_length=2048,
+    load_in_4bit=True,
+)
+
+FastLanguageModel.for_inference(model)
+
+# Test-Dataset
+dataset = load_dataset("json", data_files="test_data.jsonl")
+
+rouge = Rouge()
+scores = []
+
+for example in dataset["train"]:
+    prompt = example["text"].split("Assistant:")[0] + "Assistant:"
+    expected = example["text"].split("Assistant:")[1]
+
+    # Generiere Antwort
+    inputs = tokenizer(prompt, return_tensors="pt").to("cuda")
+    outputs = model.generate(**inputs, max_new_tokens=100)
+    generated = tokenizer.decode(outputs[0])
+
+    # ROUGE Score
+    score = rouge.get_scores(generated, expected)[0]["rouge1"]
+    scores.append(score["f"])
+
+avg_score = np.mean(scores)
+print(f"Average ROUGE-1: {avg_score:.3f}")
+print(f"(0.5+ ist gut, 0.7+ ist ausgezeichnet)")
+```
+
+### Manuelle Evaluation
+
+Best Practice:
+1. Generiere 10 Antworten
+2. Lese sie manuell
+3. Rate: 1 (Unsinn) bis 5 (Perfekt)
+4. Berechne Durchschnitt
+
+```python
+# manual_eval.py
+test_questions = [
+    "Was ist RAG?",
+    "Erkläre Fine-Tuning",
+    "Wie funktioniert QLoRA?"
+]
+
+print("Manuelle Evaluation: Rate Antworten 1-5\n")
+
+for q in test_questions:
+    prompt = f"User: {q}\nAssistant:"
+    # ... generiere ...
+    rating = int(input(f"Rating für '{q}': "))
+```
+
+## Teil 7: ROI-Berechnung
+
+Rentiert sich Fine-Tuning?
+
+### Kosten
+
+```
+Hardware-Kosten:
+- RTX 4090: $1500 (einmalig)
+- oder Cloud GPU: $1-3/Stunde
+
+Training-Kosten (einmalig):
+- 10 Stunden Training auf RTX 4090: ~$0
+- 10 Stunden auf Cloud GPU: $10-30
+
+Total einmalig: $0-30
+```
+
+### Ersparnis
+
+```
+Scenario: 1 Millionen API Calls/Monat
+
+Claude API:
+- Input: 1M * 500 Tokens @ $3/1M = $1,500
+- Output: 1M * 200 Tokens @ $15/1M = $3,000
+- Total: $4,500/Monat = $54,000/Jahr
+
+Fine-Tuned Llama (lokal):
+- GPU Betrieb: ~$0 (bereits vorhanden)
+- Strom: ~$50/Monat
+- Total: $50/Monat = $600/Jahr
+
+Ersparnis: $54,000 - $600 = $53,400/Jahr
+```
+
+## Top-5 Fehlerbehebung
+
+### Problem 1: "CUDA out of memory"
+
+```python
+# Ursache: batch_size oder context_length zu groß
+
+# Vorher
+per_device_train_batch_size=8,
+max_seq_length=4096,
+
+# Nachher
+per_device_train_batch_size=1,  # Halbiert VRAM
+max_seq_length=512,  # Stark reduziert
+```
+
+### Problem 2: Loss geht nicht runter
+
+```python
+# Learning rate zu hoch
+learning_rate=2e-4,  # Probiere kleinere Werte
+
+# Oder: Warmup zu kurz
+warmup_steps=5,  # Erhöhe auf 20
+```
+
+### Problem 3: Output ist Nonsense
+
+```python
+# Model braucht mehr Training
+num_train_epochs=3,  # Erhöhe auf 10
+# Oder: Datenlecks (Test-Daten auch im Training)
+```
+
+### Problem 4: Training sehr langsam
+
+```python
+# GPU wird nicht genutzt
+import torch
+print(torch.cuda.is_available())  # Muss True sein
+
+# Oder: Gradient Checkpointing disabled
+use_gradient_checkpointing="unsloth",  # Setze das
+```
+
+### Problem 5: Modell lädt nicht
+
+```python
+# Falscher Modell-Name
+"unsloth/Llama-3.2-7B-Instruct-bnb-4bit"  # Korrekt
+# nicht: "Llama-3.2-7B" (falscher Name)
+
+# Netzwerkfehler
+# → Hugging Face offline? Später retry
+```
+
+## Zusammenfassung
+
+Fine-Tuning Workflow:
+
+1. **Dataset** → 100+ Qualitäts-Beispiele
+2. **Modell** → Unsloth-Version laden (bnb-4bit)
+3. **LoRA** → r=16-32 je nach VRAM
+4. **Training** → 3-5 Epochen, eval während Training
+5. **Eval** → ROUGE Score + manuelle Checks
+6. **Deployment** → Ollama oder als HF Model
+
+**Wann lohnt sich Fine-Tuning?**
+- ✓ >50.000 API Calls/Monat
+- ✓ Spezifische Domain (Support, Code, Medicine)
+- ✓ Qualitätskontrolle wichtig
+- ✗ <1000 API Calls/Monat (zu teuer)
+- ✗ Generische Tasks (Prompt Engineering reicht)
+
+**Nächste Schritte:**
+- RLHF (Reinforcement Learning from Human Feedback)
+- Merging mehrerer LoRA Adapters
+- Quantisierung für schnellere Inferenz
+
+## Quellen und Links
+
+- [Unsloth](https://github.com/unslothai/unsloth)
+- [Axolotl](https://github.com/axolotl-ai-cloud/axolotl)

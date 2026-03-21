@@ -1,0 +1,98 @@
+---
+title: Vektor-Datenbanken Vergleich 2026
+date: 2026-03-21
+summary: Weaviate vs Qdrant vs Milvus vs Chroma vs pgvector vs Pinecone. Performance-Benchmarks, Skalierung, Features, Self-Hosted vs Cloud.
+tags: [vector-db, qdrant, weaviate, milvus, chroma, pgvector]
+author: AI Engineering
+---
+
+# Vektor-Datenbanken — Vergleich & Empfehlungen
+
+Vektor-Datenbanken sind zentral für RAG und Similarity Search. Dieser Vergleich deckt 6 führende Lösungen ab.
+
+## Schnell-Vergleich
+
+| DB | Self-Hosted | Cloud | VRAM | Skalierung | AI Features |
+|----|---|---|---|---|---|
+| **Qdrant** | ✅ Ja | ✅ Ja | Niedrig | Hoch | Hybrid Search |
+| **Weaviate** | ✅ Ja | ✅ Ja | Mittel | Hoch | Generative Search |
+| **Milvus** | ✅ Ja | ✅ Ja | Hoch | Sehr hoch | Advanced Indexing |
+| **Chroma** | ✅ Ja | ❌ Nein | Niedrig | Mittel | Simple + Fast |
+| **pgvector** | ✅ Ja | ✅ Ja | Niedrig | Hoch | PostgreSQL Native |
+| **Pinecone** | ❌ Nein | ✅ Cloud | Managed | Cloud | Fully Managed |
+
+## Qdrant
+
+**Best für**: Production RAG, Hybrid Search
+
+```bash
+docker run -p 6333:6333 qdrant/qdrant
+```
+
+**Pros**: Rust-Performance, Hybrid Search (BM25+Vector)  
+**Cons**: Weniger Ecosystem als Weaviate
+
+## Weaviate
+
+**Best für**: Graphbasierte AI-Apps, Generative Search
+
+**Generative Search Beispiel**:
+
+```
+Query
+  ↓
+Vector Search → Retrieve Top-K
+  ↓
+Generative Result (mit LLM)
+```
+
+## Milvus
+
+**Best für**: Cloud-Scale (Millionen Vektoren)
+
+**Performance**: Schneller als Qdrant/Weaviate bei großen Mengen
+
+## Chroma
+
+**Best für**: Lokal entwickeln, schneller Start
+
+```python
+import chromadb
+client = chromadb.Client()
+collection = client.create_collection(name="my_docs")
+collection.add(
+    documents=["Doc1", "Doc2"],
+    ids=["id1", "id2"]
+)
+results = collection.query(
+    query_embeddings=[[...]], n_results=5
+)
+```
+
+## pgvector (PostgreSQL)
+
+**Best für**: Bestehende PostgreSQL-Infrastruktur
+
+```sql
+CREATE EXTENSION vector;
+CREATE TABLE embeddings (
+  id SERIAL PRIMARY KEY,
+  text TEXT,
+  embedding vector(1536)
+);
+CREATE INDEX ON embeddings USING ivfflat (embedding vector_cosine_ops);
+```
+
+## Pinecone
+
+**Best für**: Vollständig managed (keine Infra-Last)
+
+**Kost**: ~$0.10 pro 1M vectors/Monat
+
+## Empfehlung nach Use Case
+
+- **POC lokal**: Chroma
+- **Production Self-Hosted**: Qdrant oder Weaviate
+- **Large Scale**: Milvus
+- **Fully Managed**: Pinecone
+- **PostgreSQL Native**: pgvector

@@ -1,0 +1,400 @@
+---
+title: Claude Code with Amazon Bedrock
+date: 2026-03-21
+summary: Configure Claude Code to use Amazon Bedrock – AWS authentication, IAM permissions, environment variables, model pinning, and enterprise deployment guidance.
+tags: [claude-code, bedrock, aws, authentication, llm-integration, provider]
+author: AI Engineering
+---
+
+# Claude Code with Amazon Bedrock
+
+Amazon Bedrock is AWS's managed service for foundation models. You can configure Claude Code to route requests through Bedrock instead of the direct Anthropic API. This is useful for organizations already invested in AWS, and for enterprise features like IAM controls, Guardrails, and cost tracking.
+
+## Prerequisites
+
+Before configuring Claude Code with Bedrock, ensure you have:
+
+- **AWS Account** with Bedrock enabled
+- **Bedrock model access** (e.g., Claude Sonnet 4.6) in at least one region
+- **AWS CLI** installed (optional – only needed if you don't use another credential method)
+- **Correct IAM permissions** (see IAM section below)
+
+## Step 1: Enable Bedrock Access
+
+### 1.1 Enable Bedrock in AWS
+
+First-time users must enable Anthropic models:
+
+1. Go to [AWS Bedrock Console](https://console.aws.amazon.com/bedrock/)
+2. Select **Chat/Text Playground**
+3. Choose a Claude model (e.g., Claude Sonnet 4.6)
+4. Fill out the use case form
+5. Wait for confirmation (usually immediate)
+
+## Step 2: Configure AWS Credentials
+
+Claude Code uses the standard AWS SDK credential chain. You have several options:
+
+### Option A: AWS CLI Configuration
+
+```bash
+aws configure
+# Follow the prompt:
+# AWS Access Key ID: [your-access-key]
+# AWS Secret Access Key: [your-secret-key]
+# Default region: us-east-1
+# Default output format: json
+```
+
+### Option B: Environment Variables (Access Keys)
+
+```bash
+export AWS_ACCESS_KEY_ID=your-access-key-id
+export AWS_SECRET_ACCESS_KEY=your-secret-access-key
+export AWS_SESSION_TOKEN=your-session-token  # optional, if temporary
+```
+
+**Security note:** Never store these in code. Use `.env` files or a vault.
+
+### Option C: AWS SSO
+
+If your organization uses AWS SSO:
+
+```bash
+# 1. Log in via SSO
+aws sso login --profile=production
+
+# 2. Export to environment
+export AWS_PROFILE=production
+
+# Claude Code automatically reads SSO credentials
+```
+
+### Option D: Bedrock API Keys
+
+For a simpler authentication method without IAM:
+
+```bash
+export AWS_BEARER_TOKEN_BEDROCK=your-bedrock-api-key
+```
+
+[Bedrock API Keys](https://aws.amazon.com/blogs/machine-learning/accelerate-ai-development-with-amazon-bedrock-api-keys/) provide access without AWS IAM.
+
+### Option E: AWS Management Console Login
+
+```bash
+# Browser-based login
+aws login
+export AWS_PROFILE=default
+```
+
+[More on aws login](https://docs.aws.amazon.com/signin/latest/userguide/command-line-sign-in.html)
+
+## Step 3: Enable Claude Code for Bedrock
+
+Set these environment variables:
+
+```bash
+# Enable Bedrock integration
+export CLAUDE_CODE_USE_BEDROCK=1
+
+# AWS Region (REQUIRED)
+export AWS_REGION=us-east-1
+
+# Optional: Override region for small/fast model (Haiku)
+export ANTHROPIC_SMALL_FAST_MODEL_AWS_REGION=us-west-2
+```
+
+**Important:**
+- `CLAUDE_CODE_USE_BEDROCK=1` activates Bedrock
+- `AWS_REGION` is required – Claude Code does not read from `.aws/config`
+- When using Bedrock: `/login` and `/logout` commands are disabled (AWS credentials handle authentication)
+
+## Step 4: Pin Model Versions
+
+**WARNING:** Using model aliases (e.g., `sonnet`, `opus`, `haiku`) without pinning can cause failures when Anthropic releases new models that aren't yet available in your Bedrock account.
+
+**Solution:** Always pin specific model IDs:
+
+```bash
+# Use Bedrock Inference Profile IDs (cross-region, with 'us.' prefix)
+export ANTHROPIC_DEFAULT_OPUS_MODEL='us.anthropic.claude-opus-4-6-v1'
+export ANTHROPIC_DEFAULT_SONNET_MODEL='us.anthropic.claude-sonnet-4-6'
+export ANTHROPIC_DEFAULT_HAIKU_MODEL='us.anthropic.claude-haiku-4-5-20251001-v1:0'
+```
+
+These use Bedrock Inference Profiles for high availability across regions.
+
+### Using Application Inference Profile ARNs
+
+```bash
+export ANTHROPIC_MODEL='arn:aws:bedrock:us-east-2:123456789012:application-inference-profile/my-claude-profile'
+```
+
+### Default Models (without pinning – not recommended for production)
+
+| Model Type | Default ID |
+|-----------|-----------|
+| **Primary Model** | `global.anthropic.claude-sonnet-4-6` |
+| **Small/Fast Model** (Haiku) | `us.anthropic.claude-haiku-4-5-20251001-v1:0` |
+
+## Step 5: Configure IAM Permissions
+
+Create an IAM policy with these permissions:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowModelAndInferenceProfileAccess",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock:InvokeModel",
+        "bedrock:InvokeModelWithResponseStream",
+        "bedrock:ListInferenceProfiles"
+      ],
+      "Resource": [
+        "arn:aws:bedrock:*:*:inference-profile/*",
+        "arn:aws:bedrock:*:*:application-inference-profile/*",
+        "arn:aws:bedrock:*:*:foundation-model/*"
+      ]
+    },
+    {
+      "Sid": "AllowMarketplaceSubscription",
+      "Effect": "Allow",
+      "Action": [
+        "aws-marketplace:ViewSubscriptions",
+        "aws-marketplace:Subscribe"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "aws:CalledViaLast": "bedrock.amazonaws.com"
+        }
+      }
+    }
+  ]
+}
+```
+
+For stricter permissions, limit Resources to specific inference profile ARNs.
+
+See [Bedrock IAM Documentation](https://docs.aws.amazon.com/bedrock/latest/userguide/security-iam.html) for details.
+
+## Step 6: Automatic Credential Refresh (Optional)
+
+Configure Claude Code to automatically refresh expired credentials:
+
+### Method A: SSO Refresh
+
+```json
+{
+  "awsAuthRefresh": "aws sso login --profile myprofile",
+  "env": {
+    "AWS_PROFILE": "myprofile"
+  }
+}
+```
+
+### Method B: Credential Export
+
+If you can't modify `.aws`:
+
+```json
+{
+  "awsCredentialExport": "aws sts get-session-token --duration-seconds 3600"
+}
+```
+
+Output must be JSON:
+
+```json
+{
+  "Credentials": {
+    "AccessKeyId": "AKIA...",
+    "SecretAccessKey": "secret...",
+    "SessionToken": "token..."
+  }
+}
+```
+
+## Step 7: AWS Guardrails (Optional)
+
+[Amazon Bedrock Guardrails](https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html) enable content filtering:
+
+1. Go to [Bedrock Console](https://console.aws.amazon.com/bedrock/)
+2. Create a Guardrail
+3. Publish a version
+4. Add to your Claude Code settings file:
+
+```json
+{
+  "env": {
+    "ANTHROPIC_CUSTOM_HEADERS": "X-Amzn-Bedrock-GuardrailIdentifier: guardrail-abc123\nX-Amzn-Bedrock-GuardrailVersion: 1"
+  }
+}
+```
+
+**Important:** Enable Cross-Region support in Guardrails if using cross-region inference profiles.
+
+## Deploying for Multiple Users
+
+### 1. Create a Dedicated AWS Account
+
+Create a separate AWS account for Claude Code:
+- Simpler cost tracking
+- Better access control
+- Isolated audit logs
+
+### 2. Model Version Overrides
+
+If you want to offer multiple Claude versions:
+
+```json
+{
+  "modelOverrides": {
+    "claude-opus-4-6": "arn:aws:bedrock:us-east-2:123456789012:application-inference-profile/opus-46-prod",
+    "claude-opus-4-5-20251101": "arn:aws:bedrock:us-east-2:123456789012:application-inference-profile/opus-45-prod"
+  }
+}
+```
+
+Users can select different versions with `/model`.
+
+### 3. Centralized Settings File
+
+Create a central settings file (e.g., `/opt/claude-code-settings.json`):
+
+```bash
+export CLAUDE_CODE_SETTINGS=/opt/claude-code-settings.json
+```
+
+Include:
+- Bedrock configuration
+- Model pinning
+- Guardrails
+- Custom headers
+- Organization-specific rules
+
+## Troubleshooting
+
+### Problem: "Region is not supported"
+
+**Cause:** Bedrock is not available in all regions for all models.
+
+**Solution:**
+```bash
+# Check available regions
+aws bedrock list-inference-profiles --region your-region
+
+# Switch to a supported region
+export AWS_REGION=us-east-1
+```
+
+### Problem: "Model not found" 404
+
+**Cause:** Model is not enabled in your Bedrock account or region.
+
+**Solution:**
+```bash
+# List available foundation models
+aws bedrock list-foundation-models --region us-east-1
+
+# Use an available model
+export ANTHROPIC_DEFAULT_SONNET_MODEL='us.anthropic.claude-sonnet-4-6'
+```
+
+### Problem: "On-demand throughput isn't supported"
+
+**Cause:** Not using Bedrock Inference Profiles.
+
+**Solution:** Use [Bedrock Inference Profile IDs](https://docs.aws.amazon.com/bedrock/latest/userguide/inference-profiles-support.html):
+
+```bash
+export ANTHROPIC_MODEL='global.anthropic.claude-sonnet-4-6'
+```
+
+### Problem: Credentials expire frequently
+
+**Cause:** SSO session timeout too short.
+
+**Solution:** Increase session duration or use API keys:
+
+```bash
+# SSO with longer duration
+aws sso login --profile=myprofile
+
+# Or: Use Bedrock API Keys (no expiration)
+export AWS_BEARER_TOKEN_BEDROCK=your-api-key
+```
+
+## Performance & Cost
+
+### Prompt Caching
+
+Claude Code automatically uses Bedrock [Prompt Caching](https://platform.claude.com/docs/en/build-with-claude/prompt-caching) when available, saving costs on repeated content.
+
+To disable:
+```bash
+export DISABLE_PROMPT_CACHING=1
+```
+
+### Cost Comparison: Bedrock vs Direct API
+
+| Scenario | Bedrock | Direct API |
+|----------|---------|-----------|
+| **Small orgs (<50 users)** | Often more expensive (AWS overhead) | Cheaper |
+| **Large orgs (>500 users)** | Volume discounts available | More expensive (scales fast) |
+| **Enterprise & Compliance** | Better (Guardrails, VPC, Audit) | Difficult |
+| **Multi-region** | Inference Profiles excellent | Manual configuration |
+
+[Bedrock Pricing](https://aws.amazon.com/bedrock/pricing/)
+
+## Security & Compliance
+
+### Data Protection
+- Bedrock uses AWS IAM for access control
+- Optional VPC endpoints for private connectivity
+- Data encrypted in transit (TLS) and at rest
+
+### Audit Logging
+```bash
+# CloudTrail shows all Bedrock API calls
+aws cloudtrail lookup-events --lookup-attributes AttributeKey=ResourceName,AttributeValue=bedrock
+```
+
+### Compliance Certifications
+- **HIPAA:** Bedrock is HIPAA-certified
+- **PCI-DSS:** Bedrock is PCI-DSS certified
+- **SOC 2:** Bedrock is SOC 2 Type II certified
+- **EU AI Act:** Bedrock provides provider documentation (your responsibility as deployer remains)
+
+## Best Practices
+
+1. **Always pin model versions** – Aliases can break when new models release
+2. **Use separate AWS accounts for Dev/Staging/Prod** – Reduces risk
+3. **Enable CloudTrail** – Audit logging for compliance
+4. **Use Guardrails** – Content filtering for security
+5. **Rotate credentials regularly** – Generate new access keys periodically
+6. **Set up cost alerts** – AWS Budgets for unexpected charges
+7. **Maintain documentation** – Which systems use Bedrock? Which data?
+
+## Additional Resources
+
+- [AWS Bedrock Documentation](https://docs.aws.amazon.com/bedrock/)
+- [Bedrock Pricing](https://aws.amazon.com/bedrock/pricing/)
+- [Bedrock Inference Profiles](https://docs.aws.amazon.com/bedrock/latest/userguide/inference-profiles-support.html)
+- [Claude Code on Bedrock: Quick Setup (AWS Community)](https://community.aws/content/2tXkZKrZzlrlu0KfH8gST5Dkppq/claude-code-on-amazon-bedrock-quick-setup-guide)
+- [Bedrock Monitoring & Logging](https://github.com/aws-solutions-library-samples/guidance-for-claude-code-with-amazon-bedrock/blob/main/assets/docs/MONITORING.md)
+
+## Sources and Links
+
+- [Amazon Bedrock Integration](https://code.claude.com/docs/en/amazon-bedrock)
+- [AWS Bedrock Documentation](https://docs.aws.amazon.com/bedrock/)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

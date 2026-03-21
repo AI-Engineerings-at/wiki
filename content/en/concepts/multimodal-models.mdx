@@ -1,0 +1,652 @@
+---
+title: Multimodal Models
+date: 2026-03-21
+summary: Vision-Language Models, Audio, Video Understanding — architecture, comparison (GPT-4V, Claude 3.5 Vision, Gemini, LLaVA), practical use-cases
+tags: [multimodal, vision-language, image-understanding, video, audio, llm]
+author: AI Engineering
+---
+
+# Multimodal Models Explained
+
+Multimodal models understand text, images, audio, and video simultaneously. They combine specialized encoders for each modality.
+
+---
+
+## How Images Become Tokens
+
+```
+Text: "The dog jumps"
+      → Tokenize → ["The", "dog", "jumps"]
+
+Image: [Pixel Grid 224×224]
+       → Vision Transformer / CNN
+       → Image Tokens: [tok_1, tok_2, ..., tok_256]
+
+Audio: [Waveform 16kHz]
+       → Audio Encoder (Mel-Spectrogram)
+       → Audio Tokens: [tok_1, tok_2, ..., tok_512]
+
+Video: [30 frames]
+       → Temporal Encoder
+       → Video Tokens: [tok_1, tok_2, ..., tok_4096]
+
+Then: All tokens → Transformer → LLM generates answer
+```
+
+---
+
+## 2026 Model Comparison
+
+| Model | Vision | Audio | Video | Best For | Cost |
+|-------|--------|-------|-------|----------|------|
+| **GPT-4V** | ✅ Excellent | ❌ | ✅ OK | General-purpose | €0.03/K |
+| **GPT-4o** | ✅ Excellent | ✅ | ✅ Good | General-purpose | €0.005/K |
+| **Claude 3.5 Vision** | ✅ Best | ✅ | ✅ Okay | Image analysis | €0.003/K |
+| **Gemini 2.0** | ✅ Good | ✅ | ✅ Best | Video understanding | €0.0075/K |
+| **LLaVA 1.5** | ✅ Medium | ❌ | ❌ | Open-source, local | Free |
+
+---
+
+## Vision-Language Models
+
+### Claude 3.5 Sonnet (Best for Images)
+
+```python
+response = client.messages.create(
+    model="claude-3-5-sonnet",
+    messages=[{
+        "role": "user",
+        "content": [
+            {
+                "type": "image",
+                "source": {
+                    "type": "base64",
+                    "media_type": "image/jpeg",
+                    "data": base64_encoded_image,
+                },
+            },
+            {
+                "type": "text",
+                "text": "What do you see? Describe details."
+            }
+        ],
+    }]
+)
+```
+
+**Strengths**:
+- Best detail accuracy (PDFs, graphics, code in images)
+- Can OCR text
+- Excellent rectangle detection
+
+**Limitations**:
+- 200K context (10 min max video)
+- No direct audio (use Whisper first)
+
+---
+
+### GPT-4o (General Purpose, Audio)
+
+```python
+# Vision
+response = client.messages.create(
+    model="gpt-4o",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "image_url", "image_url": {"url": "https://..."}},
+            {"type": "text", "text": "Explain this diagram"}
+        ]
+    }]
+)
+
+# Audio via Whisper first
+transcript = client.audio.transcriptions.create(
+    model="whisper-1",
+    file=audio_file
+)
+```
+
+---
+
+### Gemini 2.0 (Best for Video)
+
+Better at video understanding and 1M context.
+
+---
+
+## Audio Models
+
+### Whisper (Speech-to-Text)
+
+```python
+from openai import OpenAI
+
+client = OpenAI()
+transcript = client.audio.transcriptions.create(
+    model="whisper-1",
+    file=open("audio.mp3", "rb"),
+    language="en"
+)
+
+# Accuracy: 94-97%
+# Cost: €0.02 per minute (expensive!)
+```
+
+---
+
+## Video Understanding
+
+```
+Workflow:
+1. Extract keyframes (every 10 frames)
+2. Patch + embed each keyframe
+3. Audio: Whisper transcription separately
+4. Combine: [Video tokens] + [Audio] + [Transcript] → LLM
+
+Result: Scene understanding, object detection, summaries
+```
+
+---
+
+## Practical Use-Cases
+
+### Document Analysis
+```
+Input: 100-page scanned PDF
+Process:
+- PDF → Images (1 per page)
+- Claude Vision: Analyze each page
+- Extract: Text, tables, charts
+- OCR handwriting
+
+Cost: ~€0.03 per page
+Accuracy: 95%+ for printed text
+```
+
+### Product Detection (E-Commerce)
+```
+Input: Product photo
+Output:
+- Material: Cotton
+- Color: Blue
+- Size: Large
+- Defects: None detected
+
+Use: Automate 100+ catalogs per day
+```
+
+### Meeting Summarization
+```
+Input: 1h recorded meeting
+Process:
+1. Audio extract + Whisper
+2. Key frames (every 30s)
+3. Vision + Transcript combined
+4. Summarize
+
+Output: 5-min summary + action items
+Cost: ~€0.50 per hour
+```
+
+---
+
+## Limitations & Fixes
+
+```
+Issue: Hallucinations on visual details
+Fix: "Describe ONLY what you see, not interpretation"
+
+Issue: Small text in images hard to read
+Fix: Enlarge text area first, or OCR separately
+
+Issue: Video is token-expensive (many frames)
+Fix: Keyframe sampling, or key-scene detection
+
+Issue: Audio not native in tokens
+Fix: Whisper first → text → LLM
+```
+
+Multimodal models are production-ready for image/document analysis. Claude 3.5 Vision and GPT-4o both excellent. Video understanding still developing.
+
+## Sources and Links
+
+- [LLaVA: Large Language and Vision Assistant](https://arxiv.org/abs/2304.08485)
+- [LLaVA GitHub Repository](https://github.com/haotian-liu/LLaVA)
+
+---
+
+## Advanced: Vision Transformer Architecture
+
+How multimodal models actually work:
+
+```
+Image Input (224×224)
+        ↓
+Patch Embedding (16×16 patches)
+        ↓
+Position Encoding
+        ↓
+Transformer Encoder (12 layers)
+        ↓
+Visual Features: [cls_token, patch_1_feat, ..., patch_196_feat]
+        ↓
+[MERGED with Text Tokens]
+        ↓
+LLM Decoder
+        ↓
+Text Output
+```
+
+Key insight: Vision Transformers break images into patches (tokens), same as LLMs tokenize text. This unified token representation enables joint processing.
+
+---
+
+## Cost Analysis: Image Processing at Scale
+
+```
+Scenario: Process 10,000 product images (1MB each)
+
+Provider        | Cost per 1000 | Total Cost | Time |
+----------------|---------------|-----------|------|
+Claude 3.5      | €0.30         | €3.00     | 2h   |
+GPT-4V          | €0.60         | €6.00     | 1.5h |
+Gemini 2.0      | €0.075        | €0.75     | 3h   |
+Local LLaVA     | Free (GPU)    | €0.50*    | 4h   |
+
+*GPU cost amortized over 10K images
+```
+
+**Recommendation**:
+- < 1000 images: Use cloud API (faster)
+- 1000-100K images: Switch to local LLaVA/similar
+- > 100K: Custom fine-tuned model
+
+---
+
+## Practical: OCR with Vision Models
+
+Text extraction from images (documents, receipts, handwriting):
+
+```python
+import base64
+from anthropic import Anthropic
+
+client = Anthropic()
+
+def extract_text_from_image(image_path, include_handwriting=False):
+    with open(image_path, "rb") as f:
+        image_data = base64.standard_b64encode(f.read()).decode("utf-8")
+
+    prompt = """Extract all text from this image.
+    Format as markdown with structure preserved.
+    Include tables, lists, headings."""
+
+    if include_handwriting:
+        prompt += "\nAlso transcribe any handwritten text."
+
+    message = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        max_tokens=4096,
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image",
+                        "source": {
+                            "type": "base64",
+                            "media_type": "image/jpeg",
+                            "data": image_data,
+                        },
+                    },
+                    {
+                        "type": "text",
+                        "text": prompt
+                    }
+                ],
+            }
+        ],
+    )
+
+    return message.content[0].text
+
+# Usage
+extracted = extract_text_from_image("invoice.jpg")
+print(extracted)
+```
+
+**Accuracy benchmarks** (2026):
+- Printed English: 96-98%
+- Printed German: 94-96%
+- Handwritten: 70-85% (depends on legibility)
+- Mixed (printed + handwritten): 80-90%
+
+---
+
+## Batch Processing Large Document Sets
+
+For cost efficiency with many documents:
+
+```python
+import json
+from pathlib import Path
+from anthropic import Anthropic
+
+def batch_process_documents(image_dir, output_file, batch_size=10):
+    """Process multiple images, save results, resume on error."""
+    client = Anthropic()
+    results = []
+    processed = set()
+
+    # Load previous results to resume
+    if Path(output_file).exists():
+        with open(output_file) as f:
+            existing = json.load(f)
+            processed = {r['image'] for r in existing}
+            results = existing
+
+    images = sorted(Path(image_dir).glob("*.jpg"))
+    images = [img for img in images if img.name not in processed]
+
+    for i, image_path in enumerate(images):
+        if i % batch_size == 0:
+            print(f"Progress: {i}/{len(images)}")
+
+        try:
+            # Process image
+            text = extract_text_from_image(str(image_path))
+            results.append({
+                "image": image_path.name,
+                "text": text,
+                "status": "success"
+            })
+        except Exception as e:
+            results.append({
+                "image": image_path.name,
+                "error": str(e),
+                "status": "error"
+            })
+
+        # Save after each image (checkpoint for resume)
+        with open(output_file, 'w') as f:
+            json.dump(results, f)
+
+    return results
+
+# Usage
+batch_process_documents("./invoices/", "results.json")
+```
+
+**Cost optimization tips:**
+1. Compress images to < 500KB (same quality, 50% cost reduction)
+2. Batch similar documents (same system prompt → lower variation)
+3. Cache common instructions (context caching if supported)
+4. Use local models for high-volume, lower-quality tasks
+
+---
+
+## Video Analysis: Frame Extraction & Summarization
+
+```python
+import cv2
+import json
+from pathlib import Path
+
+def extract_key_frames(video_path, fps_sampling=1, output_dir="frames"):
+    """Extract frames at specified intervals."""
+    cap = cv2.VideoCapture(video_path)
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    video_fps = cap.get(cv2.CAP_PROP_FPS)
+
+    frame_interval = int(video_fps / fps_sampling)  # 1 frame per second
+    frame_num = 0
+    extracted = []
+
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        if frame_num % frame_interval == 0:
+            frame_path = f"{output_dir}/frame_{frame_num:06d}.jpg"
+            cv2.imwrite(frame_path, frame)
+            timestamp = frame_num / video_fps
+            extracted.append({
+                "frame": frame_path,
+                "timestamp": f"{int(timestamp//60)}:{int(timestamp%60):02d}",
+                "frame_num": frame_num
+            })
+
+        frame_num += 1
+
+    cap.release()
+    return extracted
+
+def summarize_video(video_path, fps_sampling=1):
+    """Extract frames and generate summary."""
+    frames = extract_key_frames(video_path, fps_sampling=fps_sampling)
+
+    summaries = []
+    client = Anthropic()
+
+    for frame_info in frames:
+        # Process frame with Claude
+        with open(frame_info["frame"], "rb") as f:
+            image_data = base64.standard_b64encode(f.read()).decode("utf-8")
+
+        message = client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=200,
+            messages=[{
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image",
+                        "source": {
+                            "type": "base64",
+                            "media_type": "image/jpeg",
+                            "data": image_data,
+                        },
+                    },
+                    {
+                        "type": "text",
+                        "text": "Describe what's happening in this video frame. Be concise (1-2 sentences)."
+                    }
+                ],
+            }]
+        )
+
+        summaries.append({
+            "timestamp": frame_info["timestamp"],
+            "description": message.content[0].text
+        })
+
+    return summaries
+
+# Usage
+summaries = summarize_video("meeting.mp4", fps_sampling=0.5)  # 1 frame every 2 seconds
+for s in summaries:
+    print(f"{s['timestamp']}: {s['description']}")
+```
+
+**Video processing strategy**:
+- Short videos (< 5 min): Keyframe every 5s
+- Medium (5-30 min): Keyframe every 10-30s
+- Long (> 30 min): Keyframe every 60s + scene detection
+
+---
+
+## Multimodal RAG: Images in Knowledge Bases
+
+```python
+from chromadb import Client
+from pathlib import Path
+import base64
+
+def image_rag_pipeline(query_text, image_dir, query_image=None):
+    """Retrieve similar images and documents for query."""
+
+    client = Client()
+    collection = client.create_collection(name="images")
+
+    # 1. Add images to collection with descriptions
+    for image_path in Path(image_dir).glob("*.jpg"):
+        with open(image_path, "rb") as f:
+            image_data = base64.b64encode(f.read()).decode("utf-8")
+
+        # Generate image description
+        description = get_image_description(image_data)
+
+        collection.add(
+            ids=[image_path.stem],
+            documents=[description],
+            metadatas=[{
+                "image_path": str(image_path),
+                "image_base64": image_data
+            }]
+        )
+
+    # 2. Search by text query
+    text_results = collection.query(
+        query_texts=[query_text],
+        n_results=3
+    )
+
+    # 3. Search by image query (if provided)
+    if query_image:
+        query_description = get_image_description(query_image)
+        image_results = collection.query(
+            query_texts=[query_description],
+            n_results=3
+        )
+    else:
+        image_results = {"ids": [], "documents": []}
+
+    return text_results, image_results
+
+def get_image_description(image_base64):
+    """Get text description of image for embedding."""
+    client = Anthropic()
+    message = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        max_tokens=200,
+        messages=[{
+            "role": "user",
+            "content": [
+                {
+                    "type": "image",
+                    "source": {
+                        "type": "base64",
+                        "media_type": "image/jpeg",
+                        "data": image_base64,
+                    },
+                },
+                {
+                    "type": "text",
+                    "text": "Describe this image in 2-3 sentences for a search database."
+                }
+            ],
+        }]
+    )
+    return message.content[0].text
+```
+
+---
+
+## Common Issues & Fixes
+
+### Issue: Image too small/blurry, model can't read
+```python
+# Solution: Upscale before sending
+from PIL import Image
+import cv2
+
+def upscale_image(image_path, scale_factor=2):
+    img = cv2.imread(image_path)
+    height, width = img.shape[:2]
+    new_size = (width * scale_factor, height * scale_factor)
+    upscaled = cv2.resize(img, new_size, interpolation=cv2.INTER_CUBIC)
+    return upscaled
+```
+
+### Issue: Model hallucinates details not in image
+```python
+# Solution: Use explicit instruction
+prompt = """Look at this image carefully.
+Describe ONLY what you can actually see.
+Do NOT infer or guess about details not visible."""
+```
+
+### Issue: Inconsistent results across modalities
+```python
+# Solution: Use consistent formatting/preprocessing
+def preprocess_image(image_path, target_size=1024):
+    img = Image.open(image_path)
+    # Resize maintaining aspect ratio
+    img.thumbnail((target_size, target_size), Image.Resampling.LANCZOS)
+    # Convert to RGB if RGBA
+    if img.mode == 'RGBA':
+        img = img.convert('RGB')
+    return img
+```
+
+### Issue: Cost explodes with video processing
+```python
+# Solution: Adaptive frame sampling based on motion
+def smart_frame_extraction(video_path, motion_threshold=10):
+    """Extract frames only when scene changes significantly."""
+    cap = cv2.VideoCapture(video_path)
+    prev_frame = None
+    frames = []
+    frame_num = 0
+
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        if prev_frame is None:
+            frames.append(frame_num)
+        else:
+            diff = cv2.absdiff(cv2.cvtColor(prev_frame, cv2.COLOR_BGR2GRAY),
+                             cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY))
+            if diff.mean() > motion_threshold:
+                frames.append(frame_num)
+
+        prev_frame = frame
+        frame_num += 1
+
+    cap.release()
+    return frames  # Only significant frames
+```
+
+---
+
+## Performance Benchmarks (2026)
+
+| Task | Model | Speed | Accuracy | Cost |
+|------|-------|-------|----------|------|
+| Document OCR (10 pages) | Claude 3.5 | 20s | 96% | €0.06 |
+| Product Detection | GPT-4V | 5s | 94% | €0.015 |
+| Video Summary (5 min) | Gemini 2.0 | 30s | 87% | €0.10 |
+| Chart Reading | Claude 3.5 | 3s | 98% | €0.01 |
+| Handwriting Recognition | Claude 3.5 | 8s | 78% | €0.02 |
+
+---
+
+## When to Use Multimodal
+
+✅ **Excellent for:**
+- Document/receipt processing
+- Product image analysis
+- Visual Q&A
+- Chart/diagram understanding
+- Accessibility (describing images)
+- Content moderation
+
+❌ **Poor for:**
+- Real-time video processing (too slow)
+- High-frequency image analysis (cost prohibitive)
+- Tasks solvable with traditional CV (use OpenCV instead)
+- Extremely small/large images (resolution issues)

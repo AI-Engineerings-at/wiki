@@ -1,0 +1,501 @@
+---
+title: Prompt Engineering Advanced
+date: 2026-03-21
+summary: Beyond basics. System prompts, few-shot, chain-of-thought, tool use, JSON mode. Optimization and evaluation.
+tags: [prompting, system-prompt, few-shot, chain-of-thought, function-calling]
+author: AI Engineering
+---
+
+# Prompt Engineering Advanced
+
+Basic: "Write a blog post."
+
+Advanced: Structure, context, format, reasoning chains, multi-step workflows.
+
+## System Prompts
+
+System prompt is instructions **before** the user message.
+
+```python
+system = """You're a customer support AI.
+- Be polite and professional
+- Reference policies only if relevant
+- Solve issues immediately if possible
+"""
+
+response = client.messages.create(
+    model="claude-3-sonnet-20240229",
+    system=system,
+    messages=[
+        {"role": "user", "content": "My order is broken"}
+    ]
+)
+```
+
+Defines:
+- Model personality
+- Constraints
+- Output format
+
+Good system prompts are specific and compact (<300 tokens).
+
+## Few-Shot Learning
+
+Give examples instead of rules:
+
+```
+Classify this review as positive/negative.
+
+Example 1:
+Review: "Product is fantastic!"
+Classification: positive
+
+Example 2:
+Review: "Very disappointed with quality"
+Classification: negative
+
+New review: "It's OK but could be better"
+Classification: ?
+```
+
+Few-shot often beats instructions. Model "learns from pattern."
+
+## Chain-of-Thought (CoT)
+
+Let model show its thinking:
+
+```
+Problem: Train goes 60 km/h for 2 hours.
+Car goes 80 km/h for 1.5 hours.
+Which went farther?
+
+Instead of just answering:
+Think step-by-step:
+
+1. Train distance = 60 × 2 = 120 km
+2. Car distance = 80 × 1.5 = 120 km
+3. They're equal
+```
+
+CoT improves:
+- Math problems
+- Logic puzzles
+- Complex analysis
+
+## Self-Consistency
+
+Generate multiple CoT paths and vote:
+
+```python
+responses = []
+for i in range(5):
+    response = client.messages.create(
+        model="claude-3-sonnet-20240229",
+        messages=[{"role": "user", "content": problem}]
+    )
+    responses.append(response)
+
+from collections import Counter
+answers = [r.content[0].text for r in responses]
+best = Counter(answers).most_common(1)[0][0]
+```
+
+Improves accuracy, costs more (5x API calls).
+
+## Tool Use / Function Calling
+
+Let model call functions:
+
+```python
+tools = [
+    {
+        "name": "get_weather",
+        "description": "Fetches current weather",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "location": {"type": "string"},
+                "unit": {"type": "string", "enum": ["C", "F"]}
+            }
+        }
+    }
+]
+
+response = client.messages.create(
+    model="claude-3-sonnet-20240229",
+    tools=tools,
+    messages=[
+        {"role": "user", "content": "What's the weather in Vienna?"}
+    ]
+)
+
+if response.content[0].type == "tool_use":
+    tool_name = response.content[0].name
+    tool_input = response.content[0].input
+    # Call get_weather("Vienna", "C")
+```
+
+Makes models agents—can call external functions.
+
+## Structured Output (JSON Mode)
+
+Force structured output:
+
+```python
+response = client.messages.create(
+    model="claude-3-sonnet-20240229",
+    messages=[{
+        "role": "user",
+        "content": "Analyze: 'Good product but expensive'"
+    }],
+    system="""Always respond as JSON:
+{
+    "sentiment": "positive|negative|neutral",
+    "points": ["array"],
+    "confidence": 0.0-1.0
+}"""
+)
+
+import json
+data = json.loads(response.content[0].text)
+```
+
+Essential for APIs, databases, downstream processing.
+
+## Prompt Optimization: Save Tokens
+
+500-token prompt costs more than 100-token.
+
+Techniques:
+- Short system prompts
+- Avoid redundancy
+- Use shorthand
+
+```
+❌ Bad (many tokens):
+"You're a support assistant. Your job is to answer questions.
+Be friendly. Help the customer..."
+
+✓ Good (few tokens):
+"Support assistant. Helpful, friendly, efficient."
+```
+
+## Evaluation Methods
+
+How good is your prompt?
+
+**Method 1: Manual Review**
+- Generate 10 samples
+- Review manually
+- Count good vs bad
+
+**Method 2: Metric-based**
+```python
+target = 42
+response = model.generate(prompt)
+answer = extract_number(response)
+accuracy = 100 - abs(answer - target)
+```
+
+**Method 3: LLM-as-Judge**
+```python
+judge = client.messages.create(
+    model="claude-3-opus-20240229",
+    messages=[{
+        "role": "user",
+        "content": f"Rate this answer 1-10: {output}"
+    }]
+)
+```
+
+## Anti-Patterns
+
+**Too Complex**
+```
+❌ "Analyze text, extract entities, classify sentiment,
+   calculate length, summarize in EN and DE..."
+
+✓ Split into multiple prompts
+```
+
+**Vague Instructions**
+```
+❌ "Write about AI"
+
+✓ "Write 200-word blog post on RAG for beginners"
+```
+
+**Unclear Format**
+```
+❌ "Answer"
+
+✓ "Answer as JSON: {\"name\": \"\", \"score\": 0}"
+```
+
+## Advanced Techniques: Agents & Planning
+
+### Agentic Loops
+
+Let models plan multi-step workflows:
+
+```python
+import anthropic
+
+client = anthropic.Anthropic()
+
+# Define tools for agent
+tools = [
+    {
+        "name": "search_web",
+        "description": "Search the web for current information",
+        "input_schema": {
+            "type": "object",
+            "properties": {"query": {"type": "string"}}
+        }
+    },
+    {
+        "name": "calculate",
+        "description": "Perform calculation",
+        "input_schema": {
+            "type": "object",
+            "properties": {"expression": {"type": "string"}}
+        }
+    }
+]
+
+messages = [{"role": "user", "content": "What's 15% of $2000 plus tax in Vienna?"}]
+
+# Agentic loop
+while True:
+    response = client.messages.create(
+        model="claude-3-sonnet-20240229",
+        max_tokens=1024,
+        tools=tools,
+        messages=messages
+    )
+
+    if response.stop_reason == "tool_use":
+        # Extract and execute tool call
+        tool_use = next(b for b in response.content if b.type == "tool_use")
+        tool_result = execute_tool(tool_use.name, tool_use.input)
+
+        # Continue conversation
+        messages.append({"role": "assistant", "content": response.content})
+        messages.append({
+            "role": "user",
+            "content": f"Tool result: {tool_result}"
+        })
+    else:
+        # Model finished - no more tool calls needed
+        break
+
+print(response.content[0].text)
+```
+
+This pattern lets models:
+- Plan multiple steps
+- Call external APIs
+- Gather data before responding
+
+### Tree-of-Thought (Superior to CoT)
+
+Explore multiple reasoning paths:
+
+```
+Question: "Best investment: Real estate or stocks?"
+
+CoT (Linear):
+1. Research real estate
+2. Research stocks
+3. Compare
+→ Single conclusion
+
+Tree-of-Thought (Branching):
+                  [Main decision]
+                   /            \
+            [Real Estate]      [Stocks]
+            /    |    \        /   |   \
+        [Risk][Return][Tax] [Risk][Return][Tax]
+
+→ Explores multiple angles simultaneously
+```
+
+Implementation:
+
+```python
+# Generate 3 different reasoning paths
+for path in range(3):
+    response = client.messages.create(
+        model="claude-3-opus-20240229",
+        messages=[{
+            "role": "user",
+            "content": f"Reasoning path {path + 1}: Analyze from perspective of {perspectives[path]}"
+        }]
+    )
+    print(f"Path {path}: {response.content[0].text}\n")
+
+# Synthesize best insights
+synthesis = client.messages.create(
+    model="claude-3-opus-20240229",
+    messages=[{
+        "role": "user",
+        "content": f"Synthesize these perspectives into best recommendation"
+    }]
+)
+```
+
+### Structured Reasoning with XML
+
+Make reasoning explicit:
+
+```python
+response = client.messages.create(
+    model="claude-3-sonnet-20240229",
+    messages=[{
+        "role": "user",
+        "content": """Analyze this customer feedback using XML structure:
+
+<analysis>
+  <sentiment>positive/negative/neutral</sentiment>
+  <key_points>
+    <point>...</point>
+  </key_points>
+  <action_items>
+    <action>...</action>
+  </action_items>
+  <confidence>0.0-1.0</confidence>
+</analysis>
+
+Feedback: "Great product, but shipping took 2 weeks"
+"""
+    }]
+)
+
+import xml.etree.ElementTree as ET
+root = ET.fromstring(response.content[0].text)
+```
+
+## Prompt Evaluation at Scale
+
+### Benchmark Framework
+
+```python
+from dataclasses import dataclass
+from typing import List
+import json
+
+@dataclass
+class TestCase:
+    input: str
+    expected_output: str
+    category: str
+
+def evaluate_prompt(prompt_template: str, test_cases: List[TestCase]) -> dict:
+    results = {
+        "total": len(test_cases),
+        "passed": 0,
+        "by_category": {}
+    }
+
+    for test in test_cases:
+        response = client.messages.create(
+            model="claude-3-sonnet-20240229",
+            system=prompt_template,
+            messages=[{"role": "user", "content": test.input}]
+        )
+
+        output = response.content[0].text
+        is_correct = evaluate_output(output, test.expected_output)
+
+        if is_correct:
+            results["passed"] += 1
+
+        if test.category not in results["by_category"]:
+            results["by_category"][test.category] = {"correct": 0, "total": 0}
+
+        results["by_category"][test.category]["total"] += 1
+        if is_correct:
+            results["by_category"][test.category]["correct"] += 1
+
+    # Calculate accuracy
+    results["accuracy"] = results["passed"] / results["total"]
+    for cat in results["by_category"]:
+        cat_data = results["by_category"][cat]
+        cat_data["accuracy"] = cat_data["correct"] / cat_data["total"]
+
+    return results
+
+# Run evaluation
+test_cases = [TestCase(...) for _ in range(50)]
+results = evaluate_prompt(my_system_prompt, test_cases)
+print(f"Overall accuracy: {results['accuracy']:.1%}")
+print(f"By category: {json.dumps(results['by_category'], indent=2)}")
+```
+
+### Automated Prompt Optimization
+
+```python
+def optimize_prompt(base_prompt: str, test_cases: List[TestCase], iterations: int = 5):
+    current_prompt = base_prompt
+    best_accuracy = 0
+
+    for i in range(iterations):
+        # Evaluate current
+        results = evaluate_prompt(current_prompt, test_cases)
+        accuracy = results["accuracy"]
+
+        print(f"Iteration {i}: {accuracy:.1%}")
+
+        if accuracy > best_accuracy:
+            best_accuracy = accuracy
+            best_prompt = current_prompt
+
+        if accuracy >= 0.95:  # Good enough
+            break
+
+        # Generate improved version
+        improvement = client.messages.create(
+            model="claude-3-opus-20240229",
+            messages=[{
+                "role": "user",
+                "content": f"""Current prompt gets {accuracy:.0%} accuracy.
+
+Failed on these categories: {json.dumps(results['by_category'])}
+
+Improve the prompt to handle these better:
+
+Original: {current_prompt}
+
+Generate an improved version:"""
+            }]
+        )
+
+        current_prompt = improvement.content[0].text
+
+    return best_prompt
+```
+
+## Common Pitfalls & Solutions
+
+| Pitfall | Cause | Solution |
+|---------|-------|----------|
+| Vague output | Unclear format instructions | Specify JSON schema or examples |
+| Inconsistent results | Temperature too high | Set temperature=0 for consistency |
+| Too slow | Using Opus for simple task | Use Sonnet or Haiku |
+| Hallucinations in RAG | No grounding | Use tool_use for retrieval first |
+| Token waste | Overly verbose system prompt | Trim to <300 tokens |
+
+## References
+
+- [OpenAI Prompting Guide](https://platform.openai.com/docs/guides/prompt-engineering)
+- [Anthropic Prompt Engineering](https://docs.anthropic.com/claude/docs/build-a-prompt)
+- [Chain-of-Thought Paper](https://arxiv.org/abs/2201.11903)
+- [Tree-of-Thought Paper](https://arxiv.org/abs/2305.10601)
+- [Structured Output](https://docs.anthropic.com/claude/docs/structured-output)
+- [Function Calling Best Practices](https://docs.anthropic.com/claude/docs/tool-use)
+
+**Last Updated**: 21.03.2026 | **Total Lines**: 400+
+
+## Sources and Links
+
+- [Claude Docs](https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview)

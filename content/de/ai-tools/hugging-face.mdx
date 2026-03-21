@@ -1,0 +1,385 @@
+---
+title: Hugging Face Hub — Modell-Discovery und Deployment
+date: 2026-03-21
+summary: Hugging Face ist das zentrale Repository für Open-Source LLMs, Datasets und Spaces. Transformers-Library, Model Cards, gated models, CLI-Tools und praktische Integration in Production-Setups.
+tags: [hugging-face, hub, transformers, llm, dataset, model-cards]
+author: AI Engineering
+---
+
+# Hugging Face Hub — Zentrale Modell-Plattform
+
+Hugging Face ist 2026 das Standard-Repository für Open-Source LLMs. Mit über 500.000 Modellen ist der Hub unverzichtbar für:
+- Modell-Discovery und Benchmarking
+- Transformer-basierte Workflows
+- Dataset-Management
+- Community-Features wie Discussions und PRs
+
+## Hub Navigation
+
+### Homepage: huggingface.co
+
+Hauptnavigation:
+
+```
+/models          → Durchsuche 500k+ Modelle
+/datasets        → Datasets für Training/Fine-Tuning
+/spaces          → Gradio/Streamlit Apps
+/papers          → arxiv-Preprints
+/organizations   → Company/Lab Seiten
+```
+
+### Modelle durchsuchen
+
+1. Gehe zu [huggingface.co/models](https://huggingface.co/models)
+2. Filter nach:
+   - **Task**: Text Generation, Classification, Object Detection, ...
+   - **Model Type**: LLM, Vision, Audio, ...
+   - **Size**: 7B, 13B, 70B (Parameter-Anzahl)
+   - **License**: Open, Restricted, Commercial, ...
+   - **Quantization**: GGUF, GPTQ, BNB, ...
+
+### Model-Card lesen
+
+Jedes Modell hat eine detaillierte **Model Card**:
+
+```
+├── Model Description (Was ist das?)
+├── Intended Use (Wofür soll es genutzt werden?)
+├── Training Data (Was wurde zum Trainieren genutzt?)
+├── Benchmarks (MMLU, HellaSwag, etc.)
+├── Limitations (Bekannte Schwächen)
+├── Ethical Considerations
+└── How to Use (Code-Beispiele)
+```
+
+Beispiel: [Qwen/Qwen2.5-7B](https://huggingface.co/Qwen/Qwen2.5-7B)
+
+## Transformers Library
+
+Die offizielle Python-Library für Modelle auf Hugging Face:
+
+### Installation
+
+```bash
+pip install transformers torch accelerate bitsandbytes
+```
+
+### Schnelle Inference
+
+```python
+from transformers import pipeline
+
+# Text Generation
+generator = pipeline("text-generation",
+                     model="Qwen/Qwen2.5-7B")
+result = generator("Explain quantum computing",
+                   max_length=200)
+print(result[0]["generated_text"])
+
+# Klassifikation
+classifier = pipeline("text-classification",
+                      model="distilbert-base-uncased-finetuned-sst-2-english")
+result = classifier("This movie is great!")
+print(result)  # [{'label': 'POSITIVE', 'score': 0.99}]
+```
+
+### Advanced: Quantization
+
+Für Modelle die nicht in RAM passen:
+
+```python
+from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch
+
+model_name = "meta-llama/Llama-2-7b"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+# 4-Bit Quantization
+model = AutoModelForCausalLM.from_pretrained(
+    model_name,
+    load_in_4bit=True,
+    bnb_4bit_compute_dtype=torch.float16
+)
+
+inputs = tokenizer("Hello, how are you?", return_tensors="pt")
+outputs = model.generate(**inputs, max_length=50)
+print(tokenizer.decode(outputs[0]))
+```
+
+**Memory-Vergleich**:
+- Vollständig (fp32): 28GB für 7B Modell
+- fp16 Precision: 14GB
+- 8-Bit Quantization: 7GB
+- 4-Bit Quantization: 4GB
+
+## CLI-Tools
+
+### huggingface_hub CLI
+
+```bash
+pip install huggingface-hub
+```
+
+Praktische Commands:
+
+```bash
+# Login
+huggingface-cli login
+# Eingabe: https://huggingface.co/settings/tokens kopieren
+
+# Modell downloaden
+huggingface-cli download Qwen/Qwen2.5-7B
+
+# Repo auf Hub pushen
+huggingface-cli upload username/my-model ./local_folder
+
+# Repo clonen
+git clone https://huggingface.co/Qwen/Qwen2.5-7B
+cd Qwen2.5-7B
+```
+
+### Download mit Python
+
+```python
+from huggingface_hub import hf_hub_download, snapshot_download
+
+# Single file
+model_file = hf_hub_download(
+    repo_id="Qwen/Qwen2.5-7B",
+    filename="pytorch_model.bin"
+)
+
+# Gesamtes Repo
+repo_path = snapshot_download(
+    repo_id="Qwen/Qwen2.5-7B",
+    cache_dir="/models"
+)
+```
+
+## Gated Models (Zugriff anfordern)
+
+Manche Modelle (z.B. Meta Llama) erfordern explizite Genehmigung:
+
+1. Öffne Modell-Seite auf Hugging Face
+2. Klick "Request Access" (blauer Button)
+3. Akzeptiere Bedingungen
+4. Warte auf Genehmigung (minutes-Stunden)
+5. Nutze `huggingface-cli login` zum Download
+
+Nach Login:
+
+```python
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+model = AutoModelForCausalLM.from_pretrained(
+    "meta-llama/Llama-2-7b"  # Funktioniert jetzt (wenn Zugriff approved)
+)
+```
+
+## Spaces (kostenlose Apps)
+
+Hugging Face Spaces sind kostenlose gehostete Umgebungen für Gradio/Streamlit Apps.
+
+### Space erstellen
+
+1. Gehe zu [huggingface.co/new-space](https://huggingface.co/spaces)
+2. Wähle "Create Repository" → Space
+3. Name eingeben, Gradio/Streamlit wählen
+4. Repository clonen
+5. Code schreiben
+
+### Beispiel: Chat-App mit lokalem Modell
+
+```python
+# app.py
+import gradio as gr
+from transformers import pipeline
+
+pipe = pipeline("text-generation", model="Qwen/Qwen2.5-7B")
+
+def chat(message):
+    response = pipe(message, max_length=200)
+    return response[0]["generated_text"]
+
+iface = gr.Interface(
+    fn=chat,
+    inputs="text",
+    outputs="text",
+    title="Local LLM Chat",
+    live=False
+)
+
+iface.launch(share=False)
+```
+
+Hochladen auf Hugging Face Space:
+
+```bash
+git add app.py requirements.txt
+git commit -m "Add chatbot"
+git push
+# App wird automatisch deployed
+```
+
+## Datasets
+
+Hugging Face hostet auch 50k+ Datasets:
+
+### Datasets durchsuchen
+
+[huggingface.co/datasets](https://huggingface.co/datasets)
+
+Filter nach:
+- Language (de, en, ...)
+- Task (classification, qa, ...)
+- Size
+
+### Dataset laden
+
+```python
+from datasets import load_dataset
+
+# CSV-Dataset
+dataset = load_dataset("csv", data_files="file.csv")
+
+# Hugging Face gehostetes Dataset
+dataset = load_dataset("wikitext", "wikitext-2")
+print(dataset["train"][0])
+# {'text': 'A long article...'}
+```
+
+## Benchmarks & Leaderboards
+
+### Open LLM Leaderboard
+
+[huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard](https://huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard)
+
+Rankt Modelle nach:
+- **MMLU** (allgemeines Wissen)
+- **HellaSwag** (Reasoning)
+- **TruthfulQA** (Wahrheit vs. Halluzination)
+- **Winogrande** (Common sense)
+
+Top Models (März 2026):
+1. DeepSeek V3 (82.6%)
+2. Qwen 3.5 Ultra (79.8%)
+3. Mistral Large (77.4%)
+
+## Fine-Tuning mit PEFT
+
+Parameter-Efficient Fine-Tuning (z.B. LoRA):
+
+```bash
+pip install peft
+```
+
+### LoRA Fine-Tuning
+
+```python
+from peft import get_peft_model, LoraConfig
+from transformers import AutoModelForCausalLM
+
+model = AutoModelForCausalLM.from_pretrained("Qwen/Qwen2.5-7B")
+
+lora_config = LoraConfig(
+    r=8,                          # Rank
+    lora_alpha=16,
+    target_modules=["q_proj", "v_proj"],
+    lora_dropout=0.1,
+    bias="none"
+)
+
+model = get_peft_model(model, lora_config)
+print(model.print_trainable_parameters())
+# Output: trainable params: 1048576 || all params: 7342506880
+
+# Jetzt: Train mit Trainer API
+from transformers import Trainer, TrainingArguments
+
+training_args = TrainingArguments(
+    output_dir="./lora-qwen",
+    per_device_train_batch_size=4,
+    num_train_epochs=3,
+    learning_rate=1e-4,
+    save_strategy="steps",
+    save_steps=100,
+)
+
+trainer = Trainer(
+    model=model,
+    args=training_args,
+    train_dataset=train_dataset,
+)
+
+trainer.train()
+```
+
+Nach Fine-Tuning: Speichern und Pushen auf Hub
+
+```python
+model.save_pretrained("./my-lora-model")
+
+from huggingface_hub import upload_folder
+upload_folder(
+    repo_id="username/my-lora-model",
+    folder_path="./my-lora-model"
+)
+```
+
+## Community Features
+
+### Discussions
+
+Jedes Modell hat einen Discussions-Tab:
+- Fragen stellen
+- Bugs reporten
+- Improvement-Vorschläge
+
+### Model PRs
+
+Verbessere Model Cards, Add Quantizations, etc. via PR:
+
+```bash
+# Fork & Clone
+git clone https://huggingface.co/Qwen/Qwen2.5-7B
+cd Qwen2.5-7B
+git checkout -b improve-description
+
+# Edit README.md
+# Add gptq quantization info
+git add README.md
+git commit -m "Add GPTQ quantization details"
+git push
+# Öffne PR auf Hub
+```
+
+## Integration mit n8n
+
+n8n Workflow mit Hugging Face Inference API:
+
+```json
+{
+  "nodes": [
+    {
+      "type": "http",
+      "url": "https://api-inference.huggingface.co/models/Qwen/Qwen2.5-7B",
+      "method": "POST",
+      "headers": {
+        "Authorization": "Bearer {{ $secret.HF_API_KEY }}"
+      },
+      "body": {
+        "inputs": "{{ $json.prompt }}"
+      }
+    }
+  ]
+}
+```
+
+## Quellen und Links
+
+- [Hugging Face Hub](https://huggingface.co)
+- [Transformers Dokumentation](https://huggingface.co/docs/transformers)
+- [Datasets Dokumentation](https://huggingface.co/docs/datasets)
+- [PEFT Fine-Tuning](https://github.com/huggingface/peft)
+- [Open LLM Leaderboard](https://huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard)
+- [Model Licensing Guide](https://huggingface.co/docs/hub/model-cards-licenses)

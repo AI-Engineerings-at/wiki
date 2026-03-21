@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-brand: #4262FF;
+    --color-brand-hover: #3550DD;
+    --color-bg-base: #020617;
+    --color-bg-surface: #0f172a;
+    --color-bg-elevated: #1e293b;
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #cbd5e1;
+    --color-text-muted: #94a3b8;
+  }
+
+  body {
+    @apply bg-slate-950 text-slate-300 antialiased;
+    font-family: var(--font-geist-sans), Inter, Arial, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-white font-bold;
+  }
+
+  .prose {
+    @apply text-slate-300;
+  }
+
+  .prose h1, .prose h2, .prose h3, .prose h4 {
+    @apply text-white font-bold;
+  }
+
+  .prose a {
+    @apply text-blue-400 hover:text-blue-300 transition-colors;
+  }
+
+  .prose code {
+    @apply bg-slate-800 text-blue-400 px-1.5 py-0.5 rounded text-sm;
+  }
+
+  .prose pre {
+    @apply bg-slate-900 border border-slate-800 rounded-lg;
+  }
+
+  .prose blockquote {
+    @apply border-l-4 border-[#4262FF] bg-slate-900/50 px-4 py-2;
+  }
+
+  .prose table th {
+    @apply bg-slate-800 text-white;
+  }
+
+  .prose table td {
+    @apply border-slate-700;
+  }
+
+  .prose strong {
+    @apply text-white;
+  }
+
+  .prose ul, .prose ol {
+    @apply text-slate-300;
+  }
+
+  .prose li::marker {
+    @apply text-blue-400;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-[#4262FF] hover:bg-[#3550DD] text-white font-bold py-3 px-6 rounded-full transition-all hover:scale-105 shadow-lg shadow-blue-500/30;
+  }
+
+  .btn-secondary {
+    @apply bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 px-6 rounded-full transition-all;
+  }
+
+  .card {
+    @apply bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-blue-500/50 transition-all;
+  }
+
+  .badge-brand {
+    @apply bg-[#4262FF] text-white text-xs font-bold px-3 py-1 rounded-full;
+  }
+
+  .badge-blue {
+    @apply bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full;
+  }
+
+  .glass {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl;
+  }
+}

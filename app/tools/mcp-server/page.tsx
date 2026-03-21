@@ -1,0 +1,193 @@
+export const metadata = {
+  title: 'MCP Server | AI Engineering Wiki',
+  description:
+    'Model Context Protocol (MCP): Verbinde Claude Desktop mit deiner Infrastruktur. Setup, Beispiel-Server und typische Queries für Homelab/AI-Stack.',
+}
+
+export default function McpServer() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-white">MCP Server für Claude Desktop</h1>
+        <p className="text-gray-400 mt-2">Tools · 5 min</p>
+      </div>
+
+      <div className="prose prose-invert max-w-none">
+        <p className="text-lg text-gray-300">
+          Model Context Protocol (MCP) verbindet Claude Desktop mit deiner Infrastruktur.
+        </p>
+
+        <h2 className="text-xl font-semibold text-white mt-8">Was ist MCP?</h2>
+        <p className="text-gray-300 mt-2">
+          MCP ist ein offener Standard von Anthropic. Er ermöglicht Claude, 
+          mit externen Tools und Datenquellen zu kommunizieren.
+        </p>
+
+        <h2 className="text-xl font-semibold text-white mt-8">Unsere MCP Server</h2>
+
+        <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-700">
+                <th className="text-left py-2 text-gray-400">Server</th>
+                <th className="text-left py-2 text-gray-400">Tools</th>
+                <th className="text-left py-2 text-gray-400">Steuert</th>
+              </tr>
+            </thead>
+            <tbody className="text-gray-300">
+              <tr className="border-b border-gray-800">
+                <td className="py-2">Portainer</td>
+                <td className="py-2">5</td>
+                <td className="py-2">Docker Container</td>
+              </tr>
+              <tr className="border-b border-gray-800">
+                <td className="py-2">Proxmox</td>
+                <td className="py-2">6</td>
+                <td className="py-2">VMs, LXCs</td>
+              </tr>
+              <tr className="border-b border-gray-800">
+                <td className="py-2">n8n</td>
+                <td className="py-2">5</td>
+                <td className="py-2">Workflows</td>
+              </tr>
+              <tr className="border-b border-gray-800">
+                <td className="py-2">Ollama</td>
+                <td className="py-2">4</td>
+                <td className="py-2">LLM-Modelle</td>
+              </tr>
+              <tr className="border-b border-gray-800">
+                <td className="py-2">Grafana</td>
+                <td className="py-2">6</td>
+                <td className="py-2">Dashboards</td>
+              </tr>
+              <tr>
+                <td className="py-2">Uptime Kuma</td>
+                <td className="py-2">3</td>
+                <td className="py-2">Monitoring</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 className="text-xl font-semibold text-white mt-8">Installation</h2>
+
+        <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
+          <code className="text-sm text-gray-300">{`# 1. Python installieren
+pip install mcp
+
+# 2. Claude Desktop config
+# ~/.config/Claude/claude_desktop_config.json
+
+{
+  "mcpServers": {
+    "homelab": {
+      "command": "python3",
+      "args": ["/path/to/server.py"]
+    }
+  }
+}`}</code>
+        </pre>
+
+        <p className="text-gray-300 mt-3">
+          Nach dem Neustart von Claude Desktop siehst du die verfügbaren Tools im Menü.
+        </p>
+
+        <h2 className="text-xl font-semibold text-white mt-8">Eigener MCP Server mit FastMCP</h2>
+
+        <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
+          <code className="text-sm text-gray-300">{`# 1. FastMCP installieren
+pip install fastmcp
+
+# 2. server.py erstellen
+from fastmcp import FastMCP
+import subprocess
+
+mcp = FastMCP("Homelab Server")
+
+@mcp.tool()
+def run_docker_command(command: str) -> str:
+    """Führe Docker Commands aus"""
+    result = subprocess.run(
+        command.split(),
+        capture_output=True,
+        text=True
+    )
+    return result.stdout + result.stderr
+
+@mcp.tool()  
+def get_container_status() -> list:
+    """Liste alle laufenden Container"""
+    result = subprocess.run(
+        ["docker", "ps", "--format", "{{.Names}}"],
+        capture_output=True,
+        text=True
+    )
+    return result.stdout.strip().split("\n")
+
+@mcp.tool()
+def restart_service(service: str) -> str:
+    """Starte einen Docker Service neu"""
+    result = subprocess.run(
+        ["docker-compose", "restart", service],
+        capture_output=True,
+        text=True
+    )
+    return f"Service {service} restartet"
+
+if __name__ == "__main__":
+    mcp.run(transport="stdio")`}</code>
+        </pre>
+
+        <h2 className="text-xl font-semibold text-white mt-8">Beispiel-Queries</h2>
+
+        <ul className="list-disc list-inside text-gray-300 space-y-1 mt-2">
+          <li>• <strong>"Welche Container laufen gerade?"</strong></li>
+          <li>• <strong>"Starte die docker-swarm3 VM"</strong></li>
+          <li>• <strong>"Zeig mir alle aktiven Alerts"</strong></li>
+          <li>• <strong>"Wie viel VRAM nutzt Ollama?"</strong></li>
+        </ul>
+
+        <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
+          <code className="text-sm text-gray-300">{`# Erwartete Claude-Antworten:
+
+User: "Welche Container laufen gerade?"
+Claude: "Ich frage mal schnell die Docker-API..."
+→ nutzt get_container_status()
+→ "Aktuell laufen: nginx, postgres, redis, ollama"
+
+User: "Starte den n8n Container neu"
+Claude: "Klar, einen Moment..."
+→ nutzt restart_service("n8n")
+→ "Done. n8n läuft wieder."`}</code>
+        </pre>
+
+        <h2 className="text-xl font-semibold text-white mt-8">Offizielle Quellen</h2>
+
+        <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <ul className="text-sm text-gray-300 space-y-2">
+            <li>
+              <a href="https://modelcontextprotocol.io" className="text-blue-400 hover:underline">
+                modelcontextprotocol.io
+              </a>
+              <p className="text-gray-500 text-xs">Offizielle Dokumentation</p>
+            </li>
+            <li>
+              <a href="https://github.com/jlowin/FastMCP" className="text-blue-400 hover:underline">
+                FastMCP Framework
+              </a>
+              <p className="text-gray-500 text-xs">Python-Framework für MCP-Server</p>
+            </li>
+          </ul>
+        </div>
+
+        <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mt-8">
+          <h3 className="font-semibold text-white mb-2">Fazit</h3>
+          <p className="text-gray-300">
+            MCP ermöglicht Claude, deine gesamte Infrastruktur zu steuern — 
+            per Natural Language.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}

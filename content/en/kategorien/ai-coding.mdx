@@ -1,0 +1,452 @@
+---
+title: "AI Coding Tools"
+date: 2026-03-21
+summary: "Comparison of Claude Code, GitHub Copilot, Cursor, Windsurf, Cody, and Aider for AI-assisted development"
+tags: ["ai-coding", "copilot", "cursor", "claude-code", "aider", "development"]
+author: "AI Engineering"
+---
+
+# AI Coding Tools
+
+AI code assistants boost development speed. Choose based on your IDE, budget, and coding style.
+
+## Feature Comparison
+
+| Feature | Claude Code | Copilot | Cursor | Windsurf | Cody | Aider |
+|---------|------------|---------|--------|----------|------|-------|
+| **Cost** | Free + API | $10-30/mo | $20/mo | $19/mo | Free + pro | Free |
+| **IDE** | Terminal | VS Code, IDE | VS Code | VS Code | VS Code, JB | Terminal/Web |
+| **Context** | Full repo | File + imports | 8K context | Full repo | Repository | Terminal cmds |
+| **Code gen** | Good | Excellent | Very good | Excellent | Good | Good |
+| **Refactoring** | Excellent | Fair | Very good | Excellent | Good | Good |
+| **Testing** | Built-in | No | Built-in | Built-in | No | Built-in |
+| **Commits** | Git integration | No | Git integration | Git integration | No | Git commits |
+| **Model choice** | Claude 3 | GPT-4 | Claude/GPT | Claude/GPT | Claude/Gemini | Any local/API |
+
+## Claude Code (Best for Deep Refactoring)
+
+**Ideal for:** Architecture changes, multi-file refactors, complex features
+
+**Pricing:** Free, plus API costs for batch operations
+
+**How it works:**
+1. Start session: `claude-code`
+2. Ask: "Refactor auth.py to use async"
+3. Claude analyzes full codebase
+4. Generates changes, commits to git
+5. Explains reasoning
+
+**Strengths:**
+- Entire repo context (not just file)
+- Excellent at large refactors
+- Commits with messages
+- Skill ecosystem
+- Memory between sessions
+
+**Weaknesses:**
+- Terminal-only (no IDE integration)
+- Slower (requires full context analysis)
+- Setup overhead
+- API costs if heavy use
+
+**When to use:**
+- Multi-file changes
+- Architectural reviews
+- Large codebase navigation
+- Migration work (Python 2→3, etc.)
+
+**Example:**
+```bash
+claude-code
+> Refactor all error handling to use custom exception classes
+> Run tests after each file
+> Commit changes with description
+
+# Claude analyzes, finds 8 files, refactors all, tests, commits
+```
+
+## GitHub Copilot (Easiest Integration)
+
+**Ideal for:** Quick suggestions, line-by-line coding
+
+**Pricing:** $10-30/month (individual to enterprise)
+
+**How it works:**
+1. Install extension
+2. Type code, suggestions appear
+3. Tab to accept, or Ctrl+Enter for chat
+4. Multi-file edit (Copilot Edits)
+
+**Strengths:**
+- Seamless IDE integration
+- Very fast (milliseconds)
+- Works offline (suggestions cached)
+- Huge ecosystem (plugins everywhere)
+- Good for boilerplate
+
+**Weaknesses:**
+- Context limited (current file + imports)
+- Less reasoning than Claude
+- Subscription required
+- Limited refactoring capability
+
+**When to use:**
+- New code from scratch
+- Boilerplate/scaffolding
+- IDE-native experience
+- Quick suggestions
+
+**Example:**
+```python
+# Type:
+def validate_email(email:
+
+# Copilot suggests:
+str) -> bool:
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(pattern, email) is not None
+```
+
+Accept with Tab, test passes, move on.
+
+## Cursor (Best IDE for AI)
+
+**Ideal for:** AI-first IDE experience, code completion + chat
+
+**Pricing:** $20/month (or free with own API key)
+
+**How it works:**
+1. IDE built around AI (not plugin)
+2. Cmd+K: inline edit
+3. Cmd+L: chat panel
+4. Full repo as context
+5. Git integration native
+
+**Strengths:**
+- IDE built for AI (not grafted on)
+- Excellent UX
+- Claude + GPT choice
+- Smart context window (doesn't include unnecessary files)
+- Multi-file edits easy
+
+**Weaknesses:**
+- New product (less stable)
+- Replaces VS Code workflow (learning curve)
+- $20/month
+- Smaller community
+
+**When to use:**
+- New projects (not migrating)
+- Want AI-first IDE
+- Team all on same tool
+- Want best UX
+
+**Example:**
+```
+Cmd+K: "Extract validation logic into separate module"
+
+# Cursor:
+1. Identifies validation in current file
+2. Creates validators/ folder
+3. Moves code, updates imports
+4. Shows diff, asks confirm
+5. Commit ready
+```
+
+## Windsurf (Strongest Code Generation)
+
+**Ideal for:** Full feature implementation, complex features
+
+**Pricing:** $19/month
+
+**How it works:**
+1. Prompt: "Build user authentication with OAuth"
+2. Windsurf generates full feature (multiple files)
+3. Shows diffs, tests run
+4. Uses "Agentic" mode (self-correcting)
+
+**Strengths:**
+- Most ambitious AI (agentic mode)
+- Claude 3 Opus built-in
+- Excellent at full features
+- Fast iteration (self-fixing errors)
+- File exploration (understands your project)
+
+**Weaknesses:**
+- Newer (less battle-tested)
+- Can over-engineer sometimes
+- $19/month
+- Occasionally generates wrong context
+
+**When to use:**
+- Entire features (not single files)
+- Complex implementations
+- Agentic/self-correcting approach desired
+- Want Opus reasoning
+
+**Example:**
+```
+"Implement JWT token refresh with sliding window expiry"
+
+# Windsurf (agentic):
+1. Generates token service (tokens.py)
+2. Adds middleware (auth.py)
+3. Creates tests (tests/test_tokens.py)
+4. Runs tests → 1 failure (time mocking issue)
+5. Self-corrects: fixes test
+6. All green → ready
+```
+
+## Cody (For Open Source / JetBrains)
+
+**Ideal for:** Open-source projects, JetBrains IDEs
+
+**Pricing:** Free (with Sourcegraph), $40/mo pro
+
+**How it works:**
+1. Install in JetBrains IDE (IntelliJ, PyCharm, etc.)
+2. Cmd+K: code edit
+3. Cmd+L: chat
+4. Uses local code graph
+
+**Strengths:**
+- Works in PyCharm, IntelliJ, etc.
+- Free tier generous
+- Good for open-source
+- Code graph understanding (finds dependencies)
+
+**Weaknesses:**
+- Limited to JetBrains (not VS Code)
+- Smaller community
+- Less powerful than Cursor/Windsurf
+- Free tier slow
+
+**When to use:**
+- Using IntelliJ/PyCharm
+- Open-source projects
+- Budget-conscious
+- Team already in JetBrains
+
+## Aider (Terminal/Chat-First)
+
+**Ideal for:** Pair programming style, terminal-native
+
+**Pricing:** Free (uses your API keys)
+
+**How it works:**
+```bash
+aider src/
+
+# Then chat:
+> Add type hints to all functions
+> Create unit tests
+> Refactor with design pattern
+
+# Aider:
+1. Reads files you specify
+2. Generates changes
+3. Shows diff, asks confirm
+4. Auto-commits
+```
+
+**Strengths:**
+- Free (no subscription)
+- Any model (Claude, GPT, local Ollama)
+- Git-first workflow
+- Great for pair programming
+- Works with local LLMs
+
+**Weaknesses:**
+- Terminal UI (no visual IDE)
+- Manual file selection
+- Slower than IDE tools
+- Less context awareness
+
+**When to use:**
+- Terminal-native developer
+- Want local/Ollama models
+- Budget-free tier
+- Pair programming style
+
+**Example:**
+```bash
+aider src/app.py tests/
+
+> Implement user signup with validation
+
+# Aider generates:
+1. User model (src/models.py)
+2. Signup handler (src/routes.py)
+3. Tests (tests/test_signup.py)
+4. Commit message auto-generated
+```
+
+## Decision Tree
+
+**Start here:** What's your IDE?
+
+### VS Code
+1. **Want fastest setup?** → Copilot
+2. **Want AI-first IDE?** → Cursor
+3. **Want best features?** → Windsurf
+4. **Want terminal access?** → Aider
+
+### JetBrains (IntelliJ/PyCharm)
+1. **Open-source?** → Cody (free)
+2. **Commercial?** → Cody pro ($40/mo)
+3. **Bypass IDE?** → Aider (terminal)
+
+### Terminal-first
+1. → Aider (only option, also best)
+2. → Claude Code (if larger projects)
+
+### Large refactors
+1. → Claude Code (best understanding)
+2. → Windsurf (agentic, self-fixing)
+3. → Cursor (smart context window)
+
+## Workflow Comparison
+
+### Feature: "Add password reset email"
+
+**Copilot (line-by-line):**
+```
+1. Write function signature
+2. Copilot suggests password reset logic
+3. Accepts line-by-line
+4. Write email send logic
+5. Copilot completes
+6. Manual testing
+≈ 10-15 minutes
+```
+
+**Cursor (full edit):**
+```
+Cmd+K: "Add password reset with email verification"
+
+1. Cursor generates:
+   - Password reset endpoint
+   - Email template
+   - Token validation
+   - Tests
+2. Diff shown, review
+3. Accept
+≈ 5 minutes
+```
+
+**Windsurf (agentic):**
+```
+"Build password reset with email verification, rate limiting, and token expiry"
+
+1. Windsurf generates full feature
+2. Runs tests → 2 failures
+3. Self-corrects (rate limit edge case)
+4. All tests pass
+5. Commit ready
+≈ 2-3 minutes
+```
+
+**Claude Code (deep refactor):**
+```bash
+claude-code
+> Move all auth logic to separate module
+> Add type hints everywhere
+> Update all tests
+> Commit
+
+1. Analyzes 8 files
+2. Identifies auth logic
+3. Creates auth/ module
+4. Moves code, updates imports
+5. Tests run, all green
+6. Commits with explanation
+≈ 5-10 minutes, high confidence
+```
+
+## Model Access
+
+| Tool | Claude | GPT-4 | Gemini | Local |
+|------|--------|-------|--------|-------|
+| Claude Code | ✓ Opus | No | No | No |
+| Copilot | No | ✓ 4o | No | No |
+| Cursor | ✓ Claude/GPT | ✓ GPT-4 | No | No |
+| Windsurf | ✓ Opus | ✓ 4o | No | No |
+| Cody | ✓ Claude | ✓ GPT-4 | No | No |
+| Aider | ✓ Any | ✓ Any | ✓ Any | ✓ Ollama |
+
+**Aider advantage:** Only tool supporting local Ollama, so no API costs.
+
+## Cost Analysis (12 months)
+
+```
+Copilot:      $10-30 × 12 = $120-360/year
+Cursor:       $20 × 12 = $240/year
+Windsurf:     $19 × 12 = $228/year
+Cody free:    $0/year
+Claude Code:  $0/month + API usage (varies)
+Aider:        $0/year (use own API key)
+```
+
+**Most expensive:** Copilot (if maximum tier)
+**Cheapest:** Aider or Cody free
+
+## Integration with Workflow
+
+### CI/CD (Automated)
+
+Aider in CI pipeline:
+
+```yaml
+# .github/workflows/refactor.yml
+on: [workflow_dispatch]
+jobs:
+  refactor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: pip install aider-chat
+      - run: |
+          aider src/ \
+            --auto-commit \
+            --message "Automated refactoring: add type hints" \
+            < /dev/null
+      - run: git push
+```
+
+### IDE Plugin (Real-time)
+
+Copilot/Cursor/Windsurf all run suggestions while you type.
+
+### Terminal Session (Interactive)
+
+Aider best for pair-programming style:
+
+```bash
+# Session 1
+aider src/ -m "Add authentication"
+
+# Session 2
+aider src/ -m "Refactor database queries"
+
+# Full history committed
+```
+
+## Checklist
+
+- [ ] Identify primary IDE (VS Code, JetBrains, Terminal)
+- [ ] Try 2-3 tools (most have free trials)
+- [ ] Test on small feature (estimate time saved)
+- [ ] Evaluate cost vs time saved
+- [ ] Check team consistency (everyone on same tool?)
+- [ ] Set up git integration if available
+- [ ] Configure API key (if not SaaS)
+- [ ] Document tool usage in team README
+- [ ] Train team on shortcuts (Cmd+K, Cmd+L)
+- [ ] Start with code completion (easy), graduate to refactoring
+- [ ] Measure: time per feature before/after
+
+## Sources and Links
+
+- [Aider](https://github.com/Aider-AI/aider)
+- [Cline](https://github.com/cline/cline)
+- [Continue](https://github.com/continuedev/continue)

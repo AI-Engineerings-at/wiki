@@ -1,0 +1,587 @@
+---
+title: Tokenization
+date: 2026-03-21
+summary: BPE, WordPiece, SentencePiece explained — token counting vs words, context windows, tokenizer differences, saving tokens with compression
+tags: [tokenization, bpe, tokens, wordpiece, sentencepiece, context-window, llm]
+author: AI Engineering
+---
+
+# Tokenization Explained
+
+A token is the smallest unit an LLM processes. Not a word—often a word + whitespace or sub-word pieces. Tokenization is critical for cost, performance, and understanding LLMs.
+
+---
+
+## Token Reality
+
+```
+English: "The dog jumped over the fence"
+Tokens: 6
+
+German: "Der Hund sprang über den Zaun"
+Tokens: 6
+
+But: Longer German words in English tokenizer:
+"Die unglaubliche Geschwindigkeit"
+English Tokenizer: ["Die", " un", "glau", "ber", "liche", " G", "e", "sch", "wind", "igkeit"]
+Tokens: 10 (inefficient!)
+
+→ German is 3-4× more expensive in English tokenizers!
+```
+
+---
+
+## Tokenizer Algorithms
+
+### BPE (Byte Pair Encoding)
+Iteratively merge most frequent token pairs.
+
+```
+Start: ['h', 'u', 'g', 'g', 'i', 'n', 'g']
+Merge most frequent: ['h', 'ug', 'g', 'i', 'n', 'g']
+Repeat until vocab size reached
+```
+
+Used in: GPT-4, most English-optimized models
+
+### WordPiece
+Probabilistic merging based on likelihood increase.
+
+```
+score(A, B) = freq(AB) / (freq(A) × freq(B))
+Merge highest score pairs
+```
+
+Used in: BERT, Llama (modified)
+
+### SentencePiece
+Language-agnostic, treats whitespace as token.
+
+```
+Input: "Hello world"
+Output: ["▁Hello", "▁world"]  (▁ = whitespace)
+
+Reversible!
+```
+
+Used in: T5, Llama 3 (with modifications), mBART
+
+---
+
+## Token Counting
+
+### Quick Estimates
+```
+English:
+1 Token ≈ 4 Characters
+1 Token ≈ 0.75 Words
+
+German:
+1 Token ≈ 3 Characters
+1 Token ≈ 0.6 Words
+
+Code:
+1 Token ≈ 2 Characters
+
+JSON:
+1 Token ≈ 3 Characters
+```
+
+### Precise Counting
+```python
+import tiktoken
+
+enc = tiktoken.encoding_for_model("gpt-4")
+tokens = enc.encode("Your text here")
+print(len(tokens))
+```
+
+---
+
+## Model Tokenizers (2026)
+
+| Model | Tokenizer | Vocab Size | Efficiency |
+|-------|-----------|-----------|------------|
+| GPT-4 | BPE (cl100k) | 100K | 4.5 chars/token (EN) |
+| Claude 3.5 | Proprietary | ~100K | 4.0 chars/token (EN) |
+| Llama 3 | SentencePiece | 128K | 4.2 chars/token (EN) |
+| Mistral | SentencePiece | 32K | 3.8 chars/token (EN) |
+| BERT | WordPiece | 30K | 3.5 chars/token (EN) |
+
+---
+
+## Save Tokens: Practical Strategies
+
+### 1. Prompt Compression
+```
+Before: "Analyze the text thoroughly and provide a detailed summary..."
+Tokens: 25
+
+After: "Analyze. Summary with key points."
+Tokens: 8
+
+Savings: 68%!
+```
+
+### 2. Reuse Context (Caching)
+```
+Without caching:
+Prompt 1: 80 tokens (includes system prompt)
+Prompt 2: 80 tokens (repeats system prompt)
+Total: 160 tokens
+
+With caching:
+Prompt 1: 80 tokens
+Prompt 2: 5 tokens (only new question)
+Total: 85 tokens
+```
+
+Newer models (Claude 3.5) support prompt caching—old context is free!
+
+### 3. Efficient RAG
+```
+Retrieve top-100 chunks (cheap)
+        ↓
+Rerank to top-3 (with cross-encoder)
+        ↓
+Put only top-3 in prompt
+        ↓
+70% token savings!
+```
+
+---
+
+## Context Window Implications
+
+```
+8K Context Window (Llama 3):
+- System Prompt: 200 tokens
+- User Input: 500 tokens
+- Available for Response: 7292 tokens
+
+With German:
+- System: 150 tokens (more efficient)
+- Input: 750 tokens (3× costs more)
+- Available: 7092 tokens (less space!)
+
+→ German demands more, leaves less room for output
+```
+
+---
+
+## Multilingual Costs
+
+```
+Baseline (English): 1.0×
+Spanish: 1.2×
+German: 1.3×
+Japanese: 1.5×
+Chinese: 1.8×
+```
+
+English-optimized tokenizers less efficient on other languages.
+
+---
+
+## Special Cases
+
+### Emoji
+```
+"😀" = 2-3 tokens (treated like sub-word)
+
+Avoid emoji if cost-sensitive!
+```
+
+### Code
+```
+Code is expensive (whitespace, brackets are tokens)
+
+If cost-critical: minify code, use compressed formats
+```
+
+---
+
+## Cost Savings Formula
+
+```
+Total Cost = (Input Tokens + Output Tokens) × Price per Token
+
+If you reduce tokens by 30%:
+Cost Reduction = 30%
+
+Example:
+100K tokens @ €0.003/K = €0.30
+70K tokens @ €0.003/K = €0.21
+Savings: €0.09 (30%)
+
+At scale (10M tokens/day): €2.7 saved daily = €800/year!
+```
+
+Tokenization seems boring but saves real money. Smart token management → 20-40% cost reduction without quality loss.
+
+---
+
+## Advanced: Byte Pair Encoding Deep Dive
+
+BPE algorithm step-by-step:
+
+```
+Input text: "hello world"
+Step 1 - Byte-level:
+['h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd']
+
+Step 2 - Count frequent pairs:
+'l' + 'l' appears 1 time
+'o' + 'r' appears 0 times
+' ' + 'w' appears 1 time
+
+Step 3 - Merge highest frequency:
+Merge 'l' + 'l' → 'll'
+['h', 'e', 'll', 'o', ' ', 'w', 'o', 'r', 'l', 'd']
+
+Step 4 - Repeat until vocab size reached
+Final: ['h', 'ell', 'o', ' ', 'w', 'or', 'ld']
+```
+
+**Key property**: BPE is **greedy and irreversible**. Once merged, can't tell if 'll' was two separate 'l's or a merged pair.
+
+---
+
+## Subword Tokenization Issues & Workarounds
+
+### Issue: Multilingual text tokenizes inefficiently
+
+German document in English tokenizer:
+```
+"Geschwindigkeit" (speed)
+English BPE: ['G', 'e', 'sc', 'hwin', 'd', 'ig', 'k', 'e', 'it']
+Tokens: 9
+
+Spanish document:
+"rapidez"
+English BPE: ['r', 'a', 'p', 'id', 'ez']
+Tokens: 5
+
+→ German 1.8× more expensive!
+```
+
+**Solution**: Use multilingual tokenizers (SentencePiece, mBART).
+
+```python
+# Better: Use SentencePiece
+from sentencepiece import SentencePieceProcessor
+
+sp = SentencePieceProcessor()
+sp.load('spm_model.model')
+
+tokens_de = sp.encode("Geschwindigkeit")  # More efficient
+tokens_es = sp.encode("rapidez")
+```
+
+### Issue: Emoji and special characters explode tokens
+
+```python
+import tiktoken
+
+enc = tiktoken.encoding_for_model("gpt-4")
+
+text_plain = "Hello world"
+tokens_plain = len(enc.encode(text_plain))
+print(f"Plain: {tokens_plain} tokens")  # 3 tokens
+
+text_emoji = "Hello 😀 world"
+tokens_emoji = len(enc.encode(text_emoji))
+print(f"Emoji: {tokens_emoji} tokens")  # 8 tokens!
+
+text_symbols = "Hello @#$%^&* world"
+tokens_symbols = len(enc.encode(text_symbols))
+print(f"Symbols: {tokens_symbols} tokens")  # 15 tokens!
+```
+
+**Efficiency**: Plain text 1.0×, Emoji 2.7×, Symbols 5.0×
+
+**Solution**: Preprocess to remove or replace emoji/symbols.
+
+---
+
+## Token Counting Tools & APIs
+
+### Method 1: Exact (using official tokenizers)
+
+```python
+# OpenAI models
+import tiktoken
+
+enc = tiktoken.encoding_for_model("gpt-4")
+tokens = enc.encode("Your text here")
+print(f"Tokens: {len(tokens)}")
+
+# Claude models (use Anthropic library)
+import anthropic
+
+client = anthropic.Anthropic()
+# Token counting is built-in during message creation
+response = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    max_tokens=100,
+    messages=[{"role": "user", "content": "test"}]
+)
+print(f"Input tokens: {response.usage.input_tokens}")
+print(f"Output tokens: {response.usage.output_tokens}")
+```
+
+### Method 2: Estimation (before API calls)
+
+```python
+def estimate_tokens(text, model="gpt-4"):
+    """Quick estimation without API calls."""
+    estimates = {
+        "gpt-4": 0.25,      # 4 chars = 1 token
+        "gpt-35": 0.25,
+        "claude": 0.25,
+        "llama": 0.27,      # Slightly worse
+        "german": 0.33,     # 3 chars = 1 token (less efficient)
+    }
+    chars_per_token = estimates.get(model, 0.25)
+    return int(len(text) * chars_per_token)
+
+print(estimate_tokens("Hello world", "gpt-4"))  # ~3 tokens
+print(estimate_tokens("Geschwindigkeit", "german"))  # ~5 tokens
+```
+
+---
+
+## Prompt Compression Techniques
+
+### Technique 1: Instruction Distillation
+
+```python
+# BEFORE (verbose)
+system = """You are a helpful AI assistant. Your role is to analyze text carefully and provide thoughtful, detailed responses. Always consider multiple perspectives. Be clear and concise."""
+# Tokens: 45
+
+# AFTER (compressed)
+system = "Analyze text. Thoughtful, concise response."
+# Tokens: 9
+
+# Savings: 80%
+```
+
+### Technique 2: Few-Shot Compression
+
+```python
+# BEFORE: Full examples
+examples = [
+    {"input": "The dog jumped quickly over the fence", "output": "FAST"},
+    {"input": "The cat sat slowly on the couch", "output": "SLOW"},
+    {"input": "The rabbit hopped fast through the garden", "output": "FAST"},
+]
+# Tokens: 60
+
+# AFTER: Compressed notation
+examples_compressed = [
+    {"q": "dog jumped quickly", "a": "FAST"},
+    {"q": "cat sat slowly", "a": "SLOW"},
+    {"q": "rabbit hopped fast", "a": "FAST"},
+]
+# Tokens: 35
+
+# Savings: 42%
+```
+
+### Technique 3: Context Window Caching
+
+Available in Claude 3.5+, GPT-4 with cache_control:
+
+```python
+import anthropic
+
+client = anthropic.Anthropic()
+
+# Large context (system prompt + reference docs)
+system_content = """You are a financial analyst...
+[Large reference document - 5000 tokens]"""
+
+# First request: Tokens charged normally
+response1 = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    max_tokens=100,
+    system=[
+        {
+            "type": "text",
+            "text": system_content,
+            "cache_control": {"type": "ephemeral"}  # Cache this!
+        }
+    ],
+    messages=[{"role": "user", "content": "Analyze Company X"}]
+)
+
+# Second request: Cached portion is FREE or 10% cost
+response2 = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    max_tokens=100,
+    system=[
+        {
+            "type": "text",
+            "text": system_content,  # Same content, reuses cache
+            "cache_control": {"type": "ephemeral"}
+        }
+    ],
+    messages=[{"role": "user", "content": "Analyze Company Y"}]
+)
+
+# Cost comparison:
+# Without cache: 5000 + 50 + 100 + 5000 + 50 + 100 = 10,300 tokens charged
+# With cache: 5000 + 50 + 100 + 500 + 50 + 100 = 5,800 tokens charged (43% savings)
+```
+
+---
+
+## Context Window Strategy
+
+Managing limited context windows effectively:
+
+```python
+def chunked_processing(documents, context_window=128000, system_overhead=1000):
+    """Process documents respecting context window limits."""
+    available = context_window - system_overhead
+
+    chunks = []
+    current_chunk_tokens = 0
+    current_docs = []
+
+    for doc in documents:
+        doc_tokens = estimate_tokens(doc)
+
+        if current_chunk_tokens + doc_tokens > available:
+            # Start new chunk
+            chunks.append(current_docs)
+            current_docs = [doc]
+            current_chunk_tokens = doc_tokens
+        else:
+            current_docs.append(doc)
+            current_chunk_tokens += doc_tokens
+
+    if current_docs:
+        chunks.append(current_docs)
+
+    return chunks
+
+# Usage
+documents = [large_document_1, large_document_2, ...]
+chunks = chunked_processing(documents)
+
+for i, chunk in enumerate(chunks):
+    print(f"Processing chunk {i+1}/{len(chunks)}")
+    # Process each chunk independently
+```
+
+---
+
+## Tokenization & Model Performance
+
+Token count affects:
+
+| Factor | Impact | Example |
+|--------|--------|---------|
+| Input tokens | Cost + latency | 1000 tokens = €0.01 + 50ms |
+| Output tokens | Cost only | Generate 100 tokens = €0.003 |
+| Context reuse | Major savings | Cache: 90% free after first use |
+| Batch size | Throughput | Process 10 requests in parallel |
+| Model size | Quality tradeoff | Haiku: 2× cheaper, 30% slower |
+
+---
+
+## Tokenization Across Language Pairs
+
+Efficiency comparison (tokens per character):
+
+```
+Language    | English Model | Native Model | Overhead |
+------------|---------------|--------------|----------|
+English     | 0.25          | 0.25         | 0%       |
+Spanish     | 0.30          | 0.25         | 20%      |
+French      | 0.32          | 0.26         | 23%      |
+German      | 0.33          | 0.25         | 32%      |
+Japanese    | 0.50          | 0.15         | 233%     |
+Chinese     | 0.40          | 0.12         | 233%     |
+Arabic      | 0.35          | 0.24         | 46%      |
+```
+
+**Implication**: Using English-only models with non-English text is expensive. Use native tokenizers when available.
+
+---
+
+## Token Optimization Checklist
+
+- [ ] Choose model by token efficiency, not just quality
+- [ ] Estimate tokens BEFORE making API calls
+- [ ] Compress prompts without losing meaning
+- [ ] Enable caching if available
+- [ ] Batch requests to share context
+- [ ] Use native tokenizers for non-English
+- [ ] Monitor actual token usage vs estimates
+- [ ] Set token limits per request (avoid runaway costs)
+- [ ] Test compression impact on output quality
+- [ ] Track token spending trends over time
+
+---
+
+## Common Mistakes & Fixes
+
+### Mistake 1: Repeating system prompt in every message
+```python
+# WRONG
+for msg in messages:
+    tokens = estimate(system_prompt) + estimate(msg)  # System counted N times!
+
+# RIGHT
+tokens = estimate(system_prompt) + sum(estimate(m) for m in messages)
+```
+
+### Mistake 2: Not using tokenizer for estimates
+```python
+# WRONG: Using word count
+word_count = len(text.split())  # English: 100 words ≠ 75 tokens
+
+# RIGHT
+tokens = tiktoken.encoding_for_model("gpt-4").encode(text)
+```
+
+### Mistake 3: Forgetting JSON overhead
+```python
+# Text: "Hello"  = 2 tokens
+# JSON: {"text": "Hello"}  = 10 tokens (5× overhead!)
+# Always account for formatting
+
+total = estimate_tokens(content) + json_overhead
+```
+
+### Mistake 4: Not compressing after adding features
+```python
+# Original prompt: 50 tokens
+# Add examples: +100 tokens
+# Add instructions: +75 tokens
+# Total: 225 tokens
+
+# Optimization opportunity missed!
+# Could compress to 120 with same quality
+```
+
+---
+
+## Future of Tokenization (2026+)
+
+Trends emerging:
+1. **Variable-length tokens**: Instead of fixed tokenizer, models learning optimal token boundaries
+2. **Language-specific tokenizers**: Better handling of non-English (50% cost reduction for non-English)
+3. **Semantic tokenization**: Tokens represent concepts, not characters (10× compression)
+4. **Unified tokenizers**: One tokenizer for 100+ languages efficiently
+
+For now, master these fundamentals. They'll help regardless of tokenization improvements.
+
+## Sources and Links
+
+- [tiktoken: OpenAI Token Encoder](https://github.com/openai/tiktoken)
+- [SentencePiece: Language-Agnostic Tokenizer](https://github.com/google/sentencepiece)
+- [Hugging Face Tokenizers Library](https://huggingface.co/docs/tokenizers)

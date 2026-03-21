@@ -1,0 +1,476 @@
+---
+title: "Token-Effizienz bei AI Agents"
+date: "2026-03-21"
+summary: "Tiefe Referenz zu Token-Optimierung. Token Bloat Problem, Prompt Caching, Context Window Management, Model Selection und konkrete Kostensparmaßnahmen."
+tags: ["tokens", "efficiency", "costs", "optimization", "llm", "performance"]
+author: "AI Engineering"
+---
+
+# Token-Effizienz bei AI Agents
+
+> Token = Währung in der LLM-Welt. Dieses Dokument zeigt wie du 50-90% der Kosten sparst durch intelligente Tokenisierung.
+
+## Warum Token wichtig sind
+
+Tokens sind das Messmaß für:
+- **Kosten**: $0.003 - $0.075 pro 1k Tokens
+- **Latenz**: Mehr Tokens = längere Verarbeitung
+- **Context Limits**: z.B. Claude Haiku: 200k, aber teuer bei großen Inputs
+
+## Das Token Bloat Problem
+
+### Szenario: Production Agent mit schlechter Tokenisierung
+
+```
+User Input:
+"Analysiere diese CSV"
+
+System Prompt: 500 tokens ← Schon 500 vor dem Nutzer-Input!
+Tool Descriptions: 2000 tokens
+Agent Instructions: 1500 tokens
+Memory/Context: 3000 tokens
+User Input: 100 tokens
+___________________________
+Total: 7100 tokens
+← Für 100 Token echte Info!
+
+Token Overhead Ratio: 7100/100 = 71:1
+```
+
+### Token Verschwendung Sources
+
+```python
+# Beispiel: Unoptimierter Code
+
+# SCHLECHT - Full System Prompt jedes Mal
+SYSTEM_PROMPT = """
+Du bist ein AI Agent mit folgenden Fähigkeiten:
+- Read files
+- Write files
+- Execute bash commands
+- Query databases
+- Send emails
+- Analyze data
+...
+[Wiederholt sich 500+ mal pro Session]
+"""
+
+# GUT - Komprimiert und gecacht
+SYSTEM_PROMPT = """You are an AI agent with standard capabilities."""
+# Tools werden via Hooks geladen, nicht via Prompt
+```
+
+## mcp2cli: Die Revolution
+
+**mcp2cli** = CLI Wrapper um MCP Servers, der 96-99% der Tokens spart.
+
+### Wie es funktioniert
+
+Standard OpenAI Ansatz:
+```
+LLM →
+  full JSON schema von allen Tools
+  + Dokumentation
+  + Examples
+→ Immer im Context
+```
+
+mcp2cli Ansatz:
+```
+LLM → Minimale Tool References
+      (nur Name + kurze Beschreibung)
+      ↓
+      Externe CLI wird aufgerufen
+      ↓
+      Ergebnis zurück an LLM
+```
+
+### Token Vergleich
+
+```
+Task: "Implementiere einen Datei-Manager"
+
+STANDARD APPROACH:
+- System Prompt: 1500 tokens
+- Tool Schemas (JSON): 3200 tokens
+- Per Tool Call: +500 tokens
+- Total für 5 Calls: 1500 + 3200 + 2500 = 7200 tokens
+
+MCP2CLI APPROACH:
+- System Prompt: 100 tokens
+- Tool References: 50 tokens
+- Per Tool Call: +50 tokens (CLI invocation)
+- Total für 5 Calls: 100 + 50 + 250 = 400 tokens
+
+Einsparung: 94.4% ✓
+```
+
+### mcp2cli Installation & Nutzung
+
+```bash
+# Installation
+pip install mcp2cli
+
+# Konfiguration
+mcp2cli config add \
+  --name file-manager \
+  --command "python /opt/tools/file-manager.py" \
+  --description "File read/write operations"
+
+# Nutzen im Code
+from mcp2cli import Client
+
+client = Client()
+result = client.call("file-manager", "read", path="/tmp/data.txt")
+```
+
+## Prompt Caching (Anthropic)
+
+Caching = Kostenfreie Wiederverwendung von Tokens innerhalb 5 Minuten.
+
+### Cache Hit Beispiel
+
+```python
+from anthropic import Anthropic
+
+client = Anthropic()
+
+# FIRST CALL - keine Cache
+response = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    max_tokens=1000,
+    system=[
+        {
+            "type": "text",
+            "text": "You are a helpful assistant.",
+            "cache_control": {"type": "ephemeral"}
+        }
+    ],
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "text",
+                    "text": "What is 2 + 2?",
+                    "cache_control": {"type": "ephemeral"}
+                }
+            ]
+        }
+    ]
+)
+
+print(f"Input tokens: {response.usage.input_tokens}")
+print(f"Cache creation tokens: {response.usage.cache_creation_input_tokens}")
+# Output:
+# Input tokens: 10
+# Cache creation tokens: 10 (cached)
+
+# SECOND CALL - Cache Hit!
+response2 = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    max_tokens=1000,
+    system=[
+        {
+            "type": "text",
+            "text": "You are a helpful assistant.",
+            "cache_control": {"type": "ephemeral"}
+        }
+    ],
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "text",
+                    "text": "What is 2 + 2?",
+                    "cache_control": {"type": "ephemeral"}
+                }
+            ]
+        }
+    ]
+)
+
+print(f"Input tokens: {response2.usage.input_tokens}")
+print(f"Cache read tokens: {response2.usage.cache_read_input_tokens}")
+# Output:
+# Input tokens: 0 (served from cache!)
+# Cache read tokens: 10 (read from cache, 90% cheaper)
+```
+
+### Cache Pricing
+
+| Operation | Kosten |
+|-----------|--------|
+| Erste 5min Nutzung | 100% |
+| Reads (nach 5min) | 10% des Original-Preises |
+| Eviction (nach 5min inaktiv) | Automatisch |
+
+### Cache Best Practices
+
+```python
+class CachedAgent:
+    def __init__(self):
+        self.client = Anthropic()
+        self.base_system_prompt = "..." # Long system prompt
+        self.cache_ttl = 300  # 5 minutes
+
+    def call_with_cache(self, user_input):
+        """Make LLM call with caching"""
+        return self.client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=1000,
+            system=[{
+                "type": "text",
+                "text": self.base_system_prompt,
+                "cache_control": {"type": "ephemeral"}
+            }],
+            messages=[{
+                "role": "user",
+                "content": [{
+                    "type": "text",
+                    "text": user_input,
+                    # Neu Inputs NICHT cachen
+                    # "cache_control": nicht setzen
+                }]
+            }]
+        )
+
+    def calculate_savings(self, num_calls, cached_calls):
+        """Calculate token savings from caching"""
+        # First call: 100% price
+        # Subsequent: 10% price
+        total_tokens = 1000  # example
+        cost_without_cache = num_calls * total_tokens * 0.003
+        cost_with_cache = (1 * total_tokens * 0.003) + \
+                         ((cached_calls - 1) * total_tokens * 0.0003)
+        savings_pct = ((cost_without_cache - cost_with_cache) / \
+                      cost_without_cache) * 100
+        return f"{savings_pct:.1f}% savings"
+```
+
+## Context Window Management
+
+### Sliding Window Strategy
+
+```python
+class SlidingContextManager:
+    def __init__(self, window_size=4000):
+        self.window_size = window_size
+        self.history = []
+
+    def add_interaction(self, user_msg, assistant_msg):
+        """Add and maintain sliding window"""
+        self.history.append({
+            "role": "user",
+            "content": user_msg,
+            "tokens": count_tokens(user_msg)
+        })
+        self.history.append({
+            "role": "assistant",
+            "content": assistant_msg,
+            "tokens": count_tokens(assistant_msg)
+        })
+
+        # Trim to fit window
+        self._trim_to_window()
+
+    def _trim_to_window(self):
+        """Keep only recent messages that fit in window"""
+        total_tokens = 0
+        keep_from_idx = len(self.history)
+
+        # Iterate backwards
+        for i in range(len(self.history) - 1, -1, -1):
+            msg_tokens = self.history[i]["tokens"]
+            if total_tokens + msg_tokens <= self.window_size:
+                total_tokens += msg_tokens
+                keep_from_idx = i
+            else:
+                break
+
+        self.history = self.history[keep_from_idx:]
+
+    def get_context(self):
+        """Return trimmed context"""
+        return self.history
+```
+
+### Summarization für alte Context
+
+```python
+class SummarizationManager:
+    def __init__(self, client, summary_threshold=2000):
+        self.client = client
+        self.summary_threshold = summary_threshold
+
+    def summarize_if_needed(self, conversation_history):
+        """Summarize old messages if they exceed threshold"""
+        total_tokens = sum(
+            count_tokens(msg["content"])
+            for msg in conversation_history
+        )
+
+        if total_tokens > self.summary_threshold:
+            # Take oldest 10 messages
+            old_msgs = conversation_history[:10]
+            new_msgs = conversation_history[10:]
+
+            # Summarize using Claude
+            summary_prompt = f"""
+Erstelle eine Zusammenfassung dieser Konversation:
+
+{json.dumps(old_msgs)}
+
+Kurz und prägnant, max 500 tokens.
+            """
+
+            summary = self.client.messages.create(
+                model="claude-3-5-sonnet-20241022",
+                max_tokens=500,
+                messages=[{
+                    "role": "user",
+                    "content": summary_prompt
+                }]
+            )
+
+            # Replace old msgs with summary
+            return [{
+                "role": "assistant",
+                "content": f"[Summary]: {summary.content[0].text}"
+            }] + new_msgs
+
+        return conversation_history
+```
+
+## Structured Output vs Free-Form
+
+Structured Output spart Tokens durch explizite Format-Vorgabe.
+
+```python
+# INEFFIZIENT - Free Form
+prompt = "Analyze this data and tell me what you see"
+# LLM kann beliebig formatieren, repetitiv
+
+# EFFIZIENT - Structured
+prompt = "Analyze this data in JSON format: {\"key_findings\": [...], \"metrics\": {...}}"
+# LLM muss sich an Schema halten, prägnanter
+
+# Token Ersparnis: ~30%
+```
+
+## Model Selection Strategy
+
+| Task | Modell | Grund | Tokens/Call |
+|------|--------|-------|------------|
+| Simple Classification | Haiku | Günstig + schnell | 100-300 |
+| Standard Analysis | Sonnet | Balanced | 300-1000 |
+| Complex Multi-Step | Opus | Vollständig | 500-2000 |
+| Batch Processing | Haiku | Billig im Scale | 100k+ |
+
+### Dynamische Model Wahl
+
+```python
+class AdaptiveModelSelector:
+    def __init__(self):
+        self.models = {
+            "simple": "claude-3-5-haiku-20241022",
+            "standard": "claude-3-5-sonnet-20241022",
+            "complex": "claude-3-opus-20240229"
+        }
+
+    def select_model(self, task_complexity, available_budget):
+        """Choose model based on complexity and budget"""
+        if available_budget < 0.01:
+            return self.models["simple"]
+        elif task_complexity in ["classification", "simple_qa"]:
+            return self.models["simple"]
+        elif task_complexity in ["analysis", "writing"]:
+            return self.models["standard"]
+        else:
+            return self.models["complex"]
+
+    def calculate_budget_needed(self, task, estimated_tokens):
+        """Calculate cost for task"""
+        costs = {
+            "haiku": 0.00080,
+            "sonnet": 0.003,
+            "opus": 0.015
+        }
+        model = self.select_model(task, float('inf'))
+        cost_per_token = costs[model.split("-")[-1].replace("-20241022", "")]
+        return (estimated_tokens / 1000) * cost_per_token
+```
+
+## Measuring Token Usage
+
+```python
+class TokenAnalytics:
+    def __init__(self):
+        self.calls = []
+
+    def log_call(self, model, input_tokens, output_tokens, cache_read=0, cache_creation=0):
+        """Log token usage"""
+        self.calls.append({
+            "model": model,
+            "input": input_tokens,
+            "output": output_tokens,
+            "cache_read": cache_read,
+            "cache_creation": cache_creation,
+            "timestamp": datetime.now()
+        })
+
+    def get_stats(self, hours=24):
+        """Get analytics for time period"""
+        recent = [c for c in self.calls
+                 if (datetime.now() - c["timestamp"]).total_seconds() < hours * 3600]
+
+        total_input = sum(c["input"] for c in recent)
+        total_output = sum(c["output"] for c in recent)
+        cache_savings = sum(c["cache_read"] for c in recent)
+
+        pricing = {"haiku": 0.00080, "sonnet": 0.003, "opus": 0.015}
+
+        return {
+            "total_input_tokens": total_input,
+            "total_output_tokens": total_output,
+            "cache_tokens_read": cache_savings,
+            "calls": len(recent),
+            "avg_tokens_per_call": (total_input + total_output) / len(recent) if recent else 0,
+            "cache_hit_rate": cache_savings / total_input if total_input > 0 else 0
+        }
+```
+
+## Claude Code Spezifisches Token Management
+
+```yaml
+---
+# .claude/CLAUDE.md
+name: Token-Efficient Agent
+temperature: 0.7
+model: claude-3-5-sonnet-20241022  # Balanced
+
+# Use caching for static content
+system:
+  cache_control: ephemeral
+
+# Limit context to last 10 interactions
+max_history_turns: 10
+
+# Use structured output
+output_format: json
+
+# Compress repetitive instructions
+instructions_compressed: true
+---
+```
+
+---
+
+## Quellen und Links
+
+- [Anthropic API Pricing](https://www.anthropic.com/pricing)
+- [Prompt Caching — Anthropic Docs](https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching)
+- [mcp2cli — Token Optimization](https://github.com/knowsuchagency/mcp2cli)
+- [Token Counting — Anthropic](https://docs.anthropic.com/en/docs/build-with-claude/token-counting)
+- [Context Window Management Best Practices](https://code.claude.com/docs)

@@ -1,0 +1,174 @@
+---
+title: "AI Governance & Model Risk Management"
+description: "AI governance frameworks, model risk management. Documentation requirements, audit trails, model cards. Internal AI policies, responsible AI guidelines."
+section: "ethics"
+---
+
+# AI Governance & Model Risk Management
+
+Governance is the structure for responsibly building and operating AI systems. This page covers frameworks, model cards, and policies.
+
+---
+
+## 1. Model Card Template
+
+```yaml
+# Model Card for [Model Name]
+
+## Model Details
+  - Model name: [Name]
+  - Developed by: [Organization]
+  - Model date: [YYYY-MM-DD]
+  - Model version: [Version]
+  - Framework: [PyTorch/TensorFlow]
+
+## Model Use
+  - Primary use: [What it does]
+  - Intended users: [Who should use]
+  - Out-of-scope uses: [What NOT to do]
+
+## Data
+  - Training data: [Size, source, characteristics]
+  - Evaluation data: [Holdout test set]
+
+## Performance
+  - Accuracy: 92.5%
+  - Precision: 94.2%
+  - Recall: 90.1%
+  - Performance by demographic group: [Include fairness metrics]
+
+## Limitations & Biases
+  - Known limitations
+  - Ethical considerations
+  - Known biases and mitigation strategies
+
+## Recommendations
+  - Speed vs accuracy tradeoffs
+  - Best practices for use
+  - How often retrained
+```
+
+---
+
+## 2. Model Risk Assessment
+
+```python
+from enum import Enum
+from datetime import datetime
+
+class RiskLevel(Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+class ModelRiskAssessment:
+    """Assesses and tracks model risks"""
+
+    def __init__(self, model_name: str):
+        self.model_name = model_name
+        self.risks = []
+
+    def add_risk(self, category: str, description: str, level: RiskLevel):
+        """Adds a risk"""
+        self.risks.append({
+            "category": category,
+            "description": description,
+            "risk_level": level,
+        })
+
+    def generate_report(self) -> str:
+        """Generates risk report"""
+        report = f"# Model Risk Assessment\n"
+        report += f"Model: {self.model_name}\n\n"
+
+        for i, risk in enumerate(self.risks):
+            report += f"### Risk {i+1}: {risk['category']}\n"
+            report += f"- {risk['description']}\n"
+            report += f"- Level: {risk['risk_level'].value}\n\n"
+
+        return report
+
+# Usage:
+assessment = ModelRiskAssessment("Loan Approval Model")
+assessment.add_risk("Fairness", "May discriminate against protected groups", RiskLevel.HIGH)
+assessment.add_risk("Data Quality", "Training data contains biased samples", RiskLevel.MEDIUM)
+print(assessment.generate_report())
+```
+
+---
+
+## 3. Internal AI Policy
+
+```yaml
+# Internal AI Policy
+
+## Core Principles
+  1. Fairness: Minimize bias and discrimination
+  2. Transparency: Explain decisions
+  3. Accountability: Clear ownership
+  4. Privacy: Protect user data
+  5. Security: Prevent misuse
+
+## Model Approval Process
+  - Development: Model card, fairness assessment
+  - Testing: Human evaluation, performance validation
+  - Deployment: Audit trail, monitoring setup
+  - Monitoring: Weekly checks, quarterly audits
+
+## High-Risk Categories
+  Automatic decisions affecting:
+  - Credit/lending
+  - Employment
+  - Criminal justice
+  - Healthcare
+
+  Requires: Ethics review + human approval
+
+## Data Governance
+  - Data minimization
+  - Regular quality audits
+  - Retention limits
+  - Anonymization where possible
+```
+
+---
+
+## 4. Audit Trail
+
+```python
+import json
+from datetime import datetime
+
+class AuditTrail:
+    """Maintains complete audit trail"""
+
+    def __init__(self, model_id: str):
+        self.model_id = model_id
+        self.audit_file = f"audit_trail_{model_id}.jsonl"
+
+    def log_event(self, event_type: str, details: dict):
+        """Logs an event"""
+        entry = {
+            "timestamp": datetime.now().isoformat(),
+            "model_id": self.model_id,
+            "event_type": event_type,
+            "details": details,
+        }
+
+        with open(self.audit_file, "a") as f:
+            f.write(json.dumps(entry) + "\n")
+
+# Usage:
+audit = AuditTrail(model_id="loan_model_v2")
+audit.log_event("model_training", {"accuracy": 0.925})
+audit.log_event("fairness_audit", {"demographic_parity_diff": 0.05})
+```
+
+---
+
+## 5. Sources and Links
+
+- **Model Cards**: https://arxiv.org/abs/1810.03993
+- **AI RMF (NIST)**: https://airc.nist.gov/
+- **Responsible AI**: https://www.microsoft.com/en-us/ai/responsible-ai

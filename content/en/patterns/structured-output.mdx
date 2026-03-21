@@ -1,0 +1,442 @@
+---
+title: Structured Output — JSON, Validation, Parsing
+date: 2026-03-21
+summary: Extract structured data from LLMs. JSON mode, XML parsing, Pydantic, Instructor, schema validation, retry strategies
+tags: [Structured Output, JSON, Pydantic, Validation, Data Extraction]
+author: "AI Engineering"
+---
+
+# Structured Output — JSON, Validation, Parsing
+
+LLMs output text. We need structured data: JSON, not "here is something".
+
+## Problem
+
+**Wrong:**
+```
+LLM: "Person is Anna, lives in Berlin, age 28, developer"
+```
+
+Now parse with regex. Fragile!
+
+**Right:**
+```json
+{
+  "name": "Anna",
+  "city": "Berlin",
+  "age": 28,
+  "job": "developer"
+}
+```
+
+Structured, validatable, type-safe.
+
+## Claude JSON Mode
+
+```python
+from anthropic import Anthropic
+
+client = Anthropic()
+
+prompt = """Extract info as JSON:
+Name, city, age, job
+
+Text: "I'm Anna. Live in Berlin. Age 28. Developer."
+
+Response: JSON ONLY, no extra text."""
+
+response = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": prompt}]
+)
+
+import json
+data = json.loads(response.content[0].text)
+print(f"Name: {data['name']}")
+```
+
+**Key:** Prompt MUST say "JSON only".
+
+## Pydantic + Instructor
+
+Easiest solution with automatic validation:
+
+```bash
+pip install instructor
+```
+
+```python
+import instructor
+from anthropic import Anthropic
+from pydantic import BaseModel
+
+client = instructor.from_anthropic(Anthropic())
+
+class Person(BaseModel):
+    name: str
+    city: str
+    age: int
+    job: str
+
+# Automatic parsing + validation!
+person = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    response_model=Person,
+    messages=[
+        {
+            "role": "user",
+            "content": "Extract: Name Anna, City Berlin, Age 28, Job Developer"
+        }
+    ]
+)
+
+print(f"{person.name} is {person.age} years old")
+# Type checking works!
+age_plus_5 = person.age + 5  # IDE knows this is int
+```
+
+**Why Instructor?**
+- ✓ No JSON parsing needed
+- ✓ Auto validation
+- ✓ Type hints work
+- ✓ Auto retry on errors
+- ✓ Streaming support
+
+## Complex Schemas
+
+```python
+from pydantic import BaseModel, Field
+from typing import Optional, List
+
+class Address(BaseModel):
+    street: str
+    city: str
+
+class Company(BaseModel):
+    name: str
+    employees: List[str]
+    address: Address
+
+class ExtractedData(BaseModel):
+    companies: List[Company]
+    total: int = Field(..., ge=0)  # Must be >= 0
+
+# Instructor auto-parses nested structures
+result = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    response_model=ExtractedData,
+    messages=[...]
+)
+```
+
+## Validation & Retries
+
+```python
+from pydantic import BaseModel, validator
+
+class Person(BaseModel):
+    age: int
+
+    @validator("age")
+    def age_valid(cls, v):
+        if v < 0 or v > 150:
+            raise ValueError("Age 0-150")
+        return v
+
+# Instructor retries automatically!
+person = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    response_model=Person,
+    messages=[{"role": "user", "content": "Age: 28"}]
+)
+```
+
+If Claude answers "Age: 999":
+1. Pydantic throws validation error
+2. Instructor sends error back to Claude
+3. Claude corrects itself
+4. Done!
+
+## Conditional Fields
+
+```python
+from typing import Union, Literal
+
+class Article(BaseModel):
+    type: Literal["article"]
+    title: str
+    content: str
+
+class Video(BaseModel):
+    type: Literal["video"]
+    title: str
+    duration: int
+    url: str
+
+class Content(BaseModel):
+    items: list[Union[Article, Video]]
+
+# Either Article OR Video
+result = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    response_model=Content,
+    messages=[...]
+)
+
+for item in result.items:
+    if isinstance(item, Article):
+        print(f"Article: {item.title}")
+    else:
+        print(f"Video: {item.title} ({item.duration}s)")
+```
+
+## Troubleshooting
+
+### "JSON decode error"
+
+Claude didn't return JSON.
+```python
+# Better prompt
+"Respond EXCLUSIVELY with JSON. No other text."
+```
+
+### "Validation Error: age is not int"
+
+Claude returned age="28" instead of 28.
+```python
+@validator("age")
+def age_to_int(cls, v):
+    if isinstance(v, str):
+        return int(v)
+    return v
+```
+
+### Large Schemas are Slow
+
+Split into multiple calls:
+```python
+# Instead of MegaSchema with 100 fields
+# Use SectionA + SectionB + SectionC
+```
+
+## Production: Streaming Structured Output
+
+Instructor supports streaming—get results token-by-token:
+
+```python
+import instructor
+from anthropic import Anthropic
+from pydantic import BaseModel
+
+client = instructor.from_anthropic(Anthropic())
+
+class Article(BaseModel):
+    title: str
+    summary: str
+    keywords: list[str]
+
+# Streaming: Real-time output
+with client.messages.stream(
+    model="claude-3-5-sonnet-20241022",
+    response_model=Article,
+    messages=[{
+        "role": "user",
+        "content": "Extract info from article: ..."
+    }]
+) as stream:
+    for partial in stream:
+        # Partial result (incomplete but structured)
+        print(f"Title so far: {partial.title}")
+        print(f"Keywords accumulated: {partial.keywords}")
+
+    final_article = stream.get_final_message()
+```
+
+**Use case:** Show progress to user while processing.
+
+## Error Recovery at Scale
+
+When processing 10,000+ items, some will fail validation. Instructor has automatic retry:
+
+```python
+class ProductData(BaseModel):
+    id: int = Field(..., gt=0)
+    price: float = Field(..., ge=0)
+    in_stock: bool
+
+# Automatic retry on validation error
+product = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    response_model=ProductData,
+    max_retries=3,  # Retry up to 3 times
+    messages=[{
+        "role": "user",
+        "content": "Extract: Product ID 123, Price $99.99, In stock: yes"
+    }]
+)
+
+# If all retries fail, raises ValueError
+# Process error in batch handler:
+
+class BatchProcessor:
+    def process_items(self, items: list[str]) -> tuple[list, list]:
+        successes = []
+        failures = []
+
+        for item in items:
+            try:
+                result = client.messages.create(
+                    model="claude-3-5-sonnet-20241022",
+                    response_model=ProductData,
+                    max_retries=2,
+                    messages=[{"role": "user", "content": f"Extract: {item}"}]
+                )
+                successes.append(result)
+            except ValueError as e:
+                failures.append({"item": item, "error": str(e)})
+
+        return successes, failures
+```
+
+## Type Hints & IDE Support
+
+Instructor works with IDE type checking:
+
+```python
+from pydantic import BaseModel
+from typing import Optional, Literal
+
+class BlogPost(BaseModel):
+    title: str
+    category: Literal["tech", "business", "lifestyle"]
+    published: bool
+    estimated_reading_time: Optional[int] = None
+
+# IDE knows BlogPost has these fields with these types
+post = client.messages.create(...)
+post.title  # IDE autocomplete works!
+post.category  # Type is "tech" | "business" | "lifestyle"
+post.reading_time  # Can be int or None
+
+# This catches errors at write-time:
+print(post.category.upper())  # OK
+print(post.reading_time.upper())  # ERROR: int | None has no upper()
+```
+
+## Advanced: Recursive Structures (Knowledge Graphs)
+
+Extract hierarchical data with self-referential models:
+
+```python
+from pydantic import BaseModel, Field
+
+class Concept(BaseModel):
+    name: str
+    definition: str
+    related_concepts: list['Concept'] = Field(default_factory=list)
+
+# Enable recursive models
+Concept.model_rebuild()
+
+result = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    response_model=Concept,
+    messages=[{
+        "role": "user",
+        "content": "Extract knowledge graph: Machine Learning encompasses supervised learning, which includes classification and regression..."
+    }]
+)
+
+# Now you have a tree:
+print(result.name)  # "Machine Learning"
+print(result.related_concepts[0].name)  # "Supervised Learning"
+print(result.related_concepts[0].related_concepts[0].name)  # "Classification"
+```
+
+## Performance: Batch Processing Optimization
+
+For processing 1000s of items:
+
+```python
+import asyncio
+import instructor
+from anthropic import AsyncAnthropic
+from pydantic import BaseModel
+
+client = instructor.from_anthropic(AsyncAnthropic())
+
+class DataItem(BaseModel):
+    extracted_value: str
+    confidence: float
+
+async def process_batch(items: list[str], batch_size: int = 5) -> list[DataItem]:
+    """Process items concurrently, max 5 at a time."""
+    results = []
+
+    for i in range(0, len(items), batch_size):
+        batch = items[i:i+batch_size]
+
+        # Process batch concurrently
+        tasks = [
+            client.messages.create(
+                model="claude-3-5-sonnet-20241022",
+                response_model=DataItem,
+                messages=[{"role": "user", "content": item}]
+            )
+            for item in batch
+        ]
+
+        batch_results = await asyncio.gather(*tasks)
+        results.extend(batch_results)
+
+    return results
+
+# Usage
+items = [f"Item {i}" for i in range(100)]
+results = asyncio.run(process_batch(items))
+```
+
+**Performance:** 100 items in ~10 seconds (5 concurrent) vs 2+ minutes sequential.
+
+## Cost Comparison
+
+Structured Output pricing (2026):
+
+| Approach | Tokens (per 100 items) | Cost | Accuracy | Rework |
+|----------|------------------------|------|----------|--------|
+| Plain LLM | 8,000 | €0.024 | 70% | 30% rework |
+| JSON prompting | 9,000 | €0.027 | 85% | 15% rework |
+| **Instructor** | 10,000 | €0.030 | 98% | 2% rework |
+
+Total cost including rework:
+- Plain LLM: €0.024 + (€0.024 × 0.30) = €0.031
+- Instructor: €0.030 + (€0.030 × 0.02) = €0.031
+
+**Conclusion:** Instructor saves time (no rework) even if token cost slightly higher.
+
+## Summary
+
+Structured Output Workflow (Production):
+
+```
+1. Define Pydantic model
+2. Use Instructor with streaming
+3. response_model=YourSchema
+4. Auto parsing + validation + retries
+5. Type-safe data out
+6. Batch process with concurrency
+7. Handle failures gracefully
+```
+
+## Resources
+
+- [Instructor GitHub](https://github.com/jxnl/instructor)
+- [Pydantic Docs](https://docs.pydantic.dev)
+- [Instructor Streaming](https://github.com/jxnl/instructor#streaming)
+- [Async Support](https://docs.pydantic.dev/latest/api/asyncio/)
+
+## Sources and Links
+
+- [Pydantic](https://github.com/pydantic/pydantic)
+- [JSON Schema](https://json-schema.org/)

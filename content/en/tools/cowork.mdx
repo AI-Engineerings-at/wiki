@@ -1,0 +1,467 @@
+---
+title: Claude Cowork — Agent Collaboration Mode
+date: 2026-03-21
+summary: Run persistent AI agents, orchestrate multi-agent teams, and build autonomous workflows with Cowork
+tags: [cowork, agents, orchestration, automation, workflows]
+author: AI Engineering
+---
+
+# Claude Cowork — Agent Collaboration Mode
+
+Claude Cowork is a desktop application that runs Claude as a persistent AI agent on your computer. Unlike chat, Cowork maintains continuous operation, manages background tasks, and coordinates with other agents and services.
+
+## What Is Cowork?
+
+Cowork is the agent runtime for Claude Code. While Code is a CLI for development tasks, Cowork is a desktop application that:
+
+- Runs agents 24/7 without your interaction
+- Manages multiple parallel tasks
+- Coordinates between different specialized agents
+- Integrates with local files, APIs, and services
+- Provides a dashboard for monitoring agent activity
+
+Think of it as hiring a team of specialists who work continuously on your behalf.
+
+## Installation & Setup
+
+### Download Claude Cowork
+
+- macOS: https://claude.ai/cowork/download/mac
+- Windows: https://claude.ai/cowork/download/windows
+- Linux: Available via Flathub or direct download
+
+### First Launch
+
+1. Sign in with your Claude account
+2. Select a local directory as your workspace
+3. Configure integrations (Slack, email, etc.)
+4. Define your agents
+5. Create your first workflow
+
+## Agent Architecture
+
+### Built-in Agents
+
+Cowork includes ready-to-use agents:
+
+**Manager** — Orchestrates tasks, manages queue, delegates to specialists
+**Researcher** — Gathers information, analyzes data, performs due diligence
+**Developer** — Codes, tests, deploys, manages infrastructure
+**Writer** — Creates content, edits, formats, publishes
+**Analyst** — Reviews data, generates reports, identifies patterns
+
+### Creating Custom Agents
+
+```yaml
+---
+name: customer-support
+description: >
+  Handles customer support tickets with escalation routing.
+  Monitors email, responds to inquiries, flags urgent issues.
+model: sonnet
+maxTurns: 50
+skills:
+  - email-response
+  - ticket-routing
+  - escalation-rules
+disallowedTools: [Bash]
+---
+
+# Customer Support Agent
+
+Monitors incoming support tickets and responds appropriately.
+
+## Responsibilities
+
+- Read support email inbox every 30 minutes
+- Respond to common questions (FAQ-based)
+- Categorize tickets by urgency
+- Escalate to human team if needed
+- Follow up on open tickets
+
+## Escalation Rules
+
+- Account issues → Immediate escalation
+- Billing questions → Finance team
+- Technical bugs → Developer team
+- Feature requests → Product team
+```
+
+## Managing Tasks & Queues
+
+### Creating Tasks
+
+Tasks are what you want done. You create them, the system assigns them to agents:
+
+```markdown
+# Task: Analyze March Marketing Performance
+
+## Description
+Generate a comprehensive analysis of:
+1. Website traffic trends
+2. Content performance (blog, email, social)
+3. Lead quality and conversion rates
+4. Competitor activity
+
+## Requirements
+- Use data from Google Analytics + Mixpanel
+- Compare to February baseline
+- Create a visual dashboard
+- Executive summary (500 words max)
+- Detailed findings document
+
+## Due
+March 25, 2026
+
+## Assignee
+analyst
+```
+
+### Task States
+
+```
+CREATED → ASSIGNED → IN_PROGRESS → REVIEW → COMPLETED
+     ↓           ↓              ↓         ↓
+  [BACKLOG] [WAITING] [BLOCKED] [REJECTED]
+```
+
+- **CREATED**: Task entered the system
+- **ASSIGNED**: Manager assigned to an agent
+- **IN_PROGRESS**: Agent is actively working
+- **REVIEW**: Agent finished, awaiting approval
+- **COMPLETED**: Approved and delivered
+- **BLOCKED**: Waiting for external input
+- **REJECTED**: Didn't meet requirements, sent back to agent
+
+### Monitoring Progress
+
+Cowork's dashboard shows:
+- Current task distribution
+- Agent utilization
+- Task completion rates
+- Bottlenecks and delays
+- Quality metrics
+
+## Workflows & Automation
+
+### Scheduled Workflows
+
+Set agents to run on a schedule:
+
+```yaml
+---
+name: daily-standup
+schedule: "0 9 * * 1-5"  # 9 AM weekdays
+trigger: time
+agents:
+  - researcher
+  - analyst
+---
+
+## Daily Standup Generator
+
+Collects updates from all team members and generates a briefing.
+
+## Steps
+
+1. Pull email updates from team
+2. Extract calendar events for the day
+3. Check project board for changes
+4. Summarize blockers and priorities
+5. Create markdown briefing
+6. Send to Slack #standup channel
+```
+
+### Event-Triggered Workflows
+
+Workflows trigger on specific events:
+
+```yaml
+---
+name: support-ticket-handler
+trigger: email:support@company.com
+agents:
+  - customer-support
+---
+
+## Support Ticket Workflow
+
+Every time a support email arrives, this workflow runs.
+```
+
+### Conditional Logic
+
+Route tasks based on conditions:
+
+```yaml
+---
+name: invoice-processing
+trigger: file:receipts/
+agents:
+  - analyst
+---
+
+## Invoice Processing
+
+1. Analyze invoice for amount
+2. If > $5000: Escalate to manager
+3. If < $100: Auto-approve
+4. Otherwise: Route to finance team
+```
+
+## Integrations
+
+### Local File System
+
+Cowork watches directories and can trigger workflows:
+
+```yaml
+watch:
+  - path: /data/inbox/
+    pattern: "*.csv"
+    action: import-data
+```
+
+### Slack Integration
+
+Send updates, receive commands via Slack:
+
+```yaml
+slack:
+  channel: "#ai-operations"
+  commands: true
+  notifications: true
+  reports: daily
+```
+
+Agents post progress updates, and humans can command agents via Slack.
+
+### Email Integration
+
+Monitor email addresses and respond automatically:
+
+```yaml
+email:
+  accounts:
+    - support@company.com
+    - hello@company.com
+  auto-respond: true
+  escalation: team@company.com
+```
+
+### API Integration
+
+Connect to external services:
+
+```yaml
+integrations:
+  - service: stripe
+    auth: api-key
+    actions: [read-invoices, read-customers]
+  - service: github
+    auth: oauth
+    actions: [read-repos, create-issues]
+```
+
+## Agent Orchestration
+
+### Manager Agent
+
+The manager agent coordinates all others. It:
+- Receives new tasks
+- Assigns based on agent capabilities
+- Monitors progress
+- Handles escalations
+- Reports completion
+
+```yaml
+---
+name: manager
+description: >
+  Orchestrates all other agents. Assigns tasks,
+  monitors progress, handles escalations.
+model: opus  # Most capable model for complex decisions
+maxTurns: 100
+disallowedTools: []  # Full access
+---
+```
+
+### Agent Communication
+
+Agents communicate via a shared message queue:
+
+```json
+{
+  "from": "researcher",
+  "to": "analyst",
+  "task_id": "task_12345",
+  "message": "Marketing data collected. See /tmp/march_data.json"
+}
+```
+
+Agents can request help from each other:
+
+```yaml
+# In researcher skill:
+Analyze this data and summarize trends.
+@analyst please review and send to manager with recommendation.
+```
+
+## Performance & Monitoring
+
+### Agent Metrics
+
+Monitor each agent's performance:
+
+- **Completion rate** — % of assigned tasks completed
+- **Average duration** — Time per task
+- **Quality score** — Approved vs rejected outputs
+- **Utilization** — Active vs idle time
+- **Error rate** — Failed operations
+
+### Dashboard
+
+```
+┌─ Cowork Dashboard ────────────────────────┐
+│                                            │
+│ Active Tasks: 12                           │
+│ Agents Online: 5                           │
+│ Queue Length: 8                            │
+│                                            │
+│ Agents Performance                         │
+│ ├─ Manager: 100% (5/5 tasks)              │
+│ ├─ Researcher: 80% (4/5 tasks)            │
+│ ├─ Developer: 60% (3/5 tasks)             │
+│ ├─ Writer: 100% (2/2 tasks)               │
+│ └─ Analyst: 75% (3/4 tasks)               │
+│                                            │
+│ Recent Activity                            │
+│ ├─ Daily standup completed                │
+│ ├─ Marketing analysis in review            │
+│ ├─ Feature development blocked              │
+│ └─ Support tickets: 12 resolved today      │
+│                                            │
+└────────────────────────────────────────────┘
+```
+
+### Logs & Debugging
+
+View detailed logs for each agent:
+
+```bash
+# Logs from the manager
+cowork logs manager --tail=50
+
+# Logs from specific task
+cowork logs task:task_12345
+
+# Search logs
+cowork logs --grep "error" --since "24h"
+```
+
+## Advanced Features
+
+### Dispatch Mode (Research Preview)
+
+Control your desktop agents from your phone. Available on Claude Cowork with a Max subscription (launched March 2026).
+
+Setup takes two minutes:
+1. Open Claude Cowork on desktop
+2. Click "Dispatch"
+3. Scan QR code with Claude mobile app
+4. Type commands on your phone
+
+Dispatch maintains a single persistent conversation between phone and desktop. Your desktop agents execute the task while you're away.
+
+**Important**: If your desktop sleeps or Cowork closes, Dispatch stops. Success rate around 50% on complex tasks, higher on simple ones (file search, summaries).
+
+### Multi-Agent Collaboration
+
+Example: Complex report generation
+
+```yaml
+---
+name: quarterly-business-review
+agents:
+  - researcher   # Gathers data from all sources
+  - analyst      # Processes data into insights
+  - writer       # Formats findings into report
+  - manager      # Reviews and approves
+duration: 2 days
+---
+
+## Quarterly Business Review
+
+### Phase 1: Research (Day 1)
+Researcher collects:
+- Financial data (revenue, expenses, metrics)
+- Customer feedback (support tickets, surveys)
+- Market research (competitors, trends)
+- Internal data (team updates, project status)
+
+### Phase 2: Analysis (Day 1)
+Analyst processes data:
+- Calculates key metrics (growth rate, margin, efficiency)
+- Identifies trends and patterns
+- Flags anomalies and risks
+- Creates visualizations
+
+### Phase 3: Writing (Day 2)
+Writer creates:
+- Executive summary (1 page)
+- Detailed findings (10-20 pages)
+- Appendix with data tables
+- Presentation slides
+
+### Phase 4: Review (Day 2)
+Manager:
+- Reviews quality
+- Approves for delivery
+- Schedules stakeholder briefing
+```
+
+### Error Recovery
+
+Agents automatically recover from failures:
+
+```yaml
+retry:
+  max_attempts: 3
+  backoff: exponential
+  on_failure: escalate
+
+escalation:
+  support_queue: true
+  notification: true
+```
+
+## Checklist
+
+- [ ] Install Claude Cowork desktop app
+- [ ] Configure workspace directory
+- [ ] Set up integrations (email, Slack, APIs)
+- [ ] Create custom support agent
+- [ ] Define a daily standup workflow
+- [ ] Monitor agent performance dashboard
+- [ ] Test task escalation and error handling
+- [ ] Set up scheduled workflows
+- [ ] Configure integrations for your services
+- [ ] Review audit logs and agent communication
+
+---
+
+**Sources:**
+- [Claude Dispatch: Your AI Coworker That Works While You're Away | Medium](https://medium.com/@pvgool/claude-dispatch-your-ai-coworker-that-works-while-youre-away-42662f80c98f)
+- [Claude Dispatch Explained | What It Is and How It Works](https://www.lowcode.agency/blog/claude-dispatch-explained)
+- [How Claude Dispatch turns your phone into an AI agent remote control](https://www.howdoiuseai.com/blog/2026-03-19-how-claude-dispatch-turns-your-phone-into-an-ai-ag)
+
+## Sources and Links
+
+- [Claude Cowork](https://claude.com/cowork)
+- [Cowork Documentation](https://docs.claude.com/en/docs/cowork)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

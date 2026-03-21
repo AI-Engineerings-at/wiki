@@ -1,0 +1,424 @@
+---
+title: GDPR & AI — Data Protection in the Age of Automation
+date: 2026-03-21
+summary: How GDPR applies to AI systems, automated decision-making, and practical compliance strategies
+tags: [gdpr, ai, data-protection, privacy, compliance]
+author: AI Engineering
+---
+
+# GDPR & AI — Data Protection in the Age of Automation
+
+GDPR (General Data Protection Regulation) is Europe's core privacy law. The EU AI Act doesn't replace GDPR—it's an additional layer. If you process personal data, both apply.
+
+## GDPR Basics (Quick Reference)
+
+**What is GDPR?** Rules for processing personal data of EU residents.
+
+**Personal Data**: Any info that identifies or could identify a person (name, email, IP address, cookie ID, etc.).
+
+**Key Rights**:
+- Right to access their data
+- Right to delete ("right to be forgotten")
+- Right to correction
+- Right to portability (get data in standard format)
+- Right to object
+- Right to explanation (for automated decisions)
+
+**Your obligations if you have personal data**:
+- Get consent (for most processing)
+- Provide privacy policy
+- Implement security
+- Report breaches within 72 hours
+- Conduct Data Protection Impact Assessment (DPIA)
+- Maintain records
+- Respect data subject rights
+
+## GDPR + AI Act: Where They Overlap
+
+| Area | GDPR | AI Act |
+|------|------|--------|
+| **Automated Decision-Making** | Article 22 (right to explanation) | High-risk (requires safeguards) |
+| **Data Protection** | Core requirement | Assumes GDPR compliance |
+| **Impact Assessment** | DPIA (Article 35) | FRIA (Article 27) |
+| **Transparency** | Privacy policy | System documentation |
+| **Training Data** | Lawful basis required | Must be documented |
+| **High-Impact Decisions** | Restricted (Art 22) | Restricted + more controls |
+
+**Practical**: Do DPIA first (GDPR), expand to include fundamental rights (becomes FRIA for AI Act).
+
+## Personal Data in AI Systems
+
+### What Counts as Personal Data?
+
+✓ **Personal Data**:
+- Names, email addresses, phone numbers
+- Employee/contractor records
+- Customer accounts
+- IP addresses
+- Cookies/device IDs
+- Biometric data (fingerprints, face images)
+- Location data
+- Health/medical information
+- Financial account numbers
+- Educational records
+- Criminal records
+
+✗ **NOT Personal Data**:
+- Anonymized data (truly irreversible)
+- Aggregated statistics ("5% of customers...")
+- Public, non-identifying info (company name, address)
+- Technical logs without identifiers
+
+**Key**: If you can identify someone (even indirectly), it's personal data.
+
+### Data Protection Impact Assessment (DPIA)
+
+**Requirement**: DPIA needed if processing creates risk to rights/freedoms.
+
+**Triggers for AI**:
+- Using AI for hiring/employment decisions
+- Using AI for credit/financial decisions
+- Using AI in law enforcement
+- Large-scale processing of sensitive data
+- Using sensitive data (health, criminal history, biometric)
+- Using new technology
+- Automated decision-making
+
+**DPIA must address**:
+
+1. **What data?**
+   - What personal data are you processing?
+   - How much? How sensitive?
+   - Whose data (employees, customers, suspects)?
+
+2. **Why?**
+   - What's your legal basis (consent, contract, legal obligation, vital interest, public task, legitimate interest)?
+   - Is the basis legitimate?
+
+3. **How?**
+   - What systems process it (including AI)?
+   - Who has access?
+   - How long do you keep it?
+   - What could go wrong?
+
+4. **Risks?**
+   - Could the AI discriminate?
+   - Could it expose sensitive data?
+   - Could it lead to wrong decisions?
+   - Could it enable surveillance?
+
+5. **Safeguards?**
+   - How do you minimize data collection?
+   - How do you protect it (encryption, access controls)?
+   - How do people exercise their rights?
+   - Who oversees the system?
+   - What if something goes wrong?
+
+**DPIA Example (Hiring AI)**:
+
+```
+1. DATA
+   - Resumes (500+ per month)
+   - Sensitive: Criminal history (if included)
+
+2. LEGAL BASIS
+   - Legitimate interest (efficient hiring)
+   - Consent (if asking candidate permission)
+
+3. PROCESSING
+   - AI resume screening tool
+   - Shortlist of 10 candidates
+   - No hiring without human review
+
+4. RISKS
+   - AI could discriminate by gender/age
+   - Candidates can't explain AI decision
+   - False rejection (good candidate rejected)
+   - Data breach exposing candidate info
+
+5. SAFEGUARDS
+   - Test AI for bias quarterly
+   - Human manager reviews all AI rejections
+   - Candidate can request explanation
+   - Data encrypted in transit/at rest
+   - 1-year retention max
+   - Incident response plan
+```
+
+## Automated Decision-Making (Article 22)
+
+GDPR Article 22 is critical for AI: **You can't make fully automated decisions that legally affect people without safeguards.**
+
+### What's Prohibited?
+
+Fully automated decision-making where:
+- The decision is made solely by machine (no human involved)
+- AND it has legal effect or significantly affects the person
+
+**Examples that violate Article 22**:
+- AI auto-rejects job applicants without human review
+- AI auto-denies loans without human review
+- AI auto-suspends customers without review
+- AI auto-arrests suspects without human judgment
+
+### What's Allowed?
+
+- AI recommends, human decides ✓
+- AI flags suspicious transactions, human reviews ✓
+- AI grades essays, teacher reviews and can override ✓
+- AI assists with hiring, manager makes final decision ✓
+- AI purely analyzes (no decision) ✓
+
+### Safeguards Required
+
+If you do have some automated decision-making:
+
+1. **Human Oversight**
+   - Someone must review before decision takes effect
+   - That person must have authority to override
+   - They need adequate training
+
+2. **Transparency**
+   - Tell the person a decision is being made
+   - Explain the logic (at least general explanation)
+   - Tell them their rights
+
+3. **Right to Contest**
+   - Person can ask for human review
+   - Person can appeal the decision
+   - Someone else (not the AI maker) hears appeal
+
+4. **Opt-Out**
+   - When possible, offer non-AI alternative
+   - Don't penalize person for choosing opt-out
+
+### Example: Compliant AI Hiring
+
+```
+1. AI screens resumes and creates shortlist of 20
+2. Human manager reviews all 20
+3. Manager can override AI and add/remove candidates
+4. Only manager-approved candidates get interviews
+
+Safeguards:
+✓ Human oversight (manager reviews all)
+✓ Human authority (can add/remove)
+✓ Transparency (candidate told "AI assisted in screening")
+✓ Right to contest (candidate can ask why rejected)
+```
+
+### Example: Non-Compliant AI Hiring
+
+```
+AI automatically rejects candidates with:
+- No 5+ years experience
+- No specific college degree
+- Gaps > 6 months in employment
+
+No human reviews rejections.
+
+Problem:
+✗ Fully automated
+✗ No human review
+✗ Candidate doesn't know why rejected
+✗ No right to appeal
+Violates Article 22
+```
+
+## Training Data & GDPR
+
+### Lawful Basis for Training
+
+You can't just use any data to train AI. You need a lawful basis:
+
+| Basis | Example | Use with AI |
+|-------|---------|-----------|
+| **Consent** | "I agree to use my data for AI training" | ✓ If explicit |
+| **Contract** | "Terms of service for using our service" | ✓ Usually OK |
+| **Legal obligation** | Law requires you to collect this | ✓ Restricted |
+| **Vital interest** | Protecting someone's health/safety | ✓ Limited use |
+| **Public task** | Government providing public service | ✓ Government |
+| **Legitimate interest** | Your business needs it AND person's rights aren't overridden | ✓ Most common |
+
+### What About Publicly Available Data?
+
+**Not automatically free to use.**
+
+Just because data is public doesn't mean you have a lawful basis.
+
+**Example**:
+```
+Social media profile is public.
+You scrape it to train your AI.
+→ GDPR violation (no legal basis)
+→ Even though it was public
+```
+
+### Right to Opt-Out Training
+
+**You must honor requests to not use someone's data for AI training.**
+
+Under GDPR Articles 19-21, people can:
+- Object to legitimate interest processing (including AI training)
+- Request deletion (right to be forgotten)
+- Restrict processing
+
+If someone says "Don't use my data for AI", you must delete their data from training.
+
+## Data Subject Rights (That Affect AI)
+
+### Right to Access (Article 15)
+
+**Person can ask**: "What personal data do you have about me?"
+
+**You must provide** (within 30 days):
+- Copy of their data
+- Purpose of processing
+- Recipients (who has access)
+- Retention period
+
+**For AI**: Include
+- What data was used to train your model
+- How the model uses their data
+- What decisions or recommendations involve them
+
+### Right to Deletion (Article 17)
+
+**Person can ask**: "Delete all my data"
+
+**Exceptions**: You can keep if needed for:
+- Legal obligation
+- Exercising legal claims
+- Public interest
+- Vital interest protection
+
+**For AI**: Deletion request means:
+- Remove from active systems
+- Retrain model to remove their influence
+- Update any recommendations based on their data
+
+**Note**: This is hard for AI models trained on person's data. Consider this when choosing training approach.
+
+### Right to Rectification (Article 16)
+
+**Person can ask**: "Fix incorrect data about me"
+
+You must correct within 30 days.
+
+**For AI**: If model makes wrong assumptions about someone, you should:
+- Fix the data
+- Flag that person's data as disputed
+- Don't rely on disputed data for decisions
+
+### Right to Restrict Processing (Article 18)
+
+**Person can ask**: "Don't use my data for now"
+
+You must pause processing but keep the data.
+
+**For AI**: If someone requests this:
+- Don't use their data in recommendations
+- Don't retrain model with their data
+- Keep data in case they revoke request
+
+### Right to Data Portability (Article 20)
+
+**Person can ask**: "Give me my data in a standard format"
+
+You must provide (within 30 days):
+- All their data in machine-readable format
+- In a format you received it (or structured format)
+
+**For AI**: This is tricky because model decisions aren't easily "data." Provide:
+- All personal data you collected about them
+- Predictions/scores the AI generated about them
+- Decisions made by the AI
+
+### Right to Object (Article 21)
+
+**Person can ask**: "Stop using my data for this purpose"
+
+You must stop unless you have compelling reason.
+
+**For AI**: Especially applies to marketing/profiling
+- Stop using for personalization
+- Stop for targeting
+- Stop for analytics (in some cases)
+
+### Right to Explanation (Article 15 + 22)
+
+**Person can ask**: "Explain how the AI made this decision about me"
+
+You must explain:
+- In plain language (not just technical)
+- The logic of the system
+- What data was used
+- What factors mattered
+- Why decision was made
+
+**Hard but required for high-impact decisions.**
+
+## Practical: GDPR Compliance for AI
+
+### Checklist for AI Systems Processing Personal Data
+
+- [ ] **Lawful basis**: Which legal basis justifies this processing?
+- [ ] **Data minimization**: Collecting minimum needed?
+- [ ] **DPIA completed**: Assessed risks?
+- [ ] **Transparency**: Privacy policy updated?
+- [ ] **Consent (if needed)**: Getting informed consent?
+- [ ] **Human oversight**: Someone reviews AI decisions?
+- [ ] **Data security**: Encrypted, access controlled?
+- [ ] **Breach plan**: Know how to respond to breach?
+- [ ] **Data subject rights**: Can people access/delete/correct?
+- [ ] **Third-party agreements**: DPAs with vendors?
+- [ ] **Retention limits**: Delete data when no longer needed?
+- [ ] **Explainability**: Can you explain decisions?
+
+### Common GDPR + AI Mistakes
+
+❌ **Mistake 1**: Using customer data for AI training without consent
+
+✓ **Fix**: Get explicit consent or use only anonymized data
+
+❌ **Mistake 2**: AI making fully automated hiring/credit decisions
+
+✓ **Fix**: Add human review before decision takes effect
+
+❌ **Mistake 3**: No privacy policy explaining AI use
+
+✓ **Fix**: Update privacy policy with AI details
+
+❌ **Mistake 4**: Scraping public data for training without legal basis
+
+✓ **Fix**: Only use data you have legitimate right to
+
+❌ **Mistake 5**: Ignoring data subject rights requests
+
+✓ **Fix**: Implement process to handle requests within 30 days
+
+## Checklist
+
+- [ ] Understand what counts as personal data in your AI
+- [ ] Identify legal basis for processing
+- [ ] Conduct DPIA for high-risk processing
+- [ ] Implement human oversight (if decision-making)
+- [ ] Update privacy policy with AI details
+- [ ] Document training data sources and lawful basis
+- [ ] Implement process to honor deletion requests
+- [ ] Test explainability of AI decisions
+- [ ] Set up 72-hour breach notification procedures
+- [ ] Get legal review of GDPR approach
+
+---
+
+**Sources**:
+- [GDPR and AI in 2026: Rules, Risks & Tools That Comply - Sembly AI](https://www.sembly.ai/blog/gdpr-and-ai-rules-risks-tools-that-comply/)
+- [EU AI Regulations Overview: Risks, Obligations, and Enforcement - GDPR Local](https://gdprlocal.com/eu-ai-regulations/)
+- [Complete GDPR Compliance Guide (2026-Ready)](https://secureprivacy.ai/blog/gdpr-compliance-2026)
+- GDPR Official Text (regulation-eu-2016-679)
+
+## Sources and Links
+
+- [GDPR (EUR-Lex)](https://eur-lex.europa.eu/eli/reg/2016/679/oj)
+- [GDPR.gv.at](https://www.dsb.gv.at)

@@ -1,0 +1,151 @@
+---
+title: Chain-of-Thought — Schritt-für-Schritt Reasoning
+date: 2026-03-21
+summary: Wei et al. 2022, Few-shot CoT prompting, Zero-shot CoT ("Let's think step by step"), Self-consistency, Tree of Thoughts extensions.
+tags: [cot, reasoning, prompting, llm, paper]
+author: AI Engineering
+section: papers
+---
+
+# Chain-of-Thought — Schritt-für-Schritt Reasoning
+
+Chain-of-Thought (CoT) ist einer der wichtigsten Insights in Prompt Engineering. Die einfache Idee: Wenn du ein Modell bittest, seine Reasoning zu erklären, wird es dramatisch besser.
+
+## Die Entdeckung (Wei et al. 2022)
+
+Paper: "Chain-of-Thought Prompting Elicits Reasoning in Large Language Models"
+
+```
+Ohne CoT:
+F: "3 Autos auf Parkplatz, 2 kommen an. Wie viele?"
+A: "5" (Modell rät, keine Erklärung)
+
+Mit CoT:
+F: "Erkläre Schritt für Schritt: 3 Autos + 2 = ?"
+A: "Start mit 3, addiere 2, resultat ist 5"
+(Richtig mit Begründung)
+```
+
+## Few-Shot CoT Prompting
+
+Key insight: Ändere nur den Prompt, nicht das Modell.
+
+```
+Beispiel 1:
+"Roger hat 5 Äpfel. Er isst 1. Schritte:
+- Start: 5 Äpfel
+- Isst: 1 Apfel
+- Resultat: 4 Äpfel"
+
+Beispiel 2:
+"Maria hat 10 Bücher. Kauft 3. Schritte:
+- Start: 10 Bücher
+- Kauft: 3 Bücher
+- Resultat: 13 Bücher"
+
+Jetzt deine Aufgabe:
+"James hat 7 Orangen. Gibt 2 weg. Schritte: ?"
+```
+
+Das Modell lernt das Pattern: **Immer Zwischenschritte zeigen.**
+
+## Zero-Shot CoT: Der Magic Phrase
+
+Noch einfacher: Keine Beispiele nötig!
+
+Einfach hinzufügen: "Lass mich Schritt für Schritt denken"
+
+```
+Ohne Phrase: "Was sind 15% von 300?" → "45"
+Mit Phrase: "Lass mich Schritt für Schritt denken. Was sind 15% von 300?"
+→ "15% bedeutet 15/100. Davon 300: 0.15 * 300 = 45"
+```
+
+Diese EINE Phrase erhöht Genauigkeit um 10-20%!
+
+## Why Does This Work?
+
+Drei Hypothesen:
+
+1. **Mehr Tokens**: Modell hat mehr "Zeit" zu denken
+2. **Dekomposition**: Problem in Schritte zu teilen reduziert kumulativen Fehler
+3. **Routing**: Modell nutzt komplexere neuronale Pfade
+
+Wahrscheinlich eine Kombination.
+
+## Self-Consistency Extension
+
+Problem: CoT kann immer noch falsch sein.
+Lösung: Mehrfach fragen, dann Mehrheitsvoting.
+
+```python
+answers = []
+for i in range(5):  # 5 Versuche
+    reasoning = model.generate_with_cot(question)
+    answer = extract_answer(reasoning)
+    answers.append(answer)
+
+final_answer = majority_vote(answers)
+```
+
+Ergebnis: +5-10% Genauigkeit auf Mathe-Benchmarks.
+
+## Tree of Thoughts
+
+Idee: Was wenn wir mehrere Denk-Bäume generieren?
+
+```
+       Start
+      /  |  \
+   B1   B2   B3
+   /|   ||\  /|
+  A A  A AA  A A
+```
+
+Versuche mehrere Wege, prufe Low-Confidence Äste.
+Ergebnis: +10-40% auf komplexen Aufgaben.
+
+## Benchmarks
+
+```
+Math Problem Solving (GSM8K):
+
+Ohne CoT:
+- GPT-3: 11%
+- GPT-3.5: 40%
+
+Mit CoT:
+- GPT-3: 56%
+- GPT-3.5: 82%
+
+Verbesserung: 5x besser!
+```
+
+## Impact
+
+CoT bewies:
+1. **Prompting ist so wichtig wie Modellgröße**
+2. **Funktioniert auch für kleine Modelle (7B params)**
+3. **Funktioniert über viele Domains**
+4. **Einfachheit schlägt Komplexität**
+
+## Practical Use in Production
+
+In Playbook01 n8n Workflows:
+- Komplexe Datentransformationen
+- Conditional Logic
+- Multi-Step Berechnungen
+- Complex Natural Language Processing
+
+## Quando CoT Nicht Hilft
+
+- Simple Facts (Kapital von Frankreich)
+- Multiple Choice (Modell übertreibt)
+- Sehr lange Reasoning (>20 Schritte, Fehler akkumulieren)
+
+## Quellen und Links
+
+- [CoT Paper (ArXiv)](https://arxiv.org/abs/2201.11903)
+- [Zero-Shot CoT Paper](https://arxiv.org/abs/2205.11916)
+- [Self-Consistency Paper](https://arxiv.org/abs/2203.11171)
+- [Tree of Thoughts Paper](https://arxiv.org/abs/2305.10601)

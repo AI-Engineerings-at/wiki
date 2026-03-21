@@ -1,0 +1,441 @@
+---
+title: "Agent Teams — Claude Code Referenz"
+date: "2026-03-21"
+summary: "Orchestriere mehrere Claude Code Sessions als koordiniertes Team — Agent Teams ermöglichen parallele Arbeit mit gemeinsamen Task-Listen und direkter Agent-Kommunikation."
+tags: ["claude-code", "teams", "agents", "coordination", "reference"]
+author: "AI Engineering"
+---
+
+# Claude Code Agent Teams
+
+Agent Teams erlauben es dir, mehrere Claude Code Instanzen koordiniert zu steuern. Ein Team Lead koordiniert Arbeit und verteilt Tasks an spezialisierten Teammates. Jeder Teammate arbeitet in seinem eigenen Context und kommuniziert direkt mit anderen Teammates.
+
+**Unterschied zu Subagents:** Subagents berichten nur zum Main-Agent zurueck. Agent Teams haben eine gemeinsame Task-Liste und Teammates sprechen direkt miteinander.
+
+## Agent Teams aktivieren
+
+Agent Teams sind experimentell und standardmaessig deaktiviert.
+
+**Aktiviere sie durch .claude/settings.json:**
+
+```json
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  }
+}
+```
+
+Oder als Umgebungsvariable:
+
+```bash
+export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
+claude
+```
+
+## Dein erstes Agent Team starten
+
+Beginne mit einer natuerlichsprachlichen Anfrage:
+
+```
+Create an agent team to refactor the auth module.
+Spawn 3 teammates: one for refactoring, one for tests, one as QA.
+```
+
+Claude wird dann:
+1. Das Team erstellen
+2. Task-Liste aus deiner Anfrage ableiten
+3. Teammates spawnen (jeder in eigenem Context)
+4. Work-Distribution starten
+
+## Team-Architektur
+
+Ein Agent Team besteht aus:
+
+### 1. Team Lead
+- Die Haupt-Session
+- Erstellt das Team
+- Koordiniert Work
+- Communicates mit Teammates
+
+### 2. Teammates
+- Separate Claude Code Instanzen
+- Arbeiten unabhaengig
+- Teilen sich eine Task-Liste
+- Kommunizieren direkt miteinander
+
+### 3. Shared Task List
+- Zentrale Koordination
+- Tasks sind Pending → In Progress → Completed
+- Task-Dependencies
+- Alle Agents sehen die gleiche Liste
+
+### 4. Mailbox
+- Messaging zwischen Agents
+- Automatische Benachrichtigungen
+- Strukturierte Kommunikation
+
+## Display Modi
+
+### In-Process Mode (Default)
+
+Alle Teammates laufen in deinem Terminal. Wechsle zwischen ihnen mit **Shift+Down**:
+
+```
+Lead Terminal
+> [du bekommst responses vom Lead]
+
+Shift+Down → Teammate 1
+> [jetzt tippst du an Teammate 1]
+
+Shift+Down → Teammate 2
+> [jetzt an Teammate 2]
+
+Shift+Down → Lead (wraps around)
+```
+
+**Vorteile:**
+- Funktioniert in jedem Terminal
+- Keine zusaetzliche Software
+
+**Nachteile:**
+- Kannst nur einen Teammate aufs Mal sehen
+
+### Split Pane Mode
+
+Jeder Teammate bekommt eigenen Terminal-Pane. Funktioniert mit **tmux** oder **iTerm2**.
+
+```bash
+# Aktiviere Split-Panes
+claude --teammate-mode tmux
+```
+
+**Anforderungen:**
+- [tmux](https://github.com/tmux/tmux/wiki) oder
+- iTerm2 mit [it2 CLI](https://github.com/mkusaka/it2)
+
+**Vorteile:**
+- Siehst alle Outputs gleichzeitig
+- Klickst in Pane den du bedienen willst
+
+## Task-Management
+
+### Aufgaben erstellen
+
+Der Lead erstellt Tasks aus der initialen Anfrage:
+
+```
+You: Create a team to refactor the auth module.
+Lead creates these tasks:
+  - [ ] Extract authentication utils into separate module
+  - [ ] Update login handler to use new utils
+  - [ ] Write tests for refactored code
+  - [ ] QA check for regressions
+```
+
+### Tasks claiming
+
+Teammates koennen:
+1. **Self-claim**: Nach einer Task greifen sie sich selbst die naechste verfuegbare
+2. **Lead assigns**: Lead sagt welcher Teammate welche Task macht
+
+### Task Dependencies
+
+Tasks koennen voneinander abhaengig sein:
+
+```
+Task 1: Extract utils → Completed
+  ↓ (dependency)
+Task 2: Update handlers (now unblocked)
+  ↓ (dependency)
+Task 3: Write tests (blocked until Task 2 done)
+```
+
+Der Lead kann Dependencies definieren. Wenn Task 1 completiert wird, wird Task 2 automatisch freigegeben.
+
+## Teammate-Kontrolle
+
+### Teammates spawnen
+
+Nutze natuerliche Sprache:
+
+```
+Create a team with 4 teammates.
+One architect, one frontend dev, one backend dev, one tester.
+Each should focus on their specialty.
+```
+
+Claude wird Teammates mit passenden Rollen und System Prompts spawnen.
+
+### Direktes Messaging
+
+Du kannst mit jedem Teammate separat sprechen:
+
+**In-Process Mode:**
+```
+Shift+Down → Teammate 1
+/write my feedback here/
+Enter
+```
+
+**Split-Pane Mode:**
+- Click in die Pane des Teammates
+- Type dein Feedback
+- Enter
+
+### Teammates shutdown
+
+```
+Ask the security teammate to shut down.
+```
+
+Der Teammate wird die Anfrage sehen und kann akzeptieren oder mit Reason ablehnen.
+
+### Plan Approval
+
+Fuer riskante Tasks kannst du Plan-Approval erzwingen:
+
+```
+Spawn a database migration teammate.
+Require plan approval before they make changes.
+```
+
+Der Teammate erstellt einen Plan → schickt zur Review → wartet auf Approval → implementiert nach Freigabe.
+
+## Team Workflows
+
+### Code Review mit mehreren Perspectives
+
+```
+I need to review PR #142.
+Create 3 reviewers:
+- One focused on security
+- One on performance
+- One on test coverage
+
+Each should review independently and report findings.
+```
+
+Jeder Reviewer arbeitet unabhaengig aber vom gleichen PR. Danach synthesiziert der Lead die Ergebnisse.
+
+### Parallel Feature Development
+
+```
+We need 3 new features. Create a team to develop them in parallel.
+Spawn 3 developers, one per feature.
+QA team synchronizes after.
+```
+
+Jeder Developer:
+1. Nimmt einen Feature
+2. Implementiert unabhaengig
+3. Communicates bei Dependencies
+4. QA testet alle zusammen
+
+### Debugging mit Competing Hypotheses
+
+```
+Users report crashes. Spawn 5 teammates with different hypotheses.
+Have them investigate independently and challenge each other.
+Debate until consensus emerges.
+```
+
+Das "debate structure" ist wichtig: Wenn Teammates versuchen, sich gegenseitig zu widerlegen, findet man schneller die richtige Root Cause.
+
+## Messaging
+
+### Message to one Teammate
+
+```
+@jane design a database schema for this feature
+```
+
+Nur Jane erhaelt die Message.
+
+### Broadcast to all
+
+```
+Broadcast: update everyone on progress
+```
+
+Alle Teammates bekommen die Message (nutze sparsam — mehr Tokens).
+
+### Automatic Delivery
+
+Wenn Teammates sich gegenseitig Messages schreiben, werden diese automatisch delivered — du musst nicht "reply-all".
+
+## Termination und Cleanup
+
+### Team beenden
+
+```
+Clean up the team.
+```
+
+Der Lead prueft ob alle Teammates fertig sind. Falls ja, wird das Team aufgeloest und Ressourcen freigegeben.
+
+**WICHTIG:** Nur der Lead darf cleanup ausfuehren, nicht Teammates.
+
+### Einzelne Teammate shutdown
+
+```
+Ask the frontend teammate to shut down.
+```
+
+Teammate wird die Anfrage sehen und kann:
+- Accept (geht offline sofort)
+- Reject (mit Grund, z.B. "ich bin noch nicht fertig")
+
+## Best Practices
+
+### Team-Groesse
+
+- **3-5 Teammates**: Optimal fuer die meisten Tasks
+- **Zu gross** (10+): Overhead ueberwiegt Vorteile
+- **Zu klein** (1-2): Kaum Parallelisierung
+
+**Regel:** ~5-6 Tasks pro Teammate damit alle produktiv sind.
+
+### Task-Groesse
+
+- **Zu klein**: Overhead > Benefit
+- **Zu gross**: Teammates arbeiten zu lang ohne Check-in
+- **Just right**: Self-contained Units mit klarem Deliverable
+
+Beispiel: One Function = too small, One Module = just right, One System = too big.
+
+### Context geben
+
+Teammates erben project Context (CLAUDE.md, MCP, Skills) aber nicht deine Conversation History.
+
+**Das solltest du tun:**
+
+```
+Spawn a security reviewer with the prompt:
+"Review the authentication module at src/auth/ for security issues.
+Focus on token handling, session management, and input validation.
+Report with severity ratings."
+```
+
+Der Teammate bekommt spezifische Anweisung + eigenen Context.
+
+### Nicht im Background laufen lassen
+
+Kicke kein Agent Team an und geh dann away. Checke rein:
+
+```
+Shift+Down: switch between teammates
+See what everyone is working on
+Provide feedback if someone is stuck
+```
+
+Wenn jemand steckenbleibt kannst du helfen.
+
+### Avoid File Conflicts
+
+Zwei Teammates editieren die gleiche Datei = Overwrites!
+
+**Aufteilen dich die Work:**
+
+```
+Teammate A: works on src/auth/login.ts
+Teammate B: works on src/auth/tokens.ts
+Teammate C: tests/ — keine conflicts
+```
+
+## Troubleshooting
+
+### Teammates erscheinen nicht
+
+**In-Process Mode:**
+- Sie laufen vielleicht schon — drück Shift+Down um durchzucyclen
+- Oder es war zu kleine Task — Claude respawnt nicht
+
+**Split-Pane Mode:**
+- Ist tmux installiert? `which tmux`
+- Fuer iTerm: Ist Python API aktiviert? (Settings → General → Magic)
+
+### Zu viele Permission Prompts
+
+Teammate-Requests bubble zu Lead → viele Approvals noetig.
+
+**Loesungen:**
+- Pre-approve common tools in Permissions
+- Teammates mit "auto-accept" starten
+
+### Teammate bleibt stecken
+
+```
+Check on the architecture teammate.
+Help them move forward.
+```
+
+Oder:
+```
+Ask the architecture teammate to shut down.
+Spawn a new one to replace them.
+```
+
+### Raft Quorum Loss (Swarm Context)
+
+Falls dein Docker Swarm crashed (n8n Service):
+
+```
+Create a team:
+- One to recover the database
+- One to restart services
+- One to verify health
+```
+
+Mit Agent Teams kannst du parallel Recovery durchfuehren statt sequenziell.
+
+## Experimental Features & Limitations
+
+Agent Teams sind experimentell. Bekannte Limitations:
+
+- **No session resumption**: `/resume` stellt in-process Teammates nicht wieder her
+- **Task status can lag**: Teammates aktualisieren Tasks manchmal nicht sofort
+- **Shutdown can be slow**: Teammates brauchen Zeit zum herunterfahren
+- **One team per session**: Ein Lead = ein Team
+- **No nested teams**: Teammates koennen keine Teams spawnen
+- **Lead is fixed**: Der Lead kann nicht zum Teammate downgraded werden
+
+## Vergleich: Subagents vs Agent Teams
+
+| Aspekt | Subagents | Agent Teams |
+|--------|-----------|-------------|
+| **Communication** | nur mit Lead | direct zwischen Teammates |
+| **Context** | Eigener Context | Eigener Context |
+| **Task List** | Keine | Shared Task List |
+| **Best For** | Quick focused tasks | Complex collaborative work |
+| **Token Cost** | Lower | Higher |
+| **Complexity** | Simple | Medium |
+
+**Nutze Subagents wenn:**
+- Task ist fokussiert und unabhaengig
+- Result wird einfach zum Lead reported
+
+**Nutze Agent Teams wenn:**
+- Teammate muessen sich austauschen
+- Parallel Exploration einer komplexen Problem
+- Multiple unabhaengige Tasks mit Dependencies
+
+## Weitere Ressourcen
+
+- [Subagents Dokumentation](/tools/subagents)
+- [Claude Code Workflows](/tools/claude-code-workflows)
+- [Skills](/tools/skills)
+
+---
+
+*Stand: 2026-03-21 | Claude Code Agent Teams Reference*
+
+## Quellen und Links
+
+- [Agent Teams](https://code.claude.com/docs/en/agent-teams)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

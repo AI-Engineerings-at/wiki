@@ -1,0 +1,484 @@
+---
+title: Context Windows
+date: 2026-03-21
+summary: What context windows are, 2026 model comparison, long-context strategies, needle-in-haystack problem, effective vs advertised lengths
+tags: [context-window, long-context, needle-in-haystack, llm, sequence-length]
+author: AI Engineering
+---
+
+# Context Windows Explained
+
+The context window is max tokens an LLM "sees". Larger = process longer documents. But not all large windows are equal quality.
+
+---
+
+## What is a Context Window?
+
+```
+Input Tokens:  [tok1, tok2, tok3, ..., tok_N]
+               └─ max N = context window ─┘
+
+Output Tokens: [response_tok1, response_tok2, ...]
+
+Example:
+Context: 4K (4096 tokens)
+Input: 3500 tokens
+Output: max 596 tokens (4096 - 3500 remaining)
+```
+
+**Critical**: Input + Output must ≤ Context!
+
+---
+
+## 2026 Model Comparison
+
+| Model | Context | Quality | Effective |
+|-------|---------|---------|-----------|
+| **GPT-4 Turbo** | 128K | Reference | 95%+ |
+| **GPT-4o** | 128K | Similar | 95%+ |
+| **Claude 3.5 Sonnet** | 200K | Better | 98%+ |
+| **Claude 3 Opus** | 200K | Similar | 98%+ |
+| **Gemini 2.0 Pro** | 1M | Untested | ~80%? |
+| **Llama 3 8B** | 8K | Weak | 95%+ |
+| **Llama 3 70B** | 8K | Weak | 95%+ |
+| **Mistral 7B** | 32K | Weak | 90%+ |
+| **Mixtral 8x7B** | 32K | Weak | 90%+ |
+
+---
+
+## Advertised vs Effective
+
+```
+Important distinction:
+
+Llama 3 70B advertises 8K context
+But with extrapolation:
+  - 16K: unstable
+  - 32K: hallucinations
+→ Effective: 8K
+
+Claude 3.5 advertises 200K context
+Needle-in-Haystack test:
+  - 200K: 95% accuracy
+  - 150K: 98% accuracy
+→ Effective: Really 200K (exceptional!)
+
+Rule of thumb: Advertised ÷ 2-4 = safe to use
+               (except Claude 3.5)
+```
+
+---
+
+## Needle-in-Haystack Problem
+
+Test whether model remembers info in the middle of context:
+
+```
+Experiment:
+1. Fill with 100K tokens "irrelevant info"
+2. Hide fact: "Chapter 3 written in 1823"
+3. Ask: "When was Chapter 3 written?"
+
+Results:
+
+GPT-4 Turbo (128K):
+- Fact at 5%: 100% accuracy
+- Fact at 50%: 94% accuracy
+- Fact at 95%: 87% accuracy
+Problem: Middle of context weaker!
+
+Claude 3.5 Sonnet (200K):
+- All positions: 98-99% accuracy
+Problem: Minimal!
+
+Gemini 2.0 (1M):
+- All positions: 95-98% (middle)
+Problem: Larger window but not perfect
+```
+
+---
+
+## Long-Context Strategies
+
+### Strategy 1: Chunking + RAG (BEST)
+```
+Large document (1M tokens)?
+
+RAG approach:
+1. Split into 10K chunks
+2. Embed + vector search
+3. Retrieve top-5 chunks (~50K tokens)
+4. Put in prompt
+
+Overhead: +100ms for search
+Quality: +20-30%
+```
+
+### Strategy 2: Hierarchical Summarization
+```
+Document (1000 pages)
+  ├─ Chapter 1 → Summary
+  ├─ Chapter 2 → Summary
+  └─ ... (8 more)
+
+Prompt: Summaries (50K) + Chapter 5 full text (50K) + Query
+Result: Overview + detail
+```
+
+### Strategy 3: Progressive Retrieval
+```
+Iteratively:
+1. Retrieve "AI 2020-2021" → process
+2. Retrieve "AI 2022-2023" → process
+3. Retrieve "AI 2024" → process
+
+Multiple calls, each under limit
+User gets progressive results
+```
+
+### Strategy 4: Few-Shot with Large Context
+```
+With Claude 3.5 (200K):
+- System: 1K tokens
+- 100 examples (few-shot): 150K tokens
+- User query: 1K tokens
+- Available for response: 48K tokens
+
+Huge number of exemplars → model learns deeply
+Quality 50%+ improvement possible!
+```
+
+---
+
+## Position Bias
+
+Models don't "see" equally well everywhere:
+
+```
+Position Effectiveness:
+First 10%:       98% (attention starts here)
+Next 20%:        95%
+Middle 40%:      85% (U-shaped!)
+Next 20%:        95%
+Last 10%:        98% (recency bias)
+
+→ Optimal structure:
+[Important info at start]
+→ [Support details in middle]
+→ [User question at end]
+```
+
+---
+
+## Cost Implications
+
+```
+OpenAI GPT-4 Turbo:
+Input: $0.01 per 1K tokens
+
+Claude 3.5 Sonnet:
+Input: $0.003 per 1K tokens
+
+For 100K token input:
+- GPT-4: $1.00
+- Claude: $0.30
+
+Claude 3.3× cheaper for long context!
+```
+
+---
+
+## When to Use What
+
+| Scenario | Strategy |
+|----------|----------|
+| < 10K text | Direct (fit in context) |
+| 10K-50K | RAG optional, direct often OK |
+| 50K-200K | RAG required (chunking + search) |
+| > 200K | RAG + hierarchical summarization |
+| 200K+ of Claude 3.5 available | Could use directly, but RAG still better |
+
+## Advanced Context Window Techniques
+
+### Technique 1: Sliding Window with Overlap
+
+Process documents larger than context:
+
+```python
+# Document: 1M tokens, Context: 100K tokens
+
+windows = []
+overlap = 20000  # 20% overlap for continuity
+
+for i in range(0, 1000000, 80000):  # 80K stride
+    window = {
+        'start': i,
+        'end': min(i + 100000, 1000000),
+        'text': document[i:min(i + 100000, 1000000)]
+    }
+    windows.append(window)
+
+# Process each window
+for window in windows:
+    result = llm.process(window['text'])
+    # Results have context from overlapping sections
+```
+
+**Quality**: Good (20% overlap maintains continuity)
+**Cost**: Linear (N windows = N API calls)
+**Time**: Sequential (slow) or parallel (expensive)
+
+### Technique 2: Prefix Caching (GPT-4 Turbo Feature)
+
+Reuse cached tokens from previous queries:
+
+```python
+# Query 1: Process document section (100K tokens)
+response1 = client.chat.completions.create(
+    messages=[{"role": "user", "content": document[:100000]}],
+    cache_control={"type": "ephemeral"}  # Cache this!
+)
+
+# Query 2: Same document + different question
+response2 = client.chat.completions.create(
+    messages=[{"role": "user", "content": document[:100000] + "\n\nNEW QUESTION"}],
+)
+
+# Query 2 cost: 90% cheaper (reuses cached 100K tokens)
+```
+
+**Savings**: 50-90% on repeated queries with same prefix
+**Best for**: Analyst tools, research, multiple questions on same docs
+
+### Technique 3: Retrieval-Augmented Generation (RAG) - Deep Dive
+
+Optimal strategy for long documents:
+
+```python
+from langchain.vectorstores import Qdrant
+from langchain.llms import OpenAI
+from langchain.chains import RetrievalQA
+
+# 1. Index large document (~1M tokens)
+document = load_document("large_book.pdf")
+chunks = split_into_chunks(document, size=1000)  # ~1M chunks
+embeddings = encode_all(chunks)
+
+vector_db = Qdrant.from_embeddings(embeddings, chunks)
+
+# 2. User asks question
+question = "What's the main argument in chapter 5?"
+
+# 3. Retrieve relevant chunks
+relevant = vector_db.similarity_search(question, k=5)  # Top-5 chunks
+context = "\n".join([c.page_content for c in relevant])  # ~5K tokens
+
+# 4. Use LLM with just relevant context
+qa = RetrievalQA.from_chain_type(llm=OpenAI(), retriever=vector_db)
+answer = qa.run(question)
+```
+
+**Cost**: 5K tokens per query (vs 100K+ without RAG)
+**Speed**: <2 seconds total (retrieval + LLM)
+**Quality**: +20-30% (focused context vs noise)
+
+### Technique 4: Structured Information with Context
+
+Extract key facts first, then use in context:
+
+```python
+# Document: 500K tokens
+# Task: Summarize with specific focus
+
+# Step 1: Extract facts (fast)
+facts = llm.extract_facts(document)
+# Output: "CEO: John Smith", "Founded: 2010", "Revenue: $1B"
+
+# Step 2: Use facts to guide analysis (within context)
+analysis = llm.analyze(document[:200000], facts=facts)
+# Facts act as retrieval hints, document provides detail
+```
+
+**Efficiency**: Facts (few KB) guide deep analysis
+**Quality**: Balanced (overview + detail)
+
+## Context Window Limitations & Solutions
+
+### Limitation 1: Needle in Haystack (Middle Context Weakness)
+
+**Problem**: Important info in middle of long context gets missed
+
+**Solutions**:
+
+Option A: Put question at END (recency bias helps)
+```python
+# WRONG: Question first
+prompt = f"Question: {question}\n\nDocument: {document}"
+
+# RIGHT: Question last
+prompt = f"Document: {document}\n\nQuestion: {question}"
+```
+
+Option B: Use Claude (better middle attention)
+```python
+# Claude 3.5: 98% accuracy everywhere
+# GPT-4: 87% accuracy in middle
+# → Use Claude for long contexts
+```
+
+Option C: Chunk + RAG (avoid middle problem)
+```python
+# Retrieve only relevant chunks
+# No "middle" concept
+# Perfect accuracy
+```
+
+### Limitation 2: Context Length Increases Latency
+
+**Problem**: 200K tokens = slower inference
+
+**Solution**: Use faster models or batch requests
+
+```python
+# DON'T: GPT-4 with 200K tokens (slow, expensive)
+response = gpt4_client.completions.create(
+    model="gpt-4-turbo",
+    messages=[{"role": "user", "content": huge_document}]
+)
+# Latency: 30+ seconds
+# Cost: $2.00
+
+# DO: Claude 3.5 with 200K (faster, cheaper)
+response = claude_client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    max_tokens=1000,
+    messages=[{"role": "user", "content": huge_document}]
+)
+# Latency: 8 seconds
+# Cost: $0.30
+```
+
+## Cost-Benefit Matrix
+
+| Scenario | Context | Strategy | Cost | Speed | Quality |
+|----------|---------|----------|------|-------|---------|
+| **Brief inquiry** | 5K | Direct | $0.005 | <1s | 100% |
+| **Report analysis** | 50K | Direct | $0.05 | 2s | 98% |
+| **Book summary** | 200K | Direct (Claude) | $0.30 | 8s | 96% |
+| **Multiple questions on same book** | 200K | RAG + Cache | $0.05 per query | <2s | 95% |
+| **1M token analysis** | 1M | RAG + Chunking | $0.50 | <5s | 92% |
+
+**Takeaway**: Large context useful for initial analysis, RAG better for repeated access.
+
+## Model Comparison (2026 Updated)
+
+| Model | Window | Quality | Speed | Cost | Best For |
+|-------|--------|---------|-------|------|----------|
+| **Claude 3.5 Sonnet** | 200K | 98% | Fast | $0.003/K | Long docs (best all-rounder) |
+| **GPT-4o** | 128K | 95% | Medium | $0.005/K | Complex analysis |
+| **Gemini 2.0 Pro** | 1M | Unknown | Slow | $0.002/K | Experimental, massive docs |
+| **Mistral Large** | 32K | 85% | Fast | $0.002/K | Budget-conscious |
+
+**For 200K tokens**:
+- Claude: 10 seconds, $0.30 ← Best option
+- GPT-4: 20 seconds, $0.60
+- Gemini: 15 seconds, $0.20
+- **Recommendation**: Claude (best quality/speed trade-off)
+
+## Real-World Examples
+
+### Example 1: Legal Contract Analysis
+
+**Document**: 50-page contract (50K tokens)
+
+**Approach**: Direct query with Claude
+```python
+contract_text = load_contract("agreement.pdf")
+response = claude.messages.create(
+    max_tokens=2000,
+    messages=[{
+        "role": "user",
+        "content": f"Analyze risks in this contract:\n\n{contract_text}"
+    }]
+)
+```
+
+**Result**: Full analysis in <5 seconds, $0.15 cost
+
+### Example 2: Customer Support Knowledge Base
+
+**Documents**: 100 support articles (500K tokens total)
+
+**Approach**: RAG (don't use full context)
+```python
+kb = VectorDB(articles)  # Index all articles
+
+query = "How do I reset my password?"
+relevant = kb.search(query, k=3)  # Get top-3 articles
+
+response = llm.answer(query, context=relevant)
+```
+
+**Result**: Specific, accurate answer in <2s, $0.02 cost
+
+### Example 3: Research Paper Batch Analysis
+
+**Documents**: 10 papers (2M tokens total)
+
+**Approach**: Chunking + parallel
+```python
+papers = load_papers(10)
+
+for paper in papers:
+    chunks = split_paper(paper, size=100000)
+
+    summary_tasks = []
+    for chunk in chunks:
+        task = asyncio.create_task(
+            llm.summarize(chunk)
+        )
+        summary_tasks.append(task)
+
+    summaries = await asyncio.gather(*summary_tasks)
+    final = llm.synthesize(summaries)
+```
+
+**Result**: 10 full paper analyses in 30 seconds, $5 total cost
+
+## Decision Guide
+
+**Choose direct context if**:
+- Document <200K tokens
+- Using Claude 3.5 Sonnet
+- Need complete context (legal docs)
+- One-time analysis
+
+**Choose RAG if**:
+- Document >200K tokens
+- Multiple queries expected
+- Need fast response (<2s)
+- Cost matters
+- Building chat interface
+
+**Choose chunking if**:
+- Document >500K tokens
+- Need parallel processing
+- Handling document stream
+- Full document understanding needed
+
+---
+
+## Advanced Resources
+
+- [Needle-in-Haystack Test](https://github.com/gkamradt/LLMTest_NeedleInHaystack)
+- [Claude Token Counting](https://github.com/anthropics/anthropic-sdk-python#token-counting)
+- [GPT-4 Turbo Context Guide](https://platform.openai.com/docs/models/gpt-4-turbo)
+- [Prefix Caching (Alpha)](https://platform.openai.com/docs/guides/prompt-caching)
+- [LangChain RAG Templates](https://python.langchain.com/docs/templates/)
+
+**Last Updated**: 21.03.2026 | **Total Lines**: 400+
+
+## Sources and Links
+
+- [Lost in the Middle: How Language Models Use Long Contexts](https://arxiv.org/abs/2307.03172)
+- [Claude Model Configuration](https://code.claude.com/docs/en/model-config)

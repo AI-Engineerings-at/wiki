@@ -1,0 +1,524 @@
+---
+title: "Sub-Agents in Claude Code"
+date: "2026-03-21"
+summary: "Spezialisierte AI-Agents mit eigenem Context, Tools und Berechtigungen. Von eingebauten Agents (Explore, Plan) bis zu Custom Agent Definitions."
+tags: ["agents", "claude-code", "sub-agents", "orchestration", "tools"]
+author: "AI Engineering"
+---
+
+# Sub-Agents in Claude Code
+
+Sub-Agents sind spezialisierte AI-Assistenten, die spezifische Tasks in isoliertem Context ausfuehren. Jeder Agent hat einen eigenen Context Window, Custom System Prompt, definierte Tool-Zugriffe und unabhaengige Berechtigungen. Claude delegiert Tasks automatisch an Agenten, deren Beschreibung zum Problem passt.
+
+## Warum Sub-Agents?
+
+### Das Single-LLM-Problem
+
+Ein einzelnes LLM soll gleichzeitig:
+- Code schreiben und reviewen
+- Infrastruktur verwalten
+- Content erstellen
+- Browser-Tests ausfuehren
+- Codebase analysieren
+
+**Ergebnis**: Mittelmässige Leistung in allem, Context Window overload.
+
+### Sub-Agent Loesungen
+
+Sub-Agents bieten:
+- **Context Preservation**: Exploration und Implementation bleiben getrennt
+- **Tool Constraints**: Nur notwendige Tools pro Agent
+- **Reusability**: Agenten ueber Projekte hinweg verwenden
+- **Cost Control**: Haiku fuer einfache Tasks, Opus nur wenn noetig
+- **Auditability**: Klare Dokumentation welcher Agent was tat
+
+## Eingebaute Agents
+
+Claude Code liefert 4 Standard-Agents mit vordefiniertem Verhalten.
+
+### Explore — Schnelle Codebase-Analyse
+
+**Modell**: Haiku (schnell, low-latency)
+**Tools**: Nur Read-Only (Read, Grep, Glob, Bash)
+**Use-Cases**: File Discovery, Code Search, Codebase-Verstaendnis ohne Aenderungen
+
+Explore wird automatisch delegiert wenn:
+- Neue Codebasis erkundet werden muss
+- Schnelle Lookups erforderlich sind
+- Files durchsucht werden (ohne Modifikationen)
+
+**Beispiel-Delegation**:
+```
+Benutzer: "Finde alle HTTP-Handler in diesem Projekt"
+→ Claude delegiert zu Explore
+→ Explore nutzt Grep/Bash um Handler zu finden
+→ Ergebnis kehrt in Haupt-Conversation zurueck
+```
+
+### Plan — Research vor Implementation
+
+**Modell**: Erbt von Parent-Session
+**Tools**: Read-Only (Read, Grep, Glob, Bash)
+**Use-Cases**: Architektur-Analyse, Implementierungs-Planung
+
+Plan wird in [Plan Mode](/docs/patterns/plan-mode) verwendet:
+1. User aktiviert Plan Mode
+2. Claude nutzt Plan-Agent um Codebase zu verstehen
+3. Agent schlaegt Implementierungs-Strategie vor
+4. User akzeptiert oder lehnt ab, dann Implementation in Main-Session
+
+**Wichtig**: Plan-Agent kann keine Sub-Agents spawnen (verhindert Infinite Nesting).
+
+### General-Purpose — Komplexe Multi-Step Tasks
+
+**Modell**: Erbt von Parent
+**Tools**: Alle Tools (Read, Write, Edit, Bash, etc.)
+**Use-Cases**: Code-Modifikation, Tests, komplexe Workflows
+
+General-Purpose wird delegiert fuer:
+- Recherche PLUS Modifikation
+- Komplexe Reasoning zur Interpretation
+- Mehrere abhängige Schritte
+
+**Beispiel**:
+```
+Benutzer: "Refactor diese Klasse fuer bessere Performance"
+→ Claude delegiert zu general-purpose
+→ Agent analysiert Code, schlaegt Refactoring vor, implementiert, testet
+→ Summary kehrt zurueck
+```
+
+### Weitere Helper-Agents
+
+| Agent | Modell | Wann |
+|-------|--------|------|
+| Bash | Erbt | Terminal-Commands im isoliertem Context |
+| statusline-setup | Sonnet | `/statusline` Konfiguration |
+| Claude Code Guide | Haiku | Fragen ueber Claude Code |
+
+## Custom Agent Definition
+
+Sub-Agents werden als Markdown-Dateien mit YAML-Frontmatter definiert.
+
+### Datei-Format
+
+```markdown
+---
+name: code-reviewer                           # kebab-case, eindeutig
+description: Expert code review specialist.  # Trigger-Keywords
+tools: Read, Grep, Glob, Bash                # Erlaubte Tools
+disallowedTools: Write, Edit                 # Oder: Tools zum Blockieren
+model: sonnet                                # haiku, sonnet, opus, inherit
+permissionMode: default                      # default, acceptEdits, dontAsk, bypassPermissions, plan
+maxTurns: 50                                 # Max agentic turns
+skills:                                      # Pre-geladene Skills
+  - skill-name-1
+  - skill-name-2
+mcpServers:                                  # MCP-Zugriffe
+  - playwright
+  - github
+memory: user                                 # user, project, local (persistent memory)
+background: false                            # true = Background task
+effort: high                                 # low, medium, high, max (Opus 4.6+)
+isolation: worktree                          # worktree = Git-isoliert
+hooks:                                       # Lifecycle hooks
+  PreToolUse: [...]
+---
+
+# System Prompt
+
+Du bist ein Senior Code Reviewer. Deine Aufgabe ist es...
+```
+
+### Speicher-Orte & Prioritaet
+
+| Ort | Scope | Prioritaet | Verwendung |
+|-----|-------|-----------|-----------|
+| `--agents` CLI Flag | Session | 1 (hoechst) | Automation, One-Off Testing |
+| `.claude/agents/` | Projekt | 2 | Team-Agents, Version-Control |
+| `~/.claude/agents/` | Benutzer | 3 | Persoenliche Agents, alle Projekte |
+| Plugin `agents/` | Plugin | 4 (niedrig) | Installed Plugins |
+
+**Best Practice**: Projekt-Agents in `.claude/agents/` fuer Team-Zusammenarbeit.
+
+## Agent-Konfiguration
+
+### Name & Description
+
+```yaml
+name: api-validator
+description: >
+  Validiert API-Endpoints gegen REST Best Practices.
+  Prueft Fehlerbehandlung, Input-Validierung, Performance.
+  Trigger: validate API, check endpoints, api review
+```
+
+**Wichtig**: Description ist das Trigger-Signal. Claude liest diesen Text um zu entscheiden ob dieser Agent passend ist. Je praezisor die Keywords, desto haeufiger wird der Agent verwendet.
+
+### Tools & Restriktionen
+
+**Whitelist (tools-Feld)**:
+```yaml
+tools: Read, Grep, Glob, Bash  # NUR diese Tools
+```
+
+**Blacklist (disallowedTools-Feld)**:
+```yaml
+disallowedTools: Write, Edit  # Alles AUSSER diesen
+```
+
+**Beides gleichzeitig**: `disallowedTools` wird zuerst angewendet, dann `tools`.
+
+**Agent-Spawning beschraenken** (fuer Agent-to-Agent Delegation):
+```yaml
+tools: Agent(worker, researcher), Read, Bash  # NUR worker + researcher Agents darf dieser Agent spawnen
+```
+
+### Modell-Auswahl
+
+| Modell | Latenz | Kosten | Gut fuer |
+|--------|--------|--------|----------|
+| haiku | Schnell | Niedrig | Einfache Lookups, Status-Checks |
+| sonnet | Moderat | Moderat | Content, Code Reviews, Standard |
+| opus | Langsam | Hoch | Komplexe Reasoning, Architektur |
+| inherit | — | — | Gleich wie Parent Session |
+
+```yaml
+model: haiku  # Explizit setzen — niemals auf Parent vertrauen!
+```
+
+### Permission Modes
+
+| Mode | Verhalten |
+|------|-----------|
+| `default` | Standard: Permission Prompts |
+| `acceptEdits` | Auto-accept file edits |
+| `dontAsk` | Auto-deny (explizit erlaubte Tools funktionieren) |
+| `bypassPermissions` | Skip prompts (ACHTUNG: sehr permissiv!) |
+| `plan` | Read-Only, Plan-Mode |
+
+```yaml
+permissionMode: acceptEdits  # Automatisch File-Aenderungen akzeptieren
+```
+
+### MCP-Server Scoping
+
+MCP-Tools nur fuer diesen Agent verfuegbar machen:
+
+```yaml
+mcpServers:
+  # Inline Definition: NUR dieser Agent hat Zugriff
+  - playwright:
+      type: stdio
+      command: npx
+      args: ["-y", "@playwright/mcp@latest"]
+  # Referenz: Teilt bestehende Connection
+  - github
+```
+
+Inline Definitions sind isoliert zu diesem Agent. Der Parent-Session sieht diese Tools nicht.
+
+### Persistent Memory
+
+```yaml
+memory: user  # user | project | local
+```
+
+Agent speichert Learnings in:
+- `user`: `~/.claude/agent-memory/<agent-name>/` (alle Projekte)
+- `project`: `.claude/agent-memory/<agent-name>/` (dieses Projekt, versionskontrolliert)
+- `local`: `.claude/agent-memory-local/<agent-name>/` (dieses Projekt, nicht im Git)
+
+**Automatische Features**:
+- System Prompt enthaelt Read/Write/Edit Tool-Zugriff
+- Erste 200 Zeilen von `MEMORY.md` werden ins System Prompt injiziert
+- Agent kann Wissen zwischen Sessions aufbauen
+
+**Best Practice**:
+```markdown
+Review your memory before starting:
+"Read your agent memory for patterns you've seen in similar code."
+
+After completion:
+"Update your memory with what you learned."
+```
+
+### Frontmatter Fields (Komplett-Referenz)
+
+| Feld | Pflicht | Beschreibung |
+|------|---------|-------------|
+| `name` | Ja | kebab-case, unique, max 64 Zeichen |
+| `description` | Ja | Trigger-Keywords fuer Claude |
+| `tools` | Nein | Whitelist erlaubter Tools |
+| `disallowedTools` | Nein | Blacklist blockierter Tools |
+| `model` | Nein | Modell-Auswahl (Defaults zu inherit) |
+| `permissionMode` | Nein | Permission Handling |
+| `maxTurns` | Nein | Max agentic turns (Default: unbegrenzt) |
+| `skills` | Nein | Pre-geladene Skills (vollstaendiger Content) |
+| `mcpServers` | Nein | MCP-Tool Zugriffe |
+| `memory` | Nein | Persistent Memory Scope |
+| `background` | Nein | true = Background Task |
+| `effort` | Nein | low, medium, high, max |
+| `isolation` | Nein | worktree = Git-isoliert |
+| `hooks` | Nein | Lifecycle-Hooks |
+
+## Agents verwenden
+
+### Automatische Delegation
+
+Claude entscheidet automatisch ob Delegation noetig ist. Die Agent-`description` ist das Entscheidungs-Signal:
+
+```
+Benutzer: "Mach einen Code Review"
+Claude liest alle Agent-Descriptions
+→ Findet "code-reviewer" Agent
+→ Delegiert wenn Beschreibung passt
+```
+
+**Tipp**: "Proaktiv verwenden" in die Description schreiben um haeufiger delegiert zu werden:
+
+```yaml
+description: >
+  Proaktiver Code-Reviewer. Nutze sofort nach Code-Aenderungen.
+  Prueft Qualitaet, Security, Best Practices.
+```
+
+### Explizite Delegation
+
+#### Natural Language
+```
+Nutze den code-reviewer Agent um die Auth-Changes zu pruefen
+```
+
+Claude entscheidet ob Delegation sinnvoll ist.
+
+#### @-Mention (garantiert Delegation)
+```
+@"code-reviewer (agent)" pruefe die neuen API-Changes
+```
+
+**Wichtig**: Der @-Mention garantiert welcher Agent verwendet wird, aber Claude schreibt immer noch die Task-Description basierend auf deiner Anfrage.
+
+#### Session-Wide Agent
+```bash
+claude --agent code-reviewer
+```
+
+Ganze Session laeuft mit diesem Agent's System Prompt, Tool-Restrictions, Model.
+
+Oder in `.claude/settings.json`:
+```json
+{
+  "agent": "code-reviewer"
+}
+```
+
+### Agent Erstellen
+
+#### Via CLI (Interactive)
+```bash
+/agents
+```
+
+Schritte:
+1. "Create new" auswaehlen
+2. Scope waehlen (Personal = `~/.claude/agents/`, Project = `.claude/agents/`)
+3. Claude generiert Identifier + Description + Prompt
+4. Tools auswaehlen
+5. Modell auswaehlen
+6. Farbe auswaehlen
+7. Memory Scope (user/project/local/none)
+8. Speichern
+
+#### Manually (Textdatei)
+```bash
+cat > .claude/agents/my-agent.md << 'EOF'
+---
+name: my-agent
+description: What this agent does. Trigger: keyword1, keyword2
+tools: Read, Grep, Bash
+model: sonnet
+---
+
+System prompt goes here...
+EOF
+```
+
+#### Via CLI Flags (Session-Only)
+```bash
+claude --agents '{
+  "code-reviewer": {
+    "description": "Expert code reviewer",
+    "prompt": "You are a senior code reviewer...",
+    "tools": ["Read", "Grep", "Bash"],
+    "model": "sonnet"
+  }
+}'
+```
+
+## Patterns & Use-Cases
+
+### Pattern: Isolierte Hochvolumen-Output
+
+Wenn Task viel Output produziert (Tests, Logs, Dokumentation):
+
+```
+Nutze einen Agent um Test-Suite zu laufen und nur Failed Tests + Errors zu reportieren
+```
+
+Agent: Haendelt all die Logs intern, kehrt nur Summary zurueck.
+
+### Pattern: Parallele Recherche
+
+Mehrere Agents gleichzeitig fuer unabhaengige Tasks:
+
+```
+Recherchiere Authentication, Database, API Modules parallel mit separaten Agents
+```
+
+Jeder Agent arbeitet unabhaengig, Claude synthetisiert Findings.
+
+### Pattern: Agent-Verkettung
+
+Sequenzielle Multi-Step Workflows:
+
+```
+Nutze code-reviewer Agent um Performance-Issues zu finden,
+dann nutze optimizer Agent um sie zu fixen
+```
+
+Agent A → kehrt Ergebnis zurueck → Agent B nimmt Ergebnis + startet.
+
+### Pattern: Tool-Beschraenkung fuer Security
+
+Agent mit nur Read-Only Zugriff fuer sensible Operationen:
+
+```yaml
+name: db-reader
+description: Execute read-only database queries
+tools: Bash
+hooks:
+  PreToolUse:
+    - matcher: "Bash"
+      hooks:
+        - type: command
+          command: "./scripts/validate-readonly-query.sh"
+```
+
+Validation-Script blockiert INSERT/UPDATE/DELETE.
+
+## Hooks: Agent Lifecycle Control
+
+Hooks laufen zu definierten Zeiten waehrend Agent-Execution.
+
+### PreToolUse — Vor Tool-Aufruf
+
+```yaml
+hooks:
+  PreToolUse:
+    - matcher: "Bash"  # Regex fuer Tool-Namen
+      hooks:
+        - type: command
+          command: "./scripts/validate-command.sh"
+```
+
+Hook empfaengt JSON via stdin:
+```json
+{
+  "tool_input": {
+    "command": "rm -rf /"
+  }
+}
+```
+
+Hook kann:
+- Exit 0: Aufruf erlaubt
+- Exit 2: Aufruf blockiert, stderr-Nachricht an Claude
+- Exit 1: Fehler
+
+### PostToolUse — Nach Tool-Aufruf
+
+```yaml
+hooks:
+  PostToolUse:
+    - matcher: "Edit|Write"
+      hooks:
+        - type: command
+          command: "./scripts/run-linter.sh"
+```
+
+Laeuft nach erfolgreicher Tool-Ausfuehrung. Gut fuer Cleanup, Validierung.
+
+### Stop — Agent beendet sich
+
+```yaml
+hooks:
+  Stop:
+    - hooks:
+        - type: command
+          command: "./scripts/cleanup.sh"
+```
+
+Wird zu `SubagentStop` konvertiert zur Laufzeit.
+
+## Foreground vs Background
+
+### Foreground (Standard)
+- Blockiert Haupt-Conversation
+- Permission Prompts gehen an User
+- Resultat wird sofort sichtbar
+
+### Background
+- Laeuft concurrent
+- Pre-genehmigung fuer Tools erforderlich
+- User kann weitermachen
+- Resultat wird spaeter angezeigt
+
+**Aktivieren**:
+```
+Run this in the background
+Ctrl+B (in laufendem Task)
+```
+
+**Disable**:
+```bash
+export CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1
+```
+
+## Beziehung zu Agents in Playbook01
+
+Im Playbook01-Team ([@jim, @jim01, @lisa01, etc.](docs/tools/agents)) sind das **Mattermost Bots**, nicht Claude Code Sub-Agents. Sie kommunizieren ueber Mattermost Webhooks und Bridge-Services.
+
+**Sub-Agents** = Claude Code, isolierter Context, Tool-kontrolliert
+**Team Agents** = Mattermost Bots, Multi-Session Orchestration, Chat-basiert
+
+Beides kann kombiniert werden: Sub-Agents kuennten zu Mattermost posten, Team-Agents koennen Claude Code aufrufen.
+
+## Best Practices
+
+1. **Spezializiert**: Jeder Agent = eine Aufgabe, exzellent
+2. **Klare Beschreibung**: Keywords sind das Delegations-Signal
+3. **Tool-Minimal**: Nur notwendige Tools, nicht alle
+4. **Memory nutzen**: Agent-Lernings zwischen Sessions aufbauen
+5. **In Version-Control**: Projekt-Agents in `.claude/agents/`, damit Team sie nutzt
+6. **Hooks fuer Constraints**: Fuer conditional Tool-Zugriff (z.B. nur SELECT, nicht UPDATE)
+
+## Weiter lesen
+
+- [Claude Code Agents Referenz](https://code.claude.com/docs/en/sub-agents)
+- [Skills erstellen](/de/skills/erstellen) — Reusable Prompts in Sub-Agents
+- [Multi-Agent Systeme](/de/grundlagen/multi-agent-systeme) — Agent Orchestration
+- [Mattermost Integration](/de/tools/mattermost) — Team Agent Communication
+
+---
+
+*Stand: 2026-03-21 | Reference Quality*
+
+## Quellen und Links
+
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

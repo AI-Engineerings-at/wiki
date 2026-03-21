@@ -1,0 +1,631 @@
+---
+title: Claude Code für Teams — Shared Config & CI/CD
+date: 2026-03-21
+summary: Team-Setup für Claude Code — Shared vs. Personal Config, Permission Management, CI/CD Integration, Code Review Automation, Cost Tracking und Sicherheit für verteilte Entwickler-Teams.
+tags: [claude-code, teams, ci-cd, automation, permissions, collaboration]
+author: AI Engineering
+---
+
+# Claude Code für Teams — Shared Config & CI/CD
+
+Claude Code funktioniert am besten, wenn die **ganze Mannschaft** gleiche Regeln, Hooks und Standards nutzt. Dieser Guide erklärt, wie man das aufbaut.
+
+## The Problem: Code Chaos in Teams
+
+Szenario ohne Team-Setup:
+
+```
+Alice: "Warte, was ist die Testing-Convention?"
+Bob:   "Wir nutzen Jest? Oder Vitest?"
+Charlie: "Ich hab Prettier installiert, aber lauft nicht..."
+Dave: "Mein VSCode-Claude-Setup ist ganz anders..."
+
+Result: 4 unterschiedliche Setups, keine Konsistenz, viel Friction
+```
+
+## Lösung: Three-Level Config Strategy
+
+```
+1. GLOBAL (.claude/CLAUDE.md in ~/.claude/)
+   → Alle Projekte des Users
+   → Persönliche Conventions
+   → NICHT geteilt
+
+2. SHARED (CLAUDE.md + .claude/ in Repo)
+   → Ganze Mannschaft
+   → Committed to Git
+   → Jeder clont und hat die gleichen Rules
+
+3. PERSONAL (.claude/settings.local.json im Repo)
+   → Individual preferences
+   → In .gitignore
+   → NUR dein Rechner
+```
+
+### Dateistruktur für Teams
+
+```
+my-project/
+  ├── CLAUDE.md                     # ← Geteilt! Git-committed
+  ├── .claude/
+  │   ├── CLAUDE.md                 # ← Team-Secrets (in .gitignore)
+  │   ├── settings.json             # ← Geteilt! Git-committed
+  │   ├── settings.local.json        # ← Personal (in .gitignore)
+  │   ├── rules/                    # ← Geteilt! Git-committed
+  │   │   ├── 01-safety.md
+  │   │   ├── 02-testing.md
+  │   │   ├── 03-git-workflow.md
+  │   │   └── 04-ci-cd.md
+  │   ├── agents/                   # ← Geteilt! Git-committed
+  │   │   ├── code-reviewer.md
+  │   │   └── deployment-orchestrator.md
+  │   └── skills/                   # ← Geteilt! Git-committed
+  │       ├── deploy-staging/
+  │       └── run-tests/
+  └── .gitignore
+      .claude/CLAUDE.md
+      .claude/settings.local.json
+```
+
+### .gitignore Setup (WICHTIG!)
+
+```bash
+# .gitignore
+
+# NIEMALS committen:
+.claude/CLAUDE.md                    # Team-Secrets
+.claude/settings.local.json          # Persönliche Config
+.claude/hook-logs/                   # Hook-Logs
+.claude/cache/                       # Cache
+.env.local                           # Local env vars
+.env.*.local
+
+# Aber diese MÜSSEN committet werden:
+# .claude/CLAUDE.md                  # ← NICHT hier!
+# .claude/settings.json              # ← JA! Geteilt
+# .claude/rules/                     # ← JA! Geteilt
+# .claude/agents/                    # ← JA! Geteilt
+# .claude/skills/                    # ← JA! Geteilt
+```
+
+**Kritischer Fehler:** Wenn Team-Secrets ins Git gehen = DESASTER!
+
+```bash
+# FALSCH
+git add .claude/CLAUDE.md
+git push
+
+# RICHTIG (schon in .gitignore)
+git status
+→ .claude/CLAUDE.md ist nicht aufgelistet (weil .gitignore es ignoriert)
+```
+
+## Permission Management
+
+### Was sind Permissions?
+
+Permissions kontrollieren, welche Tools Claude Code verwenden darf:
+
+```
+Read   - Darf Dateien lesen?
+Write  - Darf Dateien schreiben?
+Edit   - Darf Dateien bearbeiten?
+Bash   - Darf Shell-Commands ausführen?
+Glob   - Darf nach Dateien suchen?
+Grep   - Darf nach Text suchen?
+Delete - Darf Dateien löschen?
+```
+
+### Global vs. Per-Project Permissions
+
+**Lokal (in settings.local.json):**
+
+```json
+{
+  "permissions": {
+    "Bash": "ask",           // Ask before running Bash
+    "Write": "allow",        // Always allow Write
+    "Delete": "deny"         // Never allow Delete
+  }
+}
+```
+
+**Team-Shared (in settings.json):**
+
+```json
+{
+  "permissions": {
+    "Bash": "ask",
+    "Write": "allow",
+    "Delete": "deny",
+    "Edit": "allow"
+  }
+}
+```
+
+Wenn beide definiert sind: **Local gewinnt** (überschreibt Global).
+
+### The /permissions Command
+
+```bash
+/permissions
+→ Zeigt alle aktuellen Permissions
+
+/permissions --set Bash deny
+→ Setzt Bash auf "deny"
+
+/permissions --set Write ask
+→ Setzt Write auf "ask" (Claude fragt vorher)
+```
+
+Output:
+
+```
+Current Permissions:
+┌─────────┬───────────┐
+│ Tool    │ Setting   │
+├─────────┼───────────┤
+│ Read    │ allow     │
+│ Write   │ allow     │
+│ Edit    │ allow     │
+│ Bash    │ ask       │
+│ Delete  │ deny      │
+└─────────┴───────────┘
+```
+
+### Team-Policy für Permissions
+
+**Beispiel: Senior Devs vs. Juniors**
+
+**Team-Config (.claude/settings.json):**
+
+```json
+{
+  "permissions": {
+    "Read": "allow",
+    "Glob": "allow",
+    "Grep": "allow",
+    "Write": "ask",      // ← Frage bevor Datei geschrieben wird
+    "Edit": "ask",
+    "Bash": "ask",       // ← Frage bevor Shell lauft
+    "Delete": "deny"     // ← NIEMALS löschen (zu riskant)
+  }
+}
+```
+
+Das ist die **strikte Default**-Policy. Wer mehr Vertrauen braucht:
+
+**Junior Dev's local settings.local.json:**
+
+```json
+{
+  "permissions": {
+    "Bash": "ask",       // Bleiben Sie vorsichtig
+    "Write": "ask"
+  }
+}
+```
+
+**Senior Dev's local settings.local.json:**
+
+```json
+{
+  "permissions": {
+    "Bash": "allow",     // Ich weiß was ich tue
+    "Write": "allow",
+    "Edit": "allow"
+  }
+}
+```
+
+## CI/CD Integration
+
+### Pattern 1: GitHub Actions + Claude Code
+
+```yaml
+# .github/workflows/claude-code-review.yml
+
+name: Claude Code Review
+
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'tests/**'
+
+jobs:
+  claude-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code-cli
+
+      - name: Review PR Code
+        run: |
+          claude-code run \
+            -p "Review the changes in this PR. Focus on: security, performance, code style. Output as JSON with issues and severity levels."
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Parse Results
+        run: |
+          # Output ist JSON, parse und post als Comment
+          cat review-output.json | jq '.issues[]' > /tmp/issues.txt
+
+          if [ -s /tmp/issues.txt ]; then
+            # Issues gefunden - Post als Comment
+            echo "Issues gefunden:"
+            cat /tmp/issues.txt
+          fi
+```
+
+### Pattern 2: Headless Mode (Print Mode)
+
+Die `-p` Flag macht Claude Code non-interactive:
+
+```bash
+# Prints output, dann Exit
+claude-code run -p "Analyze this code for security issues" < code.ts
+
+# Output wird zu stdout (kann piped werden)
+claude-code run -p "Generate tests" | tee tests.ts
+```
+
+**Use Case: Bash scripts mit Claude**
+
+```bash
+#!/bin/bash
+
+# Script: analyze-all-changes.sh
+
+CHANGES=$(git diff --name-only main)
+
+for file in $CHANGES; do
+  echo "Analyzing $file..."
+
+  # Claude reviewt die Datei
+  result=$(claude-code run -p "Review this file for bugs: $file" 2>/dev/null)
+
+  if echo "$result" | grep -q "⚠️ WARNING\|❌ ERROR"; then
+    echo "⚠️ Issues found in $file"
+    echo "$result"
+  fi
+done
+```
+
+### Pattern 3: CI/CD für Code Generation
+
+```yaml
+# .github/workflows/generate-api-docs.yml
+
+name: Auto-Generate API Docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/routes/**'
+
+jobs:
+  generate-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Generate API Docs with Claude
+        run: |
+          npm install -g @anthropic-ai/claude-code-cli
+
+          claude-code run -p \
+            "Generate OpenAPI specification for all routes in src/routes/. Output as valid JSON." \
+            > openapi.json
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Commit & Push Docs
+        run: |
+          git add openapi.json docs/
+          git commit -m "docs: auto-generated API docs" || true
+          git push
+```
+
+### Pattern 4: Cost Control in CI
+
+```bash
+# scripts/claude-code-review-budget.sh
+
+#!/bin/bash
+
+BUDGET_USD=5.00      # Max 5 USD pro Review-Run
+ESTIMATED_COST=0.015 # ~1.5 cents per file
+
+FILES=$(git diff --name-only main | wc -l)
+TOTAL_COST=$(echo "$FILES * $ESTIMATED_COST" | bc)
+
+if (( $(echo "$TOTAL_COST > $BUDGET_USD" | bc -l) )); then
+  echo "❌ Cost limit exceeded: $TOTAL_COST > $BUDGET_USD"
+  echo "Reviewing nur $((BUDGET_USD / ESTIMATED_COST)) files statt $FILES"
+  exit 1
+fi
+
+echo "✓ Cost estimate: $TOTAL_COST USD (budget: $BUDGET_USD)"
+```
+
+## Code Review Automation
+
+### Automatischer Review beim PR
+
+```bash
+# setup-in-repo
+
+# 1. Create .github/workflows/auto-review.yml
+
+name: Auto Review
+
+on:
+  pull_request:
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Review Changed Files
+        run: |
+          claude-code run -p "
+          You are a code reviewer.
+
+          Review the changes in this PR for:
+          1. Security issues
+          2. Performance problems
+          3. Code style violations
+          4. Test coverage gaps
+
+          Output as JSON:
+          {
+            \"files\": [
+              {
+                \"name\": \"file.ts\",
+                \"issues\": [
+                  {\"line\": 42, \"severity\": \"critical\", \"msg\": \"SQL injection\"}
+                ]
+              }
+            ]
+          }
+          " > review.json
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Post Review as Comment
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const review = JSON.parse(fs.readFileSync('review.json', 'utf8'));
+
+            let comment = "## Claude Code Review\n\n";
+
+            review.files.forEach(file => {
+              comment += `### ${file.name}\n`;
+              file.issues.forEach(issue => {
+                const icon = issue.severity === 'critical' ? '🔴' : '🟡';
+                comment += `${icon} Line ${issue.line}: ${issue.msg}\n`;
+              });
+            });
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+```
+
+## Cost Management für Teams
+
+### Tracking mit /cost Command
+
+```bash
+/cost
+→ Shows current session cost
+
+Output:
+Session Cost Breakdown:
+┌──────────────┬──────────┬────────┐
+│ Model        │ Tokens   │ Cost   │
+├──────────────┼──────────┼────────┤
+│ sonnet       │ 45,230   │ $0.34  │
+│ haiku        │ 12,100   │ $0.05  │
+│ opus         │ 8,900    │ $0.42  │
+└──────────────┴──────────┴────────┘
+Total: $0.81 for this session
+```
+
+### Budget-Policies für Teams
+
+**Kleine Teams (< 5 Devs):**
+
+```json
+// .claude/settings.json
+{
+  "budget": {
+    "monthly_limit_usd": 100,
+    "per_session_limit": 5,
+    "alert_at_percentage": 80
+  }
+}
+```
+
+**Mittlere Teams (5-20 Devs):**
+
+```json
+{
+  "budget": {
+    "monthly_limit_usd": 500,
+    "per_developer": 20,      // Jeder Dev max 20/Month
+    "per_session": 10,
+    "alert_at_percentage": 70
+  }
+}
+```
+
+**Model Selection Strategy:**
+
+| Task | Model | Grund | Cost |
+|------|-------|-------|------|
+| Simple lookup, quick fixes | haiku | Fast, cheap | $0.00015/K tokens |
+| Standard coding | sonnet | Good balance | $0.003/K tokens |
+| Complex architecture | opus | Best thinking | $0.015/K tokens |
+| Batch jobs (CI/CD) | haiku | Many parallel runs | Low cost |
+
+## Onboarding neuer Mannschaftsmitglieder
+
+### Tag 1: Setup-Prozess
+
+```bash
+# New Developer onboarding script
+
+#!/bin/bash
+
+echo "🎉 Welcome to the team!"
+
+# 1. Clone repo
+git clone https://github.com/myteam/my-project
+cd my-project
+
+# 2. Install Claude Code CLI
+npm install -g @anthropic-ai/claude-code-cli
+
+# 3. Claude Code Auto-Detection
+# (Claude Code liest CLAUDE.md + .claude/rules/ automatisch)
+
+# 4. Check Setup
+claude-code doctor
+
+# Output sollte sein:
+# ✓ CLAUDE.md found and loaded
+# ✓ 4 rules loaded from .claude/rules/
+# ✓ 3 skills available
+# ✓ API key configured
+# ✓ Permissions set to: team-standard
+```
+
+### Tag 2-3: Practicing
+
+```bash
+# Guided exercises für Neulinge
+
+du: "Ich bin neu, wie funktioniert das hier?"
+
+Claude: "Willkommen! Hier sind deine ersten Aufgaben:"
+
+1. Task: Lese src/main.ts und erkläre mir die Architektur
+   du: "/read src/main.ts"
+   Claude: [Erklärt alles]
+
+2. Task: Schreib einen Unit Test für utils/helpers.ts
+   du: "Schreib einen Test"
+   Claude: [Schreibt Tests]
+
+3. Task: Erstelle einen Feature Branch
+   du: "/branch feature/my-first-feature"
+   Claude: [Branch erstellt]
+
+4. Task: Commit & PR
+   du: "/pr --title 'My first PR'"
+   Claude: [PR erstellt mit guter Beschreibung]
+
+5. Code Review
+   du: "/review"
+   Claude: [Gibt Feedback]
+
+Result: New Dev hat verstanden wie alles funktioniert
+```
+
+## Sicherheit in Team-Settings
+
+### Secrets Management
+
+**NIEMALS in commits:**
+```
+API Keys
+Database passwords
+JWT secrets
+OAuth tokens
+```
+
+**RICHTIG: Vault oder Environment Variablen**
+
+```bash
+# .env.example (committet, keine echten Secrets)
+DATABASE_URL=postgresql://localhost/mydb
+API_KEY=sk_...  # ← BEISPIEL! Real key in Vault
+
+# Echte Secrets nur lokal:
+export API_KEY=$(vault kv get -field=value shared/api-key)
+claude-code run "Do something with the API"
+```
+
+### Audit Trail für Mannschaft
+
+```bash
+# .claude/audit-log.md (optional, kann committed werden)
+
+## Audit Trail
+
+| Date | Dev | Action | Files | Status |
+|------|-----|--------|-------|--------|
+| 2026-03-21 | alice | Created feature X | 5 files | ✓ Deployed |
+| 2026-03-20 | bob | Fixed bug Y | 2 files | ✓ Merged |
+| 2026-03-19 | charlie | Refactored auth | 8 files | ⏳ PR Review |
+```
+
+Claude kann automatisch Audit Trail führen:
+
+```bash
+# Hook nach jedem Commit
+claude-code run -p \
+  "Append entry to audit-log.md with current git info" \
+  --hook PostCommit
+```
+
+## Checkliste: Team-Setup
+
+- [ ] CLAUDE.md (shared) ist im Root-Verzeichnis
+- [ ] .claude/CLAUDE.md (secrets) ist in .gitignore
+- [ ] .claude/settings.json (shared) ist committed
+- [ ] .claude/settings.local.json (personal) ist in .gitignore
+- [ ] .claude/rules/ ist committed mit Konventionen
+- [ ] Alle Team-Member haben API Key konfiguriert
+- [ ] Permissions Policy ist definiert (strict/permissive)
+- [ ] CI/CD Workflows sind tested
+- [ ] Budget-Limits sind konfiguriert
+- [ ] Onboarding-Prozess dokumentiert
+- [ ] Secrets sind NICHT in commits
+- [ ] Audit Trail läuft (optional aber empfohlen)
+
+---
+
+**Sources:**
+- [Claude Code Configuration for Teams](https://code.claude.com/docs/en/configuration)
+- [GitHub Actions Integration Guide](https://docs.github.com/en/actions)
+
+## Quellen und Links
+
+- [Agent Teams](https://code.claude.com/docs/en/agent-teams)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

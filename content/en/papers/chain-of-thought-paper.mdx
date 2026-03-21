@@ -1,0 +1,87 @@
+---
+title: Chain-of-Thought — Step-by-Step Reasoning
+date: 2026-03-21
+summary: Wei et al. 2022, Few-shot CoT prompting, Zero-shot CoT ("Let's think step by step"), Self-consistency, Tree of Thoughts extensions.
+tags: [cot, reasoning, prompting, llm, paper]
+author: AI Engineering
+section: papers
+---
+
+# Chain-of-Thought — Step-by-Step Reasoning
+
+Chain-of-Thought (CoT) is one of the most important insights in prompt engineering. Simple idea: ask a model to explain its reasoning, and it gets dramatically better.
+
+## The Discovery
+
+**Paper:** "Chain-of-Thought Prompting Elicits Reasoning in Large Language Models" (Wei et al., Google, 2022)
+
+```
+Without CoT:
+Q: "3 cars in lot, 2 arrive. Total?"
+A: "5" (guessed, no reasoning)
+
+With CoT:
+Q: "Show steps: 3 cars + 2 arrive = ?"
+A: "Start with 3, add 2, result is 5"
+(Correct with reasoning)
+```
+
+## Few-Shot CoT
+
+Key: Change the prompt, not the model.
+
+```
+Example 1: "Roger has 5 apples, eats 1 → 4 apples"
+Example 2: "Maria has 10 books, buys 3 → 13 books"
+Now: "James has 7 oranges, gives 2 away → ?"
+```
+
+Model learns: **Always show intermediate steps.**
+
+## Zero-Shot CoT: The Magic Phrase
+
+Even simpler: Just say "Let me think step by step"
+
+One phrase improves accuracy by 10-20%!
+
+## Why It Works
+
+1. **More tokens**: Model has more "time" to think
+2. **Decomposition**: Breaking into steps reduces error
+3. **Routing**: Model uses more complex neural paths
+
+## Self-Consistency
+
+Problem: CoT can still be wrong.
+Solution: Ask multiple times, take majority vote.
+
+Result: +5-10% improvement on math benchmarks.
+
+## Benchmarks
+
+```
+Math Problem Solving (GSM8K):
+
+Without CoT:
+- GPT-3: 11%
+- GPT-3.5: 40%
+
+With CoT:
+- GPT-3: 56%
+- GPT-3.5: 82%
+
+Improvement: 5x better!
+```
+
+## Impact
+
+CoT proved:
+1. Prompting is as important as model size
+2. Works for small models too
+3. Simplicity beats complexity
+
+## Sources and Links
+
+- [CoT Paper (ArXiv)](https://arxiv.org/abs/2201.11903)
+- [Zero-Shot CoT](https://arxiv.org/abs/2205.11916)
+- [Self-Consistency](https://arxiv.org/abs/2203.11171)

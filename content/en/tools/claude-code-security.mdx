@@ -1,0 +1,607 @@
+---
+title: "Claude Code Security — Hardening & Best Practices"
+date: "2026-03-21"
+summary: "Comprehensive security reference for Claude Code. Permission modes, sandbox configuration, hooks, CLAUDE.md security, enterprise compliance, and common pitfalls."
+tags: ["security", "claude-code", "permissions", "sandbox", "enterprise", "compliance"]
+author: "AI Engineering"
+---
+
+# Claude Code Security — Hardening & Best Practices
+
+> Production security reference. Every security feature is documented with concrete implementations.
+
+## Permission Modes: The Core Concept
+
+Claude Code has 5 permission modes that control what an agent can do:
+
+### Mode 1: Default (Restricted)
+
+```yaml
+---
+name: safe-agent
+model: claude-sonnet
+permission-mode: default
+disallowedTools: [Bash]  # No shell
+---
+```
+
+**Allowed:** Read, Write, Edit, Glob, Grep
+**Blocked:** Bash, dangerous operations
+
+**Use Case:** Content generation, analysis, writing
+
+### Mode 2: Standard (Balanced)
+
+```yaml
+---
+name: developer-agent
+permission-mode: default
+tools: [Read, Write, Edit, Bash, Git]
+disallowedTools: []
+---
+```
+
+**Allowed:** Everything except...
+**Blocked:** Dangerous Bash patterns (rm -rf, sudo)
+
+**Use Case:** Development, code review, testing
+
+### Mode 3: Elevated (Power User)
+
+```yaml
+---
+name: devops-agent
+permission-mode: elevated
+---
+```
+
+**Allowed:** Full Bash access, root commands
+**Blocked:** Some admin operations
+
+**Warning:** Elevated mode should rarely be used!
+
+**Use Case:** Infrastructure automation, system administration
+
+### Mode 4: Enterprise (Audit-Heavy)
+
+```yaml
+---
+name: enterprise-agent
+permission-mode: enterprise
+audit-log: true
+require-approval: true
+approval-threshold: ["write", "bash"]
+---
+```
+
+**Features:**
+- Complete audit logging
+- Approval required for critical ops
+- Compliance reporting
+- SAML/SSO integration
+
+**Use Case:** Regulated industries (finance, healthcare)
+
+### Mode 5: Bypass (Not recommended!)
+
+```yaml
+---
+name: debug-agent
+permission-mode: bypass  # Local debugging only!
+---
+```
+
+**Warning:** NEVER in production!
+
+## Sandbox Configuration
+
+### Filesystem Sandbox
+
+```yaml
+---
+name: sandboxed-agent
+sandbox:
+  filesystem: /tmp/workspace
+  allowed-dirs:
+    - /data/input
+    - /data/output
+  blocked-dirs:
+    - /etc
+    - /root
+    - /sys
+  readonly: [/data/input]  # Read only
+  readwrite: [/data/output]  # Read+write
+---
+```
+
+### Network Sandbox
+
+```yaml
+---
+name: network-restricted
+sandbox:
+  network:
+    enabled: true
+    allowed-domains:
+      - api.example.com
+      - data.example.com
+    blocked-domains:
+      - facebook.com
+      - malicious-site.com
+    protocols:
+      - https  # HTTPS only
+    rate_limit:
+      requests_per_minute: 60
+      data_per_hour: 1GB
+---
+```
+
+### Process Sandbox
+
+```yaml
+---
+name: resource-limited
+sandbox:
+  process:
+    cpu_limit: 50%
+    memory_limit: 1GB
+    timeout: 300s
+    max_file_descriptors: 256
+    no_spawn: true  # Cannot spawn child processes
+---
+```
+
+## Security Hooks: Pre & Post Execution
+
+### Pre-Tool-Use Hook for Validation
+
+```python
+# .claude/hooks/pre-tool-use/security-validator.js
+module.exports = {
+  name: 'security-validator',
+  event: 'pre-tool-use',
+  async handler(context) {
+    const { tool, args, agent_id } = context;
+
+    // Rule 1: Block SQL injection patterns
+    if (tool === 'Write' || tool === 'Bash') {
+      const dangerous = [
+        /DROP\s+TABLE/i,
+        /DELETE\s+FROM/i,
+        /TRUNCATE/i,
+        /exec\(/,
+        /eval\(/,
+        /rm\s+-rf/
+      ];
+
+      const full_input = JSON.stringify(args);
+      for (const pattern of dangerous) {
+        if (pattern.test(full_input)) {
+          throw new Error(
+            `SECURITY: Dangerous pattern detected: ${pattern.source}`
+          );
+        }
+      }
+    }
+
+    // Rule 2: Rate limiting per agent
+    const rate_key = `agent:${agent_id}:tool:${tool}`;
+    const count = await redis.incr(rate_key);
+    await redis.expire(rate_key, 60);
+
+    if (count > 100) {
+      throw new Error(`Rate limit exceeded for ${tool}`);
+    }
+
+    // Rule 3: Log all risky operations
+    if (['Bash', 'Edit', 'Write'].includes(tool)) {
+      console.log(`[SECURITY] ${agent_id} calling ${tool}:`, args);
+    }
+
+    return context; // Allow or throw to block
+  }
+};
+```
+
+### Post-Execution Hook for Output Sanitization
+
+```python
+# .claude/hooks/post-execution/output-sanitizer.js
+module.exports = {
+  name: 'output-sanitizer',
+  event: 'post-execution',
+  async handler(context) {
+    const { output, tool } = context;
+
+    // Sanitize output before returning to user
+    let sanitized = output;
+
+    // Remove API keys
+    sanitized = sanitized.replace(
+      /sk-[\w\d]{40,}/g,
+      '[ANTHROPIC_API_KEY_REDACTED]'
+    );
+    sanitized = sanitized.replace(
+      /AKIA[\w\d]{16}/g,
+      '[AWS_ACCESS_KEY_REDACTED]'
+    );
+
+    // Remove internal IPs
+    sanitized = sanitized.replace(
+      /192\.168\.\d{1,3}\.\d{1,3}/g,
+      '[INTERNAL_IP]'
+    );
+    sanitized = sanitized.replace(
+      /10\.\d{1,3}\.\d{1,3}\.\d{1,3}/g,
+      '[INTERNAL_IP]'
+    );
+
+    // Remove credentials from connection strings
+    sanitized = sanitized.replace(
+      /([a-z]+):\/\/([^:]+):([^@]+)@/g,
+      '$1://[USER]:[PASSWORD]@'
+    );
+
+    // Remove emails
+    if (!process.env.ALLOW_EMAIL_IN_OUTPUT) {
+      sanitized = sanitized.replace(
+        /[\w.-]+@[\w.-]+\.\w+/g,
+        '[EMAIL_REDACTED]'
+      );
+    }
+
+    return { ...context, output: sanitized };
+  }
+};
+```
+
+## CLAUDE.md Security Directives
+
+```yaml
+---
+# Security-focused CLAUDE.md
+name: secure-agent
+version: 1.0.0
+
+# === Permission lockdown ===
+model: claude-sonnet
+permission-mode: default
+disallowedTools: [Bash]  # No shell!
+
+# === Tools whitelist ===
+allowed-tools:
+  - Read
+  - Grep
+  - Glob
+  - Edit (only /tmp/workspace)
+
+# === Safety rules ===
+safety-rules:
+  never:
+    - Execute arbitrary shell commands
+    - Read files outside /data/input
+    - Write to system directories
+    - Make outbound network requests
+    - Access credentials from environment
+
+  always:
+    - Sanitize user input
+    - Check file paths
+    - Log sensitive operations
+    - Ask before destructive ops
+
+# === API key management ===
+secrets:
+  location: vault  # NEVER hardcode!
+  access: credentials-only
+  encryption: AES-256
+
+# === Audit & monitoring ===
+audit:
+  enabled: true
+  log_all_operations: true
+  sensitive_operations:
+    - Write
+    - Edit
+    - Bash
+  retention: 90 days
+
+# === Rate limiting ===
+rate_limits:
+  api_calls: 1000 per hour
+  file_operations: 100 per hour
+  bash_commands: 0 (disabled)
+
+# === Data retention ===
+data_retention:
+  session_logs: 24 hours
+  audit_logs: 90 days
+  crash_dumps: 7 days
+---
+```
+
+## Credentials & Secret Management
+
+### NEVER Hardcoded
+
+```python
+# WRONG - NEVER DO THIS
+OPENAI_API_KEY = "sk-proj-abc123..."
+DATABASE_URL = "postgresql://user:pass@host"
+
+# RIGHT - Use vault
+from vault import get_secret
+
+api_key = get_secret("shared/openai/API_KEY")
+db_url = get_secret("shared/database/CONNECTION_STRING")
+```
+
+### Vault Integration Pattern
+
+```python
+class VaultManager:
+    def __init__(self):
+        self.vault = VaultClient(
+            url=os.environ["VAULT_ADDR"],
+            token=os.environ["VAULT_TOKEN"]
+        )
+
+    def get_credential(self, path):
+        """Safely retrieve credential from vault"""
+        try:
+            secret = self.vault.get(f"shared/{path}")
+            return secret["data"]["value"]
+        except Exception as e:
+            raise SecretError(f"Failed to retrieve {path}")
+
+    def rotate_credential(self, path, new_value):
+        """Update credential with audit trail"""
+        self.vault.put(f"shared/{path}", {"value": new_value})
+        self.log_audit(f"Credential rotated: {path}", level="CRITICAL")
+
+    def list_credentials(self):
+        """Show all accessible secrets"""
+        return self.vault.list("shared/")
+
+# Usage
+vault = VaultManager()
+api_key = vault.get_credential("openai/API_KEY")
+db_password = vault.get_credential("database/PASSWORD")
+```
+
+## CI/CD Security in GitHub Actions
+
+### Secure Workflow Template
+
+```yaml
+name: Secure Claude Code Action
+
+on:
+  push:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  security-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Secret scanning
+      - name: TruffleHog Secret Scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          extra_args: --debug --json
+
+      # Dependency scanning
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      # Upload to GitHub Security
+      - name: Upload Trivy Results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      # Claude Code with security restrictions
+      - name: Claude Code Analysis
+        uses: anthropics/claude-code-action@v1
+        with:
+          api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: claude-opus
+          max-turns: 10
+          custom-instructions: |
+            Security review of this code:
+            - No hardcoded credentials
+            - SQL injection protection
+            - OWASP Top 10 compliance
+            - No sensitive data in logs
+```
+
+## Plugin Security: Evaluating Third-Party Plugins
+
+```python
+class PluginSecurityEvaluator:
+    def __init__(self):
+        self.risk_factors = []
+
+    def evaluate_plugin(self, plugin_manifest):
+        """Evaluate plugin for security risks"""
+        scores = {
+            "permissions": self._check_permissions(plugin_manifest),
+            "source": self._check_source(plugin_manifest),
+            "dependencies": self._check_dependencies(plugin_manifest),
+            "code_review": self._check_code_review(plugin_manifest)
+        }
+
+        return self._calculate_risk_score(scores)
+
+    def _check_permissions(self, manifest):
+        """Check if plugin requests dangerous permissions"""
+        dangerous_perms = ["tool:bash", "network:outbound", "credential:vault"]
+        requested = manifest.get("permissions", [])
+        risky = [p for p in requested if p in dangerous_perms]
+        return {"risk": len(risky) * 20}  # 20 points per dangerous perm
+
+    def _check_source(self, manifest):
+        """Verify plugin comes from trusted source"""
+        author = manifest.get("author")
+        trusted_authors = ["anthropics", "buildwithclaude"]
+        is_trusted = any(t in author.lower() for t in trusted_authors)
+        return {"risk": 0 if is_trusted else 50}
+
+    def _check_dependencies(self, manifest):
+        """Check if dependencies are safe"""
+        # Scan for known vulnerable packages
+        deps = manifest.get("dependencies", {})
+        vulnerable = ["left-pad", "event-stream"]  # Known issues
+        risky_deps = [d for d in deps if d in vulnerable]
+        return {"risk": len(risky_deps) * 30}
+
+    def _check_code_review(self, manifest):
+        """Check if code has been reviewed"""
+        reviews = manifest.get("reviews", [])
+        stars = manifest.get("rating", 0)
+        downloads = manifest.get("downloads", 0)
+
+        # More downloads + good reviews = lower risk
+        review_score = (len(reviews) * 10) + (stars * 5) + (downloads / 1000)
+        return {"risk": max(0, 50 - review_score)}
+
+    def _calculate_risk_score(self, scores):
+        """Aggregate risk scores"""
+        total = sum(s["risk"] for s in scores.values())
+        risk_level = "LOW" if total < 30 else "MEDIUM" if total < 60 else "HIGH"
+        return {"total_risk": total, "level": risk_level, "scores": scores}
+```
+
+## Enterprise Security: SSO & RBAC
+
+```python
+class EnterpriseSecurityManager:
+    def __init__(self):
+        self.sso_provider = "okta"  # or "azure-ad"
+        self.rbac = RBACEngine()
+
+    def setup_sso(self, config):
+        """Configure SSO integration"""
+        return {
+            "provider": config.get("provider"),
+            "client_id": config.get("client_id"),
+            "client_secret": config.get("client_secret"),
+            "discovery_url": config.get("discovery_url"),
+            "redirect_uri": "https://claude.company.com/auth/callback"
+        }
+
+    def verify_user(self, token):
+        """Verify JWT token from SSO"""
+        try:
+            payload = jwt.decode(
+                token,
+                algorithms=["RS256"],
+                options={"verify_signature": True}
+            )
+            return payload
+        except jwt.InvalidTokenError as e:
+            raise AuthenticationError(f"Invalid token: {e}")
+
+    def check_permission(self, user_id, action, resource):
+        """Check RBAC permission"""
+        role = self._get_user_role(user_id)
+        perms = self.rbac.get_permissions(role)
+
+        action_key = f"{action}:{resource}"
+        if action_key not in perms:
+            raise PermissionDenied(
+                f"User {user_id} not authorized for {action_key}"
+            )
+
+    def audit_log(self, user_id, action, resource, result):
+        """Log all access attempts"""
+        timestamp = datetime.now().isoformat()
+        log_entry = {
+            "timestamp": timestamp,
+            "user_id": user_id,
+            "action": action,
+            "resource": resource,
+            "result": result,
+            "ip": request.remote_addr
+        }
+
+        # Store in audit database
+        self._save_to_audit_db(log_entry)
+
+        # Alert on suspicious activity
+        if result == "DENIED":
+            self._check_for_attacks(user_id)
+```
+
+## Common Security Mistakes
+
+### Mistake 1: API Keys in Code
+
+```python
+# WRONG
+api_key = "sk-proj-abc123"
+requests.get(f"https://api.example.com?key={api_key}")
+
+# RIGHT
+api_key = os.environ.get("API_KEY")
+requests.get("https://api.example.com", headers={"Authorization": f"Bearer {api_key}"})
+```
+
+### Mistake 2: SQL Injection
+
+```python
+# WRONG - Vulnerable!
+query = f"SELECT * FROM users WHERE email = '{user_email}'"
+db.execute(query)
+
+# RIGHT - Parameterized
+query = "SELECT * FROM users WHERE email = %s"
+db.execute(query, (user_email,))
+```
+
+### Mistake 3: Overly Permissive Sandbox
+
+```yaml
+# WRONG - Way too open!
+sandbox:
+  filesystem: /
+  network:
+    allowed-domains: "*"
+
+# RIGHT - Restricted
+sandbox:
+  filesystem: /tmp/workspace
+  network:
+    allowed-domains:
+      - api.trusted.com
+```
+
+### Mistake 4: Logging Sensitive Data
+
+```python
+# WRONG
+logger.info(f"User authenticated: {password}")
+
+# RIGHT
+logger.info(f"User authenticated: {username}")
+```
+
+## Sources and Links
+
+- [Claude Code Security — Official Docs](https://code.claude.com/docs/en/security)
+- [Trail of Bits Claude Code Config](https://github.com/trailofbits/claude-code-config)
+- [OWASP Top 10](https://owasp.org/Top10/)
+- [CWE/SANS Top 25](https://cwe.mitre.org/top25/)
+- [Secret Management Best Practices](https://www.vaultproject.io/use-cases/secrets-management)

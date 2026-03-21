@@ -1,0 +1,348 @@
+---
+title: "AI Pipeline Design: ETL for LLM Systems"
+description: "Data Ingestion, Preprocessing, Embedding, Indexing for RAG and Inference. Apache Airflow, Prefect, Dagster."
+section: "architecture"
+---
+
+# AI Pipeline Design: ETL for LLM Systems
+
+An AI pipeline is an ETL machine specialized for LLM data: documents in, embeddings out, searchable.
+
+## The Problem: Ad-Hoc Data Processing
+
+**Chaos Scenario:**
+```
+PDF arrives
+  ├→ Someone extracts text manually
+  ├→ Copies to Word
+  ├→ Emails it
+  ├→ Someone adds it manually
+  └→ ERROR! PDF was old!
+```
+
+**Ordered Scenario:**
+```
+Automated AI Pipeline
+├─ 1. Data Ingestion (S3, Webhook, Polling)
+├─ 2. Preprocessing (Extract, Clean, Chunk)
+├─ 3. Embedding (Batch embed thousands)
+├─ 4. Indexing (Upsert to Vector DB)
+└─ 5. Monitoring (Log, Retry, Alert)
+```
+
+## 1. Pipeline Architecture (5 Stages)
+
+```
+Stage 1: Ingestion    Stage 2: Processing    Stage 3: Enrichment
+┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
+│ S3 / HTTP / DB   │→ │ Extract Text     │→ │ Embed            │
+│ Files arrive     │  │ Split Chunks     │  │ Compute Vectors  │
+└──────────────────┘  │ Clean Metadata   │  └──────────────────┘
+                      └──────────────────┘           ↓
+                         Stage 5: Monitoring  Stage 4: Storage
+                         ┌──────────────────┐ ┌──────────────────┐
+                         │ Errors & Alerts  │←│ Vector DB        │
+                         │ Performance Logs │ │ Cache / Metrics  │
+                         └──────────────────┘ └──────────────────┘
+```
+
+## 2. Apache Airflow: DAG-based Pipelines
+
+DAG = Directed Acyclic Graph. Define dependencies, Airflow executes:
+
+```python
+from airflow import DAG
+from airflow.operators.python import PythonOperator
+from airflow.utils.dates import days_ago
+
+def fetch_documents():
+    """Stage 1: Fetch documents from S3"""
+    import boto3
+    s3 = boto3.client('s3')
+    response = s3.list_objects_v2(Bucket='document-bucket', Prefix='uploads/')
+    return [obj['Key'] for obj in response.get('Contents', [])]
+
+def extract_text(documents):
+    """Stage 2: Extract text from documents"""
+    import PyPDF2
+    extracted = []
+    for doc in documents:
+        if doc.endswith('.pdf'):
+            with open(f"/tmp/{doc}", 'rb') as f:
+                reader = PyPDF2.PdfReader(f)
+                text = "\n".join([p.extract_text() for p in reader.pages])
+            extracted.append({'document_id': doc, 'text': text})
+    return extracted
+
+def chunk_documents(documents):
+    """Stage 2b: Split large documents"""
+    from langchain.text_splitter import RecursiveCharacterTextSplitter
+    splitter = RecursiveCharacterTextSplitter(chunk_size=512, chunk_overlap=50)
+    chunks = []
+    for doc in documents:
+        doc_chunks = splitter.split_text(doc['text'])
+        for i, chunk in enumerate(doc_chunks):
+            chunks.append({
+                'document_id': doc['document_id'],
+                'chunk_index': i,
+                'content': chunk
+            })
+    return chunks
+
+def embed_chunks(chunks):
+    """Stage 3: Embed chunks"""
+    from sentence_transformers import SentenceTransformer
+    model = SentenceTransformer('all-MiniLM-L6-v2')
+    embeddings = []
+    for chunk in chunks:
+        embedding = model.encode(chunk['content'])
+        embeddings.append({
+            'document_id': chunk['document_id'],
+            'chunk_index': chunk['chunk_index'],
+            'embedding': embedding.tolist()
+        })
+    return embeddings
+
+def index_embeddings(**context):
+    """Stage 4: Store embeddings in Vector DB"""
+    from pinecone import Pinecone
+    pc = Pinecone(api_key="YOUR_API_KEY")
+    index = pc.Index("documents")
+
+    task_instance = context['task_instance']
+    embeddings = task_instance.xcom_pull(task_ids='embed_chunks')
+
+    vectors = [
+        (f"{e['document_id']}#{e['chunk_index']}", e['embedding'])
+        for e in embeddings
+    ]
+
+    index.upsert(vectors=vectors, batch_size=100)
+    return len(vectors)
+
+# DAG Definition
+dag = DAG(
+    'document_ingestion_pipeline',
+    default_args={'owner': 'ai-team', 'retries': 2},
+    schedule_interval='0 2 * * *',  # Daily at 2 AM
+    start_date=days_ago(1)
+)
+
+fetch_task = PythonOperator(task_id='fetch_documents', python_callable=fetch_documents, dag=dag)
+extract_task = PythonOperator(task_id='extract_text', python_callable=extract_text, dag=dag)
+chunk_task = PythonOperator(task_id='chunk_documents', python_callable=chunk_documents, dag=dag)
+embed_task = PythonOperator(task_id='embed_chunks', python_callable=embed_chunks, dag=dag)
+index_task = PythonOperator(task_id='index_embeddings', python_callable=index_embeddings, dag=dag)
+
+fetch_task >> extract_task >> chunk_task >> embed_task >> index_task
+```
+
+## 3. Prefect: Modern Alternative
+
+Simpler and faster for SMEs:
+
+```python
+from prefect import flow, task
+import httpx
+
+@task(retries=2)
+async def fetch_from_s3(bucket: str) -> list:
+    """Fetch documents"""
+    import boto3
+    s3 = boto3.client('s3')
+    response = s3.list_objects_v2(Bucket=bucket, Prefix='uploads/')
+    return [obj['Key'] for obj in response.get('Contents', [])]
+
+@task
+async def extract_text(document_path: str) -> str:
+    """Extract text"""
+    import PyPDF2
+    with open(document_path, 'rb') as f:
+        reader = PyPDF2.PdfReader(f)
+        return "\n".join([p.extract_text() for p in reader.pages])
+
+@task
+async def generate_embedding(text: str) -> list:
+    """Embed text"""
+    from sentence_transformers import SentenceTransformer
+    model = SentenceTransformer('all-MiniLM-L6-v2')
+    return model.encode(text).tolist()
+
+@flow
+async def document_pipeline(bucket: str):
+    """Main pipeline"""
+    documents = await fetch_from_s3(bucket)
+    for doc in documents:
+        text = await extract_text(doc)
+        embedding = await generate_embedding(text)
+
+if __name__ == "__main__":
+    document_pipeline("my-bucket")
+```
+
+## 4. RAG Pipeline (Retrieval-Augmented Generation)
+
+RAG: Retrieve relevant docs, then generate:
+
+```python
+class RAGPipeline:
+    def __init__(self, vector_db, llm_client):
+        self.vector_db = vector_db
+        self.llm = llm_client
+
+    def retrieve(self, query: str, top_k: int = 5) -> list[str]:
+        """Stage 1: Retrieve relevant documents"""
+        from sentence_transformers import SentenceTransformer
+        model = SentenceTransformer('all-MiniLM-L6-v2')
+        query_embedding = model.encode(query).tolist()
+
+        results = self.vector_db.search(vector=query_embedding, top_k=top_k)
+        return [r['metadata']['content'] for r in results]
+
+    def generate(self, query: str, context: list[str]) -> str:
+        """Stage 2: Generate response with context"""
+        context_str = "\n\n".join([f"[Doc {i}]\n{doc}" for i, doc in enumerate(context)])
+
+        prompt = f"""Context:
+{context_str}
+
+Query: {query}
+
+Answer:"""
+
+        return self.llm.generate(prompt)
+
+    def execute(self, query: str) -> dict:
+        """Full RAG pipeline"""
+        context = self.retrieve(query)
+        response = self.generate(query, context)
+
+        return {
+            'query': query,
+            'context': context,
+            'response': response
+        }
+
+# Usage
+rag = RAGPipeline(vector_db, llm_client)
+result = rag.execute("What are the new features?")
+print(result['response'])
+```
+
+## 5. Batch vs. Real-Time Pipelines
+
+**Batch (Night Runs):**
+```
+23:00 Start
+  ├─ Load 1000s new documents
+  ├─ Embed all in parallel
+  ├─ Index to Vector DB
+01:00 Done
+
+Pros: Fast, cost-efficient (high GPU utilization)
+Cons: New data searchable only tomorrow
+```
+
+**Real-Time (On-Demand):**
+```
+User uploads file
+  ↓ (100ms)
+Webhook triggered
+  ↓ (50ms)
+Extract Text
+  ↓ (200ms)
+Embed (Async)
+  ↓ (500ms)
+Indexed
+  ↓ (50ms)
+"File now searchable"
+
+Pros: Instant
+Cons: Needs more server capacity
+```
+
+**Hybrid (Best of Both):**
+```
+Real-Time for: User uploads, Live streaming
+Batch for: News feeds, Archive, Re-training
+```
+
+## 6. Error Handling and Retries
+
+```python
+from prefect import task
+
+@task(retries=3, retry_delay_seconds=60)
+def embed_with_retry(chunk: str) -> list:
+    """Embed with automatic retries"""
+    try:
+        return embed_model.encode(chunk)
+    except Exception as e:
+        print(f"Embed failed: {e}")
+        raise  # Prefect retries
+
+@task
+def embed_with_circuit_breaker(chunk: str, circuit_breaker) -> list:
+    """With circuit breaker pattern"""
+    if circuit_breaker.is_open():
+        return cache.get(chunk)  # Fallback
+
+    try:
+        return embed_model.encode(chunk)
+    except Exception:
+        circuit_breaker.record_failure()
+        if circuit_breaker.should_open():
+            circuit_breaker.open()
+        raise
+```
+
+## 7. Pipeline Monitoring
+
+```python
+from prometheus_client import Counter, Histogram
+
+docs_processed = Counter('pipeline_docs_processed_total', 'Total docs')
+embedding_time = Histogram('pipeline_embedding_seconds', 'Latency')
+pipeline_errors = Counter('pipeline_errors_total', 'Errors', ['stage'])
+
+class MonitoredPipeline:
+    def process_document(self, doc_path: str):
+        """Process with monitoring"""
+        try:
+            text = extract(doc_path)
+            docs_processed.inc()
+
+            with embedding_time.time():
+                chunks = split_and_embed(text)
+
+            index_chunks(chunks)
+
+        except Exception as e:
+            pipeline_errors.labels(stage=type(e).__name__).inc()
+            raise
+```
+
+## Summary: Pipeline Architecture
+
+| Need | Tool | Complexity |
+|------|------|-----------|
+| **Simple Batch** | Cron + Python | Low |
+| **Complex DAGs** | Airflow | High |
+| **Modern + Fast** | Prefect | Medium |
+| **Data Engineering** | Dagster | High |
+| **Streaming** | Kafka + Spark | Very High |
+
+**Recommendation:**
+- Start: Cron + Python
+- Scale: Prefect
+- Enterprise: Airflow + Kubernetes
+
+## Sources and Links
+
+- [Apache Airflow](https://airflow.apache.org/) — Workflow Orchestration
+- [Prefect Cloud](https://www.prefect.io/) — Modern Data Workflows
+- [Dagster](https://dagster.io/) — Data Engineering Platform
+- [LangChain Text Splitter](https://python.langchain.com/docs/modules/data_connection/document_loaders/file_directory) — Chunking
+- [Pinecone](https://www.pinecone.io/) — Vector Database
+- [RAG: Retrieval-Augmented Generation](https://arxiv.org/abs/2005.11401) — Original Paper
+- [Vector Search Best Practices](https://docs.vespa.ai/en/approximate-nn-hnsw.html) — Performance Tuning

@@ -1,0 +1,90 @@
+---
+title: MLflow — Experiment Tracking und Model Registry
+date: 2026-03-21
+summary: MLflow ist Open-Source ML Ops Platform für Experiment Tracking, Model Registry und Deployment. Tracking API, Model Serving, Registry, Self-Hosting.
+tags: [mlflow, experiment-tracking, model-registry, ml-ops]
+author: AI Engineering
+---
+
+# MLflow — ML Experimentation Platform
+
+MLflow ist die Standard-Plattform für Experiment Tracking und Model Management in Data Science Teams.
+
+## Installation
+
+```bash
+pip install mlflow
+mlflow ui
+```
+
+Browser: http://localhost:5000
+
+## Tracking API
+
+```python
+import mlflow
+from sklearn.ensemble import RandomForestClassifier
+
+mlflow.start_run()
+
+# Log parameters
+mlflow.log_param("n_estimators", 100)
+mlflow.log_param("max_depth", 10)
+
+# Log metrics
+mlflow.log_metric("accuracy", 0.95)
+mlflow.log_metric("f1_score", 0.92)
+
+# Log model
+model = RandomForestClassifier(n_estimators=100)
+mlflow.sklearn.log_model(model, "model")
+
+mlflow.end_run()
+```
+
+## Model Registry
+
+Zentrale Model-Verwaltung:
+
+```python
+# Register model
+mlflow.register_model(
+    "runs:/abc123/model",
+    "my-classifier"
+)
+
+# Promote to production
+client = mlflow.tracking.MlflowClient()
+client.transition_model_version_stage(
+    name="my-classifier",
+    version=1,
+    stage="Production"
+)
+```
+
+## MLflow + LLMs
+
+```python
+import mlflow
+
+mlflow.start_run()
+mlflow.log_param("model", "qwen2.5-7b")
+mlflow.log_param("temperature", 0.7)
+mlflow.log_metric("eval_loss", 0.25)
+mlflow.log_artifact("predictions.json")
+mlflow.end_run()
+```
+
+## Serving
+
+```bash
+mlflow models serve -m runs:/abc123/model -p 1234
+curl http://localhost:1234/invocations \
+  -H 'Content-Type: application/json' \
+  -d '[...]'
+```
+
+## Sources
+
+- [MLflow GitHub](https://github.com/mlflow/mlflow)
+- [Documentation](https://mlflow.org)

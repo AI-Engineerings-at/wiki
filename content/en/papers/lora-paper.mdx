@@ -1,0 +1,395 @@
+---
+title: LoRA Explained — Low-Rank Adaptation
+date: 2026-03-21
+summary: "LoRA: Low-Rank Adaptation of Large Language Models" (Hu et al. 2021). Fine-tune massive models with minimal resources. The tech behind practical LLM customization.
+tags: [lora, fine-tuning, parameter-efficiency, training, adapter]
+author: AI Engineering
+---
+
+# LoRA Explained — Low-Rank Adaptation
+
+Fine-tuning a 70B parameter model normally requires:
+- 24+ GB VRAM
+- Weeks of training
+- Millions in hardware
+
+Hu et al. (2021) asked: What if we update only a few thousand parameters instead of billions?
+
+Answer: **LoRA**. A mini-update for mega-models.
+
+## The Problem: Full Fine-Tuning
+
+Full fine-tuning updates all 70 billion parameters. Each:
+- Needs a gradient (memory)
+- Gets updated (compute)
+- Gets stored (storage)
+
+Impossible for most. Only Tech Giants can do this.
+
+## The Insight: Low-Rank Adaptation
+
+LoRA rests on observation: **Models don't change radically during fine-tuning.**
+
+Parameter updates are small. Changes follow a low-rank structure.
+
+Simplified idea:
+- Original model has matrix W (70B parameters)
+- Instead of changing W, learn two small matrices A and B
+- Update: W_new = W + A × B
+- A and B together: Only 0.1% of original parameters!
+
+Concretely:
+```
+Original Layer: y = W × x (W is 1024×1024 = 1M params)
+
+With LoRA:
+y = W × x + A × B × x
+(A is 1024×16, B is 16×1024 = 32K params total)
+
+The 16 is the "rank". Higher rank = more capacity = more params.
+```
+
+## How LoRA Works (Detail)
+
+1. Freeze the base model. **No update to W**.
+2. Learn two new matrices for each layer:
+   - A: Small shape (rank 16 or 32)
+   - B: Small shape
+3. During training: Update only A and B
+4. Inference: Combine W + A×B → same latency as original
+
+Works for nearly every layer. With rank 8:
+- Base model: 7 billion parameters
+- LoRA adapters: 20 million parameters (0.3%)
+
+## Why It Works
+
+Mathematical intuition: Parameter updates during fine-tuning have low effective rank.
+
+Empirically: Low-rank approximation causes minimal performance loss.
+
+Analogy: A large image survives 95% compression. Parameter updates are similarly redundant.
+
+## Practical Advantages
+
+**Memory:** Store gradients for 20M params instead of 7B. ~99% reduction.
+
+**Speed:** Less compute = faster training.
+- No LoRA: 24 days on A100
+- With LoRA: 2 days on RTX 3090
+
+**Cost:** $100K hardware → $1K.
+
+**Distribution:** LoRA is small. Share 20MB LoRA weights instead of 7GB model.
+
+## LoRA in Practice
+
+```python
+from peft import get_peft_model, LoraConfig
+
+lora_config = LoraConfig(
+    r=8,                    # rank
+    lora_alpha=16,          # scaling
+    target_modules=["q_proj", "v_proj"],  # which layers?
+    lora_dropout=0.05,
+)
+
+model = get_peft_model(base_model, lora_config)
+# Train normally
+```
+
+Libraries like PEFT make this trivial.
+
+## Variants and Hybrids
+
+**QLoRA:** Quantize base model too. VRAM reduction by 50% more.
+
+**DoRA:** Combine LoRA with direction & magnitude. Better performance, similar cost.
+
+**Dual LoRA:** Different LoRA for different tasks. Switch as needed.
+
+## LoRA Limitations
+
+LoRA isn't universally superior.
+
+**Problem 1: Rank Constraint**
+
+If your task drastically differs from base (English → Klingon), rank 8 is too small. You need rank 128+. Loses advantage.
+
+**Problem 2: Base Model Quality**
+
+LoRA adapts; doesn't fundamentally improve. Bad base model = bad result.
+
+**Problem 3: Multiple Tasks**
+
+Training multiple LoRA on same base can cause interference. Merging is complex.
+
+## LoRA for Different Use Cases
+
+**Case 1: Domain Adaptation**
+
+Fine-tune GPT-3.5 for German legal terminology.
+
+LoRA perfect. Rank 8–16 enough. Hours of training. Minimal cost.
+
+**Case 2: Instruction Tuning**
+
+RLHF-like training on 10K examples.
+
+LoRA works, but full fine-tune could be better if VRAM available.
+
+**Case 3: Style Transfer**
+
+Train model to write in specific style.
+
+LoRA perfect. Rank 4–8 sufficient.
+
+## Why LoRA Matters
+
+Before LoRA: LLM fine-tuning was elite. Only universities/tech corps.
+
+After LoRA: Anyone with $1K hardware can experiment.
+
+This democratized open-source LLMs. Llama, Mistral, etc. are practical only because of LoRA.
+
+## Future of LoRA
+
+LoRA won't disappear, but alternatives emerge:
+
+**Prefix Tuning:** Train only new token embeddings. Sometimes beats LoRA.
+
+**Prompt Tuning:** Soft prompts. Fewer parameters.
+
+**State-Space Models (Mamba):** Alternatives to Transformers.
+
+But LoRA remains standard for Transformer fine-tuning.
+
+## Mathematical Intuition Behind Low-Rank
+
+Why does low-rank approximation work?
+
+**Observation:** During fine-tuning, parameters change *slightly*.
+
+Mathematically: ΔW = W_new - W_old has low effective rank.
+
+**Intuition:**
+- During pre-training: Broad, shallow changes
+- During fine-tuning: Narrow, deep changes
+
+Narrow + deep = low-rank.
+
+**Empirical Validation:**
+
+Hu et al. measured singular values of ΔW:
+
+```
+LoRA-Rank vs Original Rank:
+- Original W: 1024 singular values
+- ΔW with rank=8: 8 dominant values
+- Rest negligible (< 1% energy)
+```
+
+Shows: Fine-tuning doesn't need full rank.
+
+## QLoRA: Next-Gen LoRA
+
+**Problem with LoRA:** Still need large VRAM for base weights.
+
+**QLoRA Solution:** Quantize the base model too.
+
+Concretely:
+```
+Standard LoRA:
+- Base: 32-bit (7B × 4 bytes = 28GB)
+- LoRA: 16-bit (0.02GB)
+- Total: ~28GB
+
+QLoRA:
+- Base: 4-bit (7B × 0.5 bytes = 3.5GB)
+- LoRA: 16-bit (0.02GB)
+- Total: ~3.5GB
+```
+
+Massive reduction. Consumer GPU (24GB) sufficient.
+
+**How 4-bit Quantization Works:**
+
+```
+Simplified:
+- 32-bit float: [-3.14, -0.001, 0, 1000, ...]
+- 4-bit: [0, 1, 2, 3, 4, 5, ... 15]
+
+With scaling:
+4-bit × Scale = Original-Value
+```
+
+Scale-factors are small. 4-bit values are the bulk.
+
+**QLoRA Results:**
+- Memory: 75-90% reduction vs LoRA
+- Performance: ~98-99% vs LoRA
+- Speed: Slightly slower (dequantization), but practical
+
+Today: QLoRA is de-facto standard for consumer-GPU fine-tuning.
+
+## LoRA with Other Architectures
+
+LoRA was designed for Transformers. Does it work elsewhere?
+
+**Vision Transformers (ViT):**
+- LoRA on Q, K, V, FC layers
+- Works well, similar speedups
+- Supported in PEFT
+
+**Diffusion Models:**
+- LoRA on UNet blocks
+- Enables fast style transfer
+- Popular: Stable Diffusion LoRA
+
+**Recurrent Networks (RNNs, LSTMs):**
+- LoRA less effective
+- Reason: RNNs have fewer params already
+- Low-rank gain diminished
+
+**Conclusion:** LoRA shines on parameter-heavy architectures. Transformers = ideal.
+
+## LoRA in Practice: Case Study
+
+**Scenario:** Fine-tune Llama-2-70B for German medical terminology.
+
+**Without LoRA:**
+- Memory: 280GB (70B × 4)
+- Hardware: 4x A100 (80GB), $40k
+- Time: 4 weeks
+- Cost: High
+
+**With LoRA (Rank=8):**
+- Memory: ~60GB (with 4-bit quantization + gradient checkpointing)
+- Hardware: 2x RTX 4090 (24GB), $3k
+- Time: 3 days
+- Cost: 1/10th
+
+**Output:** 120MB LoRA adapter instead of 280GB model copy.
+
+This is why LoRA democratized fine-tuning.
+
+## Limits and Edge Cases
+
+**Edge Case 1: Extreme Domain Shift**
+
+Task vastly differs from pre-training:
+- Pre-training: English Wikipedia
+- Task: Medieval German Poetry
+
+Rank=8 insufficient. Need rank=64+ → lose advantages.
+
+Solution: Full fine-tuning or multiple LoRA combinations.
+
+**Edge Case 2: Multi-Task LoRA Merging**
+
+Have multiple LoRAs:
+- LoRA #1: German domain
+- LoRA #2: Medical domain
+- LoRA #3: Poetry style
+
+Can you merge them?
+
+```
+Merged = Base + 0.5*LoRA1 + 0.3*LoRA2 + 0.2*LoRA3
+```
+
+Works, but: Parameter interference.
+
+New research: "LoRA Routing" — model selects which LoRA to use.
+
+**Edge Case 3: Inference with LoRA**
+
+Normally:
+```
+Output = Base(Input) + LoRA(Input)
+Latency = Base-latency (LoRA negligible)
+```
+
+But: If rank is high, LoRA becomes bottleneck.
+
+Solution: Merge LoRA back into base before deployment.
+
+## LoRA Merging: Combining Multiple Adapters
+
+Topic: Train multiple LoRA adapters, how combine?
+
+**Naive Merge:**
+```python
+merged = base + 0.5 * lora_support + 0.5 * lora_legal
+```
+
+**Problem:** Conflicting adapters make naive merge suboptimal.
+
+**Better: Adaptive Routing**
+```
+Router: "Detect: legal context"
+→ Select: lora_legal only
+```
+
+Complex but much better with conflicts.
+
+## LoRA + Flash Attention
+
+Flash Attention saves 75% VRAM on attention.
+
+**With LoRA:**
+```
+LoRA: 99% VRAM savings (training)
+Flash: 75% (inference)
+Combined: Very efficient!
+```
+
+Why consumer-GPU fine-tuning works.
+
+## LoRA and Inference
+
+**Problem:** Large rank becomes bottleneck.
+
+**Solution: Merge before deployment**
+```python
+merged = original + lora_a @ lora_b
+save_model(merged)
+# No LoRA ops, faster!
+```
+
+Standard for production.
+
+## Future: Beyond LoRA
+
+**Prefix Tuning:**
+- Train input embeddings only
+- Fewer params than LoRA
+- Trade-off: Sometimes weaker
+
+**Prompt Tuning:**
+- "Soft prompts" — learnable tokens
+- Extreme: 10-100 tokens
+- Trade-off: Weak on hard tasks
+
+**Adapter Modules:**
+- Small NN between layers
+- Hybrid approach
+- Sometimes better, complex
+
+**State-Space Models (Mamba):**
+- New architecture, not Transformer
+- Different fine-tuning
+- Early research
+
+**My Take (2026):** LoRA stays standard. Others are niches. Hybrids growing.
+
+## References
+
+- LoRA: arxiv.org/abs/2106.09714
+- QLoRA: arxiv.org/abs/2305.14314
+- DoRA: arxiv.org/abs/2402.09353
+- PEFT Library: github.com/huggingface/peft
+
+## Sources and Links
+
+- [LoRA: Low-Rank Adaptation (arXiv)](https://arxiv.org/abs/2106.09685)

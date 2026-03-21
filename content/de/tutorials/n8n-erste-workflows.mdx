@@ -1,0 +1,428 @@
+---
+title: "Deine ersten 3 AI Workflows mit n8n"
+date: 2026-03-21
+summary: "Webhook → AI → Response. RSS → Summary → Email. Form → Classification → Alert. Praktische n8n Workflows zum Kopieren."
+tags: ["n8n", "workflows", "ollama", "automation", "ai"]
+author: "AI Engineering"
+---
+
+# Deine ersten 3 AI Workflows mit n8n
+
+Du wirst 3 funktionierende n8n Workflows bauen: Chat-API, RSS-Summary-Mailer, und AI-Klassifikation. Jeder ist copy-paste-ready und zeigt dir die wichtigsten n8n Patterns.
+
+**Voraussetzung**: Du hast Ollama + Open WebUI + n8n laufen (siehe: AI Stack in 30 Minuten aufsetzen)
+
+## Basics: n8n Expressions und Credentials
+
+### Ollama Credential einrichten
+
+1. Geh zu n8n Admin Panel: http://localhost:5678/admin/credentials
+2. Klick "+ New"
+3. Suche "HTTP Request"
+4. Speichere:
+   - Name: "Ollama Local"
+   - URL: http://ollama:11434
+   - Authentication: None
+
+### n8n Expression Syntax (wichtig!)
+
+In n8n 2.x brauchst du ein **`=` Prefix** für Expressions:
+
+```
+{{ $json.text }}           # Falsch — wird als Literal-String behandelt
+={{ $json.text }}          # Richtig — wird als Expression evaluiert
+```
+
+**Datumsformate** (Luxon statt Moment.js):
+
+```
+Falsch:  "YYYY-MM-DD"     # Gibt "YYYY-03-Mar 20, 2026"
+Richtig: "yyyy-MM-dd"     # Gibt "2026-03-20"
+```
+
+## Workflow 1: Webhook Chat API
+
+**Was macht er**: POST-Request mit Prompt → Ollama antwortet → JSON Response zurück.
+
+### Aufbau
+
+```
+Webhook (POST) → Ollama Request → Response (HTTP)
+```
+
+### Schritt-für-Schritt
+
+**1. Neuer Workflow**
+
+Geh zu n8n, klick "New Workflow", benenne ihn "Chat API".
+
+**2. Webhook Trigger hinzufügen**
+
+- Klick das blaue "+" oben links
+- Suche "Webhook"
+- Wähle "Webhook"
+- Method: POST
+- URL: /webhook/chat (n8n generiert die komplette URL)
+- Klick "Listen for test event"
+
+**3. Code Node (Prompt validieren)**
+
+- Klick "+" neben Webhook
+- Suche "Code"
+- Wähle "Code"
+- Language: JavaScript
+- Code:
+
+```javascript
+const { prompt } = $json.body || {};
+
+if (!prompt || prompt.trim().length === 0) {
+  throw new Error('prompt is required');
+}
+
+return {
+  prompt: prompt.trim(),
+  model: 'mistral'
+};
+```
+
+**4. HTTP Request zu Ollama**
+
+- Klick "+" neben Code
+- Suche "HTTP Request"
+- Method: POST
+- URL: `http://ollama:11434/api/generate`
+- Body (raw):
+
+```
+{
+  "model": "mistral",
+  "prompt": "={{ $prevNode.json.prompt }}",
+  "stream": false
+}
+```
+
+- Headers:
+  - Content-Type: application/json
+
+**5. Response Node**
+
+- Klick "+" neben HTTP Request
+- Suche "Respond to Webhook"
+- Body (JSON):
+
+```json
+{
+  "response": "={{ $prevNode.json.response }}",
+  "model": "mistral"
+}
+```
+
+### Testen
+
+Klick "Listen for test event" beim Webhook, warte bis "listening" angezeigt wird.
+
+Öffne Terminal und teste:
+
+```bash
+curl -X POST http://localhost:5678/webhook/chat \
+  -H "Content-Type: application/json" \
+  -d '{"prompt":"Was ist Docker?"}'
+```
+
+Du solltest die Ollama-Antwort bekommen. Speichern und "Activate" klicken.
+
+---
+
+## Workflow 2: RSS Feed → AI Summary → Email
+
+**Was macht er**: RSS Feed abfragen → neueste Artikel → mit Ollama zusammenfassen → per Email versenden.
+
+**Voraussetzung**: Du hast einen Email-Account (Gmail, Outlook, etc.) für SMTP konfiguriert.
+
+### Aufbau
+
+```
+Cron Trigger (täglich) → RSS Read → Split Items → Ollama Summary → Email Send
+```
+
+### Schritt-für-Schritt
+
+**1. Neuer Workflow**: "RSS Digest"
+
+**2. Cron Trigger**
+
+- Klick "+" → suche "Cron"
+- Trigger: Every Day
+- Time: 08:00 (jeden Morgen)
+- Timezone: Europe/Vienna
+
+**3. RSS Read**
+
+- Klick "+" neben Cron
+- Suche "RSS Read"
+- URL: `https://news.ycombinator.com/rss`
+- Max Items: 5
+- Settings: "Return all items as separate objects" = JA
+
+**4. Split Items (wichtig)**
+
+- Klick "+" neben RSS
+- Suche "Split Out"
+- Field to Split on: `items` (wird automatisch erkannt)
+
+Das teilt den Array auf, so dass jedes Item einzeln verarbeitet wird.
+
+**5. Ollama Summarize**
+
+- Klick "+" neben Split Out
+- Suche "HTTP Request"
+- Method: POST
+- URL: `http://ollama:11434/api/generate`
+- Body (raw):
+
+```
+{
+  "model": "mistral",
+  "prompt": "Fasse den folgenden Text in 2 Sätzen auf Deutsch zusammen:\n\n{{ $json.title }}\n\n{{ $json.description }}",
+  "stream": false
+}
+```
+
+**6. Email senden**
+
+- Klick "+" neben HTTP Request
+- Suche "Gmail" (oder "SMTP")
+- Falls Gmail:
+  - App Password: (generiere einen über Google Account)
+  - To: deine-email@example.com
+  - Subject: `RSS Digest: {{ $json.title }}`
+  - HTML:
+
+```html
+<h2>{{ $json.title }}</h2>
+<p><strong>Zusammenfassung:</strong></p>
+<p>{{ $json.response }}</p>
+<a href="{{ $json.link }}">Zum Artikel</a>
+```
+
+**Wichtig**: Die "Split Out" Node sorgt dafür, dass die Email Loop 5x ausgeführt wird (einmal pro Item).
+
+### Testen
+
+Klick "Test" oben rechts. Der Workflow sollte 5 Emails verschicken (oder 0, wenn du noch keine Gmail-Credentials hast).
+
+---
+
+## Workflow 3: Form → Classification → Notification
+
+**Was macht er**: Formular-Submission → Text kategorisieren (Bug/Feature/Feedback) → Alert in Mattermost schreiben.
+
+### Aufbau
+
+```
+Webhook (Form) → Ollama Classify → Mattermost Post
+```
+
+### Schritt-für-Schritt
+
+**1. Neuer Workflow**: "Feedback Classifier"
+
+**2. Webhook Form**
+
+- Klick "+" → suche "Webhook"
+- Method: POST
+- URL: /webhook/feedback
+- "Listen for test event" starten
+
+**3. Classification Code**
+
+- Klick "+" neben Webhook
+- Suche "Code"
+- Language: JavaScript
+- Code:
+
+```javascript
+const { text, email } = $json.body || {};
+
+if (!text) {
+  throw new Error('text is required');
+}
+
+// Prompt für Klassifikation
+const classificationPrompt = `Klassifiziere den folgenden Text in eine dieser Kategorien: BUG, FEATURE_REQUEST, FEEDBACK, OTHER
+
+Text: "${text}"
+
+Antworte NUR mit der Kategorie, z.B. "BUG".`;
+
+return {
+  original_text: text,
+  email: email,
+  prompt: classificationPrompt
+};
+```
+
+**4. Ollama Classify**
+
+- Klick "+" neben Code
+- Suche "HTTP Request"
+- Method: POST
+- URL: `http://ollama:11434/api/generate`
+- Body (raw):
+
+```
+{
+  "model": "mistral",
+  "prompt": "={{ $prevNode.json.prompt }}",
+  "stream": false
+}
+```
+
+**5. Mattermost Notification**
+
+- Klick "+" neben HTTP Request
+- Suche "Mattermost"
+- Channel: #feedback
+- Message:
+
+```
+**Neue Einsendung**
+Kategorie: {{ $prevNode.json.response }}
+Email: {{ $prevNode.json.email }}
+Text: {{ $prevNode.json.original_text }}
+```
+
+Falls du Mattermost nicht hast, nimm stattdessen "Send Email" oder "Slack".
+
+### Testen
+
+Terminal:
+
+```bash
+curl -X POST http://localhost:5678/webhook/feedback \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "Beim Starten von Ollama kommt Fehler CUDA Out of Memory",
+    "email": "user@example.com"
+  }'
+```
+
+Du solltest eine Mattermost-Nachricht mit "BUG" Kategorisierung bekommen.
+
+---
+
+## Wichtige n8n Patterns
+
+### Pattern 1: If/Dann verzweigen
+
+Um einen Workflow abhängig von Ollama-Antwort zu verzweigen:
+
+```javascript
+// Code Node: Classification Check
+const category = $json.response.trim();
+
+return {
+  is_bug: category === 'BUG',
+  is_feature: category === 'FEATURE_REQUEST',
+  category
+};
+```
+
+Dann mit "If" Nodes branchen.
+
+### Pattern 2: Batch Processing
+
+Für viele Items ohne Split (schneller):
+
+```javascript
+// Sammle alle zusammen
+const items = $json.items || [];
+const summaries = [];
+
+for (const item of items) {
+  // Ollama API
+  const response = await fetch('http://ollama:11434/api/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'mistral',
+      prompt: `Summarize: ${item.text}`,
+      stream: false
+    })
+  });
+
+  const data = await response.json();
+  summaries.push(data.response);
+}
+
+return { summaries };
+```
+
+Das ist schneller als Split, da keine separaten Node-Executions nötig sind.
+
+### Pattern 3: Error Handling
+
+An jeder kritischen Node: Settings → "Error" Tab:
+
+- "Continue on Error" = Workflow geht weiter, fehlerhafte Items werden skipped
+- "Stop on Error" = Workflow stoppt, gute für Kritische Daten
+
+---
+
+## Troubleshooting
+
+### "Connection refused" zu Ollama
+
+Öffne Terminal:
+
+```bash
+docker ps | grep ollama
+docker logs ai-ollama
+```
+
+Meist: Ollama noch nicht bereit. Warte 10 Sekunden.
+
+### Ollama antwortet, aber super langsam
+
+- Modell zu groß für deine RAM? Wechsel zu kleinerer: `mistral` statt `llama2`
+- CPU wird gefloppt? Aktiviere GPU (siehe: AI Stack Setup)
+
+### n8n Expressions funktionieren nicht
+
+Doppel-Check: **Ist das `=` Prefix da?**
+
+```
+Falsch:  {{ $json.text }}
+Richtig: ={{ $json.text }}
+```
+
+Die Expression-Box ist goldfarben, Code-Nodes sind hellgrau.
+
+### Email wird nicht versendet
+
+- Gmail: Hast du ein App Password generiert (nicht dein Passwort direkt)?
+- SMTP: Port 587 (TLS) statt 25
+- Logs: `docker-compose logs n8n` checken
+
+## Nächste Schritte
+
+- Workflows **aktivieren** (Toggle oben rechts)
+- **Webhook URLs speichern** für deine Apps
+- Lies: **Multi-Agent System aufbauen** — verbinde mehrere Workflows
+- Monitoring: **AI Monitoring Dashboard** — Track Workflow-Performance
+
+## Checkliste
+
+- [ ] Ollama Credential erstellt
+- [ ] Workflow 1 (Chat API) getestet
+- [ ] Workflow 2 (RSS Digest) getestet
+- [ ] Workflow 3 (Feedback Classifier) getestet
+- [ ] Alle 3 Workflows aktiviert
+- [ ] Webhook URLs dokumentiert
+- [ ] Passwort für n8n gesichert (password manager)
+
+## Quellen und Links
+
+- [n8n](https://github.com/n8n-io/n8n)
+- [n8n Docs](https://docs.n8n.io)

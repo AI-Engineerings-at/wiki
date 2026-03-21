@@ -1,0 +1,397 @@
+---
+title: Claude Code CLI
+date: 2026-03-21
+summary: Komplette Anleitung zum Claude Code Command Line Interface - Installation, Konfiguration, Commands und IDE-Integration
+tags: [claude-code, cli, local, installation, ide]
+author: AI Engineering
+---
+
+# Claude Code CLI
+
+Claude Code ist das Command Line Interface zum Arbeiten mit Claude in deinen lokalen Projekten. Du steuerst es über Slash-Commands und konfigurierst es über CLAUDE.md Dateien.
+
+## Installation
+
+### macOS (Homebrew)
+```bash
+brew install anthropic/claude-code/claude-code
+```
+
+### Linux / Windows (npm)
+```bash
+npm install -g @anthropic-ai/claude-code
+```
+
+Nach Installation die Version prüfen:
+```bash
+claude --version
+```
+
+### Autocompletion
+```bash
+# Bash
+eval "$(claude --completion bash)"
+
+# Zsh
+eval "$(claude --completion zsh)"
+
+# Fish
+claude --completion fish | source
+```
+
+## Projekt initialisieren
+
+Beim ersten Start in einem Verzeichnis:
+```bash
+cd /dein/projekt
+claude /init
+```
+
+Das erstellt automatisch:
+- `.claude/CLAUDE.md` — Projekt-Level Instruktionen
+- `.claude/rules/` — Regel-Verzeichnis (optional)
+- `.claude/skills/` — Custom Skills (optional)
+- `.claude/agents/` — Agent-Definitionen (optional)
+
+## Wichtigste Commands
+
+### `/init`
+Initialisiert ein neues Projekt mit `.claude/`-Struktur.
+```bash
+claude /init
+```
+
+### `/compact`
+Speichert den aktuellen Context und startet eine neue Session. Der alte Context bleibt erhalten und wird bei Bedarf geladen.
+```bash
+claude /compact
+# Erstellt einen Checkpoint — danach ist der Chat leer
+```
+
+**Wann nutzen:** Bei langen Sessions (> 50 Turns) wenn der Context zu groß wird.
+
+### `/clear`
+Löscht die lokale Chat-History der aktuellen Session, nicht die Dateien.
+```bash
+claude /clear
+```
+
+### `/model`
+Wechselt das Modell für die aktuelle Session.
+```bash
+claude /model sonnet  # haiku, sonnet, oder opus
+```
+
+**Verfügbar:** `haiku` (schnell, einfach), `sonnet` (Standard), `opus` (komplex).
+
+### `/permissions`
+Zeigt und verwaltet Tool-Berechtigungen.
+```bash
+claude /permissions
+# Listet verfügbare Tools auf
+```
+
+### `/cost`
+Zeigt Input- und Output-Token der aktuellen Session.
+```bash
+claude /cost
+```
+
+### `/doctor`
+Diagnostiziert Probleme mit deinem Setup.
+```bash
+claude /doctor
+# Prüft: Git, Node.js, .claude/ Struktur, Credentials
+```
+
+### `/review`
+Erstellt einen Code-Review eines bestimmten Files.
+```bash
+claude /review src/main.py
+```
+
+### `/pr`
+Generiert einen Pull-Request aus den lokalen Änderungen.
+```bash
+claude /pr
+# Basiert auf git diff gegen main
+```
+
+## CLAUDE.md Struktur
+
+CLAUDE.md Dateien konfigurieren Claude für dein Projekt. Sie können auf mehreren Ebenen existieren:
+
+### Ebenen
+1. **User-Level** — `~/.claude/CLAUDE.md` (optional, global für alle Projekte)
+2. **Projekt-Level** — `/dein/projekt/.claude/CLAUDE.md` (PFLICHT, überschreibt User-Level)
+3. **Rules** — `.claude/rules/*.md` (granulare Regeln, werden vom Projekt-CLAUDE.md geladen)
+
+### Aufbau einer CLAUDE.md
+
+```markdown
+# Mein Projekt — AI Engineering Standards
+
+## Sicherheit
+- Keine API Keys in Code
+- Alle Credentials vom Vault laden
+
+## Tool-Regeln
+- File-Operationen NUR in /src und /docs
+- Bash-Befehle IMMER nach Rückfrage
+
+## Git-Workflow
+- Immer auf Feature-Branch
+- Commit-Messages: Imperative Form
+- Vor Merge: CI/CD muss grün sein
+
+## Projekt-Kontext
+ERPNext läuft auf dein-server:8082
+n8n Workflows in ./n8n-workflows/
+Test-Suite: npm run test
+```
+
+**Wichtig:** CLAUDE.md ist im Repository — jeder Entwickler erbt die gleichen Regeln.
+
+## Hooks System
+
+Hooks erlauben es, eigene Logik vor/nach Tool-Einsatz auszuführen.
+
+### Verfügbare Hook-Punkte
+```yaml
+hooks:
+  PreToolUse: [...]      # VOR jedes Tool wird ausgeführt
+  PostToolUse: [...]     # NACH jedes Tool
+  PreAction: [...]       # VOR jeder Aktion (File schreiben, Git commit, etc.)
+  PostAction: [...]      # NACH jeder Aktion
+```
+
+### Hook-Format
+```yaml
+hooks:
+  PreToolUse:
+    - matcher: "Write|Edit"      # Regex: welche Tools betroffen
+      action: "confirm"          # confirm = fragen, log = melden, block = blocken
+      message: "Datei wird geändert: $file"
+```
+
+### Beispiel: Backup VOR jeder File-Bearbeitung
+```yaml
+hooks:
+  PreAction:
+    - matcher: "file_modify"
+      action: "backup_first"
+      retention: 5              # letzte 5 Backups behalten
+```
+
+## Agent SDK Basics
+
+Wenn du Custom-Agents bauen möchtest, nutze das Agent SDK:
+
+```typescript
+import { Anthropic } from "@anthropic-ai/sdk";
+
+const client = new Anthropic();
+
+const response = await client.messages.create({
+  model: "claude-opus-4-1",
+  max_tokens: 4096,
+  tools: [
+    {
+      name: "read_file",
+      description: "Liest eine Datei",
+      input_schema: {
+        type: "object",
+        properties: {
+          path: { type: "string", description: "Dateipfad" }
+        },
+        required: ["path"]
+      }
+    }
+  ],
+  messages: [
+    {
+      role: "user",
+      content: "Lese die README.md Datei"
+    }
+  ]
+});
+```
+
+Das SDK ist auf npm verfügbar:
+```bash
+npm install @anthropic-ai/sdk
+```
+
+## IDE-Integration
+
+### VS Code
+1. Extension installieren: "Claude Code" (Anthropic Official)
+2. Befehlspalette: `Cmd+Shift+P` → "Claude: Initialize Project"
+3. Chat öffnet sich im Editor-Panel
+
+**Shortcuts:**
+- `Cmd+Shift+C` — Claude Chat öffnen
+- `Cmd+Shift+A` — Datei als Context hinzufügen
+
+### JetBrains (IntelliJ, PyCharm, etc.)
+1. Settings → Plugins → "Claude Code" installieren
+2. Tools → Claude Code → Initialize Project
+3. Chat panel öffnet sich rechts
+
+**Shortcuts:**
+- `Cmd+K` / `Ctrl+K` — Chat öffnen
+- `Cmd+Shift+K` — Code-Block erzeugen
+
+### Vim / Neovim
+Kein offizielles Plugin, aber Claude Code CLI funktioniert:
+```bash
+claude /review src/main.py  # Output im Terminal
+```
+
+Alternative: `coc-claude` Extension für coc.nvim.
+
+## Print Mode (-p Flag)
+
+Print Mode führt eine Anfrage aus und beendet sich sofort — no interactive session.
+
+```bash
+claude -p "Schreibe einen Unit Test für main.py"
+```
+
+**Anwendung:**
+- Einmalige Anfragen
+- Skripte/Automation
+- CI/CD Pipelines
+
+**Wichtig:** Mit `-p` wird keine Session gespeichert. Für längere Arbeit `/init` verwenden.
+
+## Headless Mode
+
+Claude Code kann ohne Benutzer-Interaktion über Skripte gesteuert werden:
+
+```bash
+# Nicht-interaktiv einen Skill ausführen
+echo "Fix the bug in main.py" | claude
+```
+
+## MCP Integration
+
+Claude Code kann MCP (Model Context Protocol) Server nutzen. Konfiguration in `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "node",
+      "args": ["~/.mcp-servers/filesystem/index.js"]
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_..."
+      }
+    }
+  }
+}
+```
+
+Nach Änderung neustarten:
+```bash
+claude /doctor  # zeigt MCP-Verbindung
+```
+
+## Tips & Best Practices
+
+### 1. Große Projekte strukturieren
+Nutze `.claude/rules/` für verschiedene Bereiche:
+```
+.claude/
+  ├── CLAUDE.md
+  ├── rules/
+  │   ├── 01-safety.md
+  │   ├── 02-architecture.md
+  │   ├── 03-testing.md
+  │   └── 04-git-workflow.md
+  └── skills/
+```
+
+### 2. Context Noise reduzieren
+Mit `/compact` regelmäßig den Context aufräumen:
+```bash
+# Nach 50 Turns
+claude /compact
+```
+
+### 3. Kosten monitoren
+Regelmäßig `/cost` ausführen um zu sehen welche Models teuer sind:
+```bash
+claude /cost
+# Output: Haiku: 1234 tokens (€0.18), Opus: 567 tokens (€0.28)
+```
+
+### 4. Git vor AI-Änderungen
+Vor großen Änderungen:
+```bash
+git add -A && git commit -m "Before AI session"
+```
+
+Dann kann Claude auf Basis von `git diff` arbeiten.
+
+### 5. File-Kontext gezielt geben
+Statt ganz `.` zu indexieren:
+```bash
+claude /init
+# Dann manuell nur relevante Dateien hinzufügen via IDE oder /add
+```
+
+## Troubleshooting
+
+### "CLAUDECODE env var is set" Error
+```bash
+unset CLAUDECODE
+# Oder neue Session starten
+```
+
+**Grund:** Zwei Claude Code Instanzen laufen parallel. Nur eine Instanz pro Projekt erlaubt.
+
+### Skills werden nicht gefunden
+```bash
+# Sicherstellen, dass Claude Code im Projekt-Root startet
+pwd  # sollte die Datei mit .claude/ zeigen
+claude /doctor  # zeigt verfügbare Skills
+```
+
+### MCP-Server verbindet nicht
+```bash
+claude /doctor
+# "MCP connections: 0" bedeutet Config-Problem
+# Prüfe .mcp.json auf Syntax
+```
+
+### Context zu groß
+```bash
+claude /compact
+# Neuer Checkpoint wird erstellt
+```
+
+## Checkliste
+
+- [ ] Claude Code installiert (`claude --version` funktioniert)
+- [ ] Projekt initialisiert (`ls .claude/CLAUDE.md` existiert)
+- [ ] `.claude/CLAUDE.md` angepasst (Projekt-spezifische Regeln)
+- [ ] IDE-Extension installiert (VS Code / JetBrains / Vim)
+- [ ] MCP-Server konfiguriert (falls benötigt)
+- [ ] Erste Session erfolgreich (`claude /doctor` zeigt grüne Checkmarks)
+- [ ] Git-Workflow etabliert (Commits vor großen Changes)
+
+## Quellen und Links
+
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [Interactive Mode](https://code.claude.com/docs/en/interactive-mode)
+- [npm Package](https://www.npmjs.com/package/@anthropic-ai/claude-code)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

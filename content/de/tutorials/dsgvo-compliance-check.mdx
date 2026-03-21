@@ -1,0 +1,423 @@
+---
+title: "DSGVO Compliance Check für deinen AI Stack"
+date: 2026-03-21
+summary: "Art. 30 Verzeichnis, DSFA, technische Maßnahmen, AVV, Löschkonzept. Checklisten und Templates."
+tags: ["dsgvo", "compliance", "legal", "privacy", "ai"]
+author: "AI Engineering"
+---
+
+# DSGVO Compliance Check für deinen AI Stack
+
+Du wirst die wichtigsten DSGVO-Anforderungen für deinen Local AI Stack dokumentieren: Verarbeitungsverzeichnis, Datenschutz-Folgenabschätzung, technische Sicherheit, Verträge. Dies ersetzt keine Rechtsberatung, ist aber ein praktischer Einstieg.
+
+**Wichtig**: Das ist für Unternehmen in der EU/Österreich. Für andere Länder gelten andere Regeln.
+
+## Warum ist das wichtig?
+
+- Du speicherst Benutzerdaten (Prompts, Feedback) lokal
+- Ollama lädt Modelle herunter (externe API-Calls möglich)
+- n8n verarbeitet Kundendaten in Workflows
+- DSGVO Strafen: bis €20 Mio oder 4% Umsatz (Art. 83, 84)
+
+Die Behörden kontrollieren verstärkt KI-Systeme. Eine Dokumentation ist dein Schutz.
+
+## Schritt 1: Verarbeitungsverzeichnis (Art. 30 DSGVO)
+
+Das ist eine Tabelle, die dokumentiert: **Wer, Welche Daten, Zu Welchem Zweck, Wie lange**.
+
+Erstelle eine Datei: `dsgvo/verarbeitungsverzeichnis.md`
+
+### Template
+
+```markdown
+# Verarbeitungsverzeichnis nach Art. 30 DSGVO
+Verantwortlicher: [Dein Name/Firma]
+Erstellt: 2026-03-21
+Letzte Aktualisierung: [Datum]
+
+## Verarbeitungsvorgänge
+
+### 1. Chat-Prompts speichern (Ollama + Open WebUI)
+
+| Feld | Beschreibung |
+|------|------------|
+| **Kategorien betroffener Personen** | Nutzer des Chat-Systems |
+| **Kategorien personenbezogener Daten** | Prompts (Texte), IP-Adresse, Zeitstempel, ggf. Name |
+| **Zweck der Verarbeitung** | KI-Assistenz bereitstellen, Nutzungserlebnis verbessern |
+| **Rechtsgrundlage** | Art. 6 Abs. 1 Buchst. b) DSGVO (Vertrag) oder Abs. 1 Buchst. a) (Einwilligung) |
+| **Empfänger** | Intern: Administratoren; Extern: keine (Ollama lädt Modelle von huggingface.co) |
+| **Speicherdauer** | 3 Monate (dann automatisch löschen) |
+| **Beschreibung der Sicherheit** | SSL/TLS, PostgreSQL Verschlüsslung, Zugriffskontrolle |
+| **Besonderheiten** | Modelldownload erfolgt extern ohne Prompt-Versand |
+
+### 2. n8n Workflow-Daten (Executions, Logs)
+
+| Feld | Beschreibung |
+|------|------------|
+| **Kategorien betroffener Personen** | Kunden, deren Daten in Workflows verarbeitet werden |
+| **Kategorien personenbezogener Daten** | Kundendaten (variabel je Workflow), Ausführungsergebnisse, Error Logs |
+| **Zweck der Verarbeitung** | Automatisierung von Geschäftsprozessen |
+| **Rechtsgrundlage** | Art. 6 Abs. 1 Buchst. b) DSGVO (Vertragserfüllung) |
+| **Empfänger** | Intern: Administratoren; Extern: z.B. Email-Provider (wenn Workflow versendet) |
+| **Speicherdauer** | 30 Tage (dann löschen gemäß Audit-Trail-Anforderungen) |
+| **Beschreibung der Sicherheit** | PostgreSQL verschlüsselt, Execution Logs nach 30d löschen, Zugriffskontrolle |
+| **Besonderheiten** | Sensitive Daten können in Error Logs landen → Regelmäßige Log-Löschung nötig |
+
+### 3. Monitoring & System-Logs (Prometheus, Grafana)
+
+| Feld | Beschreibung |
+|------|------------|
+| **Kategorien betroffener Personen** | Benutzer des Systems |
+| **Kategorien personenbezogener Daten** | IP-Adressen, Request-URLs (können Nutzerdaten enthalten) |
+| **Zweck der Verarbeitung** | Systemüberwachung, Sicherheit, Performance-Analyse |
+| **Rechtsgrundlage** | Art. 6 Abs. 1 Buchst. f) DSGVO (berechtigtes Interesse) |
+| **Empfänger** | Administratoren nur |
+| **Speicherdauer** | 7 Tage (Prometheus Retention) |
+| **Beschreibung der Sicherheit** | Lokal gespeichert, Zugriff nur per Passwort |
+| **Besonderheiten** | Falls öffentlich zugänglich: Sofort einschränken! |
+
+---
+
+## Schritt 2: Datenschutz-Folgenabschätzung (DSFA, Art. 35)
+
+Du brauchst eine DSFA wenn:
+- KI-Systeme automatisch über Menschen entscheiden (Klassifikation, Filtering)
+- Profiling mit Auswirkungen
+- Massive Datenmengen verarbeitet
+
+Datei: `dsgvo/dsfa-ai-stack.md`
+
+### Template
+
+```markdown
+# Datenschutz-Folgenabschätzung (DSFA)
+System: Local AI Stack (Ollama + n8n)
+Datum: 2026-03-21
+Erstellt von: [Dein Name]
+
+## 1. Beschreibung der Verarbeitung
+
+**Was**: Lokal gehostete KI-Anwendung mit Ollama (Mistral, Llama2, etc.)
+**Wer**: KMU-Betreiber (Inhaber, Mitarbeiter)
+**Wo**: Server auf der Firmeninfrastruktur (Docker Container)
+**Daten**: Chat-Prompts, RSS-Feed-Inhalte, Kundenfeedback
+**Output**: AI-generierte Zusammenfassungen, Klassifikationen
+
+## 2. Notwendigkeit und Verhältnismäßigkeit
+
+**Geschäftlicher Nutzen**:
+- Automatisierte Customer Support (FAQ-Answering)
+- Content Summarization (Zeit sparen)
+- Feedback-Klassifikation (Priorisierung)
+
+**Weniger invasive Alternativen geprüft**: Keine (Manuelle Verarbeitung wäre nicht praktikabel)
+
+**Fazit**: Verhältnismäßig ✓
+
+## 3. Risiken für Betroffene
+
+| Risiko | Schweregrad | Auswirkung |
+|--------|------------|-----------|
+| **Datenleck**: Prompts durch Hacker geleakt | MITTEL | Preisgabe von Geschäftsgeheimnissen |
+| **Model Bias**: Diskriminierende Klassifikation | HOCH | Unfaire Behandlung von Kunden |
+| **Datenspeicherung**: Prompts länger als nötig | MITTEL | Unnötiger Datenbestand |
+| **Profilbildung**: Nutzungsmuster analysiert | NIEDRIG | Aber möglich, wenn Logs nicht gelöscht |
+
+## 4. Maßnahmen zur Risikominderung
+
+- **Datenschutz-Anforderungen**: SSL/TLS Verschlüsslung bei Übertragung
+- **Zugriffskontrolle**: Nur autorisierte Mitarbeiter können Prompts lesen
+- **Audit Trail**: Wer hat welche Daten wann verarbeitet? → Prometheus + n8n Logs
+- **Datenlöschung**: Prompts nach 3 Monaten automatisch löschen (Cron-Job)
+- **Bias-Test**: Regelmäßig prüfen, ob Klassifikationen diskriminierend sind
+- **Incident Response**: Plan für Datenbrechs vorhanden (siehe: Sicherheitsmaßnahmen)
+
+## 5. Konsultation mit Datenschützer
+
+Wurde durchgeführt: ☐ JA ☐ NEIN (empfohlen für Firmensysteme)
+
+---
+```
+
+## Schritt 3: Technische und organisatorische Maßnahmen (TOM)
+
+Datei: `dsgvo/technische-massnahmen.md`
+
+```markdown
+# Technische & Organisatorische Maßnahmen (TOMs)
+
+## Zugriffskontrolle (Art. 32 Abs. 1 Buchst. b)
+
+### Ollama
+- [ ] Admin-Passwort für Open WebUI gesetzt (nicht leer)
+- [ ] Nur autorisierte Nutzer haben Zugriff (kein öffentlich freigegebenes Interface)
+- [ ] SSH-Zugriff zum Server: Nur mit Public Key (kein Passwort-Login)
+
+### n8n
+- [ ] Admin-Passwort gesetzt (nicht default)
+- [ ] 2FA aktiviert (Settings → Security)
+- [ ] Credentials nicht im Workflow-Text (geheime env vars verwenden)
+- [ ] API-Keys rotiert mindestens jährlich
+
+### Grafana
+- [ ] Admin-Passwort geändert
+- [ ] Public Dashboards deaktiviert (nicht anonym zugänglich)
+
+## Verschlüsselung (Art. 32 Abs. 1 Buchst. b)
+
+- [ ] HTTPS für alle Web-Interfaces (Reverse Proxy mit Let's Encrypt)
+- [ ] PostgreSQL verschlüsselt (at-rest): Vollplattenverschlüsselung des Servers
+- [ ] Daten in Transit: TLS 1.2+ (Nginx Config)
+- [ ] Backups verschlüsselt (gpg, oder server-seitigen Encryption)
+
+## Verfügbarkeit & Ausfallsicherheit (Art. 32 Abs. 1 Buchst. c)
+
+- [ ] Regelmäßige Backups: Täglich (PostgreSQL, n8n Workflows, Ollama Models)
+- [ ] Backup-Test durchgeführt: [Datum]
+- [ ] Recovery Time Objective (RTO): 4 Stunden
+- [ ] Recovery Point Objective (RPO): 1 Tag
+
+## Integrität & Belastbarkeit (Art. 32 Abs. 1 Buchst. b, c)
+
+- [ ] System-Updates monatlich eingespielt
+- [ ] Container-Images regelmäßig aktualisiert (wöchentlich)
+- [ ] Monitoring aktiv (Grafana Alerts für kritische Fehler)
+- [ ] Incident Response Plan vorhanden
+
+## Protokollierung (Art. 32 Abs. 1 Buchst. g)
+
+- [ ] Audit Logs aktiviert (n8n Executions, PostgreSQL)
+- [ ] Logs mindestens 30 Tage aufbewahrt
+- [ ] Privilegierte Zugriffe protokolliert (Admin-Aktionen)
+- [ ] Logs sind manipulationssicher (Read-Only nach 1 Tag)
+
+---
+```
+
+## Schritt 4: Auftragsverarbeitungsvertrag (AVV, Art. 28)
+
+Falls du externe Services nutzt (z.B. Ollama Model-Download von Hugging Face, Email via Gmail):
+
+Datei: `dsgvo/auftragsverarbeiter.md`
+
+```markdown
+# Auftragsverarbeiter & Subunternehmer
+
+## Art. 28 DSGVO: Verträge mit Datenverarbeitern
+
+### 1. Ollama Model Downloads (Hugging Face)
+
+**Auftragsverarbeiter**: Hugging Face (huggingface.co)
+**Daten**: Modell-Weights (keine Prompts!)
+**Rechtsgrundlage**: Berechtigtes Interesse (Modell-Hosting)
+**Vertrag**: Implizit durch Terms of Service
+
+**Maßnahmen**:
+- [ ] Hugging Face Terms gelesen
+- [ ] Datentransfer hat rechtliche Basis
+- [ ] Modelle sind public (Transparenz)
+
+### 2. Email-Versand (Gmail / SMTP)
+
+**Auftragsverarbeiter**: Google (falls Gmail) oder SMTP-Provider
+**Daten**: Email-Inhalte, Empfängeradressen
+**Rechtsgrundlage**: Vertragserfüllung (Kundenkommunikation)
+**Vertrag**: Data Processing Addendum (DPA) vorhanden?
+
+**Maßnahmen**:
+- [ ] DPA abgeschlossen oder Standardklauseln (EU Standard Contractual Clauses)
+- [ ] Only send necessary data (nicht die ganzen Prompts)
+- [ ] Encryption in transit (STARTTLS)
+
+### 3. Falls Ollama über API extern läuft
+
+Falls du Ollama hosted bei Anbieter (z.B. Replicate, Together AI):
+
+**Auftragsverarbeiter**: [Anbieter-Name]
+**Daten**: Prompts, Responses
+**Vertrag**: DPA vorhanden?
+
+**Maßnahmen**:
+- [ ] DPA unterzeichnet
+- [ ] Standort der Server geprüft (EU/Safe Harbor?)
+- [ ] Retention Policy gelesen (wie lange speichern die deine Daten?)
+
+---
+```
+
+## Schritt 5: Löschkonzept
+
+Datei: `dsgvo/loeschkonzept.md`
+
+```markdown
+# Löschkonzept
+
+## Art. 17 DSGVO: Recht auf Löschung
+
+### Automatische Löschung nach Retention Policy
+
+| Datentyp | Speicherdauer | Lösch-Methode | Automatisiert |
+|----------|---------------|---------------|---------------|
+| Chat-Prompts | 3 Monate | Löschen aus Open WebUI DB | Ja (Cron Job) |
+| n8n Execution Logs | 30 Tage | Löschen aus PostgreSQL | Ja (Built-in) |
+| System Logs (Prometheus) | 7 Tage | TSDB Auto-Rotation | Ja |
+| Backups | 14 Tage | Automatisches Löschen | Ja (find -mtime +14 -delete) |
+| Email-Archive | 6 Monate | Manuell löschen | Nein (zu prüfen) |
+
+### On-Demand Löschung (Antrag einer Person)
+
+**Prozess**:
+1. Person schreibt per Email: "Ich möchte meine Daten gelöscht haben"
+2. Identitätscheck: IP bestätigen, Email bestätigen
+3. SQL Query:
+   ```sql
+   DELETE FROM open_webui.chats WHERE user_id = '123' AND created_at < NOW() - INTERVAL '3 months';
+   DELETE FROM n8n.workflow_statistics WHERE user_id = '123';
+   ```
+4. Backup nach Löschung (für Audit Trail)
+5. Bestätigung an Person: "Daten gelöscht am [Datum]"
+
+### Notfalllöschung (Datenleck)
+
+Falls Hacker Zugriff hatten:
+1. System sofort vom Netz nehmen
+2. Backups > 2 Wochen löschen (Annahme: Hacker schon drin)
+3. Alle Passwörter zurücksetzen
+4. Datenschutzbeauftragte informieren
+5. Betroffene informieren (bei Risiko für Personen)
+
+---
+```
+
+## Schritt 6: Datenschutzrichtlinie (Privacy Policy)
+
+Wenn du dein System öffentlich bereitstellst (z.B. Chat für Kunden):
+
+Datei: `dsgvo/privacy-policy-template.md`
+
+```markdown
+# Datenschutzerklärung
+
+**Verantwortlicher**: [Dein Name], [Adresse], [Email]
+
+## 1. Allgemeines
+
+Wir verarbeiten deine Daten zur Bereitstellung unseres AI Chat Services. Diese Erklärung erklärt wie.
+
+## 2. Welche Daten wir sammeln
+
+- **Chat-Prompts**: Deine Texte, die du eingibst
+- **Metadata**: IP-Adresse, Zeitstempel, Browser-Info
+- **Cookies**: Session-ID (nicht für Tracking)
+
+## 3. Wie wir sie nutzen
+
+- Chat-Service bereitstellen
+- System verbessern (Fehleranalyse)
+- Sicherheit (Spam-Detektion)
+
+## 4. Speicherdauer
+
+- Chat-Prompts: 3 Monate dann auto-löschen
+- Logs: 7 Tage
+
+## 5. Deine Rechte
+
+- Auskunft: Welche Daten haben wir von dir? (Email an privacy@[domain])
+- Berichtigung: Falsche Daten korrigieren
+- Löschung: Daten löschen lassen
+- Widerspruch: Nicht mehr kontaktiert werden
+
+## 6. Kontakt
+
+Datenschutzbeauftragte: [Email]
+
+---
+```
+
+## Checkliste für dein Setup
+
+Erstelle `dsgvo/checkliste.md`:
+
+```markdown
+# DSGVO Compliance Checkliste
+
+## Dokumentation
+- [ ] Verarbeitungsverzeichnis (Art. 30) erstellt
+- [ ] DSFA (Datenschutz-Folgenabschätzung) durchgeführt
+- [ ] TOMs (Technische Maßnahmen) dokumentiert
+- [ ] Auftragsverarbeiter-Verträge überprüft
+- [ ] Löschkonzept definiert
+
+## Technische Maßnahmen
+- [ ] SSL/TLS für alle Services
+- [ ] Starke Passwörter für Admin-Accounts
+- [ ] Backups testen (monatlich)
+- [ ] Logs für mindestens 30 Tage
+- [ ] Monitoring aktiv (Alerts bei Anomalien)
+
+## Prozesse
+- [ ] Datenlöschung automatisiert
+- [ ] Incident Response Plan vorhanden
+- [ ] Mitarbeiter geschult (Datenschutz Basics)
+- [ ] Datenschutzbeauftragte bestellt (optional, aber empfohlen)
+
+## Regelmäßig überprüfen
+- [ ] Quartalsweise: Backups testen
+- [ ] Halbjährlich: Zugriffslisten überprüfen
+- [ ] Jährlich: DSFA aktualisieren
+- [ ] Nach Updates: Security-Audit
+
+---
+```
+
+## Risiken und was du NICHT tun solltest
+
+### ❌ Nicht DSGVO-konform
+
+- Prompts speichern ohne Retention Policy
+- Backups ohne Test-Restore
+- Admin-Passwort nicht ändern
+- Externe APIs ohne DPA nutzen
+- Benutzer nicht über Datennutzung informieren
+- Logs öffentlich sichtbar machen
+
+### ✓ Sicher und konform
+
+- Datenlöschung automatisiert
+- Zugriffskontrolle streng
+- Regelmäßige Backups + Tests
+- Transparenz: Privacy Policy veröffentlichen
+- Audit Logs führen
+- Updates regelmäßig einspielen
+
+## Wichtige Links
+
+- **Österreichische Datenschutzbehörde**: https://www.dsb.gv.at/
+- **DSGVO Text**: https://gdpr-info.eu/ (Deutsch)
+- **EDPB Guidelines**: https://edpb.ec.europa.eu/
+- **Generische DSFA Template**: https://www.bfdi.bund.de/
+
+## Nächste Schritte
+
+1. Alle Templates in deinem Repo speichern
+2. Mit einem Rechtsanwalt (Spezial: Datenschutz) durchgehen
+3. Dokumentation monatlich aktualisieren
+4. Mitarbeiter schulen
+5. Privacy Policy veröffentlichen (falls öffentliches System)
+
+## Checkliste
+
+- [ ] Verarbeitungsverzeichnis erstellt
+- [ ] DSFA durchgeführt
+- [ ] Technische Maßnahmen implementiert
+- [ ] Auftragsverarbeitungsverträge überprüft
+- [ ] Löschkonzept in Code integriert (Cron Job)
+- [ ] Mitarbeiter informiert
+- [ ] Datenschutzbeauftragte (optional) bestellt
+- [ ] Jährliches Review-Datum kalenderisiert
+
+## Quellen und Links
+
+- [GDPR.gv.at](https://www.dsb.gv.at)
+- [EU AI Act](https://eur-lex.europa.eu/eli/reg/2024/1689/oj)

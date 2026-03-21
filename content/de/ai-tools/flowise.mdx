@@ -1,0 +1,81 @@
+---
+title: Flowise — Visueller LLM Flow Builder
+date: 2026-03-21
+summary: Flowise ist ein visuelle Plattform zum Bauen von LLM-Flows ohne Code. Node-basiert, integriert mit Ollama, Vector Stores, Custom Tools, Self-Hosting.
+tags: [flowise, llm-flow, visual-builder, no-code]
+author: AI Engineering
+---
+
+# Flowise — LLM Flow Builder
+
+Flowise ist ein Open-Source Visual Node Editor für LLM-Anwendungen. Mit Drag-and-Drop-Interface lassen sich komplexe Workflows schnell aufbauen.
+
+## Installation
+
+```bash
+docker run -d \
+  -p 3000:3000 \
+  -v flowise:/root/.flowise \
+  flowiseai/flowise:latest
+```
+
+Zugang: http://localhost:3000
+
+## Core Nodes
+
+### LLM Nodes
+- OpenAI, Claude, Ollama, Local LLM
+
+### Memory Nodes  
+- Chat History, Buffer Memory
+
+### Vector Store Nodes
+- Weaviate, Qdrant, Pinecone, ChromaDB
+
+### Tool Nodes
+- Google Search, Calculator, Database Query
+
+## Workflow Beispiel
+
+```
+User Input
+  ↓
+Chat Memory Retrieve
+  ↓
+Vector Store Similarity Search
+  ↓
+LLM Process
+  ↓
+Output
+```
+
+## Integration
+
+### REST API
+
+```bash
+curl -X POST http://localhost:3000/api/v1/prediction/workflow-id \
+  -H "Content-Type: application/json" \
+  -d '{"question": "Hello"}'
+```
+
+### Self-Hosting
+
+```yaml
+services:
+  flowise:
+    image: flowiseai/flowise:latest
+    ports:
+      - "3000:3000"
+    environment:
+      FLOWISE_USERNAME: admin
+      FLOWISE_PASSWORD: secure
+      DATABASE_PATH: /root/.flowise/flowise.db
+    volumes:
+      - flowise-data:/root/.flowise
+```
+
+## Quellen
+
+- [Flowise GitHub](https://github.com/FlowiseAI/Flowise)
+- [Documentation](https://docs.flowiseai.com)

@@ -1,0 +1,169 @@
+---
+title: "Erklärbare KI (XAI): SHAP, LIME, Feature Importance"
+description: "XAI Methods: SHAP, LIME, Attention Visualization, Feature Importance. Interpretability vs Accuracy Tradeoff. EU AI Act Article 13 Requirements."
+section: "ethik"
+---
+
+# Erklärbare KI (XAI)
+
+Erklärbare KI (Explainable AI, XAI) beantwortet die Frage: "Warum hat das Modell diese Entscheidung getroffen?" Diese Seite behandelt SHAP, LIME und andere XAI-Methoden.
+
+---
+
+## 1. SHAP (SHapley Additive exPlanations)
+
+SHAP ist das theoretisch fundierteste XAI-Framework basierend auf Spieltheorie.
+
+```python
+import shap
+import numpy as np
+from sklearn.ensemble import RandomForestClassifier
+
+# Train model
+X_train = np.random.random((100, 10))
+y_train = np.random.randint(0, 2, 100)
+model = RandomForestClassifier().fit(X_train, y_train)
+
+# Explain predictions with SHAP
+explainer = shap.TreeExplainer(model)
+shap_values = explainer.shap_values(X_train[:10])
+
+# Visualize
+shap.summary_plot(shap_values[1], X_train[:10])  # Force plot
+shap.force_plot(explainer.expected_value[1], shap_values[1][0], X_train[0])
+
+# Feature importance
+shap_importance = np.abs(shap_values[1]).mean(axis=0)
+print("Feature Importance (SHAP):", shap_importance)
+```
+
+---
+
+## 2. LIME (Local Interpretable Model-agnostic Explanations)
+
+LIME erklärt einzelne Vorhersagen durch lokale Approximation.
+
+```python
+import lime
+import lime.lime_tabular
+
+# Create LIME explainer
+explainer = lime.lime_tabular.LimeTabularExplainer(
+    X_train,
+    feature_names=[f"feature_{i}" for i in range(10)],
+    class_names=["negative", "positive"],
+    mode="classification"
+)
+
+# Explain a single prediction
+instance = X_train[0]
+explanation = explainer.explain_instance(instance, model.predict_proba)
+explanation.show_in_notebook()
+
+# Get explanation as dictionary
+exp_dict = dict(explanation.as_list())
+print(f"Explanation: {exp_dict}")
+```
+
+---
+
+## 3. Attention Visualization
+
+Für Transformer Modelle kann man die Attention-Gewichte visualisieren.
+
+```python
+import torch
+from transformers import BertTokenizer, BertModel
+import numpy as np
+
+# Load pre-trained BERT
+tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+model = BertModel.from_pretrained("bert-base-uncased", output_attentions=True)
+
+# Example text
+text = "This movie is absolutely fantastic and I loved it"
+inputs = tokenizer.encode(text, return_tensors="pt")
+
+# Get attention weights
+outputs = model(inputs)
+attention = outputs[-1]  # List of attention tensors for each layer
+
+# Attention shape: (batch_size, num_heads, seq_length, seq_length)
+# Visualize first layer, first head
+attn_weights = attention[0][0, 0].detach().numpy()
+
+# Create heatmap
+import matplotlib.pyplot as plt
+tokens = tokenizer.convert_ids_to_tokens(inputs[0])
+
+plt.figure(figsize=(10, 8))
+plt.imshow(attn_weights, cmap="viridis")
+plt.xticks(range(len(tokens)), tokens, rotation=45)
+plt.yticks(range(len(tokens)), tokens)
+plt.colorbar()
+plt.title("BERT Attention Weights (Layer 0, Head 0)")
+plt.tight_layout()
+plt.show()
+```
+
+---
+
+## 4. EU AI Act Article 13
+
+EU AI Act erfordert Erklärbarkeit für High-Risk Systeme:
+
+```yaml
+Article 13 Requirements:
+  - Automatische Person-Profiling ist transparent
+  - Bedeutende Entscheidungen müssen erklärbar sein
+  - Für Kredite, Beschäftigung, strafrechtliche Justiz erforderlich
+  - Nutzer müssen Recht auf Erklärung haben
+  - Dokumentation erforderlich
+```
+
+```python
+class XAICompliance:
+    """Ensures XAI compliance with regulations"""
+
+    def __init__(self, model_type: str):
+        self.model_type = model_type
+
+    def requires_xai(self) -> bool:
+        """Determines if model requires explainability"""
+        high_risk_areas = ["credit", "employment", "criminal_justice", "immigration"]
+        return self.model_type in high_risk_areas
+
+    def generate_xai_report(self, model, test_data) -> str:
+        """Generates XAI report for compliance"""
+        report = f"# XAI Compliance Report\n\n"
+        report += f"Model Type: {self.model_type}\n"
+        report += f"Requires XAI: {self.requires_xai()}\n"
+
+        if self.requires_xai():
+            report += "\n## Explanation Methods Used:\n"
+            report += "- SHAP for feature importance\n"
+            report += "- LIME for local explanations\n"
+            report += "- Attention visualization\n"
+
+            report += "\n## Documentation:\n"
+            report += "- [Include feature importance rankings]\n"
+            report += "- [Include sample explanations]\n"
+            report += "- [Include fairness metrics]\n"
+
+        return report
+
+# Usage:
+compliance = XAICompliance("credit_scoring")
+if compliance.requires_xai():
+    report = compliance.generate_xai_report(model, test_data)
+    print(report)
+```
+
+---
+
+## 5. Quellen und Links
+
+- **SHAP**: https://shap.readthedocs.io/
+- **LIME**: https://github.com/marcotcr/lime
+- **EU AI Act**: https://eur-lex.europa.eu/eli/reg/2023/1230/oj
+- **Interpretability vs Accuracy**: https://christophm.github.io/interpretable-ml-book/

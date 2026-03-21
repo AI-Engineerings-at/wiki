@@ -1,0 +1,326 @@
+---
+title: "AI Stack in 30 Minuten aufsetzen"
+date: 2026-03-21
+summary: "Docker Compose mit Ollama, Open WebUI und n8n zum Laufen bringen. Self-hosted, lokal, ohne Cloud."
+tags: ["docker", "ollama", "self-hosted", "ai-stack", "setup"]
+author: "AI Engineering"
+---
+
+# AI Stack in 30 Minuten aufsetzen
+
+Du wirst einen funktionsfähigen Local AI Stack mit Ollama (LLM + Embeddings), Open WebUI (Web-Interface) und n8n (Workflow-Engine) aufsetzen. Danach kannst du Prompts eingeben, Modelle wechseln und erste Workflows bauen.
+
+## Voraussetzungen
+
+- **Hardware**: 16GB RAM (mindestens), 4 CPU-Kerne, 50GB freier Platz
+- **Software**: Docker + Docker Compose installiert (https://docs.docker.com/compose/install/)
+- **Linux/Mac/Windows mit WSL2**: Funktioniert auf allen
+- **Optional für GPU**: NVIDIA Grafikkarte mit CUDA Support oder AMD mit ROCm
+
+## Was wird installiert
+
+- **Ollama**: Lokale LLM Engine (Mistral, Llama 2, Qwen usw.)
+- **Open WebUI**: ChatGPT-ähnliches Interface
+- **n8n**: Workflow Engine für AI Automatisierung
+- **PostgreSQL**: Datenbank für n8n Workflows
+
+## Schritt 1: Docker Compose Datei erstellen
+
+Erstelle ein neues Verzeichnis:
+
+```bash
+mkdir ai-stack && cd ai-stack
+```
+
+Erstelle `docker-compose.yml`:
+
+```yaml
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ai-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+    networks:
+      - ai-network
+    # GPU Support für NVIDIA (optional):
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:latest
+    container_name: ai-webui
+    ports:
+      - "3000:8080"
+    volumes:
+      - webui-data:/app/backend/data
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+    networks:
+      - ai-network
+    depends_on:
+      - ollama
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: ai-postgres
+    environment:
+      POSTGRES_DB: n8n
+      POSTGRES_USER: n8n
+      POSTGRES_PASSWORD: n8n_password_change_me
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - ai-network
+    ports:
+      - "5432:5432"
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: ai-n8n
+    ports:
+      - "5678:5678"
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: n8n
+      DB_POSTGRESDB_USER: n8n
+      DB_POSTGRESDB_PASSWORD: n8n_password_change_me
+      N8N_BASIC_AUTH_ACTIVE: "true"
+      N8N_BASIC_AUTH_USER: admin
+      N8N_BASIC_AUTH_PASSWORD: change_me_password
+      N8N_HOST: localhost
+      N8N_PORT: 5678
+      N8N_PROTOCOL: http
+      NODE_ENV: production
+      EXECUTIONS_DATA_SAVE_ON_ERROR: "true"
+      EXECUTIONS_DATA_SAVE_ON_SUCCESS: "true"
+    volumes:
+      - n8n-data:/home/node/.n8n
+    networks:
+      - ai-network
+    depends_on:
+      - postgres
+
+volumes:
+  ollama-models:
+  webui-data:
+  postgres-data:
+  n8n-data:
+
+networks:
+  ai-network:
+    driver: bridge
+```
+
+## Schritt 2: Stack starten
+
+```bash
+docker-compose up -d
+```
+
+Checke ob alles läuft:
+
+```bash
+docker-compose ps
+```
+
+Du solltest alle 4 Container mit Status "Up" sehen.
+
+## Schritt 3: Ollama Modell downloaden
+
+Ollama ist jetzt am Laufen, hat aber noch kein Modell. Lade dir ein kleines Modell (schnell, 4GB RAM):
+
+```bash
+docker exec ai-ollama ollama pull mistral
+```
+
+Oder größer (8-10GB, bessere Qualität):
+
+```bash
+docker exec ai-ollama ollama pull llama2
+```
+
+Das kann einige Minuten dauern — du suchst dir einen Kaffee.
+
+## Schritt 4: Open WebUI öffnen
+
+Geh auf http://localhost:3000 und registriere dich (erste Person wird Admin).
+
+Im Chat-Interface wählst du unten das Modell (z.B. "mistral") und gibst einen Prompt ein:
+
+```
+Erkläre mir Docker in 3 Sätzen.
+```
+
+Falls das nicht geht, checke die Logs:
+
+```bash
+docker-compose logs open-webui
+```
+
+## Schritt 5: n8n öffnen
+
+Geh auf http://localhost:5678, logge dich mit:
+- **User**: admin
+- **Password**: change_me_password (die aus der docker-compose.yml)
+
+Klick "New Workflow" und erstelle deinen ersten Workflow:
+
+```
+Webhook Trigger → Code Node (Call Ollama) → Response
+```
+
+Code-Node Beispiel (Node.js):
+
+```javascript
+const response = await fetch('http://ollama:11434/api/generate', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    model: 'mistral',
+    prompt: 'Explain Docker in German',
+    stream: false
+  })
+});
+
+const data = await response.json();
+return { output: data.response };
+```
+
+## GPU aktivieren (Optional — NVIDIA)
+
+Falls du eine NVIDIA Grafikkarte hast:
+
+1. Installiere NVIDIA Docker Runtime:
+
+```bash
+curl https://get.docker.com | sh && sudo systemctl start docker
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | \
+  sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+sudo apt-get update && sudo apt-get install -y nvidia-docker2
+sudo systemctl restart docker
+```
+
+2. Decommentiere die GPU-Section in der Ollama Service in docker-compose.yml
+
+3. Neustart:
+
+```bash
+docker-compose down && docker-compose up -d
+```
+
+## Netzwerk-Setup: Remote Zugriff
+
+Falls du von einem anderen Rechner zugreifen willst (z.B. `192.168.1.100:3000`):
+
+In `docker-compose.yml` ändere:
+
+```yaml
+open-webui:
+  ports:
+    - "0.0.0.0:3000:8080"  # Statt nur localhost
+```
+
+```yaml
+n8n:
+  environment:
+    N8N_HOST: "192.168.1.100"  # deine Maschinen-IP
+```
+
+Neustart:
+
+```bash
+docker-compose down && docker-compose up -d
+```
+
+## Troubleshooting
+
+### Ollama lädt, aber Modell wird nicht gefunden
+
+```bash
+docker exec ai-ollama ollama list
+```
+
+Falls leer: Modell ist noch nicht fertig heruntergeladen. Warte oder checke:
+
+```bash
+docker-compose logs ollama
+```
+
+### Open WebUI sagt "Connection refused"
+
+```bash
+docker-compose logs open-webui
+```
+
+Meist bedeutet es, dass Ollama noch nicht bereit ist. Warte 10 Sekunden, reload browser.
+
+### n8n startet nicht, PostgreSQL-Fehler
+
+```bash
+docker-compose down
+docker-compose up -d postgres
+sleep 10
+docker-compose up -d
+```
+
+Postgres braucht kurz zum initialisieren.
+
+### Speicher wird zu knapp
+
+Ollama speichert Modelle in `/root/.ollama` im Container. Falls Platz voll:
+
+```bash
+docker exec ai-ollama ollama list
+docker exec ai-ollama ollama rm mistral  # Modell löschen
+docker exec ai-ollama ollama pull mistral:7b  # Kleinere Variante
+```
+
+## Beliebte Modelle zum Ausprobieren
+
+| Modell | Größe | RAM | Qualität | Deutsch |
+|--------|-------|-----|----------|---------|
+| mistral | 7B | 4GB | Gut | OK |
+| neural-chat | 7B | 4GB | Gut | Gut |
+| llama2 | 7B | 4GB | Besser | Besser |
+| mistral:13b | 13B | 8GB | Sehr gut | Sehr gut |
+
+Installieren mit: `docker exec ai-ollama ollama pull mistral`
+
+## Nächste Schritte
+
+- Lies: **Deine ersten 3 AI Workflows mit n8n** — baue Automation auf
+- Konfiguriere: **AI Monitoring Dashboard** — Track Model Performance
+- Für Produktion: Ändere alle Passwörter in docker-compose.yml
+
+## Checkliste
+
+- [ ] Docker Compose Datei erstellt
+- [ ] `docker-compose up -d` erfolgreich
+- [ ] Ollama Modell heruntergeladen (`docker-compose logs ollama`)
+- [ ] Open WebUI unter http://localhost:3000 erreichbar
+- [ ] Chat-Test mit Mistral erfolgreich
+- [ ] n8n unter http://localhost:5678 erreichbar
+- [ ] n8n Passwort geändert
+- [ ] Postgres Passwort geändert
+- [ ] (Optional) GPU aktiviert und getestet
+
+## Quellen und Links
+
+- [Docker](https://docs.docker.com)
+- [n8n](https://docs.n8n.io)

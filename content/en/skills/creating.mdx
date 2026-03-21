@@ -1,0 +1,567 @@
+---
+title: "Creating Skills"
+date: "2026-03-21"
+summary: "How to build your own Claude Code skills — from idea to quality gate."
+tags: ["skills", "claude-code", "development"]
+author: "AI Engineering"
+---
+
+# Creating Skills
+
+Want to build your own Claude Code skill? Here's everything you need — from structure to finished quality gate.
+
+## What Is a Skill?
+
+A skill is a `SKILL.md` file in a `.claude/skills/<name>/` directory. Claude Code loads all skills automatically when you work in the repo root. Each skill combines YAML metadata with prompt instructions.
+
+**Core principle:** One skill = one well-defined use case. Not "do everything", but "do exactly this, and do it well."
+
+## SKILL.md Structure
+
+Each skill file has two parts:
+
+### 1. Frontmatter (YAML)
+
+```yaml
+---
+name: "deploy"
+description: "Deploy Voice Gateway or Dashboard to Docker Swarm"
+command_injection: "git log --oneline -5"
+version: "1.2.0"
+requires: ["vault", "ssh"]
+produces: ["deployment", "mm-notification"]
+error-refs: ["E001", "E015"]
+learning-refs: ["L003", "L045"]
+---
+```
+
+### 2. Body (Prompt Instructions)
+
+The body is free Markdown text. This is where you describe what Claude should do when the skill activates.
+
+```markdown
+## Approach
+
+1. Load vault credentials
+2. Copy files via SCP
+3. Execute Docker build
+4. Update service
+5. Health check
+6. Post result in Mattermost
+
+## Rules
+
+- Always use `--no-cache` if you suspect cache bug
+- Build timeout: minimum 600 seconds
+- After deploy: check logs for "not configured"
+```
+
+## Official Anthropic Fields
+
+These fields are part of the official Claude Code skill standard:
+
+| Field | Required | Description |
+|-------|---------|-------------|
+| `name` | Yes | Unique skill name (lowercase, kebab-case) |
+| `description` | Yes | Brief description (one sentence) |
+| `instructions` | No | Alternative to body — instructions as frontmatter string |
+| `command_injection` | No | Shell command whose output gets injected as context |
+
+### Custom Extensions (AI Engineering)
+
+| Field | Description |
+|-------|-------------|
+| `version` | Semantic versioning (e.g., `1.2.0`) |
+| `requires` | Dependencies (other skills, tools, credentials) |
+| `produces` | What the skill creates (artifacts, notifications) |
+| `error-refs` | References in error registry (e.g., `E001`) |
+| `learning-refs` | References in learnings registry (e.g., `L003`) |
+
+## String Substitutions
+
+Claude Code replaces these variables at runtime:
+
+| Variable | Value |
+|----------|-------|
+| `$ARGUMENTS` | Everything after the skill trigger |
+| `${CLAUDE_SKILL_DIR}` | Absolute path to skill directory |
+| `${workspaceFolder}` | Absolute path to workspace root |
+
+**Example:**
+
+```markdown
+Analyze the file: $ARGUMENTS
+
+Use the script at ${CLAUDE_SKILL_DIR}/analyze.py for evaluation.
+Save the result to ${workspaceFolder}/reports/.
+```
+
+## Dynamic Context with Command Injection
+
+The `command_injection` field executes a shell command and injects the output as context. Useful when Claude needs to know the current state.
+
+```yaml
+---
+name: "deploy"
+command_injection: "git log --oneline -5 && docker service ls --format '{{.Name}} {{.Replicas}}'"
+---
+```
+
+Claude automatically sees the last 5 commits and current service status before the skill starts.
+
+**Caution:** The command runs on every skill load. Keep it fast (under 2 seconds).
+
+## Best Practices
+
+### 1. One skill, one job
+
+Not: `all-in-one-manager` that does everything.
+Better: `deploy`, `version-bump`, `dr-recovery` — each focused.
+
+### 2. Clear trigger keywords
+
+Define in the description when the skill activates:
+
+```yaml
+description: "Deploy VG or Dashboard — Trigger: deploy, VG, dashboard"
+```
+
+### 3. Document error handling
+
+Write in the body what to do if things break:
+
+```markdown
+## Error Handling
+
+- SSH timeout → Retry after 10s, max 3 attempts
+- Build failure → Show logs, do NOT rebuild without analysis
+- Service update hangs → Check `docker service ps <name>`
+```
+
+### 4. Put scripts next to SKILL.md
+
+If your skill needs shell or Python scripts, put them in the same directory:
+
+```
+.claude/skills/deploy/
+  SKILL.md
+  pre-check.sh
+  verify-health.py
+```
+
+Reference them with `${CLAUDE_SKILL_DIR}/pre-check.sh`.
+
+### 5. Never put credentials in the skill
+
+Never write tokens or passwords into SKILL.md. Always use vault:
+
+```markdown
+## Credentials
+
+Load all needed tokens via vault:
+- `vault.py get <agent> <service> <key>`
+```
+
+## Quality Gate Checklist
+
+Before a skill counts as "done":
+
+- [ ] `SKILL.md` exists with complete frontmatter
+- [ ] `name` is unique (no duplicates in repo)
+- [ ] `description` explains purpose in one sentence
+- [ ] Body has clear step-by-step instructions
+- [ ] Error handling is documented
+- [ ] No credentials in plain text
+- [ ] In the right repo (`phantom-ai` for infra, `Playbook01` for business)
+- [ ] Registered in skill catalog
+- [ ] Tested manually at least once
+
+## Example: Create a Log Analysis Skill
+
+Let's build a skill that analyzes log files.
+
+### Step 1: Create Directory
+
+```bash
+mkdir -p .claude/skills/log-analyzer/
+```
+
+### Step 2: Write SKILL.md
+
+```yaml
+---
+name: "log-analyzer"
+description: "Analyze Docker logs and find error patterns — Trigger: log, errors, analyze logs"
+command_injection: "docker service ls --format '{{.Name}}' 2>/dev/null | head -20"
+version: "1.0.0"
+requires: ["ssh"]
+produces: ["analysis-report"]
+---
+```
+
+```markdown
+## Task
+
+Analyze logs from the specified service: $ARGUMENTS
+
+## Approach
+
+1. Extract service name from $ARGUMENTS
+2. Get logs: `docker logs <container_id> --tail 500`
+3. Search for known error patterns:
+   - "error", "Error", "ERROR"
+   - "not configured"
+   - "timeout"
+   - "connection refused"
+4. Create summary with:
+   - Error count by type
+   - Log timeframe
+   - Recommended fixes
+
+## Output
+
+Markdown report with error summary and concrete fix suggestions.
+```
+
+### Step 3: Test
+
+Start Claude Code in repo root and test:
+
+```
+> Analyze the logs from Voice Gateway
+```
+
+Claude recognizes trigger "analyze logs" and activates the skill.
+
+### Step 4: Register
+
+Add the skill to the skill catalog and bump the total count.
+
+## Extending Your Skill
+
+After initial creation, you can add supporting files:
+
+### Adding Helper Scripts
+
+```
+.claude/skills/log-analyzer/
+  SKILL.md
+  analyze.py       # Core analysis logic
+  patterns.json    # Error patterns database
+  formatter.py     # Format output
+```
+
+Reference from SKILL.md:
+
+```markdown
+## Implementation
+
+Run analysis script:
+\`\`\`bash
+python ${CLAUDE_SKILL_DIR}/analyze.py $ARGUMENTS
+\`\`\`
+```
+
+### Using Command Injection
+
+Update SKILL.md to inject dynamic context:
+
+```yaml
+---
+name: "log-analyzer"
+command_injection: "docker service ls --format '{{.Name}}' 2>/dev/null"
+---
+```
+
+Now Claude sees available services automatically before starting.
+
+### Adding Error References
+
+Link to error documentation:
+
+```yaml
+---
+error-refs: ["E001", "E015", "E023"]
+---
+```
+
+Users can look up specific errors in ERROR_REGISTRY.md.
+
+### Adding Learning References
+
+Document lessons learned:
+
+```yaml
+---
+learning-refs: ["L003", "L045", "L089"]
+---
+```
+
+This helps future maintainers understand why the skill works this way.
+
+## Debugging Skills
+
+### Test a skill locally
+
+Before making it public:
+
+```bash
+# Start Claude Code in the skill's repo
+cd ~/path/to/repo
+claude
+
+# Manually trigger the skill
+> /log-analyzer nginx-service
+```
+
+Watch what Claude does and refine the instructions.
+
+### Enable verbose logging
+
+```bash
+# Show skill loading details
+export CLAUDE_SKILL_DEBUG=1
+claude
+```
+
+### Check skill discovery
+
+```bash
+# List all available skills
+/help
+
+# Search for specific skill
+/help log-analyzer
+```
+
+## Skill Maintenance
+
+### Keep version up-to-date
+
+```yaml
+---
+name: "log-analyzer"
+version: "1.0.0"
+---
+```
+
+Update when you:
+- Add features (1.1.0)
+- Fix bugs (1.0.1)
+- Major refactor (2.0.0)
+
+### Track last-verified
+
+Update the date whenever you test the skill:
+
+```yaml
+---
+last-verified: "2026-03-21"
+---
+```
+
+This helps identify stale skills (> 30 days old).
+
+### Document dependencies
+
+List what the skill needs to work:
+
+```yaml
+---
+requires: ["docker", "ssh", "bash"]
+---
+```
+
+Helps Claude understand prerequisites.
+
+### Document outputs
+
+What does the skill produce?
+
+```yaml
+---
+produces: ["analysis-report", "log-summary"]
+---
+```
+
+## Common Pitfalls
+
+### Pitfall 1: Too Many Trigger Keywords
+
+Avoid:
+```yaml
+description: "Analyze logs — Trigger: log, logs, error, errors, debug, check, inspect, analyze, review, examine"
+```
+
+Better:
+```yaml
+description: "Analyze Docker logs for error patterns — Trigger: log, analyze logs, error analysis"
+```
+
+Too many keywords confuse auto-invocation.
+
+### Pitfall 2: Assuming Tools Are Installed
+
+Don't assume docker, git, or specialized tools exist:
+
+```markdown
+# WRONG
+Run `logstash` to parse logs
+
+# CORRECT
+Check if logstash is installed. If not, use simple grep parsing.
+```
+
+### Pitfall 3: Credentials in Plain Text
+
+**WRONG:**
+```markdown
+SSH to prod-server:
+\`\`\`
+ssh root@prod.example.com -p 2222 -i ~/.ssh/id_rsa
+\`\`\`
+```
+
+**CORRECT:**
+```markdown
+SSH credentials stored in vault:
+\`\`\`
+ssh_host=$(vault.py get prod ssh_host)
+ssh_key=$(vault.py get prod ssh_key)
+\`\`\`
+```
+
+### Pitfall 4: Instructions Too Long
+
+If body exceeds 500 lines, break it into multiple smaller skills.
+
+### Pitfall 5: No Error Handling
+
+Always document what happens if things fail:
+
+```markdown
+## Error Handling
+
+- Docker daemon not running → Check `systemctl status docker`
+- Permission denied → Verify user in docker group
+- No logs available → Service might not exist
+```
+
+## Testing Your Skill
+
+### Manual Test Checklist
+
+- [ ] Trigger keyword works
+- [ ] Skill loads without errors
+- [ ] Instructions are clear
+- [ ] All references are correct
+- [ ] No hardcoded paths (use `${CLAUDE_SKILL_DIR}`)
+- [ ] Error cases documented
+- [ ] Output format is useful
+
+### Integration Test
+
+Test with agent teams:
+
+```bash
+claude
+
+> Create a team to analyze logs from 3 services.
+> Spawn 3 teammates, each runs log-analyzer on one service.
+```
+
+Verify the skill works in parallel context.
+
+## Publishing Your Skill
+
+### Update Catalog
+
+Add to `SKILL-CATALOG.md`:
+
+```markdown
+### log-analyzer (1.0.0)
+- **Trigger:** log, analyze logs, error analysis
+- **Repo:** Playbook01
+- **Author:** [Your Name]
+- **Status:** Active
+- **Last Verified:** 2026-03-21
+- **Description:** Analyze Docker logs for error patterns and report findings.
+```
+
+### Document in SKILLS_INDEX
+
+Add your skill to the index:
+
+```markdown
+| Skill | Trigger | Category | Description |
+|-------|---------|----------|-------------|
+| `log-analyzer` | log, errors, analyze | Operations | Analyze Docker logs for patterns |
+```
+
+### Create GitHub Release (Optional)
+
+If sharing publicly:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+## Advanced Patterns
+
+### Skill Composition
+
+Call other skills from within a skill:
+
+```markdown
+## Task
+
+1. Run /log-analyzer on the service
+2. Take the output and run /generate-report
+3. Post to Mattermost
+```
+
+### Conditional Logic
+
+Use Claude's reasoning:
+
+```markdown
+## Approach
+
+Based on the service type:
+- If Kubernetes cluster → Use kubectl logs
+- If Docker Swarm → Use docker logs
+- If standalone → Use systemctl logs
+```
+
+### Multi-Language Support
+
+Support both English and German:
+
+```markdown
+---
+name: "log-analyzer"
+description: "Analyze logs for errors — Trigger: log, errors | Fehleranalyse, logs"
+---
+
+## Task
+
+Analyze logs from: $ARGUMENTS
+
+(Claude will understand trigger keywords in both languages)
+```
+
+## Further Reading
+
+- [Skills Overview](/skills/) — All 49 skills at a glance
+- [Agent Teams](/tools/agents) — Who uses which skills?
+- [Skill Catalog (Full Version)](https://github.com/AI-Engineerings-at/Playbook01/blob/main/docs/SKILL-CATALOG.md)
+- [Quality Gate Checklist](/tools/skill-quality-gate)
+
+---
+
+*Last updated: 2026-03-21*
+
+## Sources and Links
+
+- [Claude Code Skills Documentation](https://code.claude.com/docs/en/skills)

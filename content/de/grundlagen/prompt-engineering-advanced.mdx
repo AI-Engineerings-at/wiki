@@ -1,0 +1,505 @@
+---
+title: Prompt Engineering Advanced
+date: 2026-03-21
+summary: Über die Basics hinaus. System Prompts, Few-Shot, Chain-of-Thought, Tool Use, JSON Mode. Optimierung und Evaluation.
+tags: [prompting, system-prompt, few-shot, chain-of-thought, function-calling]
+author: AI Engineering
+---
+
+# Prompt Engineering Advanced
+
+Basis-Prompting: „Schreib einen Blog-Post."
+
+Advanced-Prompting: Struktur, Kontext, Format, Reasoning-Pfade, Multi-Step Workflows.
+
+## System Prompts
+
+Der System Prompt ist die Anweisung an das Modell **bevor** der User spricht.
+
+```python
+system = """Du bist ein KI-Assistent für Kundenservice.
+- Sei höflich und professionell
+- Verweise auf Policies nur wenn relevant
+- Löse Probleme sofort wenn möglich
+"""
+
+response = client.messages.create(
+    model="claude-3-sonnet-20240229",
+    system=system,  # ← System prompt
+    messages=[
+        {"role": "user", "content": "Meine Bestellung ist kaputt"}
+    ]
+)
+```
+
+Der System Prompt definiert:
+- Persönlichkeit des Modells
+- Grundlegende Constraints
+- Output-Format
+
+Good System Prompts sind spezifisch und kompakt (<300 Tokens).
+
+## Few-Shot Learning
+
+Gib dem Modell Beispiele statt Regeln:
+
+```
+User: Klassifiziere diese Bewertung als positiv/negativ.
+
+Beispiel 1:
+Bewertung: "Produkt ist fantastisch!"
+Klassifikation: positiv
+
+Beispiel 2:
+Bewertung: "Sehr enttäuscht von Qualität"
+Klassifikation: negativ
+
+Neue Bewertung: "Das ist OK aber könnte besser sein"
+Klassifikation: ?
+```
+
+Few-Shot funktioniert oft besser als Anweisungen allein. Das Modell „lernt von Pattern".
+
+## Chain-of-Thought (CoT)
+
+Lasse das Modell seinen Denk-Prozess zeigen:
+
+```
+Problem: Ein Zug fährt mit 60 km/h für 2 Stunden.
+Ein Auto fährt mit 80 km/h für 1.5 Stunden.
+Welches Fahrzeug hat weitere Distanz zurückgelegt?
+
+Anstatt einfach die Antwort:
+Antworte Step-by-Step:
+
+1. Distanz Zug = Geschwindigkeit × Zeit = 60 × 2 = 120 km
+2. Distanz Auto = 80 × 1.5 = 120 km
+3. Beide sind gleich
+```
+
+CoT Prompts sagen explizit: „Denke Schritt für Schritt."
+
+Das verbessert:
+- Mathematik-Probleme
+- Logik-Rätsel
+- Komplexe Analysen
+
+## Self-Consistency
+
+Generiere mehrere CoT-Pfade und votiere:
+
+```python
+# Statt 1x denken, denk 5x
+responses = []
+for i in range(5):
+    response = client.messages.create(
+        model="claude-3-sonnet-20240229",
+        messages=[{"role": "user", "content": problem}]
+    )
+    responses.append(response)
+
+# Zähle die häufigste Antwort
+from collections import Counter
+answers = [r.content[0].text for r in responses]
+best_answer = Counter(answers).most_common(1)[0][0]
+```
+
+Verbessert Genauigkeit, kostet mehr (5x API Calls).
+
+## Tool Use / Function Calling
+
+Lasse das Modell Funktionen aufrufen:
+
+```python
+tools = [
+    {
+        "name": "get_weather",
+        "description": "Holt aktuelle Wetter-Daten",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "location": {"type": "string"},
+                "unit": {"type": "string", "enum": ["C", "F"]}
+            }
+        }
+    }
+]
+
+response = client.messages.create(
+    model="claude-3-sonnet-20240229",
+    tools=tools,
+    messages=[
+        {"role": "user", "content": "Wie ist das Wetter in Wien?"}
+    ]
+)
+
+# Response enthält tool_use Block
+if response.content[0].type == "tool_use":
+    tool_name = response.content[0].name
+    tool_input = response.content[0].input
+    # → Call get_weather("Wien", "C")
+```
+
+Tool Use macht Modelle zu Agenten—sie können externe Funktionen aufrufen.
+
+## Structured Output (JSON Mode)
+
+Zwinge das Modell zu strukturiertem Output:
+
+```python
+response = client.messages.create(
+    model="claude-3-sonnet-20240229",
+    messages=[{
+        "role": "user",
+        "content": "Analysiere diese Bewertung: 'Das Produkt ist gut aber teuer'"
+    }],
+    max_tokens=1024,
+    system="""Antworte IMMER als JSON:
+{
+    "sentiment": "positive|negative|neutral",
+    "key_points": ["array", "of", "strings"],
+    "confidence": 0.0-1.0
+}"""
+)
+
+# Parse JSON
+import json
+data = json.loads(response.content[0].text)
+sentiment = data["sentiment"]
+```
+
+JSON Mode ist essentiell für:
+- APIs
+- Datenbanken
+- Downstream Processing
+
+## Prompt Optimization: Token Sparen
+
+Ein Prompt mit 500 Tokens kostet mehr als einer mit 100.
+
+Techniken:
+- Kurze System Prompts
+- Vermeide Redundanz
+- Nutze Shorthand
+
+```
+❌ Schlecht (viele Tokens):
+"Du bist ein Assistent für Customer Support.
+Deine Aufgabe ist es, Fragen zu beantworten.
+Antworte freundlich. Helfe dem Kunden. Sei höflich..."
+
+✓ Gut (wenige Tokens):
+"Customer Support Assistant. Helpful, friendly, solve issues fast."
+```
+
+Mit `max_tokens=1024` zahlst du pro Input-Token. Optimiere Input, nicht nur Output.
+
+## Evaluation Methods
+
+Wie gut ist dein Prompt?
+
+**Methode 1: Manual Review**
+- Generiere 10 Samples
+- Review manuell
+- Zähle gute vs. schlechte
+
+**Methode 2: Metric-based**
+```python
+# Wenn Ausgabe eine Zahl sein soll
+target = 42
+response = model.generate(prompt)
+answer = extract_number(response)
+error = abs(answer - target)
+accuracy = 100 - error  # 0-100%
+```
+
+**Methode 3: LLM-as-Judge**
+```python
+# Nutze ein anderes Modell um deine Outputs zu evaluieren
+judge = client.messages.create(
+    model="claude-3-opus-20240229",  # Besseres Modell
+    messages=[{
+        "role": "user",
+        "content": f"Ist diese Antwort gut? {output}\nEvaluiere 1-10."
+    }]
+)
+```
+
+## Anti-Patterns: Was NICHT tun
+
+**Anti-Pattern 1: Zu viel Komplexität**
+
+```
+❌ "Analysiere den Text, extrahiere Entitäten, klassifiziere Sentiment,
+berechne Länge, und gib Deutsch/Englisch Zusammenfassung..."
+
+✓ Teile in mehrere Prompts auf
+```
+
+**Anti-Pattern 2: Vage Anweisungen**
+
+```
+❌ "Schreib etwas über AI"
+
+✓ "Schreib einen 200-Wort Blog-Post über RAG-Systeme für Anfänger"
+```
+
+**Anti-Pattern 3: Unklare Format-Erwartungen**
+
+```
+❌ "Antworte"
+
+✓ "Antworte als JSON: {\"name\": \"\", \"score\": 0}"
+```
+
+## Advanced Patterns: Template + Retrieval
+
+### RAG Prompt Pattern
+
+```python
+system = """Du bist ein Kundenservice-Assistent.
+Nutze die untenstehenden Kontextinformationen
+um Fragen zu beantworten.
+
+Wenn die Kontextinformationen die Antwort nicht
+enthalten, sag "Ich weiß nicht" statt zu raten."""
+
+context = """
+FAQ Database:
+Q: Was ist die Rückgabefrist?
+A: 30 Tage nach Kauf
+
+Q: Wie kontaktiere ich Support?
+A: support@example.com
+"""
+
+user_question = "Kann ich in 45 Tagen zurückgeben?"
+
+full_prompt = f"""
+{context}
+
+User: {user_question}
+"""
+
+response = client.messages.create(
+    model="claude-3-sonnet",
+    system=system,
+    messages=[{"role": "user", "content": full_prompt}]
+)
+
+# Response: "Nein, die Rückgabefrist ist 30 Tage.
+#            Sie haben 45 Tage, das ist zu spät."
+```
+
+### Dynamic Few-Shot Learning
+
+```python
+# Schritt 1: Ähnliche Exemplare finden
+query = user_input
+similar_examples = retrieval_system.find_similar(query, n=2)
+
+# Schritt 2: Few-Shot Prompt konstruieren
+system = "Du bist ein Classification Assistant"
+
+few_shot_examples = ""
+for example in similar_examples:
+    few_shot_examples += f"""
+Input: {example['input']}
+Output: {example['output']}
+---
+"""
+
+# Schritt 3: Vollständiger Prompt
+full_prompt = f"{few_shot_examples}\nInput: {user_input}\nOutput:"
+
+# Schritt 4: Abfrage
+response = client.messages.create(
+    model="claude-3-sonnet",
+    system=system,
+    messages=[{"role": "user", "content": full_prompt}]
+)
+```
+
+---
+
+## Production Considerations
+
+### Token Counting Für Cost Control
+
+```python
+# VOR dem Senden: Wie viele Tokens?
+import tiktoken
+
+encoder = tiktoken.encoding_for_model("gpt-4")
+system_tokens = len(encoder.encode(system_prompt))
+input_tokens = len(encoder.encode(user_input))
+
+total_input = system_tokens + input_tokens
+
+# Kosten-Schätzung
+input_cost = (total_input / 1_000_000) * 0.03  # $0.03/1M
+output_estimate = 500  # ~500 Output Tokens
+output_cost = (output_estimate / 1_000_000) * 0.06
+
+total_cost = input_cost + output_cost
+
+if total_cost > 0.10:  # > 10 Cents
+    log("Warning: Expensive request")
+```
+
+### Streaming für bessere UX
+
+```python
+# Normale Antwort: 5 Sekunden Warten
+response = client.messages.create(...)
+print(response.content[0].text)  # Alles auf einmal
+
+# Streaming: Text kommt Stück-für-Stück
+with client.messages.stream(
+    model="claude-3-sonnet",
+    messages=[{"role": "user", "content": "Write a poem"}]
+) as stream:
+    for text in stream.text_stream:
+        print(text, end="", flush=True)
+        # User sieht: "In the..." → " quiet..." → " night..."
+```
+
+---
+
+## Prompt Optimization Techniques
+
+### 1. Delimiter Strategy (für Parser)
+
+```python
+# FALSCH: Mehrdeutig
+prompt = """
+Name: John
+Age: 30
+Job: Engineer
+"""
+
+# RICHTIG: Klar strukturiert
+prompt = """
+===PERSON_DATA_START===
+Name: John
+Age: 30
+Job: Engineer
+===PERSON_DATA_END===
+
+Please extract the age."""
+```
+
+### 2. Role Definition
+
+```python
+# Statt vage:
+"Du bist hilfreiche KI"
+
+# Konkrete Rolle:
+"Du bist ein Finanzberater mit 20 Jahren Erfahrung
+in Steueroptimierung für KMUs in Deutschland.
+Nutze immer aktuelle Steuergesetze (2026).
+Disklaim: 'Dies ist keine rechtliche Beratung.'"
+```
+
+### 3. Conditional Logic in Prompt
+
+```python
+system = """Du beantwortest Fragen basierend auf:
+
+IF question_about == "technical":
+  → Nutze Code-Beispiele
+  → Sei präzise
+
+ELIF question_about == "business":
+  → Gib Kontext
+  → Erläutere Trade-offs
+
+ELSE:
+  → Allgemeine informative Antwort
+"""
+```
+
+---
+
+## Debugging: Prompt Failures
+
+### Failure 1: "Model ignoriert Instructions"
+
+```python
+# Problem
+system = "Antworte NUR mit JSON"
+response = model("What is AI?")
+# Response: "AI ist..." (Text, nicht JSON!)
+
+# Lösung: Explizit Format in Output zeigen
+system = """Antworte NUR als JSON.
+
+BEISPIEL OUTPUT:
+{
+  "answer": "AI steht für Artificial Intelligence",
+  "confidence": 0.95
+}
+
+Verwende dieses Format IMMER."""
+```
+
+### Failure 2: "Output ist zu lang"
+
+```python
+# FALSCH
+"Summarize this document"
+# → 5000 Wort Summary (zu lang!)
+
+# RICHTIG
+"Summarize this document in AT MOST 100 words.
+STOP AT 100 WORDS. Do not exceed."
+```
+
+### Failure 3: "Halluzinationen bei Facts"
+
+```python
+# Kombiniere mit Retrieval
+system = """You only answer based on the facts below.
+If information is not provided, say 'I don't know'."""
+
+context = retrieve_from_knowledge_base(query)
+
+full_prompt = f"""
+{context}
+
+Question: {query}
+
+Answer based ONLY on the above context.
+Do not use external knowledge."""
+```
+
+---
+
+## Best Practices Checklist
+
+- [ ] System Prompt ist konkret, nicht vage
+- [ ] Few-Shot Beispiele sind relevant
+- [ ] Output Format ist explizit definiert
+- [ ] Limits sind gesetzt (max length, etc.)
+- [ ] Error Cases sind gehandhabt
+- [ ] Token Count wird trackt
+- [ ] Streaming für lange Responses
+- [ ] Testen mit verschiedenen Inputs
+- [ ] Monitoring von Failures
+
+---
+
+## Literatur & Ressourcen
+
+- [OpenAI Prompting Guide](https://platform.openai.com/docs/guides/prompt-engineering)
+- [Anthropic Prompt Engineering](https://docs.anthropic.com/en/docs/build-a-chatbot)
+- [Chain-of-Thought Papers](https://arxiv.org/abs/2201.11903)
+- [Prompt Injection Attacks](https://simonwillison.net/2024/Mar/5/prompt-injection/)
+- [LLM Evaluation Framework](https://github.com/Azure/promptflow)
+
+**Letzte Aktualisierung**: 21.03.2026 | **Nächste Überprüfung**: Juni 2026
+
+## Quellen und Links
+
+- [Claude Docs](https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview)

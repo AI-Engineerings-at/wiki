@@ -1,0 +1,478 @@
+---
+title: EU AI Act Risk Categories — Classification Guide
+date: 2026-03-21
+summary: Detailed breakdown of EU AI Act risk categories and how to classify your AI systems
+tags: [eu-ai-act, risk-categories, classification, compliance]
+author: AI Engineering
+---
+
+# EU AI Act Risk Categories — Classification Guide
+
+The EU AI Act uses a risk-based approach. Classifying your AI systems correctly determines your compliance requirements. This guide explains each category with real examples.
+
+## The Risk Hierarchy
+
+```
+Prohibited (Banned)
+        ↓
+High-Risk (Strict Requirements)
+        ↓
+Transparency Risk (Mid-Risk)
+        ↓
+Low-Risk (Basic)
+        ↓
+Unregulated (No Requirements)
+```
+
+## Category 1: Prohibited AI (Article 5)
+
+These applications are **illegal in the EU**, no exceptions.
+
+### 1.1 Social Credit Scoring
+
+**What it is**: AI that assigns overall "scores" to people based on their social behavior, used for rewards/punishments.
+
+**Examples that are prohibited**:
+- China-style system rating citizens overall behavior
+- Company system that tracks "trustworthiness" and restricts services
+- Credit system that includes behavior outside financial domain
+
+**Examples that are OK**:
+- Credit scoring based only on financial data
+- Loan approval based on income and debt
+- Community moderation (removing harmful posts)
+
+**Why**: Violates human dignity and creates discriminatory harm.
+
+### 1.2 Real-Time Facial Recognition in Public Spaces
+
+**What it is**: Using AI to identify people in real-time in public areas via cameras.
+
+**Prohibited uses**:
+- Police identifying suspects from street cameras without warrant
+- Shopping centers tracking customers
+- Airports recognizing travelers
+
+**Exceptions allowed**:
+- Law enforcement with court order and strict safeguards
+- Border control with legal basis
+- Finding missing children/endangered persons
+- Preventing specific crime with legal authorization
+
+**Practical note**: Most law enforcement use is still prohibited without additional legal justification. The bar is very high.
+
+### 1.3 Subliminal Manipulation
+
+**What it is**: Hidden content designed to alter behavior without conscious awareness.
+
+**Prohibited examples**:
+- Flashing hidden images in videos to influence decisions
+- Audio content below hearing threshold
+- Visual patterns designed to manipulate without awareness
+- Exploitation of psychological vulnerabilities by design
+
+**Key**: "Without the person being able to perceive" the content.
+
+### 1.4 Exploitation of Vulnerabilities
+
+**What it is**: AI deliberately exploiting vulnerable groups (children, disabled, elderly) to harm them.
+
+**Prohibited**:
+- AI targeting children to manipulate them into addictive behavior
+- Scam systems targeting elderly or cognitively disabled
+- Systems designed to exploit people with gambling addictions
+
+**Allowed**:
+- Age-appropriate content for children
+- Accessibility features for disabled users
+- Credit checks that consider ability to repay
+
+## Category 2: High-Risk AI (Annex III)
+
+High-risk systems require extensive documentation, testing, and controls. If you use high-risk AI, see `eu-ai-act-guide.mdx` for full compliance requirements.
+
+### Subcategory 2.1: Biometric Identification & Categorization
+
+**AI that identifies or categorizes people via biometrics**.
+
+Includes:
+- Facial recognition
+- Fingerprint matching
+- Iris/retina scanning
+- Gait recognition
+- Voice recognition (for identification, not just activation)
+- Emotion recognition from facial/body analysis
+- Gender/race/age detection from images
+- Medical condition detection from appearance
+
+**Examples**:
+- Airport facial recognition for border control ✓ High-Risk
+- Phone unlock via face (not high-risk—low consequence, user-initiated)
+- Police facial search database ✓ High-Risk
+- Dating app detecting age from photo ✓ High-Risk
+- Surveillance system identifying "suspicious" people ✓ High-Risk
+
+**Why high-risk**: Biometric data is permanent, can't be changed, and affects fundamental rights.
+
+### Subcategory 2.2: Critical Infrastructure
+
+**AI that controls critical systems**.
+
+Includes:
+- Power grid management
+- Water system operations
+- Gas distribution
+- Transportation networks
+- Utilities management
+- Emergency services dispatch
+
+**Examples**:
+- AI managing electricity distribution ✓ High-Risk
+- Smart grid load balancing ✓ High-Risk
+- Traffic light optimization (local city) — Depends (probably not high-risk)
+- Rail switching systems ✓ High-Risk
+
+**Why**: Failures directly endanger lives and public safety.
+
+### Subcategory 2.3: Law Enforcement
+
+**AI used by police and courts**.
+
+Includes:
+- Crime prediction or pattern analysis
+- Evidence assessment or valuation
+- Suspect identification
+- Risk assessment (recidivism prediction)
+- Case prioritization
+
+**Examples**:
+- Predictive policing (high-risk) ✓
+- Facial identification for suspects ✓ High-Risk
+- Automated flagging of suspicious transactions ✓ High-Risk
+- Risk assessment for bail decisions ✓ High-Risk
+- Weapon detection in security footage ✓ High-Risk
+
+**Why**: Directly impacts liberty and justice. Errors have severe consequences.
+
+### Subcategory 2.4: Employment & Labor
+
+**AI making or informing employment decisions**.
+
+Includes:
+- Resume screening or ranking
+- Interview analysis or evaluation
+- Performance evaluation
+- Promotion/bonus decisions
+- Shift scheduling (if affects livelihood)
+- Redundancy decisions
+- Wage decisions
+
+**Examples**:
+- Resume screening tool ✓ High-Risk
+- Interview analysis rating candidates ✓ High-Risk
+- Performance tracking software ✓ High-Risk
+- AI determining who gets raises ✓ High-Risk
+- Schedule optimization (just efficiency, not firing) — May be high-risk
+- Recommendation system (helps manager, manager decides) — Probably high-risk
+
+**Why**: Affects fundamental right to work and livelihood.
+
+### Subcategory 2.5: Education
+
+**AI making educational decisions about individuals**.
+
+Includes:
+- Grading or assessment
+- Admission decisions
+- Course or program recommendations
+- Performance evaluation (students)
+- Educational resource allocation
+- Dropout prediction
+
+**Examples**:
+- AI grading essays ✓ High-Risk
+- University admissions ranking ✓ High-Risk
+- Student performance prediction ✓ High-Risk
+- Course recommendation system ✓ High-Risk (if used for decisions)
+- Automated flagging of struggling students ✓ High-Risk
+
+**Why**: Affects future opportunities and life trajectory.
+
+### Subcategory 2.6: Credit & Financial Services
+
+**AI for creditworthiness or financial inclusion decisions**.
+
+Includes:
+- Credit scoring
+- Loan approval/denial
+- Interest rate determination
+- Loan terms (amount, duration)
+- Insurance underwriting
+- Insurance pricing
+- Mortgage qualification
+
+**Examples**:
+- Credit scoring tool ✓ High-Risk
+- Loan approval based on AI ✓ High-Risk
+- Insurance underwriting ✓ High-Risk
+- Automated mortgage denial ✓ High-Risk
+- Banking fraud detection — Not high-risk (just flagging, human reviews)
+- Invoice payment prediction — Not high-risk (operational, not decisional)
+
+**Why**: Affects financial stability and economic opportunity.
+
+### Subcategory 2.7: Benefits & Social Services
+
+**AI determining eligibility for social support**.
+
+Includes:
+- Welfare eligibility determination
+- Benefit level decisions
+- Social housing assignment
+- Child protection decisions
+- Healthcare rationing
+- Eligibility for state services
+
+**Examples**:
+- Unemployment benefit eligibility AI ✓ High-Risk
+- Healthcare need assessment ✓ High-Risk
+- Social housing allocation ✓ High-Risk
+- Food assistance determination ✓ High-Risk
+
+**Why**: Directly affects ability to meet basic needs.
+
+### Subcategory 2.8: Justice & Legal Systems
+
+**AI used in legal/judicial processes**.
+
+Includes:
+- Case outcome prediction
+- Sentencing recommendations
+- Bail/parole decisions
+- Evidence evaluation or prioritization
+- Legal research prioritization
+- Judicial decision assistance
+
+**Examples**:
+- Sentencing recommendation AI ✓ High-Risk
+- Bail risk assessment ✓ High-Risk
+- Parole eligibility prediction ✓ High-Risk
+- Court case outcome prediction ✓ High-Risk
+
+**Why**: Affects liberty and justice. Most serious consequences for individuals.
+
+## Category 3: Transparency Risk (Article 50)
+
+These systems have **mid-level requirements**: mostly disclosure and documentation.
+
+### 3.1 AI-Generated or Manipulated Content
+
+**What it is**: Content created or substantially altered by AI.
+
+Includes:
+- Deepfakes (synthetic faces/voices)
+- Text generated by large language models
+- AI-created images or art
+- Voice synthesis
+- Video synthesis
+
+**Requirement**: Disclose that content was AI-generated.
+
+**Examples requiring disclosure**:
+- Blog post written by ChatGPT ("This article was written with AI assistance")
+- AI-generated product images
+- Deepfake video (even if used for satire)
+- Synthetic voice in narration
+- AI-created music
+
+**Not requiring disclosure**:
+- Spell checkers and grammar tools (not AI-generated, assisted)
+- Search engine results
+- Simple templates
+- Data visualization
+
+**Why**: People have right to know if they're interacting with AI, not a human.
+
+### 3.2 Chatbots & Conversational AI
+
+**What it is**: AI systems that simulate conversation with humans.
+
+**Requirement**: Disclose that user is talking to an AI, not a human.
+
+**Examples**:
+- ChatGPT-based customer support ("Talking to AI assistant")
+- Large language model chatbots
+- Conversational virtual agents
+
+**Not including**:
+- Traditional chatbots with fixed responses
+- Keyword-matching Q&A systems
+- Simple voice assistants (Alexa, Google)
+
+**Why**: People should know they're not talking to a human.
+
+### 3.3 Biometric Emotion Recognition
+
+**What it is**: AI inferring emotions from facial expressions, body language, tone.
+
+**Requirements**:
+- Disclose it's being used
+- Document limitations and unreliability
+- Safeguards against misuse
+
+**Examples**:
+- Job interview analysis detecting "stress"
+- Classroom monitoring detecting "engagement"
+- Lie detection via emotional analysis
+- Recruitment AI analyzing interview demeanor
+
+**Why**: Emotion recognition is unreliable and can be misused to harm. Employees/candidates should know they're being evaluated this way.
+
+### 3.4 Content Recommendation Systems
+
+**What it is**: AI that recommends content to users (not making decisions, just suggestions).
+
+**Requirements**:
+- Explain main factors affecting recommendations
+- Document algorithm
+- Safeguards against filter bubbles
+
+**Note**: If recommendation system is used for legal decisions (e.g., "algorithm recommends loan denial"), it becomes high-risk.
+
+**Examples**:
+- YouTube recommendation algorithm
+- Spotify playlist recommendations
+- Netflix "recommendations for you"
+- E-commerce "similar products"
+
+**Why**: Algorithms can create filter bubbles and polarization. Transparency helps understand why you see what you see.
+
+## Category 4: Low-Risk / General Compliance
+
+These systems have **minimal specific requirements** (just general GDPR, consumer protection).
+
+### 4.1 Traditional Machine Learning
+
+- Spam filters
+- Demand forecasting
+- Price optimization
+- Customer segmentation
+- Churn prediction
+- Inventory management
+- Quality control
+
+**Requirement**: Basic GDPR if personal data is involved, but no special AI Act requirements.
+
+### 4.2 Simple Automation
+
+- Workflow automation (n8n, Zapier)
+- Data transformation
+- Scheduled tasks
+- Report generation
+
+**Requirement**: If involving personal data, GDPR compliance. Otherwise, minimal requirements.
+
+### 4.3 Data Analytics
+
+- Business intelligence
+- Trend analysis
+- Performance dashboards
+- Historical analysis
+
+**Requirement**: GDPR if analyzing personal data.
+
+## Classification Checklist
+
+When classifying a system, ask in order:
+
+1. **Is it on the prohibited list?** → PROHIBITED (remove immediately)
+
+2. **Does it involve**:
+   - Automated decision-making affecting rights? → HIGH-RISK
+   - Biometric identification? → HIGH-RISK
+   - Employment/hiring/promotion decisions? → HIGH-RISK
+   - Credit/financial decisions? → HIGH-RISK
+   - Legal/judicial decisions? → HIGH-RISK
+   - Education/grading? → HIGH-RISK
+   - Welfare/benefits eligibility? → HIGH-RISK
+   - Law enforcement use? → HIGH-RISK
+   - Critical infrastructure? → HIGH-RISK
+
+3. **Does it involve**:
+   - AI-generated content? → TRANSPARENCY
+   - Chatbots? → TRANSPARENCY
+   - Emotion recognition? → TRANSPARENCY
+   - Recommendations (not decisions)? → TRANSPARENCY
+
+4. **Otherwise** → LOW-RISK
+
+## Real-World Classification Examples
+
+### Example 1: Resume Screening Tool
+
+```
+1. Prohibited? No
+2. Automated decision-making? Yes (screening in/out)
+3. Employment-related? Yes
+
+Classification: HIGH-RISK
+Compliance needed: Full high-risk compliance
+```
+
+### Example 2: Customer Support Chatbot
+
+```
+1. Prohibited? No
+2. Automated decision? No (just answering questions)
+3. Chatbot? Yes
+
+Classification: TRANSPARENCY
+Compliance needed: Disclose "AI assistant"
+```
+
+### Example 3: Email Spam Filter
+
+```
+1. Prohibited? No
+2. Automated decision? No (just flagging)
+3. Emotion/biometric? No
+4. Content recommendation? No
+
+Classification: LOW-RISK
+Compliance needed: Basic (just GDPR if email data)
+```
+
+### Example 4: Sales Price Optimization
+
+```
+1. Prohibited? No
+2. Decision? Not really (just suggestions to business)
+3. Recommendation? Not individual
+4. GDPR data? Probably
+
+Classification: LOW-RISK (or basic transparency)
+Compliance needed: GDPR compliance, basic documentation
+```
+
+## Checklist
+
+- [ ] List all your AI systems
+- [ ] Check each against prohibited list (remove if any)
+- [ ] Classify each as high-risk, transparency, or low-risk
+- [ ] For each high-risk: Plan compliance work
+- [ ] For each transparency: Plan disclosure mechanisms
+- [ ] Document your classification decisions
+- [ ] Get second opinion from legal counsel (if high-risk)
+- [ ] Update classification quarterly (AI capabilities change)
+- [ ] Train team on what qualifies as what risk level
+
+---
+
+**Sources:**
+- EU AI Act Articles 5, 50 and Annex III
+- Implementation guidelines from EC
+- https://artificialintelligenceact.eu/
+
+## Sources and Links
+
+- [EU AI Act](https://eur-lex.europa.eu/eli/reg/2024/1689/oj)

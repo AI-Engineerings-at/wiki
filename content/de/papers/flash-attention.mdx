@@ -1,0 +1,257 @@
+---
+title: Flash Attention — Effiziente Transformer-Inferenz
+date: 2026-03-21
+summary: IO-aware attention, Tiling, Memory-Hierarchie. Flash Attention 1 vs. 2 vs. 3, Speed/Memory Improvements, praktische Auswirkungen auf Inferenz.
+tags: [flash-attention, attention, optimization, memory, inference, transformer]
+author: AI Engineering
+section: papers
+---
+
+# Flash Attention — Effiziente Transformer-Inferenz
+
+Flash Attention ist eine der wichtigsten praktischen Optimierungen in modernen Sprachmodellen. Das Paper zeigt: Die meisten Probleme bei Transformer-Inferenz sind nicht algorithmisch, sondern **Memory-Zugriff-Probleme**.
+
+## Das Grundproblem
+
+Standard Self-Attention hat O(N²) Speicher- und Zeit-Komplexität:
+
+```python
+# Naive Attention
+def attention(Q, K, V):
+    # Q, K: (Batch, Heads, Seq_Len, Dim)
+    scores = (Q @ K.T) / sqrt(dim)  # Shape: (Seq, Seq)
+    attention_weights = softmax(scores)  # Shape: (Seq, Seq)
+    output = attention_weights @ V  # Shape: (Seq, Dim)
+    return output
+
+# Problem: Für Seq_Len = 4096:
+# Attention Weights Matrix = 4096 x 4096 = 16 Millionen Einträge
+# Bei float32 = 64 MB pro Head
+# Mit 32 Heads = 2 GB für eine Schicht!
+```
+
+Das ist nicht nur Memory—es ist auch **langsam**, weil GPU-Memory zu GPU-Compute verhältnis schlecht ist.
+
+### GPU Memory Hierarchie
+
+```
+Register (auf Chip): 100 TB/s, 1 KB pro Thread
+L1 Cache: 80 TB/s, 128 KB pro SM
+L2 Cache: 3 TB/s, 40 MB gemeinsam
+HBM (GPU VRAM): 2 TB/s, 80 GB gemeinsam
+```
+
+Das Problem: Attention schreibt die 16 Millionen Werte nach HBM, dann liest sie sie sofort wieder. Das ist **1000x langsamer** als direkt im L1 zu rechnen.
+
+## Flash Attention v1: Tiling (2022)
+
+**Paper:** "Fast and Memory-Efficient Exact Attention with IO-Aware Heuristics" (Dao et al.)
+
+Die Idee: **Berechne Attention in kleineren Blöcken.**
+
+```
+Statt:
+Scores = Q @ K^T (komplette 4096 x 4096 Matrix)
+Attention = softmax(Scores)
+Output = Attention @ V
+
+Mache:
+Block 1:
+  Q_block (1000 x 64)
+  K_block (1000 x 64)
+  V_block (1000 x 64)
+  → Scores_block (1000 x 1000) passt in L1 Cache!
+  → Berechne Attention lokal
+
+Wiederhole für alle Blocks
+```
+
+### Tiling Algorithm
+
+```
+for i in range(0, Seq_Len, Block_Size):
+  for j in range(0, Seq_Len, Block_Size):
+    # Lade kleine Blöcke von Q, K, V
+    Q_i = Q[i:i+B]  # (B, D)
+    K_j = K[j:j+B]  # (B, D)
+    V_j = V[j:j+B]  # (B, D)
+
+    # Berechne Scores für diesen Block
+    S_ij = (Q_i @ K_j^T) / sqrt(D)  # (B, B)
+
+    # Wende Softmax an
+    P_ij = softmax(S_ij)  # (B, B)
+
+    # Multiply mit Values
+    O_i += P_ij @ V_j  # (B, D)
+```
+
+### Trick: Reverse-Stabilität für Softmax
+
+Normal-Softmax mit Tiling hat ein Problem: Softmax ist global (braucht alle Scores, um zu normalisieren).
+
+**Lösung:** Online Softmax
+
+```python
+# Normaler Online Softmax
+m = -inf
+l = 0
+o = 0
+
+for block in blocks:
+    S = compute_scores(block)
+    m_new = max(m, max(S))
+
+    # Skaliere alten Output neu
+    l = exp(m - m_new) * l + sum(exp(S - m_new))
+    o = (o * exp(m - m_new)) + exp(S - m_new) @ V_block
+
+    m = m_new
+```
+
+Das funktioniert! Und der numerische Fehler ist sogar *kleiner* als normale Softmax (weil keine großen Zahlen subtrahiert werden).
+
+### Ergebnisse
+
+```
+Benchmark: Attention auf A100 GPU
+
+Standard Attention:
+- 4096 Seq Len: 10 ms
+- Speicher: 2 GB für 32 Heads
+
+Flash Attention v1:
+- 4096 Seq Len: 1.2 ms
+- Speicher: 100 MB
+- Speedup: 8x
+- Memory: 20x weniger
+```
+
+## Flash Attention v2: Noch besser (2023)
+
+**Paper:** "Flash-Decoding for Fast Batched Inference on LLMs" (Dao et al.)
+
+Flash Attention v2 wurde optimiert auf Basis von echten GPU-Measurements.
+
+### Verbesserungen
+
+1. **Warp-Level Parallelisierung**
+   - Statt Thread-Level Parallelisierung (langsam)
+   - Nutze Warp-Shuffle Operationen (schnell)
+   - 2x Speedup
+
+2. **Better Work Distribution**
+   - Vorher: Alle Threads machen Softmax (synchronisierung overhead)
+   - Nachher: Nur ein Warp macht Softmax, andere rechnen weiter
+   - 1.5x Speedup
+
+3. **Asynchrones Memory Layout**
+   - Optimiert für GPU Cache-Zugriffsmuster
+   - Nicht 100% klar im Paper, aber empirisch 1.3x schneller
+
+### Performance v2
+
+```
+Speedup über Standard Attention:
+
+Seq_Len = 512: 2.3x (nicht so viel zu gewinnen)
+Seq_Len = 1024: 3.8x
+Seq_Len = 2048: 6.2x
+Seq_Len = 4096: 7.6x
+Seq_Len = 8192: 8.1x
+```
+
+## Flash Attention v3: Pipelining (2024)
+
+**Aktuell: Noch nicht im Original-Paper, aber in praktischen Implementierungen**
+
+Flash Attention v3 macht echtes Pipelining:
+
+```
+Thread A: Lade Q_block von HBM → L1
+Thread B: Berechne Scores für Q_block (parallel)
+Thread C: Lade K_block von HBM → L1 (parallel)
+Thread D: Schreibe Output (parallel)
+
+Statt sequenziell:
+Load → Compute → Store
+```
+
+Das ist schwer zu implementieren, aber kann 1.5x weiterer Speedup bringen.
+
+## Praktische Auswirkungen
+
+### Inference Speed
+
+```
+LLaMA 7B auf A100:
+
+Ohne Flash Attention:
+- 1 Token/ms (bottleneck: Attention)
+- Generierung von 100 Tokens = 100ms
+
+Mit Flash Attention:
+- 3 Tokens/ms (8x speedup Attention, aber nur 3x gesamt)
+- Warum nicht 8x? Weil auch andere Teile Zeit brauchen
+```
+
+### Memory Usage
+
+```
+Batch Size 32, Seq Len 4096:
+
+Ohne Flash Attention:
+- Model Params: 7B (28 GB)
+- Attention Buffers: 2 GB pro Layer * 32 Layers = 64 GB
+- Total: 92 GB → braucht H100 (80 GB + Swap)
+
+Mit Flash Attention:
+- Model Params: 7B (28 GB)
+- Attention Buffers: 64 MB pro Layer * 32 Layers = 2 GB
+- Total: 30 GB → passt auf A100 (80 GB)
+```
+
+## Wo funktioniert Flash Attention?
+
+### ✅ Gut
+- Inferenz (exakt das, wofür es optimiert ist)
+- Training mit großen Batch Sizes
+- Lange Sequenzen
+
+### ⚠️ Nuanciert
+- Sehr kurze Sequenzen (< 512): Overhead schlimmer als Speedup
+- Sparse Attention Patterns: Flash Attention macht volle Attention
+- Custom Attention Kernels: Oft nicht mit Flash Attention kompatibel
+
+## Integration in Frameworks
+
+```python
+# PyTorch 2.0+: Automatisch
+import torch
+attention_output = F.scaled_dot_product_attention(Q, K, V)
+# Nutzt Flash Attention automatisch wenn möglich
+
+# HuggingFace Transformers: Opt-in
+from transformers import AutoModelForCausalLM
+model = AutoModelForCausalLM.from_pretrained(
+    "meta-llama/Llama-2-7b",
+    attn_implementation="flash_attention_2"
+)
+
+# vLLM: Default
+# vLLM nutzt Flash Attention v2 für alle Inferenz
+```
+
+## Zusammenfassung
+
+Flash Attention ist nicht ein neuer Algorithmus (Attention ist immer noch O(N²)). Es ist eine **IO-optimierte Implementierung**.
+
+Die Lektion: **Viele "KI-Durchbrüche" sind eigentlich Implementations-Optimierungen.** Der Unterschied zwischen theoretisch optimal und praktisch schnell ist oft größer als der Unterschied zwischen Algorithmus A und B.
+
+## Quellen und Links
+
+- [Flash Attention v1 Paper (ArXiv)](https://arxiv.org/abs/2205.14135)
+- [Flash Attention v2 Paper (ArXiv)](https://arxiv.org/abs/2307.08691)
+- [Flash Attention GitHub](https://github.com/Dao-AILab/flash-attention)
+- [PyTorch Flash Attention Docs](https://pytorch.org/docs/stable/generated/torch.nn.functional.scaled_dot_product_attention.html)
+- [vLLM Blog: Flash Attention Performance](https://blog.vllm.ai/)

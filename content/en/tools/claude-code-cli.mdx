@@ -1,0 +1,680 @@
+---
+title: "Claude Code CLI — Complete Reference"
+date: "2026-03-21"
+summary: "Exhaustive reference for the Claude Code command line interface. Every flag, command, option, keyboard shortcut, environment variable, and error handling — sourced from official Anthropic documentation."
+tags: ["claude-code", "cli", "reference", "terminal", "commands"]
+author: "AI Engineering"
+---
+
+# Claude Code CLI — Complete Reference
+
+> This document is a REFERENCE — not a guide, not an overview. Every flag, every command, every option is documented. Based on official Anthropic documentation (March 2026).
+
+## Installation
+
+### Supported Platforms
+
+Claude Code is available for:
+- **macOS** 13.0 or newer (Intel and Apple Silicon)
+- **Linux** x86_64 and aarch64 (glibc systems)
+- **Alpine Linux** and musl-based distributions (special handling required)
+- **Windows** 10/11 with Git Bash
+- **WSL1/WSL2** on Windows
+
+### Installation Methods
+
+#### Shell Installer (macOS / Linux)
+
+```bash
+curl -fsSL https://claude.ai/install.sh | bash
+```
+
+The script:
+- Checks system requirements
+- Auto-detects CPU architecture
+- Installs to `~/.local/bin/claude`
+- Detects your shell profile and adds PATH
+
+After installation:
+- Restart terminal OR
+- Run `source ~/.zshrc` / `source ~/.bashrc`
+
+#### PowerShell Installer (Windows)
+
+```powershell
+irm https://claude.ai/install.ps1 | iex
+```
+
+The script:
+- Checks system requirements
+- Detects Windows architecture
+- Installs to `%USERPROFILE%\.local\bin\claude.exe`
+- Adds to User PATH environment variable
+
+After installation: Restart terminal.
+
+#### CMD Installer (Windows)
+
+```batch
+curl -fsSL https://claude.ai/install.cmd -o install.cmd && install.cmd && del install.cmd
+```
+
+#### Homebrew (macOS)
+
+```bash
+brew install --cask claude-code
+```
+
+#### WinGet (Windows)
+
+```powershell
+winget install Anthropic.ClaudeCode
+```
+
+#### NPM (All platforms, deprecated)
+
+```bash
+npm install -g @anthropic-ai/claude-code
+```
+
+> NPM installation is deprecated. Use the shell/PowerShell installer instead. They are 3-4x faster.
+
+### System Requirements
+
+| Requirement | Minimum | Recommended |
+|-------------|---------|-------------|
+| RAM | 4 GB | 8+ GB |
+| Disk | 100 MB | 1+ GB |
+| macOS | 13.0 | Current |
+| Linux | glibc 2.29 (Debian 10) | Current |
+| Windows | 10 Build 19041 | 11 |
+| WSL | WSL2 (WSL1 works, slower) | WSL2 with mirrored networking |
+
+### Verification After Installation
+
+```bash
+claude --version
+```
+
+Should output version number, e.g., `claude 2.1.42`.
+
+## CLI Commands
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `claude` | Start interactive session | `claude` |
+| `claude "query"` | Interactive session with initial prompt | `claude "explain this project"` |
+| `claude -p "query"` | Print mode: Query via SDK, then exit | `claude -p "explain this function"` |
+| `cat file \| claude -p "query"` | Print mode with piped content | `cat logs.txt \| claude -p "analyze"` |
+| `claude -c` | Continue: Resume last session in current directory | `claude -c` |
+| `claude -c -p "query"` | Continue via SDK | `claude -c -p "check for errors"` |
+| `claude -r "<session>" "query"` | Resume: Continue session by ID or name | `claude -r "auth-refactor" "Finish PR"` |
+| `claude update` | Update to latest version | `claude update` |
+| `claude auth login` | Sign in to Anthropic account | `claude auth login --console` |
+| `claude auth logout` | Sign out | `claude auth logout` |
+| `claude auth status` | Show authentication status (JSON or text) | `claude auth status --text` |
+| `claude agents` | List all configured subagents | `claude agents` |
+| `claude mcp` | Configure Model Context Protocol servers | `claude mcp add server` |
+| `claude remote-control` | Start Remote Control server (server mode) | `claude remote-control --name "Project"` |
+
+## CLI Flags — Complete Reference
+
+### General Flags
+
+| Flag | Description | Default | Example |
+|------|-------------|---------|---------|
+| `--version`, `-v` | Output version number | - | `claude -v` |
+| `--verbose` | Enable verbose logging (full turn-by-turn output) | false | `claude --verbose` |
+| `--help`, `-h` | Show help | - | `claude --help` |
+| `--debug` | Enable debug mode with optional category filtering | false | `claude --debug "api,mcp"` |
+
+Debug categories:
+- `api` — API calls
+- `mcp` — MCP servers
+- `hooks` — Lifecycle hooks
+- `file` — File operations
+- `statsig` — Feature flags
+
+Negate with `!` (e.g., `"!statsig,!file"`).
+
+### Session Management
+
+| Flag | Description | Default | Example |
+|------|-------------|---------|---------|
+| `--name`, `-n` | Set display name for session (shown in `/resume` and title) | auto | `claude -n "my-feature"` |
+| `--continue`, `-c` | Load most recent session in current directory | false | `claude -c` |
+| `--resume`, `-r` | Resume session by ID or name, or show picker | - | `claude -r auth-refactor` |
+| `--fork-session` | Create new session ID instead of reusing old (with `--resume`) | false | `claude -r abc123 --fork-session` |
+| `--session-id` | Use specific session ID (must be valid UUID) | auto | `claude --session-id "550e8400..."` |
+| `--no-session-persistence` | Don't save sessions to disk (print mode only) | false | `claude -p --no-session-persistence "query"` |
+| `--from-pr` | Resume sessions linked to specific GitHub PR (number or URL) | - | `claude --from-pr 123` |
+| `--remote` | Create new web session on claude.ai with task description | false | `claude --remote "Fix Login Bug"` |
+| `--remote-control`, `--rc` | Enable Remote Control (control from claude.ai) | false | `claude --remote-control "Project"` |
+| `--teleport` | Bring web session back to local terminal | false | `claude --teleport` |
+
+### Directory and File Management
+
+| Flag | Description | Default | Example |
+|------|-------------|---------|---------|
+| `--add-dir` | Add additional working directories (validates existence) | - | `claude --add-dir ../apps ../lib` |
+| `--worktree`, `-w` | Start isolated git worktree (in `.claude/worktrees/`) | - | `claude -w feature-auth` |
+
+### Model and Agent Configuration
+
+| Flag | Description | Default | Example |
+|------|-------------|---------|---------|
+| `--model` | Set model for this session (haiku, sonnet, opus or full name) | Parent session | `claude --model claude-sonnet-4-6` |
+| `--effort` | Set effort level (low, medium, high, max — Opus 4.6 only) | medium | `claude --effort high` |
+| `--fallback-model` | Enable fallback to specified model when default overloaded (print mode only) | - | `claude -p --fallback-model sonnet "query"` |
+| `--agent` | Specify agent for current session | default | `claude --agent my-custom-agent` |
+| `--agents` | Define custom subagents dynamically via JSON | - | `claude --agents '{"reviewer":{...}}'` |
+
+### Permission and Security
+
+| Flag | Description | Default | Example |
+|------|-------------|---------|---------|
+| `--permission-mode` | Begin in specified permission mode (default, plan, ask) | default | `claude --permission-mode plan` |
+| `--dangerously-skip-permissions` | Skip permission prompts (use with caution) | false | `claude --dangerously-skip-permissions` |
+| `--allow-dangerously-skip-permissions` | Enable permission bypassing option (with `--permission-mode`) | false | `claude --permission-mode plan --allow-dangerously-skip-permissions` |
+| `--permission-prompt-tool` | MCP tool to handle permission prompts in non-interactive mode | - | `claude -p --permission-prompt-tool mcp_auth_tool "query"` |
+
+### Tool Control
+
+| Flag | Description | Default | Example |
+|------|-------------|---------|---------|
+| `--tools` | Restrict which built-in tools are available | all | `claude --tools "Bash,Edit,Read"` |
+| `--disallowedTools` | Remove tools (as blacklist) | - | `claude --disallowedTools "Bash(git log *)"` |
+| `--allowedTools` | Tools that execute without prompting | - | `claude --allowedTools "Bash(git log *)" "Read"` |
+
+Syntax:
+- `"Bash"` — all bash commands
+- `"Bash(git log *)"` — only `git log` pattern matching
+- `"Read"` — read tool completely
+- `""` — disable all tools
+
+### Browser Integration
+
+| Flag | Description | Default | Example |
+|------|-------------|---------|---------|
+| `--chrome` | Enable Chrome browser integration | false | `claude --chrome` |
+| `--no-chrome` | Disable Chrome browser integration | - | `claude --no-chrome` |
+
+### System Prompt Customization
+
+| Flag | Description | Default | Example |
+|------|-------------|---------|---------|
+| `--system-prompt` | Replace entire system prompt | default | `claude --system-prompt "You are expert"` |
+| `--system-prompt-file` | Load system prompt from file (replaces default) | - | `claude --system-prompt-file ./prompt.txt` |
+| `--append-system-prompt` | Append text to default prompt | - | `claude --append-system-prompt "Always use TypeScript"` |
+| `--append-system-prompt-file` | Append file contents to default prompt | - | `claude --append-system-prompt-file ./rules.txt` |
+
+> `--system-prompt` and `--system-prompt-file` are mutually exclusive.
+> Append flags can be combined with either replacement flag.
+
+### Configuration Files
+
+| Flag | Description | Default | Example |
+|------|-------------|---------|---------|
+| `--settings` | Load settings JSON file or string | ~/.claude/settings.json | `claude --settings ./settings.json` |
+| `--setting-sources` | Which setting sources to load (user, project, local) | all | `claude --setting-sources user,project` |
+| `--mcp-config` | Load MCP servers from JSON file/string | .mcp.json | `claude --mcp-config ./mcp.json` |
+| `--strict-mcp-config` | Only use MCP servers from `--mcp-config` (ignore rest) | false | `claude --strict-mcp-config --mcp-config ./mcp.json` |
+
+### Print Mode (Non-Interactive)
+
+| Flag | Description | Default | Example |
+|------|-------------|---------|---------|
+| `--print`, `-p` | Print mode: Output response, then exit | false | `claude -p "query"` |
+| `--output-format` | Output format (text, json, stream-json) | text | `claude -p --output-format json "query"` |
+| `--input-format` | Input format (text, stream-json) | text | `claude -p --input-format stream-json` |
+| `--include-partial-messages` | Include partial streaming events in output (stream-json only) | false | `claude -p --output-format stream-json --include-partial-messages "query"` |
+| `--max-turns` | Limit agentic turns (print mode only) | unlimited | `claude -p --max-turns 3 "query"` |
+| `--max-budget-usd` | Maximum dollar amount to spend on API calls | unlimited | `claude -p --max-budget-usd 5.00 "query"` |
+| `--json-schema` | Get validated JSON output matching JSON Schema (Structured Outputs) | - | `claude -p --json-schema '{"type":"object"...}' "query"` |
+
+### IDE and Development
+
+| Flag | Description | Default | Example |
+|------|-------------|---------|---------|
+| `--ide` | Auto-connect to IDE on startup if exactly one available | false | `claude --ide` |
+| `--teammate-mode` | Agent team display mode (auto, in-process, tmux) | auto | `claude --teammate-mode in-process` |
+
+### Plugins and Extensions
+
+| Flag | Description | Default | Example |
+|------|-------------|---------|---------|
+| `--plugin-dir` | Load plugins from directory (repeatable) | ~/.claude/plugins | `claude --plugin-dir ./my-plugins` |
+| `--disable-slash-commands` | Disable all skills and commands for this session | false | `claude --disable-slash-commands` |
+
+### MCP and Channels (Research Preview)
+
+| Flag | Description | Default | Example |
+|------|-------------|---------|---------|
+| `--channels` | MCP server channel notifications (plugin:name@marketplace) | - | `claude --channels plugin:my-notifier@my-marketplace` |
+| `--dangerously-load-development-channels` | Load non-allowlist channels (development) | false | `claude --dangerously-load-development-channels server:webhook` |
+
+### Maintenance and Initialization
+
+| Flag | Description | Default | Example |
+|------|-------------|---------|---------|
+| `--init` | Run initialization hooks and start interactive | false | `claude --init` |
+| `--init-only` | Run initialization hooks and exit (no interactive) | false | `claude --init-only` |
+| `--maintenance` | Run maintenance hooks and exit | false | `claude --maintenance` |
+
+### API and Advanced Options
+
+| Flag | Description | Default | Example |
+|------|-------------|---------|---------|
+| `--betas` | Beta headers for API requests (API key users only) | - | `claude --betas interleaved-thinking` |
+
+## Built-In Keyboard Shortcuts (Interactive Mode)
+
+### General Controls
+
+| Shortcut | Action | Context |
+|----------|--------|---------|
+| `Ctrl+C` | Cancel current input or generation | Standard interrupt |
+| `Ctrl+D` | Exit Claude Code session (EOF signal) | Empty input |
+| `Ctrl+F` | Kill all background agents (press twice to confirm) | Background control |
+| `Ctrl+L` | Clear terminal screen | Keeps conversation history |
+| `Ctrl+O` | Toggle verbose output | Shows tool usage, execution |
+| `Ctrl+R` | Reverse search command history | Interactive search |
+| `Ctrl+G` | Open input in default text editor | Edit prompts/responses |
+| `Ctrl+V` or `Cmd+V` or `Alt+V` | Paste image from clipboard | Images/image paths |
+| `Ctrl+B` | Background bash commands | Tmux users: press twice |
+| `Ctrl+T` | Toggle task list | Show/hide in status area |
+| `Up/Down Arrows` | Navigate command history | Recall previous inputs |
+| `Left/Right Arrows` | Cycle through dialog tabs | Permission dialogs, menus |
+| `Esc+Esc` | Rewind or summarize | Restore code or get summary |
+| `Shift+Tab` or `Alt+M` | Toggle permission modes | Switch modes |
+| `Option+P` (macOS) or `Alt+P` | Switch model (without clearing prompt) | Model switching |
+| `Option+T` (macOS) or `Alt+T` | Toggle extended thinking (after `/terminal-setup`) | Extended thinking |
+
+### Text Editing
+
+| Shortcut | Action | Context |
+|----------|--------|---------|
+| `Ctrl+K` | Delete to end of line (stores for paste) | Text editing |
+| `Ctrl+U` | Delete entire line (stores for paste) | Text editing |
+| `Ctrl+Y` | Paste stored text | Paste deleted text |
+| `Alt+Y` (after `Ctrl+Y`) | Cycle paste history | Cycle previously deleted |
+| `Alt+B` | Move cursor back one word | Word navigation (macOS: Option as Meta) |
+| `Alt+F` | Move cursor forward one word | Word navigation (macOS: Option as Meta) |
+
+### Multiline Input (Various Methods)
+
+| Method | Shortcut | Terminal Compatibility |
+|--------|----------|------------------------|
+| Quick escape | `\` + `Enter` | All terminals |
+| macOS default | `Option+Enter` | macOS |
+| Shift+Enter | `Shift+Enter` | iTerm2, WezTerm, Ghostty, Kitty |
+| Control sequence | `Ctrl+J` | All (line feed) |
+| Paste mode | Paste directly | For code blocks, logs |
+
+> `Shift+Enter` works out-of-the-box on iTerm2, WezTerm, Ghostty, Kitty.
+> Other terminals: run `/terminal-setup` to configure.
+
+### Quick Commands (Prefix Notation)
+
+| Prefix | Meaning | Example |
+|--------|---------|---------|
+| `/` | Built-in command or skill | `/rename "new-name"` |
+| `!` | Bash mode (execute directly) | `! npm test` |
+| `@` | File path mention (autocomplete) | `@src/index.ts` |
+
+### Vim Editor Mode
+
+Enable with `/vim` command or `/config`.
+
+#### Mode Switching
+
+| Command | Action | From mode |
+|---------|--------|-----------|
+| `Esc` | Enter NORMAL mode | INSERT |
+| `i` | Insert before cursor | NORMAL |
+| `I` | Insert at beginning of line | NORMAL |
+| `a` | Insert after cursor | NORMAL |
+| `A` | Insert at end of line | NORMAL |
+| `o` | Open line below | NORMAL |
+| `O` | Open line above | NORMAL |
+
+#### Navigation (NORMAL Mode)
+
+| Command | Action |
+|---------|--------|
+| `h`/`j`/`k`/`l` | Left/Down/Up/Right |
+| `w` | Next word |
+| `e` | End of word |
+| `b` | Previous word |
+| `0` | Beginning of line |
+| `$` | End of line |
+| `^` | First non-blank character |
+| `gg` | Beginning of input |
+| `G` | End of input |
+| `f{char}` | Jump to character |
+| `F{char}` | Jump to character backward |
+| `t{char}` | Jump to before character |
+| `T{char}` | Jump to after character backward |
+| `;` | Repeat last f/F/t/T |
+| `,` | Repeat last f/F/t/T reversed |
+
+#### Editing (NORMAL Mode)
+
+| Command | Action |
+|---------|--------|
+| `x` | Delete character |
+| `dd` | Delete line |
+| `D` | Delete to end of line |
+| `dw`/`de`/`db` | Delete word/to end/backward |
+| `cc` | Change line |
+| `C` | Change to end of line |
+| `cw`/`ce`/`cb` | Change word/to end/backward |
+| `yy`/`Y` | Yank (copy) line |
+| `yw`/`ye`/`yb` | Yank word/to end/backward |
+| `p` | Paste after cursor |
+| `P` | Paste before cursor |
+| `>>`/`<<` | Indent/dedent line |
+| `J` | Join lines |
+| `.` | Repeat last change |
+
+#### Text Objects
+
+| Command | Action |
+|---------|--------|
+| `iw`/`aw` | Inner/around word |
+| `iW`/`aW` | Inner/around WORD (whitespace-delimited) |
+| `i"`/`a"` | Inner/around double quotes |
+| `i'`/`a'` | Inner/around single quotes |
+| `i(`/`a(` | Inner/around parentheses |
+| `i[`/`a[` | Inner/around brackets |
+| `i{`/`a{` | Inner/around braces |
+
+### Voice Input
+
+| Shortcut | Action |
+|----------|--------|
+| Hold `Space` | Push-to-talk dictation (must be enabled) |
+
+Transcript inserts at cursor. Key is rebindable.
+
+## Environment Variables
+
+### API and Authentication
+
+| Variable | Description | Format | Example |
+|----------|-------------|--------|---------|
+| `ANTHROPIC_API_KEY` | Anthropic API key (overrides OAuth) | String | `ANTHROPIC_API_KEY=sk-ant-...` |
+| `ANTHROPIC_BASE_URL` | Custom API endpoint | URL | `ANTHROPIC_BASE_URL=https://api.company.com` |
+
+### Network and Proxy
+
+| Variable | Description | Format | Example |
+|----------|-------------|--------|---------|
+| `HTTP_PROXY` | HTTP proxy server | URL | `HTTP_PROXY=http://proxy:8080` |
+| `HTTPS_PROXY` | HTTPS proxy server | URL | `HTTPS_PROXY=http://proxy:8080` |
+| `NO_PROXY` | Hosts to skip proxy for | Comma-separated | `NO_PROXY=localhost,127.0.0.1` |
+| `NODE_EXTRA_CA_CERTS` | Corporate CA certificate bundle | Path | `NODE_EXTRA_CA_CERTS=/path/to/ca.pem` |
+
+### Feature Flags and Behavior
+
+| Variable | Description | Format | Example |
+|----------|-------------|--------|---------|
+| `CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION` | Enable prompt suggestions | Boolean | `CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION=false` |
+| `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS` | Disable background task functionality | Boolean | `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1` |
+| `CLAUDE_CODE_TASK_LIST_ID` | Named directory for task lists (across sessions) | String | `CLAUDE_CODE_TASK_LIST_ID=my-project` |
+| `USE_BUILTIN_RIPGREP` | Use built-in ripgrep (vs system) | Boolean | `USE_BUILTIN_RIPGREP=0` |
+| `CLAUDE_CODE_GIT_BASH_PATH` | Custom Git Bash path (Windows) | Path | `CLAUDE_CODE_GIT_BASH_PATH=C:\Program Files\Git\bin\bash.exe` |
+
+### Terminal and IDE
+
+| Variable | Description | Format | Example |
+|----------|-------------|--------|---------|
+| `BROWSER` | Default browser for OAuth login | Command | `BROWSER="/Applications/Chrome.app/Contents/MacOS/Google Chrome"` |
+| `EDITOR` | Default text editor | Command | `EDITOR=vim` |
+| `TERM` | Terminal emulator type | String | `TERM=xterm-256color` |
+
+### Development and Debugging
+
+| Variable | Description | Format | Example |
+|----------|-------------|--------|---------|
+| `CLAUDE_SESSION_ID` | Current session ID (READ-ONLY) | UUID | `CLAUDE_SESSION_ID=abc123-def456` |
+| `CLAUDE_SKILL_DIR` | Skill directory (absolute, READ-ONLY) | Path | `CLAUDE_SKILL_DIR=/home/user/.claude/skills/my-skill` |
+
+## Configuration Files
+
+### Storage Locations
+
+| File | Purpose | Scope | Format |
+|------|---------|-------|--------|
+| `~/.claude/settings.json` | User settings (permissions, hooks, model overrides) | Global user | JSON |
+| `.claude/settings.json` | Project settings (checked into git) | Project | JSON |
+| `.claude/settings.local.json` | Local project settings (not committed) | Local | JSON |
+| `~/.claude.json` | Global state (theme, OAuth, MCP) | Global user | JSON |
+| `.mcp.json` | Project MCP servers (checked into git) | Project | JSON |
+| `managed-mcp.json` | Managed MCP servers | Managed | JSON |
+| `.claude/CLAUDE.md` | Project memory (context for sessions) | Project | Markdown |
+| `~/.claude/hooks/` | Global hooks directory | Global user | JavaScript/hooks |
+| `.claude/hooks/` | Project hooks directory | Project | JavaScript/hooks |
+
+### Settings File Structure
+
+```json
+{
+  "model": "claude-opus-4-1",
+  "tools": ["Read", "Bash", "Edit", "Glob", "Grep"],
+  "allowedTools": [
+    "Bash(git log *)",
+    "Bash(git diff *)",
+    "Read"
+  ],
+  "permissionMode": "plan",
+  "maxTurns": 50,
+  "env": {
+    "CUSTOM_VAR": "value"
+  },
+  "hooks": {
+    "PreToolUse": ["check-schema"],
+    "PostToolUse": ["format-output"]
+  }
+}
+```
+
+### MCP Configuration
+
+```json
+{
+  "mcpServers": {
+    "my-server": {
+      "command": "node",
+      "args": ["./server.js"],
+      "env": {
+        "API_KEY": "key"
+      }
+    }
+  }
+}
+```
+
+## Exit Codes
+
+| Code | Meaning | Example |
+|------|---------|---------|
+| `0` | Success | Command completed |
+| `1` | General error | Authentication failed, invalid input |
+| `2` | Command line parse error | Invalid flags, syntax error |
+| `42` | Context limit exceeded | Token limit exceeded (print mode) |
+| `99` | Internal error | Crash, unexpected exception |
+
+Examples:
+```bash
+claude auth status
+echo $?  # Returns 0 if logged in, 1 if not
+```
+
+## Common Error Handling
+
+### Installation
+
+| Error | Solution |
+|-------|----------|
+| `command not found: claude` | PATH not updated — see "Verify your PATH" in troubleshooting |
+| `syntax error near unexpected token '<'` | Install script returned HTML (not script) — try Homebrew or WinGet |
+| `curl: (56) Failure writing output to destination` | Connection interrupted — retry or use alternative method |
+| `Killed` on Linux (low-memory) | Add swap space: `sudo fallocate -l 2G /swapfile && sudo swapon /swapfile` |
+| `TLS connect error` or `SSL/TLS secure channel` | Update CA certificates or configure proxy |
+| `Failed to fetch version` | Network blocking Google Cloud Storage — try proxy/VPN |
+
+### Authentication
+
+| Error | Solution |
+|-------|----------|
+| `OAuth error: Invalid code` | Login code expired — retry quickly |
+| `403 Forbidden` | Subscription inactive or API key invalid — check `/status` |
+| "This organization has been disabled" | `ANTHROPIC_API_KEY` env var overrides subscription — `unset ANTHROPIC_API_KEY` |
+| `Not logged in` | OAuth token expired — run `/login` |
+
+### Performance
+
+| Error | Solution |
+|-------|----------|
+| High CPU/memory usage | Use `/compact`, restart between tasks, update `.gitignore` |
+| Command hangs/freezes | Press `Ctrl+C` to abort, restart terminal if unresponsive |
+| Search/discovery broken | Install system `ripgrep`: `brew install ripgrep` |
+
+### Configuration
+
+| Error | Solution |
+|-------|----------|
+| Malformed settings.json | Validate JSON (use VSCode JSON validator) |
+| MCP server not loading | Run `claude --debug`, check stderr for errors |
+| Repeated permission prompts | Run `/permissions`, configure rules |
+
+## Debugging and Diagnostics
+
+### Doctor Command
+
+```bash
+claude /doctor
+```
+
+Checks:
+- Installation type, version, search functionality
+- Auto-update status and available versions
+- Invalid settings files (malformed JSON, wrong types)
+- MCP server configuration errors
+- Keybinding configuration issues
+- Context usage warnings (large CLAUDE.md, high MCP tokens)
+- Plugin and agent loading errors
+
+### Verbose Output
+
+```bash
+claude --verbose
+```
+
+Shows:
+- Complete turn-by-turn output
+- Tool invocations and results
+- Token usage per turn
+- API request/response details
+
+### Debug Categories
+
+```bash
+claude --debug "api,mcp"
+claude --debug "!statsig,!file"  # Everything EXCEPT statsig, file
+```
+
+## macOS Terminal Configuration (For Alt-Keys)
+
+If `Alt+B`, `Alt+F`, `Alt+Y`, `Alt+M`, `Alt+P` don't work, configure Option as Meta:
+
+### iTerm2
+
+1. Settings → Profiles → Keys
+2. Set Left Option Key to "Esc+"
+3. Set Right Option Key to "Esc+"
+
+### Terminal.app
+
+1. Settings → Profiles → Keyboard
+2. Check "Use Option as Meta Key"
+
+### VS Code Terminal
+
+1. Settings → Profiles → Keys
+2. Set Left/Right Option Key to "Esc+"
+
+## Best Practices
+
+### Session Management
+
+1. **Use named sessions** for better organization:
+   ```bash
+   claude -n "feature-auth-refactor"
+   ```
+
+2. **Continue instead of resume** for same directory:
+   ```bash
+   claude -c  # Instead of -r session-id
+   ```
+
+3. **Worktrees for parallel work**:
+   ```bash
+   claude -w feature-1  # Isolated branch
+   claude -w feature-2  # Different branch
+   ```
+
+### Performance
+
+1. **Compact context regularly**:
+   ```bash
+   /compact
+   ```
+
+2. **Scope large codebases with `--add-dir`**:
+   ```bash
+   claude --add-dir ./src ./tests
+   ```
+
+3. **Limit turns when cost-sensitive**:
+   ```bash
+   claude -p --max-turns 3 "query"
+   ```
+
+### Security
+
+1. **Never pass credentials in CLI flags**:
+   ```bash
+   # WRONG
+   claude --betas "api_key=secret"
+
+   # RIGHT
+   export ANTHROPIC_API_KEY=sk-ant-...
+   claude
+   ```
+
+2. **Use print mode for sensitive work**:
+   ```bash
+   claude -p "query"  # No persistent session
+   ```
+
+3. **Use permission modes**:
+   ```bash
+   claude --permission-mode plan  # Review before execution
+   ```
+
+---
+
+**Last Updated**: March 2026 | **Source**: Anthropic Code Documentation
+
+## Sources and Links
+
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [Interactive Mode](https://code.claude.com/docs/en/interactive-mode)
+- [npm Package](https://www.npmjs.com/package/@anthropic-ai/claude-code)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

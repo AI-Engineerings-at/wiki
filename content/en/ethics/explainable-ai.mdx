@@ -1,0 +1,115 @@
+---
+title: "Explainable AI (XAI): SHAP, LIME, Feature Importance"
+description: "XAI methods: SHAP, LIME, attention visualization, feature importance. Interpretability vs accuracy tradeoff. EU AI Act Article 13 requirements."
+section: "ethics"
+---
+
+# Explainable AI (XAI)
+
+Explainable AI answers: "Why did the model make this decision?" This page covers SHAP, LIME, and other XAI methods.
+
+---
+
+## 1. SHAP (SHapley Additive exPlanations)
+
+```python
+import shap
+import numpy as np
+from sklearn.ensemble import RandomForestClassifier
+
+# Train model
+X_train = np.random.random((100, 10))
+y_train = np.random.randint(0, 2, 100)
+model = RandomForestClassifier().fit(X_train, y_train)
+
+# Explain with SHAP
+explainer = shap.TreeExplainer(model)
+shap_values = explainer.shap_values(X_train[:10])
+
+# Visualize
+shap.summary_plot(shap_values[1], X_train[:10])
+
+# Feature importance
+shap_importance = np.abs(shap_values[1]).mean(axis=0)
+print("Feature Importance (SHAP):", shap_importance)
+```
+
+---
+
+## 2. LIME (Local Interpretable Model-agnostic Explanations)
+
+```python
+import lime.lime_tabular
+
+# Create LIME explainer
+explainer = lime.lime_tabular.LimeTabularExplainer(
+    X_train,
+    feature_names=[f"feature_{i}" for i in range(10)],
+    class_names=["negative", "positive"],
+    mode="classification"
+)
+
+# Explain a single prediction
+instance = X_train[0]
+explanation = explainer.explain_instance(instance, model.predict_proba)
+
+# Get explanation
+exp_dict = dict(explanation.as_list())
+print(f"Explanation: {exp_dict}")
+```
+
+---
+
+## 3. Feature Importance
+
+```python
+import numpy as np
+
+class FeatureImportanceAnalyzer:
+    """Computes feature importance"""
+
+    @staticmethod
+    def permutation_importance(model, X, y, n_repeats=10):
+        """Permutation-based feature importance"""
+        baseline_score = model.score(X, y)
+        importances = []
+
+        for i in range(X.shape[1]):
+            X_permuted = X.copy()
+            scores = []
+
+            for _ in range(n_repeats):
+                X_permuted[:, i] = np.random.permutation(X_permuted[:, i])
+                score = model.score(X_permuted, y)
+                scores.append(baseline_score - score)
+
+            importances.append(np.mean(scores))
+
+        return importances
+
+# Usage:
+analyzer = FeatureImportanceAnalyzer()
+importances = analyzer.permutation_importance(model, X_test, y_test)
+```
+
+---
+
+## 4. EU AI Act Article 13
+
+```yaml
+Article 13 Requirements:
+  - Automatic person profiling must be transparent
+  - Significant decisions must be explainable
+  - Required for credit, employment, criminal justice
+  - Users have right to explanation
+  - Documentation required
+```
+
+---
+
+## 5. Sources and Links
+
+- **SHAP**: https://shap.readthedocs.io/
+- **LIME**: https://github.com/marcotcr/lime
+- **EU AI Act**: https://eur-lex.europa.eu/eli/reg/2023/1230/oj
+- **Interpretable ML Book**: https://christophm.github.io/interpretable-ml-book/

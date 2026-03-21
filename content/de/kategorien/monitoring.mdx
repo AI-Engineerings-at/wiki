@@ -1,0 +1,408 @@
+---
+title: "Monitoring: Grafana, Prometheus, Uptime Kuma & Alternativen"
+date: 2026-03-21
+summary: "Übersicht von Monitoring-Tools für KI-Infrastruktur. Was du messen solltest, welche Tools geeignet sind."
+tags: ["Monitoring", "Observability", "Grafana", "Prometheus", "Uptime"]
+author: "AI Engineering"
+---
+
+# Monitoring: Infrastruktur & AI-Workloads
+
+Du brauchst zu wissen: Läuft es? Ist es schnell? Wo ist der Engpass? Diese Seite zeigt dir Monitoring-Tools und was du bei AI-Workloads tracken musst.
+
+## Das Monitoring-Stack-Paradigma
+
+```
+Metriken sammeln (Prometheus)
+       ↓
+Visualisieren (Grafana)
+       ↓
+Alarmieren (Alertmanager)
+```
+
+Das ist der Standard für Production AI Workloads.
+
+---
+
+## Self-Hosted Monitoring Stack
+
+### Grafana + Prometheus (das Standardpaar)
+
+| Aspekt | Detail |
+|--------|--------|
+| **Kosten** | Kostenlos (Open Source) |
+| **Deployment** | Docker Compose (15min) |
+| **Metriken-Quelle** | Prometheus (scraping) oder Push (Pushgateway) |
+| **Retention** | Prometheus: 15d default (konfigurierbar) |
+| **Skalierbarkeit** | Bis ~1M metrics/min single-instance |
+| **DSGVO** | ✅ Komplett lokal |
+
+**Was Prometheus sammelt:**
+- CPU, RAM, Disk (via Node Exporter)
+- Docker Container (via cAdvisor)
+- Applikations-Metriken (via Prometheus Client Libraries)
+- HTTP Requests, Errors, Latenz
+
+**Was Grafana zeigt:**
+- Live Dashboards
+- Historical Trends
+- Alerting Rules
+- Custom Visualizations
+
+**Beispiel-Setup:**
+```yaml
+services:
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+```
+
+**Stärken:**
+- Kostenlos, Open Source, keine Limits
+- Sehr zuverlässig (seit 10+ Jahren im Production)
+- Riesen Ecosystem (1000+ Exporters für Datenquellen)
+- DSGVO-konform (alles lokal)
+
+**Schwächen:**
+- Selbst betreiben erforderlich (Backup, Updates)
+- Steile Lernkurve für PromQL (Query-Language)
+- Keine "AI-KI" Integration out-of-the-box
+
+**Best for:** Teams mit Ops-Erfahrung. Production AI. Kostenoptimiert.
+
+---
+
+### Uptime Kuma (einfaches Uptime-Monitoring)
+
+| Aspekt | Detail |
+|--------|--------|
+| **Kosten** | Kostenlos (Open Source) |
+| **Was es tut** | Prüft ob Services alive sind (HTTP, TCP, Ping) |
+| **Retention** | Beliebig (SQLite lokal) |
+| **Alerts** | Email, Slack, Telegram, Discord |
+| **Self-Hosted** | Docker (2min) |
+| **UI** | Modern, Einsteigerfreundlich |
+
+**Beispiel-Setup:**
+```yaml
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./uptime-kuma-data:/app/data
+```
+
+**Was du monitoren solltest:**
+1. n8n Workflow-Engine (http://localhost:5678/health)
+2. Ollama LLM Server (http://localhost:11434/api/tags)
+3. Download-Issuer (http://localhost:3002/health)
+4. PostgreSQL (TCP Port 5432)
+5. Deine API (HTTP 200 Response)
+
+**Stärken:**
+- Super einsteigerfreundlich
+- Perfekt für "ist es up?" Checks
+- Schnell deployed
+- Nice Status-Page für Kunden (public)
+
+**Schwächen:**
+- Nur Uptime, keine Performance-Metriken
+- Nicht für tiefe Analyse (braucht Grafana daneben)
+
+**Best for:** Kleine Teams. Schnelle "is it down?" Alerts.
+
+---
+
+## Cloud-Alternativen
+
+### Datadog (Full Stack Observability)
+
+| Aspekt | Detail |
+|--------|--------|
+| **Kosten** | $15-30 pro Host/Monat |
+| **Vorteile** | Alles in einem: Metrics, Logs, Traces, APM |
+| **DSGVO** | ⚠️ USA-Verarbeitung (Datadog war schwierig mit DSGVO früher) |
+| **Skalierung** | Enterprise-ready |
+
+**Wann:** Wenn dein Unternehmen Budget hat und DSGVO nicht kritisch.
+
+---
+
+### New Relic (APM-fokussiert)
+
+| Aspekt | Detail |
+|--------|--------|
+| **Kosten** | Ingest-basiert (~$0.30 per GB) |
+| **Vorteile** | Besonders gut für Application Performance Monitoring |
+| **DSGVO** | ⚠️ Ähnliche Lage wie Datadog |
+
+**Wann:** Application Performance ist Kernfrage. Budget verfügbar.
+
+---
+
+### Splunk (Enterprise, aber teuer)
+
+| Aspekt | Detail |
+|--------|--------|
+| **Kosten** | $5000+/Monat (Einstieg) |
+| **Vorteile** | Powerful Log Analysis, Security |
+| **DSGVO** | ⚠️ Problematisch |
+
+**Wann:** Enterprise-Umgebung mit großem Budget.
+
+---
+
+## Was du bei AI-Workloads messen solltest
+
+### Für LLM-Inference (Ollama, vLLM)
+
+```
+Latenz (ms):
+  - Time to First Token (TTFT)
+  - Time Per Output Token (TPOT)
+  - End-to-End latency
+
+Throughput:
+  - Tokens/second
+  - Requests/second
+  - Queue length
+
+Resource:
+  - GPU Utilization (%)
+  - GPU Memory (MB)
+  - CPU Load
+  - RAM Utilization
+
+Quality:
+  - Error Rate (%)
+  - Cache Hit Rate (KV-Cache)
+  - Model Load Time (ms)
+```
+
+**Prometheus-Metriken (Ollama):**
+```
+http://localhost:11434/api/pull    # Wartet bis Model lokal
+http://localhost:11434/metrics     # Prometheus-Format
+```
+
+**Grafana Dashboard:** "Ollama Dashboard" (verfügbar auf Grafana Cloud Share).
+
+---
+
+### Für Workflow-Engines (n8n)
+
+```
+Executions:
+  - Running (Aktuell ausgeführt)
+  - Completed (Erfolg)
+  - Failed (Fehler)
+  - Execution Time (ms)
+
+Errors:
+  - Error Rate (%)
+  - Most Common Errors
+  - Error Types (Timeout, Auth, Network)
+
+Workflow Health:
+  - Avg Duration per Workflow
+  - Success Rate per Workflow
+  - Node-Level Errors
+```
+
+**n8n hat native Metriken:**
+- `/api/workflows` (REST API)
+- `/api/executions` (Query Execution History)
+- Prometheus Export: via Community Node
+
+---
+
+### Für APIs & Services
+
+```
+HTTP Metrics:
+  - Request Count (by method, status)
+  - Response Time (p50, p95, p99)
+  - Error Rate (4xx, 5xx)
+  - Throughput (requests/sec)
+
+Business Metrics:
+  - Active Users
+  - API Key Usage
+  - Token Consumption (wenn LLM-API)
+  - Revenue Impact (Errors vs. Downtime Cost)
+```
+
+---
+
+## Prometheus Exporters (was sammelt)
+
+| Exporter | Was es tut | Port | Einsatz |
+|----------|-----------|------|---------|
+| **Node Exporter** | CPU, RAM, Disk, Network | 9100 | Every Server |
+| **cAdvisor** | Docker Container Stats | 8080 | Docker Hosts |
+| **PostgreSQL Exporter** | DB Performance | 9187 | n8n DB |
+| **Redis Exporter** | Cache Stats | 9121 | Falls du Redis nutzt |
+| **Blackbox Exporter** | HTTP/TCP/ICMP Checks | 9115 | External Uptime |
+| **Process Exporter** | Individual Process Stats | 9256 | App-Level |
+
+**Einfach deployen:**
+```yaml
+node-exporter:
+  image: prom/node-exporter
+  ports:
+    - "9100:9100"
+  command:
+    - '--path.rootfs=/host'
+  volumes:
+    - /:/host:ro
+```
+
+---
+
+## Alert Rules (was sollte piepen?)
+
+### Kritisch (sofort notify)
+
+```yaml
+- alert: ServiceDown
+  expr: up{job="ollama"} == 0
+  for: 1m
+  action: PagerDuty
+
+- alert: HighErrorRate
+  expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
+  for: 5m
+  action: Slack #alerts
+
+- alert: GPUOutOfMemory
+  expr: gpu_memory_used_bytes > gpu_memory_total_bytes * 0.95
+  for: 2m
+  action: Slack #alerts
+```
+
+### Warnung (täglich digest)
+
+```yaml
+- alert: HighLatency
+  expr: http_request_duration_seconds_p95 > 2
+  for: 10m
+  action: Daily Report
+
+- alert: DiskSpaceLow
+  expr: node_filesystem_avail_bytes < node_filesystem_size_bytes * 0.1
+  for: 1h
+  action: Daily Report
+```
+
+---
+
+## Retention & Speicher
+
+| Szenario | Metriken/Min | Storage/7d | Grafana-Fenster |
+|----------|---|---|---|
+| Dev Server (1-2 Systeme) | 10k | ~100MB | 7 Tage |
+| Staging (10 Systeme) | 50k | ~500MB | 30 Tage |
+| Production (50+ Systeme) | 500k+ | ~5GB | 90 Tage |
+
+**Speicher sparen:**
+```yaml
+# prometheus.yml
+global:
+  scrape_interval: 60s      # von default 15s
+  retention_time: 15d       # Lokal kurz halten
+```
+
+Langzeit-Archiv: Externe Tools (Thanos, InfluxDB).
+
+---
+
+## Alerting-Kanäle
+
+| Kanal | Setup | Best for |
+|-------|-------|----------|
+| **Slack** | Webhook (2min) | Team Notifications |
+| **Email** | SMTP | Formal, Audit Trail |
+| **Discord** | Webhook | Tech Team |
+| **Telegram** | Bot Token | Mobile Alerts |
+| **PagerDuty** | Integration | On-Call Escalation |
+
+**Einfaches Beispiel:**
+```yaml
+alertmanager:
+  receivers:
+    - name: slack
+      slack_configs:
+        - api_url: https://hooks.slack.com/services/YOUR/WEBHOOK
+          channel: '#alerts'
+```
+
+---
+
+## Dashboard-Best-Practices
+
+### Für den CEO (High-Level)
+- Uptime % (aktuell, 30d, 90d)
+- Error Rate (%)
+- Average Response Time
+
+### Für Ops-Team (Debugging)
+- Individual Service Status
+- Resource Utilization
+- Error Logs (drilldown-fähig)
+- Node Performance (CPU, Memory)
+
+### Für AI-Team (Workload-Tuning)
+- LLM Latency Distribution
+- Token/s Throughput
+- GPU Utilization & Memory
+- Queue Length
+
+---
+
+## Checkliste: Monitoring Setup
+
+**Minimum (kostenlos, 1h Setup):**
+- [ ] Uptime Kuma deployed
+- [ ] 5 kritische Services hinzugefügt
+- [ ] Slack-Integration aktiviert
+- [ ] Status-Page öffentlich (für Kunden)
+
+**Standard (kostenlos, 4h Setup):**
+- [ ] Prometheus + Grafana deployed
+- [ ] Node Exporter + cAdvisor active
+- [ ] 3 Dashboards erstellt
+- [ ] 5 Alert Rules aktiv
+- [ ] Daily Digest in Slack
+
+**Production (kostenlos, 2 Tage):**
+- [ ] Prometheus Federation (für Scale)
+- [ ] PostgreSQL Exporter (DB Health)
+- [ ] Custom App Metrics (Prometheus Client)
+- [ ] PagerDuty Integration
+- [ ] Dokumentierte Runbooks (was tun bei Alert X?)
+- [ ] Quarterly Disaster Recovery Test
+
+---
+
+Sources:
+- [Prometheus Official Docs](https://prometheus.io/docs/)
+- [Grafana Dashboards](https://grafana.com/grafana/dashboards/)
+- [Uptime Kuma GitHub](https://github.com/louislam/uptime-kuma)
+- [Datadog vs New Relic 2026](https://www.techi.com/datadog-vs-new-relic/)
+
+## Quellen und Links
+
+- [Grafana](https://github.com/grafana/grafana)
+- [Prometheus](https://github.com/prometheus/prometheus)

@@ -1,0 +1,522 @@
+---
+title: Model Context Protocol (MCP)
+date: 2026-03-21
+summary: Komplette Anleitung zum Model Context Protocol - Architektur, MCP-Server bauen, Registry, Integration in Claude Code und Claude Desktop
+tags: [mcp, integration, protocol, tools, resources, context]
+author: AI Engineering
+---
+
+# Model Context Protocol (MCP)
+
+MCP ist ein Standard zum Verbinden von Claude mit externen Services — GitHub, Databases, APIs, dein eigenes Dateisystem. Claude kann dann direkt damit arbeiten.
+
+## Was ist MCP?
+
+MCP ist ein **Client-Server Protokoll** auf Basis von JSON-RPC 2.0. Es läuft zwischen:
+
+```
+Claude ←→ MCP Client ←→ Transport ←→ MCP Server ←→ (Service)
+```
+
+**Beispiel:**
+```
+Claude: "Gib mir alle offenen Issues"
+↓
+MCP Client (Claude Desktop)
+↓
+Kommuniziert via stdio/HTTP mit:
+↓
+GitHub MCP Server
+↓
+Connectet zu: api.github.com
+↓
+Returnt: JSON mit Issues
+```
+
+## Core Concepts
+
+### 1. Tools
+Tools sind Funktionen die der MCP Server bereitstellt.
+
+```json
+{
+  "name": "read_file",
+  "description": "Liest eine Datei",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "path": {"type": "string"}
+    },
+    "required": ["path"]
+  }
+}
+```
+
+Claude kann `read_file(path="/src/main.py")` aufrufen.
+
+### 2. Resources
+Resources sind Daten-Quellen — Dateien, Datenbank-Einträge, Web-Inhalte.
+
+```json
+{
+  "uri": "file:///home/user/project/README.md",
+  "name": "Project README",
+  "description": "Main project documentation",
+  "mimeType": "text/markdown"
+}
+```
+
+Claude kann Resources auflisten und lesen.
+
+### 3. Prompts
+Prompts sind vordefinierte Befehle für den MCP Server.
+
+```json
+{
+  "name": "analyze_performance",
+  "description": "Analysiere Performance eines Dienstes",
+  "arguments": [
+    {"name": "service", "description": "Service-Name"}
+  ]
+}
+```
+
+Claude kann `analyze_performance(service="database")` aufrufen.
+
+### 4. Sampling
+Der MCP Server kann Claude um Antworten fragen — z.B. um User-Input zu bekommen.
+
+```python
+response = client.request_sampling(
+    prompt="Sollte ich diese PR mergen?",
+    messages=[...]
+)
+```
+
+## MCP Server bauen
+
+### Mit FastMCP (Python — einfachste Methode)
+
+```bash
+pip install fastmcp
+```
+
+```python
+import fastmcp
+
+server = fastmcp.Server("my-server")
+
+@server.tool()
+def read_file(path: str) -> str:
+    """Liest eine Datei"""
+    with open(path, 'r') as f:
+        return f.read()
+
+@server.resource("file://{path}")
+def get_resource(path: str) -> str:
+    """Liefert eine Datei als Resource"""
+    return read_file(path)
+
+if __name__ == "__main__":
+    server.run()
+```
+
+Das startet automatisch auf stdio (stdin/stdout).
+
+### Mit MCP SDK (TypeScript)
+
+```bash
+npm install @modelcontextprotocol/sdk
+```
+
+```typescript
+import {
+  Server,
+  Tool,
+  Resource,
+  TextContent
+} from "@modelcontextprotocol/sdk";
+
+const server = new Server({
+  name: "my-server",
+  version: "1.0.0"
+});
+
+server.setRequestHandler(CallToolRequest, async (request) => {
+  if (request.params.name === "read_file") {
+    const { path } = request.params.arguments;
+    const content = await fs.readFile(path, "utf-8");
+    return {
+      content: [{ type: "text", text: content }]
+    };
+  }
+});
+
+server.run();
+```
+
+## Transport Types
+
+### 1. stdio (lokal)
+```json
+{
+  "command": "python",
+  "args": ["/path/to/server.py"]
+}
+```
+
+Server läuft als Child-Process. I/O über stdin/stdout.
+
+**Vorteil:** Einfach, keine Network-Config nötig.
+**Nachteil:** NUR lokal.
+
+### 2. SSE (Server-Sent Events — HTTP)
+```json
+{
+  "url": "http://localhost:3000/sse"
+}
+```
+
+Server läuft als HTTP-Service. Claude connected über HTTP.
+
+**Vorteil:** Remote möglich, einfach zu deployen.
+**Nachteil:** Braucht HTTP-Server, Firewall-Regeln.
+
+### 3. Streamable HTTP (duplex)
+```json
+{
+  "url": "http://localhost:3000",
+  "type": "streamable"
+}
+```
+
+Vollduplexkommunikation über HTTP. Für komplexe Szenarien.
+
+## MCP Registry
+
+Die **MCP Registry** (registry.anthropic.com) listet öffentliche MCP Server.
+
+### Populäre MCP Server
+
+| Name | Beschreibung | Typ |
+|------|---|---|
+| **Filesystem** | Dateien lesen/schreiben | stdio |
+| **GitHub** | Issues, PRs, Code lesen | HTTP |
+| **Slack** | Messages, Channels | HTTP |
+| **Notion** | Notion-Datenbanken | HTTP |
+| **PostgreSQL** | SQL Queries | stdio |
+| **Kubernetes** | kubectl Befehle | stdio |
+
+### Einen Server registrieren
+```bash
+# 1. Repository mit README
+git init my-mcp-server
+echo "# My MCP Server" > README.md
+
+# 2. package.json mit MCP metadata
+{
+  "name": "@myorg/mcp-server",
+  "mcp": {
+    "version": "1.0.0",
+    "tools": [...],
+    "resources": [...]
+  }
+}
+
+# 3. zu Registry hinzufügen
+# → anthropic.com/mcp/submit
+```
+
+## Integration in Claude Code
+
+In `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "node",
+      "args": ["~/.mcp-servers/filesystem/index.js"]
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_..."
+      }
+    },
+    "myserver": {
+      "command": "python",
+      "args": ["${HOME}/my-mcp-server/server.py"]
+    }
+  }
+}
+```
+
+Nach Änderung:
+```bash
+claude /doctor
+# Zeigt: "MCP connections: 3 ✓"
+```
+
+## Integration in Claude Desktop
+
+In `claude_desktop_config.json` (im config-Verzeichnis):
+
+**macOS:**
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_..."
+      }
+    }
+  }
+}
+```
+
+Pfad: `~/Library/Application\ Support/Claude/claude_desktop_config.json`
+
+**Windows:**
+```
+C:\Users\<username>\AppData\Local\Claude\claude_desktop_config.json
+```
+
+**Linux:**
+```
+~/.config/Claude/claude_desktop_config.json
+```
+
+Nach Änderung: Claude Desktop neu starten.
+
+## Praktische Beispiele
+
+### 1. Eigener Datenbank-Server
+
+```python
+# db_server.py
+import fastmcp
+import sqlite3
+
+server = fastmcp.Server("database-server")
+
+@server.tool()
+def query_db(sql: str) -> str:
+    """Führt SQL aus"""
+    conn = sqlite3.connect("/home/user/data.db")
+    cursor = conn.cursor()
+    cursor.execute(sql)
+    return str(cursor.fetchall())
+
+server.run()
+```
+
+`.mcp.json`:
+```json
+{
+  "mcpServers": {
+    "database": {
+      "command": "python",
+      "args": ["/path/to/db_server.py"]
+    }
+  }
+}
+```
+
+Jetzt kann Claude SQL-Queries direkt ausführen.
+
+### 2. GitHub-Integration für PRs
+
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_xyz123"
+      }
+    }
+  }
+}
+```
+
+Dann:
+```
+Claude: "Gib mir alle offenen PRs"
+→ MCP: Connectet zu GitHub
+→ Listet alle PRs auf
+```
+
+### 3. Slack-Integration für Notifications
+
+```json
+{
+  "mcpServers": {
+    "slack": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-slack"],
+      "env": {
+        "SLACK_BOT_TOKEN": "xoxb-..."
+      }
+    }
+  }
+}
+```
+
+Dann:
+```
+Claude: "Poste eine Nachricht im #deployments Channel"
+→ MCP: Connectet zu Slack
+→ Poste Message
+```
+
+## Sicherheit
+
+### Token Management
+```json
+{
+  "mcpServers": {
+    "github": {
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"  // from environment
+      }
+    }
+  }
+}
+```
+
+**NIE** direkt in config hardcoden.
+
+### Permissions
+Ein MCP Server sollte nur die Rechte haben die er braucht:
+
+```python
+# ✓ RICHTIG: Token mit nur read:repo Scope
+# ✗ FALSCH: Full admin Token
+```
+
+### Whitelisting
+In `.mcp.json` nur vertrauenswürdige Server eintragen:
+
+```json
+{
+  "mcpServers": {
+    "my-server": { ... },    // ✓ selbst gebaut
+    "github": { ... },       // ✓ official, von Anthropic
+    // NICHT: random-server von GitHub
+  }
+}
+```
+
+## Debugging
+
+### Server-Logs prüfen
+
+Claude Code:
+```bash
+claude /doctor
+# Zeigt MCP connection status
+```
+
+Claude Desktop:
+Settings → Logs → suche "mcp" Einträge.
+
+### Manuell testen
+
+```bash
+# Starte Server
+python ~/my-mcp-server/server.py
+
+# In anderem Terminal:
+# Sende Test-Request
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | python ~/my-mcp-server/server.py
+```
+
+## Limits
+
+| Limit | Wert | Grund |
+|-------|------|-------|
+| Max Tool-Größe | 100KB | Timeout-Prevention |
+| Max Resource-Größe | 10MB | Memory limit |
+| Request Timeout | 30s | Network reliability |
+| Max concurrent Tools | 10 | Parallelization limit |
+
+## Best Practices
+
+### 1. Aussagekräftige Tool-Namen
+```python
+# ✓ RICHTIG
+@server.tool()
+def read_github_issue(issue_number: int) -> str:
+    pass
+
+# ✗ FALSCH
+@server.tool()
+def tool_1() -> str:
+    pass
+```
+
+### 2. Fehlerbehandlung
+```python
+@server.tool()
+def query_db(sql: str) -> str:
+    try:
+        return execute_sql(sql)
+    except Exception as e:
+        return f"ERROR: {e}"  # Claude sieht den Fehler
+```
+
+### 3. Dokumentation
+```python
+@server.tool()
+def create_issue(title: str, body: str) -> str:
+    """
+    Erstellt ein GitHub Issue
+
+    Args:
+        title: Titel des Issues (max 100 chars)
+        body: Beschreibung (Markdown-formatiert)
+
+    Returns:
+        Issue URL
+    """
+    pass
+```
+
+### 4. Resource-Caching
+```python
+# Wenn Daten sich nicht häufig ändern:
+@server.resource("cache://data/{id}")
+def get_cached_data(id: str) -> str:
+    # Daten werden gecacht — schneller
+    pass
+```
+
+## Checkliste
+
+- [ ] MCP-Konzept verstanden (Tools, Resources, Prompts)
+- [ ] Erster MCP Server lokal gebaut (Python FastMCP oder TS SDK)
+- [ ] Server lokal getestet (stdio funktioniert)
+- [ ] `.mcp.json` / `claude_desktop_config.json` konfiguriert
+- [ ] MCP Server in Claude Code/Desktop aktiviert
+- [ ] `/doctor` zeigt grüne Verbindung
+- [ ] Mindestens 1 Tool erfolgreich genutzt
+- [ ] Token/Credentials über Environment gespeichert (NIE hardcoded)
+- [ ] Error-Handling im Server vorhanden
+
+## Quellen und Links
+
+- [MCP Documentation](https://code.claude.com/docs/en/mcp)
+- [MCP Specification](https://github.com/modelcontextprotocol/specification)
+- [MCP Servers](https://github.com/modelcontextprotocol/servers)
+- [Model Context Protocol](https://modelcontextprotocol.io)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

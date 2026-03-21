@@ -1,0 +1,63 @@
+---
+title: Agent Frameworks — Vergleich
+date: 2026-03-21
+summary: CrewAI vs AutoGen vs LangGraph vs Semantic Kernel. Architektur-Muster, Multi-Agent-Support, Tool-Integration.
+tags: [agent, multi-agent, framework, crewai, autogen]
+author: AI Engineering
+---
+
+# Agent Frameworks — Technischer Vergleich
+
+| Framework | Language | Multi-Agent | Tool Support | Community | Production-Ready |
+|-----------|----------|-------------|--------------|-----------|-----------------|
+| **CrewAI** | Python | ✅ Native | ✅ Integrations | 🟢 Growing | ✅ Ja |
+| **AutoGen** | Python | ✅ Advanced | ✅ Ja | 🟡 Microsoft | ✅ Ja |
+| **LangGraph** | Python | ✅ Graph-based | ✅ Ja | 🟢 Growing | ✅ Ja |
+| **Semantic Kernel** | C# + Python | ✅ Plugins | ✅ Ja | 🟡 Microsoft | ✅ Ja |
+
+## CrewAI
+
+Best für: Rapid prototyping von Multi-Agent-Teams
+
+```python
+from crewai import Agent, Task, Crew
+
+writer = Agent(
+    role="Writer",
+    goal="Write quality content",
+    llm="gpt-4"
+)
+
+task = Task(
+    description="Write blog post about AI",
+    agent=writer
+)
+
+crew = Crew(agents=[writer], tasks=[task])
+result = crew.kickoff()
+```
+
+## AutoGen
+
+Best für: Conversation-basierte Multi-Agent-Systeme
+
+Architektur: UserProxy ↔ ConversableAgent
+
+## LangGraph
+
+Best für: Complex workflow graphs mit Kontrolle
+
+State Machine Ansatz mit Zustandsübergängen.
+
+## Semantic Kernel
+
+Best für: Enterprise (Microsoft .NET Integration)
+
+Plugins, Skills, Connectors als abstraktion Layer.
+
+## Empfehlung
+
+- **Schneller Prototyp**: CrewAI
+- **Conversation-Agents**: AutoGen
+- **Complex Workflows**: LangGraph
+- **Enterprise .NET**: Semantic Kernel

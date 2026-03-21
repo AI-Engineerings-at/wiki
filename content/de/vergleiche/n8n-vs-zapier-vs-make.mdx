@@ -1,0 +1,571 @@
+---
+title: n8n vs. Zapier vs. Make — Self-Hosted vs Cloud Workflow Automation 2026
+date: 2026-03-21
+summary: Umfassender Vergleich der drei Workflow-Automationsplattformen mit Fokus auf Preismodelle, Features, Self-Hosting, DSGVO-Compliance, KI-Integration und echte Kostenszenarien für KMUs.
+tags: [automation, n8n, zapier, make, workflow-automation, integration, kmu, dsgvo]
+author: AI Engineering
+---
+
+# n8n vs. Zapier vs. Make — Self-Hosted vs Cloud Workflow Automation 2026
+
+Workflow-Automation ist das Fundament moderner KMU-Infrastruktur. Dieser Leitfaden hilft dir zu verstehen, welche Plattform für deine spezifische Situation richtig ist.
+
+## Die drei Abrechnungsmodelle verstehen
+
+Die Plattformen berechnen KOMPLETT unterschiedlich. Das ist der wichtigste Unterschied.
+
+### Zapier: Task-basiertes Abrechnungsmodell
+
+**Ein Task = Eine Aktion im Workflow**
+
+Ein einzelner Workflow mit Trigger + 2 Bedingungen + 2 Aktionen = bis zu 5 Tasks pro Ausführung.
+
+```
+Beispiel:
+1. Trigger: Neuer Lead in Salesforce = 1 Task
+2. Bedingung: IF Lead-Wert > $5000 = 1 Task
+3. Aktion: Erstelle in Google Sheets = 1 Task
+4. Aktion: Sende Slack = 1 Task
+─────────────────────────────────────
+Total pro Ausführung: 4 Tasks
+
+Bei 250 Leads/Monat = 1.000 Tasks/Monat
+Dieser einfache Workflow kostet dich bereits $29.99/Monat (Starter-Plan)
+```
+
+**Preisstruktur:**
+
+| Plan | Tasks/Monat | Preis | Best For |
+|------|-------------|-------|----------|
+| **Free** | 100 | $0 | Hobby, Test |
+| **Starter** | 750 | $29.99 | Kleine Teams, < 200 Workflows |
+| **Professional** | 2.000 | $69.99 | KMU, 5-10 Workflows |
+| **Team** | 50.000 | $799+/Monat | Enterprise |
+
+**Die Falle bei Zapier:**
+- Jede Verzweigung kostet Tokens
+- Fehlerbehandlung = Extra Tasks
+- Datentransformation = Extra Tasks
+- Ein Workflow mit komplexer Logik kann leicht 10+ Tasks pro Run verbrauchen
+
+### Make (ehemals Integromat): Operation-basiert
+
+**Eine Operation = Ein API-Call oder Daten-Transformation**
+
+Webhooks kosten NICHTS. Nur echte Operationen.
+
+```
+Gleicher Workflow:
+1. Trigger: Webhook = 0 Operations
+2. Parse JSON = 1 Operation
+3. HTTP zu Salesforce = 1 Operation
+4. Bedingung auswerten = 0 Operations
+5. Erstelle in Google Sheets = 1 Operation
+6. Sende Slack = 1 Operation
+─────────────────────────────────────
+Total pro Ausführung: 4 Operations
+
+Bei 250 Ausführungen/Monat = 1.000 Operations/Monat
+Kostet: Kostenlos (Free Plan hat 1.000 Ops)
+```
+
+**Preisstruktur:**
+
+| Plan | Operations/Monat | Preis | Best For |
+|------|------------------|-------|----------|
+| **Free** | 1.000 | €0 | Hobby, Testing |
+| **Basic** | 10.000 | €9 | Freelancer, kleine Automationen |
+| **Standard** | 100.000 | €29 | KMU mit mehreren Workflows |
+| **Pro** | 1.000.000 | €99 | Scale-up |
+
+**Vorteil:** Webhook-basierte Automationen sind praktisch kostenlos.
+
+### n8n: Execution-basiert (selbstgehosted kostenlos)
+
+**Eine Execution = Ein Workflow-Run, egal wie viele Nodes**
+
+```
+Gleicher Workflow:
+- 1 Execution = kompletter Workflow unabhängig von Node-Anzahl
+- 250 Leads/Monat = 250 Executions
+
+Kosten bei Self-Hosted: €0
+Kosten bei Cloud-Free: €0 (1.000 Executions/Monat gratis)
+```
+
+**Preisstruktur:**
+
+| Option | Kosten | Executions | Best For |
+|--------|--------|-----------|----------|
+| **Self-Hosted (Docker)** | €0 | Unbegrenzt | Tech-Teams, Privacy |
+| **Cloud Free** | €0 | 1.000 | Testing |
+| **Cloud Pro** | €22/Monat | 2.500 | Kleine Production |
+| **Cloud Business** | €110/Monat | Unbegrenzt | Enterprise |
+
+## Echte Kostenszenarien: Was zahlst du wirklich?
+
+### Szenario 1: Einfacher Salesforce → Sheets Workflow
+
+**Anforderung:**
+- Trigger: Lead in Salesforce
+- Aktion: In Google Sheets hinzufügen
+- Frequenz: 100 Leads/Monat
+
+**Zapier:**
+- 100 Leads × 2 Tasks (Trigger + Aktion) = 200 Tasks
+- Free Plan (100 Tasks) reicht NICHT
+- Starter Plan: **$29.99/Monat**
+
+**Make:**
+- 100 Leads × 1 Operation = 100 Operations
+- Free Plan (1.000 Ops) reicht locker
+- Kosten: **€0/Monat**
+
+**n8n Cloud:**
+- 100 Executions
+- Free Plan (1.000 Executions) reicht locker
+- Kosten: **€0/Monat**
+
+**n8n Self-Hosted:**
+- Kosten: **€0/Monat** + einmalig ~€50 Server-Setup
+
+**Gewinner:** Make oder n8n (beide kostenlos). Zapier ist 30x teurer für diesen Use Case!
+
+### Szenario 2: KMU mit mehreren Workflows (5.000 Executions/Monat)
+
+**Anforderung:**
+- 10 Workflows
+- 5.000 Executions/Monat
+- Durchschnitt 4 Nodes pro Workflow (einige mit Branching)
+- = ~15.000-20.000 Task-Äquivalente bei Zapier
+
+**Zapier:**
+- 20.000 Tasks/Monat
+- Professional Plan (2.000) reicht NICHT
+- Muss Team Plan nehmen: **€799+/Monat**
+
+**Make:**
+- 5.000 × durchschnittliche Operations
+- Realistically: ~7.500-10.000 Operations/Monat
+- Standard Plan (100.000): **€29/Monat**
+
+**n8n Cloud:**
+- 5.000 Executions direkt
+- Cloud Pro (2.500): **€22/Monat** + überschreitet dann
+- Total: ~€40-50/Monat
+
+**n8n Self-Hosted:**
+- Server-Kosten: €10-20/Monat (Contabo, Hetzner)
+- Wartung: 1h/Monat (€20-50)
+- Total: **€30-70/Monat**
+
+**Gewinner:** Make (€29) oder n8n Self-Hosted (€30-70). **Zapier kostet 15x mehr!**
+
+### Szenario 3: Enterprise mit High-Volume
+
+**Anforderung:**
+- 50+ Workflows
+- 100.000 Executions/Monat
+- Komplexe Logik (viele Branches, Error Handling)
+
+**Zapier:**
+- 200.000+ Tasks geschätzt
+- Team Plan (50.000) reicht nicht
+- Enterprise (Custom): **€2.000-5.000+/Monat**
+
+**Make:**
+- 100.000-150.000 Operations
+- Pro Plan (1.000.000): **€99/Monat**
+
+**n8n Self-Hosted:**
+- Hardware: €100-500/Monat (dedicated Server)
+- DevOps Wartung: 5h/Monat (€200+)
+- Total: **€300-700/Monat**
+
+**Gewinner:** Make (€99). Zapier unmöglich teuer.
+
+## Feature-Vergleich: Was kannst du wirklich machen?
+
+### Nodes/Module verfügbar
+
+| Kategorie | n8n | Make | Zapier |
+|-----------|-----|------|--------|
+| **Anzahl der Integrationen** | 500+ | 1.000+ | 7.000+ |
+| **Eigener Code** | JS + Python | Expressions nur | Webhook + Formatter |
+| **Webhooks** | Unbegrenzt, kostenlos | Unbegrenzt, kostenlos | Pro Plan nur |
+| **Polling Trigger** | Ja | Ja | Ja, aber Task-kosten |
+| **Error Handling** | Robust | Gut | Basic |
+| **Conditional Routing** | Mit If-Node | Mit Router | Mit Filter |
+| **Data Storage** | Unbegrenzt (Self) | 5GB | Begrenzt pro Plan |
+| **Custom Code Nodes** | ✅ JavaScript/Python | ❌ Nur Expressions | ❌ Nicht möglich |
+| **AI Integration** | ✅ Nativ (Claude, OpenAI, Ollama) | ✅ Webhooks | ✅ OpenAI Plugin |
+
+### Praktischer Vergleich: Komplexer Workflow
+
+**Szenario:** Email empfangen → Klassifizieren (AI) → Routing basierend auf Klassifikation → Verschiedene Output-Kanäle
+
+**Zapier-Architektur:**
+```
+Trigger (Email): 1 Task
+Parse Email: 1 Task
+Call OpenAI: 1 Task
+Formatter für Response: 1 Task
+IF Blocked → Google Forms: 2 Tasks
+ELSE Bug → GitHub Issue: 2 Tasks
+ELSE Feature → Airtable: 2 Tasks
+─────────────────────────
+Total: ~10 Tasks pro Email
+100 Emails/Monat = 1.000 Tasks = $29.99/Monat (minimum)
+```
+
+**Make-Architektur:**
+```
+Webhook (Email): 0 Operations
+Parse: 1 Operation
+OpenAI Call: 1 Operation
+Router Decision: 0 Operations
+Output A: 1 Operation
+Output B: 1 Operation
+Output C: 1 Operation
+─────────────────────────
+Total: 5 Operations pro Email
+100 Emails/Monat = 500 Ops = Kostenlos (Free Plan hat 1.000)
+```
+
+**n8n-Architektur:**
+```
+Webhook: 0 (kostenlos)
+Parse: 1
+OpenAI: 1
+If-Node: 1
+Routes: 3
+─────────────────────────
+Total: 1 Execution pro Email
+100 Emails/Monat = 100 Executions
+Self-Hosted: €0
+Cloud: €0 (Free Plan)
+```
+
+**Kosten für 100 Emails/Monat:**
+- Zapier: €29.99
+- Make: €0
+- n8n: €0
+
+## DSGVO und Datenschutz
+
+### n8n Self-Hosted (BESTE Option für DSGVO)
+
+✅ **Vollständige Compliance:**
+- Alle Daten bleiben auf deiner Infrastruktur
+- NIEMALS zu Dritten übertragen
+- Du hast 100% Kontrolle über Verschlüsselung
+- Keine Speicherung bei n8n selbst
+
+✅ **Praktisch:**
+```
+Docker auf lokalen Server:
+├── Deine PostgreSQL (nur deine Daten)
+├── n8n Core (Workflow Logic)
+├── Redis (Queue Management)
+└── Alle Daten fließen LOKAL
+```
+
+⚠️ **Anforderung:** Du brauchst einen Linux-Server (€10-50/Monat).
+
+### Make (Mittelmäßig für DSGVO)
+
+⚠️ **Probleme:**
+- Daten fließen durch Make-Server (USA/EU-Mix)
+- Make speichert Logs (für Debugging)
+- Ohne Enterprise-Plan: keine explizite EU Residency
+
+✅ **Lösungen:**
+- EU-DPA-Zusatz für €50-100/Monat
+- Business Plan: EU-Hosting möglich
+- Besser als Zapier, aber immer noch nicht ideal
+
+### Zapier (Schlechteste Option für DSGVO)
+
+❌ **Kritische Probleme:**
+- Alle Daten fließen durch Zapier USA-Server
+- Ohne Enterprise: keine DPA
+- Speicherung in USA (Privacy Shield Fragen)
+- Für Kundendaten: NICHT geeignet
+
+✅ **Nur mit Enterprise-Plan:**
+- Kosten: €2.000+/Monat
+- Komplexe DPA-Verhandlung
+- Immer noch keine EU-Residency Garantie
+
+**DSGVO-Ranking für Kundendaten:**
+1. n8n Self-Hosted (100% konform)
+2. Make mit EU-DPA (75% konform)
+3. n8n Cloud EU (70% konform)
+4. Azure OpenAI (60%, nur bei richtigem Setup)
+5. Zapier Enterprise (50%, sehr komplex)
+6. Standard Zapier/Make Cloud (0%, nicht nutzbar für Kundendaten!)
+
+## KI-Integration: Alle Plattformen
+
+### n8n (BESTE KI-Integration)
+
+```yaml
+Nativ unterstützt:
+- OpenAI (GPT-4o, o3)
+- Claude (Anthropic)
+- Ollama (lokal!)
+- Google Vertex AI
+- Custom HTTP zu beliebigem LLM
+
+Beispiel:
+Claude Node:
+  Input: {{$json.email_body}}
+  Model: claude-opus-4-6
+  Output: {{$json.classified_category}}
+```
+
+**Vorteil:** Du kannst jedes LLM verwenden, inklusive lokaler Modelle.
+
+### Make (Standard KI)
+
+```yaml
+Unterstützt:
+- OpenAI (native)
+- Anthropic (HTTP Workaround)
+- Google Gemini (HTTP)
+- Custom APIs
+
+Beispiel:
+HTTP Module zu Claude:
+  Header: Authorization
+  Body: {model, messages}
+```
+
+**Limitation:** Nicht so nahtlos wie n8n, aber funktioniert.
+
+### Zapier (Begrenzte KI)
+
+```yaml
+Unterstützt:
+- OpenAI (Plugin)
+- Anthropic (als HTTP)
+
+Limitation:
+- Jeder LLM Call = Extra Task-Kosten
+- Keine lokalen Modelle
+```
+
+**Beispiel-Kosten:**
+- 100 Emails mit AI-Klassifizierung
+- 100 OpenAI Calls = 100 Zapier Tasks
+- Plus: Parse + Route + Output = 400+ Tasks
+- = €69.99/Monat (Professional Plan mindestens)
+
+**KI-Integration Ranking:**
+1. n8n (alle LLMs, lokal, transparent)
+2. Make (OpenAI gut, andere HTTP Workaround)
+3. Zapier (nur OpenAI, Task-kosten frustrierend)
+
+## Ökosystem und Integrationen
+
+### Anzahl der Integrationen
+
+| Plattform | Count | Top Apps | Niche Coverage |
+|-----------|-------|----------|-----------------|
+| **Zapier** | 7.000+ | Alle populären | Beste Niche-Apps |
+| **Make** | 1.000+ | Salesforce, Shopify, Figma besser | E-Commerce gut |
+| **n8n** | 500+ | Basis-Apps alle | Erweiterbar via HTTP |
+
+**Die Wahrheit:** Für die TOP 50 Business Apps (Salesforce, HubSpot, Stripe, Google, etc.) haben ALLE drei volle Integration. Die Unterschiede sind bei Nischen-Apps relevant.
+
+**Praktisches Beispiel:**
+- Brauchst du Zapier für Salesforce? Nein, n8n reicht.
+- Brauchst du Zapier für ein Nischen-Tool? Vielleicht, aber wahrscheinlich kannst du auch HTTP verwenden.
+- Brauchst du Zapier für viel Komplexität? NEIN, n8n oder Make sind billiger!
+
+## Self-Hosting Architektur-Vergleich
+
+### n8n Self-Hosted (Empfohlen)
+
+```yaml
+Docker Swarm / Kubernetes:
+├── n8n Container
+│   ├── Workflows (in deiner DB)
+│   ├── Credentials (encrypted)
+│   └── Executions (lokal gespeichert)
+├── PostgreSQL (n8n Datenbank)
+├── Redis (Queue Management)
+└── Deine Firewall (ALLES INNEN)
+```
+
+**Setup-Zeit:** 30 Minuten (Docker Compose)
+**Maintenance:** 1h/Monat (Updates, Monitoring)
+**Kosten:** €10-50 Server + deine Zeit
+**Kapazität:** Unbegrenzt (horizontale Skalierbarkeit)
+
+### Make Self-Hosted (Nicht möglich)
+
+❌ Make bietet kein Self-Hosting an.
+
+### Zapier Self-Hosted (Nicht möglich)
+
+❌ Zapier bietet kein Self-Hosting an.
+
+## Entscheidungsmatrix: Welche Plattform?
+
+### Wähle n8n (Self-Hosted), wenn…
+
+```
+Checkboxes:
+☐ DSGVO/Kundendaten sind kritisch
+☐ Volumen > 5.000 Executions/Monat (ROI für Self-Hosting)
+☐ Team hat Linux/DevOps-Skills
+☐ Budget ist klein, Zeit vorhanden
+☐ Du willst KEINE monatliche SaaS-Abhängigkeit
+☐ Lokale KI-Integration (Ollama) brauchst
+☐ Unbegrenzte Automationen bauen wollen
+```
+
+**Break-even:** ~5.000 Executions/Monat
+
+### Wähle Make, wenn…
+
+```
+Checkboxes:
+☐ Schneller Start ohne Tech-Setup
+☐ Budget zwischen €20-100/Monat
+☐ Volumen: 1.000-100.000 Operations/Monat
+☐ Gutes Visual Routing brauchst
+☐ Make-spezifische Integrationen (Figma, Airtable, etc.)
+☐ DSGVO nicht kritisch (oder mit Enterprise-DPA)
+☐ Cloud-Lösung bevorzugt
+```
+
+**Sweet Spot:** KMU mit moderaten Anforderungen
+
+### Wähle Zapier, wenn…
+
+```
+Checkboxes:
+☐ Absolute Non-Technical User (gar keine DevOps)
+☐ Nur sehr simple Automationen (< 5 Tasks)
+☐ Großes Budget (€500+/Monat) vorhanden
+☐ Brauchst größtes Integrations-Ökosystem
+☐ Enterprise-Support ist Pflicht
+☐ Technisches Setup ist kein Problem (zu teuer dafür)
+```
+
+**Warnung:** Zapier wird schnell teuer bei Komplexität!
+
+## Konkrete Empfehlungen nach Firmengröße
+
+### Startup / Freelancer (< €100/Monat Budget)
+
+**Best:** n8n Cloud Free + später Self-Hosted
+
+```
+Monat 1-3:
+- n8n Cloud Free
+- 1.000 Executions kostenlos
+- Test Workflows
+
+Monat 4+:
+- Self-Hosted auf Contabo (€4/Monat)
+- Unbegrenzt Executions
+- €0 SaaS-Kosten
+```
+
+### KMU / Mid-Market (€100-500/Monat Budget)
+
+**Best:** Make oder n8n Cloud
+
+```
+Option A: Make Standard (€29/Monat)
+- 100.000 Operations
+- Visueller Editor
+- Gutes Ökosystem
+
+Option B: n8n Cloud Pro (€22/Monat) + Self-Hosted Fallback (€20/Monat Server)
+- Anfangen mit Cloud
+- Später zu Self-Hosted skalieren
+- Gesamtkosten ~€50/Monat
+```
+
+### Enterprise (> €500/Monat Budget)
+
+**Best:** n8n Self-Hosted + Make Backup
+
+```
+n8n Self-Hosted:
+- Infrastruktur: €500/Monat
+- DevOps Team: 1-2 FTE
+- Vollständige Kontrolle
+- Unbegrenzte Workflows
+
+Make als Fallback:
+- Pro Plan: €99/Monat
+- Für wenn n8n Down ist
+- Kritische Workflows duplizieren
+```
+
+## Migrationsszenario: Von Zapier zu n8n/Make
+
+**Realistisches Szenario:**
+- 20 Workflows auf Zapier
+- Monatliche Kosten: €300
+- Migration Effort: 1-2 Tage
+
+**n8n Self-Hosted After:**
+- Server: €20/Monat
+- Migration + Setup: 2 Tage (einmalig)
+- Laufende Kosten: €20/Monat (statt €300)
+- **ROI:** 1 Monat Break-Even, danach 90% Kostenersparnis
+
+**Migrations-Schritte:**
+1. Dokumentiere alle 20 Workflows (Zapier → Screenshot)
+2. Setup n8n Self-Hosted (Docker Compose)
+3. Recreate Workflows (1h pro Workflow durchschnittlich)
+4. Test alle Integrations
+5. Schalte Zapier ab
+
+## Fazit und Checkliste
+
+### Schnelle Entscheidungsregel
+
+```
+IF Kundendaten verarbeiten?
+  → n8n Self-Hosted
+
+ELSE IF Budget sehr klein?
+  → n8n Cloud Free
+
+ELSE IF Budget €20-100?
+  → Make
+
+ELSE IF Absolute Non-Technical und Budget unbegrenzt?
+  → Zapier
+
+ELSE:
+  → n8n Self-Hosted
+```
+
+### Final Checklist
+
+- [ ] Geschätzte monatliche Ausführungen / Tasks
+- [ ] Werden Kundendaten verarbeitet?
+- [ ] Hat Team Linux-Knowledge?
+- [ ] Budget verfügbar?
+- [ ] Spezial-Integrationen erforderlich?
+- [ ] Trial für Top 2 Optionen durchführen
+- [ ] Kostenprognose für 12 Monate
+- [ ] Entscheidung treffen und starten
+
+---
+
+**Unsere Empfehlung für die meisten KMUs:** Start mit Make (€29/Monat), migrate später zu n8n Self-Hosted wenn Volumen groß wird. Beste Kostenoptimierung.
+
+## Quellen und Links
+
+- [n8n](https://github.com/n8n-io/n8n)
+- [Zapier](https://zapier.com)
+- [Make](https://www.make.com)

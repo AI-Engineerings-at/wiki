@@ -1,0 +1,86 @@
+---
+title: Quantisierungsformate — Technischer Vergleich
+date: 2026-03-21
+summary: GGUF vs GPTQ vs AWQ vs EXL2 vs BitsAndBytes. Qualität bei verschiedenen Bit-Tiefen, Speed, Kompatibilität, Tool-Support.
+tags: [quantization, gguf, gptq, awq, bitsandbytes]
+author: AI Engineering
+---
+
+# Quantisierungsformate — Detaillierter Vergleich
+
+## Format-Übersicht
+
+| Format | Best Tool | Speicher (7B) | Speed | Qualität | CPU-OK | GPU-OK |
+|--------|-----------|---------------|-------|----------|--------|--------|
+| **GGUF** | LM Studio, Ollama | 3.6GB (q4) | ⭐⭐⭐ | ⭐⭐⭐ | ✅ | ✅ |
+| **GPTQ** | AutoGPTQ, text-gen | 3.5GB (4-bit) | ⭐⭐⭐ | ⭐⭐ | ❌ | ✅ |
+| **AWQ** | AWQ-Quantizer | 3.5GB (4-bit) | ⭐⭐⭐ | ⭐⭐ | ❌ | ✅ |
+| **EXL2** | ExLlamav2 | 2.8GB (3-bit) | ⭐⭐⭐⭐ | ⭐ | ❌ | ✅ |
+| **BNB** | bitsandbytes | Dynamic | ⭐⭐ | ⭐⭐ | ✅ | ✅ |
+
+## GGUF (Best für lokale Deployment)
+
+```
+Größe: 7B Modell
+- q8:    7.0GB (beste Qualität)
+- q6_k:  5.2GB (sehr gut)
+- q5_k:  4.3GB (gut)
+- q4_k:  3.6GB (gut, schnell) ← Standard
+- q3_k:  2.6GB (OK, sehr schnell)
+```
+
+Vorteile:
+- CPU und GPU Support
+- Universell kompatibel
+- Easy zu laden
+
+## GPTQ (Schnell, aber GPU-only)
+
+Besser als GGUF bei GPU-Inference (10-20% schneller)
+
+Nachteil: Nur GPU, größere VRAM-Anforderung beim Laden
+
+## AWQ (Alternative zu GPTQ)
+
+Ähnlich wie GPTQ, etwas schneller in bestimmten Szenarien
+
+## EXL2 (Extrem schnell)
+
+ExLlama V2 Format, beste Speed aber reduzierte Qualität
+
+Best für: API-Server mit hohem Durchsatz
+
+## BitsAndBytes (Flexibel)
+
+4-bit und 8-bit on-the-fly Quantization für Fine-Tuning
+
+```python
+from transformers import AutoModelForCausalLM
+model = AutoModelForCausalLM.from_pretrained(
+    "Qwen/Qwen2.5-7b",
+    load_in_4bit=True
+)
+```
+
+## Entscheidungshilfe
+
+```
+Lokal (LM Studio, Ollama)? → GGUF
+GPU API-Server? → GPTQ oder EXL2
+Fine-Tuning? → BitsAndBytes
+Multi-Format? → GGUF (sicherer Fallback)
+```
+
+## Größen-Referenz (7B Modell)
+
+```
+Vollständig (fp32):      28GB
+fp16:                    14GB
+GGUF q8:                 7.0GB
+GGUF q6_k:               5.2GB
+GGUF q5_k:               4.3GB
+GGUF q4_k (Standard):    3.6GB  ← Empfohlen
+GPTQ 4-bit:              3.5GB
+AWQ 4-bit:               3.5GB
+EXL2 3-bit:              2.8GB
+```

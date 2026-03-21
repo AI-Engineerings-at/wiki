@@ -1,0 +1,340 @@
+---
+title: Claude Code — Model Configuration Reference
+date: 2026-03-21
+summary: Complete documentation of model selection, aliases, effort levels, extended thinking, 1M context, provider configuration, and cost optimization strategies.
+tags: [claude-code, models, configuration, effort, reasoning, context]
+author: "AI Engineering"
+---
+
+# Claude Code — Model Configuration Reference
+
+This page documents how to configure and select models in Claude Code, including aliases, effort levels, extended thinking, and provider configuration.
+
+## Available Models
+
+You can configure either:
+- A **model alias** (short, easy to remember)
+- A **full model name** (specific version)
+
+### Model Aliases
+
+Model aliases provide a convenient way to select model settings without remembering exact version numbers:
+
+| Alias | Behavior |
+|-------|----------|
+| **`default`** | Recommended model depending on your subscription tier |
+| **`sonnet`** | Latest Sonnet model (currently Sonnet 4.6) for daily coding tasks |
+| **`opus`** | Latest Opus model (currently Opus 4.6) for complex reasoning tasks |
+| **`haiku`** | Fast and efficient Haiku model for simple tasks |
+| **`sonnet[1m]`** | Sonnet with 1 million token context window for long sessions |
+| **`opus[1m]`** | Opus with 1 million token context window for long sessions |
+| **`opusplan`** | Special mode: uses `opus` during plan mode, then switches to `sonnet` for execution |
+
+Aliases always point to the latest version. To pin to a specific version, use the full model name (e.g., `claude-opus-4-6`) or set the corresponding environment variable like `ANTHROPIC_DEFAULT_OPUS_MODEL`.
+
+## Setting Your Model
+
+You can configure your model in several ways, listed in order of priority:
+
+1. **During session** — Use `/model <alias|name>` to switch models mid-session
+2. **At startup** — Launch with `claude --model <alias|name>`
+3. **Environment variable** — Set `ANTHROPIC_MODEL=<alias|name>`
+4. **Settings** — Configure permanently in your settings file using the `model` field
+
+**Example usage**:
+
+```bash
+# Start with Opus
+claude --model opus
+
+# Switch to Sonnet during session
+/model sonnet
+
+# Or with extended context
+/model sonnet[1m]
+```
+
+**Example settings file**:
+
+```json
+{
+    "permissions": {
+        ...
+    },
+    "model": "opus"
+}
+```
+
+## Restrict Model Selection
+
+Enterprise administrators can use `availableModels` in [managed or policy settings](/en/tools/claude-code-settings) to restrict which models users can select.
+
+When `availableModels` is set, users cannot switch to models not in the list via `/model`, `--model` flag, Config tool, or `ANTHROPIC_MODEL` environment variable.
+
+```json
+{
+  "availableModels": ["sonnet", "haiku"]
+}
+```
+
+### Default model behavior
+
+The Default option in the model picker is not affected by `availableModels`. It always remains available and represents the system's runtime default based on the user's subscription tier.
+
+Even with `availableModels: []`, users can still use Claude Code with the Default model for their tier.
+
+### Control the model users run on
+
+To fully control the model experience, use `availableModels` together with the `model` setting:
+
+- **availableModels**: restricts what users can switch to
+- **model**: sets the explicit model override, taking precedence over the Default
+
+This example ensures all users run Sonnet 4.6 and can only choose between Sonnet and Haiku:
+
+```json
+{
+  "model": "sonnet",
+  "availableModels": ["sonnet", "haiku"]
+}
+```
+
+### Merge behavior
+
+When `availableModels` is set at multiple levels (user settings and project settings), arrays are merged and deduplicated. To enforce a strict allowlist, set `availableModels` in managed or policy settings which take highest priority.
+
+## Effort Levels
+
+Adaptive reasoning allocates thinking tokens based on task complexity. Three levels persist across sessions; a fourth level `max` is for single use.
+
+### Three Persistent Levels
+
+| Level | Description | Best for |
+|-------|-------------|----------|
+| **low** | Fast and cheap thinking | Simple tasks, lookups, code navigation |
+| **medium** | Balanced thinking (Opus Max default) | Standard development work |
+| **high** | Deep reasoning | Complex problems, architecture design |
+
+### Max Level (One-time Use)
+
+| Level | Description |
+|-------|-------------|
+| **max** | Deepest reasoning with no token constraint, costs more, slower response. Opus 4.6 only. Session-specific, does not persist. |
+
+### Setting Effort
+
+```bash
+# In session
+/effort low
+/effort medium
+/effort high
+/effort max       # Opus 4.6 only
+/effort auto      # Reset to model default
+
+# CLI flag
+claude --effort medium
+
+# Environment variable (takes precedence over all)
+export CLAUDE_CODE_EFFORT_LEVEL=high
+
+# settings.json
+{
+  "effortLevel": "high"
+}
+
+# Skill/subagent frontmatter
+---
+effort: high
+---
+```
+
+### Precedence
+
+1. Environment variable `CLAUDE_CODE_EFFORT_LEVEL` (highest)
+2. Session-configured level
+3. Model default (lowest)
+
+Frontmatter effort in skills/subagents overrides session level but NOT the environment variable.
+
+**Availability**: Opus 4.6 and Sonnet 4.6 only. Older models don't support adaptive reasoning.
+
+**Disabling**: Set `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING=1` to disable adaptive reasoning and revert to the fixed thinking budget controlled by `MAX_THINKING_TOKENS`.
+
+## Extended Context (1M Token)
+
+Opus 4.6 and Sonnet 4.6 support a 1 million token context window for long sessions with large codebases.
+
+### Availability by Plan
+
+| Plan | Opus 4.6 with 1M | Sonnet 4.6 with 1M |
+|------|-----------------|------------------|
+| Max, Team, Enterprise | Included with subscription | Requires extra usage |
+| Pro | Requires extra usage | Requires extra usage |
+| API and pay-as-you-go | Full access | Full access |
+
+### Using Extended Context
+
+```bash
+# /model command
+/model opus[1m]
+/model sonnet[1m]
+
+# CLI
+claude --model opus[1m]
+
+# Environment variable
+export ANTHROPIC_DEFAULT_OPUS_MODEL=claude-opus-4-6[1m]
+
+# settings.json
+{
+  "model": "opus[1m]"
+}
+```
+
+### Pricing
+
+The 1M context window uses standard model pricing with no premium for tokens beyond 200K. For plans where extended context is included with your subscription, usage remains covered by your subscription. For plans that access extended context through extra usage, tokens are billed to extra usage.
+
+### Disabling
+
+```bash
+export CLAUDE_CODE_DISABLE_1M_CONTEXT=1
+```
+
+This removes 1M model variants from the model picker.
+
+## Default Model Behavior
+
+The behavior of `default` depends on your account type:
+
+| Account Type | Default |
+|--------------|---------|
+| Claude Max, Team Premium | Opus 4.6 |
+| Claude Pro, Team Standard | Sonnet 4.6 |
+| Enterprise | Opus 4.6 available but not default |
+
+Claude Code may automatically fall back to Sonnet if you hit a usage threshold with Opus.
+
+## `opusplan` Special Mode
+
+The `opusplan` model alias provides an automated hybrid approach:
+
+| Mode | Model | Purpose |
+|------|-------|---------|
+| **In plan mode** | Opus 4.6 | Complex reasoning and architecture decisions |
+| **In execution mode** | Sonnet 4.6 | Code generation and implementation |
+
+This gives you the best of both worlds: Opus's superior reasoning for planning, and Sonnet's efficiency for execution.
+
+## Checking Your Current Model
+
+See which model you're currently using in several ways:
+
+1. In status line (if configured)
+2. In `/status`, which also displays your account information
+
+## Add a Custom Model Option
+
+Use `ANTHROPIC_CUSTOM_MODEL_OPTION` to add a single custom entry to the `/model` picker without replacing the built-in aliases. This is useful for LLM gateway deployments or testing model IDs that Claude Code does not list by default.
+
+This example sets all three variables to make a gateway-routed Opus deployment selectable:
+
+```bash
+export ANTHROPIC_CUSTOM_MODEL_OPTION="my-gateway/claude-opus-4-6"
+export ANTHROPIC_CUSTOM_MODEL_OPTION_NAME="Opus via Gateway"
+export ANTHROPIC_CUSTOM_MODEL_OPTION_DESCRIPTION="Custom deployment routed through the internal LLM gateway"
+```
+
+The custom entry appears at the bottom of the `/model` picker. `ANTHROPIC_CUSTOM_MODEL_OPTION_NAME` and `ANTHROPIC_CUSTOM_MODEL_OPTION_DESCRIPTION` are optional. If omitted, the model ID is used as the name and the description defaults to `Custom model (<model-id>)`.
+
+Claude Code skips validation for the model ID set in `ANTHROPIC_CUSTOM_MODEL_OPTION`, so you can use any string your API endpoint accepts.
+
+## Prompt Caching Configuration
+
+Claude Code automatically uses prompt caching to optimize performance and reduce costs. You can disable prompt caching globally or for specific model tiers:
+
+| Environment Variable | Description |
+|----------------------|-------------|
+| `DISABLE_PROMPT_CACHING` | Disable prompt caching for all models (takes precedence over per-model settings) |
+| `DISABLE_PROMPT_CACHING_HAIKU` | Disable prompt caching for Haiku models only |
+| `DISABLE_PROMPT_CACHING_SONNET` | Disable prompt caching for Sonnet models only |
+| `DISABLE_PROMPT_CACHING_OPUS` | Disable prompt caching for Opus models only |
+
+These environment variables give you fine-grained control over prompt caching behavior. The global `DISABLE_PROMPT_CACHING` setting takes precedence over the model-specific settings.
+
+## Model Environment Variables
+
+These must be full **model names** (or equivalent for your provider):
+
+| Environment variable | Description |
+|----------------------|-------------|
+| `ANTHROPIC_DEFAULT_OPUS_MODEL` | The model to use for `opus`, or for `opusplan` when Plan Mode is active |
+| `ANTHROPIC_DEFAULT_SONNET_MODEL` | The model to use for `sonnet`, or for `opusplan` when Plan Mode is not active |
+| `ANTHROPIC_DEFAULT_HAIKU_MODEL` | The model to use for `haiku`, or background functionality |
+| `CLAUDE_CODE_SUBAGENT_MODEL` | The model to use for subagents |
+
+**Note**: `ANTHROPIC_SMALL_FAST_MODEL` is deprecated in favor of `ANTHROPIC_DEFAULT_HAIKU_MODEL`.
+
+## Pin Models for Third-Party Deployments
+
+When deploying Claude Code through Bedrock, Vertex AI, or Foundry, pin model versions before rolling out to users.
+
+Without pinning, Claude Code uses model aliases (`sonnet`, `opus`, `haiku`) that resolve to the latest version. When Anthropic releases a new model, users whose accounts don't have the new version enabled will break silently.
+
+**Set all three model environment variables to specific version IDs as part of your initial setup:**
+
+| Provider | Example |
+|----------|---------|
+| Bedrock | `export ANTHROPIC_DEFAULT_OPUS_MODEL='us.anthropic.claude-opus-4-6-v1'` |
+| Vertex AI | `export ANTHROPIC_DEFAULT_OPUS_MODEL='claude-opus-4-6'` |
+| Foundry | `export ANTHROPIC_DEFAULT_OPUS_MODEL='claude-opus-4-6'` |
+
+Apply the same pattern for `ANTHROPIC_DEFAULT_SONNET_MODEL` and `ANTHROPIC_DEFAULT_HAIKU_MODEL`. For current and legacy model IDs across all providers, see [Models overview](https://platform.claude.com/docs/about-claude/models/overview). To upgrade users to a new model version, update these environment variables and redeploy.
+
+### Enable Extended Context for Pinned Models
+
+To enable extended context for a pinned model, append `[1m]` to the model ID in `ANTHROPIC_DEFAULT_OPUS_MODEL` or `ANTHROPIC_DEFAULT_SONNET_MODEL`:
+
+```bash
+export ANTHROPIC_DEFAULT_OPUS_MODEL='claude-opus-4-6[1m]'
+```
+
+The `[1m]` suffix applies the 1M context window to all usage of that alias, including `opusplan`. Claude Code strips the suffix before sending the model ID to your provider. Only append `[1m]` when the underlying model supports 1M context, such as Opus 4.6 or Sonnet 4.6.
+
+## Override Model IDs per Version
+
+The family-level environment variables above configure one model ID per family alias. If you need to map several versions within the same family to distinct provider IDs, use the `modelOverrides` setting instead.
+
+`modelOverrides` maps individual Anthropic model IDs to the provider-specific strings that Claude Code sends to your provider's API. When a user selects a mapped model in the `/model` picker, Claude Code uses your configured value instead of the built-in default.
+
+This lets enterprise administrators route each model version to a specific Bedrock inference profile ARN, Vertex AI version name, or Foundry deployment name for governance, cost allocation, or regional routing.
+
+Set `modelOverrides` in your settings file:
+
+```json
+{
+  "modelOverrides": {
+    "claude-opus-4-6": "arn:aws:bedrock:us-east-2:123456789012:application-inference-profile/opus-prod",
+    "claude-opus-4-5-20251101": "arn:aws:bedrock:us-east-2:123456789012:application-inference-profile/opus-45-prod",
+    "claude-sonnet-4-6": "arn:aws:bedrock:us-east-2:123456789012:application-inference-profile/sonnet-prod"
+  }
+}
+```
+
+Keys must be Anthropic model IDs as listed in the [Models overview](https://platform.claude.com/docs/about-claude/models/overview). For dated model IDs, include the date suffix exactly as it appears there.
+
+## See Also
+
+- [Claude Code Environment Variables](/en/tools/claude-code-environment-variables)
+- [Claude Code Settings](/en/tools/claude-code-settings)
+- [Claude Code Performance](/en/tools/claude-code-performance)
+
+## Sources and Links
+
+- [Model Configuration](https://code.claude.com/docs/en/model-config)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

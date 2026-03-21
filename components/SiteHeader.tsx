@@ -1,0 +1,97 @@
+'use client'
+
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { SearchBar } from './SearchBar'
+
+const navDe = [
+  { href: '/lernpfad', label: 'Lernpfad' },
+  { href: '/grundlagen', label: 'Grundlagen' },
+  { href: '/tools', label: 'Tools' },
+  { href: '/patterns', label: 'Patterns' },
+  { href: '/security', label: 'Security' },
+  { href: '/compliance', label: 'Compliance' },
+  { href: '/blog', label: 'Blog' },
+]
+
+const navEn = [
+  { href: '/en/learning-path', label: 'Learning Path' },
+  { href: '/en/grundlagen', label: 'Basics' },
+  { href: '/en/tools', label: 'Tools' },
+  { href: '/en/patterns', label: 'Patterns' },
+  { href: '/en/security', label: 'Security' },
+  { href: '/en/compliance', label: 'Compliance' },
+  { href: '/blog', label: 'Blog' },
+]
+
+export function SiteHeader() {
+  const pathname = usePathname() || '/'
+  const isEn = pathname === '/en' || pathname.startsWith('/en/')
+  const nav = isEn ? navEn : navDe
+  const homeHref = isEn ? '/en' : '/'
+  const shopLabel = 'Shop'
+
+  return (
+    <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-sm sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-3 flex items-center justify-between gap-4">
+        <Link href={homeHref} className="flex items-center gap-3 shrink-0">
+          <div className="w-10 h-8 bg-[#4262FF] rounded-lg flex items-center justify-center">
+            <span className="text-white font-black text-sm">&gt;_&lt;</span>
+          </div>
+          <div>
+            <span className="text-white font-bold text-base">AI Engineering</span>
+            <span className="text-slate-500 text-xs block -mt-0.5">Wiki</span>
+          </div>
+        </Link>
+
+        {/* Desktop Search */}
+        <div className="hidden md:block flex-1 max-w-xs">
+          <SearchBar />
+        </div>
+
+        <nav className="hidden lg:flex items-center gap-6">
+          {nav.map((item) => {
+            const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`text-sm font-medium transition-colors ${
+                  isActive
+                    ? 'text-blue-400'
+                    : 'text-slate-300 hover:text-blue-400'
+                }`}
+              >
+                {item.label}
+              </Link>
+            )
+          })}
+          <Link
+            href="https://www.ai-engineering.at"
+            className="bg-[#4262FF] hover:bg-[#3550DD] text-white font-bold py-2 px-5 rounded-full transition-all hover:scale-105 text-sm"
+          >
+            {shopLabel}
+          </Link>
+        </nav>
+
+        {/* Mobile Nav */}
+        <nav className="flex lg:hidden items-center gap-3 text-sm">
+          <Link href={nav[1].href} className="text-slate-400 hover:text-white">
+            {nav[1].label}
+          </Link>
+          <Link href={nav[5].href} className="text-slate-400 hover:text-white">
+            {nav[5].label}
+          </Link>
+          <Link href="https://www.ai-engineering.at" className="text-blue-400 font-bold">
+            {shopLabel} &rarr;
+          </Link>
+        </nav>
+      </div>
+
+      {/* Mobile Search */}
+      <div className="md:hidden px-4 pb-3">
+        <SearchBar />
+      </div>
+    </header>
+  )
+}

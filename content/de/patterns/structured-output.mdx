@@ -1,0 +1,504 @@
+---
+title: Structured Output — JSON, Validation, Parsing
+date: 2026-03-21
+summary: Extrahiere strukturierte Daten von LLMs. JSON Mode, XML Parsing, Pydantic, Instructor, Schema Validation, Retry Strategies
+tags: [Structured Output, JSON, Pydantic, Validation, Data Extraction]
+author: "AI Engineering"
+---
+
+# Structured Output — JSON, Validation, Parsing
+
+LLMs geben oft Text aus. Wir brauchen strukturierte Daten: JSON, nicht "hier ist etwas".
+
+## Problem
+
+**Falsch:**
+```
+LLM Output: "Die Person heißt Anna, lebt in Berlin, ist 28 Jahre alt und arbeitet als Developer"
+```
+
+Jetzt brauchst du Regex um das zu parsen. Fragile!
+
+**Richtig:**
+```json
+{
+  "name": "Anna",
+  "city": "Berlin",
+  "age": 28,
+  "job": "Developer"
+}
+```
+
+Das ist strukturiert, validierbar, typsicher.
+
+## Teil 1: Claude JSON Mode
+
+Claude kann direkt JSON ausgeben.
+
+```python
+# json_mode.py
+from anthropic import Anthropic
+
+client = Anthropic()
+
+# JSON Parsing prompt
+prompt = """Extrahiere diese Informationen als JSON:
+Name, Stadt, Alter, Beruf
+
+Text: "Mein Name ist Anna. Ich lebe in Berlin. Ich bin 28 Jahre alt und arbeite als Developer."
+
+Antworte NUR mit JSON, keine zusätzlichen Worte."""
+
+response = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    max_tokens=1024,
+    messages=[
+        {"role": "user", "content": prompt}
+    ]
+)
+
+import json
+data = json.loads(response.content[0].text)
+print(f"Name: {data['name']}")
+print(f"City: {data['city']}")
+```
+
+**Wichtig:** Der Prompt MUSS sagen "Antworte nur mit JSON".
+
+## Teil 2: Pydantic + Anthropic
+
+Typensicher mit Pydantic:
+
+```python
+# pydantic_claude.py
+from pydantic import BaseModel
+from anthropic import Anthropic
+import json
+
+# Schema definieren
+class Person(BaseModel):
+    name: str
+    city: str
+    age: int
+    job: str
+
+client = Anthropic()
+
+# Schema als JSON String
+schema = json.dumps({
+    "type": "object",
+    "properties": {
+        "name": {"type": "string"},
+        "city": {"type": "string"},
+        "age": {"type": "integer"},
+        "job": {"type": "string"}
+    },
+    "required": ["name", "city", "age", "job"]
+})
+
+prompt = f"""Extrahiere diese Informationen als JSON.
+Schema: {schema}
+
+Text: "Mein Name ist Anna. Ich lebe in Berlin. Ich bin 28 Jahre alt und arbeite als Developer."
+
+Antworte nur mit JSON."""
+
+response = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    max_tokens=1024,
+    messages=[
+        {"role": "user", "content": prompt}
+    ]
+)
+
+# Validiere mit Pydantic
+data = Person(**json.loads(response.content[0].text))
+print(f"Validierte Person: {data}")
+print(f"Name: {data.name}, Age: {data.age}")
+```
+
+Pydantic validiert automatisch:
+- `age` muss Integer sein
+- Alle required Felder müssen existieren
+
+## Teil 3: Instructor (Einfachste Lösung)
+
+Instructor macht Structured Output super einfach:
+
+```bash
+pip install instructor
+```
+
+```python
+# instructor_demo.py
+import instructor
+from anthropic import Anthropic
+from pydantic import BaseModel
+
+# Anthropic Client mit Instructor
+client = instructor.from_anthropic(Anthropic())
+
+# Schema
+class Person(BaseModel):
+    name: str
+    city: str
+    age: int
+    job: str
+
+# Das ist es! Keine JSON Strings, keine Validation
+person = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    response_model=Person,
+    messages=[
+        {
+            "role": "user",
+            "content": """Extrahiere diese Informationen:
+Text: "Mein Name ist Anna. Ich lebe in Berlin. Ich bin 28 Jahre alt und arbeite als Developer."
+
+Gebe die Informationen strukturiert aus."""
+        }
+    ]
+)
+
+print(f"Name: {person.name}")
+print(f"Age: {person.age}")
+# Type-Checking funktioniert auch!
+age_plus_5 = person.age + 5  # IDE kennt das age int ist!
+```
+
+**Warum Instructor?**
+- ✓ Keine JSON Parsing nötig
+- ✓ Automatische Validierung
+- ✓ Type-Hints funktionieren
+- ✓ Retry bei ungültigen Responses
+- ✓ Streaming Support
+
+## Teil 4: Komplexere Schemas
+
+```python
+# complex_schema.py
+from pydantic import BaseModel, Field
+from typing import Optional, List
+
+class Address(BaseModel):
+    street: str
+    city: str
+    postal_code: str
+
+class Contact(BaseModel):
+    email: str
+    phone: Optional[str] = None  # Optional
+
+class Company(BaseModel):
+    name: str
+    employees: List[str]  # List von Strings
+    address: Address  # Nested Object
+    contact: Contact
+
+class ExtractedData(BaseModel):
+    companies: List[Company]  # Array von Companies
+    total: int = Field(..., ge=0)  # Must be >= 0
+
+# Nutzen mit Instructor
+import instructor
+from anthropic import Anthropic
+
+client = instructor.from_anthropic(Anthropic())
+
+result = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    response_model=ExtractedData,
+    messages=[
+        {
+            "role": "user",
+            "content": """Extrahiere diese Firmen-Info:
+"AI Engineering ist eine Firma in Wien mit Mitarbeitern: Anna, Bob, Charlie.
+Contact: info@ai-engineering.at.
+Flux GmbH ist in Berlin mit Mitarbeitern: Diana, Eve."
+
+Antworte strukturiert."""
+        }
+    ]
+)
+
+print(f"Total: {result.total}")
+for company in result.companies:
+    print(f"Company: {company.name}")
+    print(f"  Location: {company.address.city}")
+    print(f"  Employees: {company.employees}")
+```
+
+## Teil 5: Validation & Retries
+
+Was wenn das LLM ungültige Daten gibt?
+
+```python
+# retry_logic.py
+from pydantic import BaseModel, validator
+import instructor
+from anthropic import Anthropic
+
+class Person(BaseModel):
+    name: str
+    age: int
+
+    @validator("age")
+    def age_valid(cls, v):
+        if v < 0 or v > 150:
+            raise ValueError("Age must be 0-150")
+        return v
+
+client = instructor.from_anthropic(
+    Anthropic(),
+    mode=instructor.Mode.MD_JSON  # Markdown JSON Mode
+)
+
+# Instructor retried automatisch!
+person = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    response_model=Person,
+    messages=[
+        {
+            "role": "user",
+            "content": "Name: Anna, Age: 28"
+        }
+    ]
+)
+
+print(f"{person.name} is {person.age} years old")
+```
+
+Wenn Claude "Age: 999" antwortet:
+1. Pydantic wirft Validator-Fehler
+2. Instructor sendet Error zurück an Claude
+3. Claude antwortet mit korrektem Wert
+4. Fertig!
+
+Das ist **automatisches Retrying**.
+
+## Teil 6: Conditional Fields
+
+Manche Felder sind optional je nach Typ:
+
+```python
+# conditional.py
+from pydantic import BaseModel, Field, discriminator
+from typing import Union, Literal
+
+class Article(BaseModel):
+    type: Literal["article"]
+    title: str
+    content: str
+
+class Video(BaseModel):
+    type: Literal["video"]
+    title: str
+    duration_seconds: int
+    url: str
+
+class Podcast(BaseModel):
+    type: Literal["podcast"]
+    title: str
+    duration_seconds: int
+    host: str
+
+# Union: Entweder Article ODER Video ODER Podcast
+class Content(BaseModel):
+    items: list[Union[Article, Video, Podcast]]
+
+# Nutzen
+result = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    response_model=Content,
+    messages=[
+        {
+            "role": "user",
+            "content": """Extrahiere Content-Info:
+"Der Artikel 'AI Trends' diskutiert neue Models.
+Das Video 'How to Fine-tune' dauert 15 Minuten.
+Der Podcast 'Tech Talk' mit Alice."""
+        }
+    ]
+)
+
+for item in result.items:
+    print(f"Type: {item.type}")
+    if isinstance(item, Article):
+        print(f"  Article: {item.title}")
+    elif isinstance(item, Video):
+        print(f"  Video: {item.title} ({item.duration_seconds}s)")
+    elif isinstance(item, Podcast):
+        print(f"  Podcast: {item.host} - {item.title}")
+```
+
+## Teil 7: OpenAI vs Anthropic
+
+| Feature | Claude | GPT-4 |
+|---------|--------|-------|
+| JSON Mode | Prompt-basiert | Native `response_format` |
+| Instructor | ✓ | ✓ |
+| Validation | Via Pydantic | Via Pydantic |
+
+### OpenAI JSON Mode
+
+```python
+# openai_json.py
+from openai import OpenAI
+
+client = OpenAI()
+
+response = client.chat.completions.create(
+    model="gpt-4-turbo",
+    messages=[
+        {
+            "role": "user",
+            "content": "Extract: Name, Age"
+        }
+    ],
+    response_format={"type": "json_object"}  # Native JSON!
+)
+
+import json
+data = json.loads(response.choices[0].message.content)
+```
+
+## Teil 8: Streaming mit Structured Output
+
+Streaming + Structured = Schwierig. Aber mit Instructor:
+
+```python
+# streaming_structured.py
+import instructor
+from anthropic import Anthropic
+from pydantic import BaseModel
+
+client = instructor.from_anthropic(Anthropic())
+
+class Person(BaseModel):
+    name: str
+    age: int
+
+# Streaming funktioniert auch
+for person in client.messages.create_streaming(
+    model="claude-3-5-sonnet-20241022",
+    response_model=Person,
+    messages=[
+        {"role": "user", "content": "Name: Anna, Age: 28"}
+    ]
+):
+    print(f"Partial: {person}")
+```
+
+## Top-5 Fehlerbehebung
+
+### 1. "JSON decode error"
+
+```python
+# Claude gab nicht-JSON aus
+# Grund: Prompt zu vage
+
+# Vorher
+"Extrahiere die Info"
+
+# Nachher
+"Antworte AUSSCHLIESSLICH mit JSON. Keine anderen Worte."
+```
+
+### 2. "Validation Error: age is not int"
+
+```python
+# Claude gab age="28" statt age=28
+# Reason: Schema nicht klar
+
+# Mit Pydantic Validator:
+@validator("age")
+def age_int(cls, v):
+    if isinstance(v, str):
+        return int(v)
+    return v
+```
+
+### 3. Instructor gibt None zurück
+
+```python
+# Response war ungültig und konnte nicht gefixed werden
+# Debugging:
+
+for attempt in range(3):
+    try:
+        result = client.messages.create(...)
+        if result:
+            return result
+    except Exception as e:
+        print(f"Attempt {attempt}: {e}")
+
+return None
+```
+
+### 4. Große Schemas sind langsam
+
+```python
+# Schema mit 100 Feldern ist ineffizient
+# Better: Teile in multiple Calls auf
+
+# Statt:
+class MegaSchema(BaseModel):
+    field_1: str
+    # ... 99 weitere Felder
+
+# Besser:
+class SectionA(BaseModel):
+    name: str
+    email: str
+
+class SectionB(BaseModel):
+    age: int
+    address: str
+
+# Rufe zwei Mal auf
+```
+
+### 5. Optional Felder werden nicht returned
+
+```python
+# Pydantic skipped None Values
+# Lösung:
+
+class Model(BaseModel):
+    name: str
+    middle_name: Optional[str] = None
+
+    class Config:
+        # Behalte None Werte
+        exclude_none = False
+```
+
+## Best Practices
+
+1. **Schema First** → Definiere Pydantic Model
+2. **Instructor nutzen** → Einfachste Lösung
+3. **Validation** → Nutze Validators
+4. **Prompt klar** → "Antworte nur mit JSON"
+5. **Fallback** → Was wenn Parsing fehlschlägt?
+
+## Zusammenfassung
+
+Structured Output Workflow:
+
+```
+1. Pydantic Schema definieren
+2. Instructor initialisieren
+3. response_model=YourSchema
+4. Automatic Parsing + Validation
+5. Type-safe Daten ausgeben
+```
+
+**Nächste Schritte:**
+- Bulk Data Extraction
+- Streaming mit Structured Output
+- Custom Validators für komplexe Logik
+
+## Quellen und Links
+
+- [Pydantic](https://github.com/pydantic/pydantic)
+- [JSON Schema](https://json-schema.org/)

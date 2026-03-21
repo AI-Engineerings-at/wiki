@@ -1,0 +1,632 @@
+---
+title: Claude Code for Teams — Shared Config & CI/CD
+date: 2026-03-21
+summary: Team deployment of Claude Code. Covers shared configuration, permissions, GitHub Actions integration, headless/print modes, cost management, security, and onboarding patterns.
+tags: [claude-code, teams, ci-cd, github-actions, security]
+author: AI Engineering
+---
+
+# Claude Code for Teams — Shared Config & CI/CD
+
+Claude Code becomes powerful when teams use it together. This guide covers shared configuration, permissions, automation, and team workflows.
+
+## Team Setup: Shared vs Personal Config
+
+Claude Code uses a 3-level configuration hierarchy:
+
+```
+.claude/settings.json              (Shared, in git, team sees it)
+.claude/settings.local.json        (Personal, NOT in git, your overrides)
+~/.claude/config.json              (User home, personal defaults)
+```
+
+### What Goes in Shared Config (.claude/settings.json)
+
+```json
+{
+  "model": "sonnet",
+  "maxTokens": 4096,
+  "tools": {
+    "allowed": ["Read", "Write", "Edit", "Bash", "Grep"],
+    "blocked": []
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "^Bash$",
+        "command": "bash",
+        "args": ["./.claude/hooks/pre-bash.sh"]
+      }
+    ]
+  },
+  "rules": [
+    "./.claude/rules/01-safety.md",
+    "./.claude/rules/02-coding-standards.md"
+  ]
+}
+```
+
+This is VERSION CONTROLLED. Every team member gets the same policies.
+
+### What Goes in Personal Override (.claude/settings.local.json)
+
+```json
+{
+  "model": "opus",
+  "apiKey": "sk-proj-xxx",
+  "verbose": true
+}
+```
+
+This is in `.gitignore`. Your personal preferences, API keys, debugging flags.
+
+### Permission Model
+
+Team admins configure what each team member CAN do:
+
+```json
+{
+  "permissions": {
+    "write": true,
+    "bash": true,
+    "destructive_bash": false,
+    "dangerous_patterns": ["rm -rf", "DROP TABLE"],
+    "docker": true,
+    "deploy": false
+  }
+}
+```
+
+Hooks enforce these policies. A junior developer can't accidentally delete production.
+
+## GitHub Actions Integration
+
+Have Claude work in your CI/CD pipeline:
+
+### Installation
+
+```bash
+# 1. Install GitHub app to your repo
+claude-code /install-github-app
+
+# 2. Add API key as secret
+# Go to Settings > Secrets > New repository secret
+# Name: ANTHROPIC_API_KEY
+# Value: your-api-key
+
+# 3. Copy workflow file
+# From: https://github.com/anthropics/claude-code-action
+# To: .github/workflows/claude.yml
+```
+
+### Basic Workflow: Auto-Review PRs
+
+```yaml
+# .github/workflows/claude-code-review.yml
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Claude Code Review
+        uses: anthropics/claude-code-action@v1
+        with:
+          command: review-pr
+          api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Comment Review on PR
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const review = process.env.CLAUDE_REVIEW;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: review
+            });
+```
+
+Every PR gets a Claude review automatically.
+
+### Workflow: Generate Tests
+
+```yaml
+# .github/workflows/claude-generate-tests.yml
+name: Generate Missing Tests
+
+on:
+  pull_request:
+    paths:
+      - 'src/**/*.py'
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for diff
+
+      - name: Find New Code
+        id: new-code
+        run: |
+          # Compare against main to find new functions
+          NEW_FUNCTIONS=$(git diff main...HEAD --name-only | grep '.py$')
+          echo "files=$NEW_FUNCTIONS" >> $GITHUB_OUTPUT
+
+      - name: Generate Tests with Claude
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          for file in ${{ steps.new-code.outputs.files }}; do
+            echo "Generating tests for $file"
+            claude-code -p "Generate pytest tests for the new functions in $file. Save as tests/test_$(basename $file)"
+          done
+
+      - name: Create PR with Tests
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: 'test: auto-generated tests for new functions'
+          title: '[Auto] Generated Tests'
+          body: |
+            Claude Code generated tests for new functions.
+            Please review and adjust as needed.
+          branch: claude-generated-tests
+```
+
+### Workflow: Release Notes Generation
+
+```yaml
+# .github/workflows/claude-release-notes.yml
+name: Generate Release Notes
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  notes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get Commits Since Last Release
+        id: commits
+        run: |
+          COMMITS=$(git log --oneline $(git describe --tags --abbrev=0)..HEAD)
+          echo "commits<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMITS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Generate Release Notes
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          claude-code -p "Generate release notes from these commits:
+          ${{ steps.commits.outputs.commits }}
+
+          Format:
+          - Features (bulleted)
+          - Bug Fixes (bulleted)
+          - Breaking Changes (if any)
+
+          Keep it concise and user-friendly."
+
+      - name: Update Release
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: context.payload.release.id,
+              body: process.env.CLAUDE_OUTPUT
+            });
+```
+
+## Headless Mode: Claude Code in Scripts
+
+Run Claude Code without a terminal UI:
+
+```bash
+# Print output to stdout, exit immediately
+claude-code -p "Analyze src/app.py for performance issues"
+
+# Useful in:
+# - CI/CD pipelines
+# - Automated scripts
+# - Monitoring/alerting systems
+# - Batch processing
+```
+
+### Example: Batch Code Analysis
+
+```bash
+#!/bin/bash
+# analyze-codebase.sh
+
+# Run Claude Code analysis on all Python files
+FILES=$(find src/ -name "*.py")
+
+for file in $FILES; do
+  echo "Analyzing $file..."
+
+  claude-code -p "
+  Review $file for:
+  - Security issues
+  - Performance problems
+  - Code quality
+
+  Keep analysis brief (< 200 words)"
+
+  echo "---"
+done | tee analysis-report.txt
+```
+
+Use in CI/CD:
+
+```yaml
+- name: Analyze Codebase
+  run: bash scripts/analyze-codebase.sh
+
+- name: Upload Report
+  uses: actions/upload-artifact@v3
+  with:
+    name: analysis-report
+    path: analysis-report.txt
+```
+
+## Cost Management at Scale
+
+Teams can quickly rack up costs. Implement guardrails:
+
+### Cost Tracking
+
+```python
+# track_costs.py
+import json
+from datetime import datetime
+from pathlib import Path
+
+def log_usage(model, input_tokens, output_tokens):
+    """Log token usage for cost tracking"""
+
+    # Rough pricing (as of 2026)
+    COSTS = {
+        "haiku": {"input": 0.80, "output": 2.40},      # per 1M tokens
+        "sonnet": {"input": 3.00, "output": 15.00},
+        "opus": {"input": 15.00, "output": 75.00},
+    }
+
+    cost = COSTS[model]
+    input_cost = (input_tokens / 1_000_000) * cost["input"]
+    output_cost = (output_tokens / 1_000_000) * cost["output"]
+    total_cost = input_cost + output_cost
+
+    log_entry = {
+        "timestamp": datetime.now().isoformat(),
+        "model": model,
+        "input_tokens": input_tokens,
+        "output_tokens": output_tokens,
+        "cost": total_cost
+    }
+
+    # Append to cost log
+    log_file = Path("costs.jsonl")
+    with open(log_file, "a") as f:
+        f.write(json.dumps(log_entry) + "\n")
+
+    return total_cost
+
+def daily_cost_report():
+    """Generate cost report"""
+    log_file = Path("costs.jsonl")
+    if not log_file.exists():
+        return {}
+
+    today = datetime.now().date()
+    total_cost = 0
+    by_model = {}
+
+    with open(log_file) as f:
+        for line in f:
+            entry = json.loads(line)
+            entry_date = datetime.fromisoformat(entry["timestamp"]).date()
+
+            if entry_date == today:
+                total_cost += entry["cost"]
+                model = entry["model"]
+                by_model[model] = by_model.get(model, 0) + entry["cost"]
+
+    return {
+        "date": str(today),
+        "total_cost": total_cost,
+        "by_model": by_model,
+        "budget_remaining": 500 - total_cost  # $500/day budget
+    }
+```
+
+Use in CI/CD:
+
+```yaml
+- name: Check Daily Cost
+  run: |
+    python scripts/track_costs.py
+    COST=$(python -c "from scripts.track_costs import daily_cost_report; import json; print(json.dumps(daily_cost_report()))")
+
+    if (( $(echo "$COST > 500" | bc -l) )); then
+      echo "⚠️ Daily cost budget exceeded!"
+      exit 1
+    fi
+```
+
+### Budget Alerts
+
+```python
+# alert_on_cost.py
+import os
+from track_costs import daily_cost_report
+
+def alert_if_needed():
+    report = daily_cost_report()
+    cost = report["total_cost"]
+
+    # Alert at 70%, 90%, 100% of budget
+    BUDGET = 500
+    THRESHOLDS = [0.7, 0.9, 1.0]
+
+    for threshold in THRESHOLDS:
+        limit = BUDGET * threshold
+        if cost >= limit and cost < (limit + 50):  # Avoid duplicate alerts
+            send_slack_alert(f"Cost alert: ${cost:.2f} ({threshold*100:.0f}% of budget)")
+
+def send_slack_alert(message):
+    import requests
+    webhook = os.environ.get("SLACK_WEBHOOK")
+    if webhook:
+        requests.post(webhook, json={"text": message})
+```
+
+## Model Selection Strategy
+
+Optimize cost by choosing the right model per task:
+
+```yaml
+# .claude/settings.json
+{
+  "modelSelection": {
+    "default": "sonnet",
+    "tasks": {
+      "code-review": "sonnet",
+      "refactoring": "sonnet",
+      "testing": "haiku",
+      "bug-investigation": "opus",
+      "architecture-planning": "opus",
+      "documentation": "haiku"
+    }
+  }
+}
+```
+
+Team agrees: use Haiku for documentation (cheap), Opus only for hard problems.
+
+## Security & Access Control
+
+### Secret Management
+
+Never commit API keys. Use environment variables or secret managers:
+
+```bash
+# .github/workflows/workflow.yml
+- name: Run Claude Code
+  env:
+    ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  run: claude-code -p "..."
+```
+
+### Permission Policies
+
+Define what each role can do:
+
+```json
+{
+  "roles": {
+    "junior": {
+      "can_bash": false,
+      "can_write": true,
+      "can_deploy": false,
+      "max_tokens": 2000
+    },
+    "senior": {
+      "can_bash": true,
+      "can_write": true,
+      "can_deploy": true,
+      "max_tokens": 8000
+    },
+    "infra": {
+      "can_bash": true,
+      "can_write": true,
+      "can_deploy": true,
+      "allowed_dirs": ["infrastructure/", "k8s/"]
+    }
+  }
+}
+```
+
+### Audit Logging
+
+Log all Claude Code actions for compliance:
+
+```bash
+# .claude/hooks/post-tool-audit.sh
+#!/bin/bash
+
+LOG_FILE=".audit.log"
+
+# Log every tool invocation
+echo "$(date -Iseconds) $CLAUDE_TOOL_NAME $USER $CLAUDE_SESSION_ID" >> "$LOG_FILE"
+
+# For write/edit, also log what changed
+if [[ "$CLAUDE_TOOL_NAME" == "Edit" ]] || [[ "$CLAUDE_TOOL_NAME" == "Write" ]]; then
+  FILE=$(echo "$CLAUDE_TOOL_INPUT" | jq -r '.path')
+  echo "  Modified: $FILE" >> "$LOG_FILE"
+fi
+```
+
+## Onboarding New Team Members
+
+### Checklist
+
+```markdown
+# Claude Code Onboarding Checklist
+
+- [ ] Install Claude Code CLI
+- [ ] Get ANTHROPIC_API_KEY from team lead
+- [ ] Clone repository
+- [ ] Read project CLAUDE.md
+- [ ] Review .claude/rules/ (coding standards, safety, etc)
+- [ ] Configure .claude/settings.local.json with your API key
+- [ ] Run: `claude-code "Summarize this project for me"`
+- [ ] Complete first task: Fix a simple issue with Claude Code
+- [ ] Code review by senior team member
+- [ ] Approved to work independently
+```
+
+### Guided First Task
+
+```
+Team lead: "Review my CLAUDE.md and summarize the project architecture"
+
+> claude-code "Read CLAUDE.md. What's the architecture? What are the main components?"
+
+Claude explains the project. If Claude is confused, CLAUDE.md needs improvement.
+```
+
+This validates both the new person's setup AND the quality of project docs.
+
+## Team Communication Patterns
+
+### Pattern 1: Async Code Review
+
+Pull request → Claude auto-reviews → human reviews Claude's feedback:
+
+```
+1. Author pushes PR
+2. GitHub Actions runs: claude-code /review-pr
+3. Claude posts review as comment
+4. Author reads Claude's feedback + adjusts if needed
+5. Reviewers see refined PR
+6. Faster review cycle
+```
+
+### Pattern 2: Pair Programming with Claude
+
+Two humans + Claude in a session:
+
+```
+Junior: "Help me understand what this function does"
+Claude: Explains code
+Senior: "Good explanation. Now let's refactor it"
+Claude: Suggests refactoring
+Junior: Implements suggested changes
+Claude: Reviews implementation, suggests tests
+Both: Discuss and finalize
+```
+
+### Pattern 3: Async Documentation
+
+Claude auto-generates docs:
+
+```
+1. PR merged
+2. GitHub Actions: claude-code "Generate API docs"
+3. Docs auto-committed to main
+4. Website auto-deploys with latest docs
+```
+
+Docs always in sync with code.
+
+## Common Team Gotchas
+
+### Gotcha 1: Everyone Shares One API Key
+
+```bash
+# Bad: Shared API key, hard to track usage
+# Good: Individual API keys, aggregate cost reports
+```
+
+Give each team member their own key. Track usage per person.
+
+### Gotcha 2: Git Conflicts on CLAUDE.md
+
+```
+Multiple people editing CLAUDE.md → merge conflicts
+
+Solution:
+- Designate 1 person as CLAUDE.md maintainer
+- Other team members suggest changes via issues/PRs
+- Maintainer updates once after discussion
+```
+
+### Gotcha 3: Stale CLAUDE.md
+
+```
+CLAUDE.md written 6 months ago, project has changed significantly
+Claude gets outdated information
+Results are wrong
+
+Solution:
+- Monthly review of CLAUDE.md
+- Update after major changes
+- Add "Last Updated" date
+```
+
+### Gotcha 4: Model Too Expensive
+
+```
+Team uses Opus (most expensive) for all tasks
+Monthly bill is $10,000+
+
+Solution:
+- Use Haiku for simple tasks
+- Use Sonnet for most work
+- Use Opus only when really needed
+- Set per-team-member daily budget
+```
+
+## Checklist
+
+- [ ] Created `.claude/settings.json` with shared team policies
+- [ ] Created `.gitignore` entry for `.claude/settings.local.json`
+- [ ] Set up GitHub Actions for Claude Code workflows
+- [ ] Installed GitHub app with proper permissions
+- [ ] Added API key as GitHub Secret
+- [ ] Created cost tracking script
+- [ ] Set daily budget alerts
+- [ ] Defined roles and permissions
+- [ ] Set up audit logging
+- [ ] Created onboarding checklist for new team members
+- [ ] Documented team communication patterns
+- [ ] Designated CLAUDE.md maintainer
+- [ ] Scheduled monthly CLAUDE.md review
+- [ ] Tested that junior developers can't access dangerous operations
+- [ ] Verified CI/CD workflows work end-to-end
+
+## Sources and Links
+
+- [Agent Teams](https://code.claude.com/docs/en/agent-teams)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

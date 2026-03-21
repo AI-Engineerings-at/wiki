@@ -1,0 +1,461 @@
+---
+title: DSGVO und AI – Überschneidungen und praktische Compliance
+date: 2026-03-21
+summary: Wie DSGVO und EU AI Act zusammenpassen. Datenschutz für KI-Training, automatisierte Entscheidungen, lokale Modelle, Cloud AI und Data Processing Agreements.
+tags: [dsgvo, gdpr, eu-ai-act, datenschutz, privacy, local-ai]
+author: AI Engineering
+---
+
+# DSGVO und AI – Überschneidungen und praktische Compliance
+
+DSGVO (Datenschutzgrundverordnung) und EU AI Act sind zwei separate Regelungen, aber bei KI-Systemen überschneiden sie sich. Dieser Guide zeigt dir, wie sie zusammenpassen und was du praktisch tun musst.
+
+## Das Wichtigste in Kürze
+
+| Situation | DSGVO relevant? | AI Act relevant? | Was tun? |
+|-----------|-----------------|-----------------|---------|
+| Du trainierst KI mit Kundendaten | **JA** | JA | Rechtsgrundlage + Transparenz |
+| Du nutzt ChatGPT im Customer Service | JA (Datenfluss) | **JA** (begrenzt/hochrisiko) | Data Processing Agreement + Transparenz |
+| Du hostest Ollama lokal (offline) | Minimal (nur Input) | JA (wenn hochrisiko) | KI-Dokumentation |
+| Kreditentscheidung mit KI | **JA** (Art. 22) | **JA** (hochrisiko) | Beides: DSGVO Art. 22 + AI Act |
+| Dein lokales Modell analysiert Fotos | JA (Biometrische Daten?) | JA (wenn Emotion Recog.) | Beides prüfen |
+
+---
+
+## Teil 1: DSGVO und KI-Training
+
+### 1.1 Datenverarbeitung für KI-Training
+
+Wenn du ein KI-Modell trainierst, nutzt du personenbezogene Daten. DSGVO regelt das:
+
+**Du brauchst:**
+
+1. **Rechtsgrundlage** (Art. 6 DSGVO)
+   - Einwilligung (schwierig bei Millionen Daten)
+   - Berechtigtes Interesse (häufig für interne KI)
+   - Vertrag (z.B. Kundenservice-KI für deine Kunden)
+   - Gesetzliche Verpflichtung (selten)
+
+2. **Transparenzinformation** (Art. 13/14 DSGVO)
+   - Nutzer muss wissen: Du verwendest ihre Daten für KI-Training
+   - In Datenschutzerklärung festgehalten
+
+3. **Datenschutz-Folgenabschätzung (DPIA)** (Art. 35 DSGVO)
+   - Wenn KI-Training ein hohes Risiko birgt (z.B. sensible Daten, große Auswirkung)
+   - Dokumentation: Was sind die Risiken? Wie werden sie gemindert?
+
+### 1.2 Praktisch: Interne KI mit Kundendaten trainieren
+
+**Szenario:** Du möchtest ein lokales Sprachmodell mit deinen Kundeninteraktionen trainieren (Support-Daten, Chat-Logs).
+
+**Rechtsgrundlage:**
+- Berechtigtes Interesse: Verbesserung des Customer Service, Effizienzsteigerung
+- ODER: Kunde akzeptiert das (Opt-in in deinen AGB)
+
+**Was du aufschreibst:**
+```
+Datenschutzerklärung:
+"Wir nutzen Ihre Kundenservice-Gespräche zur Verbesserung unserer KI-Sprachmodelle.
+Die Daten werden anonymisiert/pseudonymisiert [wahr?] bevor das Training startet.
+Sie können widersprechen unter [Email]."
+```
+
+**DPIA durchführen:**
+```
+DPIA für KI-Training
+System: Customer-Support-KI
+Datentyp: Chat-Logs (E-Mail, Namen, Inhalte)
+Umfang: 50.000 Gespräche
+Risiken:
+- Personenbezug: Wenn Daten nicht anonymisiert → HOCH
+- Auswirkung: Kunde merkt nicht, dass Daten trainieren
+- Weitere Nutzung: KI könnte private Infos offenbaren
+
+Maßnahmen:
+- Anonymisierung vor Training (Name, E-Mail rauslöschen)
+- Opt-Out-Möglichkeit für Kunden
+- Regelmäßige Überprüfung (testet die KI, private Infos auszuspucken?)
+```
+
+### 1.3 Datenschutz bei großen LLMs (ChatGPT, Copilot)
+
+Wenn du **gekaufte** KI-Systeme nutzt, gelten andere Regeln:
+
+**OpenAI (ChatGPT):**
+- Du geben Input (Kundenfrage) → OpenAI verarbeitet die Daten
+- DSGVO: OpenAI ist Auftragsverarbeiter (Data Processor) für dich
+- Du brauchst: Data Processing Agreement (DPA) mit OpenAI
+- OpenAI speichert ggf. Daten zur Modellverbesserung → DPIA nötig
+
+**Microsoft (Copilot, Azure OpenAI):**
+- Microsoft hat Data Processing Agreement
+- Mit Azure-Kunden: Enterprise Privacy mit Zusicherungen
+
+**Google (Bard/Gemini):**
+- Ähnlich wie OpenAI
+- DPA notwendig
+
+**Praktisch:** Falls du ChatGPT geschäftlich nutzt, sollte dein OpenAI-Plan ein **Business-Tier** sein mit besseren Datenschutz-Zusicherungen.
+
+---
+
+## Teil 2: DSGVO Art. 22 – Automatisierte Entscheidungen
+
+### 2.1 Was ist Art. 22?
+
+Art. 22 DSGVO verbietet bestimmte **vollautomatisierte Entscheidungen**, die einer Person rechtlich oder praktisch bedeutsam schaden.
+
+**Wann greift Art. 22?**
+- Die Entscheidung ist **automatisiert** (KI macht sie, nicht Mensch)
+- Sie betrifft den Betroffenen **rechtlich oder praktisch erheblich** (z.B. Kreditablehnung, Job, Versicherung, Kündigung)
+- Es gibt keine menschliche Kontrolle ("solely automated")
+
+**Beispiele:**
+
+❌ **Verstößt gegen Art. 22:**
+- KI lehnt Kreditantrag ab, ohne dass ein Mensch es prüft
+- System kündigt Versicherung aufgrund automatisierter Analyse
+- HR-Algorithmus lehnt Bewerbung ab, ohne dass ein Mensch sie sieht
+
+✅ **OK mit Art. 22:**
+- KI macht Vorschlag, **Mensch entscheidet** (Exemption: not solely automated)
+- Mensch hat die Möglichkeit, die KI-Entscheidung zu überschreiben
+- KI wird nur für Verwaltungsjunk genutzt (E-Mail-Filterung)
+
+### 2.2 Was ist erlaubt? Die Exemption
+
+**Ausnahme zu Art. 22:** Automatisierte Entscheidungen sind OK, wenn:
+1. Sie sind **notwendig für Vertragserfüllung** (z.B. Sofort-Versand auslösen beim Kauf)
+2. Sie sind **autorisiert durch Gesetz** (z.B. Abrechnung, Steuervorgänge)
+3. Es gibt **explizite Einwilligung** (Betroffener muss aktiv sagen: Ja, ich akzeptiere)
+
+**Praktisch:** Meist reicht Punkt 1 (Vertragserfüllung). Aber nur wenn es **nicht sinnvoll ist**, manuell einzugreifen.
+
+Beispiel OK: Ein E-Commerce-System der Lager automatisch basierend auf Bestellungen – das ist Vertragserfüllung und sinnvoll automatisiert.
+
+### 2.3 Art. 22 + AI Act: Hochrisiko
+
+Hier überlappen sich DSGVO und AI Act:
+
+| Anwendungsfall | DSGVO Art. 22 | AI Act Hochrisiko | Du musst |
+|---|---|---|---|
+| Kreditvergabe | Ja (rechtliche Auswirkung) | Ja | Beides beachten |
+| HR-Screening | Ja (Beschäftigung) | Ja | Beides |
+| Versicherungs-Pricing | Ja (finanzielle Auswirkung) | Ja | Beides |
+| Customer Service KI | Nein (keine rechtliche Auswirkung) | Nein/Begrenzt | Nur Transparenz |
+
+**Was bedeutet das praktisch?**
+
+Wenn du ein **hochrisiko KI-System mit automatisierter Entscheidung** hast:
+
+- **DSGVO Art. 22:** Menschliche Kontrolle + Einspruchsrecht
+- **AI Act:** Menschliche Kontrolle + Dokumentation + Monitoring
+
+Beides verlangt dasselbe: **Mensch muss die Entscheidung treffen oder ratifizieren.**
+
+---
+
+## Teil 3: Data Protection Impact Assessment (DPIA) für KI
+
+### 3.1 Wann brauchst du eine DPIA?
+
+DPIA ist Pflicht bei KI-Systemen mit **hohem Risiko für personenbezogene Daten**:
+
+- KI trainiert mit großen Datenmengen
+- KI verarbeitet sensible Daten (Gesundheit, Religion, Biometrie)
+- KI trifft automatisierte Entscheidungen (Art. 22)
+- KI ist hochrisiko nach AI Act (besonders HR, Kredit, Justiz)
+
+**Kurz:** Hochrisiko-KI → DPIA ist Pflicht.
+
+### 3.2 DPIA Template für KI
+
+```
+DATENSCHUTZ-FOLGENABSCHÄTZUNG (DPIA)
+für KI-Systeme
+
+1. BESCHREIBUNG DES KI-SYSTEMS
+System-Name: [z.B. "Kreditvergabe-KI"]
+Verantwortlicher: [Dein Unternehmen]
+Datum: [2026-03-21]
+
+2. VERARBEITUNG PERSONENBEZOGENER DATEN
+Welche Daten?
+- Kundennamen
+- Einkommensinformationen
+- Kredithistorie
+- Demografische Daten (Alter, Ort)
+Woher kommen die Daten? [Kundenformular, externe DB, historische Daten]
+Speichern? Ja / Nein. Wie lange?
+
+3. RECHTMÄSSIGKEIT (ART. 6 DSGVO)
+Rechtsgrundlage: [ ] Einwilligung [ ] Berechtigtes Interesse [ ] Vertrag [ ] Gesetz
+Begründung: [z.B. "Berechtigtes Interesse: Kreditrisiko-Bewertung zur Fraud-Verhinderung"]
+
+4. TRANSPARENZ
+Wie informiert ihr Kunden?
+- [ ] Datenschutzerklärung erwähnt KI
+- [ ] Beim Kreditantrag steht: "KI-gestützte Entscheidung"
+- [ ] Kunde kann Erklärung anfordern
+
+5. IDENTIFIZIERUNG VON RISIKEN
+
+A. Daten-Sicherheits-Risiken
+Risiko: Unbefugter Zugriff auf Trainingsdaten
+Wahrscheinlichkeit: MITTEL (Systeme können gehackt werden)
+Auswirkung: HOCH (Finanzinformationen + Namen geleakt)
+Maßnahme: Verschlüsselung, Zugriffskontrolle, regelmäßige Backups
+
+B. Bias & Diskriminierungs-Risiken
+Risiko: KI diskriminiert aufgrund von Geschlecht/Alter/Ethnie
+Wahrscheinlichkeit: MITTEL-HOCH (Trainingsdaten können Bias haben)
+Auswirkung: HOCH (Kunden werden unfair behandelt, Beschwerde + Klage)
+Maßnahme: Bias-Tests, Monitoring, Audits
+
+C. Falsche Entscheidungen
+Risiko: KI gibt falsche Kreditbewertung, Kunde wird fälschlicherweise abgelehnt
+Wahrscheinlichkeit: MITTEL (Alle Systeme haben Fehlerquote)
+Auswirkung: MITTEL (Kunde kann Einspruch erheben, Menschprüfung)
+Maßnahme: Audit vor Einsatz, menschliche Kontrolle, Einspruchsrecht
+
+D. Profilierung
+Risiko: KI erstellt detailliertes Profil, das zu unfairer Behandlung führt
+Wahrscheinlichkeit: HOCH (KI aggregiert alle Daten)
+Auswirkung: HOCH (Kunde wird als "risikoreich" klassifiziert, alle Dienste teuerer)
+Maßnahme: Datenminimierung, Transparenz, Einspruchsmöglichkeit
+
+6. GESAMTRISIKO-BEWERTUNG
+[ ] Niedrig → Keine weiteren Maßnahmen nötig
+[ ] Mittel → Mitigations-Maßnahmen (unten) + Monitoring
+[ ] Hoch → Konsultation mit Datenschutzbehörde empfohlen
+
+7. MITIGATIONS-MASSNAHMEN (schon gemacht oder geplant?)
+[ ] Menschliche Kontrolle vor kritischen Entscheidungen
+[ ] Datenminimierung (nutze nur nötigste Daten)
+[ ] Pseudonymisierung/Anonymisierung von Trainingsdaten
+[ ] Regelmäßige Bias-Audits (monatlich/quartalsweise)
+[ ] Sicherheitstests (Penetrationstesting)
+[ ] Transparenz-Kommunikation an Kunden
+[ ] Datenschutz by Design: KI modular, ohne unnötige Datenverkettung
+
+8. EINSPRUCHSRECHT & HUMAN REVIEW
+[ ] Kunde kann Einspruch gegen automatisierte Entscheidung erheben
+[ ] Mensch prüft Einspruch neu
+[ ] System-Verbesserung basierend auf Einsprüchen
+
+9. DOKUMENTATION
+Wo wird diese DPIA gespeichert? [Z.B. Compliance-Ordner]
+Überprüfung alle: [ ] 6 Monate [ ] 12 Monate [ ] bei Systemchange
+
+10. GENEHMIGUNG
+Durchgeführt von: [Name, Rolle]
+Genehmigt von: [Manager/Compliance-Officer]
+Datum: [2026-03-21]
+```
+
+---
+
+## Teil 4: Praktische Szenarien
+
+### Szenario 1: Self-Hosted Ollama für interne Dokumentation
+
+**Frage:** Brauchen wir DSGVO-Compliance dafür?
+
+**Antwort:**
+- **Wenn offline/lokal:** Minimale DSGVO-Anforderung
+  - Du gibst Text ein → KI verarbeitet lokal → Output wird lokal genutzt
+  - Kein Datentransfer = minimales Risiko
+  - Aber: Falls du Kundendaten reinfütterst? Dann brauchst du Rechtsgrundlage (Art. 6)
+
+- **DPIA nötig?** Nein (außer du trainierst das Modell mit sensiblen Daten)
+
+- **AI Act?** Nein (minimal-Risiko, intern genutzt)
+
+**Praktisch:** Einfach dokumentieren, dass lokale Modelle intern genutzt werden. Fertig.
+
+---
+
+### Szenario 2: ChatGPT für Customer Service mit Kundendaten
+
+**Frage:** Darf ich Kundenfragen an OpenAI senden? Sind meine Daten sicher?
+
+**Antwort:**
+- **DSGVO:** Ja, aber unter Bedingungen:
+  1. Musst OpenAI-Business-Plan haben (besser als Free/Plus)
+  2. Data Processing Agreement mit OpenAI abschließen
+  3. Datenschutz aktualisieren: „Wir nutzen OpenAI ChatGPT. Deine Frage wird an OpenAI übertragen."
+  4. Ggf. Kundendaten anonymisieren vor Senden (Name rauslöschen)
+
+- **AI Act:** Begrenzt-Risiko (Chatbot)
+  - Nutzer informieren, dass Chatbot KI ist ✓
+  - Besser: auch dass Daten zu OpenAI gehen ✓
+
+- **Praktisch:**
+```
+Chatbot-Disclaimer auf Website:
+"Dieser Support wird von ChatGPT (OpenAI) betrieben.
+Deine Anfrage wird an OpenAI übertragen zur Beantwortung.
+Bitte keine sensiblen Daten eingeben.
+Datenschutz: [Link zu aktualiserter Datenschutzerklärung]"
+```
+
+---
+
+### Szenario 3: Lokales Sprachmodell trainiert mit Kundendaten
+
+**Frage:** Wir möchten unser eigenes Modell mit Support-Chats trainieren. Brauchen wir Erlaubnis?
+
+**Antwort:**
+- **DSGVO:** JA – Rechtsgrundlage nötig
+  - Option 1: Berechtigtes Interesse (musst begründen: Warum brauchst du das?)
+  - Option 2: Kunden-Einwilligung (schwer zu skalieren)
+  - Option 3: Anonymisiere Daten vorher (Namen, Kontonummern raus)
+
+- **DPIA:** JA – hochrisiko (du trainierst mit realen Kundendaten)
+  - Risiken: Leak von Support-Inhalten, Bias gegen bestimmte Kundengruppen, Datensicherheit
+
+- **AI Act:** JA – wenn hochrisiko (z.B. Kreditvergabe-Support)
+  - Dokumentation nötig
+
+- **Praktisch:**
+```
+Rechtsgrundlage: Berechtigtes Interesse
+"Wir nutzen anonymisierte Support-Chats zur Verbesserung unseres Support-Systems.
+Vor Training werden Name, Kontonummer und sensible Daten entfernt.
+Kunden können unter [Email] widersprechen."
+
+Maßnahmen:
+1. Anonymisierung: Automatisches Scriptl, das Daten entfernt
+2. DPIA vor Training
+3. Bias-Tests: Antwortet das Modell fair auf verschiedene Kundentypen?
+4. Datensicherheit: Wo ist das Modell gespeichert? Verschlüsselung?
+```
+
+---
+
+### Szenario 4: Automatisierte Kreditevaluation
+
+**Frage:** Wir nutzen ein KI-Tool für Kreditentscheidungen. Welche DSGVO + AI Act-Pflichten?
+
+**Antwort:**
+- **DSGVO Art. 22:** ✓ Menschliche Kontrolle MUSS sein
+  - KI analysiert → Sachbearbeiter bestätigt/lehnt ab
+  - Bewerber kann Einspruch erheben
+
+- **DSGVO DPIA:** ✓ Pflicht
+  - Risiken: Diskriminierung, falsche Bewertung, Datenleck
+  - Maßnahmen: Bias-Tests, Audit, menschliche Kontrolle
+
+- **AI Act Hochrisiko:** ✓ Vollständige Compliance nötig
+  - Dokumentation, Transparenz, Monitoring
+
+- **Praktisch:**
+```
+KPI für Compliance:
+- 100% der Ablehnungen geprüft und freigebeben von Sachbearbeiter (menschliche Kontrolle)
+- Monatliche Bias-Analyse: Wird eine Gruppe diskriminiert?
+- Einspruch-Prozess: Kunde kann Entscheidung anfechten
+- DPIA jährlich aktualisiert
+- AI Act Dokumentation gepflegt
+```
+
+---
+
+## Teil 5: Cloud AI Providers und Data Processing Agreements
+
+### 5.1 Wer ist der Datenverarbeiter?
+
+**Wenn du ChatGPT/Azure OpenAI/Google Bard nutzt:**
+
+- Du (dein Unternehmen) = **Datenverantwortlicher** (Controller)
+- OpenAI/Microsoft/Google = **Auftragsverarbeiter** (Processor)
+- Du brauchst einen **Datenverarbeitungsvertrag (DPA)** mit dem Provider
+
+### 5.2 Was muss der DPA beinhalten?
+
+Wichtige Punkte:
+
+| Punkt | Bedeutung | Prüfung |
+|-------|-----------|---------|
+| **Datenerfassung** | Was darf der Provider mit deinen Daten tun? | Darf OpenAI für Modell-Training nutzen? (meist JA mit Business-Plan, NEIN mit Privacy-Addendum) |
+| **Datentransfer** | Wohin gehen die Daten? (USA? EU?) | Sind Transfers durch SCCs (Standard Contractual Clauses) gedeckt? |
+| **Speicherdauer** | Wie lange hält der Provider deine Daten? | OpenAI: 30 Tage (ohne Privacy-Addendum: länger für Training) |
+| **Subverarbeiter** | Wer sind die Unterauftragnehmer? | OpenAI kann mit anderen Firmen arbeiten |
+| **Sicherheit** | Welche Sicherheitsmaßnahmen? | Verschlüsselung, Zugriffskontrolle, Audits |
+| **Löschung** | Was passiert mit deinen Daten am Ende? | Archiviert oder gelöscht? |
+
+### 5.3 Checks durchführen
+
+Für jeden Cloud-AI-Provider, den du nutzt:
+
+- [ ] **DPA existiert?** Ja / Nein
+- [ ] **Privacy Addendum?** Ja / Nein (verhindert Datennutzung für Training)
+- [ ] **Datenfluss geklärt?** Ja / Nein (wo gehen meine Daten hin?)
+- [ ] **Subverarbeiter gelistet?** Ja / Nein
+- [ ] **Sicherheit dokumentiert?** Ja / Nein (mindestens ISO 27001)
+
+**Wenn irgendein "Nein":** Entweder Provider kontaktieren oder zu einem anderen wechseln.
+
+---
+
+## Teil 6: Rechtliche Schnittmengen und Compliance
+
+### Was passiert, wenn beide gelten?
+
+Die größeren Anforderungen gewinnen:
+
+| Anwendungsfall | DSGVO-Anforderung | AI Act-Anforderung | Compliance |
+|---|---|---|---|
+| **Hochrisiko-KI mit Automatisierung** | Menschliche Kontrolle (Art. 22) | Menschliche Kontrolle | Beide erfüllt ✓ |
+| **Hochrisiko-KI + sensible Daten** | DPIA + Transparenz | Dokumentation + Monitoring | DPIA + AI Act Doku kombinieren |
+| **Niedrig-risiko, aber automatisiert** | Art. 22 gilt | Art. 22 mit Exempt | Trotzdem Mensch erforderlich |
+
+**Praktisch:** Wenn du DSGVO-Anforderungen + AI Act-Anforderungen erfüllst, bist du safe.
+
+### Integrierter Compliance-Prozess
+
+Statt DSGVO und AI Act getrennt: Kombiniert denken:
+
+```
+KI-SYSTEM-EINFÜHRUNG
+
+1. DSGVO-PRÜFUNG
+   - Welche Daten verarbeitest du?
+   - Rechtsgrundlage vorhanden?
+   - Transparenz aktualisiert?
+
+2. AI ACT PRÜFUNG
+   - Risikoklasse?
+   - Hochrisiko? → Dokumentation + Kontrollen
+
+3. KOMBINIERT
+   - Falls beides relevant: DPIA + AI Act Doku zusammenfassen
+   - Menschliche Kontrolle etablieren
+   - Transparenz festlegen
+   - Monitoring implementieren
+
+4. DOKUMENTATION
+   - Ein gemeinsames Dokument (nicht zwei separate)
+   - Zeigt: Compliance mit DSGVO + AI Act
+```
+
+---
+
+## Checkliste
+
+- [ ] Alle KI-Systeme aufgelistet (welche Daten verarbeiten sie?)
+- [ ] DSGVO Rechtsgrundlage pro System (Art. 6) geklärt
+- [ ] Datenschutzerklärung aktualisiert (KI-Hinweis)
+- [ ] Hochrisiko-Systeme: DPIA durchgeführt
+- [ ] Automatisierte Entscheidungen: Art. 22 Exemption geprüft
+- [ ] Cloud-AI-Provider: DPA vorhanden und geprüft
+- [ ] Transparenz-Maßnahmen für Nutzer implementiert
+- [ ] Menschliche Kontrolle für kritische Systeme etabliert
+- [ ] Einspruchsrecht dokumentiert
+- [ ] Monitoring und Logging eingerichtet
+- [ ] Datenschutz-Officer (oder verantwortliche Person) informiert
+
+## Quellen und Links
+
+- [GDPR (EUR-Lex)](https://eur-lex.europa.eu/eli/reg/2016/679/oj)
+- [GDPR.gv.at](https://www.dsb.gv.at)

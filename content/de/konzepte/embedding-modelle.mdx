@@ -1,0 +1,468 @@
+---
+title: Embedding-Modelle
+date: 2026-03-21
+summary: Wie Embeddings funktionieren, Training (Contrastive Learning), MTEB Benchmark, Vergleich — Sentence-Transformers, OpenAI, Nomic, BGE, E5
+tags: [embeddings, semantic-search, sentence-transformers, mteb, contrastive-learning, vector-similarity]
+author: AI Engineering
+section: Konzepte
+---
+
+# Embedding-Modelle verstehen
+
+Embeddings konvertieren Text in hochdimensionale Vektoren, die Bedeutung repräsentieren. Ähnliche Texte haben ähnliche Vektoren.
+
+```
+Text: "Ein brauner Hund sitzt"
+Embedding: [0.12, -0.45, 0.89, ..., -0.23]  (384 oder 768 Dimensionen)
+
+Text: "Der Hund ist braun"
+Embedding: [0.15, -0.43, 0.87, ..., -0.21]  (Sehr ähnlich!)
+
+Cosine Similarity = 0.99 (sehr ähnlich)
+```
+
+---
+
+## Wie Embeddings trainiert werden
+
+### Contrastive Learning
+
+Das Standard-Training-Paradigma.
+
+```
+Gegeben: Tripel (Anker, Positiv, Negativ)
+  - Anker: "Ein Hund sitzt"
+  - Positiv: "Der Hund sitzt" (paraphrase, ähnlich)
+  - Negativ: "Ein Apfel liegt" (nicht verwandt)
+
+Ziel: Anker nahe bei Positiv, weit weg von Negativ
+```
+
+### Triplet Loss
+
+```python
+def triplet_loss(anchor, positive, negative, margin=0.5):
+    """
+    anchor, positive, negative: embeddings (batch_size, embedding_dim)
+    """
+    # Distanzen
+    pos_distance = torch.norm(anchor - positive, dim=1)
+    neg_distance = torch.norm(anchor - negative, dim=1)
+
+    # Loss: positive sollte näher als negative sein
+    loss = torch.relu(pos_distance - neg_distance + margin)
+    return loss.mean()
+
+# Bedeutung:
+# pos_distance < neg_distance - margin
+# Wenn erfüllt: loss = 0 (perfect)
+# margin = Sicherheitsabstand
+```
+
+### Contrastive Loss (pairweise)
+
+```python
+def contrastive_loss(embeddings_1, embeddings_2, labels, temperature=0.07):
+    """
+    labels: 1 wenn Paar ähnlich, 0 wenn anders
+    """
+    # Cosine Similarity
+    sim_matrix = torch.nn.functional.cosine_similarity(
+        embeddings_1.unsqueeze(1),
+        embeddings_2.unsqueeze(0),
+        dim=2
+    )
+
+    # Skalierung (temperature)
+    sim_matrix = sim_matrix / temperature
+
+    # Logistische Regression
+    loss = torch.nn.functional.binary_cross_entropy_with_logits(
+        sim_matrix,
+        labels.float()
+    )
+    return loss
+```
+
+---
+
+## MTEB Benchmark
+
+Massive Text Embedding Benchmark - Standard Evaluation für Embeddings.
+
+### Aufgaben-Kategorien
+
+```
+1. Retrieval (30 Datasets)
+   - Finde relevante Dokumente für Queries
+   - Metrik: nDCG@10
+
+2. Clustering (11 Datasets)
+   - Klustere ähnliche Texte
+   - Metrik: V-Measure
+
+3. Semantic Search (14 Datasets)
+   - Finde semantisch ähnliche Texte
+   - Metrik: nDCG@10
+
+4. Reranking (4 Datasets)
+   - Re-ranke Kandidaten nach Relevanz
+   - Metrik: nDCG@10
+
+5. Pair Classification (3 Datasets)
+   - Bestimme ob Paar semantisch ähnlich
+   - Metrik: Accuracy
+
+6. Classification (12 Datasets)
+   - Klassifiziere Texte
+   - Metrik: Accuracy
+
+7. STS (Semantic Textual Similarity) (14 Datasets)
+   - Bewerte Ähnlichkeit von Paaren (0-5)
+   - Metrik: Spearman Correlation
+```
+
+### Top Modelle (2024)
+
+| Modell | Größe | Retrieval | STS | Clustering | Allgemein | Kosten |
+|--------|-------|-----------|-----|-----------|-----------|--------|
+| BGE-M3 | 568M | 64.6 | 86.2 | 46.8 | 73.5 | Free |
+| E5-large-v2 | 335M | 63.2 | 87.1 | 44.2 | 72.4 | Free |
+| Nomic-Embed | 137M | 61.7 | 85.3 | 43.1 | 69.8 | Free |
+| OpenAI ada | 1.2B | 62.3 | 84.9 | 44.5 | 70.2 | $0.00002/1K |
+| Cohere-V3 | Proprietary | 66.2 | 88.5 | 48.1 | 75.1 | $0.025/1M |
+
+---
+
+## Popular Embedding Modelle
+
+### Sentence-Transformers (SBERT)
+
+Basis der meisten Open-Source Embeddings.
+
+```python
+from sentence_transformers import SentenceTransformer, util
+
+# Modell laden
+model = SentenceTransformer('all-MiniLM-L6-v2')  # 22M params, 384-dim
+
+# Embeddings generieren
+sentences = [
+    "Ein Hund sitzt auf der Matte",
+    "Der Hund liegt auf dem Teppich",
+    "Ein Auto fährt auf der Straße"
+]
+
+embeddings = model.encode(sentences)
+# Shape: (3, 384)
+
+# Ähnlichkeit berechnen
+similarity_matrix = util.pytorch_cos_sim(embeddings, embeddings)
+print(similarity_matrix)
+# [[1.00, 0.87, 0.12],
+#  [0.87, 1.00, 0.15],
+#  [0.12, 0.15, 1.00]]
+```
+
+### OpenAI Embeddings (ada-002)
+
+```python
+from openai import OpenAI
+
+client = OpenAI()
+
+response = client.embeddings.create(
+    input="Der schnelle braune Fuchs",
+    model="text-embedding-3-small"  # 1536-dim, schnell
+)
+
+embedding = response.data[0].embedding
+# [0.012, -0.045, ..., 0.089]  (1536 dimensions)
+```
+
+### BGE (BAAI General Embedding)
+
+Best für Retrieval Tasks.
+
+```python
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("BAAI/bge-large-en-v1.5")
+# 335M params, 768-dim
+
+# Multi-lingual Version
+model = SentenceTransformer("BAAI/bge-m3")
+# Unterstützt 100+ Sprachen!
+
+embeddings = model.encode(["Hallo", "Hello", "你好"])
+# Alle drei sind semantisch ähnlich → ähnliche Embeddings
+```
+
+### Nomic Embed
+
+Effiziente Embeddings (kleineres Modell).
+
+```python
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("nomic-ai/nomic-embed-text-v1.5")
+# 137M params, 768-dim
+# Schneller als größere Modelle
+
+# Trainiert auf großem Datenset (Nomic Corpus)
+embeddings = model.encode(["text1", "text2"])
+```
+
+### E5 (Entence Embeddings from Transformers)
+
+```python
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("intfloat/e5-large-v2")
+
+# Wichtig: E5 erwartet prefix!
+sentences = [
+    "passage: Ein Hund sitzt auf einer Matte",
+    "query: Wo sitzt der Hund?"
+]
+
+embeddings = model.encode(sentences, prompt_name="")
+# Prefix ändert Embedding Space!
+```
+
+---
+
+## Embedding Space Dimensionen
+
+```
+Größere Dimensionen:
+  OpenAI ada: 1536-dim → Mehr Nuancen, aber größer
+  BGE/E5: 768-dim → Balanciert
+  MiniLM: 384-dim → Schnell, kleiner
+
+Regel:
+  Höhere Dimensionalität → Bessere Qualität
+  Aber: 768-dim ist meist Sweetspot (Qualität + Speed)
+```
+
+---
+
+## Semantische Suche (praktisch)
+
+### Vector Database Setup
+
+```python
+from sentence_transformers import SentenceTransformer
+import faiss
+import numpy as np
+
+# 1. Modell laden
+model = SentenceTransformer("all-MiniLM-L6-v2")
+
+# 2. Dokumente einbetten
+documents = [
+    "Python ist eine Programmiersprache",
+    "Java wird oft für Backend verwendet",
+    "JavaScript läuft im Browser",
+    "Machine Learning ist ein Gebiet der KI"
+]
+
+doc_embeddings = model.encode(documents, convert_to_numpy=True)
+# Shape: (4, 384)
+
+# 3. FAISS Index erstellen (Ähnlichkeitssuche)
+index = faiss.IndexFlatL2(384)  # L2 Distance
+index.add(doc_embeddings.astype('float32'))
+
+# 4. Query
+query = "Was ist eine Programmiersprache?"
+query_embedding = model.encode(query, convert_to_numpy=True)
+
+distances, indices = index.search(
+    query_embedding.astype('float32').reshape(1, -1),
+    k=2  # Top 2 Ergebnisse
+)
+
+print("Top Results:")
+for idx in indices[0]:
+    print(f"  - {documents[idx]}")
+```
+
+### Mit Vector DB (Weaviate, Milvus, Pinecone)
+
+```python
+import weaviate
+
+# Weaviate Client
+client = weaviate.Client("http://localhost:8080")
+
+# Schema
+client.schema.create_class({
+    "class": "Document",
+    "vectorizer": "text2vec-transformers",
+    "properties": [
+        {"name": "text", "dataType": ["string"]},
+        {"name": "source", "dataType": ["string"]}
+    ]
+})
+
+# Indexieren
+documents = [
+    {"text": "Python ist great für ML", "source": "blog1"},
+    {"text": "JavaScript für Web Development", "source": "blog2"}
+]
+
+for doc in documents:
+    client.data_object.create(
+        class_name="Document",
+        data_object=doc,
+        vector=model.encode(doc["text"])  # Embedding
+    )
+
+# Suchen
+query = "ML Sprachen"
+result = client.query.get(
+    "Document",
+    ["text", "source"]
+).with_near_text({
+    "concepts": [query]
+}).with_limit(3).do()
+
+print(result)
+```
+
+---
+
+## Finetuning von Embeddings
+
+Für Task-spezifische Verbesserungen.
+
+```python
+from sentence_transformers import SentenceTransformer, InputExample, losses
+from torch.utils.data import DataLoader
+
+# Modell laden
+model = SentenceTransformer("all-MiniLM-L6-v2")
+
+# Training Data
+train_examples = [
+    InputExample(
+        texts=["Hund sitzt", "Der Hund sitzt"],
+        label=0.9  # 0-1, wie ähnlich
+    ),
+    InputExample(
+        texts=["Hund sitzt", "Auto fährt"],
+        label=0.1  # Nicht ähnlich
+    ),
+    # ... mehr Beispiele
+]
+
+# DataLoader
+train_dataloader = DataLoader(train_examples, shuffle=True, batch_size=16)
+
+# Loss Function
+train_loss = losses.CosineSimilarityLoss(model)
+
+# Finetuning
+model.fit(
+    train_objectives=[(train_dataloader, train_loss)],
+    epochs=10,
+    warmup_steps=100,
+    show_progress_bar=True
+)
+
+model.save_pretrained("./my-embeddings")
+```
+
+---
+
+## Best Practices
+
+### 1. Model Wahl basierend auf Use Case
+
+```
+Retrieval (Dokumente suchen):
+  → BGE oder E5 (spezialisiert)
+
+Clustering:
+  → Größere Modelle (768-dim+)
+
+Speed kritisch:
+  → Nomic oder MiniLM
+
+Hohe Qualität:
+  → BGE-M3 oder OpenAI ada
+```
+
+### 2. Batch Processing für große Datenmengen
+
+```python
+# ❌ Langsam: Ein Document nach dem anderen
+for doc in documents:
+    embedding = model.encode(doc)
+
+# ✅ Schnell: Batch Processing
+embeddings = model.encode(
+    documents,
+    batch_size=128,
+    show_progress_bar=True,
+    convert_to_numpy=True
+)
+```
+
+### 3. Normalisierung und Skalierung
+
+```python
+from sklearn.preprocessing import normalize
+
+# Normalisiere auf Unit Sphere (für Cosine Similarity)
+embeddings_normalized = normalize(embeddings, norm='l2')
+
+# Cosine Similarity ist dann einfach Dot Product
+similarity = embeddings_normalized @ embeddings_normalized.T
+```
+
+---
+
+## Häufige Fehler
+
+### 1. Falsche Prefix (bei E5)
+
+```
+❌ Ohne Prefix
+text = "Python ist great"
+embedding = model.encode(text)
+
+✅ Mit Prefix
+text = "passage: Python ist great"  # oder "query: ..."
+embedding = model.encode(text)
+```
+
+### 2. Zu kleine Dimensionen
+
+```
+❌ 256-dim: Zu viel Informationsverlust
+✅ 384-dim+: Guter Balance
+```
+
+### 3. Keine Normalisierung bei Cosine Similarity
+
+```
+❌ Cosine Similarity ohne Normalisierung
+sim = dot_product(e1, e2)
+
+✅ Mit Normalisierung
+e1_norm = e1 / ||e1||
+e2_norm = e2 / ||e2||
+sim = dot_product(e1_norm, e2_norm)
+```
+
+---
+
+## Quellen und Links
+
+- [Sentence-BERT (Reimers & Gurevych 2019)](https://arxiv.org/abs/1908.10084)
+- [MTEB Benchmark](https://github.com/embeddings-benchmark/mteb)
+- [BGE - BAAI General Embedding](https://github.com/FlagOpen/FlagEmbedding)
+- [E5 - Entence Embeddings](https://github.com/microsoft/unilm/tree/master/e5)
+- [Nomic Embed](https://huggingface.co/nomic-ai/nomic-embed-text-v1.5)

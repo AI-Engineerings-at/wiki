@@ -1,0 +1,245 @@
+---
+title: "Data Privacy & Data Handling for AI"
+description: "Data handling for AI: anonymization, differential privacy, on-premise vs cloud, data residency, encryption. GDPR implications for training data, right to deletion."
+section: "security"
+---
+
+# Data Privacy & Data Handling for AI
+
+AI systems need data. But data is sensitive. This page covers legal and technical aspects of data privacy in AI systems.
+
+---
+
+## 1. GDPR Compliance for AI
+
+### 1.1 Nine Core GDPR Principles
+
+```yaml
+1. Lawfulness
+   - Processing must have legal basis
+   - Consent, Contract, Legal Obligation, Vital Interests, Public Task, Legitimate Interest
+
+2. Fairness
+   - Processing must not wrongfully disadvantage
+   - Transparency about data usage
+
+3. Transparency
+   - Users must know what data is processed
+   - Privacy statement required
+
+4. Purpose Limitation
+   - Data can only be used for original purpose
+   - Cannot be repurposed later
+
+5. Data Minimization
+   - Only collect/keep necessary data
+   - Less data = less risk
+
+6. Accuracy
+   - Data must be correct
+   - Must have process for corrections
+
+7. Storage Limitation
+   - Don't store longer than necessary
+   - Delete or anonymize after purpose fulfilled
+
+8. Integrity & Confidentiality
+   - Protection against misuse, loss, unauthorized access
+   - Encryption, access controls, auditing
+
+9. Accountability
+   - Prove GDPR compliance
+   - Records of processing (DPA), contracts (DPA), impact assessments
+```
+
+---
+
+## 2. Anonymization & Pseudonymization
+
+### 2.1 Anonymization Techniques
+
+```python
+import hashlib
+import secrets
+from typing import List, Dict
+from collections import Counter
+
+class AnonymizationEngine:
+    """Tools for data anonymization"""
+
+    @staticmethod
+    def irreversible_hash(value: str, salt: str = None) -> str:
+        """Irreversible hashing (true anonymization)"""
+        if salt is None:
+            salt = secrets.token_hex(16)
+
+        combined = f"{value}{salt}".encode('utf-8')
+        hashed = hashlib.sha256(combined).hexdigest()
+        return hashed[:16]
+
+    @staticmethod
+    def k_anonymity_check(dataset: List[Dict], quasi_identifiers: List[str], k: int = 5) -> bool:
+        """
+        K-Anonymity Check: Each quasi-identifier combination appears >= k times
+        Prevents re-identification
+
+        Args:
+            dataset: List of records
+            quasi_identifiers: Columns that could identify
+            k: Minimum frequency
+        """
+        combinations = []
+        for record in dataset:
+            combo = tuple(record.get(qi) for qi in quasi_identifiers)
+            combinations.append(combo)
+
+        counter = Counter(combinations)
+        return all(count >= k for count in counter.values())
+
+# Usage:
+engine = AnonymizationEngine()
+
+dataset = [
+    {"age": "25-30", "gender": "M", "zip": "10001"},
+    {"age": "25-30", "gender": "M", "zip": "10001"},
+    {"age": "25-30", "gender": "M", "zip": "10001"},
+    {"age": "25-30", "gender": "M", "zip": "10001"},
+    {"age": "25-30", "gender": "M", "zip": "10001"},
+]
+is_kanon = engine.k_anonymity_check(dataset, ["age", "gender"], k=5)
+print(f"5-anonymity satisfied: {is_kanon}")
+```
+
+### 2.2 Differential Privacy
+
+```python
+import numpy as np
+
+class DifferentialPrivacyEngine:
+    """Differential Privacy for ML"""
+
+    @staticmethod
+    def laplace_mechanism(value: float, sensitivity: float, epsilon: float) -> float:
+        """
+        Laplace Mechanism: Add Laplace-distributed noise
+
+        Args:
+            value: True value (e.g., average)
+            sensitivity: Maximum change when removing one row
+            epsilon: Privacy budget (higher = less privacy, more accuracy)
+        """
+        scale = sensitivity / epsilon
+        noise = np.random.laplace(loc=0, scale=scale)
+        return value + noise
+
+# Usage:
+engine = DifferentialPrivacyEngine()
+
+true_value = 50000
+sensitivity = 100000
+epsilon = 1.0
+
+noisy = engine.laplace_mechanism(true_value, sensitivity, epsilon)
+print(f"True value: {true_value}")
+print(f"DP value: {noisy:.2f}")
+```
+
+---
+
+## 3. On-Premise vs Cloud: Data Residency
+
+```python
+class DataResidencyManager:
+    """Manages data location compliance"""
+
+    COMPLIANT_REGIONS = {
+        "EU": ["eu-west-1", "eu-central-1", "eu-north-1"],
+        "US": ["us-east-1", "us-west-2"],
+    }
+
+    def __init__(self, required_regions: List[str]):
+        self.required_regions = required_regions
+        self.audit_log = []
+
+    def store_data(self, data: str, region: str) -> bool:
+        """Stores data only in compliant regions"""
+        allowed = False
+        for req_region in self.required_regions:
+            if region in self.COMPLIANT_REGIONS.get(req_region, []):
+                allowed = True
+                break
+
+        self.audit_log.append({
+            "action": "store",
+            "region": region,
+            "status": "ALLOWED" if allowed else "DENIED"
+        })
+
+        return allowed
+
+# Usage:
+manager = DataResidencyManager(required_regions=["EU"])
+
+ok = manager.store_data("customer data", region="eu-west-1")
+print(f"Store in EU: {ok}")  # True
+
+not_ok = manager.store_data("customer data", region="us-east-1")
+print(f"Store in US: {not_ok}")  # False
+```
+
+---
+
+## 4. Encryption at Rest & In Transit
+
+```python
+from cryptography.fernet import Fernet
+import ssl
+
+class DataEncryption:
+    """Encryption for data"""
+
+    @staticmethod
+    def encrypt_at_rest(data: str, key: bytes) -> str:
+        """Encrypts data for storage"""
+        cipher = Fernet(key)
+        encrypted = cipher.encrypt(data.encode('utf-8'))
+        return encrypted.decode('utf-8')
+
+    @staticmethod
+    def decrypt_at_rest(encrypted_data: str, key: bytes) -> str:
+        """Decrypts stored data"""
+        cipher = Fernet(key)
+        decrypted = cipher.decrypt(encrypted_data.encode('utf-8'))
+        return decrypted.decode('utf-8')
+
+    @staticmethod
+    def setup_tls_for_transit():
+        """SSL/TLS Configuration for Data in Transit"""
+        context = ssl.create_default_context()
+        context.check_hostname = True
+        context.verify_mode = ssl.CERT_REQUIRED
+        context.minimum_version = ssl.TLSVersion.TLSv1_2
+        return context
+
+# Usage:
+key = Fernet.generate_key()
+encryption = DataEncryption()
+
+plaintext = "Sensitive customer data"
+encrypted = encryption.encrypt_at_rest(plaintext, key)
+decrypted = encryption.decrypt_at_rest(encrypted, key)
+
+print(f"Encrypted: {encrypted}")
+print(f"Decrypted: {decrypted}")
+```
+
+---
+
+## 5. Sources and Links
+
+- **GDPR (Official)**: https://gdpr-info.eu/
+- **GDPR Art. 17 (Right to Deletion)**: https://gdpr-info.eu/art-17-gdpr/
+- **Differential Privacy**: https://en.wikipedia.org/wiki/Differential_privacy
+- **K-Anonymity**: https://en.wikipedia.org/wiki/K-anonymity
+- **Microsoft Presidio (PII)**: https://github.com/microsoft/presidio
+- **OpenDP (Differential Privacy)**: https://opendp.org/

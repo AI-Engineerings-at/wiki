@@ -1,0 +1,407 @@
+---
+title: AI API Basics
+date: 2026-03-21
+summary: How AI APIs work. REST, authentication, rate limits, pricing models. Anthropic, OpenAI, Google, Mistral APIs explained.
+tags: [api, rest, authentication, rate-limits, pricing]
+author: AI Engineering
+---
+
+# AI API Basics
+
+AI APIs are the practical way to use large models. Instead of hosting 70B yourself, APIs connect you remotely and return responses.
+
+## What is an API?
+
+**API = Application Programming Interface.** A way for your software to talk to the model.
+
+Flow:
+```
+You → POST /v1/messages → OpenAI Server
+OpenAI Server → Runs model → Response
+OpenAI Server → JSON → Your App
+```
+
+## REST APIs: The Standard
+
+Most AI APIs are **REST APIs**.
+
+REST uses HTTP methods:
+- **POST:** Send data (prompt), get answer
+- **GET:** Fetch information
+- **PUT:** Update something
+- **DELETE:** Delete something
+
+Example POST (curl):
+
+```bash
+curl -X POST https://api.anthropic.com/v1/messages \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "model": "claude-3-sonnet-20240229",
+    "max_tokens": 1024,
+    "messages": [
+      {"role": "user", "content": "What is 2+2?"}
+    ]
+  }'
+```
+
+Response (JSON):
+```json
+{
+  "id": "msg_123abc",
+  "content": [
+    {"type": "text", "text": "2 + 2 = 4"}
+  ],
+  "stop_reason": "end_turn"
+}
+```
+
+## Authentication: API Keys
+
+You need an **API Key** to use an API.
+
+**Important:** Never hardcode keys or commit to GitHub!
+
+Better: Environment variables:
+
+```bash
+# .env file (DO NOT commit)
+ANTHROPIC_API_KEY=sk-ant-...
+
+# Python
+import os
+api_key = os.getenv("ANTHROPIC_API_KEY")
+```
+
+Or use secret management (Vault, AWS Secrets Manager, etc).
+
+## Rate Limits
+
+APIs have limits to prevent abuse.
+
+Typical:
+```
+- 100 requests per minute (RPM)
+- 100,000 tokens per minute (TPM)
+```
+
+Exceed limit:
+```
+HTTP 429: Too Many Requests
+```
+
+Solution: **Exponential Backoff**
+
+```python
+import time
+
+retries = 0
+wait = 1
+
+while retries < 5:
+    try:
+        response = api.make_request()
+        return response
+    except RateLimitError:
+        wait *= 2  # 1s → 2s → 4s → 8s
+        time.sleep(wait)
+        retries += 1
+```
+
+## Pricing Models
+
+### Pay-Per-Token (OpenAI, Anthropic, Google)
+
+You pay per token (input + output):
+
+```
+Input: $1 per 1M tokens
+Output: $3 per 1M tokens
+
+Prompt: "What is AI?" (4 tokens)
+Response: "AI is..." (50 tokens)
+
+Cost: (4/1M * $1) + (50/1M * $3) ≈ $0.00016
+```
+
+### Pay-Per-Request
+
+Flat fee per request:
+```
+$0.10 per request
+```
+
+Good for small requests. Bad for large.
+
+### Subscription (ChatGPT Plus)
+
+$20/month unlimited. Simple but expensive if you use a lot.
+
+## API Comparison
+
+| API | Model | Input | Output | Latency |
+|-----|-------|-------|--------|---------|
+| OpenAI (GPT-4) | 175B+ | $30/1M | $60/1M | Fast |
+| Anthropic (Claude 3) | 200B+ | $3/1M | $15/1M | Medium |
+| Google (Gemini) | 200B+ | $1/1M | $2/1M | Fast |
+| Mistral | 70B+ | $0.25/1M | $0.75/1M | Medium |
+| Ollama (local) | - | Free | Free | Slow |
+
+## Anthropic API Practical
+
+Step 1: Get API Key
+
+```bash
+# From https://console.anthropic.com/
+export ANTHROPIC_API_KEY=sk-ant-...
+```
+
+Step 2: Python Request
+
+```python
+import anthropic
+
+client = anthropic.Anthropic()
+
+message = client.messages.create(
+    model="claude-3-sonnet-20240229",
+    max_tokens=1024,
+    messages=[
+        {"role": "user", "content": "Write a limerick"}
+    ]
+)
+
+print(message.content[0].text)
+```
+
+Step 3: Streaming
+
+```python
+with client.messages.stream(
+    model="claude-3-sonnet-20240229",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "Hello"}]
+) as stream:
+    for text in stream.text_stream:
+        print(text, end="", flush=True)
+```
+
+## OpenAI API Practical
+
+Similar structure, different endpoint:
+
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-...")
+
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[{"role": "user", "content": "Hi"}]
+)
+
+print(response.choices[0].message.content)
+```
+
+## Error Handling
+
+APIs fail. Be prepared:
+
+```python
+try:
+    response = client.messages.create(...)
+except anthropic.RateLimitError:
+    print("Rate limited, retry later")
+except anthropic.APIError as e:
+    print(f"API Error: {e}")
+```
+
+Common errors:
+- **401 Unauthorized:** Wrong API key
+- **429 Too Many Requests:** Rate limit
+- **500 Internal Server Error:** Server problem
+- **503 Service Unavailable:** API down
+
+## Best Practices
+
+1. **Secure keys:** Environment variables, vaults
+2. **Respect rate limits:** Implement backoff
+3. **Set timeouts:** Don't wait forever
+   ```python
+   response = client.messages.create(
+       ...,
+       timeout=30
+   )
+   ```
+4. **Log requests:** For debugging
+5. **Monitor costs:** Track spending
+   ```python
+   cost = response.usage.output_tokens / 1_000_000 * 0.015
+   print(f"Cost: ${cost}")
+   ```
+
+## Local Alternative: Ollama
+
+Free, private local API:
+
+```bash
+ollama pull llama2
+ollama serve
+
+# API available at http://localhost:11434
+```
+
+## Cost Estimation
+
+### Scenario 1: Small App (1000 API calls/month)
+
+```
+Model: GPT-4 (expensive)
+Input: 200 tokens/call = 200k tokens/month = $6/month
+Output: 500 tokens/call = 500k tokens/month = $30/month
+Total: ~$40/month
+
+Model: Claude 3 Sonnet (cheaper)
+Input: 200 tokens = $0.60/month
+Output: 500 tokens = $7.50/month
+Total: ~$10/month
+
+Savings: 75% with Claude
+```
+
+### Scenario 2: Production (100k API calls/month)
+
+```
+GPT-4: $4,000/month
+Claude: $1,000/month
+Self-hosted (Ollama): $0 (electricity only ~$50/month)
+
+Break-even: Self-hosting pays off after 2 months
+```
+
+## Streaming vs Non-Streaming
+
+### Non-Streaming (Batch)
+
+```python
+response = client.messages.create(...)  # Waits for full response
+# Pros: Simple, full response at once
+# Cons: Higher latency, user waits
+```
+
+### Streaming (Real-time)
+
+```python
+with client.messages.stream(...) as stream:
+    for chunk in stream.text_stream:
+        print(chunk, end="", flush=True)  # Print as it comes
+# Pros: Lower perceived latency, better UX
+# Cons: Slightly more complex code
+```
+
+**Recommendation**: Use streaming for chat/UI, batch for background tasks.
+
+## Monitoring API Usage
+
+### Track Spending
+
+```python
+def track_cost(response, model="claude-3-sonnet"):
+    input_cost = response.usage.input_tokens / 1_000_000 * 0.003
+    output_cost = response.usage.output_tokens / 1_000_000 * 0.015
+    total = input_cost + output_cost
+    print(f"Cost: ${total:.4f}")
+    return total
+
+total_cost = 0
+for request in requests:
+    response = client.messages.create(...)
+    total_cost += track_cost(response)
+print(f"Total monthly: ${total_cost * 1000:.2f}")
+```
+
+### Set Cost Limits
+
+```bash
+# OpenAI: https://platform.openai.com/account/billing/limits
+# Set: Usage limits → $50/month
+# (Prevents surprise bills)
+
+# Anthropic: No automatic limits, monitor console.anthropic.com
+```
+
+## Advanced: Batch Processing
+
+Send multiple requests at once (cheaper):
+
+```python
+# Batch API (if supported)
+batch_requests = [
+    {"custom_id": "req_1", "prompt": "Translate to Spanish: Hello"},
+    {"custom_id": "req_2", "prompt": "Translate to Spanish: Goodbye"},
+]
+
+# Submit batch, get results later (hours)
+# Discount: ~50% cheaper than individual requests
+```
+
+## Prompt Caching (Save Costs)
+
+Reuse long contexts:
+
+```python
+# First request (compute cache)
+response = client.messages.create(
+    model="claude-3-sonnet",
+    system="Long system prompt (50k tokens)",
+    messages=[{"role": "user", "content": "Question"}]
+)
+# Cost: full price
+
+# Second request (reuse cache, if within window)
+response = client.messages.create(
+    model="claude-3-sonnet",
+    system="Same long system prompt",
+    messages=[{"role": "user", "content": "Different question"}]
+)
+# Cost: 10% of previous (cache reuse!)
+```
+
+## Common API Mistakes
+
+| Mistake | Fix |
+|---------|-----|
+| Hardcoding API keys | Use environment variables |
+| Not handling errors | Wrap in try/except, retry logic |
+| Ignoring rate limits | Implement exponential backoff |
+| Streaming without buffering | Buffer chunks before processing |
+| No cost monitoring | Log every API call's cost |
+| Wrong endpoint | Check API docs for correct URL |
+
+## References
+
+- [Anthropic API Docs](https://docs.anthropic.com)
+- [OpenAI API Docs](https://platform.openai.com/docs)
+- [Google AI API](https://ai.google.dev)
+- [Mistral API](https://docs.mistral.ai)
+- [vLLM Local API](https://docs.vllm.ai)
+
+**Last Updated**: 21.03.2026 | **Total Lines**: 400+
+
+# Use locally
+curl -X POST http://localhost:11434/api/generate \
+  -d '{"model":"llama2","prompt":"Hi"}'
+```
+
+Pros: Free, private. Cons: Slow (runs on your machine).
+
+## References
+
+- Anthropic: docs.anthropic.com
+- OpenAI: platform.openai.com/docs
+- REST: MDN Web Docs
+
+## Sources and Links
+
+- [Anthropic Docs](https://docs.anthropic.com)
+- [OpenAI Docs](https://platform.openai.com/docs)

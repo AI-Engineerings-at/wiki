@@ -1,0 +1,110 @@
+---
+title: Model Merging
+date: 2026-03-21
+summary: SLERP, TIES, DARE, Linear Merge, mergekit Tool, Practical Merge Recipes — When Merging Works
+tags: [model-merging, weight-merging, lora-merge, slerp, ties, dare, mergekit]
+author: AI Engineering
+section: Concepts
+---
+
+# Understanding Model Merging
+
+Model Merging combines multiple trained models into one.
+
+## Merge Algorithms
+
+### Linear Merge (Simple)
+
+```python
+# Simple average of weights
+merged_weight = 0.5 * model_a.weight + 0.5 * model_b.weight
+
+# With different proportions
+merged_weight = 0.3 * model_a.weight + 0.7 * model_b.weight
+```
+
+### SLERP (Spherical Linear Interpolation)
+
+```
+Standard Linear: Vectors may get shorter
+SLERP: Interpolates on unit sphere, preserves magnitude
+
+SLERP maintains vector properties while blending
+```
+
+### TIES (Task-Specific Importance based Estimate)
+
+Select important weights from each model intelligently.
+
+### DARE (Drops And REscale)
+
+Drop unimportant weights (~90%), rescale remaining.
+
+---
+
+## mergekit Tool
+
+Popular open-source tool.
+
+```bash
+pip install mergekit
+
+# Configuration: merge_config.yaml
+models:
+  - model_name: model_a_path
+    parameters:
+      weight: 0.5
+  - model_name: model_b_path
+    parameters:
+      weight: 0.5
+
+merge_method: ties
+base_model: model_a_path
+parameters:
+  normalize_weights: true
+```
+
+---
+
+## Practical Merge Recipes
+
+### Recipe 1: Chat + Coding
+
+```yaml
+models:
+  - model_name: codellama/CodeLlama-7b-Instruct-hf
+    parameters:
+      weight: 0.6
+  - model_name: THUDM/chatglm2-6b
+    parameters:
+      weight: 0.4
+
+merge_method: slerp
+base_model: codellama/CodeLlama-7b-Instruct-hf
+```
+
+---
+
+## When Merging Works
+
+### ✅ Merging Works Well
+
+- Diverse models (different tasks)
+- Similar architecture
+- Similar size
+- Fine-tuned on common base
+
+### ❌ Merging Fails
+
+- Too similar models (redundant)
+- Contradictory goals
+- Very different sizes
+- No common base
+
+---
+
+## Sources and Links
+
+- [TIES Merge (Yadav et al. 2023)](https://arxiv.org/abs/2306.01708)
+- [DARE Merge (Wettig et al. 2023)](https://arxiv.org/abs/2311.03099)
+- [mergekit GitHub](https://github.com/cg123/mergekit)

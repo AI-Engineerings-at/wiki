@@ -1,0 +1,611 @@
+---
+title: Claude Code Debugging & Troubleshooting
+date: 2026-03-21
+summary: Umfassender Troubleshooting-Guide — Häufige Fehler, /doctor Command, Diagnostik-Tools, Performance-Optimierung, Plattform-spezifische Issues und wie man Bugs effektiv reported.
+tags: [claude-code, debugging, troubleshooting, diagnostik, performance]
+author: AI Engineering
+---
+
+# Claude Code Debugging & Troubleshooting
+
+Manchmal läuft Claude Code nicht wie erwartet. Dieser Guide hilft dir, Probleme schnell zu finden und zu beheben.
+
+## Erste Anlaufstelle: Der /doctor Command
+
+Wenn ETWAS nicht stimmt, nutze sofort:
+
+```bash
+/doctor
+```
+
+Output zeigt:
+
+```
+Claude Code Diagnostics
+======================
+
+✓ API Key configured
+✓ CLAUDE.md found (245 lines)
+✓ .claude/settings.json valid (3 rules loaded)
+✓ Git repository detected
+✓ Node.js v18.12.0 available
+⚠️ WARNING: Context window at 78% (156k/200k tokens)
+✓ All tools available
+✓ No network issues
+⚠️ WARNING: Hook "PostToolUse" executed slowly (2.3s)
+✓ No API quota issues
+```
+
+Der /doctor sagt dir sofort:
+- Konfiguration OK?
+- Tools funktionieren?
+- Network-Probleme?
+- Performance-Issues?
+
+## Häufige Fehler und Lösungen
+
+### Fehler 1: "CLAUDECODE env var is set"
+
+**Symptom:**
+```
+Error: CLAUDECODE environment variable is already set
+Cannot start nested Claude Code instance
+```
+
+**Ursache:** Du versuchst, Claude Code innerhalb von Claude Code zu starten (z.B. ein Script, das `claude-code` aufruft).
+
+**Lösung:**
+
+```bash
+# FALSCH
+claude-code run "Rufe claude-code auf"
+  ↳ Das startet eine zweite Instanz (Fehler!)
+
+# RICHTIG
+# Nutze die Agent SDK statt CLI
+import anthropic
+
+client = anthropic.Anthropic()
+response = client.messages.create(...)  # ← Das ist OK
+```
+
+Oder: Nutze nicht die CLI, sondern den `client.messages.create()` aus dem SDK.
+
+### Fehler 2: "Context window full"
+
+**Symptom:**
+```
+⚠️ Context window exceeded: 201k/200k tokens
+Claude cannot continue this conversation
+Suggestion: Run /compact to compress context
+```
+
+**Ursache:** Zu viele Nachrichten, zu viele Dateien gelesen. Der Context ist voll.
+
+**Sofort-Lösung:**
+
+```bash
+/compact
+```
+
+Das:
+1. Speichert wichtige Learnings in Session-Memory
+2. Entfernt alte Konversation
+3. Startet mit leerem Context, aber behält Knowledge
+
+**Prävention:**
+
+```bash
+# Monitore Context-Größe
+/cost
+→ Shows "Context: 156k/200k (78%)"
+
+# Compact BEVOR es 200k erreicht
+# Idealerweise bei 150k
+```
+
+### Fehler 3: "Skills not found"
+
+**Symptom:**
+```
+Error: Cannot find skill 'my-custom-skill'
+Looked in: /project/.claude/skills/
+```
+
+**Ursache:** Skill-Verzeichnis-Struktur ist falsch.
+
+**Correct Structure:**
+```
+.claude/skills/
+  └── my-custom-skill/         # ← Verzeichnis mit Bindestrich
+      ├── SKILL.md             # ← Hauptdatei
+      ├── scripts/
+      │   └── main.py
+      └── templates/
+          └── output.md
+```
+
+**FALSCH:**
+```
+.claude/skills/
+  └── my_custom_skill/         # ← Underscore statt Bindestrich
+```
+
+**Fix:**
+
+```bash
+# Umbenennen
+mv .claude/skills/my_custom_skill .claude/skills/my-custom-skill
+
+# Dann startet Claude Code neu und findet den Skill
+```
+
+### Fehler 4: "MCP Server Connection Failed"
+
+**Symptom:**
+```
+Error: Failed to connect to MCP server 'my-mcp-server'
+Connection timeout after 5s
+```
+
+**Ursache:** MCP Server läuft nicht oder falscher Port.
+
+**Debugging:**
+
+```bash
+# 1. Ist der Server am Laufen?
+lsof -i :5000  # Falls Server auf Port 5000 läuft
+→ Sollte "LISTEN" zeigen
+
+# 2. Ist die Konfiguration korrekt?
+cat .claude/settings.json | jq '.mcp'
+
+# 3. Teste Verbindung manuel
+curl http://localhost:5000/health
+
+# 4. Logs prüfen
+tail -f /tmp/mcp-server.log
+```
+
+**Fix:**
+
+```bash
+# Server starten (falls nicht laufen)
+docker run -d -p 5000:5000 my-mcp-server
+
+# Oder wenn Shell-Befehl:
+nohup python mcp_server.py > /tmp/mcp.log 2>&1 &
+
+# Dann Claude Code neu starten
+exit
+claude-code run "Try again"
+```
+
+### Fehler 5: "Permission Denied" beim Write
+
+**Symptom:**
+```
+Error: Write operation denied
+Tool 'Write' is disabled in your configuration
+```
+
+**Ursache:** Deine Permissions erlauben kein Write.
+
+**Check Permissions:**
+
+```bash
+/permissions
+→ Shows: Write: deny
+```
+
+**Fix:**
+
+```bash
+/permissions --set Write ask
+# oder
+/permissions --set Write allow
+```
+
+Lokal konfigurieren (in .claude/settings.local.json):
+
+```json
+{
+  "permissions": {
+    "Write": "allow"
+  }
+}
+```
+
+### Fehler 6: "Rate Limit Exceeded"
+
+**Symptom:**
+```
+Error: Rate limit exceeded
+You've made too many API calls
+Retry after 30 seconds
+```
+
+**Ursache:** Zu viele Claude API Calls hintereinander.
+
+**Sofort-Fix:**
+
+```bash
+# Warte
+sleep 30
+
+# Versuche erneut
+claude-code run "Continue with task"
+```
+
+**Prävention:**
+
+```bash
+# Nutze smaller models wenn möglich
+# In CLAUDE.md:
+model: haiku  # Günstiger, weniger Rate Limits
+
+# Oder: Batch-Requests zusammenfassen
+# Statt 10 einzelne Calls → 1 großer Call mit 10 Tasks
+```
+
+### Fehler 7: "Hooks Failed Silently"
+
+**Symptom:**
+```
+Tried to run hook PreToolUse on Read
+Hook script not found or failed
+Continuing without hook...
+```
+
+**Ursache:** Hook-Script ist nicht ausführbar oder hat Syntax-Fehler.
+
+**Debug:**
+
+```bash
+# 1. Teste das Script manuell
+bash scripts/my-hook.sh
+
+# 2. Schau Hook-Logs an
+cat .claude/hook-logs/PreToolUse_Read.log
+
+# 3. Aktiviere verbose Hook-Logging
+cat > .claude/settings.json << EOF
+{
+  "debug": {
+    "hooks": "verbose"
+  }
+}
+EOF
+
+# 4. Versuche wieder
+/doctor
+```
+
+## The /doctor Command Tiefgang
+
+```bash
+/doctor
+```
+
+Checklist, was /doctor prüft:
+
+| Check | What | Wenn fehlgeschlagen |
+|-------|------|-------------------|
+| API Key | `$ANTHROPIC_API_KEY` gesetzt? | Setze API Key: `export ANTHROPIC_API_KEY=sk_...` |
+| CLAUDE.md | Projekt-Context-Datei vorhanden? | Erstelle `/claude-code /init` |
+| Git Repo | Bist du in einem Git-Repo? | `git init` wenn neu |
+| Network | Kann Claude Code zu API.anthropic.com verbinden? | Firewall? Proxy? |
+| Disk Space | Genug freier Speicher? | Mindestens 1GB |
+| Model Access | Hast du Zugang zu Modellen? | Billing aktiv? Quota? |
+| Tools | Alle Tools vorhanden? | Reinstall: `npm install -g @anthropic-ai/claude-code-cli@latest` |
+
+## Diagnostik-Tools
+
+### Verbose Mode
+
+```bash
+# Alle Details zeigen
+export CLAUDE_CODE_DEBUG=verbose
+claude-code run "Do something"
+```
+
+Output zeigt:
+- Token-Count für jeden Request
+- API Response (Headers, Status)
+- Timing für jeden Schritt
+- Hook-Ausführung
+
+### Network Diagnostics
+
+```bash
+# Teste Verbindung zur Claude API
+curl -v https://api.anthropic.com/v1/health
+
+# Falls hinter Proxy:
+export HTTP_PROXY=http://proxy.example.com:8080
+export HTTPS_PROXY=http://proxy.example.com:8080
+
+claude-code doctor
+```
+
+### Logs inspizieren
+
+```bash
+# Claude Code speichert Logs in verschiedene Dateien:
+
+# Session Log
+~/.claude/logs/session-$(date +%Y%m%d).log
+
+# Hook Logs
+.claude/hook-logs/PreToolUse_*.log
+.claude/hook-logs/PostToolUse_*.log
+
+# API Request Log (verbose only)
+~/.claude/logs/api-calls.log
+
+# Anschauen:
+tail -f ~/.claude/logs/session-$(date +%Y%m%d).log
+```
+
+## Performance-Optimierung
+
+### Context Window Management
+
+**Problem:** Nach 2h wird der Context voll.
+
+**Metrics:**
+
+```bash
+/cost
+→ Shows: "Context: 178k / 200k tokens (89%)"
+
+# Das ist zu voll, compact jetzt!
+/compact
+```
+
+**Was passiert beim /compact:**
+
+1. Claude schreibt wichtige Findings auf
+2. Entfernt alte Konversation
+3. Context wird auf ~50k reset
+4. Important Context bleibt in Memory
+
+**Resultat:** Du kannst noch 2h weitermachen.
+
+### Effiziente File-Reading Strategien
+
+```bash
+# FALSCH: Read riesige Dateien
+/read src/config/all-env-vars.json  # 500KB
+→ Verbraucht 125k tokens!
+
+# RICHTIG: Spezifisch sein
+/grep "DATABASE_URL" src/config/
+→ Verbraucht 2k tokens!
+
+# FALSCH: Read ganze Ordner
+/glob "src/**/*.ts"  # 500 Dateien!
+→ Verbraucht enorm viel Context
+
+# RICHTIG: Einschränken
+/glob "src/components/*.ts"  # nur Components
+```
+
+### Token Reduction Tips
+
+```
+Pro Read-Datei: ~1k-10k tokens
+Pro Tool-Call: ~100 tokens
+Pro Konversations-Turn: ~500 tokens
+
+= Nach 50 File-Reads + 200 Tool-Calls + 100 Turns
+= Etwa 150k tokens verwendet
+```
+
+**Sparen:**
+
+```
+1. Nutze Grep statt Read (wenn nur nach Text suchst)
+2. Nutze Glob statt einzelne Read-Calls
+3. Batch mehrere Fragen zusammen
+4. Nutze haiku Model statt opus für simple Tasks
+```
+
+## Plattform-spezifische Issues
+
+### Windows (PowerShell)
+
+**Problem 1: Paths mit Spaces**
+
+```powershell
+# FALSCH
+claude-code run read C:\Users\Joe Smith\file.ts
+→ Error: C:\Users\Joe not found
+
+# RICHTIG: Quotes
+claude-code run read "C:\Users\Joe Smith\file.ts"
+```
+
+**Problem 2: CP1252 Encoding (nicht UTF-8)**
+
+```powershell
+# Setze Encoding
+chcp 65001  # UTF-8
+
+# Oder in PowerShell:
+$env:PYTHONIOENCODING = "utf-8"
+claude-code run "Do something"
+```
+
+**Problem 3: Bash vs. PowerShell**
+
+```powershell
+# FALSCH: Bash-Syntax in Windows
+claude-code run bash "grep -r 'text' src/"
+
+# RICHTIG: Powershell oder WSL
+claude-code run powershell "Get-ChildItem -Recurse"
+
+# ODER: Nutze WSL
+wsl bash -c "grep -r 'text' src/"
+```
+
+### macOS (Homebrew)
+
+**Problem: Permissions bei Homebrew-Installation**
+
+```bash
+# Wenn npm install -g fehlschlägt:
+sudo npm install -g @anthropic-ai/claude-code-cli
+
+# ODER: Ohne Sudo (besser):
+mkdir ~/.npm-global
+npm config set prefix '~/.npm-global'
+export PATH=~/.npm-global/bin:$PATH
+npm install -g @anthropic-ai/claude-code-cli
+```
+
+**Problem: Xcode Tools fehlen**
+
+```bash
+# xcode-select: command not found
+
+xcode-select --install
+
+# Sollte automatisch Command Line Tools installieren
+```
+
+### Linux (npm Permissions)
+
+**Problem: npm install -g schlägt fehl**
+
+```bash
+# FALSCH
+npm install -g @anthropic-ai/claude-code-cli
+→ Error: EACCES permission denied
+
+# RICHTIG: Fix npm Permissions
+mkdir ~/.npm-global
+npm config set prefix '~/.npm-global'
+echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc
+source ~/.bashrc
+
+npm install -g @anthropic-ai/claude-code-cli
+```
+
+## Version Conflicts und Updates
+
+### Outdated Claude Code CLI
+
+**Problem:**
+```
+Warning: You are using Claude Code version 0.8.1
+Latest version available: 0.12.3
+```
+
+**Fix:**
+
+```bash
+# Update
+npm install -g @anthropic-ai/claude-code-cli@latest
+
+# Verify
+claude-code --version
+→ Should show: 0.12.3
+```
+
+### SDK Version Mismatch
+
+**Problem:**
+```
+Error: SDK version 0.8 incompatible with CLI version 0.12
+```
+
+**Fix:**
+
+```bash
+# Python
+pip install --upgrade anthropic
+
+# TypeScript
+npm update @anthropic-ai/sdk
+```
+
+## Bug Reports schreiben
+
+Falls nichts hilft, report den Bug:
+
+### Guter Bug Report
+
+```markdown
+# Bug: Claude Code hangs when reading large files
+
+## Environment
+- OS: macOS 14.2
+- Node: 18.12.0
+- Claude Code CLI: 0.12.3
+
+## Steps to Reproduce
+1. Run: claude-code run "read src/utils/huge-file.ts"
+2. Datei ist ~2MB groß
+3. Session hängt nach 30 Sekunden
+
+## Expected Behavior
+Sollte Datei lesen oder sagen dass sie zu groß ist
+
+## Actual Behavior
+Session freezes, keine Fehlermeldung
+Muss mit Ctrl+C abbrechen
+
+## Additional Info
+- ~/.claude/CLAUDE.md ist leer (keine Custom Config)
+- Settings sind Standard
+- API Key funktioniert (andere Tasks OK)
+
+## Logs
+[Paste relevant logs from ~/.claude/logs/]
+```
+
+### Schlechter Bug Report
+
+```markdown
+# It's broken!!!
+
+Claude Code doesn't work at all.
+Please fix ASAP!
+
+Thanks!
+```
+
+Das hilft niemandem. Sei spezifisch!
+
+## Checkliste: Debugging-Prozess
+
+- [ ] /doctor ausgeführt und alle Checks bestanden
+- [ ] Fehler-Nachricht in .claude/hook-logs/ geprüft
+- [ ] API Key konfiguriert (echo $ANTHROPIC_API_KEY)
+- [ ] CLAUDE.md vorhanden und gültig
+- [ ] Git Repository initialisiert
+- [ ] Netzwerk funktioniert (ping api.anthropic.com)
+- [ ] Context nicht voll (unter 150k tokens)
+- [ ] Permissions korrekt (/permissions check)
+- [ ] MCP Server läuft (falls verwendet)
+- [ ] Plattform-spezifische Issues berücksichtigt (Windows/Mac/Linux)
+- [ ] Version aktuell (npm update -g)
+- [ ] Beim Bug-Report: Steps zu Reproduce + Environment enthalten
+
+---
+
+**Sources:**
+- [Claude Code Documentation - Troubleshooting](https://code.claude.com/docs/en/troubleshooting)
+- [GitHub Issues - Claude Code Bugs](https://github.com/anthropic-ai/claude-code/issues)
+
+## Quellen und Links
+
+- [Debugging & Troubleshooting](https://code.claude.com/docs/en/troubleshooting)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

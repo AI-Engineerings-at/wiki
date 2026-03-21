@@ -1,0 +1,85 @@
+---
+title: Vector Database Comparison 2026
+date: 2026-03-21
+summary: Weaviate vs Qdrant vs Milvus vs Chroma vs pgvector vs Pinecone. Performance benchmarks, scaling, features, self-hosted vs cloud.
+tags: [vector-db, qdrant, weaviate, milvus, chroma, pgvector]
+author: AI Engineering
+---
+
+# Vector Databases — Comparison & Recommendations
+
+Vector databases are essential for RAG and similarity search. This covers 6 leading solutions.
+
+## Quick Comparison
+
+| DB | Self-Hosted | Cloud | Memory | Scaling | AI Features |
+|----|---|---|---|---|---|
+| **Qdrant** | ✅ | ✅ | Low | High | Hybrid Search |
+| **Weaviate** | ✅ | ✅ | Medium | High | Generative |
+| **Milvus** | ✅ | ✅ | High | Very High | Advanced |
+| **Chroma** | ✅ | ❌ | Low | Medium | Simple |
+| **pgvector** | ✅ | ✅ | Low | High | PostgreSQL |
+| **Pinecone** | ❌ | ✅ | Managed | Cloud | Managed |
+
+## Qdrant
+
+**Best for**: Production RAG, Hybrid Search
+
+```bash
+docker run -p 6333:6333 qdrant/qdrant
+```
+
+**Strengths**: Rust performance, hybrid search (BM25+vector)  
+**Weaknesses**: Smaller ecosystem than Weaviate
+
+## Weaviate
+
+**Best for**: Graph-based AI apps, generative search
+
+**Generative Search**: Query → Vector Search → LLM Generation
+
+## Milvus
+
+**Best for**: Cloud scale (millions of vectors)
+
+**Performance**: Faster than Qdrant/Weaviate at scale
+
+## Chroma
+
+**Best for**: Local development, quick start
+
+```python
+import chromadb
+client = chromadb.Client()
+collection = client.create_collection(name="docs")
+collection.add(documents=["Doc1"], ids=["id1"])
+results = collection.query(query_embeddings=[[...]], n_results=5)
+```
+
+## pgvector (PostgreSQL)
+
+**Best for**: Existing PostgreSQL infrastructure
+
+```sql
+CREATE EXTENSION vector;
+CREATE TABLE embeddings (
+  id SERIAL PRIMARY KEY,
+  text TEXT,
+  embedding vector(1536)
+);
+CREATE INDEX ON embeddings USING ivfflat (embedding vector_cosine_ops);
+```
+
+## Pinecone
+
+**Best for**: Fully managed (no infrastructure)
+
+**Cost**: ~$0.10 per 1M vectors/month
+
+## Recommendation by Use Case
+
+- **POC locally**: Chroma
+- **Production self-hosted**: Qdrant or Weaviate
+- **Large scale**: Milvus
+- **Fully managed**: Pinecone
+- **PostgreSQL native**: pgvector

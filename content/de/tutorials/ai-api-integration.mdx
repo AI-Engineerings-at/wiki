@@ -1,0 +1,707 @@
+---
+title: AI API Integration — Anthropic, OpenAI, Google
+date: 2026-03-21
+summary: Integration verschiedener AI APIs in Python & TypeScript. Authentifizierung, Streaming, Tool Use, Error Handling, Rate Limiting, Kostenoptimierung
+tags: [API, Claude, OpenAI, Google Gemini, Integration, Python, TypeScript]
+author: "AI Engineering"
+---
+
+# AI API Integration — Anthropic, OpenAI, Google
+
+Verbinde AI APIs in deine Anwendung. Wir zeigen Anthropic (Claude), OpenAI, und Google.
+
+## Teil 1: Anthropic (Claude) — Python
+
+### Installation & Setup
+
+```bash
+pip install anthropic python-dotenv
+```
+
+`.env`:
+```
+ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxxx
+```
+
+### Basis-Anfrage
+
+```python
+# basic_claude.py
+import os
+from anthropic import Anthropic
+
+client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+
+# Single request
+message = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    max_tokens=1024,
+    messages=[
+        {"role": "user", "content": "Wer war Albert Einstein?"}
+    ]
+)
+
+print(message.content[0].text)
+```
+
+Output:
+```
+Albert Einstein war ein deutsch-schweizer Physiker...
+```
+
+### Mit System Prompt
+
+```python
+message = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    max_tokens=1024,
+    system="Du bist ein Experte für Quantenphysik. Erkläre komplexe Konzepte einfach.",
+    messages=[
+        {"role": "user", "content": "Was ist Superposition?"}
+    ]
+)
+
+print(message.content[0].text)
+```
+
+### Streaming (für schnelle Anzeige)
+
+```python
+# streaming_claude.py
+from anthropic import Anthropic
+
+client = Anthropic()
+
+with client.messages.stream(
+    model="claude-3-5-sonnet-20241022",
+    max_tokens=1024,
+    messages=[
+        {"role": "user", "content": "Schreibe ein kurzes Gedicht über Maschinen"}
+    ]
+) as stream:
+    for text in stream.text_stream:
+        print(text, end="", flush=True)
+
+print()
+```
+
+Output:
+```
+Maschinen summen leise,
+Präzision in jedem Schritt,
+Stahl und Draht reisen,
+Dem Menschen zum Schritt...
+```
+
+### Multi-Turn Conversation
+
+```python
+# conversation.py
+from anthropic import Anthropic
+
+client = Anthropic()
+
+conversation_history = []
+
+def chat(user_message: str) -> str:
+    conversation_history.append({
+        "role": "user",
+        "content": user_message
+    })
+
+    response = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        max_tokens=1024,
+        system="Du bist ein hilfreicher Assistent.",
+        messages=conversation_history
+    )
+
+    assistant_message = response.content[0].text
+    conversation_history.append({
+        "role": "assistant",
+        "content": assistant_message
+    })
+
+    return assistant_message
+
+# Nutzung
+print(chat("Wer war Marie Curie?"))
+print(chat("Welche Nobelpreise hat sie gewonnen?"))  # Context behalten!
+```
+
+## Teil 2: Anthropic (Claude) — TypeScript/Node.js
+
+### Installation
+
+```bash
+npm install @anthropic-ai/sdk
+```
+
+### Basis-Anfrage
+
+```typescript
+// basic.ts
+import Anthropic from "@anthropic-ai/sdk";
+
+const client = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
+
+async function main() {
+  const message = await client.messages.create({
+    model: "claude-3-5-sonnet-20241022",
+    max_tokens: 1024,
+    messages: [
+      {
+        role: "user",
+        content: "Wer war Isaac Newton?",
+      },
+    ],
+  });
+
+  console.log(message.content[0]);
+}
+
+main();
+```
+
+### Streaming
+
+```typescript
+// streaming.ts
+import Anthropic from "@anthropic-ai/sdk";
+
+const client = new Anthropic();
+
+async function main() {
+  const stream = client.messages.stream({
+    model: "claude-3-5-sonnet-20241022",
+    max_tokens: 1024,
+    messages: [
+      {
+        role: "user",
+        content: "Schreibe eine kurze Geschichte",
+      },
+    ],
+  });
+
+  stream.on("text", (text) => {
+    process.stdout.write(text);
+  });
+
+  await stream.finalMessage();
+}
+
+main();
+```
+
+## Teil 3: OpenAI (GPT-4) — Python
+
+### Installation
+
+```bash
+pip install openai python-dotenv
+```
+
+`.env`:
+```
+OPENAI_API_KEY=sk-proj-xxxxxxxxxxxxx
+```
+
+### Basis-Anfrage
+
+```python
+# openai_basic.py
+from openai import OpenAI
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+response = client.chat.completions.create(
+    model="gpt-4-turbo",
+    messages=[
+        {"role": "user", "content": "Was ist Machine Learning?"}
+    ],
+    max_tokens=1024,
+    temperature=0.7
+)
+
+print(response.choices[0].message.content)
+```
+
+### Streaming
+
+```python
+# openai_stream.py
+from openai import OpenAI
+
+client = OpenAI()
+
+with client.chat.completions.create(
+    model="gpt-4-turbo",
+    messages=[
+        {"role": "user", "content": "Schreibe einen kurzen Code in Python"}
+    ],
+    stream=True
+) as response:
+    for chunk in response:
+        if chunk.choices[0].delta.content:
+            print(chunk.choices[0].delta.content, end="", flush=True)
+```
+
+### Function Calling (Tool Use)
+
+```python
+# openai_tools.py
+from openai import OpenAI
+
+client = OpenAI()
+
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_weather",
+            "description": "Ruft das Wetter ab",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "location": {
+                        "type": "string",
+                        "description": "Stadt"
+                    }
+                },
+                "required": ["location"]
+            }
+        }
+    }
+]
+
+def get_weather(location: str):
+    return f"In {location} sind es 20°C und sonnig"
+
+# Erste anfrage
+response = client.chat.completions.create(
+    model="gpt-4-turbo",
+    messages=[
+        {"role": "user", "content": "Wie ist das Wetter in Berlin?"}
+    ],
+    tools=tools
+)
+
+# Wenn Tool called wird:
+if response.choices[0].message.tool_calls:
+    tool_call = response.choices[0].message.tool_calls[0]
+    tool_name = tool_call.function.name
+    tool_args = json.loads(tool_call.function.arguments)
+
+    # Tool ausführen
+    result = get_weather(**tool_args)
+
+    # Zurück an Claude
+    response = client.chat.completions.create(
+        model="gpt-4-turbo",
+        messages=[
+            {"role": "user", "content": "Wie ist das Wetter in Berlin?"},
+            {"role": "assistant", "content": response.choices[0].message.content},
+            {
+                "role": "tool",
+                "tool_use_id": tool_call.id,
+                "content": result
+            }
+        ],
+        tools=tools
+    )
+
+    print(response.choices[0].message.content)
+```
+
+## Teil 4: Google Gemini — Python
+
+### Installation
+
+```bash
+pip install google-generativeai python-dotenv
+```
+
+`.env`:
+```
+GOOGLE_API_KEY=AIz...
+```
+
+### Basis-Anfrage
+
+```python
+# gemini_basic.py
+import os
+import google.generativeai as genai
+
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+
+model = genai.GenerativeModel("gemini-2.0-flash")
+response = model.generate_content("Wer war Nikola Tesla?")
+
+print(response.text)
+```
+
+### Streaming
+
+```python
+# gemini_stream.py
+import google.generativeai as genai
+
+model = genai.GenerativeModel("gemini-2.0-flash")
+
+response = model.generate_content(
+    "Schreibe ein Gedicht über Technologie",
+    stream=True
+)
+
+for chunk in response:
+    print(chunk.text, end="", flush=True)
+```
+
+### Multi-Turn Chat
+
+```python
+# gemini_chat.py
+import google.generativeai as genai
+
+model = genai.GenerativeModel("gemini-2.0-flash")
+chat = model.start_chat(history=[])
+
+# Turn 1
+response = chat.send_message("Was ist KI?")
+print(response.text)
+
+# Turn 2
+response = chat.send_message("Welche Anwendungen gibt es?")
+print(response.text)
+```
+
+## Teil 5: API Comparison
+
+| Aspekt | Claude | GPT-4 | Gemini |
+|--------|--------|-------|--------|
+| Speed | Schnell | Mittel | Schnell |
+| Qualität | Ausgezeichnet | Beste | Gut |
+| Tool Use | ✓ | ✓ | ✓ |
+| Max Tokens | 200k | 128k | 2M |
+| Kosten | Mittel | Hoch | Niedrig |
+| Streaming | ✓ | ✓ | ✓ |
+
+**Wann nutzen?**
+- Claude: Allrounder, beste Community
+- GPT-4: High Performance, Web-Integration
+- Gemini: Budget-Option, großer Context
+
+## Teil 6: Error Handling & Retries
+
+```python
+# error_handling.py
+import time
+import random
+from anthropic import Anthropic, APIError, APIConnectionError
+
+client = Anthropic()
+
+def query_with_retry(prompt: str, max_retries: int = 3) -> str:
+    for attempt in range(max_retries):
+        try:
+            response = client.messages.create(
+                model="claude-3-5-sonnet-20241022",
+                max_tokens=1024,
+                messages=[
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            return response.content[0].text
+
+        except APIConnectionError as e:
+            # Netzwerkfehler
+            wait_time = 2 ** attempt + random.uniform(0, 1)
+            print(f"Netzwerkfehler. Warte {wait_time:.1f}s...")
+            time.sleep(wait_time)
+
+        except APIError as e:
+            # API-Fehler
+            if e.status_code == 429:
+                # Rate limit
+                wait_time = 60
+                print(f"Rate limit. Warte {wait_time}s...")
+                time.sleep(wait_time)
+            else:
+                # Anderer Fehler
+                raise
+
+    raise Exception(f"Fehlgeschlagen nach {max_retries} Versuchen")
+
+# Nutzen
+result = query_with_retry("Was ist Quantencomputing?")
+print(result)
+```
+
+## Teil 7: Rate Limiting & Cost Control
+
+```python
+# rate_limiting.py
+import time
+from collections import deque
+from datetime import datetime, timedelta
+
+class RateLimiter:
+    def __init__(self, max_requests: int, time_window: int = 60):
+        self.max_requests = max_requests
+        self.time_window = time_window
+        self.requests = deque()
+
+    def wait_if_needed(self):
+        now = datetime.now()
+        # Entferne alte Requests
+        while self.requests and self.requests[0] < now - timedelta(seconds=self.time_window):
+            self.requests.popleft()
+
+        # Warte wenn notwendig
+        if len(self.requests) >= self.max_requests:
+            wait_time = (self.requests[0] - (now - timedelta(seconds=self.time_window))).total_seconds()
+            if wait_time > 0:
+                print(f"Rate limit: warte {wait_time:.1f}s")
+                time.sleep(wait_time)
+
+        self.requests.append(now)
+
+# Nutzen: 5 Requests pro Minute
+limiter = RateLimiter(max_requests=5, time_window=60)
+
+for i in range(10):
+    limiter.wait_if_needed()
+    print(f"Request {i+1}")
+```
+
+### Kosten tracken
+
+```python
+# cost_tracking.py
+from datetime import datetime
+
+class CostTracker:
+    PRICES = {
+        "claude-3-5-sonnet-20241022": {
+            "input": 0.003 / 1000,   # $3 pro 1M tokens
+            "output": 0.015 / 1000
+        },
+        "gpt-4-turbo": {
+            "input": 0.01 / 1000,
+            "output": 0.03 / 1000
+        }
+    }
+
+    def __init__(self):
+        self.costs = []
+
+    def add_request(self, model: str, input_tokens: int, output_tokens: int):
+        prices = self.PRICES[model]
+        cost = (input_tokens * prices["input"]) + (output_tokens * prices["output"])
+        self.costs.append({
+            "timestamp": datetime.now(),
+            "model": model,
+            "input_tokens": input_tokens,
+            "output_tokens": output_tokens,
+            "cost": cost
+        })
+
+    def total_cost(self) -> float:
+        return sum(c["cost"] for c in self.costs)
+
+    def cost_by_model(self) -> dict:
+        by_model = {}
+        for c in self.costs:
+            model = c["model"]
+            by_model[model] = by_model.get(model, 0) + c["cost"]
+        return by_model
+
+# Nutzen
+tracker = CostTracker()
+tracker.add_request("claude-3-5-sonnet-20241022", 1000, 500)
+tracker.add_request("gpt-4-turbo", 2000, 1000)
+
+print(f"Total: ${tracker.total_cost():.4f}")
+print(f"By model: {tracker.cost_by_model()}")
+```
+
+## Teil 8: Production-Grade Wrapper
+
+```python
+# ai_client.py
+from typing import Optional, Callable
+from anthropic import Anthropic
+from openai import OpenAI
+import logging
+
+logger = logging.getLogger(__name__)
+
+class UnifiedAIClient:
+    """Unified interface für verschiedene AI APIs"""
+
+    def __init__(self, provider: str = "claude"):
+        self.provider = provider
+
+        if provider == "claude":
+            self.client = Anthropic()
+        elif provider == "openai":
+            self.client = OpenAI()
+        else:
+            raise ValueError(f"Unknown provider: {provider}")
+
+    def generate(
+        self,
+        prompt: str,
+        system: Optional[str] = None,
+        temperature: float = 0.7,
+        max_tokens: int = 1024,
+        streaming: bool = False
+    ) -> str:
+        """Generiert Text (Provider-agnostisch)"""
+
+        try:
+            if self.provider == "claude":
+                messages = [{"role": "user", "content": prompt}]
+
+                if streaming:
+                    with self.client.messages.stream(
+                        model="claude-3-5-sonnet-20241022",
+                        max_tokens=max_tokens,
+                        temperature=temperature,
+                        system=system,
+                        messages=messages
+                    ) as stream:
+                        for text in stream.text_stream:
+                            yield text
+                else:
+                    response = self.client.messages.create(
+                        model="claude-3-5-sonnet-20241022",
+                        max_tokens=max_tokens,
+                        temperature=temperature,
+                        system=system,
+                        messages=messages
+                    )
+                    return response.content[0].text
+
+            elif self.provider == "openai":
+                messages = [{"role": "user", "content": prompt}]
+                if system:
+                    messages.insert(0, {"role": "system", "content": system})
+
+                if streaming:
+                    with self.client.chat.completions.create(
+                        model="gpt-4-turbo",
+                        messages=messages,
+                        temperature=temperature,
+                        max_tokens=max_tokens,
+                        stream=True
+                    ) as response:
+                        for chunk in response:
+                            if chunk.choices[0].delta.content:
+                                yield chunk.choices[0].delta.content
+                else:
+                    response = self.client.chat.completions.create(
+                        model="gpt-4-turbo",
+                        messages=messages,
+                        temperature=temperature,
+                        max_tokens=max_tokens
+                    )
+                    return response.choices[0].message.content
+
+        except Exception as e:
+            logger.error(f"Error in {self.provider}: {e}")
+            raise
+
+# Nutzen
+client = UnifiedAIClient(provider="claude")
+result = client.generate("Wer war Einstein?")
+```
+
+## Top-5 Fehlerbehebung
+
+### 1. "API Key not found"
+
+```python
+# FALSCH
+client = Anthropic()  # Sucht ANTHROPIC_API_KEY
+
+# RICHTIG
+import os
+client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+```
+
+### 2. "Rate limit exceeded"
+
+```python
+# Nutze Retry-Logik (siehe Part 6)
+# Oder: Batch-Anfragen reduzieren
+```
+
+### 3. "Connection timeout"
+
+```python
+# Erhöhe timeout
+from anthropic import Anthropic
+
+client = Anthropic(timeout=60.0)  # 60 Sekunden
+```
+
+### 4. "Token limit exceeded"
+
+```python
+# max_tokens reduzieren
+response = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    max_tokens=500,  # Statt 4096
+    messages=[...]
+)
+```
+
+### 5. "Invalid tool definition"
+
+```python
+# Tools Schema muss korrekt sein
+tools = [{
+    "type": "function",  # "type" ist PFLICHT
+    "function": {
+        "name": "get_weather",
+        "description": "...",
+        "parameters": {
+            "type": "object",
+            "properties": {...},
+            "required": [...]  # Kann leer sein
+        }
+    }
+}]
+```
+
+## Zusammenfassung
+
+API-Integration Checkliste:
+
+1. **API Key** in `.env` oder Env-Variable
+2. **Client initialisieren** mit Key
+3. **Basis-Anfrage** bauen (messages format)
+4. **Error Handling** mit Retries
+5. **Rate Limiting** für Production
+6. **Streaming** für schnelle Anzeige
+7. **Cost Tracking** für Budget
+8. **Tools/Functions** für komplexe Logik
+
+**Wann welche API?**
+- Schnelle Prototypen: Gemini (günstig)
+- Production: Claude (zuverlässig)
+- Spezialisiert: GPT-4 (für bestimmte Tasks)
+
+**Nächste Schritte:**
+- Agent mit Tool Use bauen
+- Batch-Processing
+- Caching für wiederholte Anfragen
+
+## Quellen und Links
+
+- [Anthropic Docs](https://docs.anthropic.com)
+- [OpenAI Docs](https://platform.openai.com/docs)

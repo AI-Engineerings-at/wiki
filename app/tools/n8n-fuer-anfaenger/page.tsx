@@ -1,0 +1,180 @@
+import { CaseStudyBox } from '../../../components/CaseStudyBox'
+import Callout from "../../../components/Callout"
+
+export const metadata = {
+  title: 'n8n für Anfänger | AI Engineering Wiki',
+  description:
+    'n8n Workflow-Automatisierung im lokalen AI-Stack: Installation, Nodes, Beispiele und Integration mit Ollama, Slack/Mattermost und Stripe.',
+}
+
+export default function N8nAnfaenger() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-white">n8n: Workflow-Automatisierung</h1>
+        <p className="text-gray-400 mt-2">Tools · 8 min</p>
+      </div>
+
+      <div className="prose prose-invert max-w-none">
+        <Callout type="summary" title="Auf einen Blick">
+          <p>
+            n8n ist ein Open-Source Workflow-Automatisierungstool. Self-hosted,
+            400+ Integrationen, visueller Editor. Verbindet Ollama, Stripe,
+            Mattermost und mehr — ohne Programmierung. In 5 Minuten per Docker
+            installiert.
+          </p>
+        </Callout>
+
+        <p className="text-lg text-gray-300">
+          n8n ist ein leistungsstarkes Tool für Workflow-Automatisierung.
+          Es verbindet Apps, Dienste und APIs — ohne Programmierung.
+        </p>
+
+        <CaseStudyBox
+          tool="n8n"
+          stat="36 aktiven Workflows"
+          description="fuer Revenue-Pipeline, Content-Automation und Infrastruktur-Monitoring"
+          blogLink="/blog/2026-03-08-36-n8n-workflows"
+          productLink="https://buy.stripe.com/8x2fZh7VB2DT2Hk1xafQI01"
+          productName="n8n AI Workflow Bundle (EUR 29)"
+        />
+
+        <figure className="my-8">
+          <img src="/images/diagrams/tools-n8n-architektur.png" alt="n8n Architektur — Nodes, Workflows, Trigger und Integrationen" className="rounded-xl border border-white/10 w-full" />
+          <figcaption className="text-center text-white/40 text-sm mt-2">n8n Architektur: Wie Nodes, Workflows und Integrationen zusammenspielen</figcaption>
+        </figure>
+
+        <h2 className="text-xl font-semibold text-white mt-8">Warum n8n?</h2>
+
+        <div className="grid md:grid-cols-2 gap-4 mt-4">
+          <div className="bg-gray-900 border border-green-700 rounded-lg p-4">
+            <h3 className="font-semibold text-white mb-2">Vorteile</h3>
+            <ul className="text-gray-300 text-sm space-y-1">
+              <li>• <strong>Self-hosted</strong> — all data stays local</li>
+              <li>• <strong>Open Source</strong> — free</li>
+              <li>• <strong>400+ integrations</strong></li>
+              <li>• <strong>Code nodes</strong> for custom logic</li>
+            </ul>
+          </div>
+          <div className="bg-gray-900 border border-red-700 rounded-lg p-4">
+            <h3 className="font-semibold text-white mb-2">Nachteile</h3>
+            <ul className="text-gray-300 text-sm space-y-1">
+              <li>• <strong>More setup</strong> than cloud tools</li>
+              <li>• <strong>You're responsible</strong> for hosting</li>
+              <li>• <strong>Steeper learning curve</strong></li>
+            </ul>
+          </div>
+        </div>
+
+        <h2 className="text-xl font-semibold text-white mt-8">Installation</h2>
+
+        <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
+          <code className="text-sm text-gray-300">{`services:
+  n8n:
+    image: n8nio/n8n:latest
+    ports:
+      - "5678:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n`}</code>
+        </pre>
+
+        <h2 className="text-xl font-semibold text-white mt-8">Grundkonzepte</h2>
+
+        <p className="text-gray-300">
+          <strong>Nodes</strong> sind die Bausteine. Jede Node macht eine Sache.
+          <strong>Workflows</strong> verbinden Nodes zu Ketten.
+          <strong>Expressions</strong> wie {"{{$json.name}}"} manipulieren Daten.
+        </p>
+
+        <h2 className="text-xl font-semibold text-white mt-8">Nützliche Nodes</h2>
+
+        <ul className="list-disc list-inside text-gray-300 space-y-1 mt-2">
+          <li>• <strong>HTTP Request</strong> — API calls</li>
+          <li>• <strong>IF</strong> — Conditional branching</li>
+          <li>• <strong>Set</strong> — Transform data</li>
+          <li>• <strong>Function</strong> — Custom JavaScript code</li>
+          <li>• <strong>Slack / Mattermost</strong> — Send messages</li>
+          <li>• <strong>Ollama</strong> — Local LLMs</li>
+        </ul>
+
+        <h2 className="text-xl font-semibold text-white mt-8">Praktische Beispiele</h2>
+
+        <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
+          <code className="text-sm text-gray-300">{`# Stripe Payment -> E-Mail
+Webhook (Stripe) -> IF (success) -> Email Send
+
+# RSS -> Newsletter  
+RSS Read (täglich) -> Slack -> Email Send
+
+# Formular -> AI -> Speichern
+Webhook -> Ollama -> Notion -> Slack`}</code>
+        </pre>
+
+        <h2 className="text-xl font-semibold text-white mt-8">Best Practices</h2>
+
+        <ol className="list-decimal list-inside text-gray-300 space-y-2 mt-2">
+          <li>• <strong>Start small</strong> — first simple, then expand</li>
+          <li>• <strong>Add error handling</strong></li>
+          <li>• <strong>Use test mode</strong></li>
+          <li>• <strong>Check logs</strong> for debugging</li>
+        </ol>
+
+        <Callout type="tip" title="n8n 2.x Expressions">
+          <p>
+            In n8n 2.x muessen Expressions mit einem = Zeichen beginnen.
+            Beispiel: ={`{{ $json.name }}`} statt nur {`{{ $json.name }}`}.
+            Datums-Formatierung nutzt Luxon (yyyy-MM-dd), nicht Moment.js.
+          </p>
+        </Callout>
+
+        <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mt-8">
+          <h3 className="font-semibold text-white mb-2">Nächste Schritte</h3>
+          <ul className="text-slate-300 text-sm space-y-1">
+            <li>n8n installieren mit Docker</li>
+            <li>Ersten Workflow: Webhook → Slack-Notification</li>
+            <li>AI-Workflows erkunden</li>
+          </ul>
+        </div>
+
+        {/* Quellen */}
+        <section className="mt-16 pt-8 border-t border-white/10">
+          <h2 className="text-xl font-bold text-white mb-4">Quellen</h2>
+          <ul className="space-y-2 text-sm text-white/50">
+            <li><a href="https://n8n.io/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">n8n.io — Offizielle Website</a></li>
+            <li><a href="https://docs.n8n.io/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">n8n Dokumentation</a> — Nodes, Expressions, API</li>
+            <li><a href="https://github.com/n8n-io/n8n" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">GitHub: n8n-io/n8n</a> — Source Code</li>
+            <li><a href="https://community.n8n.io/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">n8n Community Forum</a> — Hilfe und Workflow-Vorlagen</li>
+          </ul>
+        </section>
+      </div>
+
+      <div className="bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-500/30 rounded-2xl p-6 mt-8">
+        <div className="flex flex-col md:flex-row items-center gap-6">
+          <div className="flex-1">
+            <h3 className="text-xl font-bold text-white mb-2">n8n AI Workflow Bundle</h3>
+            <p className="text-gray-300 mb-4">
+              13 fertige Workflow-JSONs: Stripe Payment, Ollama LLM Integration, AIOps Alert Pipeline, 
+              Daily Status Report — alles ready-to-use.
+            </p>
+            <ul className="text-sm text-gray-400 space-y-1 mb-4">
+              <li>✓ Stripe Payment Fulfillment</li>
+              <li>✓ AIOps Alert Pipeline</li>
+              <li>✓ Ollama LLM Integration</li>
+              <li>✓ Sofort importierbar (30s)</li>
+            </ul>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl font-black text-white mb-1">€29</div>
+            <div className="text-sm text-slate-500 line-through mb-3">€49</div>
+            <a 
+              href="https://buy.stripe.com/8x2fZh7VB2DT2Hk1xafQI01" 
+              className="inline-block bg-[#4262FF] hover:bg-[#3550DD] text-slate-950 font-bold py-3 px-8 rounded-full transition-all hover:scale-105 shadow-lg shadow-blue-500/30"
+            >
+              Jetzt kaufen
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

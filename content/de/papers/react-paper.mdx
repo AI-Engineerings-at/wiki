@@ -1,0 +1,178 @@
+---
+title: ReAct — Reasoning + Acting in LLMs
+date: 2026-03-21
+summary: ReAct Framework, Thought-Action-Observation Loop, Impact auf Agent Design, praktische Implementierungen in n8n und Open WebUI.
+tags: [react, llm, agents, reasoning, action, paper]
+author: AI Engineering
+section: papers
+---
+
+# ReAct — Reasoning + Acting in LLMs
+
+ReAct zeigt, wie man LLMs in echte Agenten verwandelt, die denken (Reasoning) und handeln (Action) können.
+
+## Das Core Problem
+
+Frühere Ansätze:
+
+```
+Approach 1: Pure Reasoning (Chain-of-Thought)
+Q: "Wie alt ist Albert Einstein jetzt?"
+A: "Albert Einstein wurde 1879 geboren. Wenn man 145 Jahre addiert, ist er 2024 Jahre alt."
+Problem: Faktisch falsch (Einstein ist tot seit 1955)
+
+Approach 2: Pure Actions (Tools)
+Q: "Wie alt ist Albert Einstein?"
+Tools: search_web("Albert Einstein age")
+Problem: Suche hat keine Kontext, macht schlechte Queries
+```
+
+ReAct kombiniertboth: **Think, then Act, observe Result, repeat.**
+
+## ReAct Loop: Thought-Action-Observation
+
+```
+Input Question: "Wann wurde Albert Einstein geboren?"
+
+Schritt 1 - Thought:
+"Ich kenne das möglicherweise, aber bin nicht sicher.
+Besser suchen."
+
+Schritt 2 - Action:
+search_wikipedia("Albert Einstein birth date")
+
+Schritt 3 - Observation:
+[Wikipedia Result] Albert Einstein was born on March 14, 1879
+
+Schritt 4 - Thought:
+"Ich habe die Antwort: March 14, 1879"
+
+Output: March 14, 1879
+```
+
+## Praktische Implementierung
+
+```
+Prompt für ReAct:
+
+Q: Frage
+Thought: Du denkst über die Beste Handlung
+Action: Du wählst eine Action oder Final Answer
+  Format: Action: tool_name[input]
+Observation: Resultat der Action
+... (repeat bis zu Final Answer)
+Final Answer: [answer]
+```
+
+### Beispiel aus dem Paper
+
+```
+Q: What is the elevation range for the area in southern Colorado named Great Sand Dunes?
+
+Thought 1: I need to search for information about Great Sand Dunes in southern Colorado.
+Action 1: search[Great Sand Dunes southern Colorado]
+Observation 1: Great Sand Dunes National Park is a national park located in southern Colorado...
+
+Thought 2: The search result mentions the park but doesn't explicitly state the elevation range. Let me search for more specific information about the elevation.
+Action 2: search[Great Sand Dunes elevation range]
+Observation 2: ...varies in elevation from 8,949 feet to 13,604 feet...
+
+Thought 3: I found the elevation range.
+Final Answer: The elevation range for the Great Sand Dunes is 8,949 feet to 13,604 feet.
+```
+
+## Tools und Actions
+
+ReAct definiert eine Reihe von verfügbaren Actions:
+
+```
+Standard Tools:
+- search(query): Search a knowledge base
+- calculate(expression): Calculate math
+- get_wikipedia(page): Get Wikipedia article
+- get_current_time(): Get current date/time
+- call_api(endpoint, parameters): Call external API
+
+Custom Tools:
+- Alles was dein System benötigt
+```
+
+## Vergleich: ReAct vs. Chain-of-Thought vs. Standard
+
+```
+Task: "Was ist das BIP von Frankreich 2024?"
+
+Chain-of-Thought (keine Tools):
+CoT: "Frankreich ist ein großes Land in Europa. Das BIP wird in Billionen Euro gemessen. Basierend auf meinem Wissen ist es etwa 3 Billionen."
+Problem: Kann veraltet oder falsch sein.
+
+Pure Actions (keine Reasoning):
+Tool: search_web("France GDP 2024")
+Problem: Keine Kontext, sucht möglicherweise nach aktuellem Stock-Preis statt BIP.
+
+ReAct:
+Thought: "Ich brauche das aktuelle BIP von Frankreich. Das ändert sich jedes Jahr, daher sollte ich suchen."
+Action: search["France GDP 2024"]
+Observation: [Recent Data] France GDP 2024: €2.94 trillion
+Final Answer: €2.94 trillion
+```
+
+## Impact auf Agent Design
+
+Nach ReAct wurde das Standard-Paradigma:
+
+1. **Agents nutzen Thought-Action-Observation Loop**
+2. **LLMs delegieren zu Tools statt zu halluzinieren**
+3. **Mehrfache Iterations sind OK** (nicht immer first-time richtig)
+
+## ReAct in modernen Systemen
+
+### OpenAI Function Calling
+```python
+# Ähnlich wie ReAct
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[{"role": "user", "content": question}],
+    tools=[
+        {"name": "search", "description": "Search the web"},
+        {"name": "calculate", "description": "Calculate math"}
+    ]
+)
+
+# Model antwortet mit: "I should use tool X"
+# System führt Tool aus
+# Model sieht result und macht nächste Entscheidung
+```
+
+### n8n Workflows (Playbook01 Use Case)
+
+```
+n8n kann ReAct direkt implementieren:
+
+1. HTTP Request Node mit LLM (Prompt mit Tools)
+2. LLM erzeugt: Action: search[query]
+3. Code Node parsed die Action
+4. Search Node führt Suche aus
+5. Zurück zu LLM mit Observation
+6. Repeat bis Final Answer
+```
+
+## Limitationen
+
+```
+ReAct funktioniert gut bis:
+- ~10 Iterations
+- ~10 verfügbare Tools
+- Einfache Reasoning Tasks
+
+ReAct funktioniert nicht gut:
+- Tasks mit >20 Steps
+- Tools mit komplexer Interaktion
+- Wenn die Erste-Step Wahl verkehrt ist (kein Backtracking)
+```
+
+## Quellen und Links
+
+- [ReAct Paper (ArXiv)](https://arxiv.org/abs/2210.03629)
+- [OpenAI Function Calling](https://platform.openai.com/docs/guides/function-calling)
+- [LangChain ReAct Agent](https://python.langchain.com/docs/modules/agents/)

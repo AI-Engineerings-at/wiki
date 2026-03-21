@@ -1,0 +1,844 @@
+---
+title: Claude Code Einstellungen — Vollständige Referenz
+date: 2026-03-21
+summary: Umfassende Referenz für Claude Code settings.json mit allen Konfigurationsfeldern, Scopes, Sandbox-Optionen und globalen Konfigurationsoptionen.
+tags: [claude-code, einstellungen, konfiguration, sandbox, settings-json]
+author: AI Engineering
+---
+
+# Claude Code Einstellungen — Vollständige Referenz
+
+Claude Code-Einstellungen steuern Verhalten, Sicherheit, Modelle und erweiterte Features. Diese Referenz dokumentiert jedes Einstellungsfeld und Konfigurationsoption.
+
+## Konfiguration Scopes
+
+Claude Code verwendet ein gestuftes Scope-System um zu bestimmen wo Einstellungen gelten und wer sie beeinflusst.
+
+### Scope-Hierarchie
+
+| Scope | Datei-Ort | Wer betroffen | Gemeinsam | Übersteuerbar |
+|-------|---|---|---|---|
+| **Managed** | Server/OS-Level, `managed-settings.json` | Alle Benutzer auf Maschine | Ja (IT-Bereitstellung) | Kann nicht überschrieben werden |
+| **Benutzer** | `~/.claude/settings.json` | Du, alle Projekte | Nein (persönlich) | Überschrieben durch Projekt/Lokal |
+| **Projekt** | `.claude/settings.json` | Team auf diesem Repo | Ja (git) | Überschrieben durch Lokal |
+| **Lokal** | `.claude/settings.local.json` | Du, nur dieses Repo | Nein (gitignored) | Übersteuerungen alle außer Managed |
+
+### Wann jeden Scope verwenden
+
+**Managed Scope** — IT/Organisation:
+- Sicherheitsrichtlinien (Berechtigungen, Sandbox-Regeln)
+- Durchgesetzte Einstellungen die nicht überschrieben werden können
+- Bereitgestellt via MDM, OS-Richtlinien oder Server-Management
+
+**Benutzer Scope** — Persönliche Einstellungen:
+- IDE-Integrations-Einstellungen
+- Persönliche API-Schlüssel
+- Debug-Logging-Vorlieben
+- Nicht mit Team geteilt
+
+**Projekt Scope** — Team-Einstellungen:
+- Modell-Konfiguration für Projekt
+- Projekt-spezifische Berechtigungen
+- Hooks für diese Codebasis
+- Committed in git, mit Team geteilt
+
+**Lokal Scope** — Persönliche Überschreibungen:
+- Projekt-Einstellungen für sich selbst überschreiben
+- Neue Konfigurationen vor Commit testen
+- Nicht versionskontrolliert (gitignored)
+
+## Einstellungs-Dateien
+
+### Ort und Benennung
+
+```
+~/.claude/
+├── settings.json              # Benutzer-Level-Einstellungen
+├── .mcp.json                  # Benutzer MCP-Server
+├── commands/                  # Benutzer-Befehle
+├── agents/                    # Benutzerdefinierte Agenten
+└── skills/                    # Benutzerdefinierte Skills
+
+project-root/
+├── .claude/
+│   ├── settings.json          # Projekt-Einstellungen (committed)
+│   ├── settings.local.json    # Lokale Überschreibungen (gitignored)
+│   ├── .mcp.json              # Projekt MCP-Server
+│   ├── commands/              # Projekt-Befehle
+│   ├── agents/                # Projekt-Agenten
+│   ├── skills/                # Projekt-Skills
+│   └── rules/                 # Projekt-Regeln
+└── .gitignore                 # Einschließen *.local.json
+```
+
+### .gitignore Konfiguration
+
+```
+# Lokale Einstellungen ignorieren
+.claude/settings.local.json
+
+# Persönliche API-Schlüssel ignorieren
+.claude/managed-settings.json
+
+# IDE-spezifische Konfigurationen ignorieren
+.claude/.vscode
+.claude/.idea
+```
+
+## Kern-Einstellungen Referenz
+
+### Modell-Konfiguration
+
+#### `model`
+
+Setzt das Standard-Claude-Modell für Claude Code-Sessions.
+
+| Wert | Größe | Geschwindigkeit | Kosten | Use Case |
+|---|---|---|---|---|
+| `"haiku"` | 3B | Schnellst | Billigst | Leichte Aufgaben, Summaries, schnelle Lookups |
+| `"sonnet"` | 100B | Schnell | Moderat | Standard, meiste Aufgaben, Content-Erstellung |
+| `"opus"` | 200B | Langsam | Höchst | Komplexes Reasoning, Architektur, Planung |
+
+```json
+{
+  "model": "sonnet"
+}
+```
+
+**Standard:** `"sonnet"`
+
+**Effekte:**
+- Verwendet für alle Claude Code-Operationen außer wenn überschrieben
+- Kann auf Skill-Level überschrieben werden
+- Geändert pro-Skill in `.claude/skills/<skill>/SKILL.md`
+
+#### `availableModels`
+
+Liste der verfügbaren Modelle zur Agent-Auswahl.
+
+```json
+{
+  "availableModels": [
+    "haiku",
+    "sonnet",
+    "opus"
+  ]
+}
+```
+
+Wenn gesetzt, nur aufgelistete Modelle können verwendet werden.
+
+**Standard:** Alle verfügbaren Modelle
+
+### Berechtigungs- und Sicherheits-Einstellungen
+
+#### `defaultMode`
+
+Standard-Berechtigungsbewertungs-Modus.
+
+| Wert | Verhalten |
+|---|---|
+| `"default"` | Prompt beim ersten Einsatz jedes Tools |
+| `"acceptEdits"` | Auto-akzeptiere Datei-Edit-Berechtigungen für Session |
+| `"plan"` | Read-Only Analyse-Modus |
+| `"dontAsk"` | Auto-deny außer vor-genehmigt |
+| `"bypassPermissions"` | Skip Prompts (außer geschützte Dirs) |
+
+```json
+{
+  "defaultMode": "default"
+}
+```
+
+**Standard:** `"default"`
+
+**Geschützte Verzeichnisse** (auch im `bypassPermissions`):
+- `.git/`, `.claude/`, `.vscode/`, `.idea/`
+
+#### `permissions`
+
+Feinkörnige Berechtigungsregeln.
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "WebFetch(domain:github.com)",
+      "Bash(npm *)"
+    ],
+    "ask": [
+      "Edit"
+    ],
+    "deny": [
+      "Bash(rm *)",
+      "Bash(sudo *)"
+    ]
+  }
+}
+```
+
+**Regeltypen:**
+- `allow`: Tools die Claude verwenden kann ohne zu fragen
+- `ask`: Tools die immer Bestätigung fordern
+- `deny`: Tools die immer blockiert sind
+
+**Bewertungsreihenfolge:** deny → ask → allow (erste Übereinstimmung gewinnt)
+
+Siehe [Berechtigungen-Referenz](/de/tools/claude-code-berechtigungen) für komplette Regel-Syntax.
+
+#### `additionalDirectories`
+
+Dateizugriff über Projekt-Root hinaus erweitern.
+
+```json
+{
+  "additionalDirectories": [
+    "/full/path/to/shared/project",
+    "~/Documents/reference",
+    "/mnt/external/data"
+  ]
+}
+```
+
+Dateien in diesen Verzeichnissen:
+- Lesbar ohne Prompts
+- Folgen gleichen Edit-Berechtigungen wie Projekt-Dateien
+- Respektieren Deny-Regeln
+
+#### `sandbox`
+
+Betriebssystem-Level-Isolation für Bash-Befehle.
+
+Siehe **Sandbox-Konfiguration** Abschnitt unten für komplette Referenz.
+
+```json
+{
+  "sandbox": {
+    "enabled": true,
+    "filesystem": {
+      "allowRead": ["/public"],
+      "allowWrite": ["/tmp"]
+    },
+    "network": {
+      "allowedDomains": ["github.com"]
+    }
+  }
+}
+```
+
+### Arbeitsbereich-Konfiguration
+
+#### `env`
+
+Globale Umgebungsvariablen für alle Befehle und Subprozesse.
+
+```json
+{
+  "env": {
+    "NODE_ENV": "development",
+    "API_BASE": "https://api.example.com",
+    "LOG_LEVEL": "debug"
+  }
+}
+```
+
+Diese Variablen:
+- Gelten für alle Bash-Befehle
+- Überschreiben System-Umgebungsvariablen
+- Vererbt an Child-Prozesse
+- Verfügbar für MCP-Server
+
+**Sicherheits-Hinweis:** Speichern Sie niemals Secrets hier.
+
+#### `mcpServers`
+
+Model Context Protocol-Server konfigurieren.
+
+```json
+{
+  "mcpServers": {
+    "server-name": {
+      "command": "node",
+      "args": ["./dist/index.js"],
+      "env": {
+        "API_KEY": "value"
+      }
+    }
+  }
+}
+```
+
+Siehe [MCP-Referenz](/de/tools/mcp-referenz) für komplette Server-Konfiguration.
+
+#### `allowedMcpServers`
+
+Whitelist erlaubter MCP-Server (nur Managed Settings).
+
+```json
+{
+  "allowedMcpServers": {
+    "approved-server": {
+      "command": "node",
+      "args": ["./server.js"]
+    }
+  },
+  "allowManagedMcpServersOnly": true
+}
+```
+
+Wenn `allowManagedMcpServersOnly: true`, nur aufgelistete Server sind zugänglich.
+
+#### `deniedMcpServers`
+
+Blocklist verbotener MCP-Server.
+
+```json
+{
+  "deniedMcpServers": [
+    "untrusted-server",
+    "deprecated-server"
+  ]
+}
+```
+
+Verschmilzt über alle Scopes — Deny gewinnt immer.
+
+### Hooks und Custom Scripts
+
+#### `hooks`
+
+Custom Shell-Befehle die Claude Code-Funktionalität erweitern.
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "tool": "Bash",
+        "matcher": "curl.*",
+        "script": "echo 'Checking URL...' && echo allow"
+      }
+    ]
+  }
+}
+```
+
+**Hook-Typen:**
+- `PreToolUse`: Läuft vor Tool-Einsatz, kann deny/prompt/allow geben
+- `PostCommand`: Läuft nach CLI-Befehl
+- `PreCommand`: Läuft vor CLI-Befehl
+
+Siehe [Hooks-Anleitung](/de/tools/claude-code-hooks) für komplette Dokumentation.
+
+### Worktree-Konfiguration
+
+#### `symlinkDirectories`
+
+Behandele symlinkte Verzeichnisse als echte Verzeichnisse.
+
+```json
+{
+  "symlinkDirectories": [
+    "/home/user/projects/monorepo/packages/*"
+  ]
+}
+```
+
+Nützlich für Monorepos wo Packages symlinkt sind.
+
+#### `sparsePaths`
+
+Schließe Pfade von automatischer Erkennung aus (z.B. node_modules).
+
+```json
+{
+  "sparsePaths": [
+    "node_modules",
+    ".git",
+    "dist",
+    "build"
+  ]
+}
+```
+
+Diese Verzeichnisse:
+- Nicht automatisch aufgelistet von Glob
+- Nicht gewandert für grep/Suche
+- Können immer noch explizit gelesen werden
+- Verbessert Performance
+
+### IDE-Integration
+
+#### `autoConnectIde`
+
+Automatisch IDE verbinden wenn verfügbar.
+
+```json
+{
+  "autoConnectIde": true
+}
+```
+
+**Standard:** `true`
+
+Wenn `true`, verbindet sich Claude Code automatisch mit:
+- VS Code (wenn installiert und offen)
+- IntelliJ IDEs (wenn installiert und offen)
+
+#### `autoInstallIdeExtension`
+
+Auto-installiere IDE-Extensions beim Claude Code-Start.
+
+```json
+{
+  "autoInstallIdeExtension": true
+}
+```
+
+**Standard:** `true`
+
+Installiert Claude Code-Extensions in erkannten IDEs.
+
+### UI und Display-Einstellungen
+
+#### `showTurnDuration`
+
+Zeige verstrichene Zeit für jeden Claude Turn.
+
+```json
+{
+  "showTurnDuration": true
+}
+```
+
+Zeigt in REPL-Output:
+```
+Turn completed in 1.23s
+```
+
+**Standard:** `false`
+
+#### `companyAnnouncements`
+
+Zeige Company-Ankündigungen und Benachrichtigungen.
+
+```json
+{
+  "companyAnnouncements": true
+}
+```
+
+**Standard:** `true`
+
+Deaktivieren um Anthropic-Ankündigungen zu verstecken.
+
+### Cleanup und Maintenance
+
+#### `cleanupPeriodDays`
+
+Auto-Cleanup von temporären Dateien und Cache.
+
+```json
+{
+  "cleanupPeriodDays": 30
+}
+```
+
+Dateien älter als spezifizierte Tage werden entfernt:
+- Temporäre Dateien in `.claude/cache/`
+- Alte Logs
+- Stale Session-Daten
+
+**Standard:** `30`
+
+Setzen auf `0` um Auto-Cleanup zu deaktivieren.
+
+## Sandbox-Konfiguration
+
+Sandboxing bietet OS-Level-Restriktionen für Bash-Befehle.
+
+### `sandbox.enabled`
+
+Aktiviere oder deaktiviere Sandboxing.
+
+```json
+{
+  "sandbox": {
+    "enabled": true
+  }
+}
+```
+
+**Standard:** `false`
+
+Wenn `true`:
+- Bash-Befehle laufen in isolierter Umgebung
+- Dateizugriff ist beschränkt
+- Netzwerk-Zugriff ist beschränkt
+- Kann nicht zum System escapen
+
+### `sandbox.filesystem`
+
+Kontrolle Dateizugriff für sandboxed Bash.
+
+```json
+{
+  "sandbox": {
+    "filesystem": {
+      "enabled": true,
+      "allowRead": [
+        "/app",
+        "/home/user/projects"
+      ],
+      "allowWrite": [
+        "/app",
+        "/tmp"
+      ],
+      "blockRead": [
+        "/etc/passwd"
+      ],
+      "blockWrite": [
+        "/etc"
+      ]
+    }
+  }
+}
+```
+
+**Felder:**
+
+| Feld | Effekt |
+|---|---|
+| `enabled` | Aktiviere Filesystem-Sandboxing |
+| `allowRead` | Pfade lesbar von sandboxed Bash |
+| `allowWrite` | Pfade schreibbar von sandboxed Bash |
+| `blockRead` | Pfade die nicht gelesen werden können |
+| `blockWrite` | Pfade die nicht geschrieben werden können |
+
+**Pfad-Muster:**
+- Absolute Pfade: `/path/to/dir`
+- Glob-Muster: `/path/**/*.txt`
+- Home-Verzeichnis: `~/projects`
+
+**Standard-Verhalten:**
+- Wenn `allowRead` leer: deny alle Lesevorgänge
+- Wenn `allowWrite` leer: deny alle Schreibvorgänge
+- Wenn `allowRead` enthält `/`: alle Lesevorgänge erlaubt
+
+#### Filesystem-Vorrang
+
+Wenn Allow und Block-Regeln existieren:
+
+```json
+{
+  "allowRead": ["/app", "/home"],
+  "blockRead": ["/home/secrets"]
+}
+```
+
+Resultat: Kann `/app/**` und `/home/**` lesen außer `/home/secrets/**`
+
+### `sandbox.network`
+
+Kontrolle Netzwerk-Zugriff für sandboxed Bash.
+
+```json
+{
+  "sandbox": {
+    "network": {
+      "enabled": true,
+      "allowedDomains": [
+        "github.com",
+        "*.example.com",
+        "api.openai.com"
+      ],
+      "blockedDomains": [
+        "internal.local",
+        "10.0.0.0/8"
+      ],
+      "allowLoopback": true,
+      "allowPrivateRanges": false
+    }
+  }
+}
+```
+
+**Felder:**
+
+| Feld | Effekt |
+|---|---|
+| `enabled` | Aktiviere Netzwerk-Sandboxing |
+| `allowedDomains` | Domains die zugänglich sein können |
+| `blockedDomains` | Domains die immer blockiert sind |
+| `allowLoopback` | Erlaube localhost/127.0.0.1-Zugriff (Standard: true) |
+| `allowPrivateRanges` | Erlaube Zugriff auf private IP-Bereiche |
+
+**Domain-Muster:**
+- Exakte Domain: `github.com`
+- Wildcard-Subdomain: `*.github.com`
+- IP-Bereiche: `10.0.0.0/8`, `192.168.0.0/16`
+- Einzelne IPs: `8.8.8.8`
+
+**Netzwerk-Tools betroffen:**
+- `curl`, `wget` Befehle
+- DNS-Lookups
+- TCP/UDP-Sockets
+- HTTP-Anfragen von Scripts
+
+**Standard-Verhalten:**
+- Wenn `allowedDomains` leer: deny all network
+- Wenn `blockedDomains` leer: erlauben alle nicht explizit blockiert
+- Loopback (127.0.0.1) immer erlaubt außer explizit deaktiviert
+- Private Bereiche nur erlaubt wenn explizit aktiviert
+
+#### Netzwerk-Vorrang
+
+Block-Regeln haben Vorrang:
+
+```json
+{
+  "allowedDomains": ["*"],
+  "blockedDomains": ["internal.local"]
+}
+```
+
+Resultat: Erlaube alle Domains außer `internal.local`
+
+### `sandbox.autoAllowBashIfSandboxed`
+
+Automatisch Bash-Befehle erlauben wenn Sandboxing aktiviert ist.
+
+```json
+{
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true
+  }
+}
+```
+
+**Standard:** `false`
+
+Wenn `true`:
+- Bash-Berechtigungs-Prompts werden übersprungen
+- Bash-Befehle respektieren still Filesystem/Netzwerk-Restriktionen
+- Funktioniert nur wenn `sandbox.enabled: true`
+
+Nützlich für: Hochsicherheits-Umgebungen wo Bash im Sandbox als sicher angesehen wird.
+
+### `sandbox.excludedCommands`
+
+Befehle die nicht im Sandbox laufen können (Blocklist).
+
+```json
+{
+  "sandbox": {
+    "excludedCommands": [
+      "sudo",
+      "su",
+      "mount",
+      "docker"
+    ]
+  }
+}
+```
+
+Diese Befehle:
+- Immer blockiert im Sandbox
+- Können nicht laufen auch mit Berechtigung
+- Typischerweise System-Befehle die escapen können
+
+**Standard-Blocklisted** (immer blockiert):
+- Privilege Escalation: `sudo`, `su`, `doas`
+- System-Administration: `mount`, `umount`, `chroot`
+- Containerization: `docker`, `podman`
+
+## Managed Settings
+
+Managed Settings werden von IT bereitgestellt und können von Benutzern nicht überschrieben werden.
+
+### Managed-Only-Optionen
+
+Diese Einstellungen können NUR in Managed-Konfiguration gesetzt werden:
+
+| Einstellung | Effekt |
+|---|---|
+| `disableBypassPermissionsMode` | Verhindere `bypassPermissions`-Modus |
+| `allowManagedPermissionRulesOnly` | Erzwinge Organisations-Berechtigungsrichtlinie |
+| `allowManagedHooksOnly` | Erlaube nur Managed Hooks |
+| `allowManagedMcpServersOnly` | Erzwinge MCP-Server-Liste |
+| `blockedMarketplaces` | Deaktiviere Plugin-Marketplaces |
+| `sandbox.network.allowManagedDomainsOnly` | Erzwinge Managed-Domain-Whitelist |
+| `sandbox.filesystem.allowManagedReadPathsOnly` | Erzwinge Managed-Filesystem-Richtlinie |
+
+### Managed Settings Bereitstellung
+
+**Via Server:**
+```
+/etc/claude-code/settings.json  (Linux)
+C:\ProgramData\Claude\settings.json  (Windows)
+/Library/Application Support/Claude/settings.json  (macOS)
+```
+
+**Via Registry (Windows):**
+```
+HKEY_LOCAL_MACHINE\Software\Policies\Anthropic\ClaudeCode\Settings
+```
+
+**Via .plist (macOS):**
+```
+/Library/Preferences/com.anthropic.claude-code.plist
+```
+
+## Einstellungs-Vorrang
+
+Wenn gleiche Einstellung in mehreren Scopes erscheint:
+
+1. **Managed Settings** (höchste Priorität, kann nicht überschrieben werden)
+2. **Kommandozeilen-Argumente** (temporäre Überschreibungen)
+3. **Lokale Projekt-Einstellungen** (`.claude/settings.local.json`)
+4. **Gemeinsame Projekt-Einstellungen** (`.claude/settings.json`)
+5. **Benutzer-Einstellungen** (`~/.claude/settings.json`)
+
+### Merge-Verhalten
+
+**Für Listen** (wie `additionalDirectories`):
+- Alle Scopes werden zusammengeführt
+- Keine Duplikate
+- Beispiel: Projekt addiert zu Benutzer-Liste
+
+**Für Objekte** (wie `env`):
+- Tiefe Zusammenführung
+- Tieferer Scope überschreibt flacheren
+- Beispiel: Projekt `env.API_KEY` überschreibt Benutzer `env.API_KEY`
+
+**Für Booleans/Strings**:
+- Tiefster Scope gewinnt
+- Beispiel: Lokal `model: "opus"` überschreibt Projekt `model: "sonnet"`
+
+## Konfigurationsstatus prüfen
+
+### `/config` Befehl
+
+Zeige alle aktiven Einstellungen in REPL:
+
+```
+/config
+```
+
+Zeigt:
+- Aktuelles Modell
+- Berechtigungs-Modus
+- Sandbox-Status
+- Geladene Einstellungs-Dateien
+- Aktive Hooks
+
+### `/permissions` Befehl
+
+Alle effektiven Berechtigungsregeln ansehen:
+
+```
+/permissions
+```
+
+Zeigt:
+- Allow-Regeln (grün)
+- Ask-Regeln (gelb)
+- Deny-Regeln (rot)
+- Regel-Quellen
+
+### `/status` Befehl
+
+Voller System-Status:
+
+```
+/status
+```
+
+Einschließlich:
+- Modell und Version
+- Berechtigungs-Modus
+- Sandbox-Konfiguration
+- MCP-Server
+- Verfügbare Agenten
+- Konfigurations-Quellen
+
+## Häufige Konfigurationsbeispiele
+
+### Entwicklungs-Umgebung
+
+```json
+{
+  "model": "sonnet",
+  "defaultMode": "acceptEdits",
+  "permissions": {
+    "allow": [
+      "Bash(npm *)",
+      "Bash(git *)",
+      "Edit",
+      "Read"
+    ],
+    "deny": [
+      "Bash(sudo *)",
+      "Bash(rm *)"
+    ]
+  },
+  "sparsePaths": ["node_modules", "dist"]
+}
+```
+
+### Enterprise-Bereitstellung
+
+```json
+{
+  "allowManagedPermissionRulesOnly": true,
+  "disableBypassPermissionsMode": "disable",
+  "model": "sonnet",
+  "sandbox": {
+    "enabled": true,
+    "filesystem": {
+      "allowRead": ["/app", "/home"],
+      "allowWrite": ["/tmp"]
+    },
+    "network": {
+      "allowedDomains": ["company.com", "github.com"],
+      "allowManagedDomainsOnly": true
+    }
+  }
+}
+```
+
+### Code-Review
+
+```json
+{
+  "model": "sonnet",
+  "defaultMode": "plan",
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep"
+    ]
+  }
+}
+```
+
+## Siehe auch
+
+- [Berechtigungen-Referenz](/de/tools/claude-code-berechtigungen): Detaillierte Berechtigungsregel-Syntax
+- [Sandboxing](/de/tools/claude-code-sandboxing): OS-Level-Isolation für Bash
+- [MCP-Referenz](/de/tools/mcp-referenz): Model Context Protocol Konfiguration
+- [Hooks-Anleitung](/de/tools/claude-code-hooks): Custom Scripts und Automation
+
+## Quellen und Links
+
+- [Settings](https://code.claude.com/docs/en/settings)
+- [JSON Schema](https://json.schemastore.org/claude-code-settings.json)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

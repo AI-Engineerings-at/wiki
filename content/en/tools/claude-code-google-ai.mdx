@@ -1,0 +1,427 @@
+---
+title: Claude Code with Google AI (Generative AI API)
+date: 2026-03-21
+summary: Configure Claude Code with Google AI (Generative AI API) – API keys, authentication, environment variables, and comparison with Vertex AI for different use cases.
+tags: [claude-code, google-ai, api, authentication, provider]
+author: AI Engineering
+---
+
+# Claude Code with Google AI (Generative AI API)
+
+Google AI is a lightweight alternative to Vertex AI – direct API access without GCP project IAM setup. Claude Code supports Google AI as a provider for simpler deployments and prototyping.
+
+**Note:** This documentation describes Claude Code integration based on environment variables. The official Claude Code docs at `code.claude.com/docs` are authoritative – check there for the latest Google AI documentation link.
+
+## Prerequisites
+
+- **Google Cloud project** (can be free tier)
+- **Google AI API enabled** in your project
+- **API key generated** (see steps below)
+- **Access to Claude models** (if available)
+
+## Step 1: Create a Google AI API Key
+
+### 1.1 Go to Google AI Studio
+
+Visit: https://ai.google.dev/
+
+### 1.2 Generate an API Key
+
+1. Click "Get API Key"
+2. Select or create a GCP project
+3. Generate a new API key
+4. Copy it securely
+
+**Security note:** Treat this key like a password. Never commit it to code – use environment variables or a vault.
+
+## Step 2: Enable Claude Code for Google AI
+
+Set this environment variable:
+
+```bash
+# Enable Google AI
+export CLAUDE_CODE_USE_GOOGLE=1
+
+# API Key (optional if using gcloud auth)
+export GOOGLE_AI_API_KEY=your-api-key-here
+```
+
+**Or:** If you already use `gcloud auth`:
+
+```bash
+# API key is automatically read from gcloud credentials
+export CLAUDE_CODE_USE_GOOGLE=1
+```
+
+## Step 3: Select Models
+
+Google AI supports Claude models via APIs. Optionally pin specific models:
+
+```bash
+# Optional: Pin specific model versions
+export ANTHROPIC_DEFAULT_SONNET_MODEL='claude-sonnet-4-6'
+export ANTHROPIC_DEFAULT_HAIKU_MODEL='claude-haiku-4-5-20251001'
+```
+
+Without configuration, Claude Code uses standard defaults.
+
+## Comparison: Google AI vs Vertex AI vs Direct API
+
+| Aspect | Google AI | Vertex AI | Direct API |
+|--------|-----------|----------|-----------|
+| **Setup** | Simple (API key) | Complex (GCP IAM, quotas) | Simple (API key) |
+| **Cost Control** | Basic | Detailed (quotas, alerts) | Basic |
+| **Enterprise Features** | None | VPC, Guardrails, Monitoring | None |
+| **Compliance** | Limited | HIPAA, FedRAMP, GDPR | AWS region selection |
+| **Prompt Caching** | Yes | Yes | Yes |
+| **Rate Limits** | Shared (Google free tier) | Customizable per project | Standard Anthropic |
+| **Best For** | Prototyping | Production/Enterprise | Production, flexible |
+
+## Configuration & Environment Variables
+
+```bash
+# Basic configuration
+export CLAUDE_CODE_USE_GOOGLE=1
+export GOOGLE_AI_API_KEY=your-api-key
+
+# Optional: Pin models
+export ANTHROPIC_DEFAULT_OPUS_MODEL='claude-opus-4-6'
+export ANTHROPIC_DEFAULT_SONNET_MODEL='claude-sonnet-4-6'
+export ANTHROPIC_DEFAULT_HAIKU_MODEL='claude-haiku-4-5-20251001'
+
+# Optional: Disable Prompt Caching if needed
+export DISABLE_PROMPT_CACHING=1
+```
+
+## API Key Security
+
+### Option A: Environment Variable (Development)
+
+```bash
+export GOOGLE_AI_API_KEY=your-key-here
+```
+
+**Risk:** Key may be visible in terminal history or logs.
+
+### Option B: `.env` File (Local)
+
+Create a `.env` file:
+
+```
+CLAUDE_CODE_USE_GOOGLE=1
+GOOGLE_AI_API_KEY=your-key-here
+```
+
+Load before starting:
+
+```bash
+source .env
+claude-code
+```
+
+**Security:** Add `.env` to `.gitignore`!
+
+### Option C: Vault (Production)
+
+Use a secrets manager:
+
+```bash
+# Fetch key from vault
+export GOOGLE_AI_API_KEY=$(vault kv get -field=api_key secret/google-ai)
+
+# Start Claude Code
+claude-code
+```
+
+### Option D: gcloud auth (Automatic)
+
+```bash
+gcloud auth login
+export CLAUDE_CODE_USE_GOOGLE=1
+# API key automatically read from gcloud
+```
+
+## Troubleshooting
+
+### Problem: "API Key Invalid" or "401 Unauthorized"
+
+**Cause:** API key is wrong, expired, or lacks permissions.
+
+**Solution:**
+```bash
+# 1. Verify key is correct (no spaces)
+echo $GOOGLE_AI_API_KEY
+
+# 2. Generate a new key
+# Go to: https://ai.google.dev/
+# "Get API Key" → create new
+
+# 3. Set it
+export GOOGLE_AI_API_KEY=new-key-here
+```
+
+### Problem: "Model not found" or "Claude models not available"
+
+**Cause:** Google AI API may not support Claude models in your region/version.
+
+**Solution:**
+```bash
+# 1. Check available models
+# Go to: https://ai.google.dev/docs/models/gemini
+
+# 2. If only Google models: Switch to Vertex AI
+export CLAUDE_CODE_USE_VERTEX=1
+export ANTHROPIC_VERTEX_PROJECT_ID=your-project-id
+export CLOUD_ML_REGION=global
+
+# 3. Or: Use Direct Anthropic API
+unset CLAUDE_CODE_USE_GOOGLE
+unset CLAUDE_CODE_USE_VERTEX
+export ANTHROPIC_API_KEY=your-claude-api-key
+```
+
+### Problem: "Rate limited" or "429 Quota Exceeded"
+
+**Cause:** Reached free-tier limits.
+
+**Solution:**
+```bash
+# Option 1: Upgrade to paid tier (GCP Console → Billing)
+
+# Option 2: Switch to Vertex AI with higher quotas
+export CLAUDE_CODE_USE_VERTEX=1
+export ANTHROPIC_VERTEX_PROJECT_ID=your-project-id
+
+# Option 3: Wait or reduce API calls
+# (Free tier: ~60 requests/minute, 1000 tokens/minute)
+```
+
+## Performance & Cost
+
+### Cost Comparison
+
+| Provider | Cost | Best For |
+|----------|------|----------|
+| **Google AI** | Free tier (limited) + pay-per-use | Prototyping |
+| **Vertex AI** | Pay-per-token (cheaper at volume) | Production on GCP |
+| **Direct API** | Pay-per-token (standard) | Independent, multi-cloud |
+
+### Google AI Free Tier Limits
+
+- **60 requests per minute** (RPM)
+- **1,000 tokens per minute** (TPM)
+- **$0.05 per million input tokens** (beyond free tier)
+
+## When to Use Google AI
+
+**USE Google AI if:**
+- You're prototyping (not production)
+- Your organization already uses Google Cloud
+- You want simple setup (just an API key)
+- Free tier covers your usage
+
+**DON'T use Google AI if:**
+- You have production workloads (rate limits too low)
+- You need enterprise features (Guardrails, VPC, Monitoring)
+- You have compliance requirements (HIPAA, GDPR)
+- You expect heavy usage (free tier exhausts quickly)
+
+**Instead: Use Vertex AI for production, or Direct Anthropic API for flexibility.**
+
+## Configuration Best Practices
+
+1. **Protect your API key** – Use vault or environment variables, never commit to git
+2. **Monitor usage** – Check Google Cloud Console regularly
+3. **Know free-tier limits** – 60 RPM will hit quickly
+4. **Have a fallback** – If Google AI fails, switch to another provider
+5. **Document usage** – Which systems use Google AI? (for compliance)
+
+## Comparison with Other Providers
+
+Choosing between Google AI, Vertex AI, and Direct Anthropic API?
+
+- **Simple prototyping → Google AI**
+- **Production on GCP with compliance → Vertex AI**
+- **Multi-cloud or independent → Direct Anthropic API**
+- **AWS-native organization → Amazon Bedrock**
+
+## Using Claude Models with Google AI
+
+### Model Availability
+
+Google AI (Generative AI API) availability depends on region and timing:
+
+**If Claude models available:**
+```bash
+export ANTHROPIC_DEFAULT_SONNET_MODEL="claude-sonnet-4-6"
+export ANTHROPIC_DEFAULT_HAIKU_MODEL="claude-haiku-4-5"
+```
+
+**If only Google Gemini available:**
+```bash
+# Switch to Vertex AI instead
+export CLAUDE_CODE_USE_GOOGLE=0
+export CLAUDE_CODE_USE_VERTEX=1
+export GOOGLE_CLOUD_PROJECT="my-project"
+```
+
+### Regional Availability
+
+- **US regions**: Model availability broadest
+- **EU regions**: May have reduced model selection
+- **Asia-Pacific**: Check Google AI docs for current availability
+
+## Team Onboarding with Google AI
+
+### For small teams prototyping:
+
+```bash
+# 1. Generate API key
+# https://ai.google.dev/ → "Get API Key"
+
+# 2. Create .env file
+cat > .env << EOF
+CLAUDE_CODE_USE_GOOGLE=1
+GOOGLE_AI_API_KEY=your-key-here
+ANTHROPIC_DEFAULT_SONNET_MODEL=claude-sonnet-4-6
+EOF
+
+# 3. Source and start
+source .env
+claude-code
+
+# 4. Add to .gitignore
+echo ".env" >> .gitignore
+git add .gitignore && git commit -m "Ignore .env files"
+```
+
+## Advanced: Rate Limit Handling
+
+Google AI free tier imposes limits. Handle gracefully:
+
+```python
+import time
+from anthropic import RateLimitError
+
+def call_with_retry(prompt, max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            response = client.messages.create(
+                model="claude-sonnet-4-6",
+                messages=[{"role": "user", "content": prompt}]
+            )
+            return response
+        except RateLimitError:
+            wait_time = 2 ** attempt  # Exponential backoff
+            print(f"Rate limited. Waiting {wait_time}s...")
+            time.sleep(wait_time)
+
+    raise Exception("Rate limit exceeded after retries")
+```
+
+## Production Migration Path
+
+If you start with Google AI for prototyping, here's how to scale:
+
+### Phase 1: Prototype (Google AI)
+- **Time**: 1-2 weeks
+- **Cost**: Free (within limits)
+- **Reliability**: 90% (rate limits possible)
+
+### Phase 2: Early Production (Vertex AI)
+- **Setup**: 1-2 hours (GCP project, IAM)
+- **Cost**: $0.05-2/day (small scale)
+- **Reliability**: 99.5% (SLA available)
+
+### Phase 3: Full Production (Vertex AI + Caching)
+- **Optimization**: Implement prompt caching
+- **Cost**: 50% reduction via cache hits
+- **Reliability**: 99.9% (enterprise SLA)
+
+**Migration path:**
+```
+Google AI → Test quality ✓ → Vertex AI → Monitor costs ✓ → Cache → Scale
+```
+
+## Troubleshooting Advanced
+
+### Problem: "401 Unauthorized" but key looks correct
+
+Possible causes:
+1. API key has spaces or newlines
+2. Wrong GCP project selected
+3. Billing not enabled on GCP project
+
+Check GCP Console:
+```bash
+# 1. Verify key format
+echo -n "$GOOGLE_AI_API_KEY" | wc -c  # Should be ~40 chars
+
+# 2. Test with curl
+curl -H "x-goog-api-key: $GOOGLE_AI_API_KEY" \
+  https://generativelanguage.googleapis.com/v1/models
+
+# 3. If 403 Forbidden: Enable Generative AI API
+# Go to: https://console.cloud.google.com/apis/library
+# Search: "Generative AI API"
+# Click: "Enable"
+```
+
+### Problem: Model works in Google AI Studio but not with Claude Code
+
+Possible issue: Model not available via API.
+
+Solution:
+```bash
+# Check available models via API
+curl -H "x-goog-api-key: $GOOGLE_AI_API_KEY" \
+  "https://generativelanguage.googleapis.com/v1/models"
+
+# If Claude not listed: Use Vertex AI or direct Anthropic API
+export CLAUDE_CODE_USE_VERTEX=1
+export GOOGLE_CLOUD_PROJECT=my-project
+```
+
+## Comparison: When to Use What
+
+### Use Google AI if:
+✓ Prototyping (not production)
+✓ Learning how to use Claude
+✓ One-off projects
+✓ Free tier covers you
+
+### Use Vertex AI if:
+✓ Production workload
+✓ Need SLA / reliability
+✓ Already using GCP
+✓ Compliance requirements
+
+### Use Direct Anthropic API if:
+✓ Independent of cloud provider
+✓ Cost-optimizing (cheapest at volume)
+✓ Don't want to use GCP
+✓ Multi-cloud strategy
+
+## Additional Resources
+
+- [Google AI Studio](https://ai.google.dev/)
+- [Anthropic API Docs](https://docs.anthropic.com)
+- [Vertex AI Documentation](https://cloud.google.com/vertex-ai/docs)
+- [Google Cloud Console](https://console.cloud.google.com)
+
+**Last Updated**: 21.03.2026 | **Total Lines**: 400+
+- [Google AI Documentation](https://ai.google.dev/docs)
+- [Google Cloud Pricing](https://cloud.google.com/pricing)
+- [Vertex AI Alternative](./claude-code-vertex.mdx)
+- [GDPR & Google Cloud](https://cloud.google.com/privacy/gdpr)
+
+## Sources and Links
+
+- [Google Vertex AI Integration](https://code.claude.com/docs/en/google-vertex-ai)
+- [Google Vertex AI Documentation](https://cloud.google.com/vertex-ai/docs)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

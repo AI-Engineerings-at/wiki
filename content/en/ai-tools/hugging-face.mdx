@@ -1,0 +1,379 @@
+---
+title: Hugging Face Hub — Model Discovery and Deployment
+date: 2026-03-21
+summary: Hugging Face is the central repository for Open-Source LLMs, datasets, and Spaces. Transformers library, model cards, gated models, CLI tools, and production integration.
+tags: [hugging-face, hub, transformers, llm, dataset, model-cards]
+author: AI Engineering
+---
+
+# Hugging Face Hub — Central Model Platform
+
+Hugging Face is the de-facto standard repository for open-source LLMs in 2026. With 500,000+ models, the Hub is essential for:
+- Model discovery and benchmarking
+- Transformer-based workflows
+- Dataset management
+- Community features (discussions, PRs)
+
+## Hub Navigation
+
+### Main Site: huggingface.co
+
+Primary navigation:
+
+```
+/models          → 500k+ models
+/datasets        → 50k+ datasets
+/spaces          → Gradio/Streamlit apps
+/papers          → arxiv preprints
+/organizations   → Company/lab pages
+```
+
+### Search Models
+
+1. Visit [huggingface.co/models](https://huggingface.co/models)
+2. Filter by:
+   - **Task**: Text Generation, Classification, Object Detection...
+   - **Model Type**: LLM, Vision, Audio...
+   - **Size**: 7B, 13B, 70B (parameter count)
+   - **License**: Open, Restricted, Commercial...
+   - **Format**: GGUF, GPTQ, BNB...
+
+### Model Card Structure
+
+Each model includes detailed **Model Card**:
+
+```
+├── Description (what is it?)
+├── Intended Use (what for?)
+├── Training Data (what trained on?)
+├── Benchmarks (MMLU, HellaSwag, etc.)
+├── Limitations (known weaknesses)
+├── Ethical Considerations
+└── How to Use (code examples)
+```
+
+Example: [Qwen/Qwen2.5-7B](https://huggingface.co/Qwen/Qwen2.5-7B)
+
+## Transformers Library
+
+Official Python library for Hub models:
+
+### Installation
+
+```bash
+pip install transformers torch accelerate bitsandbytes
+```
+
+### Quick Inference
+
+```python
+from transformers import pipeline
+
+# Text generation
+generator = pipeline("text-generation",
+                     model="Qwen/Qwen2.5-7B")
+result = generator("Explain quantum computing",
+                   max_length=200)
+print(result[0]["generated_text"])
+
+# Classification
+classifier = pipeline("text-classification",
+                      model="distilbert-base-uncased-finetuned-sst-2-english")
+result = classifier("This movie is excellent!")
+print(result)  # [{'label': 'POSITIVE', 'score': 0.99}]
+```
+
+### Advanced: Quantization
+
+For models exceeding RAM:
+
+```python
+from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch
+
+model_name = "meta-llama/Llama-2-7b"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+# 4-Bit Quantization
+model = AutoModelForCausalLM.from_pretrained(
+    model_name,
+    load_in_4bit=True,
+    bnb_4bit_compute_dtype=torch.float16
+)
+
+inputs = tokenizer("Hello, how are you?", return_tensors="pt")
+outputs = model.generate(**inputs, max_length=50)
+print(tokenizer.decode(outputs[0]))
+```
+
+**Memory Comparison**:
+- Full (fp32): 28GB for 7B model
+- fp16 Precision: 14GB
+- 8-Bit Quantization: 7GB
+- 4-Bit Quantization: 4GB
+
+## CLI Tools
+
+### huggingface_hub CLI
+
+```bash
+pip install huggingface-hub
+```
+
+Practical commands:
+
+```bash
+# Login
+huggingface-cli login
+# Paste token from https://huggingface.co/settings/tokens
+
+# Download model
+huggingface-cli download Qwen/Qwen2.5-7B
+
+# Upload repo to Hub
+huggingface-cli upload username/my-model ./local_folder
+
+# Clone repository
+git clone https://huggingface.co/Qwen/Qwen2.5-7B
+```
+
+### Download with Python
+
+```python
+from huggingface_hub import hf_hub_download, snapshot_download
+
+# Single file
+model_file = hf_hub_download(
+    repo_id="Qwen/Qwen2.5-7B",
+    filename="pytorch_model.bin"
+)
+
+# Entire repo
+repo_path = snapshot_download(
+    repo_id="Qwen/Qwen2.5-7B",
+    cache_dir="/models"
+)
+```
+
+## Gated Models
+
+Some models (e.g., Meta Llama) require access approval:
+
+1. Open model page on Hugging Face
+2. Click "Request Access" (blue button)
+3. Accept terms
+4. Wait for approval (minutes to hours)
+5. Use `huggingface-cli login` to download
+
+After login:
+
+```python
+from transformers import AutoModelForCausalLM
+
+model = AutoModelForCausalLM.from_pretrained(
+    "meta-llama/Llama-2-7b"  # Now works (if access approved)
+)
+```
+
+## Spaces (Free Apps)
+
+Host Gradio/Streamlit apps for free on Hugging Face Spaces.
+
+### Create Space
+
+1. Go to [huggingface.co/new-space](https://huggingface.co/spaces)
+2. Create Repository → Space
+3. Enter name, choose Gradio/Streamlit
+4. Clone repository
+5. Write code
+
+### Example: Chat App
+
+```python
+# app.py
+import gradio as gr
+from transformers import pipeline
+
+pipe = pipeline("text-generation", model="Qwen/Qwen2.5-7B")
+
+def chat(message):
+    response = pipe(message, max_length=200)
+    return response[0]["generated_text"]
+
+iface = gr.Interface(
+    fn=chat,
+    inputs="text",
+    outputs="text",
+    title="Local LLM Chat"
+)
+
+iface.launch()
+```
+
+Deploy to Hugging Face Space:
+
+```bash
+git add app.py requirements.txt
+git commit -m "Add chatbot"
+git push
+# App auto-deploys
+```
+
+## Datasets
+
+Host and share 50k+ datasets on Hugging Face.
+
+### Search Datasets
+
+[huggingface.co/datasets](https://huggingface.co/datasets)
+
+Filter by:
+- Language (de, en...)
+- Task (classification, qa...)
+- Size
+
+### Load Dataset
+
+```python
+from datasets import load_dataset
+
+# CSV dataset
+dataset = load_dataset("csv", data_files="file.csv")
+
+# Hugging Face hosted dataset
+dataset = load_dataset("wikitext", "wikitext-2")
+print(dataset["train"][0])
+# {'text': 'A long article...'}
+```
+
+## Benchmarks & Leaderboards
+
+### Open LLM Leaderboard
+
+[huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard](https://huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard)
+
+Ranks models on:
+- **MMLU** (general knowledge)
+- **HellaSwag** (reasoning)
+- **TruthfulQA** (truth vs hallucination)
+- **Winogrande** (common sense)
+
+Top Models (March 2026):
+1. DeepSeek V3 (82.6%)
+2. Qwen 3.5 Ultra (79.8%)
+3. Mistral Large (77.4%)
+
+## Fine-Tuning with PEFT
+
+Parameter-Efficient Fine-Tuning (e.g., LoRA):
+
+```bash
+pip install peft
+```
+
+### LoRA Fine-Tuning
+
+```python
+from peft import get_peft_model, LoraConfig
+from transformers import AutoModelForCausalLM
+
+model = AutoModelForCausalLM.from_pretrained("Qwen/Qwen2.5-7B")
+
+lora_config = LoraConfig(
+    r=8,
+    lora_alpha=16,
+    target_modules=["q_proj", "v_proj"],
+    lora_dropout=0.1,
+    bias="none"
+)
+
+model = get_peft_model(model, lora_config)
+print(model.print_trainable_parameters())
+# trainable params: 1048576 || all params: 7342506880
+
+# Train with Trainer API
+from transformers import Trainer, TrainingArguments
+
+training_args = TrainingArguments(
+    output_dir="./lora-qwen",
+    per_device_train_batch_size=4,
+    num_train_epochs=3,
+    learning_rate=1e-4,
+)
+
+trainer = Trainer(
+    model=model,
+    args=training_args,
+    train_dataset=train_dataset,
+)
+
+trainer.train()
+```
+
+Push to Hub:
+
+```python
+model.save_pretrained("./my-lora-model")
+
+from huggingface_hub import upload_folder
+upload_folder(
+    repo_id="username/my-lora-model",
+    folder_path="./my-lora-model"
+)
+```
+
+## Community Features
+
+### Discussions
+
+Every model has a Discussions tab:
+- Ask questions
+- Report bugs
+- Suggest improvements
+
+### Model PRs
+
+Improve model cards, add quantizations, etc. via PR:
+
+```bash
+git clone https://huggingface.co/Qwen/Qwen2.5-7B
+cd Qwen2.5-7B
+git checkout -b improve-description
+
+# Edit README.md
+git add README.md
+git commit -m "Add GPTQ quantization details"
+git push
+# Open PR on Hub
+```
+
+## Integration with n8n
+
+n8n workflow with Hugging Face Inference API:
+
+```json
+{
+  "nodes": [
+    {
+      "type": "http",
+      "url": "https://api-inference.huggingface.co/models/Qwen/Qwen2.5-7B",
+      "method": "POST",
+      "headers": {
+        "Authorization": "Bearer {{ $secret.HF_API_KEY }}"
+      },
+      "body": {
+        "inputs": "{{ $json.prompt }}"
+      }
+    }
+  ]
+}
+```
+
+## Sources and Links
+
+- [Hugging Face Hub](https://huggingface.co)
+- [Transformers Documentation](https://huggingface.co/docs/transformers)
+- [Datasets Documentation](https://huggingface.co/docs/datasets)
+- [PEFT Fine-Tuning](https://github.com/huggingface/peft)
+- [Open LLM Leaderboard](https://huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard)
+- [Model Licensing Guide](https://huggingface.co/docs/hub/model-cards-licenses)

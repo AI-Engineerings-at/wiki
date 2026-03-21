@@ -1,0 +1,345 @@
+---
+title: Community Guides for Claude Code — The Best Learning
+date: 2026-03-21
+summary: Overview of the best community learning resources. Ultimate Guide vs Everything You Need vs Tips vs Cheat Sheet vs Best Practice. Which guide for which level. What makes each guide special.
+tags: [claude-code, learning, guides, community, best-practices, tutorials]
+author: AI Engineering
+section: tools
+---
+
+# Community Guides for Claude Code — The Best Learning
+
+There are dozens of Claude Code guides. Here's an honest overview: which guide helps **you**?
+
+## The Top 7 Guides
+
+### 1. Ultimate Guide — FlorianBruniaux
+**GitHub:** https://github.com/FlorianBruniaux/claude-code-ultimate-guide
+
+**Level:** Beginner → Poweruser
+**Time:** 8 hours
+**Format:** Structured lessons + quizzes
+
+**What you learn:**
+- Lesson 1-5: Setup, installation, first commands
+- Lesson 6-10: Workflows & automations
+- Lesson 11-15: Advanced patterns (multi-agent, memory)
+- Lesson 16-18: Common pitfalls & solutions
+- Quiz after each section
+
+**Special:** Quizzes force actual learning (not just reading).
+
+**Best For:** You want structured learning from 0 to 100.
+
+**Roadmap:**
+```
+Day 1: Lessons 1-5 (Setup)
+Day 2: Lessons 6-10 (Workflows)
+Day 3: Lessons 11-15 (Advanced)
+Day 4: Lessons 16-18 + Final quiz
+```
+
+### 2. Everything You Need to Know — wesammustafa
+**GitHub:** https://github.com/wesammustafa/Claude-Code-Everything-You-Need-to-Know
+
+**Level:** Overview
+**Time:** 4 hours
+**Format:** All-topics-in-one
+
+**Special feature:** BMAD Method
+- **B**reak — break problem into parts
+- **M**ap — identify dependencies
+- **A**ssign — distribute tasks
+- **D**eliver — execute sequentially
+
+**What you learn:**
+- Architecture thinking
+- Systemic problem solving
+- Integration patterns
+- Real-world examples
+
+**Best For:** You need overview, not depth. Or: you lack systematic thinking.
+
+**Focus:**
+- Not "how to install"
+- But "how to think"
+
+### 3. 45 Tips — ykdojo
+**GitHub:** https://github.com/ykdojo/claude-code-tips
+
+**Level:** Bite-sized tips
+**Time:** Bite-sized (~15min per tip)
+**Format:** 45 individual tips
+
+**Highlights:**
+- Tips 1-15: Setup & first run (everyone needs)
+- Tips 16-30: Workflows & automation (daily driver)
+- Tips 31-45: Advanced (power user)
+
+**Special Tips:**
+
+**Tip 42 — Gemini as Minion:**
+```bash
+# In Claude Code
+/gemini "Analyze this code for security issues"
+
+# What happens:
+1. Claude Code sends code to Gemini
+2. Gemini analyzes in parallel
+3. Claude Code merges results
+4. Final output: multi-perspective analysis
+```
+
+**Best For:** You want quick wins. Or: solve single issues.
+
+**How to use:**
+- Find a tip that matches you
+- Read it (10-15 min)
+- Try it immediately
+- Next tip tomorrow
+
+### 4. Cheat Sheet — Njengah
+**GitHub:** https://github.com/Njengah/claude-code-cheat-sheet
+
+**Level:** Reference
+**Time:** For lookup
+**Format:** Quick tables + commands
+
+**Structure:**
+```
+Commands cheat sheet
+├─ Basic commands
+│  ├─ /help
+│  ├─ /skills
+│  ├─ /agents
+│  └─ /config
+├─ Workflow commands
+│  ├─ /git
+│  ├─ /deploy
+│  └─ /test
+└─ Advanced
+   ├─ /multi-agent
+   ├─ /memory
+   └─ /hooks
+```
+
+**Best For:** You know Claude Code but forget commands. Or: quick reference.
+
+**Printable:** Yes! Print-friendly PDF.
+
+### 5. Best Practice — shanraisshan
+**GitHub:** https://github.com/shanraisshan/claude-code-best-practice
+
+**Level:** Advanced
+**Time:** 5 hours
+**Format:** Production patterns
+
+**You learn:**
+- Error handling patterns
+- State management best practices
+- Credential security
+- Testing strategies
+- Deployment workflows
+
+**Focus:** Not "how to start" but "how to go production".
+
+**Code-heavy:** 70% code, 30% explanation.
+
+**Best For:** You have basic knowledge. Want production-ready code.
+
+### 6. Step-by-Step Guide — zebbern
+**GitHub:** https://github.com/zebbern/claude-code-guide
+
+**Special feature:** German + English version
+
+**Structure:**
+1. Setup
+2. First commands
+3. Configure agents
+4. Install skills
+5. Deployment
+
+**Level:** Beginner
+**Time:** 6 hours
+**Format:** "Do step 1, then step 2"
+
+**Best For:** Absolute beginner. Or: German speaker.
+
+### 7. Showcase — ChrisWiles
+**GitHub:** https://github.com/ChrisWiles/claude-code-showcase
+
+**Special feature:** Complete working project
+
+**What you get:**
+- Hooks (5 preconfigured)
+- Skills (15 useful)
+- Agents (3 different types)
+- GitHub Actions (auto-test)
+- Docker setup
+- **All ready to copy.**
+
+**Best For:** You don't want to learn, you want copy & paste.
+
+**Workflow:**
+```bash
+git clone https://github.com/ChrisWiles/claude-code-showcase.git
+cp -r .claude/* your-project/.claude/
+# Done. Already productive.
+```
+
+### Bonus: Security-focused — Trail of Bits
+**GitHub:** https://github.com/trailofbits/claude-code-config
+
+**Special feature:** Security-first config (from security firm)
+
+**What's included:**
+- Output sanitizer (hide secrets)
+- Credential vault integration
+- Audit logging (who did what when)
+- Rate limiting
+
+**Best For:** Security-sensitive environments. Or: enterprise.
+
+## Guide Comparison Table
+
+| Guide | Level | Format | Time | Best For |
+|-------|-------|--------|------|----------|
+| **Florian** | Beginner→Pro | Structured | 8h | Complete learning |
+| **Wesammustafa** | Overview | Theory | 4h | Systematic thinking |
+| **ykdojo** | Tips | Bite-sized | 15min/tip | Single solutions |
+| **Njengah** | Reference | Cheat sheet | Lookup | Quick answers |
+| **shanraisshan** | Advanced | Code heavy | 5h | Production setup |
+| **zebbern** | Beginner | Step-by-step | 6h | Absolute beginners |
+| **ChrisWiles** | Reference | Project | Copy | Ready-to-use setup |
+| **Trail of Bits** | Security | Config | Setup | Enterprise |
+
+## Your Learning Path
+
+### Scenario 1: "I'm a complete beginner"
+```
+Week 1: zebbern guide (step-by-step)
+  ↓ (after 6 hours)
+Week 2: FlorianBruniaux (lessons 1-10)
+  ↓ (after 16 hours)
+Week 3: Practice + tips (ykdojo)
+```
+
+### Scenario 2: "I know code already"
+```
+Day 1: wesammustafa (BMAD method)
+  ↓ (after 4 hours)
+Day 2: shanraisshan (best practices)
+  ↓ (after 5 hours)
+Day 3: ChrisWiles (copy & productive)
+  ↓ (immediately productive)
+```
+
+### Scenario 3: "I need quick solutions"
+```
+→ Browse ykdojo tips
+→ Keep Njengah cheat sheet handy
+→ Google specific issue
+```
+
+### Scenario 4: "Enterprise with security"
+```
+Day 1: FlorianBruniaux (basics)
+  ↓
+Day 2: Trail of Bits (security)
+  ↓
+Then: shanraisshan (production)
+```
+
+## What makes each guide special
+
+### FlorianBruniaux
+**Strength:** Structure. Quizzes. No gaps.
+**Weakness:** Slow. Lots to read.
+
+### wesammustafa
+**Strength:** Systematic thinking. BMAD method.
+**Weakness:** Few code examples.
+
+### ykdojo
+**Strength:** Quick wins. Practical.
+**Weakness:** Not cohesive. Chaotic organization.
+
+### Njengah
+**Strength:** Gets to the point. Printable.
+**Weakness:** No explanations. Just reference.
+
+### shanraisshan
+**Strength:** Production-ready. Code-oriented.
+**Weakness:** Steep learning curve. Not for beginners.
+
+### zebbern
+**Strength:** Very beginner-friendly. Step-by-step.
+**Weakness:** Too simple. Too slow for experienced.
+
+### ChrisWiles
+**Strength:** Copy & go. Everything ready.
+**Weakness:** Not for learning. Only for deploying.
+
+### Trail of Bits
+**Strength:** Security-focused. Enterprise-ready.
+**Weakness:** Complex. Needs security background.
+
+## Quick Decision Helper
+
+```
+"I'm completely new"
+  → zebbern (6h, step-by-step)
+
+"I know code, new to Claude Code"
+  → FlorianBruniaux (8h, structured)
+
+"I just want to solve individual problems"
+  → ykdojo (tips) + Njengah (cheat sheet)
+
+"I want to think systematically"
+  → wesammustafa (4h, BMAD)
+
+"I want production-ready"
+  → shanraisshan (5h, best practices)
+
+"I just want copy & paste"
+  → ChrisWiles (one project)
+
+"I need security"
+  → Trail of Bits (3h, config)
+```
+
+## Combination Mix — Optimal Learning
+
+**For beginners:**
+1. Start: zebbern (day 1-2)
+2. Then: FlorianBruniaux lessons 1-10 (day 3-5)
+3. Practice: go through ykdojo tips (day 6-8)
+
+**For advanced:**
+1. Start: wesammustafa (day 1)
+2. Then: shanraisshan (day 2-3)
+3. Reference: keep Njengah cheat sheet handy
+4. Deploy: copy ChrisWiles project
+
+## Resource Links
+
+- https://github.com/FlorianBruniaux/claude-code-ultimate-guide
+- https://github.com/wesammustafa/Claude-Code-Everything-You-Need-to-Know
+- https://github.com/ykdojo/claude-code-tips
+- https://github.com/Njengah/claude-code-cheat-sheet
+- https://github.com/shanraisshan/claude-code-best-practice
+- https://github.com/zebbern/claude-code-guide
+- https://github.com/ChrisWiles/claude-code-showcase
+- https://github.com/trailofbits/claude-code-config
+
+## Sources and Links
+
+- https://github.com/FlorianBruniaux/claude-code-ultimate-guide
+- https://github.com/wesammustafa/Claude-Code-Everything-You-Need-to-Know
+- https://github.com/ykdojo/claude-code-tips
+- https://github.com/Njengah/claude-code-cheat-sheet
+- https://github.com/shanraisshan/claude-code-best-practice
+- https://github.com/zebbern/claude-code-guide
+- https://github.com/ChrisWiles/claude-code-showcase
+- https://github.com/trailofbits/claude-code-config

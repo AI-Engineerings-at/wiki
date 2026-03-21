@@ -1,0 +1,423 @@
+---
+title: Build an AI Agent — Tool Use, Memory, Loops
+date: 2026-03-21
+summary: Step-by-step guide to building a production-ready AI agent with Claude API. Tool definitions, execution loops, conversation memory, error handling.
+tags: [AI Agent, Tool Use, Claude API, Function Calling, Agentic AI]
+author: "AI Engineering"
+---
+
+# Build an AI Agent — Tool Use, Memory, Loops
+
+An AI agent is a program that uses LLMs to make decisions. Here we build a real, production-ready agent.
+
+## Core Concept
+
+```
+User: "What are top 5 Tech Startups 2026?"
+   ↓
+Agent: "I need web search"
+   ↓
+Web Search Tool: "Here are results"
+   ↓
+Agent: "I need more details"
+   ↓
+Web Scraper Tool: "Here's the content"
+   ↓
+Agent: "Now I can answer"
+   ↓
+User: "Top 5: [List]"
+```
+
+An agent **repeats this loop** until the task is complete.
+
+## Part 1: Setup
+
+```bash
+pip install anthropic python-dotenv requests beautifulsoup4
+```
+
+`.env`:
+```
+ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxxxx
+```
+
+## Part 2: Simple Agent (No Tools)
+
+Start with an agent without external tools.
+
+```python
+# simple_agent.py
+import os
+from anthropic import Anthropic
+
+client = Anthropic()
+
+# Conversation history
+conversation_history = []
+
+def agent_turn(user_message: str) -> str:
+    """One agent turn: user asks, agent answers"""
+
+    conversation_history.append({
+        "role": "user",
+        "content": user_message
+    })
+
+    response = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        max_tokens=1024,
+        system="You are a helpful assistant.",
+        messages=conversation_history
+    )
+
+    assistant_message = response.content[0].text
+
+    conversation_history.append({
+        "role": "assistant",
+        "content": assistant_message
+    })
+
+    return assistant_message
+
+# Chat loop
+print("Agent ready (type 'exit' to quit)\n")
+while True:
+    user_input = input("You: ").strip()
+    if user_input.lower() == "exit":
+        break
+
+    response = agent_turn(user_input)
+    print(f"Agent: {response}\n")
+```
+
+Test with:
+```bash
+python simple_agent.py
+# You: Who was Marie Curie?
+# Agent: Marie Curie was a Polish physicist...
+```
+
+## Part 3: Agent with Tools
+
+Now the real agent: it can **call tools**.
+
+```python
+# agent_with_tools.py
+import json
+from anthropic import Anthropic
+
+client = Anthropic()
+
+# Define tools (JSON Schema)
+TOOLS = [
+    {
+        "name": "web_search",
+        "description": "Search the internet for current information",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "Search query"
+                }
+            },
+            "required": ["query"]
+        }
+    },
+    {
+        "name": "calculator",
+        "description": "Perform mathematical calculations",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "expression": {
+                    "type": "string",
+                    "description": "Math expression (e.g., '2+2*3')"
+                }
+            },
+            "required": ["expression"]
+        }
+    }
+]
+
+def web_search(query: str) -> str:
+    """Mock web search — in production: requests + BeautifulSoup"""
+    return f"Search results for '{query}': [Result 1], [Result 2], [Result 3]"
+
+def calculator(expression: str) -> str:
+    """Calculate math expressions"""
+    try:
+        result = eval(expression)
+        return f"{expression} = {result}"
+    except Exception as e:
+        return f"Error: {e}"
+
+def execute_tool(tool_name: str, tool_input: dict) -> str:
+    """Execute a tool"""
+    if tool_name == "web_search":
+        return web_search(**tool_input)
+    elif tool_name == "calculator":
+        return calculator(**tool_input)
+    else:
+        return f"Unknown tool: {tool_name}"
+
+def run_agent_with_tools(user_message: str) -> str:
+    """Agent with tool-use loop"""
+
+    messages = [
+        {"role": "user", "content": user_message}
+    ]
+
+    print(f"\nUser: {user_message}")
+
+    # Agentic loop
+    while True:
+        response = client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=1024,
+            tools=TOOLS,
+            messages=messages,
+            system="You are an intelligent agent. Use available tools to complete tasks."
+        )
+
+        if response.stop_reason == "end_turn":
+            # Claude is done
+            final_text = response.content[0].text
+            print(f"Agent: {final_text}")
+            return final_text
+
+        elif response.stop_reason == "tool_use":
+            # Claude wants to call a tool
+            tool_results = []
+
+            for content in response.content:
+                if content.type == "tool_use":
+                    tool_name = content.name
+                    tool_input = content.input
+                    tool_use_id = content.id
+
+                    print(f"  → Tool: {tool_name}({json.dumps(tool_input)})")
+
+                    result = execute_tool(tool_name, tool_input)
+                    print(f"    Result: {result[:100]}...")
+
+                    tool_results.append({
+                        "type": "tool_result",
+                        "tool_use_id": tool_use_id,
+                        "content": result
+                    })
+
+            messages.append({"role": "assistant", "content": response.content})
+            messages.append({"role": "user", "content": tool_results})
+
+        else:
+            break
+
+# Test
+run_agent_with_tools("What is 123 * 456?")
+```
+
+## Part 4: Production Tool Use
+
+Real-world tools with error handling:
+
+```python
+# production_tools.py
+import logging
+import time
+import requests
+from typing import Optional
+
+logger = logging.getLogger(__name__)
+
+def web_search_real(query: str, num_results: int = 3) -> str:
+    """Real web search via SerpAPI"""
+
+    api_key = os.getenv("SERPAPI_KEY")
+    if not api_key:
+        return "Error: SERPAPI_KEY not set"
+
+    try:
+        response = requests.get(
+            "https://serpapi.com/search",
+            params={"q": query, "api_key": api_key, "num": num_results},
+            timeout=5
+        )
+
+        data = response.json()
+        results = []
+
+        for result in data.get("organic_results", [])[:num_results]:
+            results.append({
+                "title": result.get("title"),
+                "url": result.get("link"),
+                "snippet": result.get("snippet")
+            })
+
+        return json.dumps(results, ensure_ascii=False, indent=2)
+
+    except Exception as e:
+        return f"Search error: {e}"
+
+def web_scrape(url: str) -> str:
+    """Scrape a webpage and extract text"""
+
+    try:
+        headers = {"User-Agent": "Mozilla/5.0"}
+        response = requests.get(url, headers=headers, timeout=10)
+
+        if response.status_code != 200:
+            return f"Error: Status {response.status_code}"
+
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(response.content, "html.parser")
+
+        for script in soup(["script", "style"]):
+            script.decompose()
+
+        text = soup.get_text(separator="\n", strip=True)
+        return text[:5000]
+
+    except Exception as e:
+        return f"Scrape error: {e}"
+
+def execute_tool_safely(tool_name: str, tool_input: dict) -> str:
+    """Safe tool execution with error handling"""
+
+    try:
+        if tool_name == "web_search":
+            return web_search_real(**tool_input)
+        elif tool_name == "web_scrape":
+            return web_scrape(**tool_input)
+        else:
+            return f"Tool not implemented: {tool_name}"
+
+    except TimeoutError:
+        return "Tool timeout (>10s)"
+    except Exception as e:
+        return f"Tool error: {type(e).__name__}: {e}"
+```
+
+## Part 5: Multi-Agent Orchestration
+
+Coordinate multiple agents:
+
+```python
+# multi_agent.py
+class ResearchAgent:
+    def research(self, topic: str) -> str:
+        return run_agent_with_tools(f"Research: {topic}")
+
+class AnalysisAgent:
+    def analyze(self, data: str) -> str:
+        return run_agent_with_tools(f"Analyze: {data}")
+
+class WriterAgent:
+    def write_report(self, topic: str, research: str) -> str:
+        prompt = f"Write report on '{topic}' using: {research}"
+        return run_agent_with_tools(prompt)
+
+def run_research_workflow(topic: str):
+    researcher = ResearchAgent()
+    analyzer = AnalysisAgent()
+    writer = WriterAgent()
+
+    print(f"\n=== Phase 1: Research ===")
+    research = researcher.research(topic)
+
+    print(f"\n=== Phase 2: Analysis ===")
+    analysis = analyzer.analyze(research)
+
+    print(f"\n=== Phase 3: Report ===")
+    report = writer.write_report(topic, analysis)
+
+    return report
+
+report = run_research_workflow("AI in Healthcare")
+```
+
+## Part 6: Conversation Memory
+
+Store knowledge between sessions:
+
+```python
+# memory_agent.py
+import json
+from datetime import datetime
+from pathlib import Path
+
+class AgentMemory:
+    def __init__(self, memory_file: str = "agent_memory.json"):
+        self.memory_file = memory_file
+        self.memory = self._load_memory()
+
+    def _load_memory(self) -> dict:
+        if Path(self.memory_file).exists():
+            with open(self.memory_file) as f:
+                return json.load(f)
+        return {"facts": {}, "history": []}
+
+    def _save_memory(self):
+        with open(self.memory_file, "w") as f:
+            json.dump(self.memory, f, indent=2, default=str)
+
+    def add_fact(self, key: str, value: str):
+        self.memory["facts"][key] = {
+            "value": value,
+            "timestamp": datetime.now().isoformat()
+        }
+        self._save_memory()
+
+    def recall(self) -> str:
+        """Return all memory for Claude context"""
+        lines = ["=== Agent Memory ==="]
+        for key, data in self.memory["facts"].items():
+            lines.append(f"• {key}: {data['value']}")
+        return "\n".join(lines)
+
+memory = AgentMemory()
+
+memory.add_fact("user_name", "Anna")
+memory.add_fact("project", "RAG System")
+
+def agent_with_memory(user_message: str) -> str:
+    recalled = memory.recall()
+
+    messages = [
+        {
+            "role": "user",
+            "content": f"{recalled}\n\nMessage: {user_message}"
+        }
+    ]
+
+    response = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        max_tokens=1024,
+        messages=messages
+    )
+
+    return response.content[0].text
+
+print(agent_with_memory("What is my project?"))
+```
+
+## Summary
+
+Production Agent Checklist:
+
+1. **Conversation History** → State between turns
+2. **Tool Definitions** → What agent can do
+3. **Execution Loop** → Repeat until done
+4. **Error Handling** → Robustness
+5. **Memory/State** → Long-term info
+6. **Timeouts** → Prevent hanging
+
+**Next Steps:**
+- Integrate agents into n8n
+- Multi-agent orchestration
+- Agent monitoring & logs
+
+## Sources and Links
+
+- [CrewAI](https://github.com/crewAIInc/crewAI)
+- [AutoGen](https://github.com/microsoft/autogen)

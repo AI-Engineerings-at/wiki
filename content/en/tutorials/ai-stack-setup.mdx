@@ -1,0 +1,619 @@
+---
+title: "Set Up Your AI Stack in 30 Minutes"
+date: 2026-03-21
+summary: "Complete guide to deploying a self-hosted AI stack with Docker Compose, including Ollama, Open WebUI, and n8n"
+tags: ["docker", "ollama", "open-webui", "n8n", "setup", "self-hosted"]
+author: "AI Engineering"
+---
+
+# Set Up Your AI Stack in 30 Minutes
+
+Your own AI stack means no API bills, full control, and models running locally. This guide gets Docker Compose, Ollama, Open WebUI, and n8n running in under 30 minutes.
+
+## Prerequisites
+
+- Docker and Docker Compose installed (Docker Desktop on Windows/Mac, or Docker on Linux)
+- 8GB+ RAM, preferably GPU support (NVIDIA with nvidia-runtime, or Apple Silicon)
+- 20GB free disk space for models
+- Basic terminal skills
+
+## Architecture Overview
+
+```
+Your Machine
+├── Ollama (port 11434)
+│   └── LLM models (Llama 2, Mistral, etc.)
+├── Open WebUI (port 3000)
+│   └── UI for Ollama + Claude API fallback
+├── n8n (port 5678)
+│   └── Workflow automation
+└── PostgreSQL (port 5432)
+    └── n8n database
+```
+
+## Step 1: Create docker-compose.yml
+
+Create a new directory for your stack:
+
+```bash
+mkdir ai-stack && cd ai-stack
+touch docker-compose.yml
+```
+
+Add this to `docker-compose.yml`:
+
+```yaml
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+    volumes:
+      - ollama_data:/root/.ollama
+    # Optional: GPU support for NVIDIA
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:latest
+    container_name: open-webui
+    ports:
+      - "3000:8080"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}  # Optional
+    depends_on:
+      - ollama
+    volumes:
+      - open_webui_data:/app/backend/data
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: n8n-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: n8n
+      POSTGRES_USER: n8n
+      POSTGRES_PASSWORD: n8n_password_change_me
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=n8n
+      - DB_POSTGRESDB_USER=n8n
+      - DB_POSTGRESDB_PASSWORD=n8n_password_change_me
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - NODE_ENV=production
+      - WEBHOOK_URL=http://your-server:5678
+      - GENERIC_TIMEZONE=UTC
+    depends_on:
+      - postgres
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+volumes:
+  ollama_data:
+  open_webui_data:
+  postgres_data:
+  n8n_data:
+```
+
+## Step 2: Start the Stack
+
+```bash
+docker-compose up -d
+```
+
+Verify containers are running:
+
+```bash
+docker-compose ps
+```
+
+Expected output:
+```
+NAME                STATUS
+ollama              Up 2 minutes
+open-webui          Up 2 minutes
+n8n-postgres        Up 2 minutes
+n8n                 Up 1 minute
+```
+
+## Step 3: Pull Your First Model
+
+Open terminal and pull Mistral (4.1GB, fast):
+
+```bash
+docker exec ollama ollama pull mistral
+```
+
+Or Llama 2 (4GB):
+
+```bash
+docker exec ollama ollama pull llama2
+```
+
+Models download to `ollama_data` volume. First pull takes 2-5 minutes.
+
+## Step 4: Test Open WebUI
+
+1. Open http://localhost:3000 in browser
+2. Create account (first user is admin)
+3. Model dropdown → select "mistral"
+4. Chat: "Hello, what is Docker?"
+5. Response should come from local Ollama
+
+## Step 5: Configure n8n
+
+1. Open http://localhost:5678
+2. Set up admin account (email + password)
+3. Decline "AI Agent" setup (optional)
+4. Dashboard → Credentials → New
+5. Add "Ollama" credential:
+   - Base URL: `http://ollama:11434`
+   - Model: `mistral` (or your pulled model)
+   - Test connection
+
+## Step 6: Create Your First Workflow
+
+**Simple: Chat to Ollama**
+
+1. Dashboard → New Workflow
+2. Add node: "Webhook" (trigger)
+   - Method: POST
+   - Path: `/chat`
+3. Add node: "Ollama" (after Webhook)
+   - Prompt: `{{ $json.message }}`
+   - Model: `mistral`
+4. Add node: "Respond to Webhook"
+   - Response: `{{ $json.response }}`
+5. Save, activate, copy webhook URL
+
+Test with curl:
+
+```bash
+curl -X POST http://localhost:5678/webhook/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "What is an AI stack?"}'
+```
+
+## Storage & Persistence
+
+All data persists in Docker volumes:
+
+```bash
+# List volumes
+docker volume ls | grep ai-stack
+
+# Backup Ollama models
+docker run --rm -v ollama_data:/data \
+  -v /path/to/backup:/backup \
+  ubuntu tar czf /backup/ollama-backup.tar.gz /data
+
+# Restore
+docker run --rm -v ollama_data:/data \
+  -v /path/to/backup:/backup \
+  ubuntu tar xzf /backup/ollama-backup.tar.gz -C /data
+```
+
+## Networking
+
+Access from other machines:
+
+```bash
+# Find your machine IP
+# Windows/Mac: ipconfig / ifconfig
+# Linux: hostname -I
+
+# Update docker-compose.yml:
+# OLLAMA_HOST=0.0.0.0:11434 (already set)
+# WEBHOOK_URL=http://YOUR_IP:5678
+```
+
+## Common Issues
+
+**Port already in use:**
+```bash
+# Change ports in docker-compose.yml
+# ports:
+#   - "3001:8080"  # Use 3001 instead of 3000
+```
+
+**GPU not detected:**
+```bash
+# Install nvidia-docker and update docker-compose.yml
+docker-compose down
+docker-compose up -d
+docker exec ollama ollama list  # Check if GPU is used
+```
+
+**Out of memory:**
+```bash
+# Reduce model size: pull a smaller variant
+docker exec ollama ollama pull neural-chat  # Smaller than mistral
+```
+
+**Slow responses:**
+Check Ollama logs: `docker logs ollama`
+
+## Security Checklist
+
+- [ ] Change `n8n_password_change_me` to strong password
+- [ ] Set `WEBHOOK_URL` to your actual domain (not localhost)
+- [ ] Behind firewall: don't expose ports 5432, 5678 to internet
+- [ ] For production: use reverse proxy (nginx) with HTTPS
+- [ ] Backup volumes weekly
+
+## Next Steps
+
+- Import starter workflows from n8n templates
+- Connect external APIs (email, Slack, webhooks)
+- Scale to multi-GPU setup
+- Set up monitoring with Prometheus + Grafana
+
+## Checklist
+
+- [ ] Docker and Docker Compose installed
+- [ ] docker-compose.yml created with 4 services
+- [ ] `docker-compose up -d` completed without errors
+- [ ] At least one model pulled (mistral/llama2)
+- [ ] Open WebUI accessible at http://localhost:3000
+- [ ] Can chat with local model in Open WebUI
+- [ ] n8n admin account created
+- [ ] Ollama credential added to n8n
+- [ ] First webhook workflow created and tested
+- [ ] Volumes backed up
+
+## Advanced: GPU Optimization
+
+If you have an NVIDIA GPU (RTX 3080+), enable GPU acceleration:
+
+```yaml
+# Updated docker-compose.yml (GPU section)
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+      - CUDA_VISIBLE_DEVICES=0
+      - OLLAMA_NUM_GPU=1
+    volumes:
+      - ollama_data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+```
+
+Verify GPU is used:
+```bash
+docker exec ollama nvidia-smi
+# OR
+docker exec ollama ollama list --verbose
+```
+
+**Performance improvement:** 5-10x faster inference with GPU.
+
+## Multi-GPU Setup (Advanced)
+
+If you have 2+ GPUs:
+
+```yaml
+ollama:
+  environment:
+    - OLLAMA_NUM_GPU=-1  # Use all GPUs
+```
+
+Load distribution (automatic via Ollama).
+
+## Apple Silicon Optimization
+
+If running on Mac (Apple Silicon):
+
+```yaml
+ollama:
+  # No changes needed—Ollama detects Metal automatically
+  # VRAM allocation: up to 16GB shared memory
+```
+
+**Performance:** Near-GPU speed on M-series Macs.
+
+## Extending the Stack: Add More Services
+
+### Add Postgres for Data
+
+```yaml
+postgres-data:
+  image: postgres:15-alpine
+  environment:
+    POSTGRES_PASSWORD: changeme
+  volumes:
+    - postgres_data:/var/lib/postgresql/data
+  ports:
+    - "5433:5432"  # Port 5433 (not 5432, n8n uses that)
+```
+
+Then in Open WebUI or n8n, add PostgreSQL data source.
+
+### Add Redis for Caching
+
+```yaml
+redis:
+  image: redis:7-alpine
+  container_name: redis
+  ports:
+    - "6379:6379"
+```
+
+Use in n8n workflows to cache Ollama responses.
+
+### Add Minio (S3-Compatible Storage)
+
+```yaml
+minio:
+  image: minio/minio:latest
+  container_name: minio
+  ports:
+    - "9000:9000"
+    - "9001:9001"
+  environment:
+    MINIO_ROOT_USER: minioadmin
+    MINIO_ROOT_PASSWORD: minioadmin
+  volumes:
+    - minio_data:/minio
+  command: minio server /minio --console-address :9001
+```
+
+Access at http://localhost:9001 (credentials: minioadmin/minioadmin)
+
+## Monitoring & Health Checks
+
+### Prometheus + Grafana for monitoring
+
+Add to docker-compose.yml:
+
+```yaml
+prometheus:
+  image: prom/prometheus:latest
+  container_name: prometheus
+  ports:
+    - "9090:9090"
+  volumes:
+    - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    - prometheus_data:/prometheus
+
+grafana:
+  image: grafana/grafana:latest
+  container_name: grafana
+  ports:
+    - "3001:3000"  # Port 3001 (not 3000, open-webui uses that)
+  environment:
+    GF_SECURITY_ADMIN_PASSWORD: admin
+  depends_on:
+    - prometheus
+  volumes:
+    - grafana_data:/var/lib/grafana
+```
+
+Create prometheus.yml:
+
+```yaml
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'ollama'
+    static_configs:
+      - targets: ['ollama:11434']
+```
+
+Access Grafana at http://localhost:3001 (admin/admin).
+
+### Health Check Script
+
+```bash
+#!/bin/bash
+# health-check.sh
+
+echo "Checking AI Stack health..."
+
+# Ollama
+if curl -s http://localhost:11434/api/tags > /dev/null; then
+  echo "✓ Ollama: healthy"
+else
+  echo "✗ Ollama: OFFLINE"
+  exit 1
+fi
+
+# Open WebUI
+if curl -s http://localhost:3000 > /dev/null; then
+  echo "✓ Open WebUI: healthy"
+else
+  echo "✗ Open WebUI: OFFLINE"
+  exit 1
+fi
+
+# n8n
+if curl -s http://localhost:5678/rest/health > /dev/null; then
+  echo "✓ n8n: healthy"
+else
+  echo "✗ n8n: OFFLINE"
+  exit 1
+fi
+
+# PostgreSQL
+if docker exec n8n-postgres pg_isready -U n8n > /dev/null 2>&1; then
+  echo "✓ PostgreSQL: healthy"
+else
+  echo "✗ PostgreSQL: OFFLINE"
+  exit 1
+fi
+
+echo ""
+echo "All systems operational! ✓"
+```
+
+Run: `chmod +x health-check.sh && ./health-check.sh`
+
+## Scaling: Move to Cloud GPU
+
+For production workloads, move Ollama to cloud:
+
+### RunPod GPU Rental
+
+```bash
+# Pull model on RunPod (cheaper)
+runpod-cli start-pod --gpu-id a40-large --template ollama
+
+# Instead of local http://localhost:11434
+# Use RunPod endpoint: https://your-pod.runpod.io:11434
+```
+
+Update n8n:
+```
+Ollama Base URL: https://your-pod.runpod.io:11434
+```
+
+**Cost:** €0.30-0.50/hour vs. €2000 GPU purchase.
+
+### Lambda Labs GPU
+
+Similar setup:
+```bash
+# Rent GPU instance
+# SSH in, run docker-compose
+docker-compose up -d
+
+# Get public IP
+# Update n8n with http://public-ip:11434
+```
+
+## Disaster Recovery
+
+### Backup Script
+
+```bash
+#!/bin/bash
+# backup-stack.sh
+
+BACKUP_DIR="/path/to/backups"
+DATE=$(date +%Y-%m-%d)
+
+echo "Backing up AI Stack..."
+
+# Backup n8n database
+docker exec n8n-postgres pg_dump -U n8n n8n > \
+  $BACKUP_DIR/n8n-db-$DATE.sql
+
+# Backup Ollama models
+docker run --rm -v ollama_data:/data -v $BACKUP_DIR:/backup \
+  ubuntu tar czf /backup/ollama-$DATE.tar.gz /data
+
+# Backup Open WebUI
+docker run --rm -v open_webui_data:/data -v $BACKUP_DIR:/backup \
+  ubuntu tar czf /backup/webui-$DATE.tar.gz /data
+
+# Cleanup old backups (keep last 7 days)
+find $BACKUP_DIR -mtime +7 -delete
+
+echo "Backup complete!"
+```
+
+Cron job: `0 2 * * * /path/to/backup-stack.sh` (daily at 2 AM)
+
+### Restore from Backup
+
+```bash
+# Restore n8n database
+docker exec -i n8n-postgres psql -U n8n n8n < n8n-db-2026-03-21.sql
+
+# Restore Ollama
+docker run --rm -v ollama_data:/data -v /path/to/backups:/backup \
+  ubuntu tar xzf /backup/ollama-2026-03-21.tar.gz -C /data
+
+# Restart services
+docker-compose restart ollama open-webui n8n
+```
+
+## Production Checklist
+
+- [ ] GPU enabled if available
+- [ ] Monitoring set up (Prometheus + Grafana)
+- [ ] Health checks automated
+- [ ] Backups running daily
+- [ ] Restore tested (quarterly)
+- [ ] HTTPS reverse proxy in front (nginx)
+- [ ] Firewall configured (only necessary ports exposed)
+- [ ] Resource limits set (Docker memory caps)
+- [ ] Error logging centralized (ELK stack optional)
+- [ ] Model updates automated (Ollama auto-pull)
+
+## Troubleshooting Advanced Issues
+
+### Ollama OOM on larger models
+
+```bash
+# Reduce model size
+docker exec ollama ollama pull mistral:7b  # Smaller variant
+
+# OR increase swap
+docker update --memory 16g ollama
+```
+
+### n8n crashes on large workflows
+
+```bash
+# Increase Node.js heap
+docker exec -e NODE_OPTIONS=--max-old-space-size=4096 n8n npm start
+```
+
+### Open WebUI slow
+
+```bash
+# Check Ollama queue
+docker logs ollama | grep "queue"
+
+# Reduce concurrent connections
+# Settings → Max Concurrent Requests
+```
+
+## Next Steps for Production
+
+1. Add authentication (OAuth, LDAP)
+2. Set up CDN for Open WebUI (CloudFlare)
+3. Implement request rate limiting
+4. Add log aggregation (ELK, Loki)
+5. Set up alerts (PagerDuty, Slack)
+6. Document runbooks for common failures
+7. Schedule quarterly disaster recovery tests
+
+## Sources and Links
+
+- [Docker](https://docs.docker.com)
+- [n8n](https://docs.n8n.io)

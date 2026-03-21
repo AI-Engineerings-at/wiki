@@ -1,0 +1,657 @@
+---
+title: Claude Code — Troubleshooting Guide
+date: 2026-03-21
+summary: Comprehensive troubleshooting guide for installation, authentication, networking, performance, MCP, permissions, Git integration, and IDE issues with step-by-step solutions.
+tags: [claude-code, troubleshooting, debugging, installation, errors]
+author: "AI Engineering"
+---
+
+# Claude Code — Troubleshooting Guide
+
+This guide helps you diagnose and resolve common Claude Code issues. Start with `/doctor` for quick diagnostics.
+
+## Installation Issues
+
+### Error: `command not found: claude` or `'claude' is not recognized`
+
+Installation completed but `claude` doesn't work.
+
+**Cause**: The install directory is not in your shell's PATH.
+
+**Solution**:
+
+```bash
+# macOS/Linux: check your PATH
+echo $PATH | tr ':' '\n' | grep local/bin
+
+# If ~/.local/bin is missing, add it:
+# Zsh (macOS default)
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+
+# Bash (Linux default)
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+
+# Verify
+claude --version
+```
+
+**Windows PowerShell**:
+```powershell
+# Check PATH
+$env:PATH -split ';' | Select-String 'local\\bin'
+
+# Add if missing
+$currentPath = [Environment]::GetEnvironmentVariable('PATH', 'User')
+[Environment]::SetEnvironmentVariable('PATH', "$currentPath;$env:USERPROFILE\.local\bin", 'User')
+
+# Restart terminal and verify
+claude --version
+```
+
+### Error: `syntax error near unexpected token '<'` or `Invoke-Expression: Missing argument`
+
+The install script received HTML instead of a shell script.
+
+**Cause**: Network routing, regional blocking, or temporary service disruption.
+
+**Solutions**:
+
+1. **Wait a few minutes and retry** — the issue is often temporary
+
+2. **Use alternative install method**:
+   ```bash
+   # macOS/Linux: Homebrew
+   brew install --cask claude-code
+
+   # Windows: WinGet
+   winget install Anthropic.ClaudeCode
+   ```
+
+3. **Check network connectivity**:
+   ```bash
+   curl -sI https://storage.googleapis.com
+   ```
+
+### Error: `curl: (56) Failure writing output to destination`
+
+The download connection was interrupted.
+
+**Cause**: Network interruption, blocked download, or resource limits.
+
+**Solutions**:
+
+1. **Test network stability**:
+   ```bash
+   curl -fsSL https://storage.googleapis.com -o /dev/null
+   ```
+
+2. **Use alternative install method**:
+   ```bash
+   brew install --cask claude-code  # macOS/Linux
+   winget install Anthropic.ClaudeCode  # Windows
+   ```
+
+3. **Download first, then run**:
+   ```bash
+   curl -fsSL https://claude.ai/install.sh -o install.sh
+   bash install.sh
+   ```
+
+### Error: `Killed` during install on low-memory Linux
+
+The OOM killer terminated the process due to insufficient memory.
+
+**Cause**: Server has less than 4 GB of free RAM.
+
+**Solution — Add swap space**:
+```bash
+# Create 2 GB swap file
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+
+# Retry installation
+curl -fsSL https://claude.ai/install.sh | bash
+```
+
+### Error: `TLS connect error`, `SSL/TLS secure channel`, or `unable to get local issuer certificate`
+
+TLS handshake failed, often due to corporate proxies with TLS inspection.
+
+**Solutions**:
+
+1. **Update CA certificates**:
+   ```bash
+   # Ubuntu/Debian
+   sudo apt-get update && sudo apt-get install ca-certificates
+
+   # macOS
+   brew install ca-certificates
+   ```
+
+2. **Windows PowerShell — Enable TLS 1.2**:
+   ```powershell
+   [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+   irm https://claude.ai/install.ps1 | iex
+   ```
+
+3. **Configure corporate CA certificate**:
+   ```bash
+   export NODE_EXTRA_CA_CERTS=/path/to/corporate-ca.pem
+   curl -fsSL https://claude.ai/install.sh | bash
+   ```
+   Ask your IT team for the certificate file.
+
+### Error: `Failed to fetch version from storage.googleapis.com`
+
+Installer cannot reach the download server.
+
+**Cause**: `storage.googleapis.com` is blocked on your network.
+
+**Solutions**:
+
+1. **Configure proxy** (if available):
+   ```bash
+   export HTTP_PROXY=http://proxy.example.com:8080
+   export HTTPS_PROXY=http://proxy.example.com:8080
+   curl -fsSL https://claude.ai/install.sh | bash
+   ```
+
+2. **Use alternative install method**:
+   ```bash
+   brew install --cask claude-code  # macOS/Linux
+   winget install Anthropic.ClaudeCode  # Windows
+   ```
+
+### Error: `Linux: wrong binary variant installed (musl/glibc mismatch)`
+
+`Error loading shared library libstdc++.so.6: No such file or directory`
+
+**Cause**: Wrong binary downloaded for your system.
+
+**Solution**:
+
+```bash
+# Check which libc your system uses
+ldd /bin/ls | head -1
+
+# If on glibc but got musl binary: reinstall
+curl -fsSL https://claude.ai/install.sh | bash
+
+# If actually on musl (Alpine Linux)
+apk add libgcc libstdc++ ripgrep
+```
+
+### Error: `Illegal instruction` on Linux
+
+**Cause**: Binary doesn't match your CPU architecture.
+
+**Solution**:
+
+```bash
+# Check architecture
+uname -m
+# x86_64 = 64-bit Intel/AMD
+# aarch64 = ARM64
+
+# If wrong: file issue with uname -m output
+# Try alternative install
+brew install --cask claude-code
+```
+
+### Error: `dyld: cannot load` on macOS
+
+`dyld: cannot load 'claude-...' ... Abort trap: 6`
+
+**Cause**: Binary incompatible with your macOS version.
+
+**Solution**:
+
+```bash
+# Check macOS version (requires 13.0+)
+# Apple Menu → About This Mac
+
+# If older: update macOS
+
+# Alternative: Homebrew
+brew install --cask claude-code
+```
+
+### Error: Windows `irm` or `&&` not recognized
+
+You're running the wrong installer command for your shell.
+
+**If `irm not recognized`** — you're in CMD, not PowerShell:
+
+```powershell
+# Open PowerShell and run
+irm https://claude.ai/install.ps1 | iex
+```
+
+**If `&& not valid`** — you're in PowerShell but ran CMD command:
+
+```powershell
+# Correct for PowerShell
+irm https://claude.ai/install.ps1 | iex
+```
+
+### Error: WSL — `exec: node: not found`
+
+WSL is using Windows Node.js instead of Linux Node.js.
+
+**Solution**:
+
+```bash
+# Check which Node is being used
+which npm
+which node
+
+# If paths start with /mnt/c/ → Windows versions in use
+# Install Linux Node.js via nvm or package manager
+
+# via nvm
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+source ~/.nvm/nvm.sh
+nvm install node
+
+# Check again
+which npm  # should show /home/..., not /mnt/c/...
+```
+
+## Authentication Issues
+
+### Repeated permission prompts
+
+You're repeatedly asked to approve the same command.
+
+**Solution**: Use `/permissions` to permanently allow specific tools:
+
+```
+/permissions
+# Select tool and set permanent access
+```
+
+### Error: `OAuth error: Invalid code`
+
+`OAuth error: Invalid code. Please make sure the full code was copied`
+
+**Cause**: Login code expired or truncated during copy-paste.
+
+**Solutions**:
+
+1. **Type quickly**: Press Enter right after browser opens
+2. **Manual copy**: Press `c` to copy URL to clipboard
+3. **Remote session**: If SSH, copy URL from terminal and open in local browser
+
+### Error: `403 Forbidden` after login
+
+`API Error: 403 {"error":{"type":"forbidden",...}}`
+
+**Solutions**:
+
+1. **Claude Pro/Max**: Verify active subscription at claude.ai/settings
+2. **Console users**: Admin must assign "Claude Code" or "Developer" role
+3. **Behind proxy**: Check proxy configuration in Network Issues section
+
+### Error: `"This organization has been disabled"` despite active subscription
+
+**Cause**: `ANTHROPIC_API_KEY` environment variable overrides your subscription.
+
+**Solution**:
+
+```bash
+# Unset the variable
+unset ANTHROPIC_API_KEY
+
+# Check ~/.zshrc, ~/.bashrc, ~/.profile
+# Remove any `export ANTHROPIC_API_KEY=...` lines
+
+# Start and check
+claude
+/status  # shows authentication method
+```
+
+### Error: OAuth login fails in WSL2
+
+Browser doesn't open properly.
+
+**Solution**:
+
+```bash
+# Set browser explicitly
+export BROWSER="/mnt/c/Program Files/Google/Chrome/Application/chrome.exe"
+claude
+
+# Or: Manual copy
+# Press 'c' when login prompt appears
+```
+
+## Network Issues
+
+### TLS/SSL errors during install
+
+See "Installation Issues" section above.
+
+### Proxy blocks download
+
+**Solution**:
+
+```bash
+# Set proxy variables
+export HTTP_PROXY=http://proxy.example.com:8080
+export HTTPS_PROXY=http://proxy.example.com:8080
+export NO_PROXY=localhost,127.0.0.1,.internal
+
+# Install
+curl -fsSL https://claude.ai/install.sh | bash
+
+# Or: Add certificate
+export NODE_EXTRA_CA_CERTS=/path/to/ca.pem
+```
+
+### API requests fail with corporate proxy
+
+**Solution**: Configure proxy for Claude Code:
+
+```json
+// settings.json
+{
+  "env": {
+    "HTTP_PROXY": "http://proxy.example.com:8080",
+    "HTTPS_PROXY": "http://proxy.example.com:8080"
+  }
+}
+```
+
+## Performance Issues
+
+### High CPU or memory usage
+
+**Solutions**:
+
+1. **Compact context**: Use `/compact` regularly
+2. **Restart**: Restart Claude Code between major tasks
+3. **Expand .gitignore**: Exclude large build directories
+
+```bash
+# Add to .gitignore
+node_modules/
+.next/
+dist/
+build/
+```
+
+### Command hangs or freezes
+
+**Solution**:
+
+1. **Press Ctrl+C** to cancel
+2. **If unresponsive**: Close terminal and restart
+
+### Search doesn't work
+
+Search tool, `@file` mentions, custom agents not working.
+
+**Cause**: System `ripgrep` not installed.
+
+**Solution**:
+
+```bash
+# macOS
+brew install ripgrep
+
+# Windows
+winget install BurntSushi.ripgrep.MSVC
+
+# Ubuntu/Debian
+sudo apt install ripgrep
+
+# Fedora
+sudo dnf install ripgrep
+
+# Alpine
+apk add ripgrep
+
+# Then in settings.json or shell
+export USE_BUILTIN_RIPGREP=0
+```
+
+### Slow search results on WSL
+
+WSL cross-filesystem performance is slower.
+
+**Solutions**:
+
+1. **More specific searches**: "Search for JWT validation in auth package"
+2. **Move to Linux filesystem**: `/home/` instead of `/mnt/c/`
+3. **Use native Windows**: If possible
+
+## MCP Issues
+
+### MCP server won't start
+
+**Diagnose**:
+
+```bash
+/doctor  # shows MCP issues
+```
+
+**Common causes**:
+
+1. **Server file not found**: Check path in `.mcp.json`
+2. **Wrong permissions**: `chmod +x` for server binary
+3. **Missing dependencies**: Server missing required packages
+
+**Solution**:
+
+```json
+// .mcp.json — check paths
+{
+  "mcpServers": {
+    "myserver": {
+      "command": "/absolute/path/to/server",
+      "args": ["--option"]
+    }
+  }
+}
+```
+
+### Timeout connecting to MCP server
+
+**Cause**: Server responds too slowly or won't start.
+
+**Solution**:
+
+```bash
+# Test server manually
+/absolute/path/to/server --option
+
+# Check if server is running
+ps aux | grep server
+
+# Restart Claude Code
+claude
+```
+
+## IDE Integration Issues
+
+### JetBrains IDE not detected on WSL2
+
+**Cause**: WSL2 NAT networking blocks connection.
+
+**Solution 1 — Windows Firewall Rule**:
+
+```bash
+# Find WSL2 IP
+wsl hostname -I  # e.g., 172.21.123.45
+
+# Open PowerShell as Admin
+```
+
+```powershell
+New-NetFirewallRule -DisplayName "Allow WSL2 Internal Traffic" -Direction Inbound -Protocol TCP -Action Allow -RemoteAddress 172.21.0.0/16 -LocalAddress 172.21.0.0/16
+```
+
+**Solution 2 — WSL2 Mirrored Networking**:
+
+In `~/.wslconfig` (Windows directory):
+```ini
+[wsl2]
+networkingMode=mirrored
+```
+
+Then `wsl --shutdown` in PowerShell
+
+### Escape key doesn't work in JetBrains
+
+**Solution**:
+
+1. Go to Settings → Tools → Terminal
+2. Uncheck "Move focus to the editor with Escape" or delete the shortcut
+
+## Documentation Issues
+
+### Missing language tags in code blocks
+
+Generated markdown lacks code block language tags.
+
+**Solution**: Ask Claude to add language tags:
+
+```
+"Add appropriate language tags to all code blocks in this markdown file."
+```
+
+## Sandbox Issues
+
+### Error: `Sandbox requires socat and bubblewrap`
+
+WSL2 is missing required dependencies.
+
+**Solution**:
+
+```bash
+# Ubuntu/Debian WSL2
+sudo apt-get install bubblewrap socat
+
+# Fedora WSL2
+sudo dnf install bubblewrap socat
+```
+
+WSL1 doesn't support sandboxing — upgrade to WSL2.
+
+## Git Integration Issues
+
+### Git commands don't work
+
+**Cause**: Git not installed or not in PATH.
+
+**Solution**:
+
+```bash
+# Check Git installation
+which git
+git --version
+
+# If missing: install
+# macOS
+brew install git
+
+# Windows
+winget install Git.Git
+
+# Linux
+sudo apt install git  # Debian/Ubuntu
+sudo dnf install git  # Fedora
+```
+
+## File Permission Errors
+
+### Permission denied when writing
+
+**Cause**: Sandbox blocks it or no write permission.
+
+**Solutions**:
+
+1. **Check sandbox settings**:
+   ```json
+   // .claude/settings.json
+   {
+     "sandbox": {
+       "enabled": false  // temp. for testing
+     }
+   }
+   ```
+
+2. **Check file permissions**:
+   ```bash
+   ls -la filename
+   # If needed: chmod
+   chmod u+w filename
+   ```
+
+3. **Check directory structure**:
+   ```bash
+   mkdir -p directory
+   chmod u+w directory
+   ```
+
+## General Diagnostics
+
+### Use the `/doctor` command
+
+```bash
+# Anytime in Claude Code
+/doctor
+```
+
+This checks:
+- Installation and version
+- Auto-update status
+- Settings files (JSON validation)
+- MCP server configuration
+- Keybinding issues
+- Context usage warnings
+- Plugin/agent loading errors
+
+### Get logs
+
+```bash
+# Enable debug output
+export CLAUDE_CODE_DEBUG=1
+claude
+
+# Or in session
+/debug
+```
+
+### Manual troubleshooting
+
+```bash
+# Reset all configuration
+rm ~/.claude.json
+rm -rf ~/.claude/
+rm -rf .claude/
+rm .mcp.json
+
+# Reset only settings (CAUTION!)
+rm ~/.claude/settings.json
+```
+
+## See Also
+
+- [Claude Code Environment Variables](/en/tools/claude-code-environment-variables)
+- [Claude Code Installation](/en/tools/claude-code-installation)
+- [Claude Code Authentication](/en/tools/claude-code-authentication)
+
+## Sources and Links
+
+- [Troubleshooting Guide](https://code.claude.com/docs/en/troubleshooting)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

@@ -1,0 +1,435 @@
+---
+title: "Grafana Basics: Dashboards, Panels, and Alerts"
+date: 2026-03-21
+summary: "Getting started with Grafana: connecting data sources, building dashboards, creating panels, setting up alerts"
+tags: ["grafana", "dashboards", "monitoring", "visualization", "alerts", "observability"]
+author: "AI Engineering"
+---
+
+# Grafana Basics: Dashboards, Panels, and Alerts
+
+Grafana visualizes metrics. Connect Prometheus, query data, build dashboards.
+
+## What is Grafana?
+
+```
+Prometheus (time-series database)
+  ↓ stores metrics
+  ↓ cpu_usage, memory_bytes, requests_total
+  │
+  ↓ (Grafana queries)
+  │
+Grafana (visualization)
+  ├─ Dashboards
+  ├─ Panels (graphs, gauges, tables)
+  └─ Alerts
+```
+
+Grafana shows "what's happening now" with charts, numbers, and alerts.
+
+## Installation
+
+### Docker Compose
+
+```yaml
+services:
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin  # Change this!
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+volumes:
+  grafana_data:
+```
+
+```bash
+docker-compose up -d grafana
+
+# Access
+# http://localhost:3000
+# Login: admin / admin
+```
+
+## Initial Setup
+
+1. **Open http://localhost:3000**
+2. **Login:** admin / admin
+3. **Change password:** (recommended)
+4. **Add data source:** Left menu → Configuration → Data Sources
+
+## Data Sources
+
+A data source is where Grafana gets metrics from.
+
+### Add Prometheus
+
+1. Left menu → Configuration → Data Sources
+2. Click "Add data source"
+3. **Type:** Prometheus
+4. **URL:** http://prometheus:9090
+5. **Click "Save & Test"**
+
+Expected: "Data source is working"
+
+### Add Other Sources
+
+| Source | URL | Use |
+|--------|-----|-----|
+| Prometheus | http://localhost:9090 | Time-series metrics |
+| Loki | http://localhost:3100 | Logs |
+| InfluxDB | http://localhost:8086 | Metrics |
+| PostgreSQL | postgresql://user:pass@host/db | Relational data |
+
+## Dashboards
+
+A dashboard is a collection of panels.
+
+### Create Dashboard
+
+1. Left menu → Dashboards → New → New Dashboard
+2. Click "+ Add Panel"
+3. Configure panel (see next section)
+4. Click "Save dashboard"
+5. Name: "My Stack Overview"
+
+### Pre-built Dashboards
+
+Import from community (much faster than building).
+
+1. Left menu → Dashboards → Browse
+2. Search "Prometheus" or "Node Exporter"
+3. Click a dashboard
+4. "Import" button
+5. Select your Prometheus data source
+
+Popular imports:
+- Node Exporter (CPU, memory, disk)
+- Prometheus (internal metrics)
+- Docker (container stats)
+
+## Panels
+
+A panel is a single visualization.
+
+### Panel Types
+
+| Type | Use | Example |
+|------|-----|---------|
+| **Graph** | Time series (line chart) | CPU usage over time |
+| **Stat** | Single number | Current memory usage |
+| **Gauge** | Circular meter | 75% capacity |
+| **Bar Gauge** | Horizontal bar | Service health |
+| **Table** | Tabular data | Top 10 slowest queries |
+| **Heatmap** | Dense 2D matrix | Request latency distribution |
+| **Pie Chart** | Proportional | Error type breakdown |
+| **Stat List** | Multiple numbers | Services status |
+
+### Create a Graph Panel
+
+1. Click "+ Add Panel" (in dashboard)
+2. **Panel Type:** Graph
+3. **Title:** "CPU Usage"
+4. **Query (Prometheus):**
+   ```promql
+   100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+   ```
+5. **Y-Axis Label:** "Percent (%)"
+6. **Save panel**
+
+### Create a Stat Panel
+
+1. "+ Add Panel"
+2. **Panel Type:** Stat
+3. **Title:** "Memory Used"
+4. **Query:**
+   ```promql
+   node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes
+   ```
+5. **Unit:** Bytes (SI)
+6. **Thresholds:** Green 0-10GB, Yellow 10-15GB, Red 15GB+
+7. **Save**
+
+### Create a Table Panel
+
+1. "+ Add Panel"
+2. **Panel Type:** Table
+3. **Title:** "Top Errors"
+4. **Query:**
+   ```promql
+   topk(5, sum by (error_type) (rate(errors_total[5m])))
+   ```
+5. **Columns:** Customize which to show
+6. **Save**
+
+## Queries (PromQL)
+
+PromQL queries fetch metrics from Prometheus.
+
+### Basic Queries
+
+```promql
+# Current value
+node_cpu_cores                    # Latest value
+
+# Rate (change per second)
+rate(requests_total[5m])          # Requests/sec (5-min average)
+
+# Sum
+sum(memory_bytes)                 # Total memory across all nodes
+
+# Average
+avg(response_time_seconds)        # Average response time
+
+# Percentile (latency)
+histogram_quantile(0.95, latency_bucket)  # 95th percentile
+
+# Filter by label
+requests_total{status="500"}      # Only 500 errors
+
+# Combine filters (AND)
+requests_total{status="500", service="api"}
+
+# Multiple filters (OR)
+requests_total{status=~"5.."}     # 500-599 errors
+```
+
+### Advanced Queries
+
+```promql
+# Range vector (over time)
+increase(errors_total[1h])        # Errors over last hour
+
+# Instant vector (point in time)
+memory_bytes offset 5m            # Value 5 mins ago
+
+# Math operations
+(used_memory / total_memory) * 100  # Percent
+
+# Aggregation operators
+sum by (service) (requests_total)  # Sum per service
+
+# Top/Bottom
+topk(3, memory_bytes)             # 3 services with most memory
+
+# Without
+count without (instance) (up)     # Count unique services
+```
+
+## Variables & Templating
+
+Make dashboards dynamic.
+
+### Create Variable
+
+1. Dashboard → Dashboard Settings (gear icon)
+2. Variables → New Variable
+3. **Name:** host
+4. **Type:** Query
+5. **Data source:** Prometheus
+6. **Query:** label_values(up, instance)
+7. **Save**
+
+### Use Variable in Panel
+
+In query, reference variable:
+```promql
+node_cpu_usage{instance="$host"}  # $host replaced with selection
+```
+
+Now dashboard has dropdown to select host.
+
+## Alerts
+
+Alert when metric crosses threshold.
+
+### Create Alert (Classic Condition)
+
+1. Panel → Edit → Alert tab
+2. **Alert name:** "High CPU"
+3. **Condition:** avg() of B > 80
+4. **For:** 5m (trigger if true for 5 minutes)
+5. **Message:** "CPU usage above 80%"
+6. **Save**
+
+### Alert Notification Channels
+
+1. Alerting → Notification channels
+2. New notification channel
+3. **Type:** Email / Slack / PagerDuty
+4. **Configure:** Email address, Slack webhook, etc.
+5. **Send test notification**
+
+### Link Alert to Channel
+
+1. Edit alert (from above)
+2. **Send to:** Select notification channel
+3. **Save**
+
+Now when alert fires, notification sent.
+
+## Dashboard Layout
+
+### Best Practices
+
+1. **Group related panels**
+   ```
+   [ Server Health ] [ Memory ] [ CPU ]
+   [ Disk Usage  ] [ Network ]
+   [ Errors      ] [ Latency ]
+   ```
+
+2. **Time range at top**
+   - Dashboard settings → Default time range: Last 24h
+   - User can override with top-right picker
+
+3. **Legend & tooltip**
+   - Show metric names
+   - Display values on hover
+
+4. **Refresh rate**
+   - Real-time: 5-10 seconds
+   - Daily stats: 1 hour
+   - Don't refresh too fast (wastes resources)
+
+### Export Dashboard
+
+1. Dashboard → Share (top-right)
+2. **Export** → Download JSON
+3. Share JSON file with team
+4. Another instance: Dashboards → Import → Upload JSON
+
+## Scripted Dashboards
+
+Generate panels programmatically (advanced).
+
+```javascript
+// dashboard.js
+var dashboard = {
+  title: "Auto-Generated",
+  panels: [
+    {
+      title: "CPU",
+      targets: [{expr: "cpu_usage"}],
+      type: "graph"
+    },
+    {
+      title: "Memory",
+      targets: [{expr: "memory_usage"}],
+      type: "stat"
+    }
+  ]
+};
+
+// Access: http://localhost:3000/dashboard/script/dashboard.js
+```
+
+## Common Issues
+
+**"No data" in panel:**
+- Check data source is connected (Configuration → Data Sources → Test)
+- Query is returning values (test in Prometheus Graph tab)
+- Time range includes data (not querying 1 year old data)
+
+**Panel slow to load:**
+- Reduce time range (e.g., Last 24h instead of 90d)
+- Reduce query complexity
+- Increase refresh interval (e.g., 30s instead of 5s)
+
+**Alerts not firing:**
+- Verify data is flowing (check panel manually)
+- Check alert condition (sometimes off by 1)
+- Verify notification channel is configured
+- Check logs: Alerting → Alert Rules
+
+**Memory usage high:**
+- Reduce retention in Prometheus (30 days instead of 1 year)
+- Reduce scrape frequency (30s instead of 15s)
+- Disable unused dashboards/panels
+
+## Advanced Topics
+
+### Annotations
+
+Mark events on dashboard.
+```javascript
+// API call
+POST /api/annotations
+{
+  "dashboardId": 1,
+  "time": 1614556800,
+  "text": "Deployed v1.5",
+  "tags": ["deploy"]
+}
+```
+
+Graph shows vertical line with event.
+
+### Thresholds & Color Zones
+
+Panels change color based on value:
+- Green: 0-50
+- Yellow: 50-80
+- Red: 80+
+
+Set in panel settings.
+
+### Stat Panel Examples
+
+```
+Metric: Memory Available
+Thresholds: 0, 5GB, 10GB
+Colors: Red, Yellow, Green
+  Result:
+  ┌──────────────────┐
+  │     7.2 GB       │ (Yellow)
+  └──────────────────┘
+```
+
+## Performance Tips
+
+1. **Sample at intervals**
+   ```promql
+   # Instead of all data points:
+   metrics[5m]
+
+   # Use rate() which automatically averages:
+   rate(metrics[5m])
+   ```
+
+2. **Use recording rules in Prometheus**
+   - Pre-compute expensive queries
+   - Store as new metric
+   - Query pre-computed metric in Grafana
+
+3. **Cache dashboard JSON**
+   - Save as JSON, version in git
+   - Redeploy via API
+
+4. **Monitor Grafana itself**
+   - CPU, memory, query latency
+   - Self-healing (restart if stuck)
+
+## Checklist
+
+- [ ] Grafana installed and accessible
+- [ ] Prometheus connected as data source
+- [ ] Test query in Prometheus Graph tab
+- [ ] Create first dashboard
+- [ ] Add 3-5 panels (graph, stat, table)
+- [ ] Write PromQL queries correctly
+- [ ] Set time range defaults
+- [ ] Configure notification channel (email/Slack)
+- [ ] Create alert on one metric
+- [ ] Test alert trigger
+- [ ] Share dashboard with team
+- [ ] Document metric meanings in team wiki
+- [ ] Export dashboard JSON to git
+
+## Sources and Links
+
+- [Grafana](https://github.com/grafana/grafana)
+- [Grafana Docs](https://grafana.com/docs)

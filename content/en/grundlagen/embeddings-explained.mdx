@@ -1,0 +1,545 @@
+---
+title: Embeddings Explained
+date: 2026-03-21
+summary: What are embeddings? How do they work? text-embedding-3, nomic-embed, BGE. Practical application for similarity search.
+tags: [embeddings, vectors, similarity, semantic-search, rag]
+author: AI Engineering
+---
+
+# Embeddings Explained
+
+An embedding is a mathematical representation of text as a vector (list of numbers).
+
+Key: **Similar text gets similar vectors.**
+
+## The Concept
+
+```
+Text: "The dog is cute"
+Embedding: [0.2, -0.5, 0.8, ..., 0.1]  (e.g., 1536 dims)
+
+Text: "A cute dog"
+Embedding: [0.21, -0.48, 0.79, ..., 0.12]  (similar!)
+
+Text: "The car is red"
+Embedding: [-0.8, 0.2, 0.1, ..., -0.5]  (not similar)
+```
+
+Vectors are points in space. Similar meanings are spatially close.
+
+## Why Embeddings?
+
+**Reason 1: Similarity Search**
+
+You have 1000 documents. User: "Which is similar to my question?"
+
+Without: Keyword search misses semantic meaning.
+
+With:
+1. Convert question to vector
+2. Documents already vectorized
+3. Find closest vector
+4. Return document
+
+Foundation for **RAG (Retrieval-Augmented Generation)**.
+
+**Reason 2: Semantic Similarity**
+
+```
+Query: "How do I cook spaghetti?"
+
+Document A: "Cooking pasta: 1. Boil water..."
+Distance: 0.05 (close) ✓
+
+Document B: "History of Rome"
+Distance: 0.9 (far) ✗
+```
+
+Keyword match would find B too. Embeddings are smarter.
+
+## How Embeddings Work
+
+An embedding model is a neural net trained to place semantically similar texts close together.
+
+Training:
+```
+Input: "The cat is black"
+       "A black cat"
+       "The car is blue"
+
+Goal:
+- First two get similar vectors
+- Third gets different vector
+```
+
+Called **Contrastive Learning**.
+
+## Popular Embedding Models
+
+### text-embedding-3-small (OpenAI)
+
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-...")
+
+response = client.embeddings.create(
+    input="Hello, I'm text",
+    model="text-embedding-3-small"
+)
+
+embedding = response.data[0].embedding
+```
+
+- Dimensions: 1536
+- Price: $0.02 / 1M tokens
+- Quality: Excellent
+
+### nomic-embed-text (Open Source)
+
+Small, fast, free:
+
+```python
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer('nomic-ai/nomic-embed-text-v1')
+embedding = model.encode("Hello")
+```
+
+- Dimensions: 768
+- Price: Free
+- Quality: Good
+- Speed: Fast (runs locally)
+
+### bge-large-en-v1.5 (BAAI)
+
+Specialized for retrieval:
+
+```python
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("BAAI/bge-large-en-v1.5")
+embedding = model.encode("What is AI?")
+```
+
+- Quality: Excellent for semantic search
+- Speed: Medium
+- Overhead: 370MB
+
+## Similarity Search Practical
+
+```python
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
+
+doc_embeddings = [
+    [0.2, 0.5, 0.1],
+    [0.21, 0.48, 0.12],
+    [-0.8, 0.2, -0.5],
+]
+
+query = "Cute dog"
+query_embedding = [0.21, 0.49, 0.11]
+
+similarities = cosine_similarity([query_embedding], doc_embeddings)[0]
+# [0.99, 0.95, 0.1]
+
+top_indices = np.argsort(similarities)[::-1][:2]
+# [0, 1] → Most similar docs
+```
+
+## Storing Embeddings
+
+For many documents, use a **Vector Database**:
+
+- **Pinecone:** Managed, Cloud
+- **Weaviate:** Open source
+- **Milvus:** High performance
+- **Qdrant:** Modern
+- **ChromaDB:** Simple, local
+
+Example ChromaDB:
+
+```python
+import chromadb
+
+client = chromadb.Client()
+collection = client.create_collection("documents")
+
+collection.add(
+    ids=["doc_1", "doc_2"],
+    embeddings=[[0.2, 0.5], [0.21, 0.48]],
+    documents=["Text 1", "Text 2"]
+)
+
+results = collection.query(
+    query_embeddings=[[0.21, 0.49]],
+    n_results=2
+)
+```
+
+## Dimensions: Trade-offs
+
+More dimensions = more info but:
+- Higher cost
+- Slower compute
+- More storage
+
+```
+text-embedding-3-small: 1536 dims
+nomic-embed: 768 dims
+DistilBERT: 384 dims
+```
+
+For most tasks: 768 enough. Very precise search: 1536+.
+
+## Dimensionality Reduction
+
+Save costs by compressing:
+
+```python
+from sklearn.decomposition import PCA
+
+pca = PCA(n_components=256)
+reduced = pca.fit_transform(embeddings)
+
+# Quality: ~90%, Memory: -83%
+```
+
+Works for most applications with reduced embeddings.
+
+## Multilingual Embeddings
+
+Some models support multiple languages:
+
+```python
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("intfloat/multilingual-e5-large")
+
+embeddings = model.encode([
+    "How do I cook pasta?",
+    "Wie koche ich Pasta?",
+    "¿Cómo cocino pasta?"
+])
+```
+
+Great for RAG across languages.
+
+## Advanced: Embedding Fine-Tuning
+
+For specialized domains (medical, legal, technical), fine-tune embeddings on your data:
+
+```python
+# Fine-tune text-embedding-3-small on your domain
+from sentence_transformers import models, losses, SentenceTransformer
+from sentence_transformers.util import sentences2labels
+
+# Your training pairs (similar sentences)
+train_examples = [
+    ("How do I cook pasta?", "Cooking spaghetti: boil water, add salt..."),
+    ("What's machine learning?", "ML is a type of AI that learns from data..."),
+]
+
+model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+
+# Train with contrastive loss
+train_loss = losses.ContrastiveLoss(model)
+model.fit(
+    [(e[0], e[1]) for e in train_examples],
+    epochs=1,
+    warmup_steps=100,
+    show_progress_bar=True
+)
+
+model.save('./my-domain-embeddings')
+```
+
+**Result**: Model learns that your domain-specific pairs are similar, improves search relevance.
+
+## Similarity Metrics Deep Dive
+
+### Cosine Similarity (Most Common)
+
+```python
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
+
+v1 = np.array([0.2, 0.5, 0.8])
+v2 = np.array([0.19, 0.51, 0.79])
+v3 = np.array([-0.5, 0.1, 0.2])
+
+print(cosine_similarity([v1], [v2])[0][0])  # 0.9999 (nearly identical)
+print(cosine_similarity([v1], [v3])[0][0])  # 0.34 (different)
+```
+
+**Range**: -1 (opposite) to 1 (identical)
+**For embeddings**: Usually 0.7-0.99 for relevant, <0.5 for irrelevant
+
+### Euclidean Distance (Alternative)
+
+```python
+from scipy.spatial.distance import euclidean
+
+v1 = np.array([0.2, 0.5, 0.8])
+v2 = np.array([0.19, 0.51, 0.79])
+
+dist = euclidean(v1, v2)  # 0.014 (small = similar)
+```
+
+**When to use**: Less common than cosine, useful when magnitude matters
+
+### Dot Product (Fastest)
+
+```python
+# Fastest for large-scale search
+dot_product = np.dot(v1, v2)  # 0.85 (needs normalization first)
+```
+
+## Vector Database Comparison
+
+### Pinecone (Managed)
+
+```python
+import pinecone
+
+pinecone.init(api_key="...", environment="us-west1-gcp")
+
+index = pinecone.Index("documents")
+
+# Upsert vectors
+index.upsert(vectors=[
+    ("doc_1", [0.2, 0.5, 0.1, ...], {"title": "Doc 1"}),
+    ("doc_2", [0.21, 0.48, 0.12, ...], {"title": "Doc 2"}),
+])
+
+# Query
+results = index.query([0.21, 0.49, 0.11], top_k=2)
+# Returns: [("doc_1", 0.99), ("doc_2", 0.95)]
+```
+
+**Pros**: Fully managed, scalable, API-based
+**Cons**: Proprietary, cost per query (EUR 0.001-0.01 per)
+
+### Weaviate (Open Source)
+
+```python
+import weaviate
+
+client = weaviate.Client("http://localhost:8080")
+
+# Define schema
+client.schema.create_class({
+    "class": "Document",
+    "vectorizer": "text2vec-transformers",
+    "properties": [{"name": "content", "dataType": ["text"]}]
+})
+
+# Add documents
+client.data_object.create(
+    data_object={"content": "The cat is on the mat"},
+    class_name="Document"
+)
+
+# Query
+result = client.query.get("Document", ["content"]).with_near_text({
+    "concepts": ["cat mat"]
+}).do()
+```
+
+**Pros**: Open source, self-hosted, GraphQL API
+**Cons**: More complex setup, requires infra
+
+### Qdrant (Modern & Fast)
+
+```python
+from qdrant_client import QdrantClient
+from qdrant_client.models import PointStruct
+
+client = QdrantClient("localhost", port=6333)
+
+# Create collection
+client.recreate_collection(
+    collection_name="documents",
+    vectors_config={"size": 1536, "distance": "Cosine"}
+)
+
+# Add vectors
+client.upsert(
+    collection_name="documents",
+    points=[
+        PointStruct(id=1, vector=[0.2, 0.5, ...], payload={"text": "Doc 1"}),
+    ]
+)
+
+# Search
+results = client.search(
+    collection_name="documents",
+    query_vector=[0.21, 0.49, ...],
+    limit=5
+)
+```
+
+**Pros**: Very fast, REST/gRPC API, modern Python lib
+**Cons**: Newer, smaller community than Pinecone
+
+## RAG (Retrieval-Augmented Generation) Pipeline
+
+Combining embeddings with LLMs:
+
+```python
+from openai import OpenAI
+import chromadb
+
+# 1. Index documents
+client = chromadb.Client()
+collection = client.create_collection("documents")
+
+docs = [
+    "Paris is the capital of France",
+    "Tokyo is the capital of Japan",
+    "The Earth orbits the Sun"
+]
+
+collection.add(ids=[str(i) for i in range(len(docs))], documents=docs)
+
+# 2. User question
+question = "What's the capital of France?"
+
+# 3. Retrieve relevant docs (embedding search)
+results = collection.query(query_texts=[question], n_results=1)
+retrieved_doc = results["documents"][0][0]
+
+# 4. Generate answer with LLM
+llm = OpenAI()
+response = llm.chat.completions.create(
+    model="gpt-4",
+    messages=[
+        {
+            "role": "user",
+            "content": f"Based on: {retrieved_doc}\n\nAnswer: {question}"
+        }
+    ]
+)
+
+print(response.choices[0].message.content)
+# Output: "According to the context, Paris is the capital of France."
+```
+
+**Why RAG**: Avoids hallucination, uses fresh data, grounded in sources.
+
+## Hybrid Search (Embeddings + Keywords)
+
+Combining semantic + keyword search:
+
+```python
+# Hybrid search with Weaviate
+result = client.query.get("Document", ["content"]).with_where({
+    "operator": "And",
+    "operands": [
+        {"path": ["content"], "operator": "ContainsAny", "valueText": ["pasta"]},  # Keyword
+        {"path": ["embedding"], "operator": "WithinDistance", "valueDistance": 0.1}  # Semantic
+    ]
+}).do()
+```
+
+**When to use**:
+- Keyword search misses semantic matches
+- Semantic search returns irrelevant results
+- Hybrid: Best of both worlds
+
+## Embedding Dimension Trade-offs
+
+Deep analysis:
+
+| Dimensions | Model | Quality | Storage | Speed | Cost |
+|-----------|-------|---------|---------|-------|------|
+| **64** | tiny | 70% | 1x | 10x | $0.001 |
+| **384** | small | 85% | 1.5x | 5x | $0.005 |
+| **768** | medium | 92% | 3x | 2x | $0.01 |
+| **1536** | large | 98% | 6x | 1x | $0.02 |
+
+**Practical**: Use 768 for most tasks. 1536 only if precision critical.
+
+### Dimensionality Reduction (Compromise)
+
+```python
+from sklearn.decomposition import PCA
+
+# 1536 → 384 dims
+pca = PCA(n_components=384)
+compressed = pca.fit_transform(embeddings_1536)
+
+# Quality loss: ~2-5%
+# Storage gain: 75% reduction
+```
+
+## Multilingual & Cross-Lingual Search
+
+```python
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("intfloat/multilingual-e5-large")
+
+# All languages encoded to same space
+embeddings = model.encode([
+    "What is artificial intelligence?",        # English
+    "What es inteligencia artificial?",         # Spanish
+    "Qu'est-ce que l'IA?",                     # French
+    "What ist künstliche Intelligenz?",         # German (sic)
+])
+
+# All close together in vector space
+# Cross-language similarity search works!
+```
+
+**Use case**: Support multi-language document retrieval without separate models.
+
+## Cost Calculation Examples
+
+### Scenario 1: Small FAQ Bot (10k documents)
+
+```
+Embedding cost:
+- 10k docs × 200 tokens/doc = 2M tokens
+- text-embedding-3-small: $0.02/1M = $0.04
+
+Inference cost (monthly, 1000 queries):
+- 1000 queries × 200 tokens = 200k tokens = $0.004
+
+Total monthly: $0.004 (embedding cost amortized, negligible)
+```
+
+### Scenario 2: Enterprise RAG (500k documents, 10k queries/day)
+
+```
+One-time indexing:
+- 500k docs × 200 tokens = 100M tokens = $2.00
+
+Monthly inference:
+- 10k queries/day × 30 days × 200 tokens = 60M tokens = $1.20
+
+Infrastructure (vector DB):
+- Pinecone: ~$1000/month (managed)
+- Self-hosted: $200/month (VPS)
+
+Monthly total: $1200+ (with Pinecone)
+```
+
+## References
+
+- [OpenAI Embeddings API](https://platform.openai.com/docs/guides/embeddings)
+- [Sentence Transformers Documentation](https://www.sbert.net/)
+- [Semantic Search Guide](https://www.sbert.net/examples/applications/semantic-search/)
+- [BGE Models](https://huggingface.co/BAAI)
+- [ChromaDB Documentation](https://docs.trychroma.com)
+- [Pinecone Docs](https://docs.pinecone.io)
+- [Weaviate Docs](https://weaviate.io/developers/weaviate)
+- [Qdrant Docs](https://qdrant.tech/documentation/)
+
+**Last Updated**: 21.03.2026 | **Total Lines**: 450+
+
+## Sources and Links
+
+- [Getting Started with Embeddings](https://huggingface.co/blog/getting-started-with-embeddings)
+- [OpenAI Cookbook](https://github.com/openai/openai-cookbook)

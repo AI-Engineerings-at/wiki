@@ -1,0 +1,433 @@
+---
+title: RAG Explained — Retrieval-Augmented Generation
+date: 2026-03-21
+summary: "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks" (Lewis et al. 2020). Combine retrieval with generation. The foundation for modern knowledge bases.
+tags: [rag, retrieval, generation, knowledge, embedding]
+author: AI Engineering
+---
+
+# RAG Explained — Retrieval-Augmented Generation
+
+An LLM knows only what's encoded in its parameters. Problem:
+- Knowledge is specialized (internal docs)
+- Knowledge must be current (news, prices)
+- Hallucinations are common
+
+RAG—Retrieval-Augmented Generation—solves this: Before answering, fetch relevant information from a database.
+
+## The Problem: Stale Knowledge
+
+Model trained January 2024. Knows only up to January. Ask about March 2024? Hallucination.
+
+Also: Models can't store all nuances. "How much sugar in a Cortland Apple on March 15, 2024?" Impossible.
+
+Solution: Don't store everything in the model. Instead:
+1. Keep the model small/fast
+2. Store knowledge in searchable database
+3. On question: Retrieve relevant info → Feed to model → Model answers
+
+That's RAG.
+
+## How RAG Works
+
+**Architecture:**
+
+```
+Question
+  ↓
+Retriever (find relevant documents)
+  ↓
+Top-K documents (e.g., top 5)
+  ↓
+Generator (LLM)
+  ↓
+Answer based on documents
+```
+
+**Concretely:**
+
+Question: "What products did we sell in March?"
+
+1. **Retriever:** Search document database for "March sales"
+   - Find: "March Sales Report.pdf", "Q1 Summary.pdf"
+
+2. **Generator:** Feed LLM:
+   ```
+   Context:
+   [Text from relevant documents]
+
+   Question: What products did we sell in March?
+   ```
+
+3. **Answer:** Model generates based on documents.
+
+## The Components
+
+### Retriever
+
+Finds relevant documents using **embeddings**:
+
+1. Each document/chunk becomes a vector
+2. Question also becomes a vector
+3. Find similar vectors (cosine similarity)
+
+Example:
+```
+Question: "Sales March" → [0.8, 0.1, 0.5, ...]
+
+Document A: "March Sales Report" → [0.75, 0.15, 0.48, ...]  (similar)
+Document B: "January Weather" → [0.1, 0.9, 0.2, ...]  (not similar)
+
+Distance(Q, A) ≈ small → Rank A high
+Distance(Q, B) ≈ large → Rank B low
+```
+
+Popular embedding models:
+- text-embedding-3-small (OpenAI)
+- nomic-embed (small, fast)
+- BGE (better for retrieval)
+
+### Generator (LLM)
+
+Standard LLM (GPT, Claude, Llama). Takes context (documents) and generates answer.
+
+Key: No special RAG training needed. It's just normal LLM + context in prompt.
+
+## In-Context Learning Makes RAG Possible
+
+Why does RAG work? LLMs excel at **using context**.
+
+Tell an LLM: "Here's text. Answer based on it." It can do this without training.
+
+That's RAG's beauty: No special training. Works with off-the-shelf LLMs.
+
+## Practical Examples
+
+### Example 1: Internal Knowledge Base
+
+1000 internal docs. User: "What's our return policy?"
+
+Without RAG: Model hasn't trained on docs → hallucination.
+
+With RAG:
+1. Retriever finds "return" docs
+2. Locates: "Company Policies.pdf", "Customer FAQ.pdf"
+3. Generator reads and answers correctly.
+
+### Example 2: Current Information
+
+Model knowledge-cutoff: January 2024
+User: "Who's US President?"
+
+Without RAG: Wrong answer.
+
+With RAG:
+1. Retriever gets recent news
+2. Finds: "2024 election coverage.pdf"
+3. Generator gives current answer.
+
+## RAG vs Fine-Tuning
+
+| Aspect | RAG | Fine-Tuning |
+|--------|-----|-------------|
+| Update knowledge | Fast | Retrain model (days) |
+| Knowledge specificity | Very high | Diffused |
+| Latency | Higher | Normal |
+| Cost | Cheap | Expensive |
+| Hallucination control | Better | Worse |
+
+**Recommendation:** RAG for dynamic/specialized data. Fine-tuning for style/behavior.
+
+## Modern RAG Variants
+
+**Hybrid Search:** Vector + keyword search combined. Often better.
+
+**Multi-hop Retrieval:** Multiple retrieval rounds.
+
+**Re-ranking:** Retrieve 100 docs, re-rank top 10 with expensive models.
+
+**Adaptive RAG:** LLM decides: "Do I need retrieval or can I answer from memory?"
+
+## RAG Problems
+
+**Problem 1: Retrieval isn't perfect**
+
+Retriever might miss the most relevant doc. Question phrasing differs from documents.
+
+Solution: Query expansion, multi-query, embedding optimization.
+
+**Problem 2: Context window limits**
+
+Retrieving 10 documents might exceed token limit.
+
+Solution: Top-3 docs only. Or use longer contexts (200k tokens).
+
+**Problem 3: Combining Multiple Sources**
+
+Generator must synthesize from multiple docs.
+
+Example:
+```
+Doc A: "Product X costs $100"
+Doc B: "Discount is 20%"
+→ Correct answer: $80
+
+Simple model might not combine correctly.
+```
+
+Solution: Better prompting, multi-step reasoning.
+
+## The Future of RAG
+
+RAG likely becomes standard for practical LLM apps.
+
+New directions:
+- **Graph-based retrieval:** Structured knowledge graphs instead of flat documents
+- **Adaptive retrieval:** Model decides if/how to retrieve
+- **In-context RLHF:** Optimize retrieval based on feedback
+
+## The Knowledge Bottleneck Problem
+
+Huge model trained on 300B tokens. Massive. But:
+
+**Problems:**
+1. **Knowledge stales:** New data after training → model doesn't know
+2. **Specialized knowledge:** Internal docs can't be in model (confidential)
+3. **Space constraints:** Can't store everything
+
+**Quantitatively:**
+- GPT-3: 175B parameters
+- Size: ~700GB (4-bit)
+- Can't also store all company data + stay practical
+
+RAG solves this: externalize knowledge, retrieve on-demand.
+
+## RAG Architecture (Extended)
+
+```
+User: "What are course prerequisites?"
+
+├─ Query Encoding
+│  └─ Embedder(Query) → [0.8, -0.2, 0.1, ...]  (384-dim)
+│
+├─ Vector Retrieval
+│  ├─ Search FAISS index
+│  ├─ Find Top-K similar vectors (K=5)
+│  └─ Load corresponding documents
+│
+├─ Document Context
+│  └─ Provided as prompt:
+│      "Context:
+│       From Syllabus.pdf:
+│       - Python basics
+│       - Linear algebra
+│       From Policy.pdf:
+│       - Age requirement: 18+"
+│
+└─ LLM Generation
+   └─ Generate answer from context
+```
+
+## Embedding Models for RAG
+
+Key to good retrieval: **embedding quality**
+
+**Popular Models (2026):**
+
+| Model | Dimensions | Speed | Quality | Use |
+|-------|-----------|-------|---------|-----|
+| text-embedding-3-small | 512 | Fast | 85% | General |
+| text-embedding-3-large | 3072 | Slow | 95% | Enterprise |
+| nomic-embed | 768 | Fast | 80% | Open Source |
+| BGE | 768 | Normal | 90% | Retrieval-focused |
+| BAAI-large | 1024 | Slow | 92% | Chinese-heavy |
+
+**Considerations:**
+1. **Dimensionality:** Higher = better, slower retrieval
+2. **Size:** Larger = better, slower
+3. **License:** Open vs Proprietary
+
+## Practical RAG Implementation
+
+**2026 Stack:**
+
+```
+Frontend → FastAPI Backend → Vector DB → LLM
+                               ↓
+                         (Chroma, Pinecone, Qdrant)
+```
+
+**Code Example with LangChain:**
+
+```python
+from langchain.vectorstores import Chroma
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.document_loaders import PDFLoader
+from langchain.chat_models import ChatOpenAI
+from langchain.chains import RetrievalQA
+
+# 1. Load Documents
+loader = PDFLoader("documents/policy.pdf")
+docs = loader.load()
+
+# 2. Create Embeddings & Vector Store
+embeddings = OpenAIEmbeddings()
+vectorstore = Chroma.from_documents(docs, embeddings)
+
+# 3. Create RAG Chain
+llm = ChatOpenAI(model="gpt-4")
+qa_chain = RetrievalQA.from_chain_type(
+    llm=llm,
+    chain_type="stuff",  # Or "map_reduce"
+    retriever=vectorstore.as_retriever()
+)
+
+# 4. Query
+response = qa_chain.run("What are prerequisites?")
+```
+
+Simple. Complexity hidden in library.
+
+## Chain Types: "stuff" vs "map_reduce" vs "refine"
+
+**Stuff:**
+- Pack all retrieved docs in one prompt
+- Limit: ~8000 tokens
+- Fast, simple
+
+**Map-Reduce:**
+- Summarize each doc separately
+- Combine summaries
+- For 100+ docs
+
+**Refine:**
+- Iterate through docs
+- Each refines answer
+- For very long contexts
+
+**Recommendation:** Stuff < 5 docs, map-reduce otherwise.
+
+## Hybrid Search: Vectors + Keywords
+
+Problem with pure vector-search:
+
+```
+Query: "Return policy"
+
+Vector-retrieval might find:
+- "Return"-related docs (false positives)
+- Semantically similar but irrelevant terms
+
+Better: combine both
+```
+
+**Hybrid Search:**
+```
+Vector Score = cosine_similarity(query, doc)
+Keyword Score = BM25(query_text, doc_text)
+Hybrid = 0.7 * Vector + 0.3 * Keyword
+```
+
+Combines best of both:
+- Vectors: semantic similarity
+- Keywords: exact matches
+
+**Result:** 90%+ better than pure-vector in practice.
+
+## Multi-Hop Retrieval
+
+What if answer needs multiple docs?
+
+```
+Question: "Rules for return if product defective?"
+
+Step 1: Retrieve Return-Policy.pdf
+        (But says "See Defective-Guidelines")
+
+Step 2: Retrieve Defective-Guidelines.pdf
+        → Found. Full answer.
+```
+
+**Implementation:**
+
+```python
+# Step 1: First RAG
+context1 = rag(question)
+
+# Step 2: If incomplete, refine
+if "see also" in context1:
+    refined_q = llm.refine_question(question, context1)
+    context2 = rag(refined_q)
+    final = llm(question, context1 + context2)
+else:
+    final = llm(question, context1)
+```
+
+More complex, but necessary for multi-doc questions.
+
+## Vector-DB Options (2026)
+
+**In-Process:**
+- Chroma: SQLite-backed, simple, ~1M docs max
+- FAISS: Fast, Numpy-based
+
+**Cloud-Hosted:**
+- Pinecone: Managed, expensive, reliable
+- Qdrant: Open-source, self-hosted
+- Weaviate: Open, GraphQL, flexible
+
+**Enterprise:**
+- Milvus: High-volume, Kubernetes
+- Elasticsearch: Not optimized for vectors, works
+
+**Recommendation:** Chroma to start, Pinecone for scale.
+
+## RAG Evaluation: How Well Does It Work?
+
+Difficult. Multiple metrics:
+
+**Retrieval Quality:**
+- Precision@K: How many top-K are relevant?
+- Recall: How many relevant docs found?
+
+**Generation Quality:**
+- BLEU/ROUGE: Text similarity (poor for QA)
+- Exact Match: Answer correct?
+- F1: Harmonic mean
+
+**End-to-End:**
+- User feedback: User says yes/no if helpful
+- Ground truth: Compare to gold-standard answers
+
+**Problem:** Proprietary data usually has no ground-truth.
+
+Solution: User-feedback loop.
+
+## Future of RAG
+
+**2024-2026 Trends:**
+
+1. **Graph-based Retrieval:** Flat docs → knowledge graphs
+   - Structure-aware retrieval
+   - Better relationships
+
+2. **Agentic RAG:** Model decides when/how to retrieve
+   - "Do I need data?"
+   - "What query to make?"
+
+3. **Fine-tuned Retrieval:** Embeddings fine-tuned on specific tasks
+   - E.g., "Legal-RAG" with legal corpus
+
+4. **Multimodal RAG:** Text + images + audio in same vector DB
+   - "Find instructions with diagrams"
+
+## References
+
+- RAG: arxiv.org/abs/2005.11401
+- Hybrid Search: arxiv.org/abs/2312.06139
+- Adaptive RAG: arxiv.org/abs/2403.14403
+- LangChain Docs: python.langchain.com/docs/use_cases/question_answering
+
+## Sources and Links
+
+- [Retrieval-Augmented Generation (arXiv)](https://arxiv.org/abs/2005.11401)

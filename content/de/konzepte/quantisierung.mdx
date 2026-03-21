@@ -1,0 +1,509 @@
+---
+title: Quantisierung
+date: 2026-03-21
+summary: Wie große Modelle kleiner werden — von FP32 bis INT4, Formate (GGUF, GPTQ, AWQ), praktische Qualitäts-Tradeoffs und quantisieren mit llama.cpp
+tags: [quantisierung, compression, modelle, inference, vram, llm]
+author: AI Engineering
+---
+
+# Quantisierung verstehen
+
+Quantisierung ist die Kunst, große Modelle kleiner zu machen, indem man die Zahlenauflösung reduziert. Statt `0.123456789` speichert man `0.12`. Das spart massive Speicherplatz und Rechenzeit — mit minimalen Qualitätsverlusten.
+
+Ein **unquantisiertes Llama 3 70B** braucht ~140 GB RAM. Mit Quantisierung passt es auf eine RTX 4090 mit 24 GB.
+
+---
+
+## Datentypen: Von Präzision zu Kompression
+
+### FP32 (32-bit Floating Point) — Baseline
+
+```
+Value: 0.123456789
+Memory: 4 Bytes pro Zahl
+
+FP32 Format:
+┌─ Sign Bit (1) ─┬─ Exponent (8) ─┬─ Mantissa (23) ─┐
+│      0         │   10000001      │  11110010010... │
+└────────────────┴────────────────┴──────────────────┘
+```
+
+Das ist der Standard bei Training und Vollpräzision Inference.
+
+### FP16 (16-bit Floating Point) — Halbpräzision
+
+```
+Value: 0.123456789 → Rounded zu ~0.1235
+Memory: 2 Bytes pro Zahl → 50% Speicherersparnis
+
+FP16 Format:
+┌─ Sign (1) ─┬─ Exponent (5) ─┬─ Mantissa (10) ─┐
+│     0      │     10001      │   1111010010   │
+└────────────┴────────────────┴─────────────────┘
+
+Range: 6e-8 zu 65504 (vs FP32: 1e-38 zu 3e38)
+```
+
+**Wann?** GPUs unterstützen FP16 nativ. Good Kompromiss zwischen Qualität und Speicher.
+
+### BF16 (Brain Float 16) — Google's Format
+
+```
+Same size (16 Bit) aber andere Aufteilung:
+┌─ Sign (1) ─┬─ Exponent (8) ─┬─ Mantissa (7) ─┐
+│     0      │     10000001    │   1111010      │
+
+Vorteil: Gleicher Exponent-Range wie FP32, nur Mantissa reduziert
+Result: Bessere Stabilität beim Training, ähnlich Qualität wie FP32 aber nur 2 Bytes
+
+Nachteil: Nicht alle GPUs unterstützen BF16 nativ (RTX 30er Series muss emuliert)
+```
+
+**Aktuelle Praxis**: FP16 ist Standard, BF16 wird für Training beliebter.
+
+### INT8 (Integer 8-bit) — Erste echte Kompression
+
+```
+Floating Point: 0.123456789
+                ↓
+                Quantisieren: min=-1.0, max=1.0, 256 Levels
+                ↓
+Integer Index: 159 (von 0-255)
+Memory: 1 Byte pro Zahl → 75% Ersparnis vs FP32, 50% vs FP16
+
+Dequantisieren (zur Berechnung):
+INT8 Value 159 → Back to ~0.124
+```
+
+**Formel** (Affine Quantisierung):
+
+```
+INT8_value = round(FP32_value / scale) + zero_point
+
+Beispiel (scale=0.01, zero_point=128):
+FP32: 0.5
+INT8: round(0.5 / 0.01) + 128 = 50 + 128 = 178
+```
+
+### INT4 (Integer 4-bit) — Maximum Kompression
+
+```
+4 Bit = 16 Levels (0-15)
+Memory: 0.5 Byte pro Zahl (2 INT4s in 1 Byte)
+
+Darstellung:
+┌─ INT4 Value 1 (4 Bit) ─┬─ INT4 Value 2 (4 Bit) ─┐
+│     1101 (13)          │     0111 (7)            │
+└────────────────────────┴─────────────────────────┘
+
+Quantisierungsverlauf:
+Range [-1, 1] in 16 Leveln: -1.0, -0.867, -0.733, ... 0.733, 0.867, 1.0
+```
+
+**Herausforderung**: Mit nur 16 Levels ist es sehr rau. Deshalb → **Group Quantization**.
+
+### Group Quantization (für INT4)
+
+Problem: Ein INT4-Level pro ganzes Gewicht ist zu grob.
+
+Lösung: Kleine Gruppen mit jeweils eigenen min/max scales:
+
+```
+Gewichte: [0.1, 0.2, -0.5, 1.0 | 0.05, 0.15, 0.25, 0.95]
+           └─── Group 1 ───┘   └─── Group 2 ───┘
+
+Group 1 scale: (1.0 - (-0.5)) / 15 = 0.1
+Group 2 scale: (0.95 - 0.05) / 15 = 0.06
+
+Dann: Jede Gruppe wird mit ihrem Scale quantisiert
+Result: Bessere Approximation, immer noch effizient
+```
+
+**Group Size** (typisch 32 oder 128):
+- Größere Groups = weniger Overhead (speicher für scales)
+- Kleinere Groups = bessere Qualität aber mehr scales-Overhead
+
+---
+
+## Quantisierungs-Formate für LLMs
+
+### GGUF (GPT-Generated Unified Format)
+
+**Entwickelt von**: Georgi Gerganov (llama.cpp)
+**Format**: Modell + Quantisierung + Metadata in einer Datei
+**Universell**: Funktioniert mit llama.cpp, Ollama, vLLM (mittlerweile)
+
+```
+GGUF Struktur:
+┌─────────────────┐
+│ Magic Number    │ "GGUF" (Datei-Signatur)
+├─────────────────┤
+│ Version         │ (derzeit v3)
+├─────────────────┤
+│ Metadata        │ model.name, tokenizer, quantization
+│ (key-value)     │
+├─────────────────┤
+│ Tensor Data     │ Actual weights (quantisiert)
+└─────────────────┘
+```
+
+**Bits-Varianten**:
+```
+Q2_K  : 2.75 bits/weight → Llama 70B ≈ 13 GB (extreme)
+Q3_K  : 3.5 bits/weight → Llama 70B ≈ 18 GB (low quality)
+Q4_0  : 4.0 bits/weight → Llama 70B ≈ 33 GB (popular)
+Q4_K  : 4.5 bits/weight → Llama 70B ≈ 37 GB (balanced)
+Q5_0  : 5.0 bits/weight → Llama 70B ≈ 41 GB (good quality)
+Q6_K  : 6.6 bits/weight → Llama 70B ≈ 48 GB (high quality)
+Q8_0  : 8.0 bits/weight → Llama 70B ≈ 65 GB (nearly lossless)
+```
+
+**Vorteile**:
+- Einfach zu quantisieren mit `llama-cpp-python`
+- Schnell zu laden und zu inferieren
+- Mehrere Quant-Optionen in 1 Datei (teilweise)
+
+**Nachteile**:
+- Nur für Inference, nicht Training
+- Q2/Q3 haben spürbaren Qualitätsverlust
+
+### GPTQ (GPT Quantization)
+
+**Entwickelt von**: IST Austria
+**Ansatz**: Per-Group Quantisierung mit Calibration auf Daten
+
+```
+Prozess:
+1. Nimm Trainings-Daten (Calibration Set)
+2. Pro Layer, pro Group: Finde optimale Quantisierungs-Scale
+   (minimiere Fehler auf Calibration Daten)
+3. Speichere Modell mit Scales
+4. Inference ohne Renormalisierung nötig
+```
+
+**Bits-Varianten**:
+```
+GPTQ-4bit  : 4.0 bits/weight → Llama 70B ≈ 35 GB
+GPTQ-3bit  : 3.0 bits/weight → Llama 70B ≈ 26 GB
+
+Overhead: scales pro group (z.B. 128 Gruppe → 1 INT16 scale)
+```
+
+**Vorteile**:
+- Bessere Qualität als simple INT4 (wegen Calibration)
+- Unterstützt auch INT3
+- Aktiv entwickelt, gute Tool-Unterstützung
+
+**Nachteile**:
+- Quantisierungsprozess dauert Stunden
+- Braucht Calibration-Daten
+- Weniger portable als GGUF
+
+### AWQ (Activation-Aware Quantization)
+
+**Entwickelt von**: MIT
+**Ansatz**: "Nicht alle Gewichte sind gleich wichtig"
+
+```
+Insight: Im Matrix-Multiplikation X @ W, manche Spalten von X
+sind größer (höhere Aktivierungen) → sollten präziser quantisiert sein
+
+Algorithmus:
+1. Messe Aktivierungen pro Kanal
+2. Quantisiere weniger aktive Kanäle aggressiv
+3. Quantisiere wichtige Kanäle konservativ
+Result: Besseres Qualität/Größe Verhältnis
+```
+
+**Bits-Varianten**:
+```
+AWQ-4bit   : 4.0 bits/weight → Llama 70B ≈ 35 GB
+             Aber bessere Qualität als GPTQ
+```
+
+**Vorteile**:
+- Best-in-class Qualität für INT4
+- Schneller Quantisierungsprozess (Minuten, nicht Stunden)
+- Gutes Tool-Support (AutoAWQ)
+
+**Nachteile**:
+- Neueres Format, weniger Tools als GPTQ
+- Tool-Support nicht überall (llama.cpp Support entwickelt sich noch)
+
+### EXL2 (ExLlamaV2 Format)
+
+**Entwickelt von**: turboderp (ExLlama)
+**Ansatz**: 4-bit quantization mit variabler Bit-Länge pro Tensor
+
+```
+EXL2 Idee:
+- Verschiedene Layer/Tensoren brauchen unterschiedliche Präzision
+- Pro Tensor: Variable bits (z.B. Layer 1: 5-bit, Layer 2: 4-bit)
+- Besser als uniform 4-bit, aber komplexer zu implementieren
+```
+
+**Praktisch**:
+```
+EXL2-3.0bpw : 3.0 bits/weight → Llama 70B ≈ 23 GB (wild!)
+EXL2-4.5bpw : 4.5 bits/weight → Llama 70B ≈ 35 GB (usual)
+```
+
+**Besonderheiten**:
+- Nur für ExLlama/ExLlama2 Inference
+- Extrem schnell (optimierte CUDA Kernel)
+- Höhere Qualität als GGUF Q4 bei gleicher Größe
+
+**Nachteile**:
+- Spezialisiert auf ExLlama (nicht überall verwendbar)
+- Kleinerer Ökosystem als GGUF/GPTQ
+
+### Vergleich-Tabelle
+
+| Format | Bits | Ggf. 70B | Qualität | Speed | Tool Support | Portabilität |
+|--------|------|----------|----------|-------|--------------|--------------|
+| **FP32** | 32 | 140 GB | Reference | Slow | Alle | Überall |
+| **GGUF Q4_0** | 4.0 | 33 GB | Gut | Schnell | Excellente | Überall |
+| **GGUF Q5_0** | 5.0 | 41 GB | Sehr Gut | Schnell | Excellente | Überall |
+| **GPTQ-4bit** | 4.0 | 35 GB | Sehr Gut | Schnell | Gut | Llama.cpp, vLLM |
+| **AWQ-4bit** | 4.0 | 35 GB | Excellente | Schnell | Gut | Ollama, vLLM |
+| **EXL2-4.5** | 4.5 | 35 GB | Excellente | Sehr Schnell | Spezialisiert | ExLlama only |
+| **GGML** | ~4 | 33 GB | OK | Langsam | Veraltet | Legacy-Systeme |
+
+---
+
+## Quantisierungs-Qualität messbar
+
+### Benchmarks (Typical Test Results)
+
+Getestet auf: Llama 3 70B, Hellaswag und MMLU Benchmarks
+
+```
+Original (FP32):
+- MMLU:    81.2%
+- Hellaswag: 88.3%
+
+GGUF Q4_0:
+- MMLU:    80.9% (↓ 0.3%)
+- Hellaswag: 87.8% (↓ 0.5%)
+
+GPTQ-4bit:
+- MMLU:    81.0% (↓ 0.2%)
+- Hellaswag: 88.1% (↓ 0.2%)
+
+AWQ-4bit:
+- MMLU:    81.1% (↓ 0.1%)
+- Hellaswag: 88.2% (↓ 0.1%)
+
+EXL2-4.5:
+- MMLU:    81.0% (↓ 0.2%)
+- Hellaswag: 88.0% (↓ 0.3%)
+```
+
+**Fazit**: 4-bit Quantisierung hat <1% Qualitätsverlust bei guten Methoden!
+
+### Perplexity (ein Maß für sprachliche Qualität)
+
+```
+Perplexity = e^(-(1/N) * Σ log P(w_i))
+
+Niedriger = besser
+
+FP32:          7.2
+GGUF Q4_0:     7.4 (+2.7%)
+GGUF Q3_K:     8.1 (+12.5%)
+GPTQ-4bit:     7.3 (+1.4%)
+AWQ-4bit:      7.2 (~0%)
+```
+
+---
+
+## Mit llama.cpp quantisieren (praktisch)
+
+### Installation
+
+```bash
+git clone https://github.com/ggerganov/llama.cpp
+cd llama.cpp
+make
+
+# oder via homebrew (macOS)
+brew install llama-cpp
+```
+
+### Schritt 1: Modell zu GGML konvertieren
+
+```bash
+# HuggingFace Modell downloaden
+python3 -m huggingface_hub download meta-llama/Llama-2-7b-chat \
+  --local-dir ./llama-2-7b-chat-hf
+
+# Zu GGML konvertieren
+python3 convert.py ./llama-2-7b-chat-hf
+
+# Output: ggml-model-f32.gguf (Vollpräzision, gigantisch)
+```
+
+### Schritt 2: Quantisieren
+
+```bash
+# Q4_0 quantisieren (4-bit)
+./quantize ./ggml-model-f32.gguf ./ggml-model-q4_0.gguf q4_0
+
+# Q5_0 (5-bit, bessere Qualität)
+./quantize ./ggml-model-f32.gguf ./ggml-model-q5_0.gguf q5_0
+
+# Q3_K (3.5-bit, aggressiv)
+./quantize ./ggml-model-f32.gguf ./ggml-model-q3_k_m.gguf q3_k_m
+
+# Dauer: 5-30 Min je nach Modellgröße
+```
+
+### Schritt 3: Testen
+
+```bash
+# Interaktiv nutzen
+./main -m ./ggml-model-q4_0.gguf -n 128 -i
+
+# "# So long and thanks for all the fish" eingeben, Enter drücken
+# Modell antwortet
+```
+
+### Via Python (AutoGGUF)
+
+```python
+from huggingface_hub import snapshot_download
+from llama_cpp import Llama
+
+# Download und quantisieren automatisch
+llm = Llama.from_pretrained_gpt4all(
+    repo_id="TheBloke/Llama-2-7b-Chat-GGUF",
+    filename="llama-2-7b-chat.Q4_K_M.gguf",
+    verbose=False
+)
+
+response = llm("Erkläre mir Quantisierung in 100 Worten", max_tokens=100)
+print(response["choices"][0]["text"])
+```
+
+---
+
+## Welches Format für deine Use-Case?
+
+### Lokal auf Consumer-GPU (RTX 4090, 24 GB)
+
+```
+Ideal: GGUF Q4_0 oder Q5_0
+Grund: Simple, portable, guter Tool-Support
+Tool: llama.cpp, Ollama, LM Studio
+```
+
+### Lokal auf schwacher Hardware (8 GB)
+
+```
+Ideal: GGUF Q2_K oder Q3_K (für kleine Modelle wie 7B/13B)
+Grund: Passt in RAM
+Tool: llama.cpp, Ollama
+Warnung: Q2_K hat spürbaren Qualitätsverlust!
+```
+
+### Cloud/Server mit starker GPU (RTX 6000, 48 GB)
+
+```
+Ideal: GPTQ-4bit oder AWQ-4bit
+Grund: Bessere Qualität bei gleichem Speicher
+Tool: vLLM (mit GPTQ/AWQ Support)
+```
+
+### Maximum Speed (Real-time Inference)
+
+```
+Ideal: EXL2-4.5
+Grund: ExLlama2 hat extrem optimierte CUDA Kernel
+Tool: ExLlama2 / oobabooga WebUI
+Kost: Nur für ExLlama verfügbar, nicht überall
+```
+
+### Größtmögliche Modelle auf kleinem Speicher
+
+```
+Ideal: GGUF Q2_K oder EXL2-3.0bpw
+Grund: Extremste Kompression
+Tool: llama.cpp oder ExLlama2
+Warnung: Qualität ist fragwürdig, NUR für Experimente
+```
+
+---
+
+## Performance-Realitäten (2026 Daten)
+
+### Speicherverbrauch (Llama 3 70B)
+
+```
+FP32:       138 GB
+FP16:        69 GB
+GGUF Q4_0:   33 GB (76% Ersparnis!)
+GGUF Q3_K:   25 GB
+EXL2-4.5:    35 GB (auch mit Caching)
+```
+
+### Inferenz-Speed (Tokens pro Sekunde, RTX 4090)
+
+```
+GGUF Q4_0:   120 tokens/s
+GPTQ-4bit:    95 tokens/s
+AWQ-4bit:     98 tokens/s
+EXL2-4.5:    145 tokens/s (mit spezialisiertem Kernel)
+```
+
+### Quality Loss (Benchmark durchschnitt)
+
+```
+GGUF Q4_0:   0.8% Qualitätsverlust
+GGUF Q3_K:   3.5%
+GPTQ-4bit:   0.3%
+AWQ-4bit:    0.1%
+EXL2:        0.2%
+```
+
+---
+
+## Häufige Fehler bei Quantisierung
+
+### Fehler 1: Falsches Quantisierungs-Format für Use-Case
+
+```
+Problem: "Ich nehme GGUF für Produktion, muss maximale Speed"
+Lösung: EXL2-4.5 oder GPTQ mit vLLM
+```
+
+### Fehler 2: Aggressive Quantisierung ohne Testen
+
+```
+Problem: "Llama 70B → Q2_K, spart viel Speicher!"
+Resultat: Modell ist dumm, gibt Nonsense
+Lösung: Q4_0 mindestens, oder Q3_K mit Tests
+```
+
+### Fehler 3: Quantisierungs-Tool ignorieren
+
+```
+Problem: "Ich quantisiere mit llama.cpp auf Llama-3 der gemacht ist für GPTQ"
+Resultat: Schlechte Kompatibilität
+Lösung: Check HuggingFace model card welcher Quantisierungs-Typ empfohlen
+```
+
+### Fehler 4: Falsche Bit-Tiefe für Anforderung
+
+```
+Problem: "Ich brauche Präzision für medizinisches NLP, nehme Q2_K"
+Resultat: Unzuverlässige Antworten
+Lösung: Mindestens Q4_K, eher Q5_0 oder GPTQ-4bit
+```
+
+Quantisierung ist das Wundermittel um große Modelle praktisch zu machen. Mit GGUF Q4_0 sparst du 76% Speicher mit <1% Qualitätsverlust. Das ist eine der besten Investitionen beim LLM-Einsatz.
+
+## Quellen und Links
+
+- [llama.cpp](https://github.com/ggerganov/llama.cpp)
+- [AutoGPTQ](https://github.com/AutoGPTQ/AutoGPTQ)
+- [AutoAWQ](https://github.com/casper-hansen/AutoAWQ)

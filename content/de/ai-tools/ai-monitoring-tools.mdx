@@ -1,0 +1,376 @@
+---
+title: LLM Monitoring & Observability 2026 — LangSmith vs Langfuse
+date: 2026-03-21
+summary: LangSmith vs Langfuse vs Helicone vs Weights & Biases. Pricing, Self-Hosted, Features, Integration, Best for What.
+tags: [monitoring, langsmith, langfuse, observability, llm, debugging]
+author: AI Engineering
+---
+
+# LLM Monitoring & Observability 2026
+
+Monitoring deine LLM Applications ist 2026 Standard. Dieser Guide vergleicht alle Tools um zu sehen, welche für diche beste ist.
+
+## Schnell-Überblick
+
+| Tool | Preis | Self-Hosted | Best Feature | Best For |
+|------|-------|-----------|-------------|----------|
+| **Langfuse** | $29/Mo | ✅ Ja | Open Source, Data Ownership | Open-Source Teams |
+| **LangSmith** | $39/User/Mo | ⚠️ Enterprise | LangChain Integration | LangChain Shops |
+| **Helicone** | Free-$100+ | Nein | Einfachste Setup | Developer-Friendly |
+| **Weights & Biases** | Custom | ✅ Ja | Complete ML Ops | Research + Production |
+| **Arize** | Custom | Nein | Enterprise Feature | Enterprise Scale |
+
+## Langfuse vs LangSmith
+
+### Langfuse (Open-Source First)
+
+**Pricing**:
+- **Open Source**: Free (selbst hosted)
+- **Cloud Hobby**: Free Tier (50k Units/Mo)
+- **Cloud Pro**: $29/Mo (100k Units)
+- **Cloud Team**: $100+/Mo (unbegrenzt)
+- **Self-Hosted**: Free (Postgres + ClickHouse + Redis nötig)
+
+**Stärken**:
+- "Best für Data Sovereignty" — eigene Daten
+- MIT License — vollständig open
+- Framework-agnostisch (funktioniert mit OpenAI SDK, LlamaIndex, CrewAI, etc.)
+- Keine per-Seat Gebühren
+- Transparente Unit-basierte Pricing
+
+**Schwächen**:
+- Self-Hosting ist Infrastruktur-intensiv
+- Kleinere Community als LangSmith
+- Weniger integrations out-of-the-box
+
+**Best For**:
+- EU-basierte Teams (GDPR)
+- Teams mit Data Privacy Requirements
+- Non-LangChain Frameworks
+- High-Volume Usage (1000+ traces/day)
+
+### LangSmith (LangChain-Centric)
+
+**Pricing**:
+- **Free**: 1 seat, 5k traces/month
+- **Plus**: $39/User/month
+- **Trace Overages**: $0.50-5 pro 1k traces
+- **Enterprise**: Custom Pricing
+
+**Stärken**:
+- "Deepest LangChain Integration" (native debugging tools)
+- Sehr gute für LangChain/LangGraph Projekte
+- Managed Service (zero DevOps)
+- LangSmith Hub für Prompts/Models
+
+**Schwächen**:
+- Wird teuer mit Team Growth (per-user pricing)
+- Nicht ideal wenn nicht LangChain
+- Proprietary (keine Data Ownership)
+
+**Best For**:
+- LangChain-only Teams
+- Teams < 5 Menschen
+- Enterprise mit LangChain
+
+## Unit-basierte vs Per-Seat Pricing Impact
+
+```
+Szenario: Team wächst von 2 auf 10 Menschen
+
+LANGFUSE:
+- 2 Menschen: $29/Mo (1000k units = $29)
+- 10 Menschen: $29/Mo (if same unit usage!)
+- Warum? Nur eine Account bezahlt
+
+LANGSMITH:
+- 2 Menschen: $39 × 2 = $78/Mo
+- 10 Menschen: $39 × 10 = $390/Mo
+- Teuer!
+
+WINNER: Langfuse für Teams
+```
+
+## Integration Vergleich
+
+| Framework | Langfuse | LangSmith | Helicone | W&B |
+|-----------|----------|-----------|----------|-----|
+| **LangChain** | ✅ | ✅✅ (native) | ✅ | ✅ |
+| **LlamaIndex** | ✅ | ❌ | ✅ | ✅ |
+| **CrewAI** | ✅ | ❌ | ✅ | ✅ |
+| **OpenAI SDK** | ✅ | ❌ | ✅ | ✅ |
+| **Anthropic** | ✅ | ❌ | ✅ | ✅ |
+| **Custom** | ✅ API | Manual | ✅ API | ✅ |
+
+**Fazit**: Langfuse für Vielfalt, LangSmith nur wenn LangChain
+
+## Häufige Fehler
+
+### Problem #1: "LangSmith pro Team ist unbezahlbar"
+- **Ursache**: Per-User Pricing wächst linear
+- **Lösung**: Wechsel zu Langfuse ($29 flat)
+- **Einsparung**: 10× bei größeren Teams
+
+### Problem #2: "Langfuse Self-Hosted ist kompliziert"
+- **Ursache**: Braucht 3 Services (Postgres, ClickHouse, Redis)
+- **Lösung**: Nutze Langfuse Cloud ($29) oder Docker-Compose
+```bash
+# Docker: fertig in 5 Min
+docker-compose up -d
+```
+
+### Problem #3: "Traces sind nicht sichtbar in LangSmith"
+- **Ursache**: API Key falsch oder Projekt nicht konfiguriert
+- **Lösung**: Überprüfe Projekt-URL und Export Traces via UI
+
+## Setup Guide (Langfuse Cloud)
+
+```python
+from langfuse.callback import CallbackHandler
+from langchain.chat_models import ChatOpenAI
+
+# 1. Integrationscode
+callback_handler = CallbackHandler(
+    public_key="pk_xxx",
+    secret_key="sk_xxx"
+)
+
+# 2. LangChain Model mit Monitoring
+llm = ChatOpenAI(
+    callbacks=[callback_handler]
+)
+
+# 3. Alles trackt automatisch!
+response = llm.predict("Hallo")
+```
+
+Das ist alles! Traces sind jetzt sichtbar in Langfuse UI.
+
+## Use Cases
+
+### Development / Debugging
+→ **Langfuse** (bessere UX) oder **LangSmith** (if LangChain)
+
+### Production Monitoring
+→ **Langfuse Self-Hosted** (Data Control) oder **Arize** (Enterprise)
+
+### Research / Experimentation
+→ **Weights & Biases** (best für Metrics, Versioning)
+
+## Budget
+
+| Team Size | Langfuse | LangSmith |
+|-----------|----------|-----------|
+| 1 Person | $0 (Free) | $0 (Free) |
+| 3 People | $29 | $117 ($39×3) |
+| 10 People | $29 | $390 ($39×10) |
+
+**Langfuse ist 13× billiger bei 10 Menschen!**
+
+---
+
+## Helicone — Developer-Friendly Oberflächel
+
+**Besonderheit**: "Einfachste Setup, API-agnostisch"
+
+**Pricing**:
+- Free: 50k Requests/Monat
+- Hobby: $25/Mo (unlimited)
+- Pro: Custom (Enterprises)
+
+**Stärken**:
+- Schnellste Integration (ein API-Key in deinen Requests)
+- Funktioniert mit OpenAI, Anthropic, Mistral, etc.
+- Schöne Visualisierungen
+- Kostenlos zu testen
+
+**Schwächen**:
+- Nicht so tief wie LangSmith/Langfuse
+- Kleinere Community
+- Weniger erweiterte Features
+
+**Best For**: Developer die schnell starten wollen
+
+## Weights & Biases — Research + Production
+
+**Besonderheit**: "Komplettes MLOps Platform"
+
+**Pricing**:
+- Free: Für 1 Person
+- Team: Custom (meistens €100+/Mo)
+- Custom: Enterprise
+
+**Stärken**:
+- Nicht nur Logging, auch Versioning & Experimentation
+- GPU-Monitoring möglich
+- Gute für Research-Teams
+- Production Pipelines
+
+**Schwächen**:
+- Komplexer Setup
+- Overkill für einfache LLM Monitoring
+- Teurer für Teams
+
+**Best For**: Research Teams, die Models trainieren und deployen
+
+## Arize — Enterprise Scale
+
+**Besonderheit**: "Production Monitoring für 1000+ daily Predictions"
+
+**Pricing**: Custom Enterprise (€10k+/Mo typisch)
+
+**Stärken**:
+- Scalability für gigantische Deployments
+- Drift Detection (Modell Performance sinkt mit Zeit)
+- Integration in Data Pipelines
+- Compliance Features
+
+**Schwächen**:
+- Extrem teuer
+- Overkill für KMUs
+- Lange Onboarding
+
+**Best For**: Enterprise mit großen ML-Operationen
+
+## Deep Dive: Langfuse vs LangSmith Kosten (Großes Team Szenario)
+
+Szenario: **Team mit 15 Entwicklern, 100k Traces/Monat**
+
+### Langfuse Cloud Pro
+- **Basis**: €29/Mo
+- **Kosten pro 100k Traces**: €0 (unbegrenzt in Pro!)
+- **Total**: €29/Mo (unabhängig von Team-Größe!)
+
+### LangSmith
+- **Pro Plan**: €39/User/Mo × 15 = €585/Mo
+- **Zusätzliche Traces-Overages**: 100k Traces (kostenlos in Pro)
+- **Total**: €585/Mo (nur wegen 15 Leuten!)
+
+**Fazit**: Langfuse ist **20× billiger** bei großen Teams!
+
+## Real-World Setup: Langfuse + LangChain in Production
+
+```python
+# requirements.txt
+langchain==0.1.0
+langfuse==2.5.0
+python-dotenv==1.0.0
+
+# .env (nicht committen!)
+LANGFUSE_PUBLIC_KEY=pk_xxx
+LANGFUSE_SECRET_KEY=sk_xxx
+
+# main.py
+import os
+from langfuse.callback import CallbackHandler
+from langchain.chat_models import ChatOpenAI
+from langchain.chains import LLMChain
+
+# 1. Initialisiere Langfuse
+langfuse_handler = CallbackHandler(
+    public_key=os.getenv("LANGFUSE_PUBLIC_KEY"),
+    secret_key=os.getenv("LANGFUSE_SECRET_KEY")
+)
+
+# 2. Erstelle LangChain mit Callback
+llm = ChatOpenAI(
+    model="gpt-4",
+    callbacks=[langfuse_handler]
+)
+
+# 3. Alles wird automatisch getracked!
+response = llm.predict("Was ist RAG?")
+
+# Langfuse UI zeigt jetzt:
+# - Response Zeit
+# - Token Usage
+# - Input/Output
+# - Model + Temperature
+```
+
+## Feature-Vergleich: Detailliert
+
+| Feature | Langfuse | LangSmith | Helicone | W&B |
+|---------|----------|-----------|----------|-----|
+| Traces tracken | ✅ | ✅ | ✅ | ✅ |
+| Cost-Tracking | ✅ | ✅ | ✅ | ✅ |
+| Open Source | ✅ | ❌ | ❌ | ❌ |
+| Self-Hosted | ✅ | ❌ | ❌ | ✅ |
+| Experiment Tracking | ⚠️ | ✅ | ❌ | ✅ |
+| Model Versioning | ⚠️ | ✅ | ❌ | ✅ |
+| Collaboration Features | ✅ | ✅ | ⚠️ | ✅ |
+| Drifting Detection | ❌ | ❌ | ❌ | ✅ |
+| Notebooks Integration | ❌ | ❌ | ❌ | ✅ |
+| API-agnostisch | ✅ | ❌ | ✅ | ✅ |
+
+## Fehlerdiagnose: Traces nicht sichtbar
+
+### Problem: "Traces werden nicht in Langfuse angezeigt"
+
+**Lösungs-Checkliste:**
+
+1. **API Keys korrekt?**
+   ```python
+   # Teste Connection
+   from langfuse import Langfuse
+   client = Langfuse(
+       public_key="pk_xxx",
+       secret_key="sk_xxx"
+   )
+   client.flush()  # Zwinge Upload
+   ```
+
+2. **Netzwerk erreichbar?**
+   - Ping: `curl -I https://api.langfuse.com`
+   - Firewall blockiert HTTPS? (Seltenes Corporate-Problem)
+
+3. **LangChain Integrationn nicht korrekt?**
+   ```python
+   # FALSCH
+   llm = ChatOpenAI()  # No callback!
+
+   # RICHTIG
+   llm = ChatOpenAI(callbacks=[langfuse_handler])
+   ```
+
+4. **AsyncIO Problem?**
+   ```python
+   # Wenn async verwendest, callback flushes nicht auf Zeit
+   # Fix: client.flush() nach jedem Request aufrufen
+   ```
+
+### Problem: "LangSmith Projekt nicht synchronisiert"
+
+1. Stelle sicher dass Environment Variable korrekt gesetzt ist
+2. `ls ~/.langsmith` — sollte config.json existieren
+3. LangSmith UI — klicke auf dein Projekt, kopiere exakte Project ID
+4. Versuche `langsmith-config` CLI
+
+## Production Checklist
+
+- [ ] Monitoring Tool ausgewählt (Langfuse empfohlen für KMUs)
+- [ ] API Keys sicher in Vault gespeichert (nicht in .env!)
+- [ ] Callbacks in ALLE LLM-Aufrufe integriert
+- [ ] Trace-Sampling eingestellt (nicht jeden Trace tracken wenn massive Load)
+- [ ] Dashboards erstellt (Trends, Error Rates, Latency)
+- [ ] Alerts konfiguriert (z.B. "benachrichtige wenn Error Rate > 5%")
+- [ ] Retention Policy definiert (wie lang Traces speichern?)
+- [ ] Team-Access konfiguriert (wer kann Traces sehen?)
+- [ ] Monthly Cost Review etabliert
+
+## Ressourcen
+
+- [Langfuse Official](https://langfuse.com)
+- [LangSmith Docs](https://docs.smith.langchain.com)
+- [Helicone Docs](https://docs.helicone.ai)
+- [W&B Platform](https://wandb.ai)
+- [Arize AI](https://arize.com)
+- [Langfuse Cookbooks](https://cookbooks.langfuse.com)
+
+**Letzte Aktualisierung**: 21.03.2026 | **Nächste Überprüfung**: Juni 2026
+
+## Quellen und Links
+
+- [Grafana](https://github.com/grafana/grafana)
+- [Prometheus](https://github.com/prometheus/prometheus)
+- [OpenTelemetry](https://github.com/open-telemetry)

@@ -1,0 +1,516 @@
+---
+title: Lokales LLM-Setup — Anfänger bis Experte
+date: 2026-03-21
+summary: Guide für Ollama, llama.cpp, LM Studio und vLLM. Modell-Auswahl nach VRAM, Performance-Tuning, Benchmarking
+tags: [Ollama, llama.cpp, LM Studio, vLLM, LLM, lokale Modelle, Performance]
+author: "AI Engineering"
+---
+
+# Lokales LLM-Setup — Anfänger bis Experte
+
+Du willst LLMs lokal laufen lassen ohne OpenAI/Claude-API-Kosten? Hier ist der komplette Guide — von Installation bis Benchmarking.
+
+## Anfänger: Ollama
+
+**Beste Wahl für:** Schneller Start, keine Kommandozeile, unkompliziert.
+
+### Installation
+
+1. Geh zu https://ollama.ai
+2. Download für dein OS (macOS, Linux, Windows)
+3. Installieren und starten
+
+### Erstes Modell laden
+
+```bash
+ollama pull llama2:7b-chat-q4_0
+```
+
+Das dauert 5–10 Min je nach Internet. `q4_0` = 4-Bit Quantisierung.
+
+### Test: Funktioniert's?
+
+```bash
+ollama run llama2:7b-chat-q4_0
+# Jetzt kannst du schreiben:
+> Wer war Marie Curie?
+```
+
+Drück `Ctrl+D` zum Beenden.
+
+### Modell-Liste
+
+```bash
+ollama list
+```
+
+Output:
+```
+NAME                              ID              SIZE      MODIFIED
+llama2:7b-chat-q4_0               1234567890ab    3.8 GB    2 hours ago
+```
+
+### API starten (für Python/Apps)
+
+```bash
+ollama serve
+# Läuft auf http://localhost:11434
+```
+
+Jetzt von Python aus:
+
+```python
+import requests
+
+response = requests.post(
+    "http://localhost:11434/api/generate",
+    json={
+        "model": "llama2:7b-chat-q4_0",
+        "prompt": "Was ist 2+2?",
+        "stream": False
+    }
+)
+
+print(response.json()["response"])
+```
+
+## Anfänger+: VRAM-Guide
+
+VRAM bestimmt welche Modelle laufen. So wählst du:
+
+| VRAM | Modell | Quantisierung | Bemerkung |
+|------|--------|---------------|-----------|
+| 2 GB | phi-2:2.7b | q4_0 | Zu klein für gute Antworten |
+| 4 GB | mistral:7b | q4_0 | Schlecht. Wir empfehlen mehr |
+| 6 GB | llama2:7b | q4_0 | OK für einfache Tasks |
+| 8 GB | llama2:7b | q4_0 oder q5_K_M | Gut, flüssig |
+| 12 GB | llama2:13b | q4_0 | Sehr gute Qualität |
+| 16 GB | llama2:13b | q5_K_M | Ausgezeichnet |
+| 24 GB | mistral:7b x 3 | q4_0 | Mehrere Modelle parallel |
+| 32+ GB | llama2:70b | q4_0 | State-of-the-Art lokal |
+
+### VRAM prüfen
+
+**Linux/Mac:**
+```bash
+nvidia-smi  # NVIDIA
+rocm-smi    # AMD
+# Oder einfach: Systemeinstellungen
+```
+
+**Windows:**
+```cmd
+nvidia-smi
+# Oder Task-Manager → GPU
+```
+
+## Anfänger+: Quantisierungen
+
+Quantisierung = Modell komprimieren. Schneller, weniger VRAM, etwas weniger Qualität.
+
+| Kürzel | Bits | Größe | Qualität | Nutze wenn |
+|--------|------|-------|----------|-----------|
+| f16 | 16 | 100% | Beste | 24+ GB VRAM |
+| q5_K_M | 5 | ~60% | Sehr gut | 12+ GB VRAM |
+| q4_K_M | 4 | ~50% | Gut | 8+ GB VRAM |
+| q4_0 | 4 | ~48% | Gut | 6+ GB VRAM |
+| q3_K_M | 3 | ~35% | OK | <6 GB VRAM |
+
+**Regel:** Je kleiner die Quantisierung, desto schneller und speichereffizienter, aber etwas weniger Verständnis für komplexe Inhalte.
+
+### Beispiel
+
+```bash
+# Höchste Qualität
+ollama pull llama2:13b  # f16, ~25 GB
+
+# Guter Kompromiss
+ollama pull llama2:13b-q5_K_M  # ~8 GB
+
+# Ultra kompakt
+ollama pull llama2:13b-q3_K_M  # ~5 GB
+```
+
+## Zwischenstufe: LM Studio
+
+**Beste Wahl für:** GUI + einfaches Fine-Tuning + API.
+
+### Installation
+
+1. Download von https://lmstudio.ai
+2. Installieren, starten
+
+### Modell herunterladen
+
+1. Links auf "Search" klicken
+2. Suche "mistral" oder "llama2"
+3. Auf Download-Button klicken (grüner Pfeil)
+4. Warten (10 GB kann 30 Min dauern)
+
+### Modell laden & chatten
+
+1. Links auf "Chat" klicken
+2. Dropdown: Dein Modell wählen
+3. Message schreiben, Enter
+
+### LM Studio API
+
+LM Studio läuft einen **OpenAI-kompatiblen Server**:
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://localhost:1234/v1",
+    api_key="not-needed"
+)
+
+response = client.chat.completions.create(
+    model="local-model",
+    messages=[
+        {"role": "user", "content": "Wer war Nikola Tesla?"}
+    ]
+)
+
+print(response.choices[0].message.content)
+```
+
+Das funktioniert mit jedem OpenAI-Client!
+
+## Zwischenstufe: llama.cpp
+
+**Beste Wahl für:** Performance + Kontrolle + C++ Integration.
+
+llama.cpp ist extrem schnell — geschrieben in C++, nicht Python.
+
+### Installation & Build
+
+```bash
+git clone https://github.com/ggerganov/llama.cpp.git
+cd llama.cpp
+
+# Mit GPU Support (NVIDIA)
+CMAKE_ARGS="-DGGML_CUDA=ON" make
+
+# Mit Apple Metal (macOS)
+CMAKE_ARGS="-DGGML_METAL=ON" make
+
+# Nur CPU (langsam)
+make
+```
+
+### Modell herunterladen (GGUF Format)
+
+```bash
+# Von Hugging Face
+wget https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.2-GGUF/resolve/main/Mistral-7B-Instruct-v0.2.Q4_K_M.gguf
+```
+
+### Modell laufen lassen
+
+```bash
+./main -m Mistral-7B-Instruct-v0.2.Q4_K_M.gguf \
+  -n 512 \
+  -p "Wer war Einstein?" \
+  --temp 0.7
+```
+
+Flags:
+- `-m`: Modell-Datei
+- `-n`: Max Tokens für Antwort
+- `-p`: Prompt
+- `--temp`: Kreativität (0.1=fokussiert, 1.0=kreativ)
+
+### Server starten (API)
+
+```bash
+./server -m Mistral-7B-Instruct-v0.2.Q4_K_M.gguf \
+  --port 8000 \
+  -n 512
+```
+
+Jetzt auf http://localhost:8000/docs (Swagger UI).
+
+### Python mit llama.cpp
+
+```bash
+pip install llama-cpp-python
+```
+
+```python
+from llama_cpp import Llama
+
+llm = Llama(
+    model_path="./Mistral-7B-Instruct-v0.2.Q4_K_M.gguf",
+    n_ctx=2048,    # Context-Größe
+    n_threads=4,   # CPU Threads
+    n_gpu_layers=43  # GPU Layers (falls CUDA)
+)
+
+response = llm(
+    "Erkläre Quanten-Computing: ",
+    max_tokens=200,
+    temperature=0.3
+)
+
+print(response["choices"][0]["text"])
+```
+
+## Fortgeschrittene: vLLM
+
+**Beste Wahl für:** Produktionssysteme + schnelle Batch-Verarbeitung.
+
+vLLM macht PageAttention — bis zu 10x schneller!
+
+### Installation
+
+```bash
+pip install vllm
+
+# Mit CUDA Support
+pip install vllm[cuda12]
+```
+
+### Server starten
+
+```bash
+python -m vllm.entrypoints.openai.api_server \
+  --model mistralai/Mistral-7B-Instruct-v0.2 \
+  --tensor-parallel-size 1 \
+  --port 8000
+```
+
+### Nutzen von Python
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://localhost:8000/v1",
+    api_key="not-needed"
+)
+
+# Single Request
+response = client.chat.completions.create(
+    model="mistralai/Mistral-7B-Instruct-v0.2",
+    messages=[
+        {"role": "system", "content": "Du bist ein Experte für Physik."},
+        {"role": "user", "content": "Erkläre Gravitation."}
+    ],
+    temperature=0.3,
+    max_tokens=300
+)
+
+print(response.choices[0].message.content)
+```
+
+### Batch-Verarbeitung mit vLLM
+
+```python
+from vllm import LLM, SamplingParams
+
+llm = LLM(
+    model="mistralai/Mistral-7B-Instruct-v0.2",
+    tensor_parallel_size=1,
+    gpu_memory_utilization=0.8
+)
+
+sampling_params = SamplingParams(
+    temperature=0.3,
+    top_p=0.95,
+    max_tokens=200
+)
+
+prompts = [
+    "Was ist 2+2?",
+    "Wer war Leonardo da Vinci?",
+    "Erkläre Machine Learning."
+]
+
+outputs = llm.generate(prompts, sampling_params)
+
+for prompt, output in zip(prompts, outputs):
+    print(f"Q: {prompt}")
+    print(f"A: {output.outputs[0].text}\n")
+```
+
+**Das ist 5–10x schneller als einzelne Requests!**
+
+## Performance-Benchmarking
+
+Wie schnell ist dein Setup? Hier ein Benchmark:
+
+```python
+# benchmark.py
+import time
+from ollama import Client
+
+client = Client(host='http://localhost:11434')
+
+prompt = "Erkläre Machine Learning in 50 Worten."
+
+# Warmup
+client.generate(model='llama2:7b-chat-q4_0', prompt=prompt, stream=False)
+
+# Benchmark
+times = []
+for _ in range(5):
+    start = time.time()
+    response = client.generate(
+        model='llama2:7b-chat-q4_0',
+        prompt=prompt,
+        stream=False
+    )
+    elapsed = time.time() - start
+    times.append(elapsed)
+
+    tokens = len(response['response'].split())
+    print(f"Time: {elapsed:.2f}s | Tokens: {tokens} | Speed: {tokens/elapsed:.1f} tok/s")
+
+import statistics
+print(f"\nAverage: {statistics.mean(times):.2f}s")
+print(f"Median: {statistics.median(times):.2f}s")
+```
+
+### Tokens pro Sekunde (tok/s)
+
+Ziele:
+- **<1 tok/s**: Zu langsam
+- **1–3 tok/s**: OK für Chats
+- **5–10 tok/s**: Gut
+- **20+ tok/s**: Ausgezeichnet
+
+Faktoren:
+- **Quantisierung**: q4_0 schneller als f16
+- **VRAM**: GPU schneller als CPU
+- **Context-Größe**: Größer = langsamer
+- **Modell-Größe**: 7b schneller als 13b
+
+## Tuning für Speed
+
+### 1. Richtige Quantisierung
+
+```bash
+# Schnell
+ollama pull mistral:7b-q4_0
+
+# Langsam
+ollama pull mistral:7b  # f16 = Megabytes
+```
+
+### 2. Context reduzieren
+
+```python
+# llama.cpp
+llm = Llama(model_path="model.gguf", n_ctx=512)  # Statt 2048
+
+# vLLM
+llm = LLM(model="mistral-7b", max_model_len=512)
+```
+
+### 3. GPU nutzen
+
+```python
+# llama.cpp mit GPU
+llm = Llama(
+    model_path="model.gguf",
+    n_gpu_layers=43  # Alle Layers auf GPU
+)
+
+# vLLM mit GPU
+llm = LLM(
+    model="mistral-7b",
+    tensor_parallel_size=1,  # Einfach verteilen
+    gpu_memory_utilization=0.9  # 90% VRAM nutzen
+)
+```
+
+### 4. Batch-Processing
+
+Viele kleine Requests sind langsam. Batch ist schneller:
+
+```python
+# Langsam: 100x einzelne Requests
+for prompt in prompts:
+    response = llm.generate(prompt)
+
+# Schnell: 1x Batch mit 100 Prompts
+responses = llm.generate(prompts)
+```
+
+Batch ist 3–5x schneller!
+
+## Top-5 Fehlerbehebung
+
+### Problem 1: "Out of Memory"
+
+```bash
+# VRAM voll? Kleiner Model/Quantisierung
+
+# Vorher
+ollama pull llama2:13b  # 26 GB
+
+# Nachher
+ollama pull llama2:13b-q4_0  # 8 GB
+```
+
+### Problem 2: LLM startet nicht
+
+```bash
+# Fehler beim Modell-Download?
+ollama pull --name broken-model gemma:7b
+
+# Neustart
+ollama serve
+```
+
+### Problem 3: Sehr langsam (1 tok/s)
+
+Gründe:
+1. **CPU-Mode**: GPU-Support aktivieren
+2. **Context zu groß**: Auf 512 reduzieren
+3. **Quantisierung falsch**: q4_0 probieren
+
+### Problem 4: Antworten sind Unsinn
+
+Ursachen:
+1. **Modell zu klein**: 7b → 13b
+2. **Temperature zu hoch**: 0.3 probieren
+3. **Context zu kurz**: 1024 Tokens
+
+### Problem 5: API-Port besetzt
+
+```bash
+# Port 11434 schon in Benutzung?
+lsof -i :11434  # Prozess anzeigen
+kill -9 <PID>   # Beenden
+
+# Oder anderen Port nutzen
+ollama serve --port 11435
+```
+
+## Zusammenfassung
+
+| Tool | Best für | Setup-Zeit | Speed |
+|------|----------|------------|-------|
+| **Ollama** | Anfänger | 5 Min | 1–3 tok/s |
+| **LM Studio** | GUI-User | 10 Min | 2–5 tok/s |
+| **llama.cpp** | Performance | 30 Min | 5–15 tok/s |
+| **vLLM** | Produktion | 20 Min | 15–50 tok/s |
+
+**Empfehlung je nach Situation:**
+- Schneller Start? → Ollama
+- Produktionssystem? → vLLM
+- Experimentieren? → LM Studio
+- Maximum Performance? → llama.cpp + GPU
+
+## Nächste Schritte
+
+1. **RAG bauen** → rag-pipeline-bauen.mdx
+2. **Fine-Tuning** → fine-tuning-anleitung.mdx
+3. **Agent mit Tools** → build-ai-agent.mdx
+
+## Quellen und Links
+
+- [Ollama](https://github.com/ollama/ollama)
+- [vLLM](https://github.com/vllm-project/vllm)

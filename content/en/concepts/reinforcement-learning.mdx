@@ -1,0 +1,291 @@
+---
+title: Reinforcement Learning
+date: 2026-03-21
+summary: RL Basics (States, Actions, Rewards, Policies), PPO, DPO, RLHF Connection, Robotics & Games, LLM Alignment
+tags: [reinforcement-learning, policy-gradient, ppo, dpo, rlhf, rewards, alignment]
+author: AI Engineering
+section: Concepts
+---
+
+# Understanding Reinforcement Learning
+
+Reinforcement Learning trains agents through trial-and-error. The agent takes actions, receives rewards, and optimizes its policy.
+
+```
+Agent in Environment:
+  State: [Agent position, Enemy positions, ...]
+  Action: [Move right, Shoot, Jump]
+  Reward: [+1 for hit, -1 for being hit, -0.01 per step]
+  → Agent learns optimal strategy through repetition
+```
+
+---
+
+## Core Concepts
+
+### States (S)
+
+The current situation.
+
+```
+Game: State = [Player Position, Enemy Position, Health, Mana]
+Robot: State = [Joint Angles, Joint Velocities, Sensor Readings]
+Stock Trading: State = [Current Price, Price History, Volume]
+```
+
+### Actions (A)
+
+What the agent can do.
+
+```
+Game: Actions = {UP, DOWN, LEFT, RIGHT, ATTACK, DEFEND}
+Robot: Actions = Continuous [θ1, θ2, θ3] (Joint Torques)
+Trading: Actions = {BUY, HOLD, SELL}
+```
+
+### Rewards (R)
+
+Feedback for the agent.
+
+```
+Game:
+  +1: Enemy killed
+  -1: Took damage
+  -0.01: Per step (motivates speed)
+
+Robot:
+  +1: Reached goal
+  -0.1: Fell down
+  -0.001: Per step with high torque
+
+Trading:
+  +10: Made profit
+  -10: Made loss
+```
+
+### Policies (π)
+
+The agent's strategy: "What should I do in this situation?"
+
+```
+Deterministic: π(s) = a (always same action)
+Stochastic: π(a|s) = P(action | state)
+Neural Network: π_θ(a|s) = Network(s) → [0.7, 0.2, 0.1]
+```
+
+---
+
+## Policy Gradient Methods
+
+### REINFORCE (Basis)
+
+Simplest policy gradient algorithm.
+
+```python
+import torch
+import torch.nn.functional as F
+
+class PolicyNetwork(torch.nn.Module):
+    def __init__(self, state_dim, action_dim):
+        super().__init__()
+        self.fc1 = torch.nn.Linear(state_dim, 128)
+        self.fc2 = torch.nn.Linear(128, action_dim)
+
+    def forward(self, state):
+        x = F.relu(self.fc1(state))
+        action_probs = F.softmax(self.fc2(x), dim=-1)
+        return action_probs
+
+# Training
+policy = PolicyNetwork(state_dim=10, action_dim=4)
+optimizer = torch.optim.Adam(policy.parameters(), lr=0.01)
+
+# Episode
+states, actions, rewards = [], [], []
+state = env.reset()
+
+while not done:
+    probs = policy(state)
+    action = torch.multinomial(probs, 1).item()
+    next_state, reward, done = env.step(action)
+
+    states.append(state)
+    actions.append(action)
+    rewards.append(reward)
+    state = next_state
+
+# Policy Gradient Update
+returns = []
+G = 0
+for r in reversed(rewards):
+    G = r + 0.99 * G
+    returns.insert(0, G)
+
+returns = torch.tensor(returns)
+returns = (returns - returns.mean()) / (returns.std() + 1e-8)
+
+loss = 0
+for state, action, G in zip(states, actions, returns):
+    probs = policy(state)
+    log_prob = torch.log(probs[action])
+    loss -= log_prob * G
+
+optimizer.zero_grad()
+loss.backward()
+optimizer.step()
+```
+
+### PPO (Proximal Policy Optimization)
+
+More stable, better version of policy gradient.
+
+**PPO Key Innovation: Trust Region Clipping**
+
+```
+Without clipping: Ratio could explode (100x)
+                 → Huge update, policy breaks
+
+With clipping:    ratio ∈ [0.8, 1.2] (max 20% change)
+                 → Stable, controlled updates
+```
+
+---
+
+## DPO (Direct Preference Optimization)
+
+Modern alternative to RLHF for LLMs.
+
+### DPO Algorithm
+
+```python
+def dpo_loss(model, preferred_text, non_preferred_text, beta=0.5):
+    # Calculate log probabilities
+    log_prob_preferred = model.logprob(preferred_text)
+    log_prob_non_preferred = model.logprob(non_preferred_text)
+
+    # DPO Loss
+    dpo_loss = -torch.log(
+        torch.sigmoid(
+            beta * (log_prob_preferred - log_prob_non_preferred)
+        )
+    )
+
+    return dpo_loss
+```
+
+**Advantage:** Only 1 stage vs RLHF's 3 stages
+
+---
+
+## RLHF (Reinforcement Learning from Human Feedback)
+
+Used for ChatGPT, Claude alignment.
+
+```
+Stage 1: Collect Preferences
+  Human compares: "Answer A vs Answer B"
+  Feedback: "A is better"
+
+Stage 2: Train Reward Model
+  Input: "Question + Answer"
+  Output: Reward Score
+
+Stage 3: Optimize Policy
+  LLM generates answers
+  Reward Model scores
+  RL optimizes to maximize rewards
+```
+
+---
+
+## Robotics Applications
+
+### Locomotion (Walking)
+
+```python
+def locomotion_reward(position, velocity, energy):
+    reward = (
+        position * 1.0          # +1 per meter
+        + velocity ** 2 * 0.5   # Bonus for stability
+        - energy * 0.001        # Penalty for energy use
+    )
+    return reward
+```
+
+### Grasping
+
+```python
+def grasping_reward(obj_position, gripper_position, gripper_force):
+    distance = ||obj_position - gripper_position||
+
+    if distance < 0.01:
+        if gripper_force > threshold:
+            return +1  # Successfully grasped!
+        else:
+            return -0.5
+    else:
+        return -0.1 * distance
+```
+
+---
+
+## Game Applications
+
+### Atari (Breakout)
+
+```
+State: Screenshot
+Actions: [NOOP, FIRE, UP, DOWN]
+Reward: +1 per block broken, -1 life lost
+```
+
+### AlphaGo (Go)
+
+```
+State: Game board
+Actions: [Place stone at 361 possible positions]
+Reward: +1 won game, -1 lost game
+```
+
+---
+
+## Common Mistakes
+
+### 1. Poor Reward Design
+
+```
+❌ reward = +1 if goal, -1 else
+  → Agent succeeds randomly
+
+✅ reward = +1 goal, -0.01 per step, -0.1 for errors
+  → Agent learns efficiently
+```
+
+### 2. Exploding Gradients
+
+```python
+# ✅
+torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+loss.backward()
+optimizer.step()
+```
+
+### 3. Too Greedy Policy
+
+```
+❌ Always best action (exploitation)
+  → Stuck in local optima
+
+✅ Sometimes random action (exploration)
+  → Finds better solutions
+```
+
+---
+
+## Sources and Links
+
+- [PPO Paper (Schulman et al. 2017)](https://arxiv.org/abs/1707.06347)
+- [DPO Paper (Rafailov et al. 2023)](https://arxiv.org/abs/2305.18290)
+- [RLHF for LLMs (Ouyang et al. 2022)](https://arxiv.org/abs/2203.02155)
+- [OpenAI Spinning Up](https://spinningup.openai.com/)
+- [DeepMind AlphaGo](https://www.deepmind.com/research/alphago)

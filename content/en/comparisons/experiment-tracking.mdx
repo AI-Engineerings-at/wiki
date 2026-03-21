@@ -1,0 +1,48 @@
+---
+title: Experiment Tracking Tools — Comparison
+date: 2026-03-21
+summary: MLflow vs Weights & Biases vs Neptune vs ClearML. Features, pricing, self-hosted options.
+tags: [experiment-tracking, ml-ops, mlflow, wandb]
+author: AI Engineering
+---
+
+# Experiment Tracking — Comparison
+
+| Tool | Self-Hosted | Free Cloud | Price | UI | Best |
+|------|-------------|-----------|-------|----|----- |
+| **MLflow** | ✅ | ✅ | Free | Good | Teams |
+| **W&B** | ⚠️ | ✅ | Pay | ⭐⭐⭐ | ML Teams |
+| **Neptune** | ⚠️ | ✅ | Flexible | ⭐⭐⭐ | Enterprise |
+| **ClearML** | ✅ | ✅ | Free | ⭐⭐ | Automation |
+
+## MLflow
+
+Pros: Open-source, free, simple  
+Cons: UI less polished
+
+```python
+mlflow.log_param("model", "gpt-4")
+mlflow.log_metric("accuracy", 0.95)
+```
+
+## Weights & Biases
+
+Pros: Best UI, team features  
+Cons: Cloud-only (expensive)
+
+## Neptune
+
+Pros: Enterprise-ready  
+Cons: Complex setup
+
+## ClearML
+
+Pros: Free with automation  
+Cons: Smaller community
+
+## Recommendations
+
+- **Open-source teams**: MLflow
+- **ML teams**: W&B
+- **Enterprise**: Neptune
+- **Automation**: ClearML

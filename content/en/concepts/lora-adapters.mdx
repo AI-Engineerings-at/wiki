@@ -1,0 +1,625 @@
+---
+title: LoRA and Adapters
+date: 2026-03-21
+summary: Low-Rank Adaptation math simplified, rank selection, QLoRA vs DoRA, merging adapters, practical 30-minute training examples
+tags: [lora, adapter, lowrank, parameter-efficient, fine-tuning, training]
+author: AI Engineering
+---
+
+# LoRA and Adapters Explained
+
+LoRA is one of the most important innovations enabling LLM training on consumer hardware. Train ~50M parameters instead of 70B to achieve 95% quality.
+
+---
+
+## The Core Math (Simplified)
+
+Instead of training a full W [4096 × 4096] matrix, train two smaller ones:
+
+```
+Output = W × Input + α × (A @ B) × Input
+         └─ Frozen ─┘    └── Trainable ──┘
+
+A: [4096 × r]     where r = rank (typically 16)
+B: [r × 4096]
+
+Total trainable: r × (4096 + 4096) = 32K (for r=16)
+vs Full W:       4096 × 4096 = 16M
+→ 500× fewer parameters!
+```
+
+**Why this works**: The changes needed for task adaptation live in a low-rank subspace. GPT-3 → German isn't all 70B parameters changing; it's a smaller "German adaptation" in a 16-dimensional subspace.
+
+---
+
+## Rank Selection
+
+### Small Rank (r=4-8)
+- Parameters: ~32K
+- Training: 1-2 hours
+- Quality: ~85% of full fine-tuning
+- Use: Small style changes, tiny datasets
+
+### Standard Rank (r=16)
+- Parameters: ~128K
+- Training: 2-4 hours
+- Quality: ~95% of full fine-tuning
+- Use: **Industry standard**, most tasks
+- Why 16? Empirically optimal, diminishing returns after
+
+### Large Rank (r=32-64)
+- Parameters: ~256K-512K
+- Training: 4-8 hours
+- Quality: ~98% of full fine-tuning
+- Use: Complex domain adaptation, large datasets
+- Problem: After r=32, each doubling gives only +1-2% improvement for 2× time
+
+---
+
+## Which Layers to Train?
+
+```python
+# Standard (recommended)
+target_modules = ["q_proj", "v_proj"]  # Query + Value
+
+# Aggressive (everything)
+target_modules = ["q_proj", "k_proj", "v_proj", "o_proj", "up_proj", "down_proj"]
+
+# Knowledge-heavy
+target_modules = ["up_proj", "down_proj"]  # Feed-Forward only
+```
+
+**Query + Value** is best balance: captures semantics, reasonable parameters.
+
+---
+
+## QLoRA vs DoRA
+
+### QLoRA (Quantized LoRA)
+- Quantize base model to INT4 (35 GB → 35 GB but 4-bit)
+- Train LoRA on top in FP16
+- Total RAM: ~70 GB vs 175 GB for standard LoRA
+- **Quality loss**: 1-2% (quantization noise)
+- **Result**: Works on RTX 4090!
+
+```python
+model, tokenizer = FastLanguageModel.from_pretrained(
+    "llama-2-7b",
+    load_in_4bit=True,  # QLoRA flag
+)
+```
+
+### DoRA (Decomposed LoRA)
+- Separate magnitude scaling from direction
+- ~1-2% quality improvement vs LoRA
+- Similar RAM/cost to standard LoRA
+- Newer, fewer tools yet
+
+```python
+# Not yet widespread, tools still implementing
+config.use_dora = True  # In Axolotl
+```
+
+---
+
+## Merging LoRA
+
+After training, combine LoRA with original model:
+
+```python
+from peft import AutoPeftModelForCausalLM
+
+model = AutoPeftModelForCausalLM.from_pretrained(
+    "lora_path",
+    device_map="cpu",
+    torch_dtype=torch.float16,
+)
+
+merged = model.merge_and_unload()
+merged.save_pretrained("merged_model")
+```
+
+What happens:
+```
+W_new = W + α × (A @ B)
+     = W + 0.125 × (A @ B)
+```
+
+**Tradeoff**: Can't un-merge, but simpler deployment.
+
+---
+
+## Quick 30-Minute Example
+
+### Data
+```json
+[
+  {
+    "instruction": "Translate to English",
+    "input": "Der Hund springt",
+    "output": "The dog jumps"
+  },
+  ...  // ~1000 examples
+]
+```
+
+### Code
+```python
+from unsloth import FastLanguageModel
+
+model, tokenizer = FastLanguageModel.from_pretrained(
+    "unsloth/llama-2-7b",
+    max_seq_length=1024,
+    load_in_4bit=True,
+)
+
+model = FastLanguageModel.get_peft_model(
+    model,
+    r=16,
+    lora_alpha=16,
+    target_modules=["q_proj", "v_proj"],
+    lora_dropout=0.05,
+    bias="none",
+    use_gradient_checkpointing=True,
+)
+
+from trl import SFTTrainer
+from transformers import TrainingArguments
+
+trainer = SFTTrainer(
+    model=model,
+    train_dataset=dataset["train"],
+    args=TrainingArguments(
+        per_device_train_batch_size=4,
+        gradient_accumulation_steps=4,
+        warmup_steps=100,
+        num_train_epochs=1,
+        learning_rate=2e-4,
+        output_dir="lora-output",
+        optim="adamw_8bit",
+        max_steps=500,  # ~30 min
+    ),
+    packing=True,
+    max_seq_length=1024,
+)
+
+trainer.train()
+model.save_pretrained("lora-weights")
+```
+
+**Timeline**: ~30 minutes start to finish on RTX 4090.
+
+---
+
+## Common Pitfalls
+
+### Pitfall 1: Target Modules Mismatch
+```python
+# WRONG
+target_modules = ["all"]  # Doesn't exist
+
+# RIGHT
+target_modules = ["q_proj", "v_proj"]  # For Llama
+target_modules = ["query", "value"]    # For other models
+```
+
+Check with: `for name, module in model.named_modules(): print(name)`
+
+### Pitfall 2: Rank Too Small for Complex Task
+```
+Task: Learn entire medical domain with 10K examples
+Solution: r=4  # ← TOO SMALL!
+Result: Hallucinations
+
+Fix: r=32 or r=64 for complex tasks
+```
+
+### Pitfall 3: Wrong Learning Rate
+```python
+learning_rate = 1e-4  # ← Too small for LoRA!
+# LoRA needs HIGHER learning rate than full FT
+# Full FT: 5e-5
+# LoRA: 2e-4
+# QLoRA: 2e-4 to 1e-3
+```
+
+### Pitfall 4: Too Many Targets with Small Rank
+```
+r=8 with 6 target modules = 8 × 6 × 4096 × 2 ≈ 400K parameters
+That's not "small" anymore! Better to use r=16 with q_proj + v_proj only
+```
+
+---
+
+## When Merging vs Keeping Separate
+
+| Scenario | Merge | Keep Separate |
+|----------|-------|---|
+| Single deployment | ✅ | ❌ |
+| Multiple tasks | ❌ | ✅ |
+| Storage important | ✅ | ❌ |
+| Flexibility important | ❌ | ✅ |
+| Production | ✅ (Simpler) | ❌ |
+| Development | ❌ (Keep original) | ✅ |
+
+LoRA is practical magic: 500× fewer parameters, only 2-4 hour training, 95% quality. Standard approach in production now.
+
+## Sources and Links
+
+- [LoRA: Low-Rank Adaptation of Large Language Models](https://arxiv.org/abs/2106.09685)
+- [Microsoft LoRA GitHub](https://github.com/microsoft/LoRA)
+- [Hugging Face PEFT Library](https://huggingface.co/docs/peft)
+
+---
+
+## Advanced: Multiple LoRA Modules
+
+### Combining LoRA Adapters (Multi-Task Learning)
+
+```python
+from peft import PeftModel, PeftConfig
+import torch
+
+# Load base model once
+base_model = AutoModelForCausalLM.from_pretrained("llama-2-7b")
+
+# Combine multiple LoRA adapters
+config_task1 = PeftConfig.from_pretrained("lora/medical-task")
+config_task2 = PeftConfig.from_pretrained("lora/legal-task")
+
+model_medical = PeftModel.from_pretrained(base_model, "lora/medical-task")
+model_legal = PeftModel.from_pretrained(base_model, "lora/legal-task")
+
+# For inference, load the right one:
+# Medical Q: model_medical.generate(...)
+# Legal Q: model_legal.generate(...)
+```
+
+**Advantages**:
+- Single base model, multiple adapters
+- Memory: Load one adapter at a time (~500MB)
+- Modularity: Extend without retraining base
+
+---
+
+## Training Stability & Hyperparameters
+
+### Critical Hyperparameters
+
+```python
+config_variations = {
+    "conservative": {
+        "r": 8,
+        "lora_alpha": 16,
+        "learning_rate": 1e-4,
+        "num_train_epochs": 2,
+        "gradient_accumulation_steps": 8,
+        "warmup_ratio": 0.1,
+    },
+    "aggressive": {
+        "r": 32,
+        "lora_alpha": 64,
+        "learning_rate": 5e-4,
+        "num_train_epochs": 3,
+        "gradient_accumulation_steps": 2,
+        "warmup_ratio": 0.05,
+    },
+    "stable": {  # RECOMMENDED
+        "r": 16,
+        "lora_alpha": 16,
+        "learning_rate": 2e-4,
+        "num_train_epochs": 1,
+        "gradient_accumulation_steps": 4,
+        "warmup_ratio": 0.1,
+        "gradient_checkpointing": True,
+        "max_grad_norm": 1.0,
+    }
+}
+```
+
+**Why these work**:
+- `lora_alpha = r`: Linear scaling
+- `learning_rate = 2e-4`: LoRA-specific (higher than full FT)
+- `warmup_ratio = 0.1`: Stable initialization
+- `gradient_checkpointing = True`: Memory efficiency
+
+### Detecting Training Issues
+
+```python
+def diagnose_training(loss_history, eval_metrics):
+    """Detect common LoRA training problems."""
+
+    issues = []
+
+    # Check 1: Diverging loss
+    if any(l > 1000 for l in loss_history[-10:]):
+        issues.append("Loss exploding. Fix: Lower learning_rate (try 1e-4)")
+
+    # Check 2: No improvement
+    if loss_history[-1] == loss_history[0]:
+        issues.append("No learning. Fix: Increase learning_rate (try 5e-4)")
+
+    # Check 3: Overfitting (if eval_loss > train_loss by 2×)
+    train_loss = loss_history[-1]
+    eval_loss = eval_metrics["loss"]
+    if eval_loss > train_loss * 2:
+        issues.append("Overfitting. Fix: Increase dropout, reduce r")
+
+    # Check 4: Slow convergence
+    if loss_history[-1] > loss_history[0] * 0.8:
+        issues.append("Slow. Fix: Increase learning_rate or batch_size")
+
+    return issues
+```
+
+---
+
+## LoRA vs Full Fine-Tuning Tradeoffs
+
+```
+Scenario                    | LoRA      | Full FT
+----------------------------|-----------|----------
+Small dataset (<1K)         | LoRA 10%  | FT +5%
+Medium dataset (1-10K)      | LoRA 5%   | FT ±0%
+Large dataset (100K+)       | LoRA 2%   | FT +3%
+Memory (7B model)           | 20GB      | 70GB
+Training time (1 epoch)     | 2h        | 8h
+Inference latency           | Same      | Same
+Deployment complexity       | Simpler*  | Merged
+Modularity                  | ✅ Excellent | ❌ Poor
+
+*Actually simpler: One base model + many small adapters
+```
+
+---
+
+## Production Deployment Patterns
+
+### Pattern 1: Merged Adapters (Simplest)
+
+```python
+# Training
+def train_and_merge():
+    # ... training code ...
+    merged = model.merge_and_unload()
+    merged.save_pretrained("production/model")
+
+# Deployment
+def load_for_inference():
+    return AutoModelForCausalLM.from_pretrained("production/model")
+    # Normal inference, no special handling
+```
+
+**Pros**: Simple, fast, no LoRA overhead
+**Cons**: Can't mix adapters, irreversible
+
+### Pattern 2: Separate Adapters (Flexible)
+
+```python
+# Training (keep separate)
+model.save_pretrained("lora-weights/domain-xyz")
+
+# Deployment
+class MultiAdapterModel:
+    def __init__(self, base_model_path):
+        self.base = AutoModelForCausalLM.from_pretrained(base_model_path)
+        self.adapters = {}
+
+    def load_adapter(self, name, path):
+        adapter_model = PeftModel.from_pretrained(self.base, path)
+        self.adapters[name] = adapter_model
+
+    def generate(self, text, adapter_name):
+        return self.adapters[adapter_name].generate(text)
+
+# Usage
+model = MultiAdapterModel("llama-2-7b")
+model.load_adapter("medical", "lora/medical")
+model.load_adapter("legal", "lora/legal")
+
+medical_answer = model.generate("Symptoms of flu?", "medical")
+legal_answer = model.generate("What is liability?", "legal")
+```
+
+**Pros**: Flexible, memory-efficient, modular
+**Cons**: Slightly more complex
+
+### Pattern 3: Dynamically Loaded (Cloud-Ready)
+
+```python
+import asyncio
+from typing import Dict
+
+class CloudAdapterManager:
+    def __init__(self, base_model_path, adapter_cache_dir="/tmp/adapters"):
+        self.base_model = AutoModelForCausalLM.from_pretrained(base_model_path)
+        self.cache_dir = adapter_cache_dir
+        self.loaded = {}  # In-memory cache
+
+    async def get_adapter(self, adapter_id: str):
+        """Load from cache, or download if needed."""
+        if adapter_id in self.loaded:
+            return self.loaded[adapter_id]
+
+        # Download from S3/cloud storage
+        adapter_path = await self.download_adapter(adapter_id)
+        model = PeftModel.from_pretrained(self.base_model, adapter_path)
+        self.loaded[adapter_id] = model
+
+        # Evict oldest if cache too large
+        if len(self.loaded) > 3:
+            oldest = min(self.loaded.items(), key=lambda x: x[1]['loaded_at'])
+            del self.loaded[oldest[0]]
+
+        return model
+
+    async def generate(self, text: str, adapter_id: str):
+        model = await self.get_adapter(adapter_id)
+        return model.generate(text)
+```
+
+---
+
+## Quantization + LoRA (QLoRA Deep Dive)
+
+### Matching GPU VRAM Requirements
+
+```python
+def estimate_memory(model_size_b, rank, num_adapters=1):
+    """Estimate GPU memory needed."""
+
+    # Base model in INT4 (4 bits)
+    model_memory = (model_size_b * 1_000_000_000 * 4) / 8 / 1_000_000_000  # GB
+
+    # LoRA in FP16 (2 bytes per param)
+    # Per layer: r × (hidden_size + hidden_size) × 2
+    # Rough estimate: r=16, hidden=4096, ~96 layers
+    lora_memory = (rank * 2 * 4096 * 2 * 96 * num_adapters) / 1_000_000_000
+
+    # Activations & optimizers
+    misc_memory = 5  # GB (activations, gradient buffers)
+
+    total = model_memory + lora_memory + misc_memory
+    return total
+
+# Examples
+print(estimate_memory(7, rank=16))   # 7B model, r=16 → ~22GB
+print(estimate_memory(13, rank=16))  # 13B model, r=16 → ~32GB
+print(estimate_memory(70, rank=32))  # 70B model, r=32 → ~65GB
+```
+
+### Actual QLoRA Training Loop
+
+```python
+import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM
+from peft import prepare_model_for_kbit_training, get_peft_model, LoraConfig
+from bitsandbytes.optim import AdamW8bit
+
+def setup_qlora_model(model_name, rank=16):
+    """Full QLoRA setup (4-bit quantization + LoRA)."""
+
+    # Load in 4-bit
+    bnb_config = BitsAndBytesConfig(
+        load_in_4bit=True,
+        bnb_4bit_use_double_quant=True,
+        bnb_4bit_quant_type="nf4",
+        bnb_4bit_compute_dtype=torch.bfloat16,
+    )
+
+    model = AutoModelForCausalLM.from_pretrained(
+        model_name,
+        quantization_config=bnb_config,
+        device_map="auto",
+    )
+
+    # Prepare for training
+    model = prepare_model_for_kbit_training(model)
+
+    # LoRA config
+    peft_config = LoraConfig(
+        r=rank,
+        lora_alpha=rank,
+        lora_dropout=0.05,
+        bias="none",
+        task_type="CAUSAL_LM",
+        target_modules=["q_proj", "v_proj"],
+    )
+
+    model = get_peft_model(model, peft_config)
+
+    # Optimizer (8-bit for memory efficiency)
+    optimizer = AdamW8bit(model.parameters(), lr=2e-4)
+
+    return model, optimizer
+
+# Memory savings with QLoRA:
+# 70B model:
+#   Full FP32: 280GB
+#   FP16 LoRA: 140GB + 2GB (LoRA) = 142GB
+#   INT4 LoRA: 35GB + 2GB (LoRA) = 37GB ← 87% savings!
+```
+
+---
+
+## Common Production Gotchas
+
+### Gotcha 1: LoRA Inference Different from Training
+
+```python
+# In training: model in .train() mode
+model.train()
+output = model.generate(text)  # Fast because gradients off
+
+# In inference: model in .eval() mode
+model.eval()
+with torch.no_grad():
+    output = model.generate(text)  # SLIGHTLY different results!
+
+# Fix: Always save both train & eval checkpoints, test both
+```
+
+### Gotcha 2: Rank Too Small Hurts Downstream
+
+```python
+# Training with r=4:
+train_accuracy = 0.85  # Decent
+
+# But: Hard to build on (poor zero-shot, few-shot)
+# Solution: Use r=16 minimum in production
+
+# Rule: r ≥ model_width / 1024
+# 7B model (4096 hidden) → r ≥ 4
+# 70B model (8192 hidden) → r ≥ 8
+# Always use r=16+ for safety
+```
+
+### Gotcha 3: Alpha Schedule
+
+```python
+# Constant alpha (wrong for most LoRA)
+"lora_alpha": 16
+
+# Better: Decay alpha over time
+# Early training: Large alpha (plastic learning)
+# Late training: Small alpha (fine-tuning)
+
+# LambdaLR schedule
+def alpha_schedule(epoch):
+    return max(0.5, 1.0 - epoch / 10)  # Decay from 1.0 to 0.5
+
+scheduler = LambdaLR(optimizer, alpha_schedule)
+```
+
+---
+
+## Benchmark: LoRA Training on Different GPUs
+
+```
+GPU            | VRAM | 7B (r=16) | 13B (r=16) | 70B (r=32)
+---------------|------|-----------|------------|----------
+RTX 4090       | 24GB | ✅ 30min  | ⚠️ 2h    | ❌ OOM
+RTX 6000 Ada   | 48GB | ✅ 20min  | ✅ 45min  | ⚠️ 8h
+A100 (80GB)    | 80GB | ✅ 10min  | ✅ 20min  | ✅ 1.5h
+A100 (40GB)    | 40GB | ✅ 20min  | ⚠️ 1h   | ❌ OOM
+H100            | 80GB | ✅ 8min   | ✅ 15min  | ✅ 1h
+
+Legend: ✅ Comfortable | ⚠️ Tight | ❌ Requires QLoRA
+```
+
+---
+
+## When to NOT Use LoRA
+
+❌ **Poor fit**:
+- Specialization on domain heavily different from pretraining (use full FT)
+- Extremely small models (< 1B, overhead not worth it)
+- Need to change embedding dimensions (LoRA can't do this)
+- Binary classifiers (overkill, logistic regression better)
+
+✅ **Perfect fit**:
+- Style/tone adaptation
+- Domain specialization (medical, legal, code)
+- Multi-task models
+- When you have limited GPU
+- Production where flexibility matters

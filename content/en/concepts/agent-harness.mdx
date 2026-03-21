@@ -1,0 +1,533 @@
+---
+title: "What is an Agent Harness?"
+date: "2026-03-21"
+summary: "Conceptual deep dive into agent harnesses. Definition, components, history, design patterns, and how Claude Code functions as a harness."
+tags: ["agent-harness", "agents", "orchestration", "frameworks", "patterns"]
+author: "AI Engineering"
+---
+
+# What is an Agent Harness?
+
+> An agent harness is the scaffolding around an LLM that turns it into a practical agent. This article explains concepts, architecture, and decision frameworks.
+
+## Definition: The Harness Concept
+
+The term "harness" originates from manufacturing and means: the structure that holds a system together and makes it functional.
+
+In AI:
+
+**Agent Harness** = All components EXCEPT the language model that enable an agent to self-direct, use tools, and achieve goals.
+
+### Simplified Formula
+
+```
+Language Model (GPT, Claude, etc.)
+        ↓
+   + Harness
+   ├─ Memory/Context
+   ├─ Tool Bindings
+   ├─ Planning Logic
+   ├─ Evaluation
+   └─ Guardrails
+        ↓
+   = Functional Agent
+```
+
+## The 5 Core Components of a Harness
+
+### 1. Memory & Context Management
+
+The agent's memory: What does it know, what must be retained?
+
+```python
+# Example: Context window management
+class AgentMemory:
+    def __init__(self, max_tokens=8000):
+        self.context = []
+        self.max_tokens = max_tokens
+        self.token_count = 0
+
+    def add_interaction(self, user_msg, assistant_msg):
+        """Add interaction, prune old if needed"""
+        new_tokens = count_tokens(user_msg + assistant_msg)
+
+        if self.token_count + new_tokens > self.max_tokens:
+            # Prune oldest non-critical context
+            self.context = self._summarize_and_prune()
+
+        self.context.append({
+            "user": user_msg,
+            "assistant": assistant_msg,
+            "timestamp": datetime.now()
+        })
+        self.token_count += new_tokens
+
+    def _summarize_and_prune(self):
+        """Use LLM to summarize and compress old context"""
+        old_context = self.context[:-10]  # Keep last 10
+        summary_prompt = f"Summarize briefly: {old_context}"
+        summary = llm.call(summary_prompt)
+        return [{"summary": summary}] + self.context[-10:]
+
+    def get_context(self):
+        """Return current context for LLM"""
+        return "\n".join([
+            f"User: {c['user']}\nAssistant: {c['assistant']}"
+            for c in self.context
+        ])
+```
+
+**Techniques:**
+- **Sliding Window**: Only last N tokens in context
+- **Summarization**: Compress old context
+- **Semantic Chunking**: Identify relevant parts
+- **Vector Stores**: Embeddings for retrieval
+
+### 2. Tool Binding & Execution
+
+The ability to call external functions.
+
+```python
+# Tool registry pattern
+class ToolRegistry:
+    def __init__(self):
+        self.tools = {}
+
+    def register(self, name, func, description, parameters):
+        """Register a tool the agent can use"""
+        self.tools[name] = {
+            "func": func,
+            "description": description,
+            "parameters": parameters
+        }
+
+    def call_tool(self, tool_name, **kwargs):
+        """Execute tool with safety checks"""
+        if tool_name not in self.tools:
+            raise ValueError(f"Tool {tool_name} not found")
+
+        tool = self.tools[tool_name]
+
+        # Validate parameters
+        for param, value in kwargs.items():
+            if param not in tool["parameters"]:
+                raise ValueError(f"Unknown parameter: {param}")
+
+        # Execute with timeout
+        try:
+            result = timeout(
+                tool["func"](**kwargs),
+                timeout_seconds=30
+            )
+            return {"success": True, "result": result}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def get_tool_descriptions(self):
+        """Format tools for LLM context"""
+        descriptions = []
+        for name, tool in self.tools.items():
+            desc = f"""
+Tool: {name}
+Description: {tool['description']}
+Parameters: {json.dumps(tool['parameters'])}
+            """
+            descriptions.append(desc)
+        return "\n".join(descriptions)
+
+# Usage
+registry = ToolRegistry()
+registry.register(
+    "search_web",
+    web_search,
+    "Search the web for information",
+    {"query": "string", "max_results": "integer"}
+)
+```
+
+### 3. Planning & Reasoning
+
+How the agent approaches its goal structurally.
+
+```python
+# Planning agent with ReAct pattern
+class PlanningAgent:
+    def __init__(self, llm, tools):
+        self.llm = llm
+        self.tools = tools
+        self.plan = []
+
+    def create_plan(self, goal):
+        """Use LLM to create an execution plan"""
+        prompt = f"""
+Create a step-by-step plan for:
+{goal}
+
+Format:
+1. [Step]
+2. [Step]
+...
+
+Available tools:
+{self.tools.get_tool_descriptions()}
+        """
+        response = self.llm.call(prompt)
+        self.plan = self._parse_plan(response)
+        return self.plan
+
+    def execute_plan(self):
+        """Execute each step, adapt if needed"""
+        for i, step in enumerate(self.plan):
+            print(f"Executing step {i+1}: {step}")
+
+            # Reasoning phase (Thought)
+            reasoning = self.llm.call(f"Reason about this step: {step}")
+
+            # Action phase (Action)
+            tool_call = self._parse_tool_call(reasoning)
+            if tool_call:
+                result = self.tools.call_tool(**tool_call)
+
+                # Observation
+                print(f"Observation: {result}")
+
+                # Adapt if needed
+                if not result["success"]:
+                    new_step = self.llm.call(
+                        f"The step failed: {result['error']}. What should we do instead?"
+                    )
+                    self.plan[i] = new_step
+```
+
+### 4. Evaluation & Feedback
+
+How the agent checks if it reached its goal.
+
+```python
+# Evaluation framework
+class AgentEvaluator:
+    def __init__(self, llm):
+        self.llm = llm
+
+    def evaluate_action(self, goal, action, result):
+        """Evaluate if action moved towards goal"""
+        prompt = f"""
+Goal: {goal}
+Action: {action}
+Result: {result}
+
+Was this action helpful? (yes/no/partial)
+Explanation:
+        """
+        evaluation = self.llm.call(prompt)
+        return self._parse_evaluation(evaluation)
+
+    def evaluate_completion(self, goal, conversation):
+        """Check if goal was achieved"""
+        prompt = f"""
+Original goal: {goal}
+
+Full conversation:
+{conversation}
+
+Was the goal achieved? (yes/no/partial)
+Remaining tasks:
+        """
+        result = self.llm.call(prompt)
+        return self._parse_completion(result)
+```
+
+### 5. Guardrails & Safety
+
+How the agent stays on safe track.
+
+```python
+# Guardrails system
+class SafetyGuardrails:
+    def __init__(self):
+        self.blocked_patterns = [
+            r'DROP\s+TABLE',      # SQL injection
+            r'rm\s+-rf',          # Dangerous commands
+            r'API_KEY',           # Secret exposure
+        ]
+
+    def check_tool_call(self, tool_name, args):
+        """Check if tool call is safe"""
+        # Check for dangerous patterns
+        args_str = str(args)
+        for pattern in self.blocked_patterns:
+            if re.search(pattern, args_str, re.IGNORECASE):
+                raise SecurityError(f"Blocked pattern: {pattern}")
+
+        return True
+
+    def check_output(self, output):
+        """Sanitize output before returning"""
+        # Remove API keys
+        output = re.sub(r'sk-\w+', '[REDACTED]', output)
+
+        # Remove internal IPs
+        output = re.sub(r'192\.168\.\d+\.\d+', '[INTERNAL_IP]', output)
+
+        return output
+```
+
+## Agent Harness vs Framework vs SDK
+
+### Differences
+
+| Aspect | Harness | Framework | SDK |
+|--------|---------|-----------|-----|
+| **Purpose** | Single agent | Multi-agent system | Integration |
+| **Scope** | Single LLM coordination | Multiple agents + communication | Developer library |
+| **Abstraction** | High | Medium | Low |
+| **Complexity** | Medium | High | Low |
+| **Best for** | Standalone agents | Complex workflows | Existing code integration |
+
+### Examples
+
+**Harness:**
+- Claude Code native system
+- OpenAI Assistants API
+- LlamaIndex QueryEngine
+
+**Framework:**
+- AutoGen (Microsoft)
+- CrewAI
+- LangGraph (LangChain)
+
+**SDK:**
+- LangChain SDK
+- Anthropic SDK
+- OpenAI Python SDK
+
+## History: From Prompts to Harnesses
+
+### Evolution
+
+```
+1. Era: Raw LLM Prompting (2018-2020)
+   - Text-in, text-out only
+   - No memory, no tools
+
+2. Era: Few-Shot Examples (2020-2021)
+   - In-context learning
+   - Better prompts, same limitations
+
+3. Era: Function Calling (2021-2023)
+   - Tool integration (OpenAI, Claude)
+   - First primitive harnesses
+
+4. Era: Full Agent Harnesses (2023-present)
+   - Memory management
+   - Planning + reasoning
+   - Safety guardrails
+   - Multi-agent orchestration
+
+5. Era: Production Harnesses (2024-present)
+   - Enterprise safety
+   - Cost optimization
+   - Audit logging
+   - Compliance integration
+```
+
+## Design Patterns for Harnesses
+
+### Pattern 1: Single-Agent Linear
+
+```
+Input → Plan → Action → Evaluation → Output
+```
+
+Best for: Simple tasks, classification, standard workflows
+
+### Pattern 2: Hierarchical Reasoning
+
+```
+      Manager Agent
+        ↙     ↘
+     Worker 1  Worker 2
+    (specialized)
+        ↘     ↙
+       Aggregator
+```
+
+Best for: Complex multi-domain tasks
+
+### Pattern 3: Swarm Intelligence
+
+```
+Agent A ↔ Agent B
+  ↓ ↑     ↑ ↓
+  ↔ Agent C ↔
+```
+
+Best for: Collaborative problem-solving, brainstorming
+
+### Pattern 4: Hierarchical + Feedback Loop
+
+```
+LLM Agent
+   ↓
+Tool Call
+   ↓
+Evaluation → Failure → Retry / Adapt
+   ↓
+Success
+```
+
+Best for: Iterative refinement, learning
+
+## Claude Code as a Harness
+
+Claude Code as a harness provides:
+
+```python
+class ClaudeCodeHarness:
+    """Claude Code = Harness with built-in orchestrator"""
+
+    components = {
+        "memory": "Session context + multi-turn",
+        "tools": [
+            "Read", "Write", "Edit",  # Filesystem
+            "Bash", "Glob",           # Shell
+            "Grep",                    # Search
+            "Git",                     # Version control
+            "MCP Servers"              # External APIs
+        ],
+        "planning": "Automatic multi-step reasoning",
+        "evaluation": "User feedback loop",
+        "guardrails": {
+            "permissions": "Tool whitelist/blacklist",
+            "safety": "Output sanitization",
+            "audit": "Full session logging",
+            "rate_limits": "Configurable"
+        },
+        "orchestration": "Native agent sequencing"
+    }
+
+    def create_agent(self, CLAUDE_md_config):
+        """Create configured agent from CLAUDE.md"""
+        return Agent(
+            model=config.model,
+            tools=config.tools,
+            hooks=config.hooks,
+            skills=config.skills,
+            permissions=config.permissions
+        )
+```
+
+## Extending the Harness
+
+Claude Code harness can be extended through:
+
+### Plugins
+```yaml
+# Add new tools
+capabilities: [csv-processor, ml-pipeline, blockchain]
+```
+
+### Skills
+```yaml
+# Specialized workflows
+skills:
+  - data-analysis
+  - code-generation
+  - security-audit
+```
+
+### Hooks
+```javascript
+// Pre/Post execution logic
+{
+  "PreToolUse": [custom_validator],
+  "PostExecution": [audit_log]
+}
+```
+
+### MCP Servers
+```json
+{
+  "mcp_servers": {
+    "stripe": "http://localhost:3000",
+    "slack": "http://localhost:3001",
+    "salesforce": "http://localhost:3002"
+  }
+}
+```
+
+## Evaluation Metrics for Harnesses
+
+How to measure if a harness is good?
+
+| Metric | Description | Goal |
+|--------|-------------|------|
+| Task Completion Rate | % tasks fully solved | >90% |
+| Time to Completion | Average duration | Baseline |
+| Tool Accuracy | % correct tool calls | >95% |
+| Safety Score | No safety violations | 100% |
+| Cost per Task | Average API cost | Minimize |
+| User Satisfaction | Feedback score | >4.5/5 |
+
+## Community Harnesses (extending Claude Code)
+
+### ECC (Extensible Claude Code)
+Completely open harness implementation with extensible plugin architecture.
+
+**Features:**
+- Multi-agent coordination
+- Advanced memory management
+- Custom tool development framework
+
+**URL:** https://github.com/community/ecc-harness
+
+### Ruflo
+Focused harness for data processing workflows with optimized memory compression.
+
+**Features:**
+- Token-efficient context windows
+- Specialized data transformation tools
+- Built-in ML integration
+
+**URL:** https://github.com/datasets/ruflo
+
+## Build vs Buy vs Extend: Decision Framework
+
+```
+┌─────────────────────┐
+│ Requirements        │
+│ Clear?              │
+└──────────┬──────────┘
+           │
+     ┌─────┴─────┐
+     │           │
+  Yes│           │No
+     │           │
+    ▼           ▼
+Standard-      Custom
+Harness        (Build)
+(Claude Code)
+     │           │
+     └─────┬─────┘
+           │
+     ┌─────▼──────┐
+     │ Complexity │
+     │ High?      │
+     └─────┬──────┘
+           │
+     ┌─────┴──────┐
+     │            │
+  Yes│            │No
+     │            │
+    ▼            ▼
+Framework     Extend
+(AutoGen)    (Plugins)
+```
+
+## Sources and Links
+
+- [Claude Code Documentation](https://code.claude.com/docs)
+- [LangChain Framework](https://python.langchain.com/)
+- [LlamaIndex Agent Patterns](https://www.llamaindex.ai/)
+- [AutoGen Multi-Agent Orchestration](https://microsoft.github.io/autogen/)
+- [CrewAI Framework](https://crewai.com/)

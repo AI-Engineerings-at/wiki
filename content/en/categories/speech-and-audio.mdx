@@ -1,0 +1,325 @@
+---
+title: "Speech and Audio AI"
+date: "2026-03-21"
+summary: "TTS, STT, voice cloning, music generation: ElevenLabs, Whisper, Coqui TTS, Suno AI, self-hosted options"
+tags: ["tts", "stt", "voice-cloning", "whisper", "elevenlabs", "coqui", "suno", "audio"]
+author: "AI Engineering"
+---
+
+# Speech and Audio AI — Category Overview
+
+2026: Best TTS (text-to-speech) voice costs EUR 0 if you use open-source, EUR 10/1000 characters if cloud. Speech is no longer the weak AI link. Voice cloning with 6 seconds audio is possible. Music generation too.
+
+## The Architecture (brief)
+
+### Speech-to-Text (STT)
+Input: audio file → Output: text
+
+**Best-known:** OpenAI Whisper (2022, open-source). Still 2026 the standard for multilingual.
+
+### Text-to-Speech (TTS)
+Input: text → Output: audio file (with voice/tone)
+
+**Cloud:** ElevenLabs (best expressiveness), OpenAI TTS (integrated with ChatGPT), Google Cloud TTS.
+
+**Self-hosted:** Coqui TTS (voice cloning), Bark (expressive), Piper (edge-optimized).
+
+### Voice Cloning
+Input: 6-10 seconds reference audio + text → Output: text spoken in reference voice
+
+**Best-known:** Coqui XTTS v2.5 (free), ElevenLabs Prime (EUR 10/month).
+
+### Music Generation
+Input: text description or lyrics → Output: music (instrumental or with vocals)
+
+**Best-known:** Suno AI (lyrics → song), Udio (similar).
+
+## Speech-to-Text (STT)
+
+### OpenAI Whisper
+
+**What it is:** Multilingual open-source speech recognition. September 2022 release, still 2026 the baseline standard.
+
+**Highlights:**
+- 99 languages supported (!)—German, Mandarin, Swahili, everything
+- Free self-hosted (no API costs)
+- Runs locally or as API (OpenAI also offers cloud)
+- Accuracy: ~95% on high-quality audio, weaker on very loud audio
+
+**Models:**
+- `tiny` (39M parameters): Fastest, ~5ms for 1h audio, but 15% higher error-rate
+- `base` (74M): Good middle ground
+- `small` (244M): Recommended for production, 85% more accurate than `base`
+- `medium` (769M): Even more accurate, needs 8GB VRAM
+- `large` (1.5B): Best, but needs 24GB VRAM
+
+**Cost:**
+- Self-hosted: EUR 0 (your hardware)
+- OpenAI API: EUR 0.0001/minute (EUR 0.006/hour audio)
+
+**Best for:** Standard use, no alternatives needed.
+
+### Alternative: Azure Cognitive Services
+
+Microsoft's STT is common in enterprise scenarios (Office 365 integration). Costs EUR 0.0006/minute, but usually not needed if Whisper available.
+
+## Text-to-Speech (TTS)
+
+### Coqui TTS (Self-Hosted, Voice Cloning)
+
+**What it is:** Open-source TTS with voice cloning capability. Free, runs locally.
+
+**Highlights:**
+- XTTS v2.5: Voice cloning with just 6 seconds reference audio
+- Multi-language (20+ languages)
+- Runs on GPU (3GB VRAM) or CPU (slow)
+- Output quality: 94% of ElevenLabs per 2026 tests
+
+**Example (German):**
+```bash
+pip install TTS
+
+from TTS.api import TTS
+tts = TTS(model_name="tts_models/de/thorsten/glow-tts", gpu=True)
+
+# Voice cloning: upload 6 sec German audio
+tts.tts_to_file(text="Hallo, ich bin ein geclonter Agent",
+                 speaker_wav="meine_stimme.wav",
+                 file_path="output.wav")
+```
+
+**Cost:** Free (self-hosted).
+
+**Disadvantages:**
+- Voices sometimes sound "robotic" (better with newer vocoder, but setup complexity)
+- Emotions/prosody weaker than ElevenLabs
+- Self-hosting required (no simple API)
+
+**Best for:**
+- Personal assistants (clone your own voice)
+- Privacy-critical applications
+- Unlimited usage (no character limits)
+
+### ElevenLabs (Cloud, Premium)
+
+**What it is:** SaaS text-to-speech with 2000+ synthetic voices + voice cloning. 2026 the aesthetically best cloud-TTS.
+
+**Highlights:**
+- Voices: 2000+ synthetic voices in 30+ languages
+- Voice cloning: Upload your voice, or clone someone else (legally: consent needed)
+- Eleven v3: Latest model, "barely distinguishable from real voice" (per tests)
+- Streaming: real-time TTS (latency <500ms)
+- Multilingual: German with Austrian accent available
+
+**Pricing model (2026):**
+- Free tier: 10,000 characters/month
+- Starter: EUR 4.99/month (100k characters/month)
+- Professional: EUR 22/month (1M characters/month)
+- Custom: for enterprise
+
+**Cost per character (pay-as-you-go):** EUR 0.000015/character (EUR 0.015 for 1000 characters).
+
+**Best for:**
+- Podcasts (high quality = listeners stay)
+- Customer-facing voice (chatbot voices)
+- Storytelling (audiobooks)
+
+**Disadvantages:**
+- Cloud dependency (your voice is at ElevenLabs)
+- Expensive at high volume (1M characters = EUR 15, quick for news bot)
+
+### OpenAI TTS (Integrated)
+
+**What it is:** Simple TTS as OpenAI API, integrated with ChatGPT.
+
+**Highlights:**
+- Two models: `tts-1` (faster, less quality), `tts-1-hd` (higher quality)
+- Four voices: `alloy`, `echo`, `fable`, `onyx` (all neutral/professional)
+- Cheap: EUR 0.015/1000 characters (tts-1), EUR 0.030/1000 characters (tts-1-hd)
+- Simple API: `client.audio.speech.create(...)`
+
+**Best for:**
+- Quick integration (already ChatGPT customer)
+- Budget-focused (cheaper than ElevenLabs for large volume, if tts-1 sufficient)
+- No voice customization needed
+
+**Disadvantages:**
+- Only 4 voices
+- Not as expressive as ElevenLabs
+- Quality below ElevenLabs premium
+
+### Google Cloud Text-to-Speech
+
+Enterprise-grade, but usually overkill for SMBs. Cost: EUR 0.000004/character (at 1M+ characters/month). Not recommended if ElevenLabs or Coqui is sufficient.
+
+## Voice Cloning: Deeper Dive
+
+### Scenarios
+
+**Scenario 1: Clone your own voice**
+- Why: Personal brand ("that's me")
+- How: 30 seconds audio, Coqui or ElevenLabs train
+- Legal: 100% clean (your voice)
+- Cost: EUR 0 (Coqui) or EUR 10/month (ElevenLabs prime)
+
+**Scenario 2: Celebrity voice (permission required)**
+- Joe Biden voice for your bot = legal risk (imitation without permission)
+- Best practice: Find unknown voice talent to license, or synthesize new
+
+**Scenario 3: Customer service bot (consistent voice)**
+- Brand voice: "This voice = your company"
+- How: One actor/singer, 30 seconds recording, Coqui/ElevenLabs train
+- Cost: Recording (EUR 100-500) + TTS hosting (EUR 10-100/month)
+
+## Music Generation
+
+### Suno AI
+
+**What it is:** Text → music AI. You write "rock song about AI" or lyrics, Suno generates 30-second song with vocals.
+
+**Highlights:**
+- Lyrics: You write, or "generate lyrics"
+- Genre: Rock, pop, hip-hop, jazz, classical—everything
+- Vocals: Generated voices sing your lyrics
+- Quality: 2026 it's "listenable" for social media, not for Spotify release
+
+**Pricing model:**
+- Free: 50 credits/month (1 credit = 1 song generation)
+- Pro: EUR 10/month (300 credits)
+- Max: EUR 30/month (unlimited)
+
+**Cost example:** 100 songs/month = 100 credits = EUR 10 (Pro plan), so EUR 0.10/song.
+
+**Best for:**
+- YouTube background music
+- Podcast intros
+- Social media content
+- NOT: Spotify/streaming distribution (legally complicated)
+
+**Disadvantages:**
+- Audio quality below professional music (compression, artifacts visible)
+- Voice cloning difficult (synthetic vocals, not clonable)
+- Copyright: Suno generates, but who owns song? (gray area, Suno/user split)
+
+### Udio (Alternative)
+
+Similar to Suno, but different audio quality and interface. Worth experimenting if Suno not optimal.
+
+## Common Integration Patterns 2026
+
+### Pattern 1: Chatbot with voice
+
+```
+User speaks → Whisper (STT) → text
+Text → LLM agent
+Agent output → ElevenLabs TTS → voice
+Voice → user hears
+```
+
+**Cost per interaction:**
+- Whisper API: EUR 0.001
+- LLM: EUR 0.01 (per model)
+- TTS: EUR 0.0005 (100 chars output)
+**Total:** ~EUR 0.012 per Q&A cycle.
+
+### Pattern 2: Podcast automation (n8n + self-hosted)
+
+```
+Input: Article URL
+Extract: Text → n8n
+Generate: Summary (LLM)
+TTS: Summary → Coqui (self-hosted)
+Output: MP3 podcast episode
+```
+
+**Cost:** EUR 0 (self-hosted), but 20 minutes GPU time per hour audio.
+
+### Pattern 3: Personal assistant with voice clone
+
+```
+User voice recording → Coqui XTTS train
+"Good morning, tell me emails" → voice clone speaks (in your voice)
+LLM: Email summary → voice clone TTS
+```
+
+**Best for:** Private use, very personal.
+
+## Gotchas
+
+### "My Coqui TTS sounds robotic"
+
+Normal with standard vocoder. Fixes:
+1. Newer vocoder (HiFiGAN), but setup complex
+2. Switch to ElevenLabs (if budget)
+3. Longer reference audio (10 seconds vs 6) train
+
+### "I ran Whisper on 60 seconds audio, takes 30 seconds?"
+
+That's correct (realtime 2x). `tiny` model is faster, but less accurate. Medium/large slow on CPU.
+
+### "ElevenLabs costs exploded because bot talks too much"
+
+Add limiter: "Answer max 150 characters" (= ~0.002 EUR vs uncontrolled 1000+ chars = EUR 0.015).
+
+### "My cloned voice doesn't sound like me"
+
+Voice cloning needs:
+1. Good audio (noise-free, 16kHz+)
+2. Natural speech (not monotone)
+3. 6-10 seconds enough, but better: 15-30 seconds
+
+Redo: New audio, better mic, more natural accent.
+
+## Legal Considerations
+
+### Copyright
+- Text you write: your copyright
+- Music Suno generates: gray area (Suno/user split, lawsuits ongoing 2026)
+- Voice: If you "own" voice (yours), your right
+
+### Practical 2026
+- **Internal/private:** No issues
+- **Public/social media:** "Generated with Suno AI" becoming standard (transparency)
+- **Commercial:** Buy premium licenses or self-train
+
+## Roadmap 2026-2027
+
+- **Q2 2026:** Real-time voice cloning becomes standard (latency <100ms)
+- **Q3 2026:** Music copyright clarified (likely "creator owns all, Suno gets fee")
+- **Q4 2026:** Emotion control in TTS (sad, happy, angry) becomes standard
+
+## Practical Start
+
+**TTS for chatbot:** ElevenLabs free tier, 5 minutes integration, test free.
+
+**Clone your voice:** Coqui TTS, free, 30 minutes setup.
+
+**Podcast automation:** Self-hosted Coqui TTS + n8n workflow, EUR 0 running costs (VRAM only).
+
+**Music:** Suno AI, EUR 10/month, experiment.
+
+## Conclusion
+
+**Speech AI 2026:**
+- **STT:** Whisper, free, standard
+- **TTS cloud:** ElevenLabs for quality, OpenAI TTS for budget
+- **TTS self-hosted:** Coqui for voice cloning + privacy
+- **Voice clone:** 6 seconds audio, Coqui or ElevenLabs prime
+- **Music:** Suno for fun/experiments, not for commercial release
+
+Start within an hour:
+1. Load Coqui TTS, train on your voice (5 min)
+2. Generate sentence in your voice (1 min)
+3. Integrate OpenAI Whisper in Python script (10 min)
+4. Done: You have voice chatbot that understands you and speaks as you
+
+## Sources and Links
+
+- [OpenAI Whisper GitHub](https://github.com/openai/whisper)
+- [Coqui TTS GitHub](https://github.com/coqui-ai/TTS)
+- [Bark GitHub (Suno)](https://github.com/suno-ai/bark)
+- [ElevenLabs](https://elevenlabs.io)
+- [OpenAI TTS Documentation](https://platform.openai.com/docs/guides/text-to-speech)
+- [Suno AI](https://suno.com)
+- [Azure Speech Services](https://azure.microsoft.com/en-us/products/ai-services/speech-services)
+- [Google Cloud Speech-to-Text](https://cloud.google.com/speech-to-text)

@@ -1,0 +1,668 @@
+---
+title: Building a RAG Pipeline from Scratch
+date: 2026-03-21
+summary: Step-by-step guide to building a RAG (Retrieval Augmented Generation) pipeline with Python, ChromaDB, Ollama, and LangChain. Complete working examples included.
+tags: [RAG, Python, ChromaDB, Ollama, LangChain, Embedding, Retrieval]
+author: "AI Engineering"
+---
+
+# Building a RAG Pipeline from Scratch
+
+A RAG pipeline (Retrieval Augmented Generation) takes your documents, finds relevant pieces, and lets an LLM answer based on them. Fully local, no cloud dependency.
+
+We build a production-ready system with complete working examples.
+
+## What You Need
+
+- Python 3.10+
+- 8 GB RAM (minimum), 16 GB recommended
+- Optional GPU (NVIDIA with CUDA)
+- ~2 GB disk for models
+
+## Part 1: Setup & Installation
+
+### Create Virtual Environment
+
+```bash
+python -m venv rag-env
+source rag-env/bin/activate  # Windows: rag-env\Scripts\activate
+
+pip install --upgrade pip
+```
+
+### Install Dependencies
+
+```bash
+pip install \
+  langchain==0.2.6 \
+  langchain-community==0.0.28 \
+  chromadb==0.4.28 \
+  ollama==0.1.12 \
+  pypdf==4.1.0 \
+  python-dotenv==1.0.0
+```
+
+**Why these versions?** We use stable, proven versions. Newer versions can introduce breaking changes.
+
+## Part 2: Setup Ollama
+
+Ollama runs models locally — no API costs.
+
+### Installation
+
+Go to https://ollama.ai and install Ollama for your OS.
+
+### Load a Model
+
+```bash
+ollama pull llama2:7b-chat-q4_0
+```
+
+The `q4_0` means 4-bit quantization = 5 GB download, 4 GB RAM usage.
+
+### Test: Is Ollama Running?
+
+```bash
+curl http://localhost:11434/api/generate -d '{
+  "model": "llama2:7b-chat-q4_0",
+  "prompt": "Who was Albert Einstein?",
+  "stream": false
+}' | python -m json.tool
+```
+
+If JSON with `response` comes back → OK.
+
+## Part 3: Initialize ChromaDB
+
+ChromaDB stores embeddings with metadata.
+
+### Create Persistent Database
+
+```python
+# setup_chromadb.py
+import chromadb
+
+# Local persistent database
+client = chromadb.PersistentClient(path="./chroma_data")
+
+# Create collection (or load if exists)
+collection = client.get_or_create_collection(
+    name="documents",
+    metadata={"hnsw:space": "cosine"}
+)
+
+print(f"Collection '{collection.name}' created/loaded")
+print(f"Documents in index: {collection.count()}")
+```
+
+Run:
+
+```bash
+python setup_chromadb.py
+```
+
+Output: `Documents in index: 0` (empty for now).
+
+## Part 4: Load Documents & Chunk
+
+RAG needs good chunks: not too small (loses context), not too large (loses relevance).
+
+### Load PDF
+
+```python
+# load_documents.py
+from langchain_community.document_loaders import PyPDFLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+import chromadb
+
+# Load PDF
+loader = PyPDFLoader("./sample.pdf")
+documents = loader.load()
+
+print(f"PDF loaded: {len(documents)} pages")
+
+# Split into chunks
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size=800,      # Characters per chunk
+    chunk_overlap=100,   # Overlap for context
+    separators=["\n\n", "\n", " ", ""]
+)
+
+chunks = splitter.split_documents(documents)
+print(f"Chunks created: {len(chunks)}")
+
+# View sample chunk
+print("\n--- Chunk 0 ---")
+print(chunks[0].page_content[:200])
+```
+
+**Chunk Tuning:**
+- `chunk_size=800`: Good for documentation
+- `chunk_overlap=100`: Helps at boundaries
+- `separators`: First paragraphs, then sentences
+
+### Create Test PDF
+
+No PDF? Create one:
+
+```python
+# create_test_pdf.py
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+
+def create_sample_pdf():
+    c = canvas.Canvas("./sample.pdf", pagesize=letter)
+
+    texts = [
+        "Artificial Intelligence and Its Impacts",
+        "Machine Learning models require large datasets.",
+        "RAG systems combine retrieval with generation.",
+        "The future lies in hybrid approaches.",
+    ]
+
+    y = 750
+    for text in texts:
+        c.drawString(50, y, text)
+        y -= 50
+
+    c.save()
+    print("sample.pdf created")
+
+create_sample_pdf()
+```
+
+Run:
+
+```bash
+pip install reportlab
+python create_test_pdf.py
+python load_documents.py
+```
+
+## Part 5: Generate Embeddings
+
+An embedding is a numerical "fingerprint" of text. Similar texts have similar embeddings.
+
+### Using Ollama Embedding
+
+```python
+# embed_documents.py
+from langchain_community.document_loaders import PyPDFLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.embeddings import OllamaEmbeddings
+import chromadb
+
+# Load model (if not already done)
+import subprocess
+subprocess.run(["ollama", "pull", "nomic-embed-text"], check=True)
+
+# Loader & Splitter
+loader = PyPDFLoader("./sample.pdf")
+documents = loader.load()
+
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size=800,
+    chunk_overlap=100,
+)
+chunks = splitter.split_documents(documents)
+
+# Generate embeddings (locally via Ollama)
+embeddings = OllamaEmbeddings(model="nomic-embed-text")
+
+# ChromaDB client
+client = chromadb.PersistentClient(path="./chroma_data")
+collection = client.get_or_create_collection(
+    name="documents",
+    metadata={"hnsw:space": "cosine"}
+)
+
+# Add chunks to ChromaDB
+for i, chunk in enumerate(chunks):
+    embedding_vector = embeddings.embed_query(chunk.page_content)
+
+    collection.add(
+        ids=[f"chunk_{i}"],
+        documents=[chunk.page_content],
+        metadatas=[{
+            "source": chunk.metadata.get("source", "unknown"),
+            "page": chunk.metadata.get("page", 0)
+        }],
+        embeddings=[embedding_vector]
+    )
+    print(f"Chunk {i} embedded")
+
+print(f"\nTotal {collection.count()} chunks in ChromaDB")
+```
+
+**Embedding Models:**
+- `nomic-embed-text`: 768-dim, good for English
+- `mxbai-embed-large`: 1024-dim, even better
+- `all-minilm-l6-v2`: Small & fast (22 MB)
+
+Run:
+
+```bash
+python embed_documents.py
+```
+
+## Part 6: Retrieval — Find Similar Documents
+
+```python
+# retrieve.py
+from langchain_community.embeddings import OllamaEmbeddings
+import chromadb
+
+embeddings = OllamaEmbeddings(model="nomic-embed-text")
+
+client = chromadb.PersistentClient(path="./chroma_data")
+collection = client.get_or_create_collection(name="documents")
+
+# Query
+query = "What is Machine Learning?"
+query_embedding = embeddings.embed_query(query)
+
+# Find top 3 similar chunks
+results = collection.query(
+    query_embeddings=[query_embedding],
+    n_results=3,
+    include=["documents", "metadatas", "distances"]
+)
+
+print("Top Retrieval Results:")
+for i, (doc, meta, distance) in enumerate(zip(
+    results["documents"][0],
+    results["metadatas"][0],
+    results["distances"][0]
+)):
+    print(f"\n--- Result {i+1} (Similarity: {1 - distance:.2%}) ---")
+    print(f"Source: {meta['source']}, Page: {meta['page']}")
+    print(f"Text: {doc[:200]}...")
+```
+
+Run:
+
+```bash
+python retrieve.py
+```
+
+## Part 7: Complete RAG Pipeline
+
+Now combine retrieval + LLM:
+
+```python
+# rag_pipeline.py
+from langchain_community.embeddings import OllamaEmbeddings
+from langchain_community.llms import Ollama
+from langchain.prompts import PromptTemplate
+from langchain.chains import RetrievalQA
+from langchain_community.vectorstores import Chroma
+import chromadb
+
+# ChromaDB as LangChain VectorStore
+client = chromadb.PersistentClient(path="./chroma_data")
+embeddings = OllamaEmbeddings(model="nomic-embed-text")
+
+vectorstore = Chroma(
+    client=client,
+    collection_name="documents",
+    embedding_function=embeddings
+)
+
+# Initialize LLM
+llm = Ollama(model="llama2:7b-chat-q4_0", temperature=0.3)
+
+# Custom Prompt
+template = """You are a helpful assistant.
+Answer the question based on the following context.
+If you don't find the answer in context, say "I don't know".
+
+Context:
+{context}
+
+Question: {question}
+
+Answer:"""
+
+prompt = PromptTemplate(
+    template=template,
+    input_variables=["context", "question"]
+)
+
+# RAG Chain
+qa_chain = RetrievalQA.from_chain_type(
+    llm=llm,
+    chain_type="stuff",
+    retriever=vectorstore.as_retriever(search_kwargs={"k": 3}),
+    chain_type_kwargs={"prompt": prompt},
+    return_source_documents=True
+)
+
+# Query
+result = qa_chain({"query": "What is RAG?"})
+
+print("Answer:")
+print(result["result"])
+
+print("\nSources:")
+for doc in result["source_documents"]:
+    print(f"- {doc.metadata['source']} (Page {doc.metadata['page']})")
+```
+
+Run:
+
+```bash
+python rag_pipeline.py
+```
+
+Output:
+```
+Answer:
+RAG is a method that combines document retrieval with language generation...
+
+Sources:
+- ./sample.pdf (Page 0)
+- ./sample.pdf (Page 1)
+```
+
+## Part 8: Production-Grade RAG with Caching
+
+Production needs speed. Cache frequently asked questions:
+
+```python
+# rag_production.py
+from langchain_community.embeddings import OllamaEmbeddings
+from langchain_community.llms import Ollama
+from langchain.prompts import PromptTemplate
+from langchain.chains import RetrievalQA
+from langchain_community.vectorstores import Chroma
+import chromadb
+import hashlib
+import json
+from pathlib import Path
+
+# Cache file
+CACHE_FILE = "rag_cache.json"
+
+def load_cache():
+    if Path(CACHE_FILE).exists():
+        with open(CACHE_FILE) as f:
+            return json.load(f)
+    return {}
+
+def save_cache(cache):
+    with open(CACHE_FILE, "w") as f:
+        json.dump(cache, f)
+
+def get_query_hash(query):
+    return hashlib.md5(query.lower().encode()).hexdigest()
+
+cache = load_cache()
+
+# Setup ChromaDB
+client = chromadb.PersistentClient(path="./chroma_data")
+embeddings = OllamaEmbeddings(model="nomic-embed-text")
+vectorstore = Chroma(
+    client=client,
+    collection_name="documents",
+    embedding_function=embeddings
+)
+
+llm = Ollama(model="llama2:7b-chat-q4_0", temperature=0.3)
+
+template = """You are a helpful assistant.
+Answer the question based on the following context.
+
+Context:
+{context}
+
+Question: {question}
+
+Answer:"""
+
+prompt = PromptTemplate(
+    template=template,
+    input_variables=["context", "question"]
+)
+
+qa_chain = RetrievalQA.from_chain_type(
+    llm=llm,
+    chain_type="stuff",
+    retriever=vectorstore.as_retriever(search_kwargs={"k": 3}),
+    chain_type_kwargs={"prompt": prompt},
+    return_source_documents=True
+)
+
+# Query with Cache
+def query_with_cache(question):
+    query_hash = get_query_hash(question)
+
+    # In cache?
+    if query_hash in cache:
+        print(f"✓ Cache hit: {question}")
+        return cache[query_hash]
+
+    # Not in cache → generate
+    print(f"✗ Cache miss, generating...")
+    result = qa_chain({"query": question})
+
+    # Store in cache
+    cache[query_hash] = {
+        "answer": result["result"],
+        "sources": [
+            {
+                "source": doc.metadata["source"],
+                "page": doc.metadata["page"]
+            }
+            for doc in result["source_documents"]
+        ]
+    }
+    save_cache(cache)
+
+    return cache[query_hash]
+
+# Test
+answer = query_with_cache("What is RAG?")
+print("Answer:", answer["answer"][:200])
+
+# Second question → Cache hit
+answer2 = query_with_cache("What is RAG?")
+```
+
+## Part 9: Error Handling & Monitoring
+
+Real-world systems need robustness:
+
+```python
+# rag_robust.py
+import logging
+from typing import Optional, Dict
+from langchain_community.embeddings import OllamaEmbeddings
+from langchain_community.llms import Ollama
+from langchain.chains import RetrievalQA
+from langchain_community.vectorstores import Chroma
+import chromadb
+
+# Logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+class RAGPipeline:
+    def __init__(self, model_name="llama2:7b-chat-q4_0", embedding_model="nomic-embed-text"):
+        try:
+            self.embeddings = OllamaEmbeddings(model=embedding_model)
+            self.llm = Ollama(model=model_name, temperature=0.3)
+
+            client = chromadb.PersistentClient(path="./chroma_data")
+            self.vectorstore = Chroma(
+                client=client,
+                collection_name="documents",
+                embedding_function=self.embeddings
+            )
+
+            logger.info(f"RAG Pipeline initialized: {self.vectorstore._collection.count()} chunks")
+        except Exception as e:
+            logger.error(f"Error initializing RAG: {e}")
+            raise
+
+    def query(self, question: str, max_retries: int = 2) -> Optional[Dict]:
+        """Safe query with error handling"""
+
+        # Validation
+        if not question.strip():
+            logger.warning("Empty question")
+            return None
+
+        if len(question) > 1000:
+            logger.warning("Question too long (>1000 chars)")
+            return None
+
+        # Retry loop
+        for attempt in range(max_retries):
+            try:
+                logger.info(f"Attempt {attempt + 1}: '{question}'")
+
+                # Retrieval
+                retriever = self.vectorstore.as_retriever(search_kwargs={"k": 3})
+                relevant_docs = retriever.get_relevant_documents(question)
+
+                if not relevant_docs:
+                    logger.warning(f"No relevant documents found")
+                    return {
+                        "answer": "No relevant documents found.",
+                        "sources": [],
+                        "confidence": 0.0
+                    }
+
+                # Generation
+                context = "\n\n".join([doc.page_content for doc in relevant_docs])
+                prompt = f"Question: {question}\n\nContext:\n{context}\n\nAnswer:"
+
+                answer = self.llm(prompt)
+
+                return {
+                    "answer": answer,
+                    "sources": [doc.metadata.get("source") for doc in relevant_docs],
+                    "confidence": 0.85
+                }
+
+            except Exception as e:
+                logger.error(f"Attempt {attempt + 1} failed: {e}")
+                if attempt == max_retries - 1:
+                    return {
+                        "answer": "Error processing request. Please try again.",
+                        "sources": [],
+                        "confidence": 0.0
+                    }
+
+# Test
+rag = RAGPipeline()
+result = rag.query("What is Artificial Intelligence?")
+print(result)
+```
+
+## Part 10: Performance Tuning
+
+### Embedding Caching
+
+Embeddings are expensive. Cache them:
+
+```python
+# caching_embeddings.py
+from langchain_community.embeddings import OllamaEmbeddings
+import json
+from pathlib import Path
+
+class CachedOllamaEmbeddings(OllamaEmbeddings):
+    def __init__(self, *args, cache_file="embedding_cache.json", **kwargs):
+        super().__init__(*args, **kwargs)
+        self.cache_file = cache_file
+        self.cache = self._load_cache()
+
+    def _load_cache(self):
+        if Path(self.cache_file).exists():
+            with open(self.cache_file) as f:
+                return json.load(f)
+        return {}
+
+    def _save_cache(self):
+        with open(self.cache_file, "w") as f:
+            json.dump(self.cache, f)
+
+    def embed_query(self, text: str):
+        if text in self.cache:
+            return self.cache[text]
+
+        embedding = super().embed_query(text)
+        self.cache[text] = embedding
+        self._save_cache()
+
+        return embedding
+
+# Usage
+embeddings = CachedOllamaEmbeddings(model="nomic-embed-text")
+```
+
+### Retriever k-Tuning
+
+```python
+# Too many chunks → noise
+# Too few → missing info
+
+for k in [1, 3, 5, 10]:
+    retriever = vectorstore.as_retriever(search_kwargs={"k": k})
+    docs = retriever.get_relevant_documents("My query")
+    print(f"k={k}: {len(docs)} documents, total {sum(len(d.page_content) for d in docs)} chars")
+```
+
+## Troubleshooting
+
+### Problem: "Connection refused" at Ollama
+
+```bash
+# Ollama not running
+ollama serve
+
+# Or test in another terminal
+curl http://localhost:11434/api/tags
+```
+
+### Problem: ChromaDB is empty
+
+```python
+import chromadb
+client = chromadb.PersistentClient(path="./chroma_data")
+collections = client.list_collections()
+print(collections)
+
+# If empty: Load & embed documents again
+```
+
+### Problem: LLM answers are nonsense
+
+Causes:
+1. Wrong chunks retrieved → check `chunk_size` / `chunk_overlap`
+2. Prompt too complex → simplify
+3. Model too small → `llama2:7b` → `llama2:13b`
+4. Temperature too high → set to 0.1–0.3
+
+## Summary
+
+A RAG pipeline has 5 parts:
+
+1. **Load Documents** → PyPDFLoader, RecursiveCharacterTextSplitter
+2. **Generate Embeddings** → OllamaEmbeddings locally
+3. **Store Index** → ChromaDB persistent
+4. **Retrieval** → Top-k similar chunks
+5. **Generation** → LLM answers with context
+
+Works fully offline. No API limits, no per-query costs.
+
+**Next Steps:**
+- RAG with multiple data sources (CSV, webpages, etc.)
+- Reranking for better relevance
+- Summary chains for long answers
+
+## Sources and Links
+
+- [LangChain](https://github.com/langchain-ai/langchain)
+- [LlamaIndex](https://github.com/run-llama/llama_index)

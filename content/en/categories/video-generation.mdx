@@ -1,0 +1,345 @@
+---
+title: "Video Generation with AI"
+date: "2026-03-21"
+summary: "Text-to-video 2026: Sora, Runway Gen-4.5, Kling, Pika—capabilities, limitations, costs, comparisons"
+tags: ["video-generation", "sora", "runway", "kling", "pika", "text-to-video"]
+author: "AI Engineering"
+---
+
+# Video Generation with AI — Category Overview
+
+2026: Video AI is **no longer experimental**. Sora 2 generates cinematic 60-second videos with physically correct movement. Runway Gen-4.5 is agency standard. Kling clips 120 seconds. This is not a "gimmick"—video agencies use it daily.
+
+## The Status Quo March 2026
+
+### What Works
+- **Scenario videos:** "A red ball rolls down a hill" → works (physics correct)
+- **Montages:** Multiple scenes with cut coherence
+- **Camera movement:** Pan, zoom, dolly—all controllable
+- **Text overlay:** Synced text in video
+- **Color palettes:** Consistent color mood
+- **Audio:** Synchronized sound effects (new 2026)
+
+### What Still Struggles
+- **Hands:** Finger details improving, but not perfect
+- **Text in video:** "Show 'only 50% off!' text on image" → works 70%, not perfect
+- **Very long videos:** >60 seconds becomes unstable (character consistency drops)
+- **Complex physics:** "Water flows realistically" → predictably problematic
+- **Face consistency:** Realistic faces over shots = weak point
+
+## The 4 Main Players 2026
+
+### 1. Sora 2 (OpenAI)
+
+**What it is:** Most advanced open-market text-to-video. September 2025 release, continuously improved.
+
+**Capabilities (March 2026):**
+- Max 60 seconds
+- 1080p native
+- Realistic physics (water, glass, fabric behave correctly)
+- Camera control with prompts ("slow pan left")
+- Audio generation (ambient sound + speech sync)
+- Multi-shot continuity (character stays same across scenes)
+
+**Example quality:**
+"A human astronaut performing a moonwalk in slow motion. The background shows a lunar landscape with a blue Earth in the sky. The astronaut is wearing a detailed white space suit and moving gracefully." → Result is TV-broadcast-ready.
+
+**Cost:** (Beta access 2026, pricing not finalized yet). Expected: EUR 0.05-0.10 per second.
+
+**Best for:** Professional videos when budget unlimited.
+
+**Disadvantages:**
+- Limited beta access (2026 still not everyone has access)
+- Can get expensive at high volume
+- Waitlists for new features
+
+### 2. Runway Gen-4.5
+
+**What it is:** The "reliable horse" of video AI. Agency standard because predictable.
+
+**Capabilities (March 2026):**
+- Max 60 seconds
+- 1080p-4K
+- **Character consistency:** Gen-4.5 obsessed with keeping your character same across shots (strength vs competition)
+- Motion vectors: "Control what moves" (arrow → object moves there)
+- Video input: Upload video, "make it cinematic"
+- Consistency frames: "These two frames must match"
+
+**Example quality:**
+Upload YouTube video → "make that like Hollywood film" → output is dramatized, better lighting, smart cuts.
+
+**Cost:**
+- EUR 10/month (early access)
+- Pay-per-video from Q2 2026 (expected EUR 0.15-0.30/video)
+
+**Best for:**
+- Agencies producing videos daily
+- Content creators needing consistency
+- Professional use cases
+
+**Disadvantages:**
+- Interface complex (many buttons)
+- Rendering times ~5-10 minutes (not realtime)
+
+### 3. Kling 2.0 (Kuaishou, China)
+
+**What it is:** Aggressively longest max length: 120 seconds (double Sora/Runway).
+
+**Capabilities (March 2026):**
+- Max 120 seconds (!)
+- 1080p
+- Good physics simulation
+- Very fast generation (2-3 min vs 5-10 min Runway)
+- Long-form storytelling possible (two-minute video = tell story)
+
+**Example:**
+"Create a 2-minute documentary about how plants grow from seed to flower" → Kling delivers continuous 120 seconds with scene continuity, Runway would split into 4x clips.
+
+**Cost:**
+- Beta (2026): free
+- Production pricing: TBD (expected EUR 0.05-0.10/minute, so EUR 6-12 per 2-min video)
+
+**Best for:**
+- Long-form content (YouTube videos, tutorials)
+- Storytelling (narrative over >60 seconds)
+- Budget-focused (if China pricing model applies)
+
+**Disadvantages:**
+- Less available outside China (geopolitical)
+- Character consistency not as strong as Runway
+
+### 4. Pika 2.5 (Light Alternative)
+
+**What it is:** "TikTok for video AI." Fast, cheap, social-media-focused.
+
+**Capabilities (March 2026):**
+- Max 20 seconds (not longer)
+- 720p-1080p
+- Discord/web interface (very simple)
+- Fastest generation (30 seconds until video ready)
+- Anime-friendly (Japanese art style support)
+
+**Example:**
+"Cute anime cat dancing" → 20 seconds ready to go, quality totally OK for TikTok.
+
+**Cost:**
+- EUR 8/month (100 credits/month)
+- Pay-per-video possible
+
+**Best for:**
+- Social media content (TikTok, Instagram reels)
+- Fast iteration (don't wait for quality)
+- Anime/art-style specialized
+- Budget <EUR 20/month
+
+**Disadvantages:**
+- Short (20 seconds max)
+- Less cinematic than Sora/Runway
+- Simple = less control
+
+## Comparison: Which for You?
+
+| Criteria | Sora 2 | Runway | Kling | Pika |
+|----------|--------|--------|--------|-------|
+| **Max length** | 60s | 60s | 120s | 20s |
+| **Quality** | ★★★★★ | ★★★★★ | ★★★★ | ★★★ |
+| **Character consistency** | ★★★★ | ★★★★★ | ★★★★ | ★★ |
+| **Setup complexity** | Low | Medium | Low | Very low |
+| **Cost/video** | EUR 0.05-0.10 | EUR 0.15-0.30 | EUR 0.05-0.10 | EUR 0.50-1 |
+| **Min monthly cost** | ? | EUR 10 | Free (beta) | EUR 8 |
+| **For agencies** | ✓ | ✓✓✓ | ✓✓ | ✗ |
+| **For social media** | ✓✓ | ✓ | ✓✓ | ✓✓✓ |
+| **For storytelling** | ✓✓ | ✓✓ | ✓✓✓ | ✗ |
+
+## Practical Workflows 2026
+
+### Workflow 1: Quick social media videos (Pika)
+
+```
+Input: Prompt "A futuristic city at night with flying cars"
+↓
+Pika 2.5 generates 20 seconds
+↓
+Export MP4 for TikTok/Reels
+```
+
+**Time:** 2 minutes.
+**Cost:** EUR 0.50-1.
+
+### Workflow 2: Professional product video (Runway)
+
+```
+Input: Your product (iPhone case)
+↓
+Upload photo to video → generate → 3 seconds iPhone rotates, light highlights
+↓
+Motion vectors: "Finger swiping on screen" → generate
+↓
+Consistency frames: Ensure color coherence between shots
+↓
+Output: 20-second product hero video
+```
+
+**Time:** 15 minutes (prompt + review + regeneration).
+**Cost:** EUR 0.50-1 (pay-per-video).
+**vs agency:** EUR 500-2000 for same video. ROI massive.
+
+### Workflow 3: Long-form storytelling (Kling)
+
+```
+Input: "Create 2-minute tutorial: How to brew perfect coffee. Scenes: beans, water, filter, brewing, pouring, sipping."
+↓
+Kling 2.0 generates continuous 120 seconds with scene continuity
+↓
+Output: YouTube-ready tutorial
+```
+
+**Time:** 5 minutes.
+**Cost:** EUR 6-12 (if pricing like early signals).
+
+### Workflow 4: Cinematic exploration (Sora 2)
+
+```
+Input: High-quality prompt "A lone hiker at sunset on mountain ridge, camera slowly pans left"
+↓
+Sora 2 generates 60 seconds with real physics/lighting
+↓
+Output: Documentary-quality footage
+```
+
+**Time:** 10 minutes.
+**Cost:** EUR 3-6.
+
+## Technical Limits 2026
+
+### 1. Multi-shot continuity
+Character looks different between shot 1 and shot 2? Normal problem.
+
+**Fix:** Runway's "consistency frames" (upload frame from shot 1, force similar in shot 2).
+
+### 2. Text generation in video
+"Show 'only 50% off!' text on image" → works 70%, not perfect.
+
+**Fix:** Add text in post-production instead of video generation.
+
+### 3. Physics wrong
+"Ball rolls UP the hill" instead of DOWN.
+
+**Fix:** Precise prompt ("ball rolls DOWN slope due to gravity").
+
+### 4. Zoom/panning unstable
+Slow zoom flaky (quality flickers).
+
+**Best practice:** Fast movements (quick pan) more stable.
+
+## Audio Sync 2026
+
+New: Sora 2 can generate audio + sync. Runway needs post-production (audio separate).
+
+**Practically:**
+```
+Sora 2 input: "Cat plays, background music, positive mood"
+↓
+Output: Video WITH audio (cat sounds + music)
+```
+
+Better than:
+```
+Runway output: Video (no audio)
++ ElevenLabs TTS (add narration separate)
++ music generation (Suno, add separate)
++ audio editor (sync all three)
+```
+
+## Cost Calculation for Agencies
+
+**Scenario: 10 videos/month at 30 seconds (commercial)**
+
+### Option 1: Runway
+- Setup: EUR 10
+- 10 videos × EUR 0.25 = EUR 2.50
+- **Monthly: EUR 12.50**
+- vs agency: EUR 500-1000 per video = EUR 5000-10000
+- **ROI: 400x**
+
+### Option 2: Pika (fast & cheap, but short)
+- Setup: EUR 8
+- 20 videos (20 seconds) × EUR 0.50 = EUR 10
+- **Monthly: EUR 18**
+- Limitation: Only reels/TikToks, not hero videos
+- **Best for:** Volume-focused
+
+### Option 3: Sora 2 (if quality paramount)
+- Setup: unknown (still beta)
+- 10 videos × EUR 0.07 (estimated) = EUR 0.70
+- **Monthly: EUR 10.70** (if pricing good)
+- Better: Quality > Runway likely
+- **Risk:** Not finalized, might be EUR 0.15-0.20/second
+
+## Common Beginner Mistakes
+
+### 1. "I'll generate a 5-minute video in one prompt"
+No. Max 60-120 seconds, then need cuts. Workflow is "generate multiple clips, add transitions."
+
+### 2. "Text in video is easy"
+Not. Text generation in video ~70% success rate. Post-add text more robust.
+
+### 3. "Faces look realistic"
+2026: Faces weak (uncanny valley). Best practice: No tight close-ups of faces, or anonymous characters/cartoons.
+
+### 4. "Costs don't explode"
+Wrong. 100 videos/month × EUR 0.20 = EUR 20. Sounds OK? But if quality not enough, iterate (3x generate = EUR 60). Discipline needed.
+
+## Legal Considerations
+
+### Copyright
+- Videos you generate: ownership unclear (like images, Sora/Runway owns parts?)
+- Practical 2026: "Generated with Sora 2" becomes standard
+- Commercial: Buy premium license if security needed
+
+### Music
+- If video has audio (Sora 2): music copyright unclear
+- Best practice: Original music generation (Suno AI) vs sampling
+
+## Roadmap 2026-2027
+
+- **Q2 2026:** Sora 2 GA (general availability), pricing finalized
+- **Q3 2026:** 4K-native becomes standard (all tools)
+- **Q4 2026:** Video length 3+ minutes becomes possible (composite models)
+
+## Practical Start
+
+**Need videos for social media quickly:**
+→ Pika, EUR 8/month, 5 minutes setup.
+
+**Need professional hero videos:**
+→ Runway, EUR 10/month, start small (3-5 videos), scale if ROI visible.
+
+**Want quality above all:**
+→ Wait for Sora 2 GA (Q2 2026) or test-drive Runway parallel.
+
+**Need long stories (>60 seconds):**
+→ Kling 2.0 if available (China focus), else Runway with multi-clip workflow.
+
+## Conclusion
+
+**Video AI 2026:**
+- **No longer experimental**—agency standard
+- **Runway Gen-4.5:** Safe choice for pros
+- **Sora 2:** Potentially better, still beta
+- **Kling:** For long videos, geopolitical risk
+- **Pika:** For social media, fast, cheap, short
+
+**Start:** Runway EUR 10/month, generate 3 test videos, measure quality vs agency costs. ROI becomes obvious.
+
+Videos are 2026 not "nice to have"—they're marketing baseline. Question is not "do you generate?" but "how fast and cheap?"
+
+## Sources and Links
+
+- [Runway ML](https://runwayml.com)
+- [Pika](https://pika.art)
+- [Open-Sora GitHub](https://github.com/hpcaitech/Open-Sora)
+- [Kling AI](https://klingai.com)
+- [OpenAI Sora](https://openai.com/sora)
+- [Stable Video Diffusion](https://github.com/Stability-AI/generative-models)
+- [HuggingFace Video Models](https://huggingface.co/models?pipeline_tag=text-to-video)

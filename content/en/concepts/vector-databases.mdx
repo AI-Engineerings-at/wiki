@@ -1,0 +1,467 @@
+---
+title: Vector Databases
+date: 2026-03-21
+summary: Embeddings and similarity, comparison (ChromaDB, Pinecone, Weaviate, Qdrant, Milvus, pgvector), self-hosted vs cloud, HNSW and IVF indexing strategies
+tags: [vector-databases, embeddings, semantic-search, similarity, indexing, rag]
+author: AI Engineering
+---
+
+# Vector Databases Explained
+
+Vector databases store and search numerical vectors (embeddings) efficiently. They're the backbone of RAG systems.
+
+This guide covers embedding fundamentals, similarity metrics, database selection, indexing strategies, and production deployment patterns.
+
+---
+
+## What is an Embedding?
+
+```
+Text: "The dog jumps quickly"
+      ↓ Embedding Model
+Vector: [0.234, -0.512, 0.891, ..., 0.123]  (384-1536 dimensional)
+```
+
+Each dimension represents semantic properties (animality, motion, speed, etc.).
+
+---
+
+## Similarity Metrics
+
+### Cosine Similarity (Standard)
+```
+cos(A, B) = (A · B) / (||A|| × ||B||)
+Range: [-1, 1]
+  -1 = opposite direction
+   0 = orthogonal
+   1 = identical
+```
+
+Most common for semantic search.
+
+### Dot Product (Faster)
+```
+A · B
+```
+
+Faster if vectors pre-normalized. Only use if you know what you're doing.
+
+### Euclidean Distance
+```
+d = √(Σ(A_i - B_i)²)
+```
+
+Less common for semantic search.
+
+---
+
+## Database Comparison (2026)
+
+| Feature | ChromaDB | Pinecone | Weaviate | Qdrant | Milvus | pgvector |
+|---------|----------|----------|----------|--------|--------|----------|
+| Type | In-Memory + Persist | Managed Cloud | Graph-Vector | Cloud/Self | Distributed | PostgreSQL Plugin |
+| Setup | pip install | API | Container | Container | Kubernetes | SQL Extension |
+| Local | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Scaling | Medium | Unlimited | Good | Good | Excellent | DB-Limited |
+| Cost (Self) | Free | - | Free | Free | Free | ~€5-20/Mo |
+| Cost (Cloud) | $0.03/M vectors | Pay-per-API | €500+/Mo | Starter Free | Enterprise | Varies |
+
+---
+
+## Detailed Options
+
+### ChromaDB (Beginner-Friendly)
+```python
+from chromadb import Client
+
+client = Client()
+collection = client.create_collection(name="documents")
+
+collection.add(
+    ids=["1", "2", "3"],
+    documents=["The dog jumps", "A cat rests", "The bird flies"],
+)
+
+results = collection.query(
+    query_texts=["dog jumps"],
+    n_results=2
+)
+```
+
+Best for: Prototyping, small systems (<10M vectors)
+
+### Pinecone (Managed, Production)
+- Fully managed, 99.99% SLA
+- Unlimited scaling
+- Pay-per-vector model
+- Best filtering
+
+Best for: Production, high availability, budgets exist
+
+### Weaviate (Knowledge Graphs)
+- Multi-modal (text, images, audio)
+- Graph traversal
+- Complex relations
+- Open-source
+
+Best for: Complex relations, knowledge graphs
+
+### Qdrant (Rust-optimized, Fast)
+- Fastest inference
+- Hybrid search (vector + BM25 text)
+- Open-source
+- Cost-effective
+
+Best for: Speed-critical, self-hosted
+
+### Milvus (Distributed, Kubernetes)
+- Massive scale (millions of vectors)
+- Enterprise features
+- Overkill for small systems
+
+Best for: Enterprise, huge scale, managed infrastructure
+
+### pgvector (PostgreSQL)
+- SQL integration
+- ACID guarantees
+- Familiar PostgreSQL ecosystem
+- HNSW indexing
+
+Best for: Small-medium systems, existing PostgreSQL users
+
+---
+
+## Indexing Strategies
+
+### HNSW (Hierarchical Navigable Small World)
+- Fast O(log N) search
+- Memory-efficient
+- Probabilistic (best approximation, not guarantee)
+- Best for: ≤100M vectors
+
+### IVF (Inverted File)
+- Cluster-based
+- Good memory/speed tradeoff
+- Risk of poor clusterings
+- Best for: >100M vectors, memory-constrained
+
+---
+
+## Self-Hosted vs Cloud
+
+### Self-Hosted (ChromaDB, Qdrant, Milvus)
+- Cost: €150-300/month infrastructure
+- Control: Full
+- Scaling: Need engineering
+
+### Cloud (Pinecone, Weaviate Cloud)
+- Cost: €50/month + query costs
+- Control: Limited
+- Scaling: Automatic
+
+**Breakeven**: 10M vectors ≈ same cost. Larger → self-hosted better.
+
+---
+
+## Practical RAG Integration
+
+```python
+from langchain.vectorstores import Chroma
+from langchain.embeddings import OpenAIEmbeddings
+
+embeddings = OpenAIEmbeddings()
+vector_store = Chroma.from_documents(
+    documents=docs,
+    embedding=embeddings,
+)
+
+retriever = vector_store.as_retriever(
+    search_type="similarity",
+    search_kwargs={"k": 3}
+)
+
+from langchain.chains import RetrievalQA
+
+qa = RetrievalQA.from_chain_type(
+    llm=llm,
+    retriever=retriever,
+)
+```
+
+---
+
+## Advanced: Embedding Dimensions & Performance
+
+Different embedding models produce different vector dimensions. This affects memory, compute, and quality.
+
+```
+Model                      | Dimensions | Speed   | Quality | Cost      | Size
+---------------------------|-----------|---------|---------|-----------|----------
+all-MiniLM-L6-v2          | 384        | Fastest | Medium  | Free      | 22MB
+UAE-Large-V1              | 1024       | Fast    | Best    | Free      | 134MB
+OpenAI text-embedding-3   | 1536       | Medium  | Excellent | €0.02/M | N/A
+Cohere Embed-3            | 1024       | Medium  | Excellent | €0.10/M | N/A
+Gemini Embedding          | 768        | Fast    | Very Good | €0.0001/M | N/A
+```
+
+**Rule of thumb**: 384-768 dimensions work for most use-cases. Higher dimensions → better quality but slower search + more memory.
+
+---
+
+## Metadata & Filtering
+
+Vector search alone isn't enough. Add metadata (tags, timestamps, sources) for filtering before vector similarity.
+
+```python
+# ChromaDB with metadata
+collection.add(
+    ids=["doc1", "doc2", "doc3"],
+    embeddings=[vec1, vec2, vec3],
+    documents=["text1", "text2", "text3"],
+    metadatas=[
+        {"source": "wiki", "date": "2026-03-21", "language": "en"},
+        {"source": "blog", "date": "2026-03-20", "language": "en"},
+        {"source": "pdf", "date": "2025-12-01", "language": "de"},
+    ]
+)
+
+# Hybrid search: Filter by metadata, then vector search
+results = collection.query(
+    query_texts=["dog"],
+    n_results=3,
+    where={"source": "wiki"}  # Only wiki results
+)
+```
+
+**Supported filtering**:
+- Exact match: `where={"language": "en"}`
+- Range: `where={"date": {"$gte": "2026-01-01"}}`
+- Complex: `where={"$and": [{"source": "wiki"}, {"date": {"$gte": "2026-01-01"}}]}`
+
+---
+
+## Scaling Patterns: From Prototype to Production
+
+### Pattern 1: Local Development (< 1M vectors)
+```bash
+pip install chromadb
+# Stores in .chroma/ directory locally
+# Restart reloads from disk
+```
+
+Best for: Learning, prototyping, small teams
+
+### Pattern 2: Shared PostgreSQL + pgvector (1-50M vectors)
+```python
+from pgvector.django import VectorField
+from django.db import models
+
+class Document(models.Model):
+    content = models.TextField()
+    embedding = VectorField(dimensions=1536)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['embedding']),
+        ]
+```
+
+Advantages:
+- ACID transactions
+- Row-level security
+- Native SQL filtering
+- Familiar PostgreSQL tooling
+
+Disadvantages:
+- Slower vector search than specialized DBs
+- Scaling beyond 50M requires read replicas
+
+### Pattern 3: Self-Hosted Qdrant / Milvus (50M-1B vectors)
+```bash
+# Docker
+docker run -p 6333:6333 qdrant/qdrant
+
+# Python client
+from qdrant_client import QdrantClient
+
+client = QdrantClient("localhost", port=6333)
+client.create_collection(
+    collection_name="documents",
+    vectors_config=VectorParams(size=1536, distance=Distance.COSINE),
+)
+```
+
+Best for: Companies with DevOps resources, wanting full control
+
+### Pattern 4: Managed Pinecone / Weaviate (1B+ vectors)
+- Automatic scaling
+- Built-in redundancy
+- Monitoring & alerts
+- Multi-region support
+
+Trade-off: Cost increases, but operational burden decreases
+
+---
+
+## Common Pitfalls & Solutions
+
+### Pitfall 1: Dimension Mismatch
+```python
+# WRONG: Using two different embedding models
+embeddings_1 = OpenAIEmbeddings(model="text-embedding-3-small")  # 1536-dim
+embeddings_2 = sentence_transformers.SentenceTransformer(...)    # 384-dim
+
+# Result: Vectors incompatible, similarity metrics fail
+```
+
+**Solution**: Standardize on ONE embedding model across entire pipeline.
+
+### Pitfall 2: Stale Vectors After Updates
+```python
+# Document changes, but vector in DB unchanged
+doc.content = "Updated content"
+doc.save()
+# BUT: embedding vector still old!
+
+# Solution: Re-embed after every update
+new_embedding = embeddings.embed_query(doc.content)
+collection.update(ids=[doc.id], embeddings=[new_embedding])
+```
+
+### Pitfall 3: Cold Startup Problem
+```
+New deployment → empty vector DB → no retrieval → poor answers
+```
+
+**Solution**: Pre-populate with seed documents on startup.
+
+```python
+def initialize_db(vector_db, seed_docs):
+    if vector_db.count() == 0:
+        logger.info("Initializing seed documents")
+        for doc in seed_docs:
+            vector_db.add(doc)
+```
+
+### Pitfall 4: Similarity Threshold Too High
+```python
+# Retrieve only if similarity > 0.95
+results = collection.query(
+    query_texts=["dog"],
+    n_results=10,
+    where={"similarity": {"$gte": 0.95}}  # Too strict!
+)
+
+# Result: Often 0 results returned, no fallback
+```
+
+**Solution**: Use k-retrieval first, then filter by threshold as a secondary step.
+
+---
+
+## Benchmarking Vector Databases
+
+Quick evaluation framework:
+
+```python
+import time
+import numpy as np
+
+def benchmark_db(db_client, n_vectors=10000, dimension=1536):
+    vectors = np.random.randn(n_vectors, dimension).astype(np.float32)
+
+    # 1. Insert speed
+    start = time.time()
+    for i, vec in enumerate(vectors):
+        db_client.add(id=i, vector=vec)
+    insert_time = time.time() - start
+    print(f"Insert {n_vectors} vectors: {insert_time:.2f}s")
+
+    # 2. Query speed (1000 queries)
+    query_vecs = np.random.randn(1000, dimension).astype(np.float32)
+    start = time.time()
+    for q in query_vecs:
+        results = db_client.search(q, k=10)
+    query_time = time.time() - start
+    print(f"1000 queries: {query_time:.2f}s avg {query_time/1000*1000:.1f}ms per query")
+
+    # 3. Memory usage
+    memory_mb = db_client.memory_usage() / 1024 / 1024
+    print(f"Memory: {memory_mb:.0f}MB for {n_vectors} vectors")
+
+    # 4. Recall accuracy (comparison to brute-force)
+    brute_results = brute_force_search(vectors[0], vectors, k=10)
+    db_results = db_client.search(vectors[0], k=10)
+    recall = len(set(brute_results) & set(db_results)) / 10
+    print(f"Recall: {recall:.2%}")
+```
+
+---
+
+## Embedding Model Comparison Table (2026)
+
+| Model | Provider | Dims | Speed (tok/s) | Quality | Cost/M tokens | License |
+|-------|----------|------|--------------|---------|---------------|---------|
+| text-embedding-3-small | OpenAI | 1536 | 100K | 9.2/10 | €0.02 | Proprietary |
+| text-embedding-3-large | OpenAI | 3072 | 50K | 9.8/10 | €0.13 | Proprietary |
+| Cohere Embed-3 | Cohere | 1024 | 150K | 9.5/10 | €0.10 | Proprietary |
+| UAE-Large-V1 | Alibaba (Open) | 1024 | 300K | 9.1/10 | Free | Apache 2.0 |
+| all-MiniLM-L6-v2 | Sentence-T. | 384 | 1000K | 7.8/10 | Free | Apache 2.0 |
+| bge-large-en-v1.5 | BAAI (Open) | 1024 | 400K | 8.9/10 | Free | MIT |
+| Gemini Embedding | Google | 768 | 200K | 9.0/10 | €0.00013 | Proprietary |
+| Llama Embedding | Meta | 384 | 500K | 8.2/10 | Free | Llama License |
+
+---
+
+## When to Use Vector Databases
+
+✅ **Excellent for:**
+- Semantic search (find similar documents)
+- Recommendation systems
+- Anomaly detection (outliers in vector space)
+- Image retrieval (convert images → embeddings)
+- FAQ matching
+
+❌ **Poor fit for:**
+- Exact keyword search (use traditional DBs)
+- Structured data queries (use SQL)
+- Real-time updates (latency issues)
+- Guaranteed consistency (eventually consistent)
+
+---
+
+## Troubleshooting Guide
+
+### Issue: "Retrieval returns irrelevant documents"
+1. Check embedding model is consistent
+2. Lower similarity threshold
+3. Increase k (retrieve more, rerank)
+4. Add metadata filtering
+5. Switch embedding model to higher quality
+
+### Issue: "Vector DB is very slow"
+1. Missing index (create HNSW or IVF)
+2. Wrong metric (use cosine, not euclidean)
+3. Too many dimensions (compress with PCA)
+4. Overloaded server (add replicas)
+
+### Issue: "Memory usage exploding"
+1. Switch from ChromaDB to Qdrant (more efficient)
+2. Reduce embedding dimensions
+3. Use int8 quantization instead of float32
+4. Implement pagination (don't load all)
+
+### Issue: "Cost is too high with Pinecone"
+1. Move to self-hosted (Qdrant/Milvus)
+2. Reduce update frequency (batch updates)
+3. Use cheaper embedding model
+4. Implement caching layer
+
+Vector databases are critical for RAG. Choose based on scale, budget, and complexity needs.
+
+## Sources and Links
+
+- [Chroma: AI-Native Open-Source Vector Database](https://github.com/chroma-core/chroma)
+- [Qdrant: Vector Database Written in Rust](https://github.com/qdrant/qdrant)
+- [Weaviate: Vector Database for ML](https://github.com/weaviate/weaviate)
+- [Milvus: Open-Source Vector Database](https://github.com/milvus-io/milvus)

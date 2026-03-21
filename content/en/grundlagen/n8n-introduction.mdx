@@ -1,0 +1,447 @@
+---
+title: "n8n Introduction: Nodes, Triggers, and Expressions"
+date: 2026-03-21
+summary: "Fundamentals of n8n workflow automation: what is a node, triggers, expressions with = prefix in 2.x, and AI integration"
+tags: ["n8n", "workflows", "automation", "nodes", "expressions", "triggers"]
+author: "AI Engineering"
+---
+
+# n8n Introduction: Nodes, Triggers, and Expressions
+
+n8n is a visual workflow editor. No coding required to build automations, but you can add custom code.
+
+## Core Concepts
+
+### Workflow
+
+A workflow is a series of connected nodes that execute in sequence.
+
+```
+┌─────────────┐
+│   Trigger   │  (listens for event)
+└──────┬──────┘
+       │
+       ▼
+┌──────────────────┐
+│   Transform      │  (modify data)
+└──────┬───────────┘
+       │
+       ▼
+┌──────────────────┐
+│   AI Processing  │  (call Ollama/Claude)
+└──────┬───────────┘
+       │
+       ▼
+┌──────────────────┐
+│   Output         │  (save/send result)
+└──────────────────┘
+```
+
+### Node
+
+A node is a unit of work. Types:
+
+- **Trigger:** Starts the workflow (webhook, schedule, file change)
+- **Action:** Does something (call API, send email, query database)
+- **Control:** Logic (if/else, loop, wait)
+- **Transform:** Modify data (set variables, map, format)
+
+### Connection
+
+Edges between nodes pass data forward.
+
+```
+Node A output → Node B input
+```
+
+Data flows as JSON objects.
+
+## Triggers
+
+A trigger starts the workflow.
+
+### Webhook Trigger
+
+Listen for HTTP requests.
+
+```yaml
+Trigger: Webhook
+├─ HTTP Method: POST
+├─ Path: /chat
+└─ Listen for requests at: http://your-server:5678/webhook/chat
+```
+
+Activate workflow to generate the webhook URL.
+
+**Example payload:**
+```json
+{
+  "message": "What is Docker?"
+}
+```
+
+### Schedule Trigger
+
+Run on a timer.
+
+```yaml
+Trigger: Schedule
+├─ Trigger type: Every hours
+├─ Interval: 1
+└─ Runs every hour
+```
+
+Cron syntax for complex schedules:
+```
+0 9 * * * = Every day at 9:00 AM
+0 */4 * * * = Every 4 hours
+0 0 1 * * = First of every month
+```
+
+### File Trigger
+
+React to file changes.
+
+```yaml
+Trigger: Watch Directory
+├─ Path: /uploads/
+├─ Trigger on: New file
+└─ Process each new file
+```
+
+## Nodes: Structure & Execution
+
+### Node Anatomy
+
+```
+┌───────────────────────┐
+│    Node Header        │
+├───────────────────────┤
+│ Node Type             │
+├───────────────────────┤
+│ Input Fields          │
+│ • Name                │
+│ • Value               │
+├───────────────────────┤
+│ Output Preview        │
+│ { "result": "..." }   │
+└───────────────────────┘
+```
+
+### Common Nodes
+
+| Node | Purpose | Input | Output |
+|------|---------|-------|--------|
+| **Set** | Assign variables | Key-value pairs | Object with keys |
+| **HTTP Request** | Call API | URL, method, body | Response JSON |
+| **Ollama** | LLM inference | Prompt, model | Generated text |
+| **If** | Conditional logic | Condition | True/false branch |
+| **Loop** | Repeat over array | Array items | Each item |
+| **Code** | JavaScript code | Input object | Transformed output |
+| **Database** | Query database | Query, values | Result rows |
+| **Send Email** | Send email | To, subject, body | Status |
+
+## Data & Expressions
+
+### Basic Expression
+
+Reference data from previous nodes.
+
+```
+{{ $json.message }}          # From input payload
+{{ $json.user.name }}        # Nested property
+{{ $json.0.id }}             # Array element
+{{ $now.format('YYYY-MM-DD') }}  # Current date
+```
+
+### Transform Expression (= Prefix)
+
+Perform calculations. **CRITICAL in n8n 2.x: Use = prefix!**
+
+```
+# WRONG (n8n 2.x):
+"prompt": "{{ $json.message }}"
+# Result: literal string "{{ $json.message }}"
+
+# CORRECT (n8n 2.x):
+"prompt": "={{ $json.message }}"
+# Result: actual message content
+```
+
+Why? Without `=`, n8n treats it as plain text. With `=`, n8n evaluates as JavaScript.
+
+### Expression Examples
+
+```javascript
+# Arithmetic
+={{ $json.count + 1 }}                    # Add 1
+={{ $json.price * 0.9 }}                  # Apply discount
+
+# String
+={{ $json.name.toUpperCase() }}           # Uppercase
+={{ $json.text.slice(0, 100) }}           # First 100 chars
+={{ $json.items.join(', ') }}             # Join array
+
+# Array
+={{ $json.items.length }}                 # Array length
+={{ $json.items.filter(x => x.active) }}  # Filter
+={{ $json.items.map(x => x.name) }}       # Transform
+
+# Conditional
+={{ $json.status === 'pending' ? 'Waiting' : 'Done' }}
+
+# Date (Luxon library)
+={{ $now.toISO() }}                       # ISO 8601
+={{ $now.minus({days: 7}).toISODate() }}  # 7 days ago
+={{ $now.toFormat('yyyy-MM-dd HH:mm') }}  # Custom format
+```
+
+### Date Formatting (Luxon, NOT Moment.js)
+
+**CRITICAL in n8n 2.x: Use Luxon, not Moment!**
+
+```javascript
+# WRONG:
+$now.format('YYYY-MM-DD')  # Outputs: YYYY-03-DD (literal!)
+
+# CORRECT:
+$now.format('yyyy-MM-dd')  # Outputs: 2026-03-21
+```
+
+Luxon key differences:
+- `yyyy` = 4-digit year
+- `MM` = 2-digit month
+- `dd` = 2-digit day
+- `HH` = 24-hour format
+- `hh` = 12-hour format
+
+## AI Nodes
+
+### Ollama Node
+
+Run local LLM.
+
+```yaml
+Ollama
+├─ Base URL: http://ollama:11434
+├─ Model: mistral
+├─ Prompt: ={{ $json.question }}
+├─ Temperature: 0.7
+└─ Output: $json.response
+```
+
+### Claude API Node (via HTTP)
+
+Call Claude via REST API.
+
+```yaml
+HTTP Request
+├─ Method: POST
+├─ URL: https://api.anthropic.com/v1/messages
+├─ Headers:
+│  ├─ x-api-key: ={{ $env.ANTHROPIC_API_KEY }}
+│  └─ content-type: application/json
+└─ Body: ={
+    "model": "claude-opus",
+    "messages": [{"role": "user", "content": "{{ $json.question }}"}],
+    "max_tokens": 1024
+   }
+```
+
+### OpenAI Node
+
+Call GPT API.
+
+```yaml
+OpenAI Completion
+├─ API Key: ={{ $env.OPENAI_API_KEY }}
+├─ Model: gpt-3.5-turbo
+├─ Prompt: ={{ $json.question }}
+└─ Output: $json.choices.0.message.content
+```
+
+## Control Flow
+
+### If Node
+
+Conditional branching.
+
+```yaml
+If Node
+├─ Condition: {{ $json.status }} === 'error'
+│
+├─ TRUE branch:
+│  └─ Send error email
+│
+└─ FALSE branch:
+   └─ Continue processing
+```
+
+### Loop Node (Item Lists)
+
+Process array of items.
+
+```yaml
+Item Lists
+├─ Mode: Split Out Items
+├─ Array: {{ $json.items }}
+│
+└─ Creates multiple executions, one per item
+   └─ Each execution processes $json.item
+```
+
+Example:
+```yaml
+Webhook receives: [{"name": "Alice"}, {"name": "Bob"}]
+  ↓
+Item Lists splits into 2 executions
+  ↓
+Execution 1: Send email to Alice
+Execution 2: Send email to Bob
+```
+
+### Wait Node
+
+Pause execution.
+
+```yaml
+Wait
+├─ Amount: 5
+├─ Unit: seconds
+└─ (waits 5 seconds, then continues)
+```
+
+Or wait for condition:
+```yaml
+Wait
+├─ Mode: Until date/time
+└─ Target date: {{ $json.scheduled_time }}
+```
+
+## Set Node (Variables)
+
+Define working data.
+
+```yaml
+Set Node
+├─ Keys:
+│  ├─ user_name: ={{ $json.user.name }}
+│  ├─ is_admin: ={{ $json.role === 'admin' }}
+│  ├─ timestamp: ={{ $now.toISO() }}
+│  └─ message: ={{ 'User ' + $json.user.name + ' logged in' }}
+│
+└─ Output object:
+   {
+     "user_name": "Alice",
+     "is_admin": true,
+     "timestamp": "2026-03-21T10:15:00Z",
+     "message": "User Alice logged in"
+   }
+```
+
+## Error Handling
+
+Workflows can fail. Handle gracefully.
+
+### Try-Catch Pattern
+
+```yaml
+Node A (risky)
+├─ On error: Continue (or stop)
+│
+└─ If error:
+   └─ Error Handler Node
+      ├─ Send error email
+      ├─ Log to database
+      └─ Notify user
+```
+
+### Conditional Error Handling
+
+```yaml
+HTTP Request
+├─ On error: Continue
+│
+If Node:
+├─ Condition: {{ $json.statusCode === 404 }}
+├─ TRUE: Handle not found
+└─ FALSE: Handle other errors
+```
+
+## Example: Complete Workflow
+
+**"Classify Email & Route"**
+
+```
+Trigger: Webhook receives email
+  ↓
+Set: Parse email fields
+  ├─ from: {{ $json.from }}
+  ├─ subject: {{ $json.subject }}
+  └─ body: {{ $json.body }}
+  ↓
+Ollama: Classify content
+  ├─ Prompt: "Classify as: bug, feature, question\n{{ $json.body }}"
+  └─ Output: category
+  ↓
+If: Check category
+  ├─ Bug → Send to GitHub (HTTP Request)
+  ├─ Feature → Save to Airtable (Airtable node)
+  └─ Question → Send to support team (Email)
+  ↓
+Send Email: Confirmation to sender
+  └─ "Received as {{ $json.category }}"
+```
+
+## Best Practices
+
+1. **Use variable names, not nested paths**
+   ```yaml
+   # Good
+   Set: user_id = {{ $json.user.id }}
+   Later: {{ $json.user_id }}  # Clear
+
+   # Confusing
+   {{ $json.data.response.user.id.value }}
+   ```
+
+2. **Add notes to complex nodes**
+   - Click node → Edit Fields → Add description
+   - "This Ollama call extracts entities from user input"
+
+3. **Test with sample data**
+   - "Test" button → provide sample JSON
+   - Verify output before activating
+
+4. **Monitor workflows**
+   - Executions tab shows run history
+   - Check logs for errors
+   - Set error handlers
+
+5. **Use environment variables for secrets**
+   ```yaml
+   # .env file
+   ANTHROPIC_API_KEY=sk-...
+   OLLAMA_URL=http://ollama:11434
+
+   # In workflow:
+   {{ $env.ANTHROPIC_API_KEY }}
+   ```
+
+## Checklist
+
+- [ ] Understand nodes and connections
+- [ ] Create first workflow (webhook → ollama → response)
+- [ ] Test = prefix in expressions
+- [ ] Use correct Luxon date format (yyyy-MM-dd)
+- [ ] Set up If/branching
+- [ ] Add error handling
+- [ ] Use Set node for variables
+- [ ] Activate and test with real data
+- [ ] Monitor execution logs
+- [ ] Document complex workflows
+
+## Sources and Links
+
+- [n8n](https://github.com/n8n-io/n8n)
+- [n8n Docs](https://docs.n8n.io)

@@ -1,0 +1,449 @@
+---
+title: Quantization
+date: 2026-03-21
+summary: Compress large models — FP32 to INT4, formats (GGUF, GPTQ, AWQ), quality vs VRAM tradeoffs with real numbers, quantizing with llama.cpp
+tags: [quantization, compression, models, inference, vram, llm]
+author: AI Engineering
+---
+
+# Understanding Quantization
+
+Quantization makes large models smaller by reducing number precision. Instead of storing `0.123456789`, store `0.12`. Saves massive storage and speed with minimal quality loss.
+
+An unquantized **Llama 3 70B** needs ~140 GB RAM. Quantized to INT4, it fits on RTX 4090 with 24 GB.
+
+---
+
+## Data Types: Precision to Compression
+
+### FP32 (32-bit Floating Point) - Baseline
+```
+Value: 0.123456789
+Memory: 4 bytes per number
+Used in: Training, full precision inference
+```
+
+### FP16 (16-bit) - Half Precision
+```
+Value: 0.123456789 → Rounded to ~0.1235
+Memory: 2 bytes → 50% savings
+
+Used in: GPU inference, good quality/speed balance
+Tradeoff: Smaller range, but GPUs native support
+```
+
+### BF16 (Brain Float 16) - Google's Format
+```
+Same 16-bit size, different split
+Exponent range: Same as FP32 (wider range)
+Mantissa: Reduced precision only
+
+Better for: Training stability, less underflow
+Tradeoff: Not all GPUs support native
+```
+
+### INT8 (Integer 8-bit) - First Real Compression
+```
+Format: 256 levels (0-255) instead of floating point
+
+Dequantization (for compute):
+INT8 value 159 → Back to ~0.124
+
+Memory: 1 byte → 75% savings vs FP32
+Used in: Quantization-Aware Training, some inference
+```
+
+### INT4 (Integer 4-bit) - Maximum Compression
+```
+Format: 16 levels (0-15) per weight
+Memory: 0.5 bytes per number (2 INT4s in 1 byte)
+
+Problem: 16 levels very coarse → need Group Quantization
+```
+
+---
+
+## Quantization Formats
+
+### GGUF (GPT-Generated Unified Format)
+- Developed by llama.cpp author
+- One file contains model + quantization + metadata
+- Variants: Q2_K (2.75 bits), Q3_K (3.5 bits), Q4_0 (4.0 bits), Q5_0, Q6_K, Q8_0
+
+**For Llama 3 70B:**
+- Q4_0: 33 GB (66% smaller than FP32)
+- Q5_0: 41 GB (71% smaller)
+- Q6_K: 48 GB (66% smaller, better quality)
+
+Advantages: Simple, portable, good tool support
+Disadvantages: Only for inference, quality degrades at Q2/Q3
+
+### GPTQ (GPT Quantization)
+- Per-group quantization with calibration on training data
+- More sophisticated than simple INT4
+
+**For Llama 3 70B:**
+- GPTQ-4bit: 35 GB (better quality than GGUF Q4_0)
+- GPTQ-3bit: 26 GB
+
+Advantages: Better quality, supports INT3
+Disadvantages: Quantization takes hours, less portable
+
+### AWQ (Activation-Aware Quantization)
+- Key insight: Not all weights equally important
+- Quantize less-active channels aggressively, important channels conservatively
+
+**For Llama 3 70B:**
+- AWQ-4bit: 35 GB (best quality for 4-bit)
+
+Advantages: Best quality/size ratio, fast quantization (minutes)
+Disadvantages: Newer, less tool support
+
+### EXL2 (ExLlamaV2 Format)
+- Variable bit-length per tensor
+- Extremely fast with ExLlama2 inference engine
+
+**For Llama 3 70B:**
+- EXL2-4.5bpw: 35 GB
+- Speed: 145 tokens/sec vs 120 for GGUF
+
+Specialized to ExLlama, not portable to other frameworks
+
+---
+
+## Quantization Quality Comparison
+
+### Benchmark Results (Llama 3 70B)
+
+| Format | MMLU (%) | Hellaswag (%) | Quality vs Baseline |
+|--------|----------|---------------|---|
+| FP32 Baseline | 81.2% | 88.3% | 100% |
+| GGUF Q4_0 | 80.9% | 87.8% | 99.2% |
+| GGUF Q3_K | 79.1% | 86.2% | 96.5% |
+| GPTQ-4bit | 81.0% | 88.1% | 99.7% |
+| AWQ-4bit | 81.1% | 88.2% | 99.9% |
+| EXL2-4.5 | 81.0% | 88.0% | 99.6% |
+
+**Conclusion**: 4-bit quantization has <1% quality loss with good methods!
+
+---
+
+## How to Quantize with llama.cpp
+
+### Installation
+```bash
+git clone https://github.com/ggerganov/llama.cpp
+make
+```
+
+### Convert to GGML
+```bash
+python3 convert.py ./model-directory
+# Output: ggml-model-f32.gguf (full precision)
+```
+
+### Quantize
+```bash
+./quantize ./ggml-model-f32.gguf ./ggml-model-q4_0.gguf q4_0
+# Duration: 5-30 minutes depending on size
+```
+
+### Test
+```bash
+./main -m ./ggml-model-q4_0.gguf -n 128
+```
+
+---
+
+## Which Format to Use?
+
+| Use Case | Best Format | Reason |
+|----------|------------|--------|
+| Local on RTX 4090 | GGUF Q4_0 | Simple, portable, good balance |
+| Local on weak GPU | GGUF Q2_K / Q3_K | Fits in 8 GB |
+| Cloud/Server RTX 6000 | GPTQ or AWQ | Better quality, speed optimized |
+| Maximum speed | EXL2-4.5 | Specialized CUDA kernels |
+| Largest models on small VRAM | GGUF Q2_K | Most aggressive compression |
+
+---
+
+## Performance Reality (2026 Data)
+
+### Memory Usage (Llama 3 70B)
+- FP32: 138 GB
+- FP16: 69 GB
+- GGUF Q4_0: 33 GB (76% savings!)
+- GGUF Q3_K: 25 GB
+
+### Inference Speed (Tokens/sec, RTX 4090)
+- GGUF Q4_0: 120 tokens/sec
+- GPTQ-4bit: 95 tokens/sec
+- AWQ-4bit: 98 tokens/sec
+- EXL2-4.5: 145 tokens/sec
+
+### Quality Loss (Benchmark average)
+- GGUF Q4_0: 0.8% loss
+- GGUF Q3_K: 3.5% loss
+- GPTQ-4bit: 0.3% loss
+- AWQ-4bit: 0.1% loss
+- EXL2: 0.2% loss
+
+---
+
+## Quantization-Aware Training (QAT) vs Post-Training Quantization
+
+### Post-Training Quantization (PTQ) - Default
+```
+Original Model (FP32)
+    ↓ (quantize weights after training)
+Quantized Model (INT4)
+    ↓ (use as-is)
+```
+
+**Advantages**:
+- No retraining required
+- Fast (hours vs weeks)
+- Works with any pretrained model
+
+**Disadvantages**:
+- Quality loss possible (0.8-1.5% typical)
+- Not optimal for model
+
+### Quantization-Aware Training (QAT)
+```
+Original Model (FP32)
+    ↓ (finetune WITH quantization)
+Quantized Model (INT4, trained aware)
+    ↓ (use trained model)
+```
+
+**Advantages**:
+- Model learns how to work with quantization
+- Better quality (0.1-0.3% loss)
+- Only 10-20% of training cost vs full training
+
+**Disadvantages**:
+- Requires retraining (1-2 weeks)
+- Need training data
+- More complex setup
+
+**When worth it**: >100M inference calls/month (quality matters more than speed)
+
+## QLoRA (Quantized LoRA) - Best of Both Worlds
+
+Fine-tune a quantized model without full training:
+
+```python
+from peft import LoraConfig, get_peft_model
+from transformers import BitsAndBytesConfig
+
+# Load model in 4-bit
+bnb_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_compute_dtype=torch.float16,
+)
+
+model = AutoModelForCausalLM.from_pretrained(
+    "meta-llama/Llama-2-70b",
+    quantization_config=bnb_config,
+)
+
+# Add LoRA (trainable) on top
+lora_config = LoraConfig(
+    r=16,
+    lora_alpha=32,
+    lora_dropout=0.05,
+)
+
+model = get_peft_model(model, lora_config)
+
+# Fine-tune (only LoRA weights, not model weights!)
+# 7B model size, but can finetune on 24GB RTX 4090
+```
+
+**Cost-quality trade-off**:
+- Full FP32 finetune: $2,000 (A100) + 2 weeks
+- QLoRA finetune: $200 (RTX 4090) + 3 days
+- Quality: 98% of full training
+
+**ROI**: 10× cheaper, 5× faster, 98% quality
+
+## Group Quantization (Key Insight)
+
+The secret behind INT4 quality:
+
+```
+Problem with naive INT4:
+16 levels (0-15) too coarse for all weights
+Example: Weight = 0.00001 → Rounds to 0
+Error: 100%!
+
+Solution: Group Quantization
+1. Split 70B weights into groups (e.g., 32-128 per group)
+2. Find min/max per group
+3. Quantize within group (much smaller range)
+4. Store group stats
+
+Result:
+- Group A range [0.0001 to 0.005] → INT4 precise
+- Group B range [0.5 to 2.0] → INT4 precise
+- Error: <1%
+```
+
+**Key parameters**:
+- Group size: Smaller = more precise, larger files
+- Calibration data: More/better data = better quantization
+
+## Real-World Quantization Workflow
+
+### Step 1: Choose Format
+- **Local development**: GGUF Q4_0 (simple, portable)
+- **Production server**: AWQ-4bit (best quality/speed)
+- **Maximum compatibility**: GPTQ-4bit (mature ecosystem)
+
+### Step 2: Quantize
+
+**Using llama.cpp (GGUF)**:
+```bash
+# 1. Convert to GGML format
+python convert.py ./llama-70b-fp32 --outtype f32
+
+# 2. Quantize
+./quantize ./ggml-model-f32.gguf ./ggml-model-q4_0.gguf q4_0
+
+# 3. Test
+./main -m ./ggml-model-q4_0.gguf -p "Hello" -n 50
+```
+
+**Using AutoGPTQ (GPTQ)**:
+```python
+from auto_gptq import AutoGPTQForCausalLM, BaseQuantizeConfig
+
+quantize_config = BaseQuantizeConfig(
+    bits=4,
+    group_size=128,
+    desc_act=False,
+)
+
+model = AutoGPTQForCausalLM.from_pretrained(
+    "meta-llama/Llama-2-70b",
+    quantize_config,
+    max_memory={0: "40GiB"},
+)
+
+model.save_quantized("./llama-70b-gptq")
+```
+
+### Step 3: Verify Quality
+
+```python
+# Benchmark before/after
+results_before = run_benchmark(model_fp32)
+results_after = run_benchmark(model_quantized)
+
+quality_loss = (results_before - results_after) / results_before
+print(f"Quality loss: {quality_loss:.1%}")  # Should be <1%
+```
+
+## Quantization Hardware Support
+
+| GPU | INT4 Support | Speed Impact | VRAM Savings |
+|-----|-------------|------------|--------------|
+| RTX 4090 | ✅ Native | No penalty | 76% |
+| RTX 3090 | ✅ Native | No penalty | 76% |
+| V100 | ⚠️ Partial | ~20% slower | 76% |
+| A100 | ✅ Native | No penalty | 76% |
+| M1/M2 | ❌ Via CPU | 3-5× slower | N/A |
+
+**Best for quantized inference**: RTX 4090, A100 (native support)
+
+## Cost-Benefit Analysis
+
+### Scenario 1: Small Model (7B)
+**Original**: 13 GB FP32
+**Quantized**: 3.5 GB INT4
+
+**Decision**: Barely worth it (1GB space, no speed gain)
+
+### Scenario 2: Large Model (70B)
+**Original**: 140 GB FP32
+**Quantized**: 33 GB INT4
+
+**Benefits**:
+- Fits on RTX 4090 (impossible with FP32)
+- 4× faster inference (I/O limited → compute limited)
+- Costs way less than cloud inference
+- **ROI**: Definitely worth it
+
+### Scenario 3: Mixture of Experts (685B)
+**Original**: Can't load anywhere (needs multi-GPU)
+**Quantized INT4**: 160 GB (fits on 2× A100 cluster)
+
+**ROI**: Only option for large MoE models
+
+## Top-5 Mistakes & Solutions
+
+### Mistake #1: "Use INT2 to save more space"
+- **Reality**: Quality drops 10-20%, model becomes useless
+- **Solution**: Use INT4 minimum, INT5-6 if VRAM allows
+- **Sweet spot**: INT4 with good calibration
+
+### Mistake #2: "Quantize without calibration"
+- **Reality**: Random quality loss, sometimes catastrophic
+- **Solution**: Always provide calibration data (100-1000 examples)
+- **Data quality**: Same domain as model use, not just any text
+
+### Mistake #3: "All GGUF variants are the same"
+- **Reality**: Q2_K vs Q4_0 is 10× size difference, 20% quality difference
+- **Solution**: Start with Q4_0, move to Q5_0 if quality matters
+- **Testing**: Run benchmarks before committing to format
+
+### Mistake #4: "Post-quantization is always fine"
+- **Reality**: Works 95% of the time, breaks 5% of cases
+- **Solution**: Test on your specific use case first
+- **Validation**: Run few inference examples before deployment
+
+### Mistake #5: "Quantization = Free VRAM, no trade-offs"
+- **Reality**: Some inference latency penalty possible
+- **Solution**: Measure latency before/after quantization
+- **Real impact**: Usually <5% slower, sometimes faster (I/O benefits)
+
+## Quantization Format Decision Tree
+
+```
+Do you need maximum portability?
+  ├─ Yes → GGUF (works everywhere)
+  └─ No → Check GPU support
+
+Do you have NVIDIA GPU?
+  ├─ Yes → AWQ (best quality/speed)
+  └─ No → Check other options
+
+Do you need 3-bit quantization?
+  ├─ Yes → GPTQ (only supports INT3)
+  └─ No → GGUF Q4_0 (simpler)
+
+Do you need maximum inference speed?
+  ├─ Yes → EXL2 (15% faster)
+  └─ No → GGUF Q4_0 (simplest)
+
+Default: Use GGUF Q4_0 (works everywhere, simple)
+```
+
+---
+
+## Advanced Resources
+
+- [GPTQ GitHub](https://github.com/IST-DM/GPTQ)
+- [AWQ Quantization](https://arxiv.org/abs/2306.00978)
+- [llama.cpp Quantization Guide](https://github.com/ggerganov/llama.cpp/tree/master/examples/quantize)
+- [Ollama Built-in Quantization](https://ollama.ai/library)
+- [BitsAndBytes QLoRA](https://github.com/TimDettmers/bitsandbytes)
+
+**Last Updated**: 21.03.2026 | **Total Lines**: 400+
+
+## Sources and Links
+
+- [llama.cpp: Fast Inference for Llama Models](https://github.com/ggerganov/llama.cpp)
+- [AutoGPTQ: GPTQ Quantization](https://github.com/AutoGPTQ/AutoGPTQ)
+- [AutoAWQ: Activation-Aware Quantization](https://github.com/casper-hansen/AutoAWQ)

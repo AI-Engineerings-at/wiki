@@ -1,0 +1,698 @@
+---
+title: Claude Code + n8n — Integration Guide
+date: 2026-03-21
+summary: Praktischer Guide zur Integration von Claude Code und n8n — Architektur-Patterns, Webhook-Trigger, Workflow-Generation, Testing und DSGVO-Compliance für hybride AI/Workflow-Systeme.
+tags: [claude-code, n8n, integration, automation, workflows, ai-engineering]
+author: AI Engineering
+---
+
+# Claude Code + n8n — Integration Guide
+
+Claude Code (der AI-Brain) + n8n (der Workflow-Engine) = kraftvolle Kombination. Dieser Guide zeigt dir, wie man sie zusammenbringt.
+
+## Warum Claude Code + n8n zusammen?
+
+| Tool | Spezialität | Kann nicht |
+|------|------------|-----------|
+| Claude Code | Intelligenz, Code-Analyse, Entscheidungen | Regelmäßige Execution, Scheduling, Multi-Step Orchestration |
+| n8n | Workflow-Orchestration, Scheduling, Web-Integrations, Datenfluss | Intelligente Entscheidungen, Code-Analyse, Learning |
+
+**Zusammen:**
+
+```
+n8n empfängt Event (z.B. Email)
+  ↓
+Sendet an Claude Code Webhook
+  ↓
+Claude Code analysiert intelligent
+  ↓
+Gibt Decision/Output an n8n zurück
+  ↓
+n8n führt basierend auf Decision die nächsten Steps aus
+```
+
+**Result:** Intelligente Automatisierung + Zuverlässige Execution
+
+## Architektur: Wie sie kommunizieren
+
+```
+┌─────────────────────────────────────────┐
+│              n8n Workflow                │
+├─────────────────────────────────────────┤
+│ [Webhook Trigger] → Email Received      │
+│      ↓                                   │
+│ [Extract Data] → Parse Email             │
+│      ↓                                   │
+│ [HTTP Request] → Call Claude Code CLI    │
+│      (POST to http://localhost:3000/)   │
+│      ↓                                   │
+│ [Decision Node] → If result contains     │
+│                   "spam" → Delete        │
+│                   "important" → Alert    │
+│                   "normal" → Archive     │
+└─────────────────────────────────────────┘
+        ↑                          │
+        └──────────────────────────┘
+```
+
+## Pattern 1: n8n Webhook → Claude Code → n8n
+
+### Setup: Claude Code als HTTP Server
+
+```python
+# claude_code_server.py
+
+from flask import Flask, request, jsonify
+import anthropic
+import json
+
+app = Flask(__name__)
+client = anthropic.Anthropic()
+
+@app.route('/analyze', methods=['POST'])
+def analyze():
+    """
+    HTTP Endpoint für n8n
+    n8n sendet data, wir analysieren mit Claude
+    """
+    data = request.json
+    text = data.get('text', '')
+    task = data.get('task', 'Analyze this')
+
+    # Call Claude Code
+    response = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        max_tokens=1024,
+        messages=[{
+            "role": "user",
+            "content": f"{task}:\n\n{text}"
+        }]
+    )
+
+    result = response.content[0].text
+
+    # Parse Claude output (erwarten wir JSON)
+    try:
+        result_json = json.loads(result)
+    except:
+        result_json = {"text": result, "parsed": False}
+
+    return jsonify({
+        "status": "success",
+        "analysis": result_json,
+        "tokens": response.usage.input_tokens + response.usage.output_tokens
+    })
+
+@app.route('/classify', methods=['POST'])
+def classify():
+    """
+    Klassifiziere Email in: Spam, Wichtig, Normal
+    """
+    data = request.json
+    email = data.get('email', '')
+
+    response = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        max_tokens=200,
+        messages=[{
+            "role": "user",
+            "content": f"""Klassifiziere diese Email als JSON:
+{{
+  "category": "spam" | "important" | "normal",
+  "confidence": 0.9,
+  "reason": "string"
+}}
+
+Email:
+{email}"""
+        }]
+    )
+
+    result = response.content[0].text
+
+    try:
+        classification = json.loads(result)
+    except:
+        classification = {"category": "normal", "confidence": 0.5}
+
+    return jsonify(classification)
+
+if __name__ == '__main__':
+    app.run(port=3000, debug=False)
+```
+
+### n8n Workflow (JSON)
+
+```json
+{
+  "nodes": [
+    {
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "123abc",
+      "webhookPath": "email-classifier"
+    },
+    {
+      "name": "Extract Email Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "email_text",
+              "value": "={{ $json.body.email_content }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Call Claude Code",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [650, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3000/classify",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "email",
+              "value": "={{ $node['Extract Email Data'].json.email_text }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "name": "Router",
+      "type": "n8n-nodes-base.router",
+      "typeVersion": 1,
+      "position": [850, 300],
+      "parameters": {
+        "routes": [
+          {
+            "name": "Spam",
+            "value": "={{ $node['Call Claude Code'].json.category === 'spam' }}"
+          },
+          {
+            "name": "Important",
+            "value": "={{ $node['Call Claude Code'].json.category === 'important' }}"
+          },
+          {
+            "name": "Normal",
+            "value": "={{ true }}"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Delete Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [1050, 200],
+      "parameters": {
+        "operation": "delete",
+        "messageId": "={{ $json.messageId }}"
+      }
+    },
+    {
+      "name": "Send Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 3,
+      "position": [1050, 300],
+      "parameters": {
+        "text": "🔴 Important Email: {{ $json.subject }}"
+      }
+    },
+    {
+      "name": "Archive",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [1050, 400],
+      "parameters": {
+        "operation": "addLabel",
+        "label": "Archived"
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "Extract Email Data", "branch": 0}]]
+    },
+    "Extract Email Data": {
+      "main": [[{"node": "Call Claude Code", "branch": 0}]]
+    },
+    "Call Claude Code": {
+      "main": [[{"node": "Router", "branch": 0}]]
+    },
+    "Router": {
+      "main": [
+        [{"node": "Delete Email", "branch": 0}],
+        [{"node": "Send Alert", "branch": 0}],
+        [{"node": "Archive", "branch": 0}]
+      ]
+    }
+  }
+}
+```
+
+## Pattern 2: n8n generiert Workflows mit Claude Code
+
+Szenario: "Baue mir einen Workflow für X"
+
+```bash
+# claude_code_workflow_generator.py
+
+#!/usr/bin/env python3
+
+import anthropic
+import json
+import subprocess
+
+client = anthropic.Anthropic()
+
+def generate_workflow(requirement: str) -> str:
+    """
+    Claude Code generiert n8n Workflow JSON
+    """
+    response = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        max_tokens=4000,
+        messages=[{
+            "role": "user",
+            "content": f"""
+You are an n8n workflow expert.
+
+Generate a complete n8n workflow JSON for:
+{requirement}
+
+Requirements:
+1. Use realistic n8n node types (webhook, http, slack, gmail, etc.)
+2. Include proper connections between nodes
+3. Add parameters for each node
+4. Output ONLY valid JSON, no explanations
+
+The workflow should:
+- Handle errors
+- Log important steps
+- Include all necessary parameters
+
+Output format:
+{{
+  "nodes": [...],
+  "connections": {...}
+}}
+"""
+        }]
+    )
+
+    workflow_json = response.content[0].text
+
+    # Validiere JSON
+    try:
+        workflow = json.loads(workflow_json)
+        return workflow_json
+    except:
+        print("❌ Generated invalid JSON, retrying with constraints...")
+        # Retry mit strengeren Constraints
+        return None
+
+def deploy_workflow(workflow_json: str, n8n_url: str, n8n_api_key: str):
+    """
+    Deploy den generierten Workflow zu n8n
+    """
+    import requests
+
+    # Import via n8n API
+    headers = {
+        "X-N8N-API-KEY": n8n_api_key,
+        "Content-Type": "application/json"
+    }
+
+    response = requests.post(
+        f"{n8n_url}/api/v1/workflows",
+        headers=headers,
+        json=json.loads(workflow_json)
+    )
+
+    if response.status_code == 201:
+        workflow_id = response.json()['id']
+        print(f"✓ Workflow deployed: {workflow_id}")
+
+        # Aktiviere Workflow
+        requests.patch(
+            f"{n8n_url}/api/v1/workflows/{workflow_id}",
+            headers=headers,
+            json={"active": True}
+        )
+
+        return workflow_id
+    else:
+        print(f"❌ Deploy failed: {response.text}")
+        return None
+
+# Nutze es
+requirement = """
+Customer support workflow:
+1. Email kommt an
+2. Claude Code analysiert Intent (bug report, feature request, billing issue)
+3. Basierend auf Intent:
+   - Bug: Create GitHub issue, Email to Dev Team, Add to Backlog
+   - Feature: Add to Feature Board, Email to Product Owner
+   - Billing: Create ticket in Zendesk, Email to Finance
+4. Send confirmation to customer
+"""
+
+workflow = generate_workflow(requirement)
+
+if workflow:
+    print("Generated workflow:")
+    print(workflow[:200] + "...")
+
+    # Deploy (if n8n is running)
+    # deploy_workflow(workflow, "http://localhost:5678", "your_api_key")
+```
+
+## Pattern 3: n8n Workflow mit Claude Code Nodes
+
+n8n hat eine "Code Node", wo du JavaScript/TypeScript schreiben kannst. Du kannst Claude API direkt aufrufen:
+
+```javascript
+// Inside n8n Code Node
+
+const Anthropic = require("@anthropic-ai/sdk");
+
+const client = new Anthropic({
+  apiKey: $('env', 'ANTHROPIC_API_KEY') // n8n Environment Variable
+});
+
+// Analysiere den bisherigen Workflow Context
+const emailSubject = $node.previous().json.subject;
+const emailBody = $node.previous().json.body;
+
+// Call Claude
+const response = await client.messages.create({
+  model: "claude-3-5-sonnet-20241022",
+  max_tokens: 1024,
+  messages: [
+    {
+      role: "user",
+      content: `Classify this support email:
+
+Subject: ${emailSubject}
+Body: ${emailBody}
+
+Respond with JSON:
+{
+  "category": "bug|feature|billing",
+  "priority": "high|medium|low",
+  "assignee": "devops|product|finance"
+}`
+    }
+  ]
+});
+
+// Return für nächste Node
+return {
+  json: {
+    analysis: response.content[0].text,
+    tokens_used: response.usage.input_tokens + response.usage.output_tokens
+  }
+};
+```
+
+## Pattern 4: Automated Testing mit Claude Code + n8n
+
+n8n Workflows brauchen Tests. Claude Code kann sie generieren:
+
+```bash
+# test_n8n_workflow.sh
+
+#!/bin/bash
+
+N8N_URL="http://localhost:5678"
+WORKFLOW_ID="abc123xyz"
+
+# 1. Erstelle Test-Daten
+TEST_DATA='{"email": "test@example.com", "subject": "Help"}'
+
+# 2. Trigger Workflow via Webhook
+WEBHOOK_URL="$N8N_URL/webhook/test-email"
+RESPONSE=$(curl -X POST "$WEBHOOK_URL" \
+  -H "Content-Type: application/json" \
+  -d "$TEST_DATA")
+
+echo "Workflow Response: $RESPONSE"
+
+# 3. Nutze Claude Code um Response zu validieren
+claude-code run -p "
+Validate this n8n workflow response:
+$RESPONSE
+
+Check:
+1. Status is 200-299
+2. Result has required fields
+3. No errors in execution
+
+Output JSON:
+{
+  \"valid\": true/false,
+  \"issues\": [...]
+}"
+```
+
+## Pattern 5: DSGVO-Compliance bei Claude + n8n Integration
+
+**Problem:** Wenn Claude Code personenbezogene Daten verarbeitet (Namen, Emails, etc.), brauchst du Compliance.
+
+### Datenschutz-Checkliste
+
+```markdown
+# DSGVO Compliance für Claude + n8n
+
+## Datenfluss
+- [ ] Daten fließt: User → n8n → Claude Code
+- [ ] Verschlüsselung: TLS/HTTPS bei allen Übertragungen
+- [ ] Storage: Daten NICHT in Claude Context speichern
+- [ ] Retention: Claude Context wird regelmäßig geleert (/compact)
+- [ ] Deletion: Nutzer-Anfrage auf Datenlöschung wird umgesetzt
+
+## Claude Code Nutzung
+- [ ] System Prompt erklärt dass PII-Daten anonym werden
+- [ ] Keine Daten länger als nötig speichern
+- [ ] Output wird anonymisiert bevor es zurückkommt
+- [ ] Audit Log welche User-Daten Claude sah
+
+## n8n Integration
+- [ ] n8n ist selbst gehostet (nicht Cloud)
+- [ ] Database ist verschlüsselt
+- [ ] Backups sind verschlüsselt
+- [ ] Zugriff ist log-tracked
+- [ ] PII-Daten werden vor Claude anonymisiert
+```
+
+### Implementierung
+
+```python
+# Anonymize before sending to Claude
+
+def anonymize_pii(text: str) -> dict:
+    """
+    Entferne PII bevor es zu Claude geht
+    Return: (anonymized_text, mapping)
+    """
+    import re
+
+    mapping = {}
+
+    # Email Adressen
+    emails = re.findall(r'[\w\.-]+@[\w\.-]+', text)
+    for i, email in enumerate(emails):
+        placeholder = f"[EMAIL_{i}]"
+        text = text.replace(email, placeholder)
+        mapping[placeholder] = email
+
+    # Telefonnummern
+    phones = re.findall(r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b', text)
+    for i, phone in enumerate(phones):
+        placeholder = f"[PHONE_{i}]"
+        text = text.replace(phone, placeholder)
+        mapping[placeholder] = phone
+
+    # Namen (OPTIONAL: Pattern-basiert)
+    # Das ist kompliziert, meist nur bei Kontext
+
+    return text, mapping
+
+# Nutze es
+customer_email = """
+Name: John Smith
+Email: john@example.com
+Phone: 555-123-4567
+
+Issue: Billing problem with order #12345
+"""
+
+anonymized, mapping = anonymize_pii(customer_email)
+
+# Send to Claude
+response = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    messages=[{
+        "role": "user",
+        "content": f"Analyze this support request:\n{anonymized}"
+    }]
+)
+
+# Get result, de-anonymize if needed
+result = response.content[0].text
+# (result ist anonymisiert geblieben, das ist OK)
+
+# Log für Audit
+audit_log = {
+    "timestamp": datetime.now(),
+    "user_id": "user123",
+    "data_hash": hash(customer_email),  # Hash, nicht echte Daten
+    "request_type": "support_classification"
+}
+
+save_audit_log(audit_log)
+```
+
+## Praktische Beispiele
+
+### Beispiel 1: Email-Processing Pipeline
+
+```
+Gmail Webhook (neue Email)
+  ↓
+[n8n] Extract Email Fields
+  ↓
+[Claude Code] Analyze Intent & Extract Action Items
+  ↓
+[n8n] Router:
+  - If urgent: Send Slack Alert
+  - If contains tracking#: Create Zendesk Ticket
+  - If feedback: Post to Slack #feedback
+  ↓
+[n8n] Reply to Customer
+```
+
+### Beispiel 2: Content Pipeline
+
+```
+Notion Database (neue Article)
+  ↓
+[n8n] Extract Article Content
+  ↓
+[Claude Code] Generate:
+  - SEO Keywords
+  - Social Media Captions (EN + DE)
+  - LinkedIn Post
+  - Newsletter Snippet
+  ↓
+[n8n] Publish to:
+  - Medium
+  - LinkedIn
+  - Twitter
+  - Newsletter Service
+  ↓
+[n8n] Log & Track Performance
+```
+
+### Beispiel 3: Monitoring & Alerting
+
+```
+Prometheus/Grafana (Metrics)
+  ↓
+[n8n] Collect Last 1h Metrics
+  ↓
+[Claude Code] Analyze:
+  - Are there anomalies?
+  - What could be the cause?
+  - Should we alert?
+  ↓
+[n8n] If Alert Needed:
+  - Send to PagerDuty
+  - Message on-call engineer
+  - Create incident ticket
+  ↓
+[n8n] Log Analysis for Later Review
+```
+
+## Performance-Tipps
+
+### Batching
+Statt jeden Email einzeln zu Claude zu senden, batch 10 Emails:
+
+```javascript
+// n8n Code Node
+const emails = $items;  // Array von 10 Emails
+
+const batch_text = emails.map(e =>
+  `---\nFrom: ${e.from}\nSubject: ${e.subject}\n${e.body}`
+).join('\n');
+
+// Send entire batch to Claude once
+// = 10x schneller, 1/10 der Cost
+```
+
+### Caching
+Wenn ähnliche Anfragen kommen, nutze Cache:
+
+```python
+import hashlib
+from functools import lru_cache
+
+@lru_cache(maxsize=1000)
+def classify_email_cached(email_hash: str, category_schema: str) -> str:
+    """
+    Cache based on email content hash + schema
+    """
+    # ... call Claude ...
+    return result
+
+# Nutze es
+email = "..."
+email_hash = hashlib.md5(email.encode()).hexdigest()
+result = classify_email_cached(email_hash, SCHEMA_V1)
+# Zweiter Call mit gleicher Email = sofort, aus Cache!
+```
+
+## Checkliste: Claude Code + n8n Setup
+
+- [ ] Claude Code Server läuft (auf localhost:3000 oder gehostet)
+- [ ] n8n kann Claude Code erreichen (Network-Test)
+- [ ] API Keys konfiguriert (ANTHROPIC_API_KEY in Environment)
+- [ ] n8n Webhooks sind eingerichtet
+- [ ] Workflows sind getestet (mit Test-Data)
+- [ ] Fehlerhandling ist implementiert
+- [ ] Logging funktioniert (für Debugging)
+- [ ] DSGVO Compliance prüfungen bestanden
+- [ ] Performance ist OK (< 5s Response Time)
+- [ ] Monitoring läuft (Uptime, Error Rates)
+
+---
+
+**Sources:**
+- [n8n Workflows Documentation](https://docs.n8n.io/workflows/)
+- [Anthropic API Integration Guide](https://platform.claude.com/docs/en/api/rest)
+- [DSGVO Compliance Guidelines](https://gdpr-info.eu/)
+
+## Quellen und Links
+
+- [n8n GitHub](https://github.com/n8n-io/n8n)
+- [n8n Documentation](https://docs.n8n.io)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

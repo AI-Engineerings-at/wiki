@@ -1,0 +1,688 @@
+---
+title: AI-Agent bauen — Tool Use, Speicher, Loops
+date: 2026-03-21
+summary: Schritt-für-Schritt: Baue einen Agent mit Claude API, Tool-Definitions, Execution Loop, Web Search, Dateizugriff und Conversation Memory
+tags: [AI Agent, Tool Use, Claude API, Function Calling, Agentic AI]
+author: "AI Engineering"
+---
+
+# AI-Agent bauen — Tool Use, Loops & Memory
+
+Ein AI-Agent ist ein Programm, das LLMs benutzt um Entscheidungen zu treffen. Hier bauen wir einen echten, produktionsreifen Agent.
+
+## Grundkonzept
+
+```
+User: "Was sind die Top 5 Tech Startups 2026?"
+   ↓
+Agent: "Ich brauch eine Web Search"
+   ↓
+Web Search Tool: "Hier sind die Ergebnisse"
+   ↓
+Agent: "Ich brauch noch mehr Details"
+   ↓
+Web Scraper Tool: "Hier ist der Inhalt"
+   ↓
+Agent: "Jetzt kann ich antworten"
+   ↓
+User: "Top 5: [List]"
+```
+
+Ein Agent **wiederholt diesen Loop**, bis die Aufgabe erledigt ist.
+
+## Teil 1: Setup
+
+### Installation
+
+```bash
+pip install anthropic python-dotenv requests beautifulsoup4
+```
+
+### API Key
+
+Erstelle `.env`:
+
+```
+ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxxxx
+```
+
+## Teil 2: Einfacher Agent (ohne Tools)
+
+Zu Beginn: ein Agent ohne externe Tools.
+
+```python
+# simple_agent.py
+import os
+from anthropic import Anthropic
+
+client = Anthropic()
+
+# Konversations-Geschichte
+conversation_history = []
+
+def agent_turn(user_message: str) -> str:
+    """Eine Agent-Runde: User fragt, Agent antwortet"""
+
+    # Nachricht hinzufügen
+    conversation_history.append({
+        "role": "user",
+        "content": user_message
+    })
+
+    # Agent antwortet
+    response = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        max_tokens=1024,
+        system="""Du bist ein hilfreicher Assistent.
+Beantworte Fragen präzise und auf Deutsch.""",
+        messages=conversation_history
+    )
+
+    assistant_message = response.content[0].text
+
+    # Speichern für nächsten Turn
+    conversation_history.append({
+        "role": "assistant",
+        "content": assistant_message
+    })
+
+    return assistant_message
+
+# Chat-Loop
+print("Agent bereit (exit zum beenden)\n")
+while True:
+    user_input = input("Du: ").strip()
+    if user_input.lower() == "exit":
+        break
+
+    response = agent_turn(user_input)
+    print(f"Agent: {response}\n")
+```
+
+Teste mit:
+
+```bash
+python simple_agent.py
+# Du: Wer war Marie Curie?
+# Agent: Marie Curie war eine polnische Physikerin...
+```
+
+## Teil 3: Agent mit Tools (Tool Use)
+
+Jetzt der echte Agent: er kann **Tools aufrufen**.
+
+### Tools definieren
+
+```python
+# agent_with_tools.py
+import json
+from typing import Any
+
+# Tools definieren (JSON Schema)
+TOOLS = [
+    {
+        "name": "web_search",
+        "description": "Sucht das Internet nach aktuellen Informationen",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "Die Suchanfrage"
+                }
+            },
+            "required": ["query"]
+        }
+    },
+    {
+        "name": "read_file",
+        "description": "Liest den Inhalt einer lokalen Datei",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "path": {
+                    "type": "string",
+                    "description": "Der Dateipfad (z.B. /home/user/data.txt)"
+                }
+            },
+            "required": ["path"]
+        }
+    },
+    {
+        "name": "calculator",
+        "description": "Führt mathematische Berechnungen durch",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "expression": {
+                    "type": "string",
+                    "description": "Math-Ausdruck (z.B. '2+2*3')"
+                }
+            },
+            "required": ["expression"]
+        }
+    }
+]
+
+# Tool-Implementierungen
+def web_search(query: str) -> str:
+    """Mock Web Search — In der Praxis: requests + BeautifulSoup"""
+    return f"Suchergebnisse für '{query}': [Beispiel 1], [Beispiel 2], [Beispiel 3]"
+
+def read_file(path: str) -> str:
+    """Liest eine lokale Datei"""
+    try:
+        with open(path) as f:
+            return f.read()
+    except FileNotFoundError:
+        return f"Fehler: Datei {path} nicht gefunden"
+    except Exception as e:
+        return f"Fehler beim Lesen: {e}"
+
+def calculator(expression: str) -> str:
+    """Rechnet Math-Ausdrücke"""
+    try:
+        result = eval(expression)
+        return f"{expression} = {result}"
+    except Exception as e:
+        return f"Rechenfehler: {e}"
+
+# Tool aufrufen
+def execute_tool(tool_name: str, tool_input: dict) -> str:
+    """Führt ein Tool aus"""
+
+    if tool_name == "web_search":
+        return web_search(**tool_input)
+    elif tool_name == "read_file":
+        return read_file(**tool_input)
+    elif tool_name == "calculator":
+        return calculator(**tool_input)
+    else:
+        return f"Unbekanntes Tool: {tool_name}"
+```
+
+### Agent-Loop mit Tool Use
+
+```python
+from anthropic import Anthropic
+
+client = Anthropic()
+
+def run_agent_with_tools(user_message: str) -> str:
+    """Agent mit Tool-Use Loop"""
+
+    messages = [
+        {"role": "user", "content": user_message}
+    ]
+
+    print(f"\nUser: {user_message}")
+
+    # Agentic Loop
+    while True:
+        # Claude anrufen (mit Tools)
+        response = client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=1024,
+            tools=TOOLS,
+            messages=messages,
+            system="""Du bist ein intelligenter Agent.
+Nutze die verfügbaren Tools um Aufgaben zu erfüllen.
+Sei direkt und pragmatisch."""
+        )
+
+        # Response interpretieren
+        if response.stop_reason == "end_turn":
+            # Claude ist fertig
+            final_text = response.content[0].text
+            print(f"Agent: {final_text}")
+            return final_text
+
+        elif response.stop_reason == "tool_use":
+            # Claude möchte ein Tool aufrufen
+
+            # Tool-Calls aus response extrahieren
+            tool_results = []
+
+            for content in response.content:
+                if content.type == "tool_use":
+                    tool_name = content.name
+                    tool_input = content.input
+                    tool_use_id = content.id
+
+                    print(f"  → Tool: {tool_name}({json.dumps(tool_input)})")
+
+                    # Tool ausführen
+                    result = execute_tool(tool_name, tool_input)
+                    print(f"    Ergebnis: {result[:100]}...")
+
+                    # Result für nächsten Turn speichern
+                    tool_results.append({
+                        "type": "tool_result",
+                        "tool_use_id": tool_use_id,
+                        "content": result
+                    })
+
+            # Neuen Message-Zyklus mit Tool-Results
+            messages.append({"role": "assistant", "content": response.content})
+            messages.append({"role": "user", "content": tool_results})
+
+        else:
+            # Unerwarteter Stop-Grund
+            print(f"Unerwarteter Stop-Grund: {response.stop_reason}")
+            break
+
+# Test
+run_agent_with_tools("Was ist 123 * 456?")
+run_agent_with_tools("Liest die Datei /tmp/test.txt")
+```
+
+## Teil 4: Production-Grade Tools
+
+### 1. Web Search Tool
+
+```python
+# Real web search
+import requests
+from bs4 import BeautifulSoup
+
+def web_search_real(query: str, num_results: int = 3) -> str:
+    """Real Web Search via Google (SerpAPI)"""
+
+    # Braucht API Key von https://serpapi.com
+    import os
+    api_key = os.getenv("SERPAPI_KEY")
+
+    if not api_key:
+        return "Fehler: SERPAPI_KEY nicht gesetzt"
+
+    url = "https://serpapi.com/search"
+    params = {
+        "q": query,
+        "api_key": api_key,
+        "num": num_results
+    }
+
+    try:
+        response = requests.get(url, params=params, timeout=5)
+        data = response.json()
+
+        results = []
+        for result in data.get("organic_results", [])[:num_results]:
+            results.append({
+                "title": result.get("title"),
+                "url": result.get("link"),
+                "snippet": result.get("snippet")
+            })
+
+        return json.dumps(results, ensure_ascii=False, indent=2)
+
+    except Exception as e:
+        return f"Fehler bei der Suche: {e}"
+```
+
+### 2. Web Scraper Tool
+
+```python
+def scrape_url(url: str) -> str:
+    """Scrape eine Webseite und extrahiere Text"""
+
+    try:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+        }
+        response = requests.get(url, headers=headers, timeout=10)
+
+        if response.status_code != 200:
+            return f"Fehler: Status {response.status_code}"
+
+        soup = BeautifulSoup(response.content, "html.parser")
+
+        # Entferne Scripts, styles, etc.
+        for script in soup(["script", "style", "nav"]):
+            script.decompose()
+
+        # Extrahiere Text
+        text = soup.get_text(separator="\n", strip=True)
+
+        # Limit auf 5000 Zeichen
+        return text[:5000]
+
+    except Exception as e:
+        return f"Fehler beim Scraping: {e}"
+```
+
+### 3. Datei-Management Tool
+
+```python
+def write_file(path: str, content: str) -> str:
+    """Schreibt Datei (mit Sicherheit)"""
+
+    # Sicherheit: Nur im /tmp Verzeichnis
+    import os
+
+    safe_path = os.path.abspath(path)
+    safe_dir = os.path.abspath("/tmp")
+
+    if not safe_path.startswith(safe_dir):
+        return "Fehler: Nur /tmp erlaubt"
+
+    try:
+        with open(safe_path, "w") as f:
+            f.write(content)
+        return f"Datei geschrieben: {path}"
+    except Exception as e:
+        return f"Fehler: {e}"
+```
+
+## Teil 5: Multi-Agent System
+
+Mehrere Agenten koordinieren:
+
+```python
+# multi_agent.py
+
+class ResearchAgent:
+    """Agent für Recherche"""
+    def research(self, topic: str) -> str:
+        # Nutzt web_search Tool
+        return run_agent_with_tools(f"Recherchiere: {topic}")
+
+class AnalysisAgent:
+    """Agent für Analyse"""
+    def analyze(self, data: str) -> str:
+        # Nutzt calculator Tool
+        return run_agent_with_tools(f"Analysiere: {data}")
+
+class WriterAgent:
+    """Agent für Content-Erstellung"""
+    def write_report(self, topic: str, research_data: str) -> str:
+        # Nutzt write_file Tool
+        prompt = f"""Schreibe einen Report über '{topic}'.
+Verwende diese Forschungsdaten: {research_data}"""
+        return run_agent_with_tools(prompt)
+
+# Orchestrierung
+def run_research_workflow(topic: str):
+    """Workflow: Research → Analyse → Report"""
+
+    researcher = ResearchAgent()
+    analyzer = AnalysisAgent()
+    writer = WriterAgent()
+
+    # Phase 1: Recherche
+    print(f"\n=== Phase 1: Recherche über {topic} ===")
+    research_results = researcher.research(topic)
+
+    # Phase 2: Analyse
+    print(f"\n=== Phase 2: Analyse ===")
+    analysis = analyzer.analyze(research_results)
+
+    # Phase 3: Schreiben
+    print(f"\n=== Phase 3: Report ===")
+    report = writer.write_report(topic, analysis)
+
+    return report
+
+# Test
+report = run_research_workflow("Künstliche Intelligenz in der Medizin")
+```
+
+## Teil 6: Conversation Memory
+
+Langfristige Erinnerung für Agenten:
+
+```python
+# memory_agent.py
+import json
+from datetime import datetime
+from pathlib import Path
+
+class AgentMemory:
+    """Speichert Agent-Wissen zwischen Sessions"""
+
+    def __init__(self, memory_file: str = "agent_memory.json"):
+        self.memory_file = memory_file
+        self.memory = self._load_memory()
+
+    def _load_memory(self) -> dict:
+        """Lädt Memory aus Datei"""
+        if Path(self.memory_file).exists():
+            with open(self.memory_file) as f:
+                return json.load(f)
+        return {"facts": {}, "conversation_history": []}
+
+    def _save_memory(self):
+        """Speichert Memory in Datei"""
+        with open(self.memory_file, "w") as f:
+            json.dump(self.memory, f, indent=2, default=str)
+
+    def add_fact(self, key: str, value: str):
+        """Speichert ein Fakten"""
+        self.memory["facts"][key] = {
+            "value": value,
+            "timestamp": datetime.now().isoformat()
+        }
+        self._save_memory()
+
+    def get_fact(self, key: str) -> str:
+        """Retrievet ein Fakt"""
+        if key in self.memory["facts"]:
+            return self.memory["facts"][key]["value"]
+        return None
+
+    def recall(self) -> str:
+        """Gibt alle Memory als String zurück (für Claude Context)"""
+        lines = ["=== Agent Memory ==="]
+
+        for key, data in self.memory["facts"].items():
+            lines.append(f"• {key}: {data['value']}")
+
+        return "\n".join(lines)
+
+    def add_interaction(self, user: str, assistant: str):
+        """Speichert eine Konversations-Runde"""
+        self.memory["conversation_history"].append({
+            "timestamp": datetime.now().isoformat(),
+            "user": user,
+            "assistant": assistant
+        })
+        self._save_memory()
+
+# Nutzen
+memory = AgentMemory()
+
+# Fakte speichern
+memory.add_fact("user_name", "Anna")
+memory.add_fact("user_role", "Data Scientist")
+memory.add_fact("project", "RAG-System für interne Daten")
+
+# Agent aufrufen
+def agent_with_memory(user_message: str) -> str:
+    """Agent mit Memory-Context"""
+
+    recalled_context = memory.recall()
+
+    messages = [
+        {
+            "role": "user",
+            "content": f"{recalled_context}\n\nNachricht: {user_message}"
+        }
+    ]
+
+    response = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        max_tokens=1024,
+        messages=messages,
+        system="""Du bist ein persönlicher Assistent.
+Nutze die gespeicherte Information über den User.
+Sei freundlich und präzise."""
+    )
+
+    assistant_message = response.content[0].text
+    memory.add_interaction(user_message, assistant_message)
+
+    return assistant_message
+
+# Test
+print(agent_with_memory("Wie heißt der User?"))
+print(agent_with_memory("Was ist sein Projekt?"))
+```
+
+## Teil 7: Error Handling & Retries
+
+Production-Agenten brauchen robustes Error Handling:
+
+```python
+# robust_agent.py
+import time
+from typing import Optional
+
+class RobustAgent:
+    def __init__(self, max_retries: int = 3):
+        self.max_retries = max_retries
+
+    def call_with_retry(self, messages: list, tools: list) -> dict:
+        """Ruft Claude mit Retry-Logik auf"""
+
+        for attempt in range(self.max_retries):
+            try:
+                response = client.messages.create(
+                    model="claude-3-5-sonnet-20241022",
+                    max_tokens=1024,
+                    tools=tools,
+                    messages=messages,
+                    timeout=30
+                )
+                return response
+
+            except Exception as e:
+                if attempt < self.max_retries - 1:
+                    wait_time = 2 ** attempt  # Exponential backoff
+                    print(f"Fehler (Versuch {attempt+1}): {e}")
+                    print(f"Warte {wait_time}s...")
+                    time.sleep(wait_time)
+                else:
+                    print(f"Alle Versuche fehlgeschlagen: {e}")
+                    raise
+
+    def execute_tool_safely(self, tool_name: str, tool_input: dict) -> str:
+        """Tool-Ausführung mit Error Handling"""
+
+        try:
+            if tool_name == "web_search":
+                return web_search(**tool_input)
+            elif tool_name == "read_file":
+                return read_file(**tool_input)
+            else:
+                return f"Tool nicht implementiert: {tool_name}"
+
+        except TimeoutError:
+            return "Tool timed out (>10s)"
+        except Exception as e:
+            return f"Tool-Fehler: {type(e).__name__}: {e}"
+
+# Nutzen
+agent = RobustAgent(max_retries=3)
+```
+
+## Top-5 Fehlerbehebung
+
+### 1. "Tool use not enabled"
+
+```python
+# FALSCH
+response = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    messages=messages
+    # tools= fehlt!
+)
+
+# RICHTIG
+response = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    messages=messages,
+    tools=TOOLS  # Muss definiert sein
+)
+```
+
+### 2. "Tool input schema mismatch"
+
+```python
+# FALSCH
+"input_schema": {
+    "type": "object",
+    "properties": {
+        "query": {"type": "string"}
+    }
+    # required= fehlt!
+}
+
+# RICHTIG
+"input_schema": {
+    "type": "object",
+    "properties": {
+        "query": {"type": "string"}
+    },
+    "required": ["query"]
+}
+```
+
+### 3. Agent loop schleift unendlich
+
+```python
+# Limit setzen
+max_turns = 10
+turn_count = 0
+
+while turn_count < max_turns:
+    # ...
+    turn_count += 1
+    if turn_count >= max_turns:
+        print("Max turns reached")
+        break
+```
+
+### 4. Tool gibt zu viel Text zurück
+
+```python
+# Limit Output
+result = web_search(query)
+if len(result) > 2000:
+    result = result[:2000] + "\n[Text gekürzt]"
+```
+
+### 5. Memory wird zu groß
+
+```python
+# Nur letzte N Interaktionen speichern
+def add_interaction(self, user: str, assistant: str, max_history: int = 50):
+    self.memory["conversation_history"].append({...})
+
+    if len(self.memory["conversation_history"]) > max_history:
+        # Alte Einträge löschen
+        self.memory["conversation_history"] = \
+            self.memory["conversation_history"][-max_history:]
+
+    self._save_memory()
+```
+
+## Zusammenfassung
+
+Ein Production-Agent hat:
+
+1. **Conversation History** → Zustand zwischen Turns
+2. **Tool-Definitionen** → Was der Agent darf
+3. **Execution Loop** → Wiederhole bis fertig
+4. **Error Handling** → Robustheit
+5. **Memory/State** → Langfristige Info
+6. **Timeouts** → Verhindert Hängen
+
+**Nächste Schritte:**
+- Agenten in n8n integrieren
+- Multi-Agent Orchestration
+- Agent-Monitoring & Logs
+
+## Quellen und Links
+
+- [CrewAI](https://github.com/crewAIInc/crewAI)
+- [AutoGen](https://github.com/microsoft/autogen)

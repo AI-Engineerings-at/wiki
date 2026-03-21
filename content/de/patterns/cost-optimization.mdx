@@ -1,0 +1,443 @@
+---
+title: Cost-Optimierung — AI API Kosten sparen
+date: 2026-03-21
+summary: Reduziere AI API Kosten um 70%+. Prompt Caching, Model Routing, Batch Processing, Context Window Optimization, Embedding Reuse
+tags: [Cost Optimization, LLM Economics, Prompt Caching, Model Routing]
+author: "AI Engineering"
+---
+
+# Cost-Optimierung — AI API Kosten sparen
+
+Das Dilemma: Performance kostet Geld. Wir wollen beides: schnell UND billig.
+
+## Problem-Szenario
+
+```
+Millionen API Calls/Monat, Claude API:
+- Input: 1M × 500 Tokens @ $3/1M = $1.500
+- Output: 1M × 200 Tokens @ $15/1M = $3.000
+Total: $4.500/Monat = $54.000/Jahr
+
+Das ist TEUER!
+```
+
+Aber: Du kannst 70% sparen.
+
+## Teil 1: Prompt Caching
+
+**Wie es funktioniert:**
+
+Wenn du denselben Kontext für viele Abfragen nutzt:
+- First Call: Normaler Preis
+- Nachfolgende Calls: Cache Hit = 90% günstiger!
+
+```python
+# prompt_caching.py
+from anthropic import Anthropic
+
+client = Anthropic()
+
+# 1000 Seiten eines PDF — laden einmal
+LARGE_CONTEXT = """
+[Full PDF Content hier — 1M Tokens]
+...
+"""
+
+def query_with_cache(question: str) -> str:
+    """Nutze Prompt Caching"""
+
+    response = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        max_tokens=1024,
+        system=[
+            {
+                "type": "text",
+                "text": "Du bist ein Dokumenten-Expert."
+            },
+            {
+                "type": "text",
+                "text": LARGE_CONTEXT,
+                "cache_control": {"type": "ephemeral"}  # Cache diese Tokens!
+            }
+        ],
+        messages=[
+            {"role": "user", "content": question}
+        ]
+    )
+
+    # Check Cache-Performance
+    usage = response.usage
+    print(f"Input Tokens: {usage.input_tokens}")
+    print(f"Cache Read Tokens: {getattr(usage, 'cache_read_input_tokens', 0)}")
+    print(f"Cache Creation Tokens: {getattr(usage, 'cache_creation_input_tokens', 0)}")
+
+    return response.content[0].text
+
+# First Call: ~1M Tokens
+# Cost: 1M × $3/1M = $3
+
+print("Call 1:")
+answer1 = query_with_cache("Was ist auf Seite 42?")
+
+# Second Call: Nur neue Tokens
+# Cost: 500 × $3/1M + 1M × $0.30/1M = $0.33 ← 90% günstiger!
+
+print("\nCall 2:")
+answer2 = query_with_cache("Erkläre den Abschnitt über ...")
+```
+
+**Kostenrechnung:**
+- Ohne Caching: 1M × $3 × 100 Calls = $300
+- Mit Caching: $3 + (100 × $0.30) = $33
+- **Einsparung: 89%!**
+
+**Wann Caching?**
+- ✓ Großer Kontext + viele ähnliche Abfragen
+- ✓ Dokumenten-Analysen
+- ✓ Batch-Verarbeitung
+- ✗ Einmalige Calls
+
+## Teil 2: Model Routing
+
+Nicht alle Aufgaben brauchen das teuerste Modell!
+
+```python
+# model_routing.py
+from anthropic import Anthropic
+
+client = Anthropic()
+
+def classify_task(question: str) -> str:
+    """Bestimme Task-Komplexität"""
+
+    # Haiku ist billiger und schnell
+    response = client.messages.create(
+        model="claude-3-5-haiku-20241022",  # $0.80/$2.40 pro 1M Tokens (vs Sonnet $3/$15)
+        max_tokens=100,
+        messages=[
+            {
+                "role": "user",
+                "content": f"""Klassifiziere diese Aufgabe als EINFACH oder KOMPLEX:
+"{question}"
+
+Antworte nur mit EINFACH oder KOMPLEX."""
+            }
+        ]
+    )
+
+    return response.content[0].text.strip()
+
+def route_query(question: str) -> dict:
+    """Nutze billiges Modell für einfache Tasks"""
+
+    complexity = classify_task(question)
+
+    if complexity == "EINFACH":
+        # Haiku: $0.80 pro 1M Input Tokens
+        model = "claude-3-5-haiku-20241022"
+        max_tokens = 256
+    else:
+        # Sonnet: $3 pro 1M Input Tokens
+        model = "claude-3-5-sonnet-20241022"
+        max_tokens = 1024
+
+    response = client.messages.create(
+        model=model,
+        max_tokens=max_tokens,
+        messages=[
+            {"role": "user", "content": question}
+        ]
+    )
+
+    # Cost berechnen
+    input_cost = response.usage.input_tokens * (0.80 if "haiku" in model else 3.0) / 1_000_000
+    output_cost = response.usage.output_tokens * (2.40 if "haiku" in model else 15.0) / 1_000_000
+
+    return {
+        "answer": response.content[0].text,
+        "model": model,
+        "cost": input_cost + output_cost
+    }
+
+# Test
+tasks = [
+    "Was ist 2+2?",  # EINFACH → Haiku
+    "Erkläre Quantenmechanik im Detail",  # KOMPLEX → Sonnet
+    "Wer war Napoleon?"  # EINFACH → Haiku
+]
+
+for task in tasks:
+    result = route_query(task)
+    print(f"Model: {result['model']}")
+    print(f"Cost: ${result['cost']:.6f}")
+    print(f"Answer: {result['answer'][:100]}...\n")
+```
+
+**Cost Vergleich:**
+```
+Haiku:  $0.80 input, $2.40 output
+Sonnet: $3.00 input, $15.0 output
+
+Einfache Query (500 input, 100 output):
+- Haiku:  $0.0004 + $0.00024 = $0.00064
+- Sonnet: $0.0015 + $0.00150 = $0.00300
+
+Haiku ist 4.7x billiger!
+```
+
+Über 1M Calls:
+```
+Haiku Only:   $640
+Sonnet Only:  $3.000
+Hybrid (80% Haiku, 20% Sonnet): ~$1.200
+Einsparung: 60%
+```
+
+## Teil 3: Batch Processing
+
+Batch-API hat 50% Discount!
+
+```python
+# batch_processing.py
+from anthropic import Anthropic
+import json
+
+client = Anthropic()
+
+def create_batch_requests(prompts: list) -> list:
+    """Erstelle Batch-Requests"""
+
+    requests = []
+    for i, prompt in enumerate(prompts):
+        requests.append({
+            "custom_id": f"request-{i}",
+            "params": {
+                "model": "claude-3-5-sonnet-20241022",
+                "max_tokens": 512,
+                "messages": [
+                    {"role": "user", "content": prompt}
+                ]
+            }
+        })
+
+    return requests
+
+def submit_batch(requests: list) -> str:
+    """Reiche Batch ein"""
+
+    # JSONL Format
+    batch_input = "\n".join(json.dumps(r) for r in requests)
+
+    # Batch API (nicht direkt — braucht Files API)
+    # Das ist ein vereinfachtes Beispiel
+
+    print(f"Batch submitted: {len(requests)} requests")
+    print("Batch hat 50% Discount!")
+    return "batch-id-123"
+
+# Nutzung
+prompts = [
+    "Was ist AI?",
+    "Erkläre Machine Learning",
+    "Was ist ein Neural Network?"
+]
+
+requests = create_batch_requests(prompts)
+batch_id = submit_batch(requests)
+
+# Cost Vergleich:
+print("\nCost für 1000 Queries:")
+print("Regular API: $100")
+print("Batch API: $50 (50% Rabatt)")
+```
+
+**Wann Batch?**
+- ✓ 100+ Anfragen zusammen
+- ✓ Nicht Zeit-kritisch (overnight Batch)
+- ✗ Real-Time Responses
+- ✗ < 100 Anfragen (setup overhead)
+
+## Teil 4: Context Window Optimization
+
+Weniger Tokens = weniger Kosten.
+
+```python
+# context_optimization.py
+from anthropic import Anthropic
+
+client = Anthropic()
+
+# FALSCH: Gib gesamtes PDF (1M Tokens)
+full_context = """[1.000.000 Tokens von großem PDF]"""
+
+# RICHTIG: Nutze nur relevante Seiten
+def extract_relevant_context(document: str, question: str, num_chunks: int = 3) -> str:
+    """Extrahiere nur relevante Chunks"""
+
+    # Split document in Chunks
+    chunks = [document[i:i+50000] for i in range(0, len(document), 50000)]
+
+    # Finde relevante Chunks (mit Haiku — billig!)
+    relevant_chunks = []
+
+    for chunk in chunks:
+        response = client.messages.create(
+            model="claude-3-5-haiku-20241022",
+            max_tokens=50,
+            messages=[
+                {
+                    "role": "user",
+                    "content": f"Ist dieser Chunk relevant für '{question}'?\n\n{chunk[:1000]}"
+                }
+            ]
+        )
+
+        if "ja" in response.content[0].text.lower():
+            relevant_chunks.append(chunk)
+
+    # Gib nur relevante Chunks zurück
+    return "\n---\n".join(relevant_chunks[:num_chunks])
+
+# Nutze optimierte Kontext
+def query_with_optimization(document: str, question: str) -> tuple:
+    """Query mit Context-Optimierung"""
+
+    # Extracting: Billiger (Haiku)
+    context = extract_relevant_context(document, question)
+
+    # Answering: Sonnet für Quality
+    response = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        max_tokens=512,
+        system=f"Context:\n{context}",
+        messages=[
+            {"role": "user", "content": question}
+        ]
+    )
+
+    return response.content[0].text, len(context)
+
+# Cost Vergleich:
+print("1M Token Document:")
+print("- Full Context: 1M × $0.003 = $3")
+print("- Optimized: 50k × $0.003 = $0.15 (95% cheaper!)")
+```
+
+## Teil 5: Embedding Reuse
+
+Generiere Embeddings einmal, nutze sie wieder.
+
+```python
+# embedding_reuse.py
+from anthropic import Anthropic
+import json
+import hashlib
+
+client = Anthropic()
+
+class EmbeddingCache:
+    def __init__(self, cache_file: str = "embeddings.json"):
+        self.cache_file = cache_file
+        self.cache = self._load()
+
+    def _load(self):
+        try:
+            with open(self.cache_file) as f:
+                return json.load(f)
+        except FileNotFoundError:
+            return {}
+
+    def _save(self):
+        with open(self.cache_file, "w") as f:
+            json.dump(self.cache, f)
+
+    def get_or_create_embedding(self, text: str) -> list:
+        """Rufe oder erstelle Embedding"""
+
+        text_hash = hashlib.md5(text.encode()).hexdigest()
+
+        if text_hash in self.cache:
+            print(f"✓ Embedding Cache Hit")
+            return self.cache[text_hash]
+
+        # Erstelle Embedding (nur einmal!)
+        print(f"✗ Embedding Miss, creating...")
+        from anthropic import Anthropic as AnthropicClient
+        # Note: Anthropic hat keine native Embedding API, aber z.B. OpenAI:
+        # embedding = openai_client.embeddings.create(input=text)["data"][0]["embedding"]
+
+        # For demo:
+        embedding = [0.1, 0.2, 0.3]  # Placeholder
+
+        self.cache[text_hash] = embedding
+        self._save()
+
+        return embedding
+
+# Nutzung
+cache = EmbeddingCache()
+
+# First time: Kostet API Call
+emb1 = cache.get_or_create_embedding("Künstliche Intelligenz")
+
+# Second time: Cache Hit, kostenlos!
+emb2 = cache.get_or_create_embedding("Künstliche Intelligenz")
+
+# Different text: Neuer Call
+emb3 = cache.get_or_create_embedding("Machine Learning")
+```
+
+## Zusammenfassung: Kostenoptimierungs-Strategie
+
+| Methode | Einsparung | Komplexität | Best für |
+|---------|------------|-------------|----------|
+| Prompt Caching | 90% | Mittel | Große Kontexte |
+| Model Routing | 60% | Niedrig | Mixed Workloads |
+| Batch API | 50% | Hoch | Bulk Processing |
+| Context Opt. | 95% | Hoch | Large Documents |
+| Embedding Cache | 100% | Niedrig | Repeated Queries |
+
+**Praktische Kombinat...ion (Real World):**
+
+```python
+# ultimate_optimization.py
+def process_query(document: str, question: str) -> str:
+    # 1. Prüfe Embedding Cache
+    embedding = cache.get_or_create_embedding(question)
+
+    # 2. Optimiere Kontext
+    context = extract_relevant_context(document, question)
+
+    # 3. Klassifiziere Komplexität
+    complexity = classify_task(question)
+
+    # 4. Route zu billiges Modell wenn möglich
+    model = "haiku" if complexity == "EINFACH" else "sonnet"
+
+    # 5. Nutze Cache für System Prompt
+    response = client.messages.create(
+        model=model,
+        system=[
+            {"type": "text", "text": SYSTEM_PROMPT},
+            {"type": "text", "text": context, "cache_control": {"type": "ephemeral"}}
+        ],
+        messages=[...]
+    )
+
+    return response.content[0].text
+```
+
+**Gesamt-Einsparung:** 70-85% je nach Workload!
+
+## Top Tips
+
+- ✓ Cache System Prompts & Templates
+- ✓ Haiku für Klassifikation & Routen
+- ✓ Batch API für Overnight Runs
+- ✓ Speichere Embeddings lokal
+- ✓ Track die tatsächlichen Kosten (setup monitoring!)
+
+## Quellen und Links
+
+- [vLLM](https://github.com/vllm-project/vllm)
+- [llama.cpp](https://github.com/ggerganov/llama.cpp)

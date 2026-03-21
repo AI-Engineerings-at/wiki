@@ -1,0 +1,402 @@
+---
+title: AI Agent Patterns — ReAct, Plan-and-Execute, Reflection, Multi-Agent
+date: 2026-03-21
+summary: Architektur-Muster für AI Agents. ReAct Loop, Plan-and-Execute, Reflection, Multi-Agent Orchestration, Komplexitäts-Tradeoffs
+tags: [Agent Patterns, ReAct, Multi-Agent, Orchestration, Reasoning]
+author: "AI Engineering"
+---
+
+# AI Agent Patterns — ReAct, Plan-and-Execute, Reflection
+
+Agent Architektur bestimmt Qualität und Speed. Hier sind die 4 wichtigsten Patterns.
+
+## Pattern 1: ReAct (Reasoning + Acting)
+
+**Wie es funktioniert:**
+```
+Thought → Action → Observation → Thought → ...
+```
+
+Der Agent denkt, agiert, beobachtet, denkt neu.
+
+```python
+# react_agent.py
+from anthropic import Anthropic
+
+client = Anthropic()
+
+def react_agent(problem: str, max_iterations: int = 5) -> str:
+    """ReAct Agent: Denken + Handeln"""
+
+    messages = [
+        {
+            "role": "user",
+            "content": f"""Du bist ein ReAct Agent. Löse dieses Problem:
+{problem}
+
+Format:
+Thought: Was muss ich tun?
+Action: Welches Tool aufrufen?
+Observation: Was ist das Result?
+(Repeat bis Lösung gefunden)"""
+        }
+    ]
+
+    for iteration in range(max_iterations):
+        response = client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=2048,
+            messages=messages
+        )
+
+        thought = response.content[0].text
+        print(f"=== Iteration {iteration+1} ===")
+        print(thought)
+
+        # Prüfe ob fertig
+        if "Finale Antwort:" in thought:
+            return thought
+
+        # Sonst: Feedback geben und retry
+        messages.append({"role": "assistant", "content": thought})
+        messages.append({
+            "role": "user",
+            "content": "Bitte fahre fort oder gib finale Antwort."
+        })
+
+    return "Max iterations reached"
+
+# Test
+result = react_agent("Wie berechne ich die Fläche eines Kreises mit Radius 5?")
+```
+
+**Wann ReAct?**
+- ✓ Komplexe Probleme mit mehreren Schritten
+- ✓ Braucht Verständnis von Zwischenschritten
+- ✗ Einfache Aufgaben (zu langsam)
+- ✗ Real-Time Anwendungen (zu slow)
+
+## Pattern 2: Plan-and-Execute
+
+**Wie es funktioniert:**
+```
+1. Plan erstellen (Schritt-für-Schritt)
+2. Plan ausführen (alle Schritte)
+3. Zusammenfassen (Ergebnis)
+```
+
+Schneller als ReAct!
+
+```python
+# plan_execute_agent.py
+from anthropic import Anthropic
+import json
+
+client = Anthropic()
+
+class PlanExecuteAgent:
+    def __init__(self):
+        self.plan = []
+        self.results = []
+
+    def create_plan(self, problem: str) -> list:
+        """Erstelle einen Plan"""
+        prompt = f"""Erstelle einen strukturierten Plan zur Lösung:
+{problem}
+
+Gebe nur die Schritte als JSON-Array aus:
+["Schritt 1", "Schritt 2", ...]"""
+
+        response = client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=1024,
+            messages=[{"role": "user", "content": prompt}]
+        )
+
+        plan_text = response.content[0].text
+        # Parse JSON
+        self.plan = json.loads(plan_text)
+        return self.plan
+
+    def execute_plan(self) -> list:
+        """Führe jeden Schritt aus"""
+        for i, step in enumerate(self.plan):
+            print(f"Schritt {i+1}: {step}")
+
+            response = client.messages.create(
+                model="claude-3-5-sonnet-20241022",
+                max_tokens=512,
+                messages=[
+                    {"role": "user", "content": f"Führe diesen Schritt aus: {step}"}
+                ]
+            )
+
+            result = response.content[0].text
+            self.results.append({
+                "step": step,
+                "result": result
+            })
+
+        return self.results
+
+    def summarize(self) -> str:
+        """Fasse Ergebnisse zusammen"""
+        results_text = json.dumps(self.results, ensure_ascii=False, indent=2)
+
+        response = client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=512,
+            messages=[
+                {
+                    "role": "user",
+                    "content": f"Fasse diese Ergebnisse zusammen:\n{results_text}"
+                }
+            ]
+        )
+
+        return response.content[0].text
+
+# Test
+agent = PlanExecuteAgent()
+plan = agent.create_plan("Wie baue ich einen einfachen Chatbot?")
+print(f"Plan: {plan}\n")
+
+results = agent.execute_plan()
+summary = agent.summarize()
+print(f"Zusammenfassung: {summary}")
+```
+
+**Wann Plan-and-Execute?**
+- ✓ Viele sequenzielle Schritte
+- ✓ Jeder Schritt ist unabhängig
+- ✓ Performance wichtig
+- ✗ Adaptive Probleme (braucht Feedback zwischen Schritten)
+
+## Pattern 3: Reflection
+
+Agent überprüft und verbessert seine eigenen Antworten.
+
+```python
+# reflection_agent.py
+from anthropic import Anthropic
+
+client = Anthropic()
+
+def reflection_agent(problem: str, max_reflections: int = 3) -> str:
+    """Agent mit Selbst-Reflexion"""
+
+    response = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        max_tokens=1024,
+        messages=[
+            {"role": "user", "content": f"Löse: {problem}"}
+        ]
+    )
+
+    answer = response.content[0].text
+
+    for reflection in range(max_reflections):
+        # Kritik an eigener Antwort
+        critique = client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=512,
+            messages=[
+                {
+                    "role": "user",
+                    "content": f"""Beurteile diese Antwort kritisch:
+{answer}
+
+Ist sie korrekt, vollständig und klar?"""
+                }
+            ]
+        )
+
+        critique_text = critique.content[0].text
+        print(f"=== Reflexion {reflection+1} ===")
+        print(critique_text)
+
+        # Verbessern wenn nötig
+        if "falsch" in critique_text.lower() or "unvollständig" in critique_text.lower():
+            improved = client.messages.create(
+                model="claude-3-5-sonnet-20241022",
+                max_tokens=1024,
+                messages=[
+                    {"role": "user", "content": f"Löse: {problem}"},
+                    {"role": "assistant", "content": answer},
+                    {
+                        "role": "user",
+                        "content": f"Kritik: {critique_text}\n\nVerbessere deine Antwort!"
+                    }
+                ]
+            )
+
+            answer = improved.content[0].text
+        else:
+            print("Antwort ist zufriedenstellend!")
+            break
+
+    return answer
+
+# Test
+final_answer = reflection_agent("Was ist das Fibonacci Sequence?")
+print(f"\nFinal Answer: {final_answer}")
+```
+
+**Wann Reflection?**
+- ✓ Qualität ist wichtig
+- ✓ Komplexe Problem mit vielen Fallen
+- ✓ Zeit ist nicht begrenzt
+- ✗ Real-Time Applikationen
+
+## Pattern 4: Multi-Agent (Orchestration)
+
+Mehrere spezialisierte Agenten arbeiten zusammen.
+
+```python
+# multi_agent.py
+from anthropic import Anthropic
+from dataclasses import dataclass
+
+@dataclass
+class Agent:
+    name: str
+    role: str
+    system_prompt: str
+
+class MultiAgentOrchestrator:
+    def __init__(self):
+        self.client = Anthropic()
+
+        self.agents = {
+            "researcher": Agent(
+                name="Researcher",
+                role="Recherche und Fakten sammeln",
+                system_prompt="Du bist ein Recherche-Experte. Sammle genaue Informationen."
+            ),
+            "analyzer": Agent(
+                name="Analyzer",
+                role="Analyse und Interpretation",
+                system_prompt="Du bist ein Analyse-Experte. Interpretiere und strukturiere Informationen."
+            ),
+            "writer": Agent(
+                name="Writer",
+                role="Content-Erstellung",
+                system_prompt="Du bist ein Writer-Experte. Erstelle gut geschriebene Reports."
+            )
+        }
+
+        self.context = {}
+
+    def execute_agent(self, agent_name: str, prompt: str) -> str:
+        """Führe einen spezifischen Agent aus"""
+        agent = self.agents[agent_name]
+
+        response = self.client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=1024,
+            system=agent.system_prompt,
+            messages=[
+                {"role": "user", "content": prompt}
+            ]
+        )
+
+        result = response.content[0].text
+        self.context[agent_name] = result
+        return result
+
+    def run_workflow(self, topic: str) -> str:
+        """Orchestriert den Workflow"""
+
+        # Phase 1: Recherche
+        print("=== Phase 1: Recherche ===")
+        research = self.execute_agent(
+            "researcher",
+            f"Recherchiere: {topic}"
+        )
+        print(research[:200] + "...")
+
+        # Phase 2: Analyse
+        print("\n=== Phase 2: Analyse ===")
+        analysis = self.execute_agent(
+            "analyzer",
+            f"""Analysiere diese Forschung:
+{research[:500]}"""
+        )
+        print(analysis[:200] + "...")
+
+        # Phase 3: Writing
+        print("\n=== Phase 3: Report ===")
+        report = self.execute_agent(
+            "writer",
+            f"""Schreibe einen Report über '{topic}'.
+Forschung: {research[:500]}
+Analyse: {analysis[:500]}"""
+        )
+
+        return report
+
+# Test
+orchestrator = MultiAgentOrchestrator()
+final_report = orchestrator.run_workflow("Künstliche Intelligenz im Gesundheitswesen")
+print(f"\nFinal Report: {final_report}")
+```
+
+**Wann Multi-Agent?**
+- ✓ Unterschiedliche Skill brauchen
+- ✓ Große Projekte (Research → Analyse → Writing)
+- ✓ Spezialisierung wichtig
+- ✗ Einfache Tasks (overhead)
+
+## Vergleich
+
+| Pattern | Speed | Qualität | Komplexität | Best für |
+|---------|-------|----------|-------------|----------|
+| **ReAct** | Langsam | Sehr gut | Hoch | Komplexe Probleme |
+| **Plan-Execute** | Schnell | Gut | Mittel | Sequenzielle Tasks |
+| **Reflection** | Langsam | Ausgezeichnet | Hoch | Qualität-kritisch |
+| **Multi-Agent** | Mittel | Gut | Sehr Hoch | Große Workflows |
+
+## Hybrid Pattern (Best of Both)
+
+```python
+# hybrid_agent.py
+class HybridAgent:
+    """Kombiniert Plan-Execute + Reflection"""
+
+    def solve(self, problem: str) -> str:
+        # Phase 1: Plan-Execute (schnell)
+        plan = self._create_plan(problem)
+        results = self._execute_plan(plan)
+        draft = self._summarize(results)
+
+        # Phase 2: Reflection (Verbesserung)
+        feedback = self._get_feedback(draft)
+
+        if "unvollständig" in feedback.lower():
+            # Nächste Iteration
+            draft = self._improve(draft, feedback)
+
+        return draft
+```
+
+**Diese Kombination ist perfekt für Production!**
+
+## Zusammenfassung
+
+Agent-Pattern Auswahl:
+
+1. **Einfache Task?** → Plan-Execute
+2. **Komplexes Problem?** → ReAct
+3. **Hohe Qualität nötig?** → Reflection
+4. **Großer Workflow?** → Multi-Agent
+5. **Produktion?** → Hybrid (Plan + Reflection)
+
+**Nächste Schritte:**
+- Agent Monitoring
+- Error Recovery
+- Performance Optimization
+
+## Quellen und Links
+
+- [CrewAI Docs](https://docs.crewai.com)
+- [AutoGen Docs](https://microsoft.github.io/autogen/)

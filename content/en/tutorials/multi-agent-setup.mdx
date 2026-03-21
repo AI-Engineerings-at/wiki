@@ -1,0 +1,413 @@
+---
+title: "Build a Multi-Agent System Step by Step"
+date: 2026-03-21
+summary: "Architecture and implementation for coordinated AI agents: specialist roles, task delegation, communication patterns"
+tags: ["ai-agents", "multi-agent", "orchestration", "n8n", "workflows", "architecture"]
+author: "AI Engineering"
+---
+
+# Build a Multi-Agent System Step by Step
+
+A multi-agent system has independent AI agents with specialized roles that communicate and delegate work. This guide covers the architecture, communication patterns, and n8n implementation.
+
+## System Architecture
+
+```
+┌─────────────────────────────────────────────┐
+│           User/External Request              │
+└────────────────┬────────────────────────────┘
+                 │
+         ┌───────▼────────┐
+         │   Dispatcher   │  (routes requests)
+         │   (n8n core)   │
+         └───┬────────┬───┘
+             │        │
+      ┌──────▼──┐  ┌──▼──────┐
+      │ Agent A  │  │ Agent B │  Specialist agents
+      │Research │  │ Builder │  (each has role)
+      └─────┬────┘  └────┬────┘
+            │            │
+      ┌─────▼────────────▼──┐
+      │  Message Queue      │  (n8n webhooks)
+      │  (async comms)      │
+      └────────────────────┘
+```
+
+## Agent Roles (Example)
+
+Define clear responsibilities for each agent:
+
+| Agent | Role | Tools | Input | Output |
+|-------|------|-------|-------|--------|
+| Researcher | Finds info, evaluates sources | Web API, documents | Topic | Summary, sources |
+| Builder | Implements solutions | Code, n8n | Spec | Working code/workflow |
+| Reviewer | QA, tests output | Test frameworks | Artifact | Pass/fail, issues |
+| Dispatcher | Routes tasks | Scheduling, webhooks | Request | Task assignment |
+
+## Communication Pattern 1: Synchronous (Webhook Chain)
+
+Sequential execution: Agent A finishes → calls Agent B → waits for result.
+
+**Pros:** Simple, results immediately available
+**Cons:** Slow, failure in Agent B blocks whole chain
+
+```
+Request
+   ↓ (API call)
+Agent A (research)
+   ↓ (webhook POST with results)
+Agent B (build)
+   ↓ (response)
+Response
+```
+
+### Implementation in n8n
+
+**Agent A Workflow: "Research Topic"**
+
+```yaml
+Trigger: HTTP POST webhook
+├── Input: { "topic": "Docker for AI" }
+├── Search Web API for topic
+├── Summarize with Ollama
+└── Call Agent B webhook with results
+```
+
+**Agent B Workflow: "Build Tutorial"**
+
+```yaml
+Trigger: HTTP webhook (from Agent A)
+├── Input: { "research_summary": "..." }
+├── Create tutorial structure
+├── Write content with Ollama
+└── Return tutorial to caller
+```
+
+**In n8n:**
+
+1. Agent A: Add **HTTP Request** node
+   ```
+   URL: http://your-server:5678/webhook/build-tutorial
+   Method: POST
+   Body:
+   {
+     "research": {{ $json.research_summary }},
+     "topic": {{ $json.topic }}
+   }
+   ```
+
+2. Agent B: **Webhook** trigger accepts request, processes, returns response
+
+**Test:**
+```bash
+curl -X POST http://your-server:5678/webhook/research \
+  -H "Content-Type: application/json" \
+  -d '{"topic": "Docker for AI"}'
+
+# Response comes from Agent B (full chain executed)
+```
+
+## Communication Pattern 2: Asynchronous (Message Queue)
+
+Fire-and-forget: Agent A submits task → Agent B processes when ready.
+
+**Pros:** Scalable, agents independent, fault-tolerant
+**Cons:** Complex, need status polling
+
+```
+Request
+   ↓
+Agent A (queue task)
+   ↓ (immediate return: "task_id")
+Client polls status
+   ↓
+Agent B (background)
+   ├── Processes task
+   └── Updates status
+
+Client checks: /api/task/task_id → status, result
+```
+
+### Implementation with n8n + Database
+
+**Dispatcher (Main Workflow)**
+
+```yaml
+Trigger: HTTP POST
+├── Input: { "action": "analyze_feedback" }
+├── Set node: Generate task_id = UUID
+├── Write to tasks table:
+│   {
+│     "task_id": {{ $json.task_id }},
+│     "action": "analyze_feedback",
+│     "status": "pending",
+│     "created_at": now()
+│   }
+└── Respond: { "task_id": "...", "status": "pending" }
+```
+
+**Agent Worker (Background Workflow)**
+
+```yaml
+Trigger: Schedule (every 1 minute)
+├── Query: SELECT * FROM tasks WHERE status = 'pending'
+├── For each pending task:
+│   ├── Run specialized agent (n8n sub-workflow)
+│   ├── Update task row:
+│   │   {
+│   │     "status": "completed",
+│   │     "result": {{ $json.agent_output }},
+│   │     "completed_at": now()
+│   │   }
+│   └── Notify requestor (email/webhook)
+```
+
+**Status Endpoint**
+
+```yaml
+Trigger: HTTP GET /task/{task_id}
+├── Query: SELECT * FROM tasks WHERE task_id = {task_id}
+└── Return: { "status": "completed", "result": {...} }
+```
+
+## Communication Pattern 3: Hierarchical (Manager → Workers)
+
+A manager agent coordinates multiple worker agents.
+
+```
+Manager (Orchestrator)
+├── Task 1 → Worker A
+├── Task 2 → Worker B (parallel)
+└── Task 3 → Worker C (parallel)
+   ↓ (wait for all)
+Combine results
+   ↓
+Return to user
+```
+
+**Example: Content Pipeline Manager**
+
+1. **Manager:** "Create blog post"
+2. Split into subtasks:
+   - Task A: Research topic (Worker A)
+   - Task B: Create outline (Worker B)
+   - Task C: Generate images (Worker C)
+3. **Parallel execution** (all run at same time)
+4. **Merge results** → Final blog post
+
+**In n8n:**
+
+```
+Trigger
+  ↓
+Set: Generate subtask IDs
+  ↓
+┌─────────────────────────────────┐
+│ Parallel branches (3 workers)   │
+├─────┬──────────┬────────────────┤
+│     │          │                │
+Task A Task B    Task C           │
+│     │          │                │
+└─────┴──────────┴────────────────┘
+  ↓
+Merge node (wait for all)
+  ↓
+Combine results
+  ↓
+Save to file/database
+```
+
+## Agent Communication via Shared Database
+
+Agents write to shared tables, read others' output.
+
+```python
+# Agent A writes findings to database
+INSERT INTO findings (agent_id, topic, data, created_at)
+VALUES ('researcher', 'Docker', {...}, now())
+
+# Agent B reads from findings table
+SELECT * FROM findings WHERE agent_id = 'researcher'
+
+# Agent B writes its own findings
+INSERT INTO findings (agent_id, topic, data, created_at)
+VALUES ('builder', 'Docker', {...}, now())
+```
+
+**In n8n:**
+
+```yaml
+Agent A Workflow:
+  ├── Research topic
+  ├── Write to database:
+  │   Table: findings
+  │   Rows: [agent='researcher', topic='Docker', ...]
+  └── Emit event: 'research_complete'
+
+Agent B Workflow:
+  ├── Webhook: listen for 'research_complete'
+  ├── Read findings table (WHERE agent='researcher')
+  ├── Build tutorial
+  ├── Write results to database:
+  │   Table: deliverables
+  │   Rows: [type='tutorial', status='complete', ...]
+  └── Emit event: 'build_complete'
+```
+
+## State & Memory
+
+Agents need to remember past interactions.
+
+### Short-term (Session): In-memory
+
+```python
+# Shared state during single workflow execution
+session_state = {
+    "topic": "Docker",
+    "research_findings": [...],
+    "outline": [...],
+    "current_step": 3
+}
+```
+
+In n8n: Use **Set** node to build object across steps.
+
+### Long-term (Persistent): Database
+
+```sql
+CREATE TABLE agent_memory (
+    id PRIMARY KEY,
+    agent_id TEXT,
+    context_key TEXT,  -- "docker_tutorial_v1"
+    memory_data JSON,   -- {"research": {...}, "outline": {...}}
+    created_at TIMESTAMP,
+    expires_at TIMESTAMP
+);
+```
+
+**Example:** Memory for multi-turn conversation
+
+```yaml
+Message 1: "Explain Docker"
+  └─ Agent stores: { "topic": "Docker", "messages": [...] }
+
+Message 2: "What about images?"
+  └─ Agent reads memory, context-aware response
+  └─ Updates: { "topic": "Docker", "messages": [..., message2] }
+
+Message 3: "Compare with VMs"
+  └─ Agent has full conversation history
+```
+
+## Error Handling & Retries
+
+When Agent A fails calling Agent B:
+
+```yaml
+Agent A calls Agent B (HTTP request)
+├── Success (200): Continue
+├── Timeout (504): Retry 3 times with exponential backoff
+├── Rate limit (429): Queue for later
+└── Server error (500): Log and alert human
+```
+
+**In n8n:**
+
+```
+HTTP Request node
+├── Retry logic:
+│   - Max retries: 3
+│   - Delay: 2s, 4s, 8s (exponential)
+├── Error handling:
+│   - If still fails: Email admin
+│   - Log error to database
+```
+
+## Example: Complete Multi-Agent System
+
+**Workflow: "Content from Brief"**
+
+```
+User submits: { "brief": "Write API guide" }
+   ↓
+Dispatcher
+   ├── Task 1 (parallel): Research → n8n workflow
+   ├── Task 2 (parallel): Outline → n8n workflow
+   └── Task 3 (parallel): Code examples → n8n workflow
+   ↓ (all complete)
+Merge results
+   ↓
+Writer agent (sequential)
+   ├── Combine research + outline + code
+   ├── Write tutorial with Ollama
+   └── Format as markdown
+   ↓
+Reviewer agent
+   ├── Check quality
+   ├── Test code examples
+   └── Return pass/fail
+   ↓
+If failed: Notify writer agent for revision
+If passed: Save to wiki, email user
+```
+
+## Monitoring Multi-Agent Systems
+
+Track agent health and task flow:
+
+```yaml
+Metrics to monitor:
+  - Task success rate (per agent)
+  - Average task time (per agent)
+  - Queue depth (pending tasks)
+  - Agent uptime (workflow executions)
+  - Error types (failures grouped by type)
+```
+
+In Grafana dashboard:
+
+```promql
+# Success rate per agent
+(agent_tasks_success / agent_tasks_total) * 100
+
+# Queue depth
+count(tasks WHERE status='pending')
+
+# Average task duration
+avg(task_duration_ms) group by agent_id
+```
+
+## Scalability Considerations
+
+- **Number of agents:** Start with 3-5, add as needed
+- **Message queue:** n8n webhooks scale to ~100 tasks/sec
+- **Database:** PostgreSQL holds unlimited task history
+- **Rate limiting:** Prevent one agent from overwhelming others
+
+```yaml
+n8n workflow rate limiting:
+  - Add "Wait" node: 1-2 seconds between Ollama calls
+  - Distribute load: Stagger agent start times
+  - Queue max size: Reject new tasks if queue > 1000
+```
+
+## Checklist
+
+- [ ] Define agent roles and responsibilities
+- [ ] Choose communication pattern (sync/async/hierarchy)
+- [ ] Design message format (JSON schema)
+- [ ] Create dispatcher workflow
+- [ ] Create 2-3 worker workflows
+- [ ] Implement error handling (retries, fallbacks)
+- [ ] Set up shared state (database tables)
+- [ ] Add logging (what each agent does)
+- [ ] Monitor success rates and latencies
+- [ ] Document agent responsibilities
+- [ ] Test agent-to-agent communication
+- [ ] Set up backup/recovery (if agent fails)
+- [ ] Scale test (simulate 100+ concurrent tasks)
+
+## Sources and Links
+
+- [CrewAI](https://github.com/crewAIInc/crewAI)
+- [AutoGen](https://github.com/microsoft/autogen)

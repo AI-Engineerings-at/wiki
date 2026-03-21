@@ -1,0 +1,367 @@
+---
+title: Claude Code — Sandboxing Referenz
+date: 2026-03-21
+summary: Vollständige Dokumentation des nativen Sandboxing — Dateisystem-Isolation, Netzwerk-Beschränkung, Sicherheitsvorteile, Konfiguration und Best Practices zur sicheren autonomen Agent-Ausführung.
+tags: [claude-code, sandbox, security, isolation, netzwerk, dateisystem]
+author: "AI Engineering"
+---
+
+# Claude Code — Sandboxing Referenz
+
+Claude Code verfügt über natives Sandboxing zur sicheren Agent-Ausführung mit Dateisystem- und Netzwerk-Isolation. Statt konstante Permission-Prompts, definierst du upfront Grenzen wo Claude Code autonomer arbeiten kann.
+
+## Überblick
+
+Traditionelle Permission-basierte Sicherheit erfordert konstante Nutzer-Genehmigungen. Sandboxing löst dies durch:
+
+1. **Klare Grenzen definieren**: Genau angeben welche Verzeichnisse und Netzwerk-Hosts Claude Code zugreifen darf
+2. **Permission-Prompts reduzieren**: Sichere Befehle innerhalb Sandbox benötigen keine Genehmigung
+3. **Sicherheit erhalten**: Versuche außerhalb Sandbox zu zugreifen triggern sofortige Benachrichtigungen
+4. **Autonomie ermöglichen**: Claude Code kann unabhängiger innerhalb definierten Grenzen arbeiten
+
+## Wie es funktioniert
+
+### Dateisystem-Isolation
+
+Das Sandboxed Bash Tool beschränkt Dateisystem-Zugriff auf spezifische Verzeichnisse:
+
+- **Standard Write-Verhalten**: Read und Write zu aktuellem Arbeitsverzeichnis und Unterverzeichnissen
+- **Standard Read-Verhalten**: Read-Zugriff auf gesamten Computer außer bestimmter blockierter Verzeichnisse
+- **Blockierter Zugriff**: Kann Dateien außerhalb aktuellen Verzeichnisses nicht modifizieren ohne explizite Permission
+- **Konfigurierbar**: Definiere custom Allowed und Denied Pfade über settings
+
+Du kannst Write-Zugriff zu zusätzlichen Pfaden mit `sandbox.filesystem.allowWrite` in deinen settings gewähren. Diese Restriktionen werden auf OS-Level durchgesetzt (Seatbelt auf macOS, bubblewrap auf Linux), daher gelten sie für ALLE Subprocess-Befehle.
+
+### Netzwerk-Isolation
+
+Netzwerk-Zugriff wird über Proxy-Server außerhalb Sandbox kontrolliert:
+
+- **Domain-Beschränkungen**: Nur genehmigte Domains können zugegriffen werden
+- **Nutzer-Bestätigung**: Neue Domain-Anfragen triggern Permission-Prompts (außer `allowManagedDomainsOnly` ist enabled)
+- **Custom Proxy-Support**: Advanced Nutzer können custom Rules implementieren
+- **Kompletter Coverage**: Restriktionen gelten für ALLE Scripts, Programme und Subprocesse
+
+### OS-Level Enforcement
+
+Sandboxing nutzt OS-Sicherheits-Primitives:
+
+- **macOS**: Seatbelt
+- **Linux**: [bubblewrap](https://github.com/containers/bubblewrap)
+- **WSL2**: bubblewrap (wie Linux)
+
+WSL1 wird nicht unterstützt — bubblewrap benötigt Kernel-Features nur in WSL2 verfügbar.
+
+## Getting Started
+
+### Voraussetzungen
+
+**macOS**: Funktioniert out-of-the-box mit Built-in Seatbelt.
+
+**Linux und WSL2**: Installiere zunächst benötigte Packages:
+
+```bash
+# Ubuntu/Debian
+sudo apt-get install bubblewrap socat
+
+# Fedora
+sudo dnf install bubblewrap socat
+```
+
+### Sandboxing aktivieren
+
+Nutze `/sandbox` Befehl:
+
+```bash
+/sandbox
+```
+
+Dies öffnet ein Menü wo du zwischen Sandbox-Modi wählen kannst. Falls benötigte Dependencies fehlen, werden Installationsanweisungen angezeigt.
+
+### Sandbox Modes
+
+**Auto-Allow Mode**: Bash-Befehle versuchen im Sandbox zu laufen und sind automatisch allowed ohne Permission. Befehle die nicht sandboxed werden können fallback zu regulärem Permission-Flow. Explizite Allow/Deny Rules werden immer respektiert.
+
+**Regular Permissions Mode**: Alle Bash-Befehle gehen durch Standard-Permission-Flow, selbst wenn sandboxed. Dies bietet mehr Kontrolle aber benötigt mehr Approvals.
+
+In beiden Modes gelten gleiche Dateisystem- und Netzwerk-Restriktionen. Der Unterschied ist nur ob Sandboxed Commands auto-approved oder Permission-gefordert werden.
+
+**Info**: Auto-Allow Mode funktioniert unabhängig von Permission-Mode-Setting. Selbst wenn nicht in "accept edits" Mode, werden Sandboxed Bash-Befehle ohne Prompt ausgeführt.
+
+## Sandbox konfigurieren
+
+Customize Sandbox-Behavior über `settings.json`:
+
+```json
+{
+  "sandbox": {
+    "enabled": true,
+    "filesystem": {
+      "allowWrite": ["~/.kube", "/tmp/build"]
+    }
+  }
+}
+```
+
+## Dateisystem Permissions
+
+### allowWrite
+
+Gebe Subprocess Write-Zugriff zu spezifischen Pfaden außerhalb Arbeitsverzeichnis:
+
+```json
+{
+  "sandbox": {
+    "enabled": true,
+    "filesystem": {
+      "allowWrite": ["~/.kube", "/tmp/build"]
+    }
+  }
+}
+```
+
+Diese Pfade sind auf OS-Level durchgesetzt, daher respektieren alle Commands diese Grenzen.
+
+### denyWrite und denyRead
+
+Blockiere Write/Read-Zugriff zu spezifischen Pfaden:
+
+```json
+{
+  "sandbox": {
+    "filesystem": {
+      "denyWrite": ["/etc"],
+      "denyRead": ["~/sensitive"]
+    }
+  }
+}
+```
+
+### allowRead
+
+Re-Allow Reading spezifischer Pfade innerhalb `denyRead` Region:
+
+```json
+{
+  "sandbox": {
+    "filesystem": {
+      "denyRead": ["~/"],
+      "allowRead": ["."]  // Aktuelle Projekt erlauben
+    }
+  }
+}
+```
+
+### Pfad-Präfixe
+
+| Präfix | Bedeutung | Beispiel |
+|--------|-----------|---------|
+| `/` | Absoluter Pfad | `/tmp/build` bleibt `/tmp/build` |
+| `~/` | Relativ zu Home-Directory | `~/.kube` wird `$HOME/.kube` |
+| `./` oder kein Präfix | Relativ zu Projekt-Root (Project Settings) | `./output` wird `<project-root>/output` |
+
+## Netzwerk-Isolation
+
+### Allowed Domains
+
+Konfiguriere welche Domains Bash-Befehle erreichen können:
+
+```json
+{
+  "sandbox": {
+    "network": {
+      "allowedDomains": ["github.com", "npm.org"]
+    }
+  }
+}
+```
+
+### allowManagedDomainsOnly
+
+Automatisch blockieren Domains außerhalb allowedDomains:
+
+```json
+{
+  "sandbox": {
+    "network": {
+      "allowManagedDomainsOnly": true
+    }
+  }
+}
+```
+
+### Custom Proxy
+
+Advanced Netzwerk-Sicherheit mit Custom Proxy:
+
+```json
+{
+  "sandbox": {
+    "network": {
+      "httpProxyPort": 8080,
+      "socksProxyPort": 8081
+    }
+  }
+}
+```
+
+## Sicherheitsvorteile
+
+### Protection gegen Prompt Injection
+
+Selbst wenn Attacker Claude Code's Verhalten erfolgreich manipuliert:
+
+**Dateisystem**:
+- Kann critical Config Files nicht modifizieren (`~/.bashrc`)
+- Kann System-Level Files in `/bin/` nicht ändern
+- Kann Denied Files nicht lesen
+
+**Netzwerk**:
+- Kann Daten nicht zu Attacker-Controlled Servern exfiltrieren
+- Kann Malicious Scripts nicht von Unauthorized Domains downloaden
+- Kann keine API-Calls zu Unapproved Services machen
+
+**Monitoring**:
+- Alle Access-Attempts außerhalb Sandbox sind blockiert
+- Du erhältst sofortige Benachrichtigungen
+- Du kannst Deny, Allow-Once, oder Konfiguration updaten
+
+### Reduced Attack Surface
+
+Sandboxing limitiert potentiellen Schaden von:
+- Malicious Dependencies (NPM Packages mit Schad-Code)
+- Compromised Scripts (Vulnerabilities)
+- Social Engineering (Nutzer-Tricks)
+- Prompt Injection (Modell-Tricks)
+
+## Security Limitations
+
+**Network Filtering Limitations**: Das System arbeitet durch Domain-Restriktionen aber inspiziert nicht den Traffic. Du bist verantwortlich nur trusted Domains zu allowen.
+
+**Warnung**: Breite Domains wie `github.com` können Data-Exfiltration ermöglichen. Domain Fronting könnte Netzwerk-Filtering bypassen.
+
+**Privilege Escalation via Unix Sockets**: `allowUnixSockets` kann zu Sandbox-Bypasses führen (z.B. Docker Socket). Careful mit welchen Sockets du allowest.
+
+**Filesystem Permission Escalation**: Overly-Broad Filesystem-Write kann Privilege Escalation ermöglichen. Allowest keine Writes zu:
+- Verzeichnissen mit Executables in `$PATH`
+- System-Konfiguration Directories
+- User Shell-Konfiguration (`.bashrc`, `.zshrc`)
+
+**Linux Sandbox Strength**: Linux Implementation ist stark aber inkludiert `enableWeakerNestedSandbox` für Docker ohne Privileged Namespaces. Diese Option weakened Sicherheit erheblich.
+
+## Sandbox und Permissions Relationship
+
+Sandboxing und [Permissions](/de/tools/claude-code-permissions) sind komplementär:
+
+- **Permissions** kontrollieren welche Tools Claude Code nutzen darf (evaluated bevor Tool läuft, gelten ALLE Tools)
+- **Sandboxing** provides OS-Level Enforcement was Bash-Befehle zugreifen können
+
+Beide arbeiten zusammen für Defense-in-Depth.
+
+## Advanced Usage
+
+### Custom Proxy Konfiguration
+
+Für Organizations requiring Advanced Network-Sicherheit:
+
+```json
+{
+  "sandbox": {
+    "network": {
+      "httpProxyPort": 8080,
+      "socksProxyPort": 8081
+    }
+  }
+}
+```
+
+### Integration mit existierenden Security-Tools
+
+Sandboxing funktioniert mit:
+- Permission Rules (Defense-in-Depth)
+- Dev-Containers (zusätzliche Isolation)
+- Enterprise Policies (Managed Settings)
+
+## Best Practices
+
+1. **Start restrictive**: Beginne mit minimalen Permissions und expandiere je benötigt
+2. **Monitor logs**: Review Sandbox-Violation-Attempts um Claude Code Needs zu verstehen
+3. **Environment-spezifische Configs**: Unterschiedliche Sandbox-Regeln für Dev/Prod
+4. **Combine mit Permissions**: Nutze Sandboxing neben IAM-Policies
+5. **Test Configurations**: Verifiziere deine Sandbox-Settings blockieren nicht legitime Workflows
+
+## Escape Hatch
+
+Claude Code inkludiert intentionalen Escape-Hatch: Wenn Befehle wegen Sandbox-Restriktionen failen (z.B. Network), kann Claude den Befehl mit `dangerouslyDisableSandbox` Parameter retry. Diese Befehle gehen durch Normal-Permission-Flow.
+
+Disable mit:
+
+```json
+{
+  "sandbox": {
+    "allowUnsandboxedCommands": false
+  }
+}
+```
+
+## Open Source
+
+Die Sandbox Runtime ist verfügbar als Open-Source npm Package zur eigenen Agent-Nutzung. Für Details siehe [GitHub Repository](https://github.com/anthropic-experimental/sandbox-runtime).
+
+```bash
+# Sandbox any command
+npx @anthropic-ai/sandbox-runtime <command>
+```
+
+## Limitations
+
+- **Performance Overhead**: Minimal, aber manche Dateisystem-Operationen können langsamer sein
+- **Compatibility**: Manche Tools benötigen spezifische System-Access-Patterns (z.B. watchman, docker)
+- **Platform Support**: macOS, Linux, WSL2. WSL1 nicht supported. Native Windows geplant.
+
+## Häufige Probleme
+
+### `Sandbox requires socat and bubblewrap`
+
+WSL2 hat fehlende Dependencies.
+
+```bash
+# Ubuntu/Debian WSL2
+sudo apt-get install bubblewrap socat
+```
+
+### watchman incompatible
+
+Jest mit `watchman` funktioniert nicht im Sandbox.
+
+```bash
+# Verwende stattdessen
+jest --no-watchman
+```
+
+### docker incompatible
+
+Docker funktioniert nicht im Sandbox.
+
+```json
+{
+  "sandbox": {
+    "excludedCommands": ["docker"]
+  }
+}
+```
+
+## Siehe auch
+
+- [Claude Code Permissions](/de/tools/claude-code-permissions)
+- [Claude Code Settings](/de/tools/claude-code-settings)
+- [Claude Code Security](/de/tools/claude-code-security)
+
+## Quellen und Links
+
+- [Sandboxing](https://code.claude.com/docs/en/sandboxing)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

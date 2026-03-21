@@ -1,0 +1,626 @@
+---
+title: "Mattermost Integration fuer AI-Workflows"
+date: "2026-03-21"
+summary: "Self-hosted Chat-System als Agent-Kommunikations-Backbone. Webhooks, Bot-API, n8n Integration, MM-Polling Patterns."
+tags: ["mattermost", "chat", "agent-kommunikation", "webhooks", "self-hosted", "n8n"]
+author: "AI Engineering"
+---
+
+# Mattermost Integration fuer AI-Workflows
+
+Mattermost ist ein Open-Source, self-hosted Chat-System speziell optimiert fuer AI-Agent Kommunikation. Im Unterschied zu Slack ist Mattermost voellig eigenstaendig hosten, DSGVO-konform, und mit unbegrenzten Custom Integrations.
+
+## Warum Mattermost vs Slack/Discord?
+
+| Kriterium | Mattermost | Slack | Discord |
+|-----------|-----------|-------|---------|
+| Self-Hosted | Ja | Nein | Nein |
+| DSGVO-konform | Ja (eigene Server) | Fraglich | Nein |
+| Bot API | Vollstaendig | Limitiert | Limitiert |
+| Webhooks | Incoming + Outgoing | Ja | Limitiert |
+| Kosten | Kostenlos (OSS) | $8+/User/Monat | Kostenlos |
+| Custom Integrations | Unbegrenzt | Limitiert (Pro+) | Limitiert |
+| Rate Limits | Konfigurierbar | Streng | Streng |
+| API Komplexitaet | Moderat | Hoch | Moderat |
+
+**Playbook01 Setup**: Self-hosted Mattermost auf interner VM, alle Daten bleiben im Netzwerk.
+
+## Mattermost Setup fuer Teams
+
+### 1. Server Installation
+
+```bash
+# Docker Deployment (Standard)
+docker run -d \
+  --name mattermost \
+  -e MM_SQLSETTINGS_DRIVERNAME=postgres \
+  -e MM_SQLSETTINGS_DATASOURCE='postgres://...' \
+  -p 8065:8065 \
+  mattermost/mattermost-team-edition
+```
+
+**Kritische Configs**:
+```yaml
+# config.json
+ServiceSettings:
+  ListenAddress: ":8065"
+  EnableOAuthServiceProvider: true
+  EnableDeveloperMode: true
+
+EmailSettings:
+  SMTPServer: "mail.internal"
+  SMTPPort: 587
+  SendEmailNotifications: true
+
+Plugins:
+  Enabled: true
+  AllowInsecureDownloadURL: false
+```
+
+### 2. Benutzer & Bot Accounts
+
+**Team Owner erstellen**:
+System Console → Workspace → Create Team
+
+**Bot Account erstellen**:
+System Console → Integrations → Bot Accounts
+
+```
+Name: @claude-bot
+Username: claude-bot
+Icon: [Claude Logo]
+Access Token: [Auto-Generated]
+```
+
+**Token sicher speichern** (Vault, nicht im Code):
+```bash
+vault.py set shared mattermost CLAUDE_BOT_TOKEN "xxx-xxx-xxx"
+```
+
+### 3. Channel Struktur
+
+Kanal-Konvention: Nach Funktion, nicht nach Agent
+
+```
+Allgemein/
+├── #general              — Announcements, alle
+├── #random               — Off-topic
+├── #dev-team             — Development
+
+Operationen/
+├── #ceo-dashboard        — KPIs, Haupt-Metriken (nur Joe liest)
+├── #infra-alerts         — Uptime, CPU, Memory, Alerts
+├── #deployments          — Git, CI/CD, Cloudflare Pages
+├── #shop-orders          — Stripe/Gumroad Webhooks
+
+Automation/
+├── #echo-log             — Agent Outputs, Task Results
+├── #n8n-runs             — n8n Workflow Executions
+├── #social-media         — Twitter, LinkedIn Auto-Posts
+├── #email-digest         — Incoming Emails
+```
+
+**Permission Model**:
+```
+#ceo-dashboard:    Reader: @joe, @jim     | Poster: Bots only
+#infra-alerts:     Reader: Everyone       | Poster: Monitoring Bots
+#echo-log:         Reader: Everyone       | Poster: Bots only
+#general:          Reader: Everyone       | Poster: Everyone
+```
+
+## Webhooks: Bidirektionale Integration
+
+### Incoming Webhooks (Externe Systeme → Mattermost)
+
+**Use-Case**: Stripe sendet Zahlung, n8n sendet Alert, Uptime Kuma sendet Downtime.
+
+**Webhook erstellen**:
+```
+System Console → Integrations → Incoming Webhooks
+→ Create
+→ Select Channel: #shop-orders
+→ Authorized Users: (leave empty = everyone)
+→ Copy URL
+```
+
+**URL**: `https://mattermost.internal:8065/hooks/xxx-uuid-xxx`
+
+**Von External System senden** (z.B. Stripe Webhook):
+```bash
+curl -X POST \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "channel": "#shop-orders",
+    "username": "Stripe",
+    "icon_url": "https://stripe.com/logo.png",
+    "text": "💳 Payment received: $49 USD\nCustomer: john@example.com\nProduct: P1 Playbook"
+  }' \
+  https://mattermost.internal:8065/hooks/xxx-uuid-xxx
+```
+
+**Best Practice: Structured Messages**:
+```json
+{
+  "channel": "#infra-alerts",
+  "username": "Prometheus",
+  "attachments": [
+    {
+      "color": "#FF0000",
+      "title": "CPU High on .80",
+      "text": "CPU: 87% | Memory: 92% | Disk: 74%",
+      "fields": [
+        {
+          "title": "Server",
+          "value": ".80 (Manager)",
+          "short": true
+        },
+        {
+          "title": "Duration",
+          "value": "15 min",
+          "short": true
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Outgoing Webhooks (Mattermost → Externe Systeme)
+
+**Use-Case**: `/backup` Slash-Command in MM startet n8n Workflow.
+
+**Webhook erstellen**:
+```
+System Console → Integrations → Outgoing Webhooks
+→ Create
+→ Select Channel: #general (oder Private)
+→ Trigger Words: /backup
+→ Callback URL: https://n8n.internal:5678/webhook/backup
+```
+
+**MM sendet POST an n8n**:
+```json
+{
+  "token": "xxx",
+  "team_id": "xxx",
+  "team_domain": "ai-engineering",
+  "channel_id": "xxx",
+  "channel_name": "general",
+  "timestamp": 1234567890,
+  "user_id": "xxx",
+  "user_name": "joe",
+  "post_id": "xxx",
+  "text": "/backup",
+  "trigger_word": "backup"
+}
+```
+
+**n8n antwortet** (Message erscheint in MM):
+```json
+{
+  "response_type": "in_channel",
+  "text": "✅ Backup gestartet. ID: `bkp-20260321-1430`",
+  "goto_location": "https://mattermost.internal:8065/ai-engineering/channels/general"
+}
+```
+
+## Bot API: Programmmatische Integration
+
+### Python Bot Basics
+
+```python
+import requests
+import json
+
+class MattermostBot:
+    def __init__(self, base_url, username, token):
+        self.base_url = base_url
+        self.headers = {
+            'Authorization': f'Bearer {token}',
+            'Content-Type': 'application/json'
+        }
+        self.username = username
+        self._get_bot_id()
+
+    def _get_bot_id(self):
+        """Get bot's user ID"""
+        resp = requests.get(
+            f'{self.base_url}/api/v4/users/usernames?usernames={self.username}',
+            headers=self.headers
+        )
+        self.bot_id = resp.json()[0]['id']
+
+    def post_message(self, channel_id, message, attachments=None):
+        """Post message to channel"""
+        data = {
+            'channel_id': channel_id,
+            'message': message,
+            'user_id': self.bot_id
+        }
+        if attachments:
+            data['props'] = {'attachments': attachments}
+
+        resp = requests.post(
+            f'{self.base_url}/api/v4/posts',
+            headers=self.headers,
+            json=data
+        )
+        return resp.json()
+
+    def get_channel(self, channel_name):
+        """Resolve channel name to ID"""
+        resp = requests.get(
+            f'{self.base_url}/api/v4/teams/name/ai-engineering/channels/name/{channel_name}',
+            headers=self.headers
+        )
+        return resp.json()['id']
+```
+
+**Verwendung**:
+```python
+from vault import get
+
+token = get('shared', 'mattermost', 'CLAUDE_BOT_TOKEN')
+bot = MattermostBot('https://mattermost.internal:8065', 'claude-bot', token)
+
+channel_id = bot.get_channel('echo-log')
+bot.post_message(channel_id, '✅ Task completed successfully')
+```
+
+## Polling Patterns
+
+### n8n Polling (MM-Wait Skills)
+
+Agents lesen MM Nachrichten per API-Polling. Standard in Playbook01.
+
+```python
+import requests
+import time
+
+class MMPoller:
+    def __init__(self, base_url, token, channel_id, bot_name):
+        self.base_url = base_url
+        self.headers = {'Authorization': f'Bearer {token}'}
+        self.channel_id = channel_id
+        self.bot_name = bot_name
+        self.last_post_id = None
+
+    def poll_mentions(self, interval=30):  # 30 sec = Joe's preference
+        """Poll channel fuer @bot-mentions"""
+        while True:
+            try:
+                # Hole letzte Posts
+                resp = requests.get(
+                    f'{self.base_url}/api/v4/channels/{self.channel_id}/posts',
+                    headers=self.headers
+                )
+                posts = resp.json().get('posts', {})
+
+                # Filtere nach mentions
+                for post_id, post in posts.items():
+                    if self.last_post_id and post_id <= self.last_post_id:
+                        continue
+
+                    message = post.get('message', '')
+                    if f'@{self.bot_name}' in message:
+                        self.handle_mention(post)
+                        self.last_post_id = post_id
+
+            except Exception as e:
+                print(f'Poll error: {e}')
+
+            time.sleep(interval)
+
+    def handle_mention(self, post):
+        """Process @mention"""
+        user = post.get('user_id')
+        message = post.get('message')
+        print(f'[{user}] {message}')
+```
+
+**Kritische Gotchas**:
+- **SLEEP_SEC = 30** (nicht 90!) — Joe will schnelle Antworten
+- **State File**: Sichern welcher Post zuletzt verarbeitet wurde
+- **Zombie Processes**: Alt laufen gelassene Polling-Scripts killen (`ps aux | grep python`)
+- **Message Splitting**: >4000 Zeichen werden auto-split bei Paragraph-Grenzen
+
+### Heartbeat-System
+
+Jeder Agent sendet regelmaessig einen Heartbeat-Signal:
+
+```python
+def send_heartbeat(channel_id, agent_name, cpu, memory, tasks_done):
+    """Send heartbeat message"""
+    message = f"💚 @{agent_name} alive | CPU {cpu}% | RAM {memory}% | Tasks {tasks_done}/10"
+    bot.post_message(channel_id, message)
+```
+
+**Schedule**: Cron alle 60 Sekunden
+**Fehler**: Wenn >2 Heartbeats ausbleiben → Alert an #infra-alerts
+
+```
+heartbeat_missed = now() - last_heartbeat > 120 seconds
+if heartbeat_missed:
+    post_to_channel('#infra-alerts', f'⚠️ @{agent_name} Heartbeat verpasst!')
+```
+
+## n8n Integration
+
+### MM Nachrichten in n8n lesen
+
+**Use-Case**: n8n Workflow wartet auf MM Command, antwortet automatisch.
+
+```json
+{
+  "nodes": [
+    {
+      "name": "MM Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 200],
+      "webhookId": "xxx"
+    },
+    {
+      "name": "Extract Text",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [300, 200],
+      "parameters": {
+        "values": {
+          "text": "={{ $json.text }}",
+          "user": "={{ $json.user_name }}",
+          "channel": "={{ $json.channel_name }}"
+        }
+      }
+    },
+    {
+      "name": "Process (LLM/etc)",
+      "type": "n8n-nodes-base.openai",
+      "typeVersion": 2,
+      "position": [500, 200],
+      "parameters": {
+        "prompt": "Process: {{ $json.text }}"
+      }
+    },
+    {
+      "name": "Reply to MM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [700, 200],
+      "parameters": {
+        "url": "https://mattermost.internal:8065/hooks/{{ $env.MM_WEBHOOK_ID }}",
+        "method": "POST",
+        "body": {
+          "channel": "#{{ $json.channel }}",
+          "username": "n8n Bot",
+          "text": "{{ $json.response }}"
+        }
+      }
+    }
+  ]
+}
+```
+
+### MM via API aus n8n updaten
+
+**Use-Case**: n8n sendet Workflow-Status zu #infra-alerts.
+
+```json
+{
+  "name": "Post to Mattermost",
+  "type": "n8n-nodes-base.httpRequest",
+  "typeVersion": 4,
+  "parameters": {
+    "url": "=https://mattermost.internal:8065/api/v4/posts",
+    "method": "POST",
+    "authentication": "genericCredentialType",
+    "genericCredentials": {
+      "authenticationType": "bearerToken",
+      "genericCredentials": "={{ $env.MM_BOT_TOKEN }}"
+    },
+    "sendBody": true,
+    "body": {
+      "channel_id": "=INFRA_ALERTS_CHANNEL_ID",
+      "message": "=Workflow {{ $json.workflow_name }} finished in {{ $json.duration }}s"
+    }
+  }
+}
+```
+
+## Claude Code Integration
+
+### Claude Code sendet zu Mattermost
+
+```python
+# In Claude Code skill oder Agent
+import requests
+
+def post_to_mattermost(channel, message, attachments=None):
+    token = vault.get('shared/mattermost/CLAUDE_BOT_TOKEN')
+    url = 'https://mattermost.internal:8065/api/v4/posts'
+
+    data = {
+        'channel_id': get_channel_id(channel),
+        'message': message
+    }
+    if attachments:
+        data['props'] = {'attachments': attachments}
+
+    resp = requests.post(
+        url,
+        headers={'Authorization': f'Bearer {token}'},
+        json=data
+    )
+    return resp.json()
+
+# Usage
+post_to_mattermost('#echo-log', '✅ Deployment completed successfully')
+```
+
+### Mattermost Slash-Commands triggern Claude Code
+
+**Use-Case**: `/analyze` in MM startet Claude Code Analysis.
+
+1. MM Outgoing Webhook fuer `/analyze` erstellen
+2. Callback URL zeigt auf n8n oder Bridge-Service
+3. Bridge-Service ruft Claude Code aus
+4. Claude Code antwortet zu MM Webhook
+5. Ergebnis erscheint in Channel
+
+```yaml
+# n8n Workflow
+Input: MM Webhook (/analyze)
+→ Extract arguments
+→ Call Claude Code API
+→ Wait for result
+→ Post back to MM via Webhook
+```
+
+## Message Formatting
+
+### Standard Format
+
+```markdown
+### ✅ Task Complete
+**Agent:** @jim01
+**Task:** Deploy v1.2.3 to Production
+**Duration:** 3m 42s
+**Status:** Success
+
+Details: Everything deployed successfully
+```
+
+### Error Format
+
+```markdown
+### ❌ Task Failed
+**Agent:** @lisa01
+**Task:** Database migration
+**Error:** Connection timeout
+**Log:** [paste error details]
+
+Action: Retry after DB restart
+```
+
+### Table Format
+
+```markdown
+| Metric | Value |
+|--------|-------|
+| Deployment | v1.2.3 |
+| Duration | 2m 15s |
+| Tests | 124/124 passed |
+| Coverage | 92% |
+```
+
+## Best Practices
+
+### 1. Ein Token pro Agent
+
+Niemals Token teilen. Audit Trail wird unmoeglich.
+
+```bash
+vault.py set shared/mattermost/AGENT_TOKEN_JIM01 "xxx"
+vault.py set shared/mattermost/AGENT_TOKEN_LISA01 "yyy"
+```
+
+### 2. Rate Limiting
+
+Self-hosted: Standard 10 Requests/Sekunde
+Polling-Intervall: 30 Sekunden (Joe's preference)
+Posts pro Minute: Max 5 auto-posts pro Agent
+
+### 3. Channel Permissions
+
+```
+#ceo-dashboard:
+  - Readers: @joe, @jim (CEO/Manager only)
+  - Posters: Bots only (Prometheus, Uptime Kuma)
+  - Purpose: KPI review, daily standup
+
+#infra-alerts:
+  - Readers: All
+  - Posters: Monitoring bots only
+  - Purpose: Emergencies, downtimes, critical alerts
+
+#general:
+  - Readers: All
+  - Posters: All
+  - Purpose: Announcements, team updates
+```
+
+### 4. Message Retention
+
+```
+#ceo-dashboard:  30 days
+#infra-alerts:   90 days
+#echo-log:       7 days
+#general:        Unlimited
+```
+
+### 5. Notification Settings
+
+```
+Critical Alerts: All members notified
+High Alerts:     @jim + responsible agent
+Medium Alerts:   Channel only
+Low Info:        No notification
+```
+
+## Debugging Mattermost Integration
+
+### Webhook nicht erreichbar?
+
+```bash
+# Test vom Server
+curl -X POST https://mattermost.internal:8065/hooks/xxx \
+  -H 'Content-Type: application/json' \
+  -d '{"text": "Test"}'
+
+# Response: 200 OK + "Post created"
+```
+
+### Bot sendet keine Messages?
+
+```bash
+# Check token
+vault.py get shared/mattermost/CLAUDE_BOT_TOKEN
+
+# Check API
+curl -H "Authorization: Bearer $TOKEN" \
+  https://mattermost.internal:8065/api/v4/users/me
+# Response: Bot user info
+```
+
+### Polling funktioniert nicht?
+
+```bash
+# Check Process
+ps aux | grep mattermost_poll.py
+
+# Check Logs
+tail -f /opt/logs/mattermost-poller.log
+
+# Manual test
+python3 -c "from poller import MMPoller; p = MMPoller(...); p.poll_mentions()"
+```
+
+## Weiter lesen
+
+- [Agent-Team in Playbook01](/de/tools/agents) — 11 spezialisierte Agents
+- [n8n Workflow Automation](/de/tools/n8n) — Visual Workflow Builder
+- [Multi-Agent Orchestration](/de/grundlagen/multi-agent-systeme) — Architektur Patterns
+- [Mattermost Offizielle Docs](https://docs.mattermost.com/)
+
+---
+
+*Stand: 2026-03-21 | Reference Quality*
+
+## Quellen und Links
+
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

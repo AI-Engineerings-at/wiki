@@ -1,0 +1,466 @@
+---
+title: AI Deployment — Modelle in Production
+date: 2026-03-21
+summary: Wie man AI Modelle deployt. Docker, vLLM, TGI, Ollama. Scaling, Batching, GPU Sharing. Monitoring und Cost Tracking.
+tags: [deployment, production, docker, vllm, scaling, gpu]
+author: AI Engineering
+---
+
+# AI Deployment — Modelle in Production
+
+Ein trainiertes Modell auf deinem Laptop ist nicht genug. Production erfordert:
+- Skalierbarkeit (viele Requests gleichzeitig)
+- Latency (schnelle Responses)
+- Cost (GPU ist teuer)
+- Monitoring (was läuft, was bricht)
+
+## Lokales Setup: Ollama
+
+Der einfachste Weg zu starten:
+
+```bash
+# Install Ollama (ollama.ai)
+# Oder: docker pull ollama/ollama
+
+# Pull und starte Modell
+ollama pull llama2
+ollama serve
+
+# In anderer Shell:
+curl -X POST http://localhost:11434/api/generate \
+  -d '{
+    "model": "llama2",
+    "prompt": "Was ist AI?",
+    "stream": false
+  }'
+```
+
+**Vorteil:** Einfach, lokal, privat.
+**Nachteil:** Langsam, Single-Request (Wareschlange wenn viele Requests).
+
+## Production: vLLM
+
+**vLLM** ist ein hochperformanter Inference Server für LLMs.
+
+```bash
+docker run --gpus all \
+  -p 8000:8000 \
+  vllm/vllm-openai:latest \
+  --model meta-llama/Llama-2-7b-hf \
+  --tensor-parallel-size 2  # 2 GPUs
+
+# Jetzt OpenAI-kompatibel!
+curl -X POST http://localhost:8000/v1/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "Llama-2-7b-hf",
+    "prompt": "What is AI?",
+    "max_tokens": 100
+  }'
+```
+
+**Vorteile:**
+- Schnell (paged attention)
+- OpenAI-kompatibel API
+- GPU-Memory effizient
+- Batching (viele Requests zusammen)
+
+**GPU Memory (7B Modell):**
+- Ollama: ~4GB VRAM brauchbar
+- vLLM: ~8GB VRAM optimal
+- Mit Quantisierung: ~2GB möglich
+
+## Quantization: Speicher sparen
+
+Modelle können komprimiert werden. Statt float32 (4 Bytes pro Wert), nutze int8 (1 Byte):
+
+```bash
+# Mit bitsandbytes
+ollama pull neural-chat:7b-v3.2-q4
+
+# oder vLLM mit quantization
+vllm serve meta-llama/Llama-2-7b-hf --quantization awq
+```
+
+**Trade-off:**
+```
+float32: 28GB (7B Model)
+  ↓ int8:    7GB (1/4 Größe)
+  ↓ int4:   3.5GB (1/8 Größe)
+  ↓ fp8:    3.5GB
+
+Qualität-Loss: ~5% für int8, ~10% für int4
+```
+
+## Scaling: Load Balancer
+
+Mehrere vLLM Instanzen auf mehreren GPUs:
+
+```yaml
+version: '3.8'
+
+services:
+  vllm-1:
+    image: vllm/vllm-openai:latest
+    environment:
+      - MODEL_NAME=llama2
+    ports:
+      - "8001:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['0']
+              capabilities: [gpu]
+
+  vllm-2:
+    image: vllm/vllm-openai:latest
+    environment:
+      - MODEL_NAME=llama2
+    ports:
+      - "8002:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['1']
+              capabilities: [gpu]
+
+  load-balancer:
+    image: nginx:latest
+    ports:
+      - "8000:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+```
+
+nginx.conf:
+```nginx
+upstream backend {
+    server vllm-1:8000;
+    server vllm-2:8000;
+}
+
+server {
+    listen 80;
+    location / {
+        proxy_pass http://backend;
+    }
+}
+```
+
+**Resultat:** 2 Requests können parallel laufen (statt Sequential).
+
+## Batching: Effizientes GPU-Nutzen
+
+vLLM batched mehrere Requests automatisch:
+
+```python
+# Request 1: 10 Tokens Input
+# Request 2: 5 Tokens Input
+# GPU verarbeitet beide zusammen statt Sequential
+
+# Durchsatz: 2 Requests parallel
+# vs. Sequential: 2x langsamer
+```
+
+**Batch Size Tuning:**
+```
+vLLM mit batch_size=64:
+- Latency pro Request: 500ms
+- Throughput: 128 Tokens/s
+
+vs. batch_size=8:
+- Latency: 100ms (schneller!)
+- Throughput: 64 Tokens/s (langsamer)
+
+→ Trade-off zwischen Latency und Throughput
+```
+
+## Caching: GPU Memory Optimization
+
+vLLM nutzt **paged attention caching**:
+- Speichert KV-Cache (Key-Value Paare) von bisherigen Tokens
+- Erlaubt schnellere Inference für lange Sequences
+- Nutzt Seiten-basiertes Memory (weniger Fragmentation)
+
+**Resultat:** 10x Speicher-Effizienz.
+
+## Monitoring: Was läuft?
+
+Wichtige Metriken:
+
+```python
+import psutil
+import torch
+
+# GPU Memory
+gpu_memory_used = torch.cuda.memory_allocated() / 1e9  # GB
+gpu_memory_total = torch.cuda.get_device_properties(0).total_memory / 1e9
+
+# CPU/System
+cpu_percent = psutil.cpu_percent(interval=1)
+ram_percent = psutil.virtual_memory().percent
+
+# Request Metrics
+requests_per_second = 0
+average_latency_ms = 0
+tokens_per_second = 0
+
+# Log
+print(f"GPU: {gpu_memory_used:.1f}GB / {gpu_memory_total:.1f}GB")
+print(f"Throughput: {tokens_per_second:.0f} tokens/s")
+print(f"Latency: {average_latency_ms:.0f}ms")
+```
+
+Mit Prometheus + Grafana:
+
+```python
+from prometheus_client import Counter, Histogram
+
+request_count = Counter('inference_requests_total', 'Total requests')
+request_latency = Histogram('inference_latency_seconds', 'Latency')
+gpu_memory = Gauge('gpu_memory_used_gb', 'GPU Memory')
+
+@request_latency.time()
+def inference(prompt):
+    ...
+    request_count.inc()
+```
+
+## Cost Tracking
+
+GPU-Stunden sind teuer:
+
+```
+A100 (40GB): ~$1-2 pro Stunde
+RTX 3090: ~$0.50 pro Stunde
+T4: ~$0.10 pro Stunde
+
+7B Modell mit 100 Requests/Tag:
+- A100: ~$2/Tag = $60/Monat
+- T4: ~$0.10/Tag = $3/Monat
+```
+
+**Cost Optimization:**
+1. Quantisiere (spart VRAM)
+2. Nutze kleinere Modelle
+3. Batch Requests wenn möglich
+4. Nutze Cheaper Hardware (T4 statt A100)
+
+## Serving Options: Vergleich
+
+| Option | Speed | Cost | Complexity | Latency |
+|--------|-------|------|-----------|---------|
+| Ollama | Medium | Low | Low | 500ms+ |
+| vLLM | High | High | Medium | 50-200ms |
+| TGI | High | High | Medium | 50-200ms |
+| Managed (Lambda, Replicate) | Medium | High | Low | 100-500ms |
+
+## Production Deployment: Checkliste
+
+VOR Deployment in Production:
+
+- [ ] Model Performance getestet (mit echten Daten)
+- [ ] Latency akzeptabel (<1s)?
+- [ ] Memory-Footprint bekannt?
+- [ ] Error Handling implementiert?
+- [ ] Logging & Monitoring setup?
+- [ ] Rate Limiting konfiguriert?
+- [ ] Autoscaling-Policy definiert?
+- [ ] Rollback-Plan vorhanden?
+- [ ] Dokumentation geschrieben?
+
+---
+
+## Real-World Deployment Beispiel: LLM für eCommerce
+
+**Szenario:** 1000 Requests/Tag für Product Recommendations
+
+### Schritt 1: Modell-Auswahl
+```
+Anforderungen:
+- Schnell (<200ms Latency)
+- Genau (Empfehlungen treffen)
+- Cost-effective
+
+Gewinner: vLLM + Mistral 7B
+- Speed: 100ms
+- Latency OK
+- Cost: ~€50/Mo (T4 GPU)
+```
+
+### Schritt 2: Container-Setup
+```dockerfile
+FROM nvidia/cuda:12.2.0-devel-ubuntu22.04
+
+RUN apt-get update && apt-get install -y python3.10
+
+# vLLM installieren
+RUN pip install vllm
+
+EXPOSE 8000
+
+CMD ["python", "-m", "vllm.entrypoints.openai_compatible_server",
+     "--model", "mistralai/Mistral-7B-Instruct-v0.1",
+     "--tensor-parallel-size", "1"]
+```
+
+### Schritt 3: Deployment
+```yaml
+# kubernetes/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llm-inference
+
+spec:
+  replicas: 2  # 2 Pods für High Availability
+
+  template:
+    spec:
+      containers:
+      - name: vllm
+        image: my-registry/vllm:latest
+        resources:
+          requests:
+            gpu: "1"  # 1 GPU pro Pod
+          limits:
+            gpu: "1"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+```
+
+### Schritt 4: Monitoring
+```python
+from prometheus_client import Counter, Histogram
+
+request_count = Counter('llm_requests_total', 'Total requests')
+latency = Histogram('llm_latency_seconds', 'Request latency')
+errors = Counter('llm_errors_total', 'Total errors')
+
+@latency.time()
+def inference(prompt):
+    try:
+        response = model.generate(prompt)
+        request_count.inc()
+        return response
+    except Exception as e:
+        errors.inc()
+        raise
+```
+
+---
+
+## Cost Optimization im Production
+
+### Strategy 1: Quantisierung
+
+```bash
+# Original Model: 7B Modell = 28GB (float32)
+# Quantisiert: 7B Modell = 3.5GB (int4)
+
+# Speicherersparnis: 92%
+# Geschwindigkeitsvorteil: 2-3×
+# Genauigkeitsverlust: ~5%
+
+# Deployment mit Quantisierung:
+ollama pull mistral:7b-instruct-q4_K_M
+# Modell ist jetzt 3.5GB statt 28GB
+```
+
+### Strategy 2: Model Distillation
+
+```
+Original Modell: 70B Parameter
+Distilliert: 7B Parameter
+  → Trainiert um Original zu imitieren
+  → 10× schneller
+  → 90% der Genauigkeit
+
+Kosten-Einsparung: 10× (GPU Hours)
+```
+
+### Strategy 3: Caching & Batching
+
+```python
+# Caching: Gleiche Prompts nicht neu berechnen
+from functools import lru_cache
+
+@lru_cache(maxsize=1000)
+def generate(prompt):
+    return model.generate(prompt)
+
+# Batching: Multiple Requests zusammen
+responses = []
+for request in pending_requests:
+    responses.append(model.generate_batch(request))
+    # vLLM verarbeitet alle zusammen
+```
+
+---
+
+## Häufige Production Probleme
+
+### Problem: "Modell Out-of-Memory nach 24h"
+
+**Ursache:** Memory Leak, nicht gelöschte Tensors
+
+**Debug:**
+```python
+import tracemalloc
+tracemalloc.start()
+
+# Generiere viele Responses
+for i in range(1000):
+    response = model.generate("test")
+
+current, peak = tracemalloc.get_traced_memory()
+print(f"Current: {current / 1e9}GB; Peak: {peak / 1e9}GB")
+# Falls Peak steigt: Memory Leak!
+```
+
+**Fix:**
+```python
+# Explizit Cache leeren
+import torch
+torch.cuda.empty_cache()
+
+# Oder: Regelmäßig Worker neu starten
+# (Kubernetes: Pod Restart nach 8h)
+```
+
+### Problem: "Requests queuen sich auf, Latency explodiert"
+
+**Ursache:** vLLM Batch-Größe zu klein oder GPU-Auslastung hoch
+
+**Fix:**
+```bash
+# Erhöhe Batch-Größe
+vllm serve mistral \
+  --max-num-seqs 256  # Default: 256, erhöhe zu 512
+  --gpu-memory-utilization 0.95  # Nutze 95% GPU-Memory
+```
+
+---
+
+## Literatur & Ressourcen
+
+- [vLLM: vllm.ai](https://vllm.ai)
+- [TGI (Text Generation Inference): huggingface.co](https://huggingface.co/docs/text-generation-inference)
+- [Ollama: ollama.ai](https://ollama.ai)
+- [Kubernetes Best Practices](https://kubernetes.io/docs/concepts/configuration/overview/)
+- [GPU Monitoring](https://nvidia.com/en-us/data-center/gpu-monitoring-tools/)
+
+**Letzte Aktualisierung**: 21.03.2026 | **Nächste Überprüfung**: Juli 2026
+
+## Quellen und Links
+
+- [vLLM](https://github.com/vllm-project/vllm)
+- [llama.cpp](https://github.com/ggerganov/llama.cpp)

@@ -1,0 +1,204 @@
+---
+title: Dify — No-Code AI App Builder
+date: 2026-03-21
+summary: Dify ist ein Open-Source No-Code/Low-Code Platform zum schnellen Bauen von KI-Apps. Workflow-Editor, RAG-Integration, Agent-Modus, Self-Hosting, API-Publikation, Dataset-Management.
+tags: [dify, no-code, ai-app, workflow, rag, agent]
+author: AI Engineering
+---
+
+# Dify — Visuelle KI-App-Entwicklung
+
+Dify ist eine Open-Source Plattform (Apache 2.0) zum schnellen Erstellen von KI-Anwendungen ohne Code. Mit über 50k GitHub Stars ist Dify 2026 die führende No-Code-Lösung für LLM-Apps.
+
+## Installation
+
+### Docker (empfohlen)
+
+```bash
+git clone https://github.com/langgenius/dify.git
+cd dify/docker
+cp .env.example .env
+docker-compose up -d
+```
+
+Zugang: http://localhost/
+
+### Self-Hosted Anforderungen
+
+- **Server**: 4GB RAM, 20GB Disk
+- **Database**: PostgreSQL 13+
+- **Cache**: Redis 6+
+- **Vector DB**: Optional (Weaviate, Qdrant, Milvus)
+
+## Komponenten
+
+### 1. Workflow Editor
+
+Visueller Drag-and-Drop Editor für LLM-Workflows:
+
+```
+Trigger
+  ↓
+Input Processing (Regex, Split, etc.)
+  ↓
+LLM Node (mit System Prompt)
+  ↓
+Output Formatting
+  ↓
+API Response
+```
+
+Unterstützt:
+- LLM-Calls (OpenAI, Ollama, Azure, local)
+- Tool Calling (Web Search, Database Query)
+- Conditional Logic (If/Else)
+- Loops und Parallel Processing
+
+### 2. RAG Integration
+
+Integrierte Dokumenten-Suche:
+
+1. Upload PDF/TXT/Web
+2. Auto-Chunking und Embedding
+3. Vector Search in LLM-Kontext
+
+### 3. Agent-Modus
+
+Agentenbasierte Workflows mit Tool-Calling.
+
+### 4. API Publishing
+
+Veröffentliche als OpenAI-kompatible REST API.
+
+## Praktischer Workflow
+
+### Neuen Workflow erstellen
+
+1. Dashboard → "Create New App"
+2. Wähle "Blank App" oder Template
+3. Konfiguriere:
+   - **App Icon**
+   - **App Name**
+   - **Description**
+4. Öffne Workflow-Editor
+
+### LLM Node konfigurieren
+
+```
+├── Model Selection: qwen2.5-7b
+├── System Prompt: "Du sprichst Deutsch..."
+├── Temperature: 0.7
+├── Max Tokens: 500
+└── Context Window: 4096
+```
+
+### Output formatieren
+
+```
+LLM Output
+  ↓
+JSON Parser (extrahiere Felder)
+  ↓
+Template Formatter (Markdown)
+  ↓
+API Response
+```
+
+## Dataset Management
+
+Trainings-Daten und Context-Quellen:
+
+### Dataset hochladen
+
+1. Go to Datasets
+2. Click "Create Dataset"
+3. Upload CSV (Name, Prompt, Answer)
+4. Auto-indexed für RAG
+
+### Beispiel-CSV
+
+```
+question,answer
+Was ist AI?,Künstliche Intelligenz ist...
+Erklär Quantencomputer,Ein Quantencomputer nutzt...
+```
+
+### Datasets in RAG nutzen
+
+```
+Document Query
+  ↓
+Vector Search in Dataset
+  ↓
+Top-3 Results als Context
+  ↓
+LLM generates Response
+```
+
+## API & Integration
+
+### REST API Beispiel
+
+```bash
+curl -X POST http://localhost/api/workflows/run   -H "Authorization: Bearer YOUR_API_KEY"   -H "Content-Type: application/json"   -d '{
+    "workflow_id": "abc123",
+    "inputs": {
+      "user_message": "Hallo, wie geht es dir?"
+    }
+  }'
+```
+
+### Python Integration
+
+```python
+import requests
+
+response = requests.post(
+    "http://localhost/api/workflows/run",
+    headers={
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Content-Type": "application/json"
+    },
+    json={
+        "workflow_id": "abc123",
+        "inputs": {"query": "What is AI?"}
+    }
+)
+
+print(response.json()["output"])
+```
+
+## Self-Hosting Checkliste
+
+### 1. Database Setup
+
+```bash
+docker run -d --name postgres \
+  -e POSTGRES_PASSWORD=secure \
+  -v postgres_data:/var/lib/postgresql/data \
+  postgres:15
+```
+
+### 2. Redis Setup
+
+```bash
+docker run -d --name redis \
+  -v redis_data:/data \
+  redis:7
+```
+
+### 3. Environment Config
+
+```bash
+# .env
+DATABASE_URL=postgresql://user:pw@postgres:5432/dify
+REDIS_URL=redis://redis:6379
+SECRET_KEY=your-secret-key
+DIFY_API_KEY=your-api-key
+```
+
+## Quellen und Links
+
+- [Dify GitHub](https://github.com/langgenius/dify)
+- [Dify Dokumentation](https://docs.dify.ai)
+- [Self-Hosting Guide](https://docs.dify.ai/getting-started/install-self-hosted)

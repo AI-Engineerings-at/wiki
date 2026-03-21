@@ -1,0 +1,337 @@
+---
+title: Workflow-Automation — Tools, Patterns, Self-Hosted 2026
+date: 2026-03-21
+summary: Technischer Deep-Dive in Workflow-Automation mit Fokus auf n8n, Temporal, Apache Airflow, Error-Handling-Patterns, Webhook-Architekturen und AI-Integration für Enterprises.
+tags: [workflow-automation, n8n, airflow, temporal, patterns, enterprise, ai]
+author: AI Engineering
+---
+
+# Workflow-Automation — Tools, Patterns, Self-Hosted 2026
+
+Modern workflow automation goes beyond simple task chains. This guide covers production patterns for enterprise automation.
+
+## Platform Comparison: Enterprise Grade
+
+### n8n — Visual + Code Hybrid
+
+**Best for:** SMBs to mid-market, teams wanting visual + code flexibility
+
+| Feature | Value |
+|---------|-------|
+| Cloud Cost | $22-110/month |
+| Self-hosted | Free (unlimited) |
+| Nodes | 500+ integrations |
+| Code Support | JavaScript, Python |
+| Error Handling | Conditional routing, retries |
+| Monitoring | Built-in execution logs |
+
+**Architecture:**
+```
+Webhook → Parse → Branch (If-Node)
+              ├→ Path A: HTTP + Transform
+              ├→ Path B: Database + Email
+              └→ Path C: Error Handling → Slack Alert
+```
+
+**When to use n8n:**
+- Self-hosted is non-negotiable (GDPR, cost)
+- Need code flexibility (custom transforms)
+- Team size 5-50 (DevOps-capable)
+- Budget €20-100/month
+
+### Apache Airflow — Orchestration at Scale
+
+**Best for:** Data pipelines, scheduled workflows, complex DAGs
+
+| Feature | Value |
+|---------|-------|
+| Cost | Self-hosted only ($500-2k/month ops) |
+| Language | Python-native |
+| DAGs | Complex dependency management |
+| Monitoring | Detailed scheduling, SLAs |
+| Scalability | Kubernetes-native |
+
+**Example DAG:**
+```python
+from airflow import DAG
+from airflow.operators.python import PythonOperator
+
+default_args = {
+    'retries': 3,
+    'retry_delay': timedelta(minutes=5)
+}
+
+with DAG('data_pipeline', default_args=default_args) as dag:
+    extract = PythonOperator(task_id='extract', python_callable=extract_data)
+    transform = PythonOperator(task_id='transform', python_callable=transform_data)
+    load = PythonOperator(task_id='load', python_callable=load_data)
+
+    extract >> transform >> load
+```
+
+**When to use Airflow:**
+- Data engineering teams (native Python)
+- 100+ daily workflows needed
+- Complex dependency graphs
+- Kubernetes infrastructure exists
+
+### Temporal — Microservices Orchestration
+
+**Best for:** Complex, long-running workflows; microservices coordination
+
+| Feature | Value |
+|---------|-------|
+| Cost | Self-hosted ($1-5k/month infrastructure) |
+| Language | TypeScript, Go, Java, Python |
+| State Management | Durable execution |
+| Retries | Automatic + exponential backoff |
+| Saga Pattern | Built-in distributed transactions |
+
+**Example (TypeScript):**
+```typescript
+import * as wf from '@temporalio/workflow';
+
+export async function orderWorkflow(order: Order) {
+  await wf.executeActivity(chargePayment, {order});
+  try {
+    await wf.executeActivity(reserveInventory, {order});
+  } catch (err) {
+    await wf.executeActivity(refundPayment, {order});
+    throw err;
+  }
+  await wf.executeActivity(shipOrder, {order});
+}
+```
+
+**When to use Temporal:**
+- Distributed systems (microservices)
+- Long-running workflows (days/weeks)
+- Saga pattern (distributed transactions)
+- Team > 20 engineers
+
+## Error Handling Patterns
+
+### Pattern 1: Try-Catch with Fallback
+
+```yaml
+Main Flow:
+  ├─ Try: Call Primary API
+  │   └─ Success? → Continue
+  └─ Catch: Call Fallback API
+      └─ Success? → Continue
+      └─ Failure? → Slack Alert + Manual Review
+```
+
+**n8n Implementation:**
+- Use "Error Output" on HTTP Node
+- Connect to Fallback Node
+- Final error path to Slack
+
+### Pattern 2: Retry with Exponential Backoff
+
+```yaml
+Attempt 1 (immediate)
+  ├─ Fail? Wait 2s
+Attempt 2 (2s delay)
+  ├─ Fail? Wait 4s
+Attempt 3 (4s delay)
+  ├─ Fail? Wait 8s
+Attempt 4 (8s delay)
+  └─ Fail? → DLQ (Dead Letter Queue)
+```
+
+**Formula:** delay = (2 ^ attempt) seconds, max 5 retries
+
+### Pattern 3: Circuit Breaker
+
+```yaml
+State: CLOSED (normal)
+  ├─ Call API
+  └─ Success count < threshold?
+      └─ Error? Increment counter
+
+State: OPEN (failing)
+  ├─ Reject requests immediately
+  └─ After 60s? Try HALF_OPEN
+
+State: HALF_OPEN (testing)
+  ├─ Allow 1 request
+  └─ Success? → Back to CLOSED
+  └─ Failure? → Back to OPEN
+```
+
+**Implementation:** Store state in Redis, check before each call.
+
+## Webhook Patterns
+
+### Pattern 1: Simple Webhook
+
+```
+External System (Salesforce)
+  → POST https://your-n8n.com/webhook/leads
+    └─ Body: {leadId, email, value}
+      → n8n parses + processes
+      → Result: DB write, Email send
+```
+
+**Security:**
+- Verify HMAC signature (Salesforce sends X-Signature header)
+- Rate limit (1000 req/hour per IP)
+- Timeout protection (5s execution max)
+
+### Pattern 2: Webhook + Queue (Async)
+
+```
+External System
+  → POST /webhook/events
+    └─ n8n receives, validates, enqueues to Redis
+      └─ Return 200 OK immediately
+        → Redis Queue Consumer
+          └─ Process asynchronously (5 consumers)
+            └─ Result: DB, Email, Slack
+```
+
+**Benefit:** Decouples ingestion from processing. Webhooks never timeout.
+
+## AI Workflow Patterns
+
+### Pattern 1: LLM Chain (Sequential)
+
+```yaml
+Input: Customer Email
+  ├─ Step 1: Claude extracts intent + data
+  ├─ Step 2: Claude generates response draft
+  ├─ Step 3: Human review (send to Slack)
+  └─ Step 4: Send response
+```
+
+**n8n nodes:**
+```
+Webhook (Email) → Claude Node (extract)
+  → Claude Node (draft) → Slack (review)
+    → IF approved: Send Email
+    → IF rejected: Slack message
+```
+
+### Pattern 2: Multi-Model Fallback
+
+```yaml
+Try Claude:
+  ├─ Confidence > 0.9? → Use response
+  └─ Else: Try GPT-4o
+      ├─ Confidence > 0.85? → Use
+      └─ Else: Try Ollama Llama (local)
+          └─ Fallback OK? → Use
+          └─ Else: Human review required
+```
+
+**Cost optimization:** Cheap local model first, premium only if needed.
+
+### Pattern 3: RAG Pipeline
+
+```yaml
+Input: Customer Question
+  ├─ Step 1: Search knowledge base (vector DB)
+  ├─ Step 2: Retrieve top 3 documents
+  ├─ Step 3: Claude + context → Answer
+  └─ Step 4: Store Q&A for future training
+```
+
+**n8n integration:**
+```
+Input → Pinecone search → Claude (with context)
+  → Output + Store feedback
+```
+
+## Monitoring & Observability
+
+### What to Monitor
+
+| Metric | Threshold | Action |
+|--------|-----------|--------|
+| Execution Success Rate | < 95% | Alert |
+| P95 Execution Time | > 2x baseline | Investigate |
+| Dead Letter Queue | > 10 messages | Review |
+| Avg Retries/Execution | > 1.5 | Identify root cause |
+
+### Implementation
+
+```yaml
+n8n Execution Logs:
+  ├─ Track every run (n8n stores automatically)
+  └─ Export to Grafana/Loki for dashboards
+
+External Monitoring:
+  ├─ Uptime Kuma: Poll critical webhooks
+  ├─ Prometheus: Custom metrics (execution count, duration)
+  └─ Slack integration: Alerts on failures
+```
+
+## Self-Hosted Deployment Checklist
+
+### Infrastructure
+
+- [ ] Linux server (Ubuntu 20.04+) or Kubernetes cluster
+- [ ] PostgreSQL 12+ (n8n state store)
+- [ ] Redis 6+ (queue management)
+- [ ] 4GB RAM minimum, 16GB recommended
+- [ ] 50GB storage (execution logs)
+
+### Security
+
+- [ ] Reverse proxy (Nginx) with TLS
+- [ ] n8n behind auth (OAuth, LDAP)
+- [ ] Vault for credential storage
+- [ ] Backups (daily to separate server)
+- [ ] Network: Firewall restrict webhook ports
+
+### Monitoring
+
+- [ ] Prometheus scrape n8n metrics
+- [ ] Loki collect logs
+- [ ] Grafana dashboard (execution count, error rates)
+- [ ] Slack alerts on workflow failures
+
+## Cost Comparison: Real Numbers
+
+### Scenario: 10,000 executions/month
+
+**Zapier:** 20k-30k tasks estimated = €300-500/month
+
+**Make:** 10k-15k operations = €29-99/month (depends on complexity)
+
+**n8n Cloud:** €22-110/month (depending on execution tier)
+
+**n8n Self-Hosted:**
+- Server: €20/month
+- Maintenance: 5h/month (€75)
+- Total: ~€95/month
+- OR with automation: €20/month only
+
+**Winner:** n8n self-hosted (€20-95) saves money fast.
+
+## Getting Started: 3-Day Implementation
+
+**Day 1:** Setup
+- Docker Compose n8n + PostgreSQL
+- Configure Slack notifications
+- Set webhook endpoint
+
+**Day 2:** First Workflow
+- Build Salesforce→Sheets workflow
+- Test with 10 records
+- Add error handling
+
+**Day 3:** Monitoring + Production
+- Setup execution logging
+- Configure backups
+- Monitor for 24h, then go live
+
+---
+
+**Best for KMUs:** Start n8n (cost-effective), add Airflow if data pipelines grow. Most SMBs never need Temporal.
+
+## Quellen und Links
+
+- [n8n](https://github.com/n8n-io/n8n)
+- [Make](https://www.make.com)

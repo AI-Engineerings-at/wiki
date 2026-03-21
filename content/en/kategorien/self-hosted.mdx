@@ -1,0 +1,418 @@
+---
+title: "Self-Hosted AI Stack Components"
+date: 2026-03-21
+summary: "Full breakdown of self-hosted components: LLMs, UIs, workflows, monitoring, vector DBs with hardware recommendations by budget"
+tags: ["self-hosted", "ai-stack", "components", "hardware", "budget", "docker"]
+author: "AI Engineering"
+---
+
+# Self-Hosted AI Stack Components
+
+Complete guide to self-hosted AI infrastructure: what you need, hardware costs, and setup.
+
+## Full Stack Architecture
+
+```
+┌─────────────────────────────────────┐
+│         User Layer                  │
+│  Open WebUI | n8n | Custom Web App  │
+└──────────┬──────────────────────────┘
+           │
+┌──────────▼──────────────────────────┐
+│         API Layer                   │
+│  n8n Webhooks | REST Endpoints      │
+└──────────┬──────────────────────────┘
+           │
+┌──────────▼──────────────────────────┐
+│         AI/LLM Layer                │
+│  Ollama | vLLM | LM Studio          │
+│  (Llama, Mistral, Qwen, Gemma)      │
+└──────────┬──────────────────────────┘
+           │
+┌──────────▼──────────────────────────┐
+│       Storage & Vector DB           │
+│  PostgreSQL | Qdrant | Milvus       │
+│  (embeddings, documents)            │
+└──────────┬──────────────────────────┘
+           │
+┌──────────▼──────────────────────────┐
+│    Infrastructure                   │
+│  Docker Swarm | Monitoring          │
+│  Grafana | Prometheus               │
+└─────────────────────────────────────┘
+```
+
+## Component Breakdown
+
+### User Layer
+
+| Component | Purpose | Resource | Notes |
+|-----------|---------|----------|-------|
+| **Open WebUI** | Chat interface | 2GB RAM, CPU | Frontend for Ollama |
+| **n8n** | Workflow automation | 4GB RAM, 2 CPU | Orchestrates workflows |
+| **Jupyter** | Data exploration | 2GB RAM, 1 CPU | Analytics, experimentation |
+
+### LLM Layer
+
+| Component | Purpose | VRAM | Speed |
+|-----------|---------|------|-------|
+| **Ollama** | Model serving | 8-48GB | 10-40 tok/sec |
+| **vLLM** | Batched inference | 12-80GB | 50-200 tok/sec |
+| **LM Studio** | GUI + serving | 8-24GB | 10-30 tok/sec |
+
+### Storage Layer
+
+| Component | Purpose | Storage | Use |
+|-----------|---------|---------|-----|
+| **PostgreSQL** | Relational DB | 10GB+ | User data, workflows |
+| **Qdrant** | Vector DB | 20GB+ | Embeddings, semantic search |
+| **Milvus** | Vector DB | 50GB+ | Large-scale vectors |
+| **Redis** | Cache/queue | 2-5GB | Session, task queue |
+| **MinIO** | S3-compatible | 100GB+ | File storage |
+
+## Hardware Budgets
+
+### Budget Tier 1: GPU-Minimal ($500-1000)
+
+**Hardware:**
+```
+CPU: Ryzen 5 (8 cores)     $150
+RAM: 32GB DDR4             $100
+GPU: RTX 3060 (12GB)       $400
+SSD: 500GB NVMe            $50
+Motherboard/PSU:           $150
+Case/cooling:              $100
+─────────────────────────
+Total:                     ~$950
+```
+
+**What runs:**
+- Mistral 7B (local)
+- Llama 7B (local)
+- Open WebUI
+- n8n (low volume)
+- PostgreSQL
+
+**Constraints:**
+- No large models (70B fails)
+- Slow batch processing
+- Single user at a time
+
+**Monthly cost:** $0 (amortized over 3 years)
+
+### Budget Tier 2: GPU-Standard ($1500-2500)
+
+**Hardware:**
+```
+CPU: Ryzen 7 (12 cores)    $250
+RAM: 64GB DDR4             $250
+GPU: RTX 4060 Ti (16GB)    $600
+SSD: 1TB NVMe              $100
+Data drive: 4TB HDD        $100
+Motherboard/PSU:           $250
+Case/cooling:              $150
+─────────────────────────
+Total:                     ~$1700
+```
+
+**What runs:**
+- Llama 13B (local)
+- Mistral 8x7B MoE (sharded)
+- n8n (medium volume)
+- Open WebUI
+- Grafana monitoring
+- PostgreSQL + Qdrant
+
+**Constraints:**
+- 70B model too slow (2 tok/sec)
+- Can't run multiple models simultaneously
+- Moderate batch processing
+
+**Monthly cost:** $0-20 (electricity)
+
+### Budget Tier 3: GPU-Powerful ($3000-5000)
+
+**Hardware:**
+```
+CPU: Ryzen 9 (16 cores)    $400
+RAM: 128GB DDR4            $500
+GPU: RTX 4090 (24GB)       $1600
+SSD: 2TB NVMe              $200
+Data drives: 8TB HDD       $200
+Motherboard/PSU (1200W):   $400
+Case/cooling:              $300
+─────────────────────────
+Total:                     ~$3600
+```
+
+**What runs:**
+- Llama 70B (8 tok/sec)
+- Mistral 8x22B (good speed)
+- Multiple models simultaneously
+- Batch processing (100+ docs at once)
+- Full monitoring stack
+- Backups
+- Development environment
+
+**Constraints:**
+- None (for SMB workloads)
+- Power hungry (1200W peak)
+
+**Monthly cost:** $50-100 (electricity)
+
+### Budget Tier 4: Enterprise ($5000+)
+
+**Hardware:**
+```
+CPU: Dual Xeon (32+ cores) $2000
+RAM: 256GB+ ECC            $2000
+GPU: 2x RTX 4090 (48GB)    $3200
+Storage: NVME RAID         $1000
+Network: 10Gb NIC          $500
+Case/PSU (3000W+):         $1000
+─────────────────────────
+Total:                     ~$10,000+
+```
+
+**What runs:**
+- All models simultaneously
+- 100K+ concurrent vectors in Milvus
+- Distributed n8n with multiple workers
+- Kubernetes orchestration
+- Load balancing
+- Redundancy/failover
+
+**Monthly cost:** $200-400 (electricity, maintenance)
+
+## Component Installation Guide
+
+### Tier 1 Setup (Ollama only)
+
+```bash
+# 1. Install Docker
+sudo apt-get install docker.io docker-compose
+
+# 2. Create docker-compose.yml
+cat > docker-compose.yml << 'EOF'
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_NUM_GPU=1
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:latest
+    ports:
+      - "3000:8080"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+    depends_on:
+      - ollama
+
+volumes:
+  ollama_data:
+EOF
+
+# 3. Start
+docker-compose up -d
+
+# 4. Pull model
+docker exec ollama ollama pull mistral
+
+# 5. Access
+# UI: http://localhost:3000
+# API: http://localhost:11434
+```
+
+### Tier 2 Setup (Full stack)
+
+Add to docker-compose.yml:
+
+```yaml
+services:
+  # ... ollama, open-webui ...
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: n8n
+      POSTGRES_PASSWORD: change_me
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  n8n:
+    image: n8nio/n8n:latest
+    ports:
+      - "5678:5678"
+    environment:
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+    depends_on:
+      - postgres
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+
+volumes:
+  postgres_data:
+  qdrant_data:
+```
+
+### Tier 3 Setup (Enterprise)
+
+Add distributed components:
+
+```yaml
+# Swarm mode (multi-node)
+docker swarm init
+
+# Deploy with constraints
+docker service create \
+  --name ollama \
+  --constraint node.labels.gpu==true \
+  --mount type=volume,source=ollama_data,target=/root/.ollama \
+  ollama/ollama:latest
+
+# Monitor with Grafana + Prometheus
+# Backup strategy: daily PostgreSQL dumps
+```
+
+## Network & Security
+
+### Local Network Only (Development)
+
+```bash
+# No external access
+docker-compose up -d
+# Access: localhost:3000, localhost:5678
+```
+
+### Private Network (Small Team)
+
+```bash
+# Behind firewall, internal network
+services:
+  n8n:
+    networks:
+      - internal
+    ports:
+      - "127.0.0.1:5678:5678"  # localhost only
+
+networks:
+  internal:
+    driver: bridge
+```
+
+### Public Access (Production)
+
+```bash
+# Reverse proxy (nginx) with HTTPS
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - /etc/letsencrypt:/etc/letsencrypt
+
+# SSL certificate (Let's Encrypt)
+sudo certbot certonly --standalone -d your-domain.com
+```
+
+## Storage Sizing
+
+| Component | Tier 1 | Tier 2 | Tier 3 |
+|-----------|--------|--------|--------|
+| **Ollama models** | 50GB | 100GB | 200GB+ |
+| **PostgreSQL** | 20GB | 100GB | 500GB |
+| **Qdrant embeddings** | 10GB | 50GB | 200GB+ |
+| **Backups (7-day)** | 50GB | 500GB | 2TB |
+| **Logs/monitoring** | 10GB | 50GB | 100GB |
+| **Total** | 140GB | 700GB | 3TB |
+
+**Recommendation:**
+- Tier 1: 250GB SSD
+- Tier 2: 1TB SSD + 4TB HDD
+- Tier 3: 2TB SSD RAID + 8TB HDD
+
+## Cost vs Cloud Comparison
+
+**Scenario: Run Llama 70B with 1000 requests/day for 1 year**
+
+**Cloud (AWS Bedrock):**
+- 1000 req/day × 365 × $0.002/req = $730/year
+- Plus data transfer: ~$100/year
+- Total: **$830/year**
+
+**Self-hosted (Tier 3, $3600 hardware):**
+- Hardware amortized: $3600/3 years = $1200/year
+- Electricity: 1200W × 24h × 365 × $0.15/kWh = $630/year
+- Internet: $0 (included)
+- Total: **$1830/year**
+
+**Break-even:** At 3000+ requests/day, self-hosted cheaper.
+
+## Maintenance
+
+### Daily
+- Monitor GPU temp (should be < 80°C)
+- Check disk space (alert if < 10%)
+
+### Weekly
+- Verify backups completed
+- Check error logs
+
+### Monthly
+- Test restore from backup
+- Update Docker images: `docker-compose pull && docker-compose up -d`
+- Review monitoring dashboards
+
+### Quarterly
+- Full disaster recovery test
+- Hardware health check (SMART status)
+
+## Checklist
+
+- [ ] Calculate workload (requests/day, models size)
+- [ ] Choose hardware tier
+- [ ] Calculate ROI vs cloud
+- [ ] Purchase/allocate hardware
+- [ ] Install Docker + docker-compose
+- [ ] Deploy tier-appropriate services
+- [ ] Configure monitoring
+- [ ] Set up backup strategy
+- [ ] Test failover/recovery
+- [ ] Document infrastructure
+- [ ] Train team on management
+- [ ] Plan for growth (add GPU, RAM, storage)
+
+## Sources and Links
+
+- [Ollama](https://github.com/ollama/ollama)
+- [vLLM](https://github.com/vllm-project/vllm)

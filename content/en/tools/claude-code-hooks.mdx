@@ -1,0 +1,576 @@
+---
+title: "Claude Code Hooks — Complete Reference"
+date: "2026-03-21"
+summary: "Exhaustive documentation of all hook types, events, matchers, environment variables, exit codes, and configuration options"
+tags: ["hooks", "automation", "reference", "claude-code"]
+author: "AI Engineering"
+---
+
+# Claude Code Hooks — Complete Reference
+
+Hooks are user-defined shell commands, HTTP endpoints, LLM prompts, or agents that execute automatically at specific points in the Claude Code lifecycle. They enable automation, validation, security controls, and custom workflows.
+
+## Hook Types
+
+### 1. Command Hooks (`type: "command"`)
+
+Execute shell commands. Receive JSON input via stdin, return results via exit codes and stdout.
+
+```json
+{
+  "type": "command",
+  "command": ".claude/hooks/validator.sh",
+  "timeout": 30,
+  "async": false,
+  "once": false,
+  "statusMessage": "Running validation..."
+}
+```
+
+**Parameters:**
+- `command` (string): Script path. Supports `$CLAUDE_PROJECT_DIR`, `${CLAUDE_PLUGIN_ROOT}`.
+- `timeout` (number): Max runtime in seconds (default: 600s).
+- `async` (boolean): Async background execution (default: false).
+- `once` (boolean): Run once per session (default: false).
+- `statusMessage` (string): Custom status message during execution.
+
+### 2. HTTP Hooks (`type: "http"`)
+
+Send POST requests to URLs with JSON payload.
+
+```json
+{
+  "type": "http",
+  "url": "http://localhost:8080/hooks/validate",
+  "headers": {
+    "Authorization": "Bearer $MY_TOKEN"
+  },
+  "allowedEnvVars": ["MY_TOKEN"],
+  "timeout": 30
+}
+```
+
+**Parameters:**
+- `url` (string): HTTP endpoint. Supports environment variable interpolation.
+- `headers` (object): HTTP headers. Variables are interpolated.
+- `allowedEnvVars` (array): Whitelist of env vars for header interpolation.
+- `timeout` (number): Max runtime in seconds (default: 30s).
+
+### 3. Prompt Hooks (`type: "prompt"`)
+
+Single-turn evaluation by Claude with yes/no decision.
+
+```json
+{
+  "type": "prompt",
+  "prompt": "Should this command be allowed? $ARGUMENTS",
+  "model": "claude-opus",
+  "timeout": 30
+}
+```
+
+**Parameters:**
+- `prompt` (string): The prompt. `$ARGUMENTS` replaced with hook input.
+- `model` (string): `claude-opus`, `claude-sonnet`, `claude-haiku`.
+- `timeout` (number): Max runtime in seconds (default: 30s).
+
+### 4. Agent Hooks (`type: "agent"`)
+
+Spawn subagents for complex verification with tool access.
+
+```json
+{
+  "type": "agent",
+  "prompt": "Verify that tests pass",
+  "context": "fork",
+  "agent": "Plan"
+}
+```
+
+**Parameters:**
+- `prompt` (string): Instructions for subagent.
+- `context` (string): `fork` for isolated context.
+- `agent` (string): `Explore`, `Plan`, `general-purpose`.
+
+---
+
+## Hook Events — Complete List
+
+### Session Events
+
+| Event | Matcher | Blockable | Description |
+|-------|---------|----------|------------|
+| `SessionStart` | startup\|resume\|clear\|compact | No | New/resumed session. Env var: `CLAUDE_ENV_FILE` |
+| `SessionEnd` | clear\|logout\|other | Yes (Exit 2) | Session termination. Hard timeout: 1.5s. |
+| `InstructionsLoaded` | — | No | CLAUDE.md/Rules loaded. |
+
+### Tool-Execution Events
+
+| Event | Matcher | Blockable | Description |
+|-------|---------|----------|------------|
+| `PreToolUse` | Tool name (Bash, Edit\|Write, mcp__.*) | Yes (Exit 2) | Before tool execution. Env: `CLAUDE_TOOL_NAME`, `CLAUDE_TOOL_INPUT`. |
+| `PostToolUse` | Tool name | No | After successful execution. |
+| `PostToolUseFailure` | Tool name | No | After failed execution. |
+| `PermissionRequest` | Tool name | Yes (Exit 2) | Permission dialog shown. |
+
+### Agent Events
+
+| Event | Matcher | Blockable | Description |
+|-------|---------|----------|------------|
+| `SubagentStart` | Agent type (Explore, Plan, ...) | No | Subagent spawned. |
+| `SubagentStop` | Agent type | Yes (Exit 2) | Subagent finished. |
+| `Stop` | — | Yes (Exit 2) | Main agent stopped. |
+| `StopFailure` | Error type (rate_limit, auth_failed, server_error, other) | No | Turn ended due to API error. |
+
+### Configuration & Context
+
+| Event | Matcher | Blockable | Description |
+|-------|---------|----------|------------|
+| `ConfigChange` | user_settings\|project_settings\|policy_settings | Yes (Exit 2) | Config file changed. |
+| `Notification` | permission_prompt\|idle_prompt\|other | No | Notification displayed. |
+| `PreCompact` | — | No | Context compaction starting. |
+| `PostCompact` | — | No | Context compaction finished. |
+
+### Quality Gates
+
+| Event | Matcher | Blockable | Description |
+|-------|---------|----------|------------|
+| `TeammateIdle` | — | No | Team member becoming idle. |
+| `TaskCompleted` | — | No | Task marked complete. |
+
+### Git Worktree Events
+
+| Event | Matcher | Blockable | Description |
+|-------|---------|----------|------------|
+| `WorktreeCreate` | — | Yes (Exit 2) | Git worktree created. Output: path to stdout. |
+| `WorktreeRemove` | — | No | Worktree removed. |
+
+### User Input & MCP
+
+| Event | Matcher | Blockable | Description |
+|-------|---------|----------|------------|
+| `UserPromptSubmit` | — | Yes (Exit 2) | Before user prompt processing. |
+| `Elicitation` | MCP server name | Yes (Exit 2) | MCP server requests input. |
+| `ElicitationResult` | MCP server name | No | User responds to elicitation. |
+
+---
+
+## Matcher Syntax
+
+Matchers use regular expressions to filter hook events.
+
+**Matcher Support by Event:**
+
+| Event | Matcher Target | Examples |
+|-------|----------------|----------|
+| PreToolUse, PostToolUse, PermissionRequest | Tool name | `Bash`, `Edit\|Write`, `Read`, `mcp__.*` |
+| SessionStart | Session source | `startup`, `resume`, `clear`, `compact` |
+| SessionEnd | Exit reason | `clear`, `logout`, `other` |
+| SubagentStart, SubagentStop | Agent type | `Explore`, `Plan`, custom names |
+| ConfigChange | Config source | `user_settings`, `project_settings`, `policy_settings` |
+| StopFailure | Error type | `rate_limit`, `authentication_failed`, `server_error` |
+| Elicitation, ElicitationResult | MCP server name | Configured server names |
+
+**Regex Examples:**
+```json
+"matcher": "Bash"                  // Exact: Bash only
+"matcher": "Edit|Write"            // Alternation: Edit or Write
+"matcher": "mcp__.*"               // All MCP tools
+"matcher": "mcp__memory__.*"       // Only memory MCP tools
+"matcher": "^(Read|Grep|Glob)$"    // Read-only tools
+```
+
+**Events WITHOUT Matcher Support:**
+- UserPromptSubmit, Stop, TeammateIdle, TaskCompleted, WorktreeCreate, WorktreeRemove, InstructionsLoaded
+
+---
+
+## Environment Variables
+
+**Always Available:**
+```bash
+CLAUDE_PROJECT_DIR           # Absolute project path
+CLAUDE_SESSION_ID            # Unique session ID
+CLAUDE_CODE_REMOTE="true"    # Set in remote environments
+```
+
+**SessionStart Exclusive:**
+```bash
+CLAUDE_ENV_FILE              # Path to file for environment variables
+# Example: echo "export NODE_ENV=production" >> "$CLAUDE_ENV_FILE"
+```
+
+**PreToolUse Exclusive:**
+```bash
+CLAUDE_TOOL_NAME             # Name of tool being called
+CLAUDE_TOOL_INPUT            # JSON input of tool (as string)
+```
+
+**HTTP Hooks:**
+All env vars in `allowedEnvVars` are interpolated in headers.
+
+---
+
+## Exit Codes
+
+| Code | Meaning | Blocking |
+|------|---------|----------|
+| 0 | Success | JSON parsed or action allowed |
+| 2 | Blocking error | stderr as message, action blocked |
+| 1, 3, ... | Non-blocking | stderr shown in verbose mode |
+
+**Exit Code 2 Blocking Behavior by Event:**
+
+| Event | Result |
+|-------|--------|
+| PreToolUse | Tool execution blocked |
+| PermissionRequest | Permission denied |
+| UserPromptSubmit | Prompt processing blocked |
+| Stop, SubagentStop | Stop prevented |
+| ConfigChange | Config change blocked |
+| WorktreeCreate | Worktree creation blocked |
+| Elicitation | Elicitation denied |
+| PostToolUse, PostToolUseFailure | Non-blocking |
+
+---
+
+## Configuration Format
+
+Hooks configured in `settings.json` (project or user level):
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/validate.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/setup.sh",
+            "once": true
+          }
+        ]
+      }
+    ]
+  },
+  "disableAllHooks": false
+}
+```
+
+**Configuration Sources (Priority, low to high):**
+1. `~/.claude/settings.json` (user)
+2. `.claude/settings.json` (project, shareable)
+3. `.claude/settings.local.json` (project, local)
+4. Managed policies (organization)
+5. Plugin `hooks/hooks.json`
+6. Skill/Agent frontmatter
+
+Higher priority overrides lower.
+
+**Disable All Hooks:**
+```json
+{
+  "disableAllHooks": true
+}
+```
+
+Individual hooks cannot be disabled — must be removed from config.
+
+---
+
+## JSON Output Schema
+
+**Successful Response (Exit 0):**
+```json
+{
+  "continue": true,
+  "suppressOutput": false,
+  "systemMessage": "Hook executed",
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "allow"
+  }
+}
+```
+
+**Blocking Response (Exit 2):**
+```json
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "deny",
+    "permissionDecisionReason": "Blocked by policy"
+  }
+}
+```
+
+**General Schema:**
+```json
+{
+  "continue": true|false,
+  "stopReason": "string (if continue=false)",
+  "suppressOutput": false,
+  "systemMessage": "string (to user)",
+  "hookSpecificOutput": {
+    "hookEventName": "EventName",
+    "permissionDecision": "allow|deny|ask",
+    "permissionDecisionReason": "string",
+    "updatedInput": {},
+    "updatedMCPToolOutput": {},
+    "additionalContext": "string"
+  }
+}
+```
+
+---
+
+## HTTP Hook Error Handling
+
+| Response | Behavior |
+|----------|----------|
+| 2xx + empty body | Success, action allowed |
+| 2xx + JSON | JSON parsed as decision |
+| 2xx + text | Text added as context |
+| Non-2xx | Non-blocking error |
+| Timeout | Non-blocking error |
+
+To block via HTTP: Return 2xx with `{"hookSpecificOutput": {"permissionDecision": "deny"}}`.
+
+---
+
+## Timeouts
+
+| Hook Type | Default |
+|-----------|---------|
+| Command | 600 seconds |
+| Prompt | 30 seconds |
+| Agent | 60 seconds |
+| HTTP | 30 seconds |
+| SessionEnd | 1.5 seconds (hard) |
+
+**Override SessionEnd Timeout:**
+```bash
+CLAUDE_CODE_SESSIONEND_HOOKS_TIMEOUT_MS=5000 claude
+```
+
+---
+
+## Path Substitution
+
+Placeholders in `command`:
+```json
+"command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/script.sh"
+"command": "${CLAUDE_PLUGIN_ROOT}/scripts/tool.sh"
+"command": "${CLAUDE_PLUGIN_DATA}/dependencies/lib"
+```
+
+**Always quote paths with spaces:**
+```json
+"command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/my script.sh\""
+```
+
+---
+
+## Async & One-Time Execution
+
+**Async Hooks (non-blocking):**
+```json
+{
+  "type": "command",
+  "command": ".claude/hooks/background-task.sh",
+  "async": true
+}
+```
+
+**Once Per Session:**
+```json
+{
+  "type": "command",
+  "command": ".claude/hooks/setup.sh",
+  "once": true
+}
+```
+
+---
+
+## Hook Management
+
+Type `/hooks` in Claude Code for read-only browser:
+- All hook events with counts
+- Source location (User, Project, Local, Plugin)
+- Full handler details
+
+---
+
+## Practical Examples
+
+### Block Destructive Commands
+```bash
+#!/bin/bash
+COMMAND=$(jq -r '.tool_input.command')
+if echo "$COMMAND" | grep -qE '(rm -rf|dd if=)'; then
+  jq -n '{hookSpecificOutput: {hookEventName: "PreToolUse", permissionDecision: "deny"}}'
+  exit 2
+else
+  exit 0
+fi
+```
+
+### Set Environment Variables on Start
+```bash
+#!/bin/bash
+if [ -n "$CLAUDE_ENV_FILE" ]; then
+  echo "export NODE_ENV=production" >> "$CLAUDE_ENV_FILE"
+  exit 0
+fi
+```
+
+### Lint After File Changes
+```bash
+#!/bin/bash
+FILE=$(jq -r '.tool_input.file_path')
+if [[ "$FILE" == *.py ]]; then
+  python -m pylint "$FILE"
+fi
+```
+
+### Prompt-Based Validation
+```json
+{
+  "hooks": {
+    "PermissionRequest": [
+      {
+        "matcher": "Edit",
+        "hooks": [{
+          "type": "prompt",
+          "prompt": "Is this change safe? $ARGUMENTS",
+          "model": "claude-opus"
+        }]
+      }
+    ]
+  }
+}
+```
+
+### Filter Secrets from Output
+```bash
+#!/bin/bash
+jq -r '.tool_output // ""' | \
+  sed -E 's/password[=:]\s*[^ ]+/password=***REDACTED***/gi'
+```
+
+### Prevent Force-Push
+```bash
+#!/bin/bash
+COMMAND=$(jq -r '.tool_input.command')
+if echo "$COMMAND" | grep -qE 'git push.*(--force|-f)'; then
+  jq -n '{hookSpecificOutput: {hookEventName: "PreToolUse", permissionDecision: "deny"}}'
+  exit 2
+fi
+```
+
+### MCP Tools Whitelist
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__.*",
+        "hooks": [{
+          "type": "prompt",
+          "prompt": "Allow MCP tool? $ARGUMENTS",
+          "model": "claude-sonnet"
+        }]
+      }
+    ]
+  }
+}
+```
+
+### Agent-Based Test Validation
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [{
+          "type": "agent",
+          "prompt": "Verify all tests pass and no linting errors",
+          "context": "fork",
+          "agent": "Explore"
+        }]
+      }
+    ]
+  }
+}
+```
+
+### HTTP Remote Validation
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [{
+          "type": "http",
+          "url": "http://security-service:8080/validate",
+          "headers": {
+            "Authorization": "Bearer $SECURITY_TOKEN",
+            "X-Session-ID": "$CLAUDE_SESSION_ID"
+          },
+          "allowedEnvVars": ["SECURITY_TOKEN"],
+          "timeout": 10
+        }]
+      }
+    ]
+  }
+}
+```
+
+### Custom Worktree (SVN)
+```bash
+#!/bin/bash
+NAME=$(jq -r '.name')
+DIR="$HOME/.claude/worktrees/$NAME"
+mkdir -p "$(dirname "$DIR")"
+svn checkout "https://svn.example.com/branches/$NAME" "$DIR"
+echo "$DIR"
+```
+
+---
+
+## Security Notes
+
+- Managed policy hooks cannot be disabled by users.
+- Enterprises can use `allowManagedHooksOnly` to restrict hooks.
+- MCP elicitation hooks cannot override server schemas.
+- `policy_settings` ConfigChange blocks are ignored.
+
+---
+
+*Documentation: 2026-03-21*
+EOFEN
+
+## Sources and Links
+
+- [Hooks Documentation](https://code.claude.com/docs/en/hooks)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

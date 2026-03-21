@@ -1,0 +1,49 @@
+---
+title: "EU AI Act: 5 Pflichten die JETZT SCHON gelten"
+date: "2026-03-11"
+summary: "Der EU AI Act greift ab August 2026. Aber 5 Pflichten gelten bereits heute — wer sie ignoriert, riskiert Bußgelder bis zu 35 Mio. EUR. Hier ist die Checkliste."
+tags: ["eu-ai-act", "compliance", "pflichten"]
+author: "AI Engineering"
+---
+
+# EU AI Act: 5 Pflichten die JETZT SCHON gelten
+
+![EU AI Act — 5 Pflichten die jetzt schon gelten](/images/blog/eu-ai-act-was-unternehmen-tun-muessen.png)
+
+Viele Unternehmen warten auf August 2026. Das ist ein Fehler. Fünf Pflichten aus dem EU AI Act sind bereits in Kraft — seit Februar 2025. Wer sie nicht umsetzt, haftet jetzt schon.
+
+## 1. Verbot von Social Scoring
+
+AI-Systeme, die Menschen anhand ihres Sozialverhaltens bewerten und dadurch benachteiligen, sind verboten. Das betrifft nicht nur Behörden. Auch Unternehmen, die Kunden-Scoring mit Verhaltensanalyse kombinieren, müssen prüfen ob sie unter diese Regel fallen.
+
+**Was zu tun ist:** Prüfen ob interne Scoring-Systeme Verhaltensdaten nutzen. Falls ja: sofort anpassen oder abschalten.
+
+## 2. Verbot von Emotionserkennung am Arbeitsplatz
+
+AI-basierte Emotionserkennung in Bewerbungsgesprächen oder am Arbeitsplatz ist untersagt. Das gilt auch für Tools von Drittanbietern, die Mimik oder Stimme analysieren.
+
+**Was zu tun ist:** HR-Tools auf Emotionsanalyse-Features prüfen. Viele Video-Interview-Plattformen bieten das als "Feature" an.
+
+## 3. Verbot manipulativer AI-Techniken
+
+AI-Systeme, die menschliches Verhalten unterbewusst manipulieren, sind verboten. Das betrifft Dark Patterns, die durch AI gesteuert werden — etwa personalisierte Preismanipulation oder suchtfördernde Algorithmen.
+
+**Was zu tun ist:** Marketing-Tools und Personalisierungs-Engines auf manipulative Muster prüfen.
+
+## 4. AI-Kompetenzpflicht für Mitarbeiter
+
+Artikel 4 des EU AI Act verlangt, dass Personen die AI-Systeme betreiben, ausreichende AI-Kompetenz besitzen. Das gilt ab sofort — nicht erst ab August 2026.
+
+**Was zu tun ist:** Schulungsprogramm aufsetzen. Dokumentieren wer welche AI-Tools nutzt und welche Schulung absolviert wurde.
+
+## 5. Transparenzpflicht für AI-generierte Inhalte
+
+AI-generierte Texte, Bilder und Audio müssen als solche gekennzeichnet werden. Das gilt bereits für Deepfakes und synthetische Medien.
+
+**Was zu tun ist:** Alle AI-generierten Inhalte kennzeichnen. Ein einfacher Hinweis reicht: "Erstellt mit Unterstützung von AI."
+
+## Fazit
+
+Die volle Regulierung kommt im August 2026. Aber wer bis dahin wartet, hat bereits 5 Pflichten verpasst. Wer jetzt anfängt, hat einen Vorsprung.
+
+Unser [DSGVO Compliance Bundle](https://buy.stripe.com/bJe7sLb7N92ha9MejWfQI02) enthält Vorlagen für AI-Risikobewertung, Transparenzhinweise und eine EU AI Act Compliance-Checkliste — für EUR 79.

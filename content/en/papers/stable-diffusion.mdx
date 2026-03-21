@@ -1,0 +1,157 @@
+---
+title: Stable Diffusion — Latent Diffusion Models  
+date: 2026-03-21
+summary: Latent Diffusion Models paper, VAE + U-Net + CLIP architecture, conditioning. SD 1.5 → SDXL → SD3 evolution.
+tags: [diffusion, stable-diffusion, generative, image, latent, paper]
+author: AI Engineering
+section: papers
+---
+
+# Stable Diffusion — Latent Diffusion Models
+
+Stable Diffusion shows how to make complex generative models practical by working in latent space (not image space).
+
+## The Problem with Diffusion
+
+Original diffusion models (DDPM, 2020) were extremely slow:
+
+```
+Training:
+- Train on 512x512 images
+- That's 262,144 pixels
+- Requires ~1000 diffusion steps
+- Very memory-intensive
+
+Inference:
+- 50-1000 iterations to generate image
+- On GPU: 30+ seconds per image
+- On CPU: Minutes
+```
+
+**Stable Diffusion's solution:** Don't work in image space—work in latent space (VAE).
+
+## Architecture: VAE + Diffusion + CLIP
+
+```
+Step 1: VAE Encoder
+Input: 512x512 RGB image
+Output: 64x64x4 latent
+
+Step 2: Diffusion in latent space
+Noise + denoise (4x less data)
+
+Step 3: CLIP encoding (text)
+Input: "A cat on a sunny beach"
+Output: 768-dim embedding
+
+Step 4: U-Net with cross-attention
+Combine latent + CLIP
+
+Step 5: VAE Decoder
+Input: 64x64x4 latent
+Output: 512x512 image
+```
+
+## VAE (Variational Autoencoder)
+
+Compression trick:
+
+```
+Encoder: 512x512 → 64x64x4
+- 8x8x4 compression
+- Lossless (with quantization)
+
+Advantages:
+- 64x fewer parameters
+- 64x faster
+- Diffusion practical
+```
+
+## CLIP: Text Encoder
+
+```
+Input: "A cat on a sunny beach"
+Processing:
+1. Tokenize (BPE)
+2. Transformer encoder
+3. Output: 768-dim embedding
+
+This embedding conditions the U-Net.
+```
+
+CLIP was trained on billions of image-text pairs, making embeddings very meaningful.
+
+## U-Net with Cross-Attention
+
+```python
+def forward(latent, timestep, clip_embedding):
+    x = latent
+    for block in encoder_blocks:
+        x = block(x, timestep, clip_embedding)  # Cross-Attention!
+    noise_pred = decoder(x)
+    return noise_pred
+```
+
+Cross-attention is efficient because CLIP is small (77 tokens) while latent is large (4096 tokens).
+
+## Training vs. Inference
+
+### Training
+```
+Data: LAION-5B (5 billion image-text pairs)
+
+1. Load image, encode to latent (VAE)
+2. Sample random noise level t
+3. Add noise: x_t = sqrt(alpha_t) * x + sqrt(1 - alpha_t) * noise
+4. Ask model: "Remove noise"
+5. Loss: MSE between predicted and actual noise
+```
+
+### Inference
+```
+1. Start: Pure noise
+2. Loop 50 steps:
+   - Ask model: "What's less noisy?"
+   - Subtract predicted noise
+   - Reduce variance
+3. After 50 steps: Decent image
+4. VAE Decode: Latent → image
+5. Output: 512x512 image
+```
+
+## Evolution Chain
+
+### Stable Diffusion v1 (2022)
+- 860M parameters
+- Trained on LAION-5B subset
+- 4 GB model
+
+### Stable Diffusion v1.5 (2022)
+- Fine-tuned on better data
+- +5% better quality
+- Better anatomy
+
+### SDXL (2023)
+- 3.5B parameters (4x larger)
+- Two CLIP models
+- Better for 1024x1024
+
+### Stable Diffusion 3 (2024)
+- Switched U-Net to Diffusion Transformer
+- Better scaling properties
+- Better text alignment
+
+## Why Stable Diffusion is "Stable"
+
+1. Trained on publicly available data
+2. Model is open-source
+3. Runs locally (not API-dependent)
+4. No NSFW filters (user choice)
+
+## Sources and Links
+
+- [Latent Diffusion Models Paper](https://arxiv.org/abs/2112.10752)
+- [CLIP Paper](https://arxiv.org/abs/2103.14030)
+- [SDXL Paper](https://arxiv.org/abs/2307.01952)
+- [Stable Diffusion GitHub](https://github.com/CompVis/stable-diffusion)
+- [HuggingFace Diffusers](https://huggingface.co/docs/diffusers)

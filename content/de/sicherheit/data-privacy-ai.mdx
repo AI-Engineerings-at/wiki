@@ -1,0 +1,544 @@
+---
+title: "Datenschutz & Datenhaltung für KI"
+description: "Datenhandhabung für KI: Anonymisierung, Differential Privacy, On-Premise vs Cloud, Datenresidenz, Verschlüsselung. DSGVO-Implikationen für Trainingsdaten, Recht auf Löschung."
+section: "sicherheit"
+---
+
+# Datenschutz & Datenhaltung für KI
+
+KI-Systeme brauchen Daten. Aber Daten sind sensibel. Diese Seite behandelt rechtliche und technische Aspekte von Datenschutz in KI-Systemen.
+
+---
+
+## 1. DSGVO Compliance für KI
+
+### 1.1 Neun Kernprinzipien der DSGVO
+
+```yaml
+1. Lawfulness (Rechtmäßigkeit)
+   - Verarbeitung muss rechtliche Grundlage haben
+   - Consent, Contract, Legal Obligation, Vital Interests, Public Task, Legitimate Interest
+
+2. Fairness (Fairness)
+   - Verarbeitung nicht zu Unrecht benachteiligung
+   - Transparenz über wie Daten verwendet werden
+
+3. Transparency (Transparenz)
+   - User müssen wissen welche Daten verarbeitet werden
+   - Datenschutzerklärung erforderlich
+
+4. Purpose Limitation (Zweckbindung)
+   - Daten dürfen nur für Original-Zweck verwendet werden
+   - Können nicht nachträglich für andere Zwecke repurposed werden
+
+5. Data Minimization (Datenminimierung)
+   - Nur Daten sammeln/halten die notwendig sind
+   - Weniger Daten = weniger Risiko
+
+6. Accuracy (Genauigkeit)
+   - Daten müssen korrekt sein
+   - Muss Prozess für Corrections haben
+
+7. Storage Limitation (Aufbewahrungslimit)
+   - Daten nicht länger speichern als nötig
+   - Lösche oder anonymisiere nach Zweck erfüllt
+
+8. Integrity & Confidentiality (Integrität & Vertraulichkeit)
+   - Schutz gegen Missbrauch, Verlust, unbefugten Zugriff
+   - Verschlüsselung, Access Controls, Auditing
+
+9. Accountability (Rechenschaftspflicht)
+   - Belege dass du DSGVO-konform bist
+   - Datenverarbeitungs-Register (DPA), Verträge (DPA, DPA), Impact Assessments
+```
+
+### 1.2 Data Protection Impact Assessment (DPIA)
+
+Eine DPIA ist erforderlich wenn KI "high-risk processing" beinhaltet:
+
+```python
+class DPIAssessment:
+    """Template für Data Protection Impact Assessment"""
+
+    def __init__(self, ai_system_name: str):
+        self.system_name = ai_system_name
+        self.risks = []
+        self.mitigations = []
+
+    def add_risk(self, category: str, description: str, likelihood: str, impact: str):
+        """
+        Adds a data protection risk
+
+        Args:
+            category: "confidentiality" | "integrity" | "availability" | "rights" | "discrimination"
+            description: Risk description
+            likelihood: "low" | "medium" | "high"
+            impact: "low" | "medium" | "high"
+        """
+        self.risks.append({
+            "category": category,
+            "description": description,
+            "likelihood": likelihood,
+            "impact": impact,
+        })
+
+    def add_mitigation(self, risk_id: int, mitigation: str):
+        """Adds mitigation strategy for a risk"""
+        self.mitigations.append({
+            "risk_id": risk_id,
+            "mitigation": mitigation
+        })
+
+    def generate_report(self) -> str:
+        report = f"# DPIA: {self.system_name}\n\n"
+        report += "## Risks Identified\n"
+
+        for i, risk in enumerate(self.risks):
+            report += f"\n### Risk {i+1}: {risk['category']}\n"
+            report += f"- Description: {risk['description']}\n"
+            report += f"- Likelihood: {risk['likelihood']}\n"
+            report += f"- Impact: {risk['impact']}\n"
+
+        report += "\n## Mitigations\n"
+        for mit in self.mitigations:
+            report += f"- Risk {mit['risk_id']}: {mit['mitigation']}\n"
+
+        return report
+
+# Beispiel:
+dpia = DPIAssessment("Customer Support Chatbot")
+dpia.add_risk(
+    category="rights",
+    description="Model trained on customer data may leak PII",
+    likelihood="medium",
+    impact="high"
+)
+dpia.add_mitigation(0, "Anonymize training data before use")
+dpia.add_mitigation(0, "Implement output PII redaction")
+
+print(dpia.generate_report())
+```
+
+---
+
+## 2. Anonymisierung & Pseudonymisierung
+
+### 2.1 Anonymisierung Techniken
+
+```python
+import hashlib
+import secrets
+from typing import List, Dict
+
+class AnonymizationEngine:
+    """Tools zur Anonymisierung von Daten"""
+
+    @staticmethod
+    def irreversible_hash(value: str, salt: str = None) -> str:
+        """
+        Irreversible hashing (für echte Anonymisierung)
+        """
+        if salt is None:
+            salt = secrets.token_hex(16)
+
+        combined = f"{value}{salt}".encode('utf-8')
+        hashed = hashlib.sha256(combined).hexdigest()
+        return hashed[:16]  # Truncate to 16 chars
+
+    @staticmethod
+    def pseudonymize(value: str, mapping: Dict = None) -> tuple:
+        """
+        Pseudonymisierung: Ersetze echte Identifikatoren mit Codes
+        Wichtig: mapping muss sicher gespeichert werden (verschlüsselt)
+
+        Returns:
+            (pseudonym, mapping_entry)
+        """
+        pseudonym = secrets.token_hex(8)  # Zufälliger Token
+        return pseudonym, {pseudonym: value}
+
+    @staticmethod
+    def generalize(value: str, generalization_level: str) -> str:
+        """
+        Generalisierung: Reduziere Genauigkeit um Re-Identification zu verhindern
+        """
+        if generalization_level == "coarse":
+            # Nur Jahr statt vollständiges Datum
+            if len(value) >= 4 and value[:4].isdigit():
+                return value[:4]
+        elif generalization_level == "medium":
+            # Nur erste 3 Zeichen (für Namen)
+            return value[:3] + "***"
+        elif generalization_level == "fine":
+            # Komplette Generalisierung
+            return "[REDACTED]"
+
+        return value
+
+    @staticmethod
+    def k_anonymity_check(dataset: List[Dict], quasi_identifiers: List[str], k: int = 5) -> bool:
+        """
+        K-Anonymity Check: Stelle sicher dass jede Kombination von quasi-identifiers
+        mindestens k-Mal auftritt (verhindert Re-Identification)
+
+        Args:
+            dataset: List von Records
+            quasi_identifiers: Spalten die Identifikation ermöglichen können
+            k: Minimum Häufigkeit
+        """
+        from collections import Counter
+
+        # Extrahiere quasi-identifier Kombinationen
+        combinations = []
+        for record in dataset:
+            combo = tuple(record.get(qi) for qi in quasi_identifiers)
+            combinations.append(combo)
+
+        # Zähle Häufigkeit
+        counter = Counter(combinations)
+
+        # Prüfe ob alle Häufigkeiten >= k
+        return all(count >= k for count in counter.values())
+
+# Verwendung:
+engine = AnonymizationEngine()
+
+# Irreversible Hashing
+ssn = "123-45-6789"
+hashed = engine.irreversible_hash(ssn)
+print(f"SSN hashed: {hashed}")
+
+# Pseudonymisierung
+name = "John Doe"
+pseudonym, mapping = engine.pseudonymize(name)
+print(f"Name pseudonymized: {pseudonym}")
+
+# Generalisierung
+date = "1985-03-15"
+generalized = engine.generalize(date, generalization_level="coarse")
+print(f"Date generalized: {generalized}")
+
+# K-Anonymity Check
+dataset = [
+    {"age": "25-30", "gender": "M", "ssn": "123-45-6789"},
+    {"age": "25-30", "gender": "M", "ssn": "987-65-4321"},
+    {"age": "25-30", "gender": "M", "ssn": "555-55-5555"},
+    {"age": "25-30", "gender": "M", "ssn": "666-66-6666"},
+    {"age": "25-30", "gender": "M", "ssn": "777-77-7777"},
+]
+is_kanon = engine.k_anonymity_check(dataset, ["age", "gender"], k=5)
+print(f"5-anonymity satisfied: {is_kanon}")
+```
+
+### 2.2 Differential Privacy
+
+Differential Privacy: Mathematisches Framework zur Datenanalyse ohne Preisgabe individueller Daten.
+
+```python
+import numpy as np
+from scipy import stats
+
+class DifferentialPrivacyEngine:
+    """Differential Privacy für ML"""
+
+    @staticmethod
+    def laplace_mechanism(value: float, sensitivity: float, epsilon: float) -> float:
+        """
+        Laplace Mechanism: Füge Rauschen hinzu das Laplace-verteilt ist
+
+        Args:
+            value: Echter Wert (z.B. Durchschnitt)
+            sensitivity: Maximum mögliche Änderung bei Entfernung einer Row
+            epsilon: Privacy budget (höher = weniger Datenschutz, mehr Genauigkeit)
+        """
+        scale = sensitivity / epsilon
+        noise = np.random.laplace(loc=0, scale=scale)
+        return value + noise
+
+    @staticmethod
+    def gaussian_mechanism(value: float, sensitivity: float, epsilon: float, delta: float = 1e-5) -> float:
+        """
+        Gaussian Mechanism: Bessere Genauigkeit aber erfordert delta
+        """
+        sigma = np.sqrt(2 * np.log(1.25 / delta)) * sensitivity / epsilon
+        noise = np.random.normal(loc=0, scale=sigma)
+        return value + noise
+
+    @staticmethod
+    def compute_privacy_budget(epsilon: float, delta: float = 1e-5) -> str:
+        """
+        Interpretiert Privacy Budget
+        - epsilon=0.01, delta=1e-5: Sehr privat, aber wenig Genauigkeit
+        - epsilon=1.0, delta=1e-5: Moderate Privacy, gute Genauigkeit
+        - epsilon=10.0, delta=1e-5: Schwach privat, sehr genaue Ergebnisse
+        """
+        if epsilon < 0.1:
+            return "Very Strong Privacy (epsilon < 0.1)"
+        elif epsilon < 1.0:
+            return "Strong Privacy (epsilon < 1.0)"
+        elif epsilon < 10.0:
+            return "Moderate Privacy (epsilon < 10.0)"
+        else:
+            return "Weak Privacy (epsilon >= 10.0)"
+
+# Verwendung:
+engine = DifferentialPrivacyEngine()
+
+# Echter Durchschnitt: 50,000
+true_value = 50000
+sensitivity = 100000  # Max mögliche Änderung
+epsilon = 1.0
+
+# Mit Laplace Mechanism
+noisy_laplace = engine.laplace_mechanism(true_value, sensitivity, epsilon)
+print(f"True average salary: {true_value}")
+print(f"DP average (Laplace): {noisy_laplace:.2f}")
+
+# Privacy Budget
+privacy_level = engine.compute_privacy_budget(epsilon=1.0)
+print(f"Privacy Level: {privacy_level}")
+```
+
+---
+
+## 3. On-Premise vs Cloud: Datenresidenz
+
+```yaml
+ON-PREMISE (Lokal gehostet)
+  Advantages:
+    - Volle Kontrolle über Daten
+    - Keine Datenübertragung über Internet
+    - Erfüllt strengste Datenschutz-Anforderungen
+    - HIPAA, DSGVO möglich
+
+  Disadvantages:
+    - Höhere Kosten (Server, Betrieb)
+    - Sicherung liegt bei dir
+    - Skalierung schwieriger
+
+  Use Case:
+    - Hochsensible Daten (Finanzen, Gesundheit)
+    - Strikte Datenresidenz-Anforderungen
+
+CLOUD (Mit Data Residency Clause)
+  Advantages:
+    - Niedrigere Kosten
+    - Automatische Backups
+    - Globale Verfügbarkeit
+    - Auto-Scaling
+
+  Disadvantages:
+    - Abhängigkeit vom Cloud Provider
+    - Daten verlassen ggf. das Land
+    - DSGVO/HIPAA komplexer
+
+  Data Residency Options:
+    - EU-only: Daten bleiben in EU (DSGVO erforderlich)
+    - Region-locked: Daten bleiben in Selectedregion
+    - Compliant regions: z.B. AWS EU (Ireland), Azure EU (Netherlands)
+
+  Use Case:
+    - Standard Business Data
+    - Wo Kostenoptimierung wichtig ist
+```
+
+### Data Residency Implementierung
+
+```python
+class DataResidencyManager:
+    """Manages data location compliance"""
+
+    COMPLIANT_REGIONS = {
+        "EU": ["eu-west-1", "eu-central-1", "eu-north-1"],
+        "US": ["us-east-1", "us-west-2"],
+        "APAC": ["ap-southeast-1", "ap-northeast-1"],
+    }
+
+    def __init__(self, required_regions: List[str]):
+        """
+        Args:
+            required_regions: Zulässige Regionen (z.B. ["EU"])
+        """
+        self.required_regions = required_regions
+        self.audit_log = []
+
+    def store_data(self, data: str, region: str) -> bool:
+        """
+        Stores data only in compliant regions
+        """
+        allowed = False
+        for req_region in self.required_regions:
+            if region in self.COMPLIANT_REGIONS.get(req_region, []):
+                allowed = True
+                break
+
+        if allowed:
+            self.audit_log.append({
+                "action": "store",
+                "region": region,
+                "status": "ALLOWED"
+            })
+        else:
+            self.audit_log.append({
+                "action": "store",
+                "region": region,
+                "status": "DENIED"
+            })
+
+        return allowed
+
+    def get_audit_log(self) -> List[Dict]:
+        return self.audit_log
+
+# Verwendung:
+manager = DataResidencyManager(required_regions=["EU"])
+
+# OK: EU region
+ok = manager.store_data("customer data", region="eu-west-1")
+print(f"Store in EU: {ok}")  # True
+
+# NOT OK: US region
+not_ok = manager.store_data("customer data", region="us-east-1")
+print(f"Store in US: {not_ok}")  # False
+```
+
+---
+
+## 4. Encryption at Rest & In Transit
+
+```python
+from cryptography.fernet import Fernet
+import ssl
+
+class DataEncryption:
+    """Encryption für Daten"""
+
+    @staticmethod
+    def encrypt_at_rest(data: str, key: bytes) -> str:
+        """
+        Encrypts data for storage
+
+        Args:
+            data: Plaintext
+            key: Encryption key (from key management system)
+        """
+        cipher = Fernet(key)
+        encrypted = cipher.encrypt(data.encode('utf-8'))
+        return encrypted.decode('utf-8')
+
+    @staticmethod
+    def decrypt_at_rest(encrypted_data: str, key: bytes) -> str:
+        """Decrypts stored data"""
+        cipher = Fernet(key)
+        decrypted = cipher.decrypt(encrypted_data.encode('utf-8'))
+        return decrypted.decode('utf-8')
+
+    @staticmethod
+    def setup_tls_for_transit():
+        """
+        SSL/TLS Configuration für Data in Transit
+        """
+        context = ssl.create_default_context()
+        context.check_hostname = True
+        context.verify_mode = ssl.CERT_REQUIRED
+        # Minimale TLS Version: 1.2
+        context.minimum_version = ssl.TLSVersion.TLSv1_2
+        return context
+
+# Verwendung:
+# Generate a key (in production: from secure key management system)
+key = Fernet.generate_key()
+
+encryption = DataEncryption()
+
+# Encrypt at rest
+plaintext = "Sensitive customer data"
+encrypted = encryption.encrypt_at_rest(plaintext, key)
+print(f"Encrypted: {encrypted}")
+
+# Decrypt
+decrypted = encryption.decrypt_at_rest(encrypted, key)
+print(f"Decrypted: {decrypted}")
+```
+
+---
+
+## 5. Right to Deletion (DSGVO Art. 17)
+
+```python
+class RightToDelete:
+    """Implements GDPR Article 17 - Right to Deletion"""
+
+    def __init__(self, database_connection):
+        self.db = database_connection
+
+    def request_deletion(self, user_id: str, reason: str) -> dict:
+        """
+        Process deletion request
+
+        Args:
+            user_id: The user requesting deletion
+            reason: Why they're requesting deletion
+        """
+        # Document the request
+        deletion_record = {
+            "user_id": user_id,
+            "reason": reason,
+            "timestamp": datetime.now(),
+            "status": "pending"
+        }
+
+        # Find all records associated with user
+        records_to_delete = self.db.find_records(user_id=user_id)
+
+        # Exception: Legal obligations, retention requirements
+        exceptions = [
+            "Legal obligation",
+            "Court order",
+            "Public interest"
+        ]
+
+        can_delete = reason not in exceptions
+
+        if can_delete:
+            # Delete from all systems
+            self._delete_from_database(user_id)
+            self._delete_from_cache(user_id)
+            self._delete_from_backups(user_id)
+            self._delete_from_ai_models(user_id)
+
+            deletion_record["status"] = "completed"
+        else:
+            deletion_record["status"] = "denied_exception"
+
+        return deletion_record
+
+    def _delete_from_ai_models(self, user_id: str):
+        """
+        Deletes user data from trained models
+
+        CHALLENGE: Can't realistically "unlearn" without retraining
+        Options:
+        1. Retrain model without user's data
+        2. Use "machine unlearning" techniques (experimental)
+        3. Acknowledge limitation in privacy policy
+        """
+        pass
+
+# Verwendung:
+# In DSGVO-compliant system, need to handle deletion requests:
+# - Communicate with users about retention limits
+# - Implement automated deletion workflows
+# - Document exceptions
+```
+
+---
+
+## 6. Quellen und Links
+
+- **DSGVO (Official)**: https://gdpr-info.eu/
+- **DSGVO Art. 17 (Right to Deletion)**: https://gdpr-info.eu/art-17-gdpr/
+- **Differential Privacy**: https://en.wikipedia.org/wiki/Differential_privacy
+- **K-Anonymity**: https://en.wikipedia.org/wiki/K-anonymity
+- **Microsoft Presidio (PII)**: https://github.com/microsoft/presidio
+- **OpenDP (Differential Privacy)**: https://opendp.org/

@@ -1,0 +1,411 @@
+---
+title: "Multi-Agent Systems — Architecture & Patterns"
+date: "2026-03-21"
+summary: "Specialized agents collaborate: Manager/Worker (Hub & Spoke), Peer-to-Peer, Hierarchical. State management, conflict resolution, error handling, real-world patterns."
+tags: ["multi-agent", "architecture", "orchestration", "patterns", "scaling"]
+author: "AI Engineering"
+---
+
+# Multi-Agent Systems — Architecture & Patterns
+
+A **Multi-Agent System (MAS)** consists of multiple autonomous AI agents working collaboratively on complex tasks. Each agent has specialized capabilities and a clearly defined role. Unlike single-LLM solutions, multi-agent systems provide specialization, scalability, and auditability.
+
+## Why Multiple Agents Instead of One?
+
+### The Specialization Problem
+
+A single LLM asked to handle all these simultaneously:
+- Write code AND review code
+- Manage infrastructure AND monitor systems
+- Create content AND manage social media
+- Answer support tickets AND fix bugs
+- Strategic planning AND operational execution
+
+**Result**: Average performance at everything. Context window exhaustion. Impossible audit trail.
+
+### Multi-Agent Advantages
+
+| Problem | Single-LLM | Multi-Agent |
+|---------|-----------|-------------|
+| Specialization | Average | Excellent (each agent ~1 task) |
+| Context efficiency | Poor (mixed) | Good (isolated context) |
+| Error handling | Difficult | Easy (Agent A crashes, B continues) |
+| Audit trail | Impossible | Clear (who did what) |
+| Scaling | Limited | Good (add agents) |
+| Cost | High | Low (Haiku for simple, Opus for complex) |
+
+## Architecture Patterns
+
+### Pattern 1: Hub & Spoke (Manager/Worker)
+
+```
+         ┌──────────────┐
+         │  Orchestrator │
+         │    (Manager)   │
+         │    @jim        │
+         └──────┬────────┘
+    ┌────────────┼────────────┐
+    │            │            │
+┌───┴───┐   ┌───┴───┐   ┌───┴───┐
+│Dev    │   │QA     │   │Infra  │
+│@jim01 │   │@jim02 │   │@lisa01│
+└───────┘   └───────┘   └───────┘
+
+Communication:
+- Manager receives task
+- Delegates to appropriate worker
+- Tracks status
+- Workers report progress + blockers
+- Manager escalates on problems
+```
+
+**Advantages**:
+- Clear responsibility (manager = decision point)
+- Easy tracking (everything flows through manager)
+- Centralized escalation (blockers go to manager)
+
+**Disadvantages**:
+- Manager can become bottleneck
+- Single point of failure (manager down = everything down)
+- Less parallelization
+
+**Best for**: Small teams (2-5 agents)
+
+### Pattern 2: Peer-to-Peer (Mesh)
+
+```
+┌──────┐
+│Agent │
+└──┬───┘
+   │ (direct call)
+┌──┴────┐    ┌────────┐
+│Agent │←→→→→│ Agent  │
+└──────┘    └────────┘
+   ↓
+ Data Store (shared state)
+```
+
+**Advantages**:
+- No bottleneck
+- Higher parallelization
+- Resilient to agent failures
+
+**Disadvantages**:
+- Harder to debug
+- Complex conflict resolution
+- More synchronization overhead
+
+**Best for**: Specialized workflows (e.g., DevOps team)
+
+### Pattern 3: Hierarchical (Tree)
+
+```
+         ┌──────────────┐
+         │   CEO        │
+         │   @joe       │
+         └──────┬───────┘
+    ┌────────────┼────────────┐
+    │            │            │
+┌───┴──────┐ ┌──┴──────┐ ┌───┴──────┐
+│Dev Lead  │ │QA Lead  │ │Ops Lead  │
+│  @jim    │ │ @john   │ │ @lisa    │
+└───┬──────┘ └──┬──────┘ └───┬──────┘
+    │           │             │
+ 3 Devs      2 QAs         2 Ops
+```
+
+**Advantages**:
+- Scales to larger teams
+- Clear delegation paths
+- Specialization at all levels
+
+**Disadvantages**:
+- More latency (escalation through levels)
+- More coordination overhead
+
+**Best for**: Large teams (>10 agents)
+
+## Communication Patterns
+
+Multi-agent systems need structured communication channels:
+
+### 1. Chat-Based (Synchronous)
+
+**Medium**: Mattermost, Slack, Discord
+
+```
+Agent A: "@Agent B, please do X"
+Agent B: "Done, here's result Y"
+Agent A: "Thanks, using Y for..."
+```
+
+**Latency**: ~1-5 seconds (polling)
+**Best for**: Interactive tasks, escalation
+**Playbook01**: ✓ Primary mechanism (MM + polling)
+
+### 2. Queue-Based (Asynchronous)
+
+**Medium**: Redis Queue, RabbitMQ, n8n
+
+```
+Agent A: PUSH(task) → Queue
+Queue: Routes task
+Agent B: POP(task) → Process
+Agent B: PUSH(result) → Queue
+Agent A: POP(result) ← Consume
+```
+
+**Latency**: ~100-500ms
+**Best for**: Batch operations, decoupled workflows
+**Playbook01**: ✓ n8n uses queuing
+
+### 3. API-Based (Direct)
+
+**Medium**: HTTP REST, gRPC, WebSocket
+
+```
+Agent A: HTTP POST /agent-b/task
+Agent B: Process + respond
+Agent A: HTTP 200 + result
+```
+
+**Latency**: ~10-100ms
+**Best for**: Synchronous multi-step flows
+**Playbook01**: Rare (Mattermost + n8n preferred)
+
+## State Management
+
+The biggest problem: shared state between agents.
+
+### Problem: Race Conditions
+
+```
+Agent A: "Set counter = 5"
+Agent B: "Set counter = 3"  (simultaneously)
+
+Result: counter = 3 or 5? Undefined!
+```
+
+### Solution: Locking
+
+```python
+class SharedCounter:
+    def increment(self, agent_id):
+        with lock:  # Only one agent at a time
+            value = self.get()
+            self.set(value + 1)
+```
+
+**Disadvantages**: Latency, deadlock risk
+
+### Solution: Event Sourcing
+
+```python
+class Counter:
+    events = [
+        ("Agent A", "increment", ts=1),
+        ("Agent B", "increment", ts=2),
+        ("Agent A", "increment", ts=3),
+    ]
+
+    # Final value = replaying all events
+    value = 3
+```
+
+**Advantage**: No locking, audit trail, replay possible
+
+### Solution: Sharding
+
+```
+Agents split state by key:
+
+Agent A: Responsible for Users A-M
+Agent B: Responsible for Users N-Z
+
+No conflicts possible!
+```
+
+**Playbook01**: Sharding + Mattermost channels (channel = shard)
+
+## Error Handling
+
+### Error Types
+
+| Error | Example | Handling |
+|-------|---------|----------|
+| Transient | Network timeout | Retry (3x) |
+| Permanent | Auth token expired | Escalate |
+| Partial | Agent A done, B failed | Compensating transaction |
+| Silent | Agent A crashed | Heartbeat detects |
+
+### Circuit Breaker Pattern
+
+```
+Agent B is broken?
+→ Circuit OPEN: Agent A stops calling B
+→ Redirect to fallback
+→ Periodically test if B recovered
+→ Circuit CLOSED: Back to normal
+```
+
+```python
+circuit_breaker = {
+    "agent_b": {
+        "state": "OPEN",  # OPEN, HALF_OPEN, CLOSED
+        "failures": 5,
+        "threshold": 3,
+        "last_test": "2026-03-21T10:15:00Z"
+    }
+}
+
+if circuit["state"] == "OPEN":
+    use_fallback_agent()
+```
+
+### Compensating Transactions
+
+```
+Agent A: Transfer $100 (success)
+Agent B: Send email (failed)
+
+Problem: Money gone, but email never sent!
+
+Solution:
+Agent C: Reverse transaction (send $100 back)
+Agent C: Send apology email
+```
+
+## Message Ordering & Consistency
+
+### Guarantees
+
+| Level | Guarantee | Example |
+|-------|-----------|---------|
+| At-Most-Once | Message can be lost | Logging (ok if one lost) |
+| At-Least-Once | Message arrives ≥1x | Payments (ok if 2x, deduped) |
+| Exactly-Once | Message arrives exactly 1x | Transactions (expensive, complex) |
+
+**Playbook01**: Mostly At-Least-Once (MM can duplicate, n8n dedupes)
+
+## Debugging Multi-Agent Systems
+
+### Problem: "Why didn't the task run?"
+
+```
+Possible causes:
+1. Task didn't reach agent (network)
+2. Agent saw task but was busy
+3. Agent processed, then crashed
+4. Agent processed, result lost
+5. Result came back too late
+```
+
+**Solution: Trace IDs**
+
+```
+Task ID: task-12345
+Agent A sends:
+  trace-id: trace-12345
+  task: "do X"
+
+Agent B receives:
+  [trace-12345] Start processing
+  [trace-12345] Step 1: OK
+  [trace-12345] Step 2: FAILED
+  [trace-12345] Result: {"error": "..."}
+
+Agent A receives & logs:
+  [trace-12345] Processing took 2.5s
+  [trace-12345] Final result: ERROR
+```
+
+**Best practice**: Every agent logs with trace-id:
+
+```bash
+[DEBUG] trace-abc123 Agent B started
+[DEBUG] trace-abc123 Processing foo
+[INFO] trace-abc123 Foo successful
+[DEBUG] trace-abc123 Posting result
+```
+
+Then search all logs for `trace-abc123` and understand the full flow.
+
+## Case Studies from Playbook01
+
+### Case 1: @jim as Orchestrator
+
+```
+Joe: "Deploy v1.2.3"
+→ Reaches @jim via Mattermost
+→ @jim understands: "Deploy to production"
+→ @jim delegates @jim01: "git push to main"
+→ @jim01 does it, reports success
+→ @jim delegates @lisa01: "restart CF Pages"
+→ @lisa01 does it
+→ @jim reports to Joe: "v1.2.3 live"
+```
+
+**Pattern**: Hub & spoke (manager = @jim)
+**Communication**: Mattermost + polling
+**Error handling**: @jim retries 3x, then escalates to @joe
+
+### Case 2: Stripe → n8n → Email Workflow
+
+```
+Stripe sends webhook: "Payment received"
+→ n8n webhook receives it
+→ n8n processes in queue
+→ n8n generates invoice PDF
+→ n8n calls Download-Issuer
+→ n8n sends email via Resend
+→ Result logged to #shop-orders
+```
+
+**Pattern**: Queue-based (asynchronous)
+**Communication**: n8n + webhooks
+**Error handling**: n8n retries up to 3x, then alerts
+
+### Case 3: @echo_log Agent Team
+
+```
+Echo_log = Single "API" but powered by multiple agents:
+
+User: "Create a deployment"
+→ Mattermost receives message
+→ Echo_log poller detects
+→ @echo_log AI processes
+→ If complex, delegates to @jim02 (browser)
+  or @jim01 (code)
+→ Result aggregated + sent back
+```
+
+**Pattern**: Hybrid (manager + sub-agents)
+**Communication**: Mattermost + bridge services
+**State**: Persisted in Vault + message history
+
+## Best Practices for Multi-Agent Design
+
+1. **Clear roles**: Each agent knows exactly what it can do
+2. **Explicit communication**: Always handshake + confirmation
+3. **State management**: Event sourcing or sharding, no shared mutable state
+4. **Error handling**: Circuit breakers + retry logic
+5. **Tracing**: Trace IDs for debugging
+6. **Monitoring**: Heartbeats from each agent
+7. **Scaling**: Start with 2 agents (orchestrator + worker), then expand
+
+## Further Reading
+
+- [Agent Orchestration Fundamentals](/en/grundlagen/what-is-agent-orchestration)
+- [Mattermost as Communication Backbone](/en/tools/mattermost)
+- [n8n Workflow Automation](/en/tools/n8n)
+- [Claude Code Sub-Agents](/en/tools/agents)
+- [Playbook01 Agent Team](/en/tools/agents)
+
+---
+
+*Last updated: 2026-03-21 | Reference Quality*
+
+## Sources and Links
+
+- [CrewAI](https://github.com/crewAIInc/crewAI)
+- [AutoGen](https://github.com/microsoft/autogen)

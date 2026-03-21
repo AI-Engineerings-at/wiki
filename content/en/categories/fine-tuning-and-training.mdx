@@ -1,0 +1,439 @@
+---
+title: "Fine-Tuning and Training — Model Adaptation"
+date: "2026-03-21"
+summary: "Fine-Tuning vs Prompt vs RAG: LoRA, QLoRA, full training, tools, costs, when to use what?"
+tags: ["fine-tuning", "lora", "qlora", "training", "unsloth", "axolotl", "adapter"]
+author: "AI Engineering"
+---
+
+# Fine-Tuning and Training — Category Overview
+
+Fine-tuning is not "magic makes model smart"—it's "adapt model weights to your data". 2026 you don't need EUR 100k for training. LoRA + EUR 20 GPU time is enough. We show when to use it, how, and where the gotchas are.
+
+## Concepts: Prompt vs RAG vs Fine-Tuning
+
+### Prompt (Baseline)
+```
+Input: "Who is the CEO of Playbook01?"
+LLM hasn't seen this in training → "I don't know"
+```
+
+**Cost:** EUR 0.001-0.01 per query (LLM API).
+**Quality:** Low for specific knowledge.
+**Update:** Instant (new prompt).
+
+### RAG (Retrieval-Augmented)
+```
+Input: "Who is the CEO?"
+Retriever: "Finds page with 'CEO: Joe Xyz' in documents"
+LLM: "Based on document, CEO is Joe Xyz"
+```
+
+**Cost:** EUR 0.001-0.01 per query + Vector DB (EUR 10-100/month).
+**Quality:** High for facts, if documents are correct.
+**Update:** Instant (add new document).
+**Limitation:** "Document says wrong information" → LLM repeats wrong (no generalization).
+
+### Fine-Tuning (Model Adaptation)
+```
+Training Data: 1000 Examples of "CEO questions + Correct answer"
+Fine-Tuned Model: Weights adjusted
+Query: "Who is CEO?" → Model answers directly (without RAG)
+```
+
+**Cost:** EUR 10-100 (one-time) + EUR 0.001-0.01 per query (inference, but faster with smaller model).
+**Quality:** Higher for behavior patterns (style, logic), not for facts.
+**Update:** Days to weeks (new retraining).
+**Benefit:** Model generalizes (learns patterns, not just facts).
+
+## When to Use (Decision Tree)
+
+```
+Need new FACTS (e.g., "current weather")?
+  → RAG. Fine-tuning locks knowledge (outdated within days).
+
+Need new BEHAVIOR (e.g., "Always answer in English")?
+  → Fine-Tuning. Prompt is too fragile, RAG doesn't help.
+
+Need specialization (e.g., "Code generation in Rust")?
+  → RAG + Fine-Tuning Hybrid: RAG for Rust examples, FT to learn patterns.
+
+Must save costs (large volume)?
+  → Fine-Tuning (faster inference = smaller model = cheaper).
+
+Latency critical (<100ms)?
+  → Fine-Tuning on small model (4B params, fine-tuned).
+```
+
+## Fine-Tuning Methods (Efficient)
+
+### Full Fine-Tuning (Full FT)
+
+**What it is:** Update all weights of the model.
+
+```
+Model: Llama 2 7B (7 billion parameters)
+Training: Update all 7B parameters on your data
+VRAM: 80GB (impractical for hobbyists)
+Time: 1 GPU-week at 100k examples
+```
+
+**Cost:** RunPod RTX 4090 (24GB) not enough (needs A100 80GB) = EUR 500-1000.
+
+**Quality:** Best, but overkill for 90% of use cases.
+
+**Best for:** Nothing (2026). LoRA is always better (cost-quality).
+
+### LoRA (Low-Rank Adaptation)
+
+**What it is:** Instead of updating all weights, add small "adapter" matrices.
+
+```
+Original Weight Matrix W (7B params):
+  ↓
+Train only small LoRA Matrices A + B (1-2% of size)
+  ↓
+Inference: Output = W × Input + α × (A × B × Input)
+```
+
+**VRAM:** 16GB sufficient (A100 not needed, RTX 4090 works).
+**Time:** 1 day at 100k examples on single GPU.
+**Cost:** RunPod RTX 4090 = EUR 10-20 total.
+
+**Quality:** 95% of full FT, but much more efficient.
+
+**Downside:** Not ideal for very large adapters (if 10%+ parameters needed, full FT might be better).
+
+**Best for:** 90% of use cases in 2026. Default choice.
+
+### QLoRA (Quantized LoRA)
+
+**What it is:** LoRA + 4-bit quantization of model weights.
+
+```
+Original Model: 7B params × 32-bit = 28GB VRAM
+Quantized: 7B params × 4-bit = 3.5GB VRAM
+LoRA Adapter: + 0.5GB
+Total: ~4GB VRAM
+```
+
+**VRAM:** 6GB sufficient (RTX 4070, RTX 3090, M2/M3 Mac works!).
+**Time:** 1 day at 100k examples (slightly slower than LoRA).
+**Cost:** RTX 4090 is overkill, RTX 4070 = EUR 5-10.
+
+**Quality:** 90% of LoRA (quantization loses ~5% precision, but acceptable).
+
+**Best for:** If you don't have A100. Default for hobbyists.
+
+### Inference Efficiency: LoRA + Quantization
+
+After fine-tuning with QLoRA, you can also run inference with GGML (CPU-quantized) = EUR 0 hardware costs (CPU only).
+
+```
+Fine-Tuned QLoRA Model (4-bit)
+  ↓
+Export to GGML format
+  ↓
+Inference on CPU (e.g., ollama)
+  ↓
+Cost: EUR 0 (CPU only)
+```
+
+## Tools & Frameworks 2026
+
+### Unsloth (Recommended for Beginners)
+
+**What it is:** Wrapper around Hugging Face TRL, makes LoRA super easy.
+
+```python
+from unsloth import FastLanguageModel
+
+# 1. Load Model + LoRA
+model, tokenizer = FastLanguageModel.from_pretrained(
+    model_name="unsloth/mistral-7b-bnb-4bit",
+    load_in_4bit=True
+)
+model = FastLanguageModel.get_peft_model(
+    model,
+    r=16,  # LoRA rank
+    lora_alpha=32,
+    target_modules=["q_proj", "v_proj"]
+)
+
+# 2. Train
+from unsloth import train  # Wrapper
+train(model, train_dataset, num_train_epochs=3)
+
+# 3. Export
+model.save_pretrained("./my-finetuned-model")
+```
+
+**Advantages:**
+- Minimal boilerplate
+- Auto-optimized training
+- 2-3x faster than vanilla TRL
+- Free
+
+**Disadvantages:**
+- Less control
+
+**Best for:** Quick prototypes, POCs.
+
+### Axolotl (Flexible Production)
+
+**What it is:** Configuration-based training framework.
+
+```yaml
+# axolotl config
+base_model: mistralai/Mistral-7B-Instruct-v0.1
+load_in_4bit: true
+lora:
+  r: 16
+  alpha: 32
+datasets:
+  - path: ./my_training_data
+    type: instruction
+```
+
+```bash
+axolotl train config.yaml
+```
+
+**Advantages:**
+- Config-driven (no code changes for experiments)
+- Multi-GPU support
+- Flexible data formats
+- Production-ready
+
+**Disadvantages:**
+- Steep learning curve
+- YAML is error-prone
+
+**Best for:** Production pipelines, multi-experiment iteration.
+
+### Hugging Face TRL (Advanced)
+
+Direct training loop, maximum control. Too verbose for beginners, ideal for custom setups.
+
+## Training Data (Critical)
+
+### Data Format
+
+**Standard: JSON Instruction-Following**
+
+```json
+[
+  {
+    "instruction": "Write a function to reverse a string",
+    "input": "",
+    "output": "def reverse_string(s): return s[::-1]"
+  },
+  {
+    "instruction": "Translate to German",
+    "input": "Hello world",
+    "output": "Hallo Welt"
+  }
+]
+```
+
+**Conversation Format (for chatbots)**
+
+```json
+[
+  {
+    "messages": [
+      {"role": "user", "content": "Who is the CEO?"},
+      {"role": "assistant", "content": "Joe is the CEO"}
+    ]
+  }
+]
+```
+
+### Data Size
+
+```
+Minimum: 100 examples
+Target: 1000-10000 examples
+More than 100k: Diminishing returns (quality plateaus)
+```
+
+**Cost for data creation:**
+- Labeling service (Upwork, Scale): EUR 1-3 per example
+- 1000 examples = EUR 1000-3000
+- 10000 examples = EUR 10k-30k
+- Automation (GPT-4 + manual filtering): EUR 100-500 (much cheaper)
+
+### Data Quality
+
+**"Garbage in, garbage out"**—if training data is wrong, fine-tuned model is wrong.
+
+**Best practices:**
+- Diverse examples (different phrasings of same task)
+- Correct outputs (manual review)
+- Balanced datasets (not 10000 Rust code, 1 Python—mix)
+
+## Practical Example: German Support Bot
+
+**Goal:** Model always answers in German, even if user writes English.
+
+### Data Preparation
+
+```
+Create 500 examples:
+  - User writes in English
+  - Assistant answers in German
+  - Mix different topics
+```
+
+### Training
+
+```python
+from unsloth import FastLanguageModel
+
+model, tokenizer = FastLanguageModel.from_pretrained(
+    model_name="unsloth/mistral-7b-bnb-4bit",
+    load_in_4bit=True
+)
+
+model = FastLanguageModel.get_peft_model(
+    model, r=16, lora_alpha=32,
+    target_modules=["q_proj", "v_proj"]
+)
+
+# Load data
+import json
+with open("training_data.json") as f:
+    data = json.load(f)
+
+# Train (Unsloth auto-optimizer)
+from unsloth import train
+train(
+    model=model,
+    train_dataset=data,
+    num_train_epochs=3,
+    per_device_train_batch_size=4,
+    learning_rate=2e-4
+)
+
+model.save_pretrained("./deutsch-bot")
+```
+
+### Cost Calculation
+
+```
+RTX 4090 RunPod: EUR 0.67/hour
+Training time: ~4 hours (500 examples × 3 epochs)
+Total: EUR 2.70
+Inference cost: EUR 0 (self-hosted) or EUR 0.001/query (RunPod serverless)
+```
+
+**ROI:** If support agent saves EUR 50 later = 18x ROI.
+
+## Common Gotchas
+
+### 1. "Overfitting — Model memorizes training data"
+
+**Symptom:** Training loss goes to 0, but test loss stays high.
+
+**Fix:**
+- Early stopping (stop when test loss doesn't improve)
+- Fewer epochs (3 instead of 10)
+- Add dropout (not always, but helps)
+
+### 2. "Costs exploded because I left GPU running 24h"
+
+**RunPod RTX 4090 24h = EUR 16.** Oops.
+
+**Fix:**
+- Set max time in training script
+- Use spot GPU (70% cheaper, but can be interrupted)
+
+### 3. "Model became too specific (overfitted to my domain)"
+
+**Example:** Fine-tuned on 1000 Rust code examples, now writes Rust even when Python needed.
+
+**Fix:**
+- Add mixed data (500 Rust + 200 Python + 200 JS + ...)
+- Retrain with balanced data
+
+### 4. "LoRA adapter doesn't work with my custom model"
+
+**Cause:** LoRA must be trained on exact layers (q_proj, v_proj). Custom model might have different names.
+
+**Fix:**
+```python
+# Find correct layer names
+print(model.named_parameters())
+# Adjust target_modules to your model
+```
+
+## Deployment
+
+### Option 1: Self-Hosted
+
+```bash
+# Export to GGML (CPU)
+python export_to_ggml.py ./deutsch-bot
+
+# Run locally
+ollama create deutsch-bot-custom -f Modelfile
+ollama run deutsch-bot-custom "Hallo, wer bist du?"
+```
+
+**Cost:** EUR 0 (your hardware).
+
+### Option 2: RunPod Serverless
+
+Deploy fine-tuned model on RunPod, simple endpoint.
+
+**Cost:** EUR 0.001-0.005 per query.
+
+### Option 3: Cloud Endpoints (Hugging Face, Replicate)
+
+```bash
+huggingface-cli upload ./deutsch-bot my-model
+
+# Then inference via API
+```
+
+**Cost:** EUR 0.001-0.01 per query (managed).
+
+## Roadmap 2026-2027
+
+- **Q2 2026:** On-device fine-tuning becomes standard (M2 Mac training)
+- **Q3 2026:** Multimodal fine-tuning (text + image together)
+- **Q4 2026:** Continual learning (fine-tune without catastrophic forgetting)
+
+## Practical Start
+
+**Budget EUR 20, time 2 days:**
+
+1. **Prepare data:** 500 examples, JSON format, 4 hours
+2. **Train with Unsloth:** RTX 4090 RunPod, 4 hours, EUR 2.70
+3. **Test:** Query your model, 30 minutes
+4. **Deploy:** Ollama (self-hosted) or RunPod (serverless), 1 hour
+
+**Total:** EUR 2.70 + your time.
+
+## Conclusion
+
+**Fine-Tuning 2026:**
+- **LoRA** is the baseline (efficient, cheap, good)
+- **QLoRA** when GPU-limited (6GB sufficient)
+- **Unsloth** for quick prototypes
+- **Axolotl** for production
+- **Cost:** EUR 1-10 for training, EUR 0-0.01 per query inference
+
+**vs RAG:**
+- **RAG for facts** (current, from document)
+- **Fine-tuning for behavior** (style, logic, specialization)
+
+**Hybrid 2026:** Most production systems use both: RAG for knowledge, fine-tuning for behavior.
+
+**Start now:** 2 hours with Unsloth. EUR 3 cost, but shows if fine-tuning is worth it.
+
+## Sources and Links
+
+- [Unsloth: Fast LLM Fine-tuning](https://github.com/unslothai/unsloth)
+- [Axolotl: Multi-adapter Fine-tuning](https://github.com/axolotl-ai-cloud/axolotl)
+- [Hugging Face TRL: Train with Transformers](https://huggingface.co/docs/trl)

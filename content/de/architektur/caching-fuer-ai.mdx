@@ -1,0 +1,595 @@
+---
+title: "Caching für AI: Embedding Cache, Semantic Cache, KV Cache"
+description: "KV-Cache, Semantic Caching (GPTCache), Redis Embedding-Cache. Kostensparen und Latenz reduzieren."
+section: "architektur"
+---
+
+# Caching für AI: Embedding Cache, Semantic Cache, KV Cache
+
+Caching ist dein Cheat-Code für schnelle, billige AI-Systeme. Ein guter Cache kann 90% deiner Kosten sparen.
+
+## Die 3 Cache-Layer
+
+```
+Request kommt rein
+        ↓
+┌───────────────────────────────────┐
+│ Layer 1: Exact Match Cache        │ ← Haben wir exakt diesen Prompt schon?
+│  (Redis, 100 Microseconds)        │
+└───────────────────────────────────┘
+        ↓ MISS
+┌───────────────────────────────────┐
+│ Layer 2: Semantic Cache           │ ← Ähnlicher Prompt?
+│  (Embeddings + Vector DB, 10ms)   │
+└───────────────────────────────────┘
+        ↓ MISS
+┌───────────────────────────────────┐
+│ Layer 3: KV Cache (Model-Internal)│ ← Nur bei stream/long context
+│  (GPU Memory, <1ms)               │
+└───────────────────────────────────┘
+        ↓ MISS
+┌───────────────────────────────────┐
+│ Full Inference (1000ms+)          │
+└───────────────────────────────────┘
+```
+
+## 1. KV Cache (Knowledge-Value Cache)
+
+Der erste Cache ist im Model selbst: KV-Cache speichert die bereits berechneten Key-Value Paare des Attention-Mechanismus.
+
+### Das Problem ohne KV Cache
+
+```
+Token 1:  Q K V → Attention Output
+          Token1 K,V werden gespeichert ✓
+
+Token 2:  Q K V → Attention Output
+          Problem: Berechne Token1 Attention WIEDER!
+
+Token N:  Q K V → Attention Output
+          Problem: Berechne alle Token1-N Attention WIEDER!
+```
+
+Das ist extrem ineffizient. Token 1 wird N-mal berechnet!
+
+### Mit KV Cache
+
+```
+Token 1: Berechne K,V, speichere sie
+Token 2: Berechne nur neue K,V für Token2, nutze gecachte von Token1
+Token 3: Nutze gecachte K,V von Token 1-2, berechne nur Token3
+
+Resultat: Linear Time statt Quadratic!
+```
+
+**KV Cache Memory:**
+```
+Pro Token Pair (K, V):
+  Layer 32 (Llama-70B) × 8 Attention Heads × 128 Hidden Dim × 2 (K, V)
+  = 32 × 8 × 128 × 2 × 2 bytes (float16)
+  = ~131 KB pro Token
+
+Für 2048 Context:
+  131 KB × 2048 = 268 MB pro request
+
+Mit Batch von 64 Requests:
+  268 MB × 64 = 17 GB (!!)
+```
+
+Das ist wieso PagedAttention (virtual memory für KV Cache) so wichtig ist.
+
+### KV Cache in Code
+
+```python
+# Ohne KV Cache (naive)
+def generate_tokens_naive(model, input_ids, max_length=100):
+    attention_mask = torch.ones_like(input_ids)
+
+    for pos in range(input_ids.shape[1], max_length):
+        # PROBLEM: Berechne Attention für ALLE bisherigen Tokens
+        outputs = model(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            return_dict=True
+        )
+        next_token = outputs.logits[:, -1, :].argmax(dim=-1, keepdim=True)
+        input_ids = torch.cat([input_ids, next_token], dim=1)
+        attention_mask = torch.cat(
+            [attention_mask, torch.ones((1, 1), device=input_ids.device)],
+            dim=1
+        )
+
+    return input_ids
+
+# Mit KV Cache (optimiert)
+def generate_tokens_kvcache(model, input_ids, max_length=100):
+    attention_mask = torch.ones_like(input_ids)
+    past_key_values = None
+
+    for pos in range(input_ids.shape[1], max_length):
+        # Berechne NUR für neue Token!
+        outputs = model(
+            input_ids=input_ids[:, -1:],  # Nur letzter Token!
+            attention_mask=attention_mask,
+            past_key_values=past_key_values,  # Cache der bisherigen
+            return_dict=True,
+            use_cache=True  # Speichere neue K,V
+        )
+
+        past_key_values = outputs.past_key_values
+        next_token = outputs.logits[:, -1, :].argmax(dim=-1, keepdim=True)
+
+        input_ids = torch.cat([input_ids, next_token], dim=1)
+        attention_mask = torch.cat(
+            [attention_mask, torch.ones((1, 1), device=input_ids.device)],
+            dim=1
+        )
+
+    return input_ids
+
+# Speedup-Messungen:
+# Naive: 1000ms für 100 Tokens
+# KV Cache: 100ms für 100 Tokens
+# = 10x schneller!
+```
+
+## 2. Semantic Caching mit Embeddings
+
+Du cachst nicht exakte Strings, sondern Bedeutung:
+
+### Architektur
+
+```
+User Prompt: "Wie viele Beine hat ein Hund?"
+
+    ↓ embed
+
+Vector: [0.23, 0.45, 0.12, ...]
+    ↓ similarity search
+
+Similar cached:
+  "Wie viele Pfoten hat ein Hund?" → 0.98 similarity
+  "Hunde haben 4 Beine" → 0.95 similarity
+
+    ↓ return
+
+Cached Response: "Hunde haben 4 Beine"
+(No LLM call needed!)
+```
+
+### Redis + FAISS Implementation
+
+```python
+import redis
+import numpy as np
+import faiss
+from sentence_transformers import SentenceTransformer
+
+class SemanticCache:
+    def __init__(self, redis_host="localhost", redis_port=6379):
+        self.redis = redis.Redis(host=redis_host, port=redis_port, db=0)
+        self.embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+
+        # FAISS Index für Embedding-Similarity
+        self.index = faiss.IndexFlatIP(384)  # 384-dim embeddings
+        self.cache_keys = []
+
+    def embed_text(self, text: str) -> np.array:
+        """Embedde einen Text"""
+        embedding = self.embedding_model.encode(
+            text,
+            convert_to_numpy=True
+        )
+        # Normalize für Cosine Similarity
+        embedding = embedding / np.linalg.norm(embedding)
+        return embedding.astype('float32')
+
+    def get(self, prompt: str, threshold: float = 0.95):
+        """
+        Suche ähnliche Prompts im Cache.
+        threshold: 0.95 = 95% ähnlich
+        """
+        query_embedding = self.embed_text(prompt).reshape(1, -1)
+
+        # Suche in FAISS
+        distances, indices = self.index.search(query_embedding, k=5)
+
+        for dist, idx in zip(distances[0], indices[0]):
+            if dist >= threshold:  # distances are similarities (cosine)
+                cache_key = self.cache_keys[idx]
+                cached_response = self.redis.get(cache_key)
+
+                if cached_response:
+                    print(f"Cache HIT: {dist:.3f} similarity")
+                    return cached_response.decode('utf-8')
+
+        print("Cache MISS: No similar cached response")
+        return None
+
+    def put(self, prompt: str, response: str, ttl: int = 86400):
+        """
+        Speichere Prompt-Response Pair.
+        ttl: 86400 = 1 Tag
+        """
+        embedding = self.embed_text(prompt).reshape(1, -1)
+
+        # Speichere in Redis
+        cache_key = f"cache:{hash(prompt)}"
+        self.redis.setex(
+            cache_key,
+            ttl,
+            response.encode('utf-8')
+        )
+
+        # Speichere in FAISS
+        self.index.add(embedding)
+        self.cache_keys.append(cache_key)
+
+# Nutzung
+cache = SemanticCache()
+
+# Check Cache
+cached_response = cache.get("Wie programmiert man in Python?")
+
+if not cached_response:
+    # Call LLM
+    response = llm.generate("Wie programmiert man in Python?")
+    # Speichere in Cache
+    cache.put("Wie programmiert man in Python?", response)
+else:
+    response = cached_response
+
+print(response)
+```
+
+### Cosine Similarity vs Other Metrics
+
+| Metric | Use Case | Speed |
+|--------|----------|-------|
+| **Cosine Similarity** | General NLP (Embeddings) | Fast |
+| **Euclidean Distance** | Structured Data | Medium |
+| **Semantic Hashing** | Very large indexes | Very Fast |
+| **Hybrid** | Combine multiple | Slowest |
+
+## 3. GPTCache: Specialized Semantic Cache
+
+GPTCache ist ein spezialisierter Cache nur für LLM-Responses:
+
+```bash
+# Install
+pip install gptcache
+
+# Start Redis (für Backend Storage)
+docker run -d -p 6379:6379 redis:latest
+```
+
+**Konfiguration:**
+
+```python
+from gptcache import cache
+from gptcache.adapter import openai
+from gptcache.processor.pre import get_prompt_without_template
+from gptcache.embedding.onnx import Onnx
+from gptcache.similarity_evaluation.distance import SearchDistanceEvaluation
+
+# Embedding Model
+embedding = Onnx()
+
+# Similarity Evaluation
+similarity_evaluation = SearchDistanceEvaluation()
+
+# Cache initialisieren
+cache.init(
+    pre_embedding_func=get_prompt_without_template,
+    embedding_func=embedding.to_embeddings,
+    data_manager=manager,
+    similarity_evaluation=similarity_evaluation,
+    similarity_threshold=0.8
+)
+
+# Jetzt: Alle OpenAI Calls werden automatisch gecacht!
+response = openai.ChatCompletion.create(
+    model="gpt-4",
+    messages=[{"role": "user", "content": "Hallo!"}]
+)
+# Wenn ähnliche Prompt existiert → return cached response
+# Sonst → call OpenAI + cache response
+```
+
+## 4. Prompt Caching (OpenAI API)
+
+OpenAI und Claude bieten nativen Prompt Caching an:
+
+### Claude Prompt Caching
+
+```python
+import anthropic
+
+client = anthropic.Anthropic()
+
+# Definiere cacheable block_type: "ephemeral"
+response = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    max_tokens=1024,
+    system=[
+        {
+            "type": "text",
+            "text": """You are a code reviewer.
+Review the following codebase for bugs and improvements.
+Be precise and thorough."""
+        },
+        {
+            "type": "text",
+            "text": """
+# Codebase Context (LARGE - 10000 tokens)
+... [entire codebase here] ...
+""",
+            "cache_control": {"type": "ephemeral"}
+        }
+    ],
+    messages=[
+        {
+            "role": "user",
+            "content": "Review the auth module for security issues"
+        }
+    ]
+)
+
+# Usage:
+# cache_creation_input_tokens: 10000 (cached)
+# cache_read_input_tokens: 10000 (second request - free!)
+# input_tokens: 100 (new tokens)
+
+# Cost:
+# Request 1: 10000 * 1.25 + 100 * 3 = $12,500
+# Request 2: 10000 * 0.1 + 100 * 3 = $1,000  ← 90% cheaper!
+```
+
+## 5. Request/Response Level Caching
+
+Einfach: Speichere komplette Request/Response Pairs:
+
+```python
+import hashlib
+import json
+from datetime import datetime, timedelta
+
+class RequestCache:
+    def __init__(self, db):
+        self.db = db
+
+    def make_key(self, model: str, messages: list, **kwargs) -> str:
+        """Hash Request zu eindeutigem Key"""
+        request_dict = {
+            "model": model,
+            "messages": messages,
+            **kwargs
+        }
+        request_json = json.dumps(request_dict, sort_keys=True)
+        return hashlib.sha256(request_json.encode()).hexdigest()
+
+    def get(self, model: str, messages: list, **kwargs) -> dict | None:
+        """Hole cached Response"""
+        key = self.make_key(model, messages, **kwargs)
+
+        result = self.db.execute("""
+            SELECT response, created_at
+            FROM cache
+            WHERE key = ? AND created_at > datetime('now', '-7 days')
+        """, (key,))
+
+        if result:
+            return json.loads(result[0]['response'])
+        return None
+
+    def put(self, model: str, messages: list, response: dict, **kwargs):
+        """Speichere Response"""
+        key = self.make_key(model, messages, **kwargs)
+
+        self.db.execute("""
+            INSERT OR REPLACE INTO cache
+            (key, model, messages_json, response, created_at)
+            VALUES (?, ?, ?, ?, datetime('now'))
+        """, (
+            key,
+            model,
+            json.dumps(messages),
+            json.dumps(response)
+        ))
+
+# Nutzung im Gateway
+cache = RequestCache(db)
+
+@app.post("/v1/chat/completions")
+async def chat(request: dict):
+    # Check Cache
+    cached = cache.get(
+        model=request["model"],
+        messages=request["messages"],
+        temperature=request.get("temperature", 1.0)
+    )
+
+    if cached:
+        return {"response": cached, "cached": True}
+
+    # Call LLM
+    response = await llm.chat(request)
+
+    # Cache
+    cache.put(
+        model=request["model"],
+        messages=request["messages"],
+        response=response,
+        temperature=request.get("temperature", 1.0)
+    )
+
+    return {"response": response, "cached": False}
+```
+
+## 6. Cache Invalidation
+
+Die schwierigste Aufgabe in Caching: Wann Cache wegwerfen?
+
+```python
+class SmartCache:
+    def __init__(self, db, ttl_seconds=86400):
+        self.db = db
+        self.ttl = ttl_seconds
+
+    def get(self, key: str) -> dict | None:
+        result = self.db.execute("""
+            SELECT value, created_at FROM cache
+            WHERE key = ?
+        """, (key,))
+
+        if not result:
+            return None
+
+        cached_at = result[0]['created_at']
+        age_seconds = (datetime.now() - cached_at).total_seconds()
+
+        # Strategie 1: TTL (Time to Live)
+        if age_seconds > self.ttl:
+            self.delete(key)
+            return None
+
+        # Strategie 2: Freshness Score (ältere Caches haben niedrigere Confidence)
+        freshness = max(0, 1 - (age_seconds / self.ttl))
+
+        return {
+            "value": result[0]['value'],
+            "freshness": freshness  # 1.0 = gerade gecacht, 0.0 = alt
+        }
+
+    def should_refresh(self, key: str, freshness_threshold: float = 0.7):
+        """Nutze Cache, aber überprüfe ob zu alt"""
+        cached = self.get(key)
+
+        if not cached or cached['freshness'] < freshness_threshold:
+            return False  # Geb nicht aus Cache, aktualisiere
+        return True  # Nutze Cache
+
+    def delete_by_pattern(self, pattern: str):
+        """Lösche alle Caches die matchten (z.B. bei Model Update)"""
+        self.db.execute("""
+            DELETE FROM cache WHERE key LIKE ?
+        """, (pattern,))
+
+# Nutzung
+cache = SmartCache(db, ttl_seconds=3600)  # 1 Stunde
+
+@app.post("/v1/completions")
+async def completions(request: dict):
+    cache_key = make_cache_key(request)
+
+    if cache.should_refresh(cache_key, freshness_threshold=0.9):
+        cached = cache.get(cache_key)
+        return cached['value']
+
+    # Nicht frisch → aktualisiere
+    response = await llm.generate(request)
+    cache.put(cache_key, response)
+    return response
+```
+
+## 7. Caching Strategy Entscheidungsbaum
+
+```
+Frage 1: Exakte Duplikate?
+  JA → Request/Response Cache + Redis
+  NEIN → Gehe zu Frage 2
+
+Frage 2: Ähnliche Prompts OK?
+  JA → Semantic Cache + FAISS
+  NEIN → Kein Caching
+
+Frage 3: Long Context?
+  JA → KV Cache + PagedAttention
+  NEIN → Nicht notwendig
+
+Frage 4: Prompt Caching Support?
+  JA → Claude/OpenAI native caching
+  NEIN → Selbst implementieren
+```
+
+## 8. Cache Monitoring
+
+```python
+class CacheMetrics:
+    def __init__(self):
+        self.hits = 0
+        self.misses = 0
+        self.total_tokens_saved = 0
+        self.total_cost_saved = 0
+
+    def record_hit(self, tokens_saved: int, cost_saved: float):
+        self.hits += 1
+        self.total_tokens_saved += tokens_saved
+        self.total_cost_saved += cost_saved
+
+    def record_miss(self):
+        self.misses += 1
+
+    @property
+    def hit_rate(self) -> float:
+        total = self.hits + self.misses
+        return self.hits / total if total > 0 else 0
+
+    def print_stats(self):
+        print(f"""
+        Cache Statistics:
+        - Hit Rate: {self.hit_rate:.1%}
+        - Hits: {self.hits}
+        - Misses: {self.misses}
+        - Tokens Saved: {self.total_tokens_saved:,.0f}
+        - Cost Saved: ${self.total_cost_saved:.2f}
+        """)
+
+metrics = CacheMetrics()
+
+# Integrier im Gateway
+@app.post("/v1/chat/completions")
+async def chat(request: dict):
+    cached = cache.get(...)
+
+    if cached:
+        # Schätze Tokens gespart
+        tokens_saved = estimate_tokens(request["messages"])
+        cost_saved = tokens_saved * 0.00003  # Example pricing
+
+        metrics.record_hit(tokens_saved, cost_saved)
+        return cached
+    else:
+        metrics.record_miss()
+        response = await llm.chat(request)
+        return response
+
+@app.get("/api/cache/stats")
+async def cache_stats():
+    return {
+        "hit_rate": metrics.hit_rate,
+        "hits": metrics.hits,
+        "total_cost_saved": metrics.total_cost_saved
+    }
+```
+
+## Zusammenfassung: Caching Levels
+
+| Level | Technik | Speedup | Use Case |
+|-------|---------|---------|----------|
+| **L1 Exact** | Redis Hash | 100x | Duplicate Prompts |
+| **L2 Semantic** | FAISS + Embeddings | 10x | Similar Prompts |
+| **L3 KV** | GPU Memory | 10x | Long Context |
+| **L4 Prompt** | Native (Claude/OpenAI) | 10x | Large System Prompts |
+
+Ein gutes Cache-System spart **50-90% der API-Kosten**.
+
+## Quellen und Links
+
+- [GPTCache GitHub](https://github.com/zilliztech/GPTCache) — Semantic Cache für LLMs
+- [FAISS by Facebook](https://github.com/facebookresearch/faiss) — Vector Similarity Search
+- [Redis](https://redis.io/) — In-Memory Cache Backend
+- [OpenAI Prompt Caching](https://platform.openai.com/docs/guides/prompt-caching) — Native API Caching
+- [Claude Prompt Caching](https://docs.anthropic.com/en/docs/build-a-chatbot#prompt-caching) — Native API Caching
+- [KV Cache Optimization](https://arxiv.org/abs/2308.04913) — Research Paper
+- [Semantic Hashing](https://arxiv.org/abs/2109.00500) — Advanced Technique

@@ -1,0 +1,555 @@
+---
+title: LoRA und Adapter
+date: 2026-03-21
+summary: Low-Rank Adaptation im Detail — Mathematik vereinfacht, Rang-Auswahl, QLoRA vs DoRA, Adapter mergen, praktische 30-Minuten Beispiele
+tags: [lora, adapter, lowrank, parameter-efficient, fine-tuning, training]
+author: AI Engineering
+---
+
+# LoRA und Adapter verstehen
+
+LoRA (Low-Rank Adaptation) ist eine der wichtigsten Innovationen der letzten Jahre. Sie erlaubt es, große Modelle mit Consumer-Hardware zu trainieren.
+
+---
+
+## Die Kernidee: Rank Decomposition
+
+### Das Problem (nochmal)
+
+Ein Llama 3 70B Modell hat 70 Milliarden Gewichte. Um alle zu trainieren:
+
+```
+Forward Pass: Berechne Predictions
+  Layer 1: [4096 × 4096] Matrix × [Batch × 4096] Input
+  Layer 2: [4096 × 4096] Matrix × [Output von Layer 1]
+  ...
+  Total: Milliarden Multiplikationen
+
+Backward Pass: Berechne Gradienten
+  Brauche Ableitungen für JEDES Gewicht
+  Memory: 3-4× die Modellgröße selbst
+
+140 GB Modell → 420-560 GB RAM braucht
+```
+
+### Die LoRA Lösung: Math
+
+Bei Standard Matrix-Multiplikation:
+
+```
+Y = W × X  (W ist 4096 × 4096, das ist "full rank")
+
+LoRA-Idee: W ist wahrscheinlich nicht wirklich full-rank nötig.
+Die "echte" Information könnte in niedriger Rank leben.
+
+Also trainiere zwei kleinere Matrizen statt einer großen:
+
+Y_original = W × X
+Y_lora     = (A @ B) × X  (A ist 4096 × r, B ist r × 4096)
+
+r = "rank" (z.B. 16)
+A @ B produziert 4096 × 4096 Matrix, aber mit nur r × (4096 + 4096) = 32K Parameter
+vs Full W = 16M Parameter → 500× weniger!
+
+Final Output = W × X + α × (A @ B) × X
+              └─ Original, frozen ─┘   └─ Trainable Delta ─┘
+```
+
+### Warum funktioniert das?
+
+Empirische Beobachtung (Hu et al. 2021, "LoRA" paper):
+
+```
+Hypothesis: Die Änderungen nötig für Task-Adaptation
+          liegen in einem niedrig-dimensionalen Subspace.
+
+Beispiel: Llama 3 70B trainiert auf Englisch.
+         Um auf Deutsch anzupassen, brauchst du nicht
+         alle 70B Parameter zu ändern.
+         Vielleicht nur die "Deutsch-Features" in Rank-16 Subspace.
+
+Empirisch bestätigt: LoRA Rank-16 Training erreicht
+                    >95% der Qualität von Full Fine-Tuning
+                    mit 250× weniger Parametern!
+```
+
+---
+
+## Die Mathematik vereinfacht
+
+### Tensor-Contraction (vereinfacht)
+
+```
+Input Tensor:           x ∈ ℝ^(batch × seq × hidden)
+                        Beispiel: [32, 128, 4096]
+
+Original Gewicht:       W ∈ ℝ^(hidden × hidden)
+                        Beispiel: [4096, 4096]
+
+LoRA Gewichte:
+  A ∈ ℝ^(hidden × rank)    [4096, 16]
+  B ∈ ℝ^(rank × hidden)    [16, 4096]
+
+Forward Pass:
+  y_orig = x @ W^T     (shape: [32, 128, 4096])
+  y_delta = x @ A @ B^T  (shape: [32, 128, 4096])
+  y_final = y_orig + α × y_delta
+
+  α (typically 16 für rank=16): Skalierungs-Faktor
+  α = 2 × lora_alpha / rank
+```
+
+### Warum "Rank"?
+
+In Linear Algebra:
+
+```
+Matrix Rank = Anzahl linear unabhängiger Reihen/Spalten
+
+Beispiel Matrix:
+[1 2 3]
+[2 4 6]  ← Diese Reihe ist 2× erste Reihe (nicht linear unabhängig)
+[3 6 9]  ← Diese Reihe ist 3× erste Reihe
+
+Rank dieser Matrix = 1 (nur 1 linear unabhängige Reihe)
+
+Bei LoRA Rank-16:
+A @ B Matrix hat maximal Rank-16
+(auch wenn A @ B resultat 4096 × 4096 ist)
+
+Das bedeutet: Max 16 "Richtungen" der Änderung
+→ Stark begrenzt, aber ausreichend für Finetuning-Tasks!
+```
+
+---
+
+## Rank-Auswahl (praktisch)
+
+### Kleine Rank (r=4-8)
+
+```
+Parameter: 4 × 4096 × 2 = 32K (+ Layer Overhead)
+Training Speed: Sehr schnell (1-2 Stunden)
+Quality: ~85% von Full Fine-Tuning
+
+Use-Case:
+- Kleine Stil-Anpassungen
+- Kleine Datasets (<100 Beispiele)
+- Budget sehr begrenzt
+
+Problem: Kann komplexe Tasks nicht beschreiben
+```
+
+### Standard Rank (r=16)
+
+```
+Parameter: 16 × 4096 × 2 = 128K (industry standard)
+Training Speed: 2-4 Stunden
+Quality: ~95% von Full Fine-Tuning
+
+Use-Case:
+- Standard Domain Anpassung
+- 500-5000 Beispiele
+- Budget moderat
+
+Warum 16?
+- Empirisch: Diminishing returns nach Rank-16 für viele Tasks
+- Paper-Standard seit LoRA 2021
+- Gut Balance zwischen Qualität und Speicher
+```
+
+### Große Rank (r=32-64)
+
+```
+Parameter: 32 × 4096 × 2 = 256K
+Training Speed: 4-8 Stunden
+Quality: ~98% von Full Fine-Tuning
+
+Use-Case:
+- Komplexe Task-Anpassung
+- Großes Dataset (>5000 Beispiele)
+- Speicher verfügbar
+
+Problem: Nach r=32 sehr geringe zusätzliche Verbesserung
+         aber 2× mehr Training-Zeit
+         → diminishing returns
+```
+
+### Empirischer Graph (Hypothetisch)
+
+```
+Quality vs Rank (typisch für Chat-Fine-Tuning):
+
+99% ┌─────────────────── Full Fine-Tuning (Baseline)
+    │
+98% │                    ╱─────── r=32 (98%)
+    │         ╱────────╱
+95% │    ╱───╱────── r=16 (95%)
+    │ ╱─╱
+90% │╱────────── r=8 (90%)
+    │────────────────────────────
+    0   4   8   16  32  64  128
+           LoRA Rank
+
+nach r=16: jede Verdoppelung Rank ~1-2% Verbesserung
+           aber 2× längeres Training
+→ Meist nicht wert
+```
+
+---
+
+## Welche Layer sollten trainiert werden?
+
+Standard: `target_modules = ["q_proj", "v_proj"]`
+
+```python
+# In jedem Transformer Block:
+Input
+  ├─ Self-Attention
+  │  ├─ Q (Query) Projection      ← Trainiere (q_proj)
+  │  ├─ K (Key) Projection        ← Trainiere? (k_proj)
+  │  ├─ V (Value) Projection      ← Trainiere (v_proj)
+  │  └─ Output Projection
+  │
+  ├─ Feed-Forward
+  │  ├─ Linear 1                  ← Trainiere? (up_proj)
+  │  └─ Linear 2                  ← Trainiere? (down_proj)
+  │
+Output
+```
+
+### Strategien
+
+**Option 1: Nur Q und V (STANDARD)**
+```python
+target_modules = ["q_proj", "v_proj"]
+
+Begründung:
+- Q und V sind wo Semantik gelesen wird
+- K ist weniger wichtig (nur für Ähnlichkeit)
+- Feed-Forward ist teuer zu trainieren
+
+Parameter: ~64K pro Layer
+Empirisch: 95% von "trainiere alles"
+Kosten: Standard
+```
+
+**Option 2: Trainiere alles (Aggressive)**
+```python
+target_modules = ["q_proj", "k_proj", "v_proj", "o_proj", "up_proj", "down_proj"]
+
+Vorteile:
+- Beste Qualität (~99% von Full)
+- Komplexere Adaptation möglich
+
+Nachteile:
+- 6× mehr Parameter
+- 2-3× längeres Training
+- Risiko von Overfitting steigt
+
+Besser für: Große Datasets (>5000), wenn Zeit/Budget unbegrenzt
+```
+
+**Option 3: Nur Feed-Forward (Nisch)**
+```python
+target_modules = ["up_proj", "down_proj"]
+
+Warum:
+- Feed-Forward ist wo "Wissen" gespeichert ist (laut Mechanistic Interpretability)
+- Für Knowledge-basierte Tasks besser
+
+Empirisch: 90% Qualität bei 50% der Parameter
+Kompromiss: OK wenn dein Task wirklich "Knowledge-Heavy"
+```
+
+---
+
+## QLoRA vs DoRA: Variationen
+
+### QLoRA (Quantized LoRA)
+
+```
+Zusätzlich zu LoRA: Quantisiere das Base-Modell auf INT4
+
+Standard LoRA:
+Model (FP32): 140 GB
+LoRA (A, B):   50 MB
+Optimizer State: 35 GB
+Total: ~175 GB
+
+QLoRA:
+Model (INT4):  35 GB ← Komprimiert + nur read
+LoRA (A, B):   50 MB ← Float16 (trainierbar)
+Optimizer State: 35 GB
+Total: ~70 GB
+
+→ 2.5× weniger RAM!
+```
+
+**Trade-off**:
+```
+Qualität:
+- Standard LoRA:  95%
+- QLoRA:         93-94% (Quantisierung-Rauschen)
+
+RAM:
+- Standard: 175 GB
+- QLoRA:     70 GB (2.5× Ersparnis)
+
+Real-world: QLoRA ist fast nicht schlechter, aber 70× günstiger
+```
+
+### DoRA (Decomposed Rank Adaptation)
+
+```
+Standard LoRA:
+  Δ = α/rank × (A @ B)
+
+DoRA:
+  Δ = m × (A @ B) / ||A @ B||
+  └─ magnitude vector (trainierbar, pro output-dim)
+  └─ Normalisierte Richtung
+
+Intuitiv: Trainiere nicht nur "Richtung der Änderung"
+         sondern auch "wie stark" unabhängig
+
+Empirisch:
+- Standard LoRA:  95% Quality
+- DoRA:           96.5% Quality (+1.5%)
+- Similar RAM/Speed
+
+Nachteil: Etwas komplexer zu implementieren
+Vorteil: Konsistent bessere Qualität
+```
+
+**DoRA im Code**:
+```python
+# Noch nicht in allen Tools standard
+# Axolotl unterstützt's:
+config.use_dora = True
+```
+
+---
+
+## LoRA Mergen (Praktisch)
+
+### Szenario: Du trainierst LoRA, jetzt deployen
+
+```
+Nach Training hast du:
+- Original Model: model.safetensors (140 GB)
+- LoRA Weights: adapter_model.safetensors (50 MB)
+
+Problem bei Deployment:
+- Muss beide Dateien laden
+- Mergen kostet Zeit beim Startup
+- Speicher größer als nötig
+```
+
+### Lösung: Merge LoRA in Original
+
+```python
+from peft import AutoPeftModelForCausalLM
+from transformers import AutoTokenizer
+
+# Lade LoRA-adaptiertes Modell
+model_path = "./path/to/lora-model"
+model = AutoPeftModelForCausalLM.from_pretrained(
+    model_path,
+    device_map="cpu",  # Muss auf CPU sein für Merge!
+    torch_dtype=torch.float16
+)
+
+# Merge (trainiert Gewichte + LoRA zusammen)
+merged_model = model.merge_and_unload()
+
+# Speichern
+merged_model.save_pretrained("./merged-model")
+tokenizer = AutoTokenizer.from_pretrained(model_path)
+tokenizer.save_pretrained("./merged-model")
+```
+
+**Was passiert beim Merge?**
+
+```
+Original W [4096 × 4096]
+LoRA Delta (A @ B) [4096 × 4096, rank=16]
+
+Merged W_new = W + α × (A @ B)
+
+Math:
+W_new = W + (2 × A @ B / 16)
+       = W + 0.125 × (A @ B)
+
+Result: Neue Matrix mit "learned deltas eingebacken"
+        Keine LoRA-Info mehr nötig → simpleres Deployment
+```
+
+### Tradeoffs beim Mergen
+
+| Aspekt | Merged | Separate |
+|--------|--------|----------|
+| Speicher | 140 GB | 140GB + 50MB |
+| Load-Zeit | Normal | Normal (beide geladen) |
+| Inference | Schnell | Schnell (kein Unterschied) |
+| Reversibel | Nein | Ja (original noch da) |
+| Multiple LoRA | Nein | Ja (mehrere auf einmal möglich) |
+
+**Best Practice**:
+- Development: Separate (reversibel, kombinierbar)
+- Production: Merged (einfacher, deterministic)
+
+---
+
+## Praktisches Beispiel: 30-Minuten LoRA Training
+
+### Dataset vorbereiten
+
+```json
+[
+  {
+    "instruction": "Übersetze zu Englisch",
+    "input": "Der Hund springt schnell",
+    "output": "The dog jumps fast"
+  },
+  {
+    "instruction": "Beantworte die Frage",
+    "input": "Was ist ein Transformer?",
+    "output": "Ein Transformer ist eine Architektur..."
+  }
+]
+```
+
+### Code (mit Unsloth)
+
+```python
+from unsloth import FastLanguageModel
+from trl import SFTTrainer
+from transformers import TrainingArguments
+from datasets import load_dataset
+
+# 1. Load Model mit LoRA
+model, tokenizer = FastLanguageModel.from_pretrained(
+    model_name="unsloth/llama-2-7b",
+    max_seq_length=1024,
+    load_in_4bit=True,  # QLoRA
+)
+
+# 2. Attach LoRA
+model = FastLanguageModel.get_peft_model(
+    model,
+    r=16,               # Rank
+    lora_alpha=16,      # Scaling
+    target_modules=["q_proj", "v_proj"],  # Welche
+    lora_dropout=0.05,
+    bias="none",
+    use_gradient_checkpointing=True,
+)
+
+# 3. Load Dataset
+dataset = load_dataset("json", data_files="data.json")
+
+# 4. Train
+trainer = SFTTrainer(
+    model=model,
+    train_dataset=dataset["train"],
+    args=TrainingArguments(
+        per_device_train_batch_size=4,
+        gradient_accumulation_steps=4,
+        warmup_steps=100,
+        num_train_epochs=1,
+        learning_rate=2e-4,
+        output_dir="lora-output",
+        optim="adamw_8bit",  # 8-bit Optimizer für RAM-Effizienz
+        max_steps=500,  # ~30 Min
+    ),
+    packing=True,
+    max_seq_length=1024,
+    dataset_text_field="text",
+)
+
+trainer.train()
+
+# 5. Save & Merge
+model.save_pretrained("lora-weights")
+
+# Later: Merge für Deployment
+from peft import AutoPeftModelForCausalLM
+merged = AutoPeftModelForCausalLM.from_pretrained(
+    "lora-weights",
+    device_map="cpu",
+    torch_dtype=torch.float16,
+).merge_and_unload()
+merged.save_pretrained("merged-model")
+```
+
+**Timing auf RTX 4090**:
+- Load Model: 2 min
+- Training 500 steps: 20-25 min
+- Save: 1 min
+- **Total: ~30 min**
+
+---
+
+## Häufige LoRA-Fehler
+
+### Fehler 1: Target Modules falsch
+
+```
+Problem:
+target_modules = ["all"]  # ← Nicht existent!
+
+Lösung:
+target_modules = ["q_proj", "v_proj"]  # Für Llama
+target_modules = ["query", "value"]     # Für andere Modelle
+target_modules = ["lin_in", "lin_out"]  # Für spezifische
+
+Check model structure:
+for name, module in model.named_modules():
+    print(name)  # Sieh welche Layer existieren
+```
+
+### Fehler 2: Rank zu klein für komplexe Task
+
+```
+Problem:
+Task = "Lerne ganzes neues Fachgebiet (Medizin) mit 10K Beispiele"
+Solution: r=4  # ← Zu klein!
+
+Result: Model gibt Halluzinationen
+
+Lösung:
+r=32 oder r=64 für komplexe Tasks
+```
+
+### Fehler 3: Learning Rate falsch
+
+```
+Problem:
+learning_rate = 1e-4  # ← Zu klein für LoRA!
+Result: Kaum Training, Loss sinkt nicht
+
+Learning Rate Guideline:
+Full Fine-Tuning: 5e-5 (alles trainiert, klein)
+LoRA (Rank 16): 2e-4 (nur kleine Delta, größer)
+QLoRA: 2e-4 bis 1e-3 (noch größer möglich)
+```
+
+### Fehler 4: Zu viele Targets bei kleinem Rank
+
+```
+Problem:
+r = 8
+target_modules = ["q_proj", "k_proj", "v_proj", "o_proj", "up_proj", "down_proj"]
+
+Dann braucht man 6 × 8 × 4096 × 2 = 400K Parameter mit Rank 8
+Das ist Overkill! Rank verdoppeln zu r=16
+```
+
+LoRA ist eine der besten Innovationen im LLM-Space. Mit Rank-16 auf Q und V Projections trainierst du 95% Qualität mit 250× weniger Parametern. Praktisch auf Consumer-Hardware machbar in <2 Stunden.
+
+## Quellen und Links
+
+- [LoRA Paper (arXiv)](https://arxiv.org/abs/2106.09685)
+- [Microsoft LoRA](https://github.com/microsoft/LoRA)
+- [PEFT Documentation](https://huggingface.co/docs/peft)

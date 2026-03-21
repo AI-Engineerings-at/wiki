@@ -1,0 +1,349 @@
+---
+title: "LangChain vs LlamaIndex — Framework Vergleich"
+date: "2026-03-21"
+summary: "LangChain + LangGraph vs LlamaIndex: Architektur, Use Cases, Learning Curve, Wann was nutzen"
+tags: ["langchain", "llamaindex", "langgraph", "rag", "frameworks", "vergleich"]
+author: "AI Engineering"
+---
+
+# LangChain vs LlamaIndex — Framework Vergleich 2026
+
+LangChain vs LlamaIndex ist nicht "Winner nimmt alles" — es ist "nutz beide für unterschiedliche Jobs". März 2026: LangChain ist zu LangGraph geworden (Production-Grade State Machines), LlamaIndex bleibt spezialisten auf RAG. Wir zeigen dir die echte Differenz.
+
+## Kern-Philosophie
+
+### LangChain (jetzt: LangChain Ecosystem)
+
+**Original Slogan:** "The Swiss Army Knife for LLM Apps"
+
+**Realität 2026:** LangChain ist drei Dinge:
+1. **Chains** (Old API): Schnelle Prototypen, aber fragil
+2. **Agents** (RUNNABLES): Einfache Multi-Tool-Orchestration
+3. **LangGraph** (New Standard): Production-Grade DAG-based Orchestration
+
+Wenn du heute "LangChain für Production" sagst, meinst du meist **LangGraph**.
+
+### LlamaIndex
+
+**Slogan:** "Your Data into RAG Engines"
+
+**Realität:** LlamaIndex ist **Data Specialist Framework**.
+
+Fokus: Load → Index → Query Engines.
+
+```
+Your Files/APIs → LlamaIndex → Query Engine → LLM Answer
+```
+
+## Vergleich: Der Kontext ist alles
+
+### Szenario 1: "Ich will schnell RAG bauen"
+
+**LlamaIndex Winner:**
+
+```python
+from llama_index import SimpleDirectoryReader, VectorStoreIndex
+
+documents = SimpleDirectoryReader("./data").load_data()
+index = VectorStoreIndex.from_documents(documents)
+query_engine = index.as_query_engine()
+response = query_engine.query("Wer ist der CEO?")
+```
+
+**Code Länge:** 5 Zeilen.
+**Boilerplate:** Minimal.
+**Dauer bis funktionierend:** 10 Minuten.
+
+**LangChain Equivalent:**
+
+```python
+from langchain.document_loaders import DirectoryLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.vectorstores import Pinecone
+from langchain.chains import RetrievalQA
+
+loader = DirectoryLoader("./data")
+docs = loader.load()
+splitter = RecursiveCharacterTextSplitter()
+split_docs = splitter.split_documents(docs)
+embeddings = OpenAIEmbeddings()
+vector_store = Pinecone.from_documents(split_docs, embeddings)
+qa = RetrievalQA.from_chain_type(
+    llm=ChatOpenAI(),
+    chain_type="stuff",
+    retriever=vector_store.as_retriever()
+)
+response = qa.run("Wer ist der CEO?")
+```
+
+**Code Länge:** 15 Zeilen.
+**Boilerplate:** Mittel.
+**Dauer bis funktionierend:** 30 Minuten (braucht mehr Docs gelesen).
+
+**Winner für RAG:** LlamaIndex (einfacher, schneller).
+
+### Szenario 2: "Ich will RAG + Agents + Custom Tools kombinieren"
+
+**LangChain (LangGraph) Winner:**
+
+LangChain bietet Orchestration aller Tools in einen unified Graph:
+
+```python
+from langgraph.graph import StateGraph
+from langchain.tools import Tool
+
+# Define Tools
+def search_web(query): ...
+def search_db(query): ...
+tools = [Tool(name="web", func=search_web), Tool(name="db", func=search_db)]
+
+# Define State
+class AgentState(TypedDict):
+    query: str
+    context: str
+    answer: str
+
+# Build Graph
+graph = StateGraph(AgentState)
+graph.add_node("researcher", research_node)
+graph.add_node("answerer", answer_node)
+graph.add_edge("researcher", "answerer")
+
+app = graph.compile()
+result = app.invoke({"query": "What is X?"})
+```
+
+**Vorteile:** Full Kontrolle, Monitoring, Checkpointing, Test-able.
+
+**LlamaIndex Equivalent:**
+
+LlamaIndex unterstützt Agents auch:
+
+```python
+from llama_index.agent import OpenAIAgent
+from llama_index.tools import Tool as LlamaIndexTool
+
+tools = [
+    LlamaIndexTool(name="web_search", func=search_web),
+    LlamaIndexTool(name="db_search", func=search_db)
+]
+
+agent = OpenAIAgent.from_tools(tools)
+response = agent.chat("What is X?")
+```
+
+**Vorteil:** Einfacher Syntax.
+**Nachteil:** Weniger Kontrolle (Black Box Agent Loop).
+
+**Winner für Complex Orchestration:** LangChain + LangGraph (aber mehr Code).
+
+### Szenario 3: "Ich will Production Monitoring + Observability"
+
+**LangChain (LangGraph) + LangSmith Winner:**
+
+LangSmith ist the de-facto standard für Production Monitoring:
+
+```python
+from langsmith import Client
+
+client = Client()  # Auto-logs to LangSmith
+app.invoke({"query": "..."})
+
+# LangSmith Dashboard zeigt:
+# - Execution Flow
+# - Token Usage
+# - Latency
+# - Errors
+# - Cost
+```
+
+**LlamaIndex equivalent:**
+
+LlamaIndex hat Langfuse Integration:
+
+```python
+from llama_index.callbacks import LangfuseCallbackHandler
+
+callback_handler = LangfuseCallbackHandler()
+# query_engine.query(...) wird automatisch geloggt
+```
+
+**Aber:** LlamaIndex → Langfuse ist nicht so seamless wie LangChain → LangSmith.
+
+**Winner für Monitoring:** LangChain + LangSmith.
+
+## Feature Matrix
+
+| Feature | LangChain | LlamaIndex |
+|---------|-----------|-----------|
+| **RAG Simplicity** | ✓✓ | ✓✓✓ |
+| **Multi-Tool Orchestration** | ✓✓✓ (LangGraph) | ✓ |
+| **Custom Tools/Integrations** | ✓✓✓ (200+ integrations) | ✓✓ |
+| **Learning Curve** | Mittel | Niedrig |
+| **Code Verbosity** | Höher | Niedrig |
+| **Flexibility** | ✓✓✓ (DAG-based) | ✓✓ |
+| **Production Readiness** | ✓✓✓ (LangGraph) | ✓✓ |
+| **Observability** | ✓✓✓ (LangSmith) | ✓✓ (Langfuse) |
+| **Community Size** | ✓✓✓ | ✓✓ |
+| **Documentation** | ✓✓ (LangGraph docs sind new) | ✓✓✓ |
+
+## Performance 2026
+
+### Latency (p99, für simple RAG query)
+
+**LlamaIndex:**
+- Embedding: 200ms (OpenAI API)
+- Vector Search: 30ms (Pinecone)
+- LLM Call: 500ms
+- Total: ~730ms
+
+**LangChain (RunnableSequence, optimiert):**
+- Same, aber +100ms Overhead (Sequence processing)
+- Total: ~830ms
+
+**Winner:** LlamaIndex ~100ms faster (marginale Unterschied).
+
+### Token Usage
+
+**LlamaIndex:** Auto-optimized context (intelligentes Chunking).
+- Input Tokens: 1200 (für Average Query)
+
+**LangChain:** Abhängig vom Developer (wie Chunks du passest).
+- Input Tokens: 1500 (typical, weil mehr boilerplate)
+
+**Winner:** LlamaIndex ~20% weniger tokens.
+
+## Community & Ecosystem 2026
+
+### LangChain
+- 200+ Integrationen (OpenAI, Anthropic, Cohere, Local, etc.)
+- Große Community (~60k GitHub Stars)
+- Viele Third-Party Projekte
+- Schwächer: Offizielle Docs (zu viele APIs, nicht fokussiert)
+
+### LlamaIndex
+- ~80 Integrationen (fokussiert auf Data Loading)
+- Kleinere aber engaged Community (~30k GitHub Stars)
+- Spezialisierte Third-Party (RAG-fokussiert)
+- Stärker: Offizielle Docs (clear, tutorial-orientiert)
+
+## Hybrid Approach (2026 Best Practice)
+
+Viele Production-Grade Systeme nutzen **LlamaIndex + LangChain zusammen:**
+
+```
+Documents → LlamaIndex (Load, Chunk, Embed)
+  ↓
+Qdrant Vector DB (Storage)
+  ↓
+LangGraph (Orchestration: Planning, Retrieval, Reasoning)
+  ↓
+Answer
+```
+
+**Vorteile:**
+- LlamaIndex Simplicity für Data Processing
+- LangGraph Power für Orchestration
+- Best of Both Worlds
+
+**Kosten:** Lerne beide (Zeit-Investment), aber ROI ist hoch.
+
+## Entscheidungsbaum
+
+```
+Fragst du: "Ich will nur RAG, sonst nichts"?
+  JA → LlamaIndex. 10 Minuten Setup, done.
+  NEIN → nächste Frage
+
+Brauchst du komplexe Multi-Tool Orchestration?
+  JA → LangChain + LangGraph. Mehr Code, aber Kontrolle.
+  NEIN → LlamaIndex reicht wahrscheinlich
+
+Ist Production Monitoring kritisch?
+  JA → LangChain + LangSmith (best-in-class)
+  NEIN → LlamaIndex + Langfuse OK
+
+Hast du Custom Edge Cases?
+  JA → LangChain (flexibility)
+  NEIN → LlamaIndex (simplicity)
+```
+
+## Häufige Fallstricke
+
+### 1. "Ich brauche LlamaIndex nur für einfache RAG"
+
+Aber dann brauchst du Agents später (komplexere Queries). Dann brauchst du LangChain.
+
+**Lesson:** Start mit Plan, nicht "das reicht jetzt". Wenn Growth möglich ist, architecture für LangGraph von Start.
+
+### 2. "LangChain Code ist zu viel Boilerplate"
+
+Ja, aber LangGraph Code ist später re-usable. Kurz-Term schmerz, Long-Term Gewinn.
+
+### 3. "LlamaIndex Documents sagen 'LangChain Support' aber ich kann nicht verstehen wie"
+
+LlamaIndex hat LangChain Integration, aber nicht vollständig documented. Reality: Nutze LlamaIndex für Load, dann bridge zu LangChain Chains.
+
+## Tools & Tipps
+
+### LlamaIndex Tools
+- **Document Loaders:** PDF, Web, Notion, GitHub, Confluence
+- **Evaluators:** Relevance, Correctness Evals
+- **Response Synthesizers:** Customize Output Format
+
+### LangChain Tools
+- **Runnable Interface:** Composable, Testable
+- **Tool Definitions:** Built-in Tool Schema
+- **OpenAI Function Calling Support:** Native
+
+## Roadmap 2026-2027
+
+- **Q2 2026:** LlamaIndex wird "workflow-fähiger" (besser orchestration)
+- **Q3 2026:** LangGraph offizielle UI (Web-based DAG Designer)
+- **Q4 2026:** Beide frameworks convergen (less differentiation, more interop)
+
+## Praktischer Start
+
+### LlamaIndex (Start in 30 Minuten)
+
+```python
+from llama_index import SimpleDirectoryReader, VectorStoreIndex
+docs = SimpleDirectoryReader("./data").load_data()
+index = VectorStoreIndex.from_documents(docs)
+query_engine = index.as_query_engine()
+print(query_engine.query("Deine Frage"))
+```
+
+### LangChain + LangGraph (Start in 2 Stunden)
+
+```python
+from langgraph.graph import StateGraph
+# ... define state + nodes + edges
+# ... compile + invoke
+```
+
+## Fazit
+
+**LlamaIndex 2026:**
+- Best für RAG-focused Applications
+- Schnell zu lernen
+- Einfache Docs
+- EUR 0 (open source)
+
+**LangChain + LangGraph 2026:**
+- Best für Complex Multi-Tool Orchestration
+- Steile Learning Curve, aber powerful
+- Production-Grade Observability (LangSmith)
+- EUR 0-20/Monat (LangSmith optional)
+
+**Die Wahrheit:** 2026 nutzen successful companies **beide**.
+
+Start mit LlamaIndex wenn deine Task RAG ist. Upgrade zu LangGraph wenn Komplexität wächst.
+
+Hybrid: LlamaIndex + LangGraph = die produktivste Kombination.
+
+## Quellen und Links
+
+- [LangChain](https://github.com/langchain-ai/langchain)
+- [LlamaIndex](https://github.com/run-llama/llama_index)

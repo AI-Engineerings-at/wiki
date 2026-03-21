@@ -1,0 +1,385 @@
+---
+title: "KI-Agenten — Agentenentwicklung"
+date: "2026-03-21"
+summary: "Übersicht KI-Agent-Frameworks: Single-Agent vs Multi-Agent, CrewAI, AutoGen, LangGraph, Architektur, Use Cases"
+tags: ["agenten", "crewai", "autogen", "langgraph", "multi-agent", "agentenentwicklung"]
+author: "AI Engineering"
+---
+
+# KI-Agenten — Kategorieübersicht
+
+Ein KI-Agent ist kein Chatbot, der wartet bis du fragst. Ein Agent plant, führt Tools aus, überprüft das Ergebnis, passt an. 2026 sind Multi-Agent-Systeme Production-Standard. Wir zeigen dir die Architektur, Tools, und wann du welches Framework nimmst.
+
+## Was ist ein Agent? (Präzise Definition)
+
+**Chatbot:** "Warte auf Input → generiere Text → gib aus"
+
+**Agent:** "Ich habe ein Ziel → plane Schritte → führe Tools aus (Datenbank, API, Code) → überprüfe Ergebnis → weiche ab falls nötig → iteriere"
+
+Beispiel:
+- **Chatbot:** "Wie heiß bin ich?" → LLM generiert "Das weiß ich nicht"
+- **Agent:** "Finde meine aktuelle Temperatur" → Agent ruft API auf → erhält 37,5°C → gibt Ergebnis zurück
+
+Agents brauchen:
+1. **Planung:** "Welche Schritte um mein Ziel zu erreichen?"
+2. **Tool-Zugriff:** APIs, Datenbanken, Code-Execution
+3. **Reflexion:** "War das Ergebnis korrekt?"
+4. **Iteration:** "Falls nicht, nächster Versuch"
+
+## Agent-Typen
+
+### Single-Agent (ein Thema, kein Handover)
+
+**Struktur:** Ein LLM steuert alles.
+
+**Best for:**
+- Support-Bot der nur deine Doku durchsucht
+- Email-Processor der nur Emails klassifiziert
+- Datenbank-Query-Agent der nur SQL-Statements generiert
+
+**Frameworks:** LangChain mit einem Agent, OpenAI Assistants API, Claude Code (Anthropic).
+
+**Komplexität:** Niedrig. "Schreib einen Prompt" reicht oft.
+
+### Multi-Agent (Teamwork, spezialisierte Rollen)
+
+**Struktur:** Multiple Agenten mit unterschiedlichen Rollen kommunizieren, delegieren, lösen gemeinsam komplexe Probleme.
+
+**Beispiel:**
+- **Researcher Agent:** "Finde aktuelle Nachrichten über Konkurrenz"
+- **Analyst Agent:** "Fasse die Nachrichten zusammen, finde Muster"
+- **Writer Agent:** "Schreib einen Bericht"
+- **Manager Agent:** "Koordiniere die drei"
+
+**Best for:**
+- Content-Pipelines (Research → Write → Edit)
+- Sales-Workflows (Datenerfassung → CRM-Update → Email-Draft)
+- Debugging-Systeme (Code-Read → Error-Identification → Fix-Proposal)
+
+**Frameworks:** CrewAI (role-based), AutoGen (conversation-based), LangGraph (state-machine-based).
+
+**Komplexität:** Höher. "Strukturiere deine Teams" ist Design-Arbeit.
+
+## Die 3 Frameworks 2026
+
+### CrewAI — Einsteigerfreundlich
+
+**Philosophy:** "Dein Team, deine Rollen, deine Tasks."
+
+Jeder Agent hat eine Rolle (Researcher, Writer, Analyst), eine Expertise, ein Ziel. Tasks werden zwischen Agenten delegiert.
+
+**Code-Beispiel (Struktur):**
+```python
+from crewai import Agent, Task, Crew
+
+researcher = Agent(
+    role="Researcher",
+    goal="Research Stable Diffusion trends 2026",
+    tools=[web_search, api_tool]
+)
+
+writer = Agent(
+    role="Writer",
+    goal="Write an article based on research",
+    tools=[file_write]
+)
+
+task1 = Task(description="Research...", agent=researcher)
+task2 = Task(description="Write article...", agent=writer)
+
+crew = Crew(agents=[researcher, writer], tasks=[task1, task2])
+result = crew.kickoff()
+```
+
+**Vorteile:**
+- Intuitive role-based design
+- Schnellster Weg zu "Agententeam funktioniert"
+- Built-in delegation (Agent kann sagen "hey researcher, search for...")
+- Minimale Boilerplate
+
+**Nachteile:**
+- Weniger Kontrol über Zustandsverwaltung (was wenn Task A scheitert?)
+- Monitoring/Debugging schwächer als LangGraph
+- Für sehr komplexe Workflows (zyklische Dependencies) overkomplicated
+
+**Best for:** Prototyping, Content-Pipelines, schnelle Proof-of-Concepts.
+
+**Kosten:** Kostenlos (open source).
+
+### AutoGen — Conversation-driven
+
+**Philosophy:** "Agenten sind große Sprachmodelle, die miteinander sprechen."
+
+Zwei Agenten (Instanzen des gleichen oder verschiedenen LLMs) führen eine Konversation, einer plant, einer führt aus.
+
+**Code-Beispiel (Struktur):**
+```python
+from autogen import AssistantAgent, UserProxyAgent
+
+assistant = AssistantAgent(name="assistant", llm_config=llm_config)
+
+user_proxy = UserProxyAgent(
+    name="user_proxy",
+    human_input_mode="NEVER",  # vollständig autonom
+    max_consecutive_auto_reply=10
+)
+
+user_proxy.initiate_chat(
+    assistant,
+    message="Design an n8n workflow for lead scoring"
+)
+```
+
+**Vorteile:**
+- "Two-turn" Conversation ist einfaches Mental Model
+- Natürliche Fehlerbehandlung (Agent sieht Fehler, passt an)
+- Gute für einfache Automationen
+- Microsoft-Backing (Enterprise-Grade, aber Maintenance-Mode 2026)
+
+**Nachteile:**
+- Microsoft hat AutoGen in den Maintenance-Mode verschoben (2026)—aktive Entwicklung läuft jetzt unter "Microsoft Agent Framework"
+- Weniger Community-Plugins als CrewAI
+- Für sehr große Teams unübersichtlich (zwei Agenten verstehen, N Agenten wird komplex)
+
+**Best for:** Zwei-Agenten-Interaktionen, wenn du an Microsoft-Stack gebunden bist.
+
+**Kosten:** Kostenlos (open source).
+
+### LangGraph — Production-Grade State Machine
+
+**Philosophy:** "Agents are Graphs. State flows through nodes. Edges are conditional."
+
+LangGraph modelliert die Agent-Logik als directed acyclic graph (DAG). Jeden Node führt eine Funktion aus (LLM call, Tool, etc.), Edges sind Bedingungen ("if result==error, gehe zu error_handling_node").
+
+**Code-Beispiel (Struktur):**
+```python
+from langgraph.graph import StateGraph
+
+# Define state
+class AgentState(TypedDict):
+    messages: Annotated[list, operator.add]
+    research_data: str
+    article: str
+
+graph = StateGraph(AgentState)
+
+# Nodes
+graph.add_node("researcher", research_node)
+graph.add_node("writer", write_node)
+graph.add_node("editor", edit_node)
+
+# Edges
+graph.add_edge("researcher", "writer")
+graph.add_conditional_edges("writer", check_quality, {"good": "editor", "bad": "researcher"})
+
+app = graph.compile()
+result = app.invoke({"messages": [...]})
+```
+
+**Vorteile:**
+- **Checkpointing:** Speichert Zustand bei jedem Node—du kannst anhalten, anpassen, fortfahren
+- **Observability:** Jeder Knoten, jede Transition ist explizit—hervorragend zum Debuggen
+- **LangSmith Integration:** Echtzeit-Monitoring, Replay, A/B-Testing
+- **Zyklische Workflows:** "Falls Qualität schlecht, gehe zurück zu Researcher"—einfach
+- **Production:** Netflix, Stripe, andere Scale-Up nutzen es für kritische Workflows
+
+**Nachteile:**
+- **Learning Curve:** DAGs sind nicht intuitiv wenn du Nicht-Engineer bist
+- **Verbose:** Mehr Code als CrewAI für einfache Tasks
+- **Overkill für Simple:** Willst du nur "recherchieren → schreiben", Overhead unnötig
+
+**Best for:** Komplexe Workflows mit Fehlerbehandlung, Production-Critical Systems, wenn Observability wichtig ist.
+
+**Kosten:** Kostenlos (open source), LangSmith (Monitoring) hat freie Tier.
+
+## Entscheidungsmatrix: Welches Framework?
+
+| Kriterium | CrewAI | AutoGen | LangGraph |
+|-----------|--------|---------|-----------|
+| **Learning Curve** | Niedrig | Niedrig | Mittel-Hoch |
+| **Einsteigerfreundlich?** | ✓✓✓ | ✓✓ | ✓ |
+| **Team-Koordination** | ✓✓✓ | ✓ | ✓✓ |
+| **Fehlerbehandlung** | ✓✓ | ✓✓ | ✓✓✓ |
+| **Komplexe Workflows** | ✓ | ✗ | ✓✓✓ |
+| **Observability** | ✓✓ | ✓ | ✓✓✓ |
+| **Für Production** | ✓✓ | ✓ | ✓✓✓ |
+| **Community** | ✓✓✓ | ✓ | ✓✓ |
+| **Kosten** | Kostenlos | Kostenlos | Kostenlos |
+
+**Entscheidungsregel:**
+- **"Ich weiß nicht wo ich anfangen soll"** → CrewAI
+- **"Zwei Agenten sprechen miteinander"** → AutoGen
+- **"Fehler sind teuer, Observability braucht's"** → LangGraph
+- **"Alle drei, hybrid"** → Ja, Produzenten nutzen LangGraph+CrewAI zusammen (LangGraph orchestration, CrewAI für Team-Tasks)
+
+## Multi-Agent Architektur-Patterns
+
+### Hierarchical (Manager-übersiht Teams)
+
+```
+Manager Agent
+  ├─ Research Team (3 Agenten)
+  ├─ Content Team (2 Agenten)
+  └─ Distribution Team (2 Agenten)
+```
+
+**Vorteile:** Skaliert, klar organisiert.
+**Nachteile:** Manager wird zum Bottleneck falls komplex.
+**Frameworks:** CrewAI (built-in Delegation), LangGraph (manager_node).
+
+### Peer-to-Peer (Agenten koordinieren ohne Manager)
+
+```
+Agent A ←→ Agent B
+  ↕         ↕
+Agent C ←→ Agent D
+```
+
+**Vorteile:** Keine zentrale Ausfallstelle.
+**Nachteile:** Koordination ohne Überblick = Chaos.
+**Best for:** Kleine Teams (2-3 Agenten).
+
+### Pipeline (Linear workflow)
+
+```
+Input → Agent1 → Agent2 → Agent3 → Output
+```
+
+**Vorteile:** Einfach zu verstehen, zu debuggen.
+**Nachteile:** Wenn Agent2 scheitert, alles bricht.
+**Best for:** Content-Pipelines (Research → Write → Edit → Publish).
+
+## Kritische Limits 2026
+
+### 1. Halluzination in Agent-Tools
+Agents halluzinieren nicht weniger als Chatbots—aber schlimmer, weil sie Halluzinationen als API-Calls behandeln. "Rufe API `/users/{id}` auf" wo `id` halluziniert ist = Error.
+
+**Fix:** Validierung + Fallback.
+
+### 2. Cost Explosion
+Ein Agent mit 10 Tools, der 20 Schritte läuft = 20 LLM-Calls. Mit GPT-4 Preisen (EUR 0,06/1K input tokens) kann eine Query EUR 0,50-2 kosten, wenn du nicht aufpasst.
+
+**Fix:** Model-Routing (GPT-4 nur für komplexe, Sonnet für einfache), Caching.
+
+### 3. Token Context Limits
+Du fragst deinen Agent: "Schreib Artikel über 100 Startups". Agent researched, sammelt 200 URLs, versucht alle zu lesen—context explodiert.
+
+**Fix:** Agentic RAG—Agent retrieves, nicht liest alles.
+
+### 4. Monitoring Blackhole
+Agenten-Workflows laufen asymmetrisch. Step 1 dauert 2s, Step 7 dauert 45s. Wenn du kein Monitoring hast ("wo ist mein Agent jetzt?"), Blindflug.
+
+**Best Practice:** LangSmith, Langfuse, oder selbst-bauen mit strukturiertem Logging.
+
+## Real-World Beispiele 2026
+
+### Beispiel 1: E-Commerce Lead Scoring (CrewAI)
+
+```
+Task 1: Researcher → "Finde alle Signals über Lead A"
+  - Website visits
+  - Email opens
+  - Demo-Request
+
+Task 2: Scorer → "Bewerte Lead (1-10)"
+  - Signale analysiert
+
+Task 3: Writer → "Schreib Email-Draft"
+  - Personalisiert auf Score
+```
+
+**Time:** 20 Sekunden, kostet EUR 0,10, Erfolgsquote EUR 50-200 mehr pro Lead.
+
+### Beispiel 2: Content Pipeline (LangGraph)
+
+```
+Node: Research → fetch articles, news
+  ↓ (if research_successful)
+Node: Outline → structure Artikel
+  ↓ (if outline_complete)
+Node: Write → LLM schreibt draft
+  ↓ (if quality_ok)
+Node: Publish
+  ↓ (if not quality_ok)
+  ↓ loops back to: Edit Node
+```
+
+**Checkpoint-Feature:** Nach "Write" speichern. Nächster Tag? Fahre bei "Edit" fort. Nicht ganz von vorne.
+
+### Beispiel 3: Debugging Agent (AutoGen + LangGraph)
+
+```
+User: "Mein Claude Code Skill funktioniert nicht"
+  ↓
+Agent: "Lass mich Fehler reproduzieren"
+  → run skill, catch error
+  ↓
+Agent: "Fehler ist... [error message]"
+  → LLM liest error, schlägt Fix vor
+  ↓
+Agent: "Versuch Fix #1"
+  → apply fix, rerun
+  ↓
+Agent: "Erfolgreich!" (oder retry)
+```
+
+## Häufige Anfängerfehler
+
+### 1. "Agenten-Agent als Mensch-Ersatz"
+Agenten sind **Tool-Controller**, nicht Denker. "Dein Agent wird alles für dich tun" ist falsch. Sie machen repetitiv Aufgaben mit Tools.
+
+**Realität:** Agent schreibt nicht besser als du, recherchiert aber 10x schneller.
+
+### 2. "Mehr Agenten = mehr Power"
+Nein. 10 Agenten im Chaos sind schlechter als 2 koordinierte.
+
+**Best Practice:** Start mit 2-3, test wie sie koordinieren, erst dann Scale.
+
+### 3. "Keine Fehlerbehandlung nötig"
+Agents werden Fehler machen (API-Timeout, halluzinierte IDs, etc.). Error-Handling ist nicht optional.
+
+**Code:** Try-catch + Fallback um jeden Tool-Call.
+
+### 4. "Kostet nichts"
+Open-Source Code kostenlos, aber LLM-API-Kosten! Ein Agent der 10 Schritte läuft kostet wie ein teurer API-Call (EUR 0,10-1 je Query).
+
+## Tools & Integrations 2026
+
+**Agent-Frameworks:** CrewAI, AutoGen, LangGraph, OpenAI Swarm (Beta, 2026).
+
+**MCP Integration (neu 2026):** Model Context Protocol erlaubt Agents direkt auf externe Tools zuzugreifen (Git, Web, Datenbanken). Nur OpenAgents hat native MCP-Support aktuell.
+
+**Observability:** LangSmith (LangChain), Langfuse (open-source), Humanloop.
+
+## Roadmap 2026-2027
+
+- **Q2 2026:** OpenAI Swarm wird GA (GA = General Availability)—simpler Agent-Framework von OpenAI
+- **Q3 2026:** MCP wird Standard (Model Context Protocol in allen Frameworks)
+- **Q4 2026:** Agent cost-optimization Tools (Token caching, batching) werden Norm
+
+## Praktischer Start
+
+**Woche 1:** CrewAI Tutorial, build Research+Writer Agents, 2 hours.
+
+**Woche 2:** Add dritter Agent (Editor), add Error-Handling, test Delegation. 4 hours.
+
+**Woche 3:** Kosten messen (wie viel EUR pro Workflow?), add Observability, LangSmith.
+
+**Woche 4:** Production checklist: Secrets, Logging, Retry-Logic, Monitoring.
+
+Dann: Upgrade zu LangGraph wenn Komplexität wächst.
+
+## Fazit
+
+Agenten 2026:
+- **Für Einsteiger:** CrewAI, 2 Stunden bis funktionierend
+- **Für Produktionsworkflows:** LangGraph + LangSmith, observability first
+- **Für Simple Tasks:** Vergiss Frameworks, ein Prompt reicht
+- **Die Realität:** Hybrid—CrewAI für Task-Pools, LangGraph für Orchestration
+
+Beginnen: Installier CrewAI, schreib einen Research+Writer Agenten, lass sie 3 Links analysieren. Kostet EUR 0,05, zeigt alle Kern-Konzepte.
+
+## Quellen und Links
+
+- [CrewAI](https://github.com/crewAIInc/crewAI)
+- [AutoGen](https://github.com/microsoft/autogen)

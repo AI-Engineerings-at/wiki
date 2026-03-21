@@ -1,0 +1,594 @@
+---
+title: "Set Up Claude Code AI OS"
+date: 2026-03-21
+summary: "Install Claude Code CLI, configure .claude/ directory, create skills and MCP connections"
+tags: ["claude-code", "ai-os", "cli", "skills", "mcp", "agents"]
+author: "AI Engineering"
+---
+
+# Set Up Claude Code AI OS
+
+Claude Code is a CLI that runs Claude in your terminal with access to your codebase, files, and custom tools. This guide sets up a complete AI OS environment.
+
+## What is Claude Code?
+
+```
+Claude Code CLI
+├── Local codebase access (read/write/execute)
+├── Git integration (commit, branch, history)
+├── Skills (Python scripts, executables)
+├── Agents (configured Claude instances)
+├── MCP servers (external tool connections)
+└── Memory system (persistent context)
+```
+
+Unlike web Claude, Claude Code:
+- Runs locally, offline-capable
+- Direct file system access
+- Can execute bash, Python, git commands
+- Persistent workspace memory
+- Custom tools via skills and MCP
+
+## Prerequisites
+
+- Python 3.9+
+- Git installed
+- Terminal/PowerShell access
+- Claude API key (from https://claude.ai/account/api)
+
+## Step 1: Install Claude Code CLI
+
+### Windows (PowerShell)
+
+```powershell
+# Download installer
+$url = "https://github.com/anthropics/claude-code/releases/latest/download/claude-code-windows.exe"
+Invoke-WebRequest -Uri $url -OutFile claude-code.exe
+
+# Install
+.\claude-code.exe
+
+# Verify
+claude-code --version
+```
+
+### macOS
+
+```bash
+# via Homebrew
+brew tap anthropics/claude-code
+brew install claude-code
+
+# or download directly
+curl -L https://github.com/anthropics/claude-code/releases/latest/download/claude-code-mac.tar.gz | tar xz
+chmod +x claude-code
+sudo mv claude-code /usr/local/bin/
+```
+
+### Linux
+
+```bash
+# Download
+wget https://github.com/anthropics/claude-code/releases/latest/download/claude-code-linux.tar.gz
+tar xz claude-code
+chmod +x claude-code
+sudo mv claude-code /usr/local/bin/
+```
+
+## Step 2: Configure API Key
+
+```bash
+claude-code config set-key
+# Paste your API key from https://claude.ai/account/api
+# Key is stored in ~/.claude-code/config.json (encrypted)
+```
+
+Verify:
+```bash
+claude-code --version
+# Should not show "No API key configured"
+```
+
+## Step 3: Create .claude Directory Structure
+
+Navigate to your project:
+
+```bash
+cd /path/to/my-project
+mkdir -p .claude/{skills,agents,mcp,rules,templates}
+```
+
+Create `.claude/CLAUDE.md` (project instructions):
+
+```markdown
+# My Project — Claude Code Config
+
+## Project Summary
+Local AI stack setup, documentation, automation.
+
+## Codebase Structure
+- src/ — Source code
+- docs/ — Documentation
+- .claude/ — Claude Code config
+
+## Rules
+1. Always commit changes with descriptive messages
+2. Run tests before committing: `npm test`
+3. Update docs after changes
+4. No secrets in version control
+
+## Key Paths
+- Main app: src/app.py
+- Tests: tests/
+- Docs: docs/
+
+## External Resources
+- API docs: https://docs.example.com
+- Architecture: docs/ARCHITECTURE.md
+```
+
+## Step 4: Create Your First Skill
+
+Skills are Python scripts that extend Claude Code with custom capabilities.
+
+Create `.claude/skills/analyze-code/SKILL.md`:
+
+```yaml
+---
+name: analyze-code
+description: Analyze Python code for bugs, performance issues, and style problems
+version: 1.0.0
+requires: []
+produces: [analysis-report]
+model: sonnet
+context: fork
+allowed-tools: [Read, Grep, Bash]
+last-verified: 2026-03-21
+---
+
+# Analyze Code Skill
+
+Analyzes Python files for issues: bugs, style, performance, security.
+
+## Usage
+
+```bash
+/analyze-code src/app.py
+```
+
+## What It Does
+
+1. Read the Python file
+2. Parse with AST (Abstract Syntax Tree)
+3. Check for:
+   - Undefined variables
+   - Unused imports
+   - Long functions (>50 lines)
+   - Missing type hints
+   - Security issues (hardcoded secrets)
+4. Generate report
+
+## Output
+
+```json
+{
+  "file": "src/app.py",
+  "issues": [
+    {
+      "line": 42,
+      "type": "style",
+      "message": "Line too long (105 > 88)",
+      "fix": "Break into multiple lines"
+    }
+  ],
+  "summary": "3 issues found"
+}
+```
+
+## How to Use
+
+The skill runs automatically when you ask Claude to analyze code. You can also invoke manually:
+
+```bash
+/analyze-code path/to/file.py
+```
+```
+
+Create `.claude/skills/analyze-code/scripts/analyze.py`:
+
+```python
+#!/usr/bin/env python3
+"""Analyze Python code for issues."""
+
+import ast
+import sys
+import json
+from pathlib import Path
+
+def analyze_file(filepath):
+    """Analyze a Python file."""
+    path = Path(filepath)
+    if not path.exists():
+        return {"error": f"File not found: {filepath}"}
+
+    with open(path) as f:
+        content = f.read()
+
+    issues = []
+
+    # Check line length
+    for i, line in enumerate(content.split('\n'), 1):
+        if len(line) > 88:
+            issues.append({
+                "line": i,
+                "type": "style",
+                "message": f"Line too long ({len(line)} > 88)",
+                "content": line[:50] + "..."
+            })
+
+    # Parse AST
+    try:
+        tree = ast.parse(content)
+    except SyntaxError as e:
+        return {"error": f"Syntax error: {e}"}
+
+    # Find long functions
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef):
+            func_len = node.end_lineno - node.lineno
+            if func_len > 50:
+                issues.append({
+                    "line": node.lineno,
+                    "type": "style",
+                    "message": f"Function too long ({func_len} lines)",
+                    "name": node.name
+                })
+
+        # Check for hardcoded secrets
+        if isinstance(node, ast.Constant):
+            if isinstance(node.value, str):
+                if 'password' in node.value.lower() or 'api' in node.value.lower():
+                    issues.append({
+                        "line": node.lineno,
+                        "type": "security",
+                        "message": "Possible hardcoded secret detected",
+                        "fix": "Use environment variables"
+                    })
+
+    return {
+        "file": str(path),
+        "issues": issues,
+        "summary": f"{len(issues)} issues found",
+        "status": "ok" if not issues else "warnings"
+    }
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print(json.dumps({"error": "Usage: analyze.py <file>"}))
+        sys.exit(1)
+
+    result = analyze_file(sys.argv[1])
+    print(json.dumps(result, indent=2))
+```
+
+Make executable:
+```bash
+chmod +x .claude/skills/analyze-code/scripts/analyze.py
+```
+
+Test the skill:
+
+```bash
+/analyze-code src/app.py
+```
+
+Claude will run the skill and report issues found.
+
+## Step 5: Create an Agent
+
+Agents are configured Claude instances with specific roles.
+
+Create `.claude/agents/developer.md`:
+
+```yaml
+---
+name: developer
+description: Full-stack developer with code analysis, debugging, and testing abilities
+model: sonnet
+tools: [Read, Grep, Glob, Bash, Write, Edit]
+disallowedTools: []
+skills:
+  - analyze-code
+  - run-tests
+---
+
+# Developer Agent
+
+You are a skilled developer responsible for:
+- Writing clean, tested code
+- Debugging issues
+- Code reviews
+- Performance optimization
+
+## Rules
+
+1. Always run tests before committing
+2. Add type hints to new functions
+3. Document complex logic
+4. No hardcoded secrets or API keys
+
+## Workflow
+
+When asked to implement a feature:
+
+1. Ask clarifying questions if needed
+2. Design the solution
+3. Write code incrementally
+4. Run tests with `/run-tests`
+5. Analyze code with `/analyze-code`
+6. Commit with descriptive message
+
+## Tools Available
+
+- File operations (read/write/edit)
+- Git commands (commit, branch, log)
+- Terminal (bash, python)
+- Custom skills (analyze-code, run-tests)
+```
+
+## Step 6: Configure MCP Servers (External Tools)
+
+MCP (Model Context Protocol) connects Claude to external services.
+
+Create `.claude/mcp/github.json`:
+
+```json
+{
+  "name": "github",
+  "type": "server",
+  "command": "mcp-github",
+  "args": ["--token=${GITHUB_TOKEN}"],
+  "enabled": true
+}
+```
+
+Add GitHub token to environment:
+
+```bash
+# macOS/Linux
+export GITHUB_TOKEN="ghp_xxxxxxxxxxxx"
+
+# Windows PowerShell
+$env:GITHUB_TOKEN = "ghp_xxxxxxxxxxxx"
+
+# Verify
+echo $env:GITHUB_TOKEN
+```
+
+Now Claude can:
+- List repositories
+- Read issues and PRs
+- Create/update issues
+- Comment on PRs
+
+## Step 7: Memory System
+
+Persistent context across sessions.
+
+Create `.claude/memory/MEMORY.md`:
+
+```markdown
+# Memory Index
+
+## Project State
+- Current sprint: Q2 2026
+- Active features: Authentication refactor
+- Known issues: Slow dashboard queries
+
+## Team
+- Project lead: Alice (alice@company.com)
+- DevOps: Bob (bob@company.com)
+- Key contact: alice@company.com
+
+## Decisions
+- Stack: Python + React + PostgreSQL
+- Deployment: Docker + Kubernetes
+- Testing: pytest + Jest
+
+## Key Paths
+- App entry: src/app.py
+- Config: config/settings.py
+- Tests: tests/
+- Docs: docs/ARCHITECTURE.md
+```
+
+Create `.claude/memory/logs/2026-03-21.md` (daily log):
+
+```markdown
+# Daily Log: 2026-03-21
+
+## Events
+- 10:30 Implemented user authentication
+- 11:15 Added password reset flow
+- 14:00 Fixed SQL injection in search
+- 16:45 All tests passing
+```
+
+Claude automatically references memory when available.
+
+## Step 8: Usage Examples
+
+### Interactive Session
+
+```bash
+cd /path/to/project
+claude-code
+
+# Claude is ready
+```
+
+Then ask Claude:
+
+```
+Implement a function to validate email addresses.
+Add tests, analyze the code, then commit.
+```
+
+Claude will:
+1. Write the function
+2. Create tests
+3. Run `/analyze-code`
+4. Commit with `git commit`
+
+### Batch Mode (One-shot)
+
+```bash
+claude-code -p "Fix the bug in src/auth.py where login fails for spaces in password"
+```
+
+Claude processes request and exits with result.
+
+### With Specific Agent
+
+```bash
+claude-code --agent developer "Add type hints to src/utils.py"
+```
+
+Uses the developer agent configuration.
+
+### Using Skills
+
+```bash
+claude-code "Run /analyze-code src/app.py and report security issues"
+```
+
+Claude invokes the analyze-code skill and interprets results.
+
+## Directory Structure Reference
+
+```
+my-project/
+├── .claude/
+│   ├── CLAUDE.md                 # Project instructions
+│   ├── memory/
+│   │   ├── MEMORY.md             # Persistent facts
+│   │   └── logs/
+│   │       ├── 2026-03-20.md
+│   │       └── 2026-03-21.md
+│   ├── agents/
+│   │   ├── developer.md
+│   │   └── reviewer.md
+│   ├── skills/
+│   │   ├── analyze-code/
+│   │   │   ├── SKILL.md
+│   │   │   └── scripts/
+│   │   │       └── analyze.py
+│   │   └── run-tests/
+│   │       ├── SKILL.md
+│   │       └── scripts/
+│   │           └── test.py
+│   ├── mcp/
+│   │   ├── github.json
+│   │   └── slack.json
+│   └── rules/
+│       ├── 01-safety.md
+│       └── 02-quality.md
+├── src/
+├── tests/
+├── docs/
+└── README.md
+```
+
+## Common Commands
+
+```bash
+# Start interactive session
+claude-code
+
+# One-shot analysis
+claude-code -p "Analyze src/app.py for performance issues"
+
+# With specific agent
+claude-code --agent developer "Write a test for the auth module"
+
+# List available agents
+claude-code --list-agents
+
+# List available skills
+claude-code --list-skills
+
+# Set configuration
+claude-code config set model=opus
+claude-code config set session-timeout=30
+
+# Check status
+claude-code --version
+claude-code config show
+```
+
+## Security Best Practices
+
+1. **Store secrets in environment variables**
+   ```python
+   import os
+   api_key = os.getenv("API_KEY")  # Not hardcoded
+   ```
+
+2. **Never commit .env files**
+   ```
+   # .gitignore
+   .env
+   .claude-code/config.json
+   ```
+
+3. **Review code before committing**
+   - Use `/analyze-code` skill
+   - Read diffs carefully
+   - Test thoroughly
+
+4. **Restrict file access**
+   - Limit skills to necessary tools
+   - Use `allowed-tools` in SKILL.md
+   - Don't give write access unless needed
+
+## Troubleshooting
+
+**"No API key configured"**
+```bash
+claude-code config set-key
+# Paste your API key
+```
+
+**"Skill not found"**
+- Verify `.claude/skills/skill-name/SKILL.md` exists
+- Check name matches: kebab-case
+- Reload: `claude-code --reload-skills`
+
+**"File not found"**
+- Use absolute paths or paths relative to project root
+- Check `.claude/CLAUDE.md` for path definitions
+
+**Skills not executing**
+- Check Python path: `which python3`
+- Verify script is executable: `chmod +x script.py`
+- Check logs: `claude-code --debug`
+
+## Checklist
+
+- [ ] Claude Code CLI installed
+- [ ] API key configured
+- [ ] .claude/ directory structure created
+- [ ] CLAUDE.md project instructions written
+- [ ] At least one skill created and tested
+- [ ] One agent configured
+- [ ] MCP servers connected (optional)
+- [ ] Memory.md initialized
+- [ ] Daily log template created
+- [ ] .gitignore updated (exclude .claude config)
+- [ ] Team documentation updated with setup steps
+- [ ] First interactive session completed successfully
+
+## Sources and Links
+
+- [Claude Code](https://code.claude.com)
+- [Claude Docs](https://docs.claude.com)

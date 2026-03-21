@@ -1,0 +1,447 @@
+---
+title: EU AI Act Compliance Checkliste für KMUs
+date: 2026-03-21
+summary: Schritt-für-Schritt Checkliste zur Vorbereitung auf den EU AI Act bis 02.08.2026. Inventar, Risikoklassifizierung, Dokumentation, Transparenz, Monitoring.
+tags: [compliance, checkliste, eu-ai-act, implementierung, dokumentation]
+author: AI Engineering
+---
+
+# EU AI Act Compliance Checkliste für KMUs
+
+Diese Checkliste führt dich durch alle notwendigen Schritte, um dein KMU bis zum 02.08.2026 AI-Act-konform zu machen. Du kannst parallel arbeiten, aber die Reihenfolge ist sinnvoll.
+
+## Phase 1: Grundlagen (Jetzt – Mai 2026)
+
+### 1.1 KI-Inventar erstellen
+
+Schreibe auf, welche KI-Systeme dein Unternehmen einsetzt:
+
+**Template für jedes System:**
+```
+Name: [z.B. ChatGPT, Ollama, Kreditvergabe-Tool]
+Anbieter: [OpenAI, Meta, Intern entwickelt, ...]
+Modell/Version: [GPT-4, Llama 2.0, v2.3.1]
+Nutzer: [Kundenservice Team, alle Mitarbeiter, Finanzabteilung]
+Einsatzbereich: [Customer Service, Datenanalyse, Kreditevaluierung]
+Kosten/Lizenz: [ChatGPT Pro, Open Source, Eigenentwicklung]
+Daten-Input: [Kundengespräche, Finanzinformationen, interne Memos]
+Kritikalität: [Hoch/Mittel/Niedrig]
+Notizen: [...]
+```
+
+**Wo suchen:**
+- Cloud-Tools mit Nutzerverwaltung (AWS, Google Cloud, Azure)
+- SaaS-Subscriptions (ChatGPT, Copilot, etc.)
+- Interne Entwicklung (Python Scripts, lokale Modelle wie Ollama)
+- Browser-Extensions und Plugins mit KI
+- Standard-Software mit KI-Features (Word, Excel, Google Workspace)
+
+**Ziel:** Vollständige Liste ohne Auslassungen. Mindestens 5-15 Systeme bei einem typischen KMU.
+
+**Deadline:** Ende April 2026
+
+### 1.2 Risikoklassifizierung
+
+Für jedes System: Ist es unzulässig, hochrisiko, begrenzt oder minimal?
+
+**Schnell-Prüfung pro System:**
+- [ ] Ist es eines der 4 unzulässigen Systeme? (Social Scoring, RT Biometrie, Manipulation, Schwachstellen-Ausbeutung)
+  - Wenn JA → System sofort stilllegen, Punkt für Dokumentation festhalten
+  - Wenn NEIN → Weiter zu nächster Frage
+
+- [ ] Beeinfluss grundlegende Rechte? (Beschäftigung, Kredit, Justiz, Bildung, kritische Infrastruktur)
+  - Wenn JA → HOCHRISIKO
+  - Wenn NEIN → Weiter
+
+- [ ] Könnte das System Menschen täuschen? (Chatbot, Deepfake, Emotion Recognition)
+  - Wenn JA → BEGRENZT
+  - Wenn NEIN → MINIMAL
+
+**Dokumentation:**
+```
+System: ChatGPT Customer Service
+Klassifizierung: BEGRENZT (Chatbot)
+Begründung: Könnte Nutzer täuschen, dass er mit Mensch spricht
+Maßnahmen: Transparenzhinweis beim Start
+```
+
+**Ziel:** Jedes System klassifiziert. Klar dokumentiert warum.
+
+**Deadline:** 15. Mai 2026
+
+---
+
+## Phase 2: Hochrisiko-Systeme durcharbeiten (Mai – Juni 2026)
+
+Falls du HOCHRISIKO-Systeme identifiziert hast, sind hier die nächsten Schritte.
+
+### 2.1 Rolle klären: Provider oder Deployer?
+
+**Provider:** Du entwickelst, trainierst oder vertreibst das System
+**Deployer:** Du nutzt ein System (gekauft oder selbstgebaut)
+
+Häufig bist du Deployer (du nutzt ein fertiges Tool). Aber falls du in-house entwickelst oder an Kunden verkaufst, bist du auch Provider.
+
+| Rolle | Deine Pflicht |
+|-------|--------------|
+| **Deployer nur** | Dokumentation, menschliche Kontrolle, Monitoring, Transparenz |
+| **Provider nur** | Dokumentation, Risiko-Management, Qualität, Audit, Post-Market-Monitoring |
+| **Beides** | Alle Anforderungen von Provider + Deployer |
+
+### 2.2 Menschliche Kontrolle implementieren
+
+**Critical für hochrisiko:** Bevor kritische Entscheidungen wirksam werden, prüft ein Mensch.
+
+**Beispiele:**
+
+**Kreditvergabe:**
+- ❌ Falsch: KI lehnt Antrag ab, Kunde erfährt es per Email
+- ✅ Richtig: KI analysiert Antrag, Sachbearbeiter sieht die Analyse und bestätigt/lehnt ab
+
+**HR-Screening:**
+- ❌ Falsch: KI filtert 90% der Bewerbungen aus, Mensch sieht nur Top-10%
+- ✅ Richtig: KI ordnet Bewerbungen, aber HR prüft die aussortieren AUCH
+
+**Implementierung:**
+```
+1. Workflow anpassen: KI-Ergebnis → Mensch-Review → Entscheidung
+2. Wer ist der Mensch? (Titel, Berechtigung?)
+3. Wie lange hat der Mensch Zeit? (SLA setzen)
+4. Was wenn der Mensch widerspreitet? (Eskalation)
+5. Dokumentation: Jede Entscheidung + Begründung aufzeichnen
+```
+
+**Deadline:** 30. Juni 2026
+
+### 2.3 Dokumentation für hochrisiko-Systeme
+
+Schreibe auf, was du über dein System weißt. **Nicht perfekt, aber vollständig.**
+
+**Template (pro hochrisiko-System):**
+
+```
+DOKUMENTATION HOCHRISIKO-SYSTEM
+System: [Name]
+Datum: [2026-06-15]
+
+1. SYSTEM-BESCHREIBUNG
+   - Was ist das System? (Kurzbeschreibung)
+   - Wer entwickelt/wartet es? (Intern/Anbieter)
+   - Input: [Welche Daten gehen rein?]
+   - Output: [Welche Entscheidungen/Outputs kommen raus?]
+   - Wie funktioniert es? (Vereinfacht erklären)
+
+2. RISIKOANALYSE
+   - Warum ist das System hochrisiko?
+   - Welche Auswirkung hat ein Fehler? (Finanzschaden, Diskriminierung, etc.)
+   - Welche Zielgruppen sind betroffen?
+
+3. VERWENDETE DATEN
+   - Welche Input-Daten nutzt das System?
+   - Woher kommen die Daten? (Kundeneingaben, Externe APIs, Trainingsdaten?)
+   - Sind die Daten repräsentativ?
+   - Wie alt sind die Trainingsdaten?
+
+4. QUALITÄT/GENAUIGKEIT
+   - Wie genau ist das System? (z.B. 95% Genauigkeit, F1-Score 0.87)
+   - Wie wurde das gemessen?
+   - Gibt es Fehler, die du kennst?
+
+5. BIAS & FAIRNESS
+   - Diskriminiert das System bestimmte Gruppen? (z.B. Frauen, Ältere)
+   - Wie hast du das getestet?
+   - Was machst du dagegen?
+
+6. MENSCHLICHE KONTROLLE
+   - Wie kontrolliert ein Mensch die Entscheidung?
+   - Wer prüft? (Titel, Qualifikation)
+   - Was ist die SLA? (Wie lange darf es dauern?)
+
+7. TRANSPARENZ & INFORMATION
+   - Wissen betroffene Personen, dass KI eine Entscheidung trifft?
+   - Können sie Erklärung erhalten?
+   - Wo ist das dokumentiert? (Datenschutz, AGB, etc.)
+
+8. MONITORING & LOGS
+   - Was wird aufgezeichnet? (Alle Entscheidungen? Nur Ausfälle?)
+   - Wie lange werden Daten aufbewahrt? (Min. 3 Jahre)
+   - Wer hat Zugriff?
+
+9. INCIDENT REPORTING
+   - Was ist ein kritischer Fehler?
+   - Wer wird informiert? (Intern, Behörde?)
+   - In welcher Zeit? (24h? 72h?)
+
+10. BACKUP-PLAN
+    - Was passiert, wenn das System ausfällt?
+    - Wie lange Downtime ist akzeptabel?
+```
+
+**Deadline:** 30. Juni 2026
+
+### 2.4 Transparenz gegenüber betroffenen Personen
+
+**Regel:** Wenn eine hochrisiko-KI eine Entscheidung trifft, die eine Person betrifft, muss diese Person wissen, dass KI beteiligt ist.
+
+**Wie du das dokumentierst:**
+
+- **Datenschutzerklärung:** Neu aufnehmen, dass du KI nutzt, welche Daten verarbeitet werden
+- **AGB/Nutzungsbedingungen:** Wo relevant erwähnen, dass KI-Entscheidungen möglich sind
+- **Individuelle Mitteilung:** Bei kritischen Entscheidungen (z.B. Kreditablehnung), muss das Schreiben erwähnen: „Diese Entscheidung wurde von einem KI-System unterstützt"
+
+**Template für Datenschutz-Update:**
+```
+3.5 KI-GESTÜTZTE VERFAHREN
+Für die Bewertung von Kreditanträgen nutzen wir ein KI-System. Das System analysiert [Input-Daten], um ein Risikorating zu geben. Die endgültige Entscheidung trifft ein Sachbearbeiter.
+
+Ihre Rechte:
+- Sie haben das Recht, die Logik der KI-Entscheidung zu verstehen
+- Sie können Widerspruch einlegen gegen eine KI-Entscheidung
+- Sie können verlangen, dass ein Mensch die Entscheidung neu prüft
+
+Kontakt: [Email/Telefon für Anfragen]
+```
+
+**Deadline:** 30. Juni 2026
+
+---
+
+## Phase 3: Alle Systeme dokumentieren (Juni – Juli 2026)
+
+### 3.1 Dokumentations-Framework
+
+Auch minimale und begrenzte Systeme sollten dokumentiert sein (zu deinem eigenen Schutz).
+
+**Kurz-Template (für alle):**
+```
+System: [Name]
+Klassifizierung: [Minimal/Begrenzt/Hochrisiko]
+Nutzer: [Wer nutzt es intern?]
+Einsatzzweck: [Kurz: wofür?]
+Transparenzmaßnahmen: [Was sagen Nutzer/Kunden?]
+Risiken: [Was kann schiefgehen?]
+Notizen: [Anmerkungen]
+```
+
+### 3.2 Verzeichnis aufbauen
+
+Lege ein zentrales Verzeichnis an (Google Drive, Sharepoint, Wiki):
+
+```
+KI-Systems-Verzeichnis
+├── 1. ChatGPT (Begrenzt)
+├── 2. Ollama Internal (Minimal)
+├── 3. Kreditvergabe-Tool (Hochrisiko)
+├── 4. Email-Filter (Minimal)
+├── 5. Versicherungs-Pricing (Hochrisiko)
+└── ...
+```
+
+Für jedes System:
+- [ ] Dokumentation vorhanden
+- [ ] Klassifizierung klar
+- [ ] Transparenzmaßnahmen definiert (wenn nötig)
+- [ ] Kontakt bei Fragen festgelegt
+
+**Deadline:** 15. Juli 2026
+
+---
+
+## Phase 4: Umscetzung & Schulung (Juli – August 2026)
+
+### 4.1 Prozesse aktualisieren
+
+Update deine Prozesse und Richtlinien:
+
+**Kreditvergabe-Prozess:**
+```
+Kunde gibt Antrag ein
+  → KI-System analysiert
+  → Sachbearbeiter prüft
+  → Sachbearbeiter bestätigt/lehnt ab ← MENSCHLICHE KONTROLLE
+  → Kunde erhält Schreiben mit KI-Hinweis
+  → Vorfall wird geloggt (3 Jahre aufbewahrt)
+```
+
+**Datenschutz-Prozess:**
+```
+Antrag erhalten
+  → KI-Entscheidung generiert
+  → Menschliche Freigabe
+  → Kunde informieren (inkl. KI-Hinweis)
+  → Datenschutz-Anfrage? → Erklärung anbieten
+```
+
+### 4.2 Schulung für Mitarbeiter
+
+Alle Mitarbeiter, die hochrisiko-Systeme nutzen:
+
+- [ ] 1h Schulung: Was ist der AI Act?
+- [ ] Ihre Rolle: Menschliche Kontrolle, nicht Automation blindlings vertrauen
+- [ ] Rote Flaggen: Was sind verdächtige Outputs? (z.B. systematische Diskriminierung)
+- [ ] Wer kontaktieren bei Fragen? (IT, Compliance, Manager)
+- [ ] Dokumentation: Jede Entscheidung aufzeichnen
+
+**Deadline:** 25. Juli 2026
+
+### 4.3 Incident-Management einrichten
+
+Falls etwas schiefgeht:
+
+1. **Erkennung:** Mitarbeiter oder Kunde meldet Problem
+2. **Dokumentation:** Was passiert ist, wann, welche Auswirkung
+3. **Analyse:** Ist das ein AI-Act-kritischer Fall?
+4. **Korrektur:** System anpassen oder sofort stilllegen
+5. **Reporting:** Falls kritisch, Behörde informieren (RTR/DSB)
+
+**Template für Incident-Protokoll:**
+```
+Incident-Report
+Datum: 2026-08-10
+System: Kreditvergabe-Tool
+Beschreibung: KI hat 15 Anträge von Frauen über 60 systematisch abgelehnt
+Auswirkung: Diskriminierung
+Ursache: [Analyse...]
+Maßnahme: [Retraining/Stillegung/Handover zu Mensch]
+Behörden-Meldung notwendig? JA / NEIN
+Folge-Up: [...]
+```
+
+**Deadline:** 02. August 2026 (System live!)
+
+---
+
+## Phase 5: Compliance im Betrieb (Ab 02.08.2026)
+
+### 5.1 Laufende Überwachung
+
+**Hochrisiko-Systeme:**
+- [ ] Wöchentlich: Logs überprüfen auf Anomalien
+- [ ] Monatlich: Bias-Analyse durchführen
+- [ ] Quartalsweise: Dokumentation aktualisieren
+- [ ] Incident-Reports sammeln
+
+**Beispiel-Monitoring für Kreditvergabe:**
+```
+Wöchentlicher Report:
+- Anzahl Anträge: 240
+- Genehmigungsquote: 62%
+- Genehmigungsquote nach Geschlecht: Männer 64%, Frauen 60%
+- Durchschnittlicher Betrag genehmigt: 25.000 EUR
+- Kritische Abweichungen: Keine
+```
+
+### 5.2 Dokumentation aktuell halten
+
+- [ ] Quarterly: Dokumentation überprüfen (Ist sie noch aktuell?)
+- [ ] Wenn Systemupdate: Dokumentation anpassen
+- [ ] Neue Systeme: Sofort in Verzeichnis aufnehmen
+
+### 5.3 Behörden-Kommunikation
+
+Falls Behörde fragt (RTR, DSB):
+
+- [ ] Dokumentation bereitstellen (du solltest alles haben)
+- [ ] Logs zeigen
+- [ ] Transparenz-Maßnahmen erklären
+- [ ] Menschliche Kontrolle demonstrieren
+
+**Wichtig:** Behörden sind nicht dein Feind. Sie wollen sehen, dass du dich bemühst. Vollständige Dokumentation ist dein bester Schutz.
+
+---
+
+## Template: AI Act Compliance-Ordner (Google Drive / Sharepoint)
+
+Erstelle diese Struktur:
+
+```
+📁 AI Act Compliance 2026
+├── 📄 KI-Systems-Verzeichnis.xlsx
+├── 📁 Risiko-Klassifizierung
+│   └── 📄 Klassifizierung-2026-03-21.md
+├── 📁 Hochrisiko-Systeme
+│   ├── 📄 Kreditvergabe_Dokumentation.md
+│   ├── 📄 Kreditvergabe_Monitoring.xlsx
+│   └── 📄 HR-Screening_Dokumentation.md
+├── 📁 Transparenz & Datenschutz
+│   ├── 📄 Datenschutzerklärung_Update.md
+│   └── 📄 AGB_KI-Anhang.md
+├── 📁 Schulung & Prozesse
+│   ├── 📄 Mitarbeiter-Schulung_Slides.pdf
+│   └── 📄 Prozesse_KI-Governance.md
+├── 📁 Incidents & Monitoring
+│   ├── 📄 Incident_2026-08-10.md
+│   └── 📄 Weekly-Monitoring_August2026.xlsx
+└── 📄 Compliance-Checkliste_Status.md
+```
+
+---
+
+## Schnell-Prioritäten bei Zeitdruck (Wenn du erst in Juni anfängst)
+
+Falls du spät anfängst, folge dieser Priorität:
+
+1. **SOFORT:** KI-Inventar + Risikoklassifizierung (1 Woche)
+2. **Dann:** Hochrisiko-Systeme identifizieren + menschliche Kontrolle einrichten (2 Wochen)
+3. **Dann:** Dokumentation, Datenschutz-Update (2 Wochen)
+4. **Dann:** Schulung + Incident-Management einrichten (1 Woche)
+5. **Finale Woche:** Testing + Behörden-Anfrage vorbereiten
+
+Auch mit Verzögerung: Volles Buy-in + dokumentieren reicht besser aus als Panik + falsche Compliance.
+
+---
+
+## Checkliste zum Ausdrucken
+
+```
+PHASE 1 – GRUNDLAGEN (April – Mai 2026)
+[ ] KI-Inventar erstellt (alle Systeme gelistet)
+[ ] Risikoklassifizierung pro System (unzulässig/hochrisiko/begrenzt/minimal)
+[ ] Dokumentation der Klassifizierung (warum? begründet?)
+
+PHASE 2 – HOCHRISIKO (Mai – Juni 2026)
+[ ] Hochrisiko-Systeme detailliert dokumentiert
+[ ] Menschliche Kontrolle für hochrisiko implementiert
+[ ] Transparenzmaßnahmen für Nutzer geplant
+[ ] Datenschutzerklärung aktualisiert (KI-Hinweis)
+
+PHASE 3 – DOKUMENTATION (Juni – Juli 2026)
+[ ] Alle Systeme in zentralem Verzeichnis
+[ ] Kurzform-Dokumentation für begrenzte/minimale Systeme
+[ ] Kontaktpersonen für KI-Fragen festgelegt
+
+PHASE 4 – UMSETZTUNG (Juli – August 2026)
+[ ] Prozesse aktualisiert (KI-Entscheidungsflow mit Mensch)
+[ ] Mitarbeiter geschult (min. 1h)
+[ ] Incident-Management-Prozess eingerichtet und getestet
+[ ] Logs/Monitoring laufen
+
+PHASE 5 – BETRIEB (Ab 02.08.2026)
+[ ] Wöchentliches Monitoring läuft
+[ ] Dokumentation aktuell
+[ ] Behörden-Anfrage beantwortbar (in < 2 Wochen)
+```
+
+---
+
+## Häufige Fehler vermeiden
+
+❌ **Fehler 1:** „Wir haben keine KI, das betrifft uns nicht."
+✅ **Richtig:** ChatGPT ist KI. Spam-Filter ist KI. Dich betrifft es wahrscheinlich.
+
+❌ **Fehler 2:** „Wir dokumentieren alles danach, wenn Behörde fragt."
+✅ **Richtig:** Dokumentieren jetzt. Behörde wird 02.08 kontrollieren, nicht später.
+
+❌ **Fehler 3:** „Hochrisiko-System wird von KI automatisiert, wir vertrauen dem."
+✅ **Richtig:** Mensch muss JEDE kritische Entscheidung prüfen. KI ist Hilfsmittel, nicht Automat.
+
+❌ **Fehler 4:** „Transparenz? Das steht irgendwo in den AGBs."
+✅ **Richtig:** Klar kommunizieren BEIM Nutzerkontakt, nicht versteckt in Legalese.
+
+❌ **Fehler 5:** „Wir passen uns an, wenn der AI Act endlich kommt."
+✅ **Richtig:** Vorbereitung jetzt. Ab 02.08.2026 wird es eng.
+
+## Quellen und Links
+
+- [EU AI Act](https://eur-lex.europa.eu/eli/reg/2024/1689/oj)
+- [GDPR](https://eur-lex.europa.eu/eli/reg/2016/679/oj)

@@ -1,0 +1,429 @@
+---
+title: "Skills erstellen"
+date: "2026-03-09"
+summary: "Wie du eigene Claude Code Skills erstellst — von der Idee bis zum Quality Gate."
+tags: ["skills", "claude-code", "development"]
+author: "AI Engineering"
+---
+
+# Skills erstellen
+
+Du willst einen eigenen Claude Code Skill bauen? Hier ist alles was du brauchst — vom Aufbau bis zum fertigen Quality Gate.
+
+## Was ist ein Skill?
+
+Ein Skill ist eine `SKILL.md` Datei in einem `.claude/skills/<name>/` Verzeichnis. Claude Code laedt alle Skills automatisch, wenn du im Repo-Root arbeitest. Jeder Skill kombiniert YAML Metadata mit Prompt-Anweisungen.
+
+**Kern-Prinzip:** Ein Skill = ein klar abgegrenzter Anwendungsfall. Nicht "mach alles", sondern "mach genau das, und zwar richtig."
+
+## SKILL.md Aufbau
+
+Jede Skill-Datei besteht aus zwei Teilen:
+
+### 1. Frontmatter (YAML)
+
+```yaml
+---
+name: "deploy"
+description: "Deploy Voice Gateway or Dashboard to Docker Swarm"
+command_injection: "git log --oneline -5"
+version: "1.2.0"
+requires: ["vault", "ssh"]
+produces: ["deployment", "mm-notification"]
+error-refs: ["E001", "E015"]
+learning-refs: ["L003", "L045"]
+---
+```
+
+### 2. Body (Prompt-Anweisungen)
+
+Der Body ist freier Markdown-Text. Hier beschreibst du, was Claude tun soll, wenn der Skill aktiviert wird.
+
+```markdown
+## Vorgehen
+
+1. Vault-Credentials laden
+2. Dateien via SCP kopieren
+3. Docker Build ausfuehren
+4. Service Update
+5. Health Check
+6. Ergebnis in Mattermost posten
+
+## Regeln
+
+- Immer `--no-cache` bei Verdacht auf Cache-Bug
+- Build Timeout: mindestens 600 Sekunden
+- Nach Deploy: Logs pruefen auf "not configured"
+```
+
+## Offizielle Anthropic Felder
+
+Diese Felder sind Teil des offiziellen Claude Code Skill-Standards:
+
+| Feld | Pflicht | Beschreibung |
+|------|---------|-------------|
+| `name` | Ja | Eindeutiger Skill-Name (lowercase, kebab-case) |
+| `description` | Ja | Kurzbeschreibung (1 Satz) |
+| `instructions` | Nein | Alternative zum Body — Anweisungen als Frontmatter-String |
+| `command_injection` | Nein | Shell-Command, dessen Output als Kontext injiziert wird |
+
+### Custom Extensions (AI Engineering)
+
+| Feld | Beschreibung |
+|------|-------------|
+| `version` | Semantic Versioning (z.B. `1.2.0`) |
+| `requires` | Abhaengigkeiten (andere Skills, Tools, Credentials) |
+| `produces` | Was der Skill erzeugt (Artefakte, Notifications) |
+| `error-refs` | Referenzen in die Error Registry (z.B. `E001`) |
+| `learning-refs` | Referenzen in die Learnings Registry (z.B. `L003`) |
+
+## String Substitutions
+
+Claude Code ersetzt diese Variablen zur Laufzeit:
+
+| Variable | Wert |
+|----------|------|
+| `$ARGUMENTS` | Alles was nach dem Skill-Trigger kommt |
+| `${CLAUDE_SKILL_DIR}` | Absoluter Pfad zum Skill-Verzeichnis |
+| `${workspaceFolder}` | Absoluter Pfad zum Workspace-Root |
+
+**Beispiel:**
+
+```markdown
+Analysiere die Datei: $ARGUMENTS
+
+Nutze das Script in ${CLAUDE_SKILL_DIR}/analyze.py fuer die Auswertung.
+Speichere das Ergebnis in ${workspaceFolder}/reports/.
+```
+
+## Dynamic Context mit Command Injection
+
+Das Feld `command_injection` fuehrt einen Shell-Befehl aus und injiziert die Ausgabe als Kontext. Das ist praktisch wenn Claude den aktuellen Zustand kennen muss.
+
+```yaml
+---
+name: "deploy"
+command_injection: "git log --oneline -5 && docker service ls --format '{{.Name}} {{.Replicas}}'"
+---
+```
+
+Claude sieht dann automatisch die letzten 5 Commits und den aktuellen Service-Status, bevor der Skill startet.
+
+**Vorsicht:** Der Command laeuft bei jedem Skill-Load. Halte ihn schnell (unter 2 Sekunden).
+
+## Best Practices
+
+### 1. Ein Skill, ein Job
+
+Nicht: `all-in-one-manager` der alles kann.
+Besser: `deploy`, `version-bump`, `dr-recovery` — jeweils fokussiert.
+
+### 2. Klare Trigger-Keywords
+
+Definiere in der Description, wann der Skill aktiviert werden soll:
+
+```yaml
+description: "Deploy VG or Dashboard — Trigger: deploy, VG, dashboard"
+```
+
+### 3. Fehler-Handling dokumentieren
+
+Schreib in den Body, was bei Fehlern passieren soll:
+
+```markdown
+## Fehler-Handling
+
+- SSH Timeout → Retry nach 10s, max 3 Versuche
+- Build Failure → Logs zeigen, NICHT erneut bauen ohne Analyse
+- Service Update haengt → `docker service ps <name>` pruefen
+```
+
+### 4. Scripts neben die SKILL.md
+
+Wenn dein Skill Shell- oder Python-Scripts braucht, lege sie ins gleiche Verzeichnis:
+
+```
+.claude/skills/deploy/
+  SKILL.md
+  pre-check.sh
+  verify-health.py
+```
+
+Referenziere sie mit `${CLAUDE_SKILL_DIR}/pre-check.sh`.
+
+### 5. Keine Credentials im Skill
+
+Nie Tokens oder Passwoerter in die SKILL.md schreiben. Immer via Vault:
+
+```markdown
+## Credentials
+
+Lade alle benoetigten Tokens via Vault:
+- `vault.py get <agent> <service> <key>`
+```
+
+## Quality Gate Checkliste
+
+Bevor ein Skill als "fertig" gilt:
+
+- [ ] `SKILL.md` existiert mit vollstaendigem Frontmatter
+- [ ] `name` ist eindeutig (kein Duplikat im Repo)
+- [ ] `description` erklaert den Zweck in einem Satz
+- [ ] Body hat klare Schritt-fuer-Schritt Anweisungen
+- [ ] Fehler-Handling ist dokumentiert
+- [ ] Keine Credentials im Klartext
+- [ ] Im richtigen Repo (`phantom-ai` fuer Infra, `Playbook01` fuer Business)
+- [ ] Im Skill-Katalog eingetragen
+- [ ] Mindestens 1x manuell getestet
+
+## Beispiel: Einen Analyse-Skill erstellen
+
+Nehmen wir an, du willst einen Skill der Log-Dateien analysiert.
+
+### Schritt 1: Verzeichnis erstellen
+
+```bash
+mkdir -p .claude/skills/log-analyzer/
+```
+
+### Schritt 2: SKILL.md schreiben
+
+```yaml
+---
+name: "log-analyzer"
+description: "Analysiert Docker-Logs und findet Fehler-Muster — Trigger: log, errors, analyse logs"
+command_injection: "docker service ls --format '{{.Name}}' 2>/dev/null | head -20"
+version: "1.0.0"
+requires: ["ssh"]
+produces: ["analysis-report"]
+---
+```
+
+```markdown
+## Aufgabe
+
+Analysiere die Logs des angegebenen Services: $ARGUMENTS
+
+## Vorgehen
+
+1. Service-Name aus $ARGUMENTS extrahieren
+2. Logs abrufen: `docker logs <container_id> --tail 500`
+3. Nach bekannten Fehler-Mustern suchen:
+   - "error", "Error", "ERROR"
+   - "not configured"
+   - "timeout"
+   - "connection refused"
+4. Zusammenfassung erstellen mit:
+   - Anzahl Fehler pro Typ
+   - Zeitraum der Logs
+   - Empfohlene Massnahmen
+
+## Output
+
+Markdown-Report mit Fehler-Zusammenfassung und konkreten Fix-Vorschlaegen.
+```
+
+### Schritt 3: Testen
+
+Starte Claude Code im Repo-Root und teste:
+
+```
+> Analysiere die Logs vom Voice Gateway
+```
+
+Claude erkennt den Trigger "analyse logs" und aktiviert den Skill.
+
+### Schritt 4: Katalogisieren
+
+Trage den Skill in den Skill-Katalog ein und bump die Gesamt-Anzahl.
+
+---
+
+## Weiter lesen
+
+- [Skills-Uebersicht](/skills/) — Alle 49 Skills im Ueberblick
+- [Agent-Team](/tools/agents) — Wer nutzt welche Skills?
+- [Skill-Katalog (Vollversion)](https://github.com/AI-Engineerings-at/Playbook01/blob/main/docs/SKILL-CATALOG.md)
+
+---
+
+## Fortgeschrittene Themen
+
+### Skill-Versioning
+
+Nutze Semantic Versioning:
+
+```yaml
+version: "1.0.0"  # Major.Minor.Patch
+```
+
+- **1.0.0**: Erstes Release
+- **1.1.0**: Neues Feature hinzugefügt (rückwärts kompatibel)
+- **1.2.5**: Bug-Fix (rückwärts kompatibel)
+- **2.0.0**: Breaking Change (Syntax ändert sich)
+
+Jedes Release dokumentieren: `CHANGELOG.md` im Skill-Verzeichnis.
+
+### Dependency-Management
+
+Wenn Skill A Skill B braucht:
+
+```yaml
+---
+name: "deploy-full"
+description: "Vollständiges Deployment mit Verifikation"
+requires: ["deploy", "health-check", "vault"]
+---
+```
+
+Claude Code prüft automatisch, dass diese Skills geladen sind.
+
+### Error Handling & Recovery
+
+Dokumentiere, was bei Fehlern passiert:
+
+```markdown
+## Fehler-Szenarien
+
+### SSH Connection Timeout
+- Max 3 Versuche mit 10s Backoff
+- Fallback: Über Bastion Host versuchen
+- Bei Fehler: #infra-alerts notifizieren
+
+### Docker Build Failure
+- Logs ausgeben (letzte 50 Zeilen)
+- Cache-Bug Check: `--no-cache` retry
+- Bei Fehler: Manueller Review erforderlich
+```
+
+### Conditional Execution
+
+Nutze Bash-Logik für bedingte Ausführung:
+
+```markdown
+## Pre-Flight Checks
+
+```bash
+# Vor dem Deploy prüfen
+if ! command -v docker &> /dev/null; then
+    echo "Docker nicht installiert"
+    exit 1
+fi
+
+if ! git diff --quiet; then
+    echo "Änderungen nicht committed"
+    exit 1
+fi
+```
+```
+
+### Skill-Kommunikation (Skill A calls Skill B)
+
+Nicht direkt möglich, aber du kannst:
+
+1. **Sequenzielle Skills**: Deploy → Health Check (manuell hintereinander)
+2. **Kombinierte Prompt**: Ein Skill mit beiden Anweisungen
+3. **Shared Output**: Skill A speichert Ergebnis, Skill B liest es
+
+Besser: Design Skills small and focused, nicht mega-skills.
+
+### Skill-Testing vor Produktivnahme
+
+```bash
+# 1. Lokal im Repo testen
+cd /path/to/repo
+claude  # Mit `.claude/` im Root
+
+# 2. Skill manuell aufrufen
+> run skill-name arg1 arg2
+
+# 3. Output prüfen
+# 4. Fehler-Szenarien testen (z.B. "was wenn Datei nicht existiert?")
+# 5. Im #testing Kanal dokumentieren
+```
+
+### Skill-Katalog-Integration
+
+Alle neuen Skills müssen in den Katalog:
+
+**Datei**: `docs/SKILL-CATALOG.md`
+
+```markdown
+## deploy v1.2.0
+
+Deployment auf Docker Swarm für Voice Gateway / Dashboard.
+
+- **Repo**: Playbook01 / phantom-ai (wer?)
+- **Trigger Keywords**: deploy, VG, dashboard
+- **Abhängigkeiten**: vault, ssh
+- **Fehlerbehandlung**: Mit Logs + #infra-alerts
+- **Getestet**: ✓ (20.03.2026)
+- **Kontakt**: @jim (bei Fragen)
+```
+
+## Häufige Fehler & Lösungen
+
+| Problem | Ursache | Lösung |
+|---------|--------|--------|
+| Skill wird nicht geladen | Falsche Ordner-Struktur | `.claude/skills/<name>/SKILL.md` |
+| Variables nicht ersetzt | Falsche Syntax in Body | `${CLAUDE_SKILL_DIR}` nicht `$CLAUDE_SKILL_DIR` |
+| Command Injection zu langsam | Zu komplexer Command | Unter 2 Sekunden halten |
+| Credentials leak | Im Klartext in SKILL.md | Immer über Vault laden |
+| Skill triggert nie | Keywords nicht in description | Keywords explizit auflisten |
+
+## Best Practices (2026 Lessons Learned)
+
+1. **Schreib klare Anweisungen** — Claude ist gut aber nicht omniscient
+2. **Test vor Deploy** — Mindestens 1x manuell ausprobieren
+3. **Dokumentiere Fehler** — Was schief gehen kann, wird schiefgehen
+4. **Keine Mega-Skills** — Fokussiert und klein ist besser
+5. **Versioniere alles** — Nachverfolgbarkeit ist wichtig
+6. **Integriere in den Katalog** — Sonst vergessen alle, dass du es gebaut hast
+
+## Beispiel-Skills aus der Praxis
+
+### Skill 1: Einfache Analyse
+
+```yaml
+---
+name: "quick-analyze"
+description: "Schnelle Code-Analyse auf Bugs"
+version: "1.0.0"
+requires: []
+produces: ["analysis-report"]
+---
+```
+
+Sehr kurz, braucht keine externen Abhängigkeiten.
+
+### Skill 2: Infrastructure-Deployment (Komplex)
+
+```yaml
+---
+name: "deploy-stack"
+description: "Vollständiges Infra-Deployment"
+version: "2.1.0"
+requires: ["vault", "ssh", "docker"]
+produces: ["deployment", "notification"]
+command_injection: "docker service ls && git log -1 --oneline"
+error-refs: ["E001", "E015", "E042"]
+learning-refs: ["L008", "L099"]
+---
+```
+
+Umfangreicher, viele Abhängigkeiten, detailliertes Error-Handling.
+
+## Weiterführende Ressourcen
+
+- **Skill-Standard**: `/rules/14-skill-standard.md` (offiziell)
+- **Quality Gate**: `/rules/15-skill-quality-gate.md` (Testing-Checkliste)
+- **Alle Skills**: `/docs/SKILL-CATALOG.md` (49 Skills im Überblick)
+- **Claude Code Docs**: https://code.claude.com/docs
+
+---
+
+*Stand: 2026-03-21 | Total Lines: 400+*
+
+## Quellen und Links
+
+- [Claude Code Skills Dokumentation](https://code.claude.com/docs/en/skills)

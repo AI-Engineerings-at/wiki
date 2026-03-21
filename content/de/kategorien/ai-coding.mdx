@@ -1,0 +1,375 @@
+---
+title: "AI Coding Tools: Claude Code, Cursor, GitHub Copilot & Co."
+date: 2026-03-21
+summary: "Vergleich von Claude Code CLI, Cursor, Windsurf, GitHub Copilot. Pricing, Features, Code-Privacy."
+tags: ["AI", "Coding", "Development", "IDE", "Privacy"]
+author: "AI Engineering"
+---
+
+# AI Coding Tools: Von CLI bis IDE
+
+Du willst Code schneller schreiben, Bug-Suchen outsourcen oder Agent-Mode. Diese Tools machen das. Die Frage: Willst du Cloud oder CLI? Browser oder IDE?
+
+## CLI-Tools (Kommandozeilen-nativer Zugang)
+
+### Claude Code CLI (Anthropic)
+
+| Aspekt | Detail |
+|--------|--------|
+| **Zugang** | Lokal CLI (Kommandozeile) |
+| **Modelle** | Haiku, Sonnet, Opus (wählbar) |
+| **Preis** | Pay-per-use API (Sonnet: $3/$15 per 1M tokens) |
+| **Agent Mode** | ✅ Ja (`--code-editing` flag) |
+| **Code-Privacy** | 🔵 Code geht an Anthropic (USA), aber unter DPA möglich |
+| **Integration** | Standalone, VS Code Extension optional |
+| **Latenz** | Netzwerk-abhängig (USA-Server) |
+
+**Installation:**
+```bash
+npm install -g @anthropic-ai/claude-code
+claude-code --help
+```
+
+**Typische Use-Cases:**
+```bash
+# Einzelne Datei analysieren
+claude-code analyze src/app.tsx
+
+# Bug-finden (mit Kontext)
+claude-code debug src/ --error "TypeError: cannot read property 'map'"
+
+# Refactoring vorschlagen
+claude-code refactor src/old-component.js --suggestion "use hooks"
+
+# Agent-Mode: Datei selbst editieren
+claude-code --code-editing "fix all TypeScript errors in src/"
+```
+
+**Stärken:**
+- Best-in-class Reasoning (Opus)
+- Lokal einsatzbereit (kein Server-Setup)
+- Pay-per-use (günstig bei sparsamer Nutzung)
+- Haiku schnell und günstig für Lookups
+
+**Schwächen:**
+- Code geht an OpenAI-API (Privacy)
+- CLI-only (manche mögen IDE besser)
+- Keine IDE-Integration out-of-the-box
+
+**Best for:** Entwickler mit Privacy-Concerns. Sparsame Nutzung (<$100/Monat). Remote-Worker ohne IDE-Preference.
+
+---
+
+### Aider (Claude + Code Editing)
+
+| Aspekt | Detail |
+|--------|--------|
+| **Zugang** | Python CLI + Chat Interface |
+| **Modelle** | Claude, GPT-4, Llama (auswählbar) |
+| **Preis** | API-Kosten (Claude bei Anthropic) |
+| **Agent Mode** | ✅ Full (auto-edits Dateien) |
+| **Git-Integration** | ✅ Ja (Commits automatisch) |
+| **Multi-File** | ✅ Ja |
+| **Spezialität** | Code-Editing Agent, nicht IDE |
+
+**Installation:**
+```bash
+pip install aider-chat
+aider --model claude-3-5-sonnet
+```
+
+**Workflow:**
+```bash
+# Aider startet, du schreibst natürlich:
+aider> "add error handling to the payment endpoint"
+
+# Aider:
+# 1. Schaut die Dateien an
+# 2. Macht die Änderungen
+# 3. Committed zu Git
+# 4. Zeigt dir das Diff
+```
+
+**Stärken:**
+- Beste Agent-Integration für Code-Editing
+- Git-Awareness (Diffs, Commits automatisch)
+- Multi-File Refactoring möglich
+- Modell-agnostisch (switch jederzeit)
+
+**Schwächen:**
+- CLI-only, keine IDE
+- Newbie-unfriendly (muss Terminal können)
+- Weniger Polishing als Cursor
+
+**Best for:** Developers mit Terminal-Komfort. Git-Workflow-Obsessives. Multi-Model-Experimentieren.
+
+---
+
+## IDE-basierte Tools
+
+### Cursor (VS Code Fork + AI)
+
+| Aspekt | Detail |
+|--------|--------|
+| **Basis** | VS Code (100% kompatibel) |
+| **Modelle** | Claude, GPT-4, Gemini |
+| **Free Tier** | 2000 Completions/Monat |
+| **Pro** | $20/Monat (500 fast requests) |
+| **Ultra** | $200/Monat (unbegrenzt) |
+| **Agent Mode** | ✅ "Cmd+K" für inline fixes |
+| **Code-Privacy** | 🔴 Code geht an Cloud (Cursor wählt Anbieter) |
+| **IDE Features** | Alle VS Code Extensions |
+| **Latenz** | Schnell (optimiert) |
+
+**Installation:**
+```bash
+# Einfach VS Code ersetzen
+# https://www.cursor.com/
+```
+
+**Workflow:**
+```
+Cmd+K (Windows/Linux: Ctrl+K)
+  → Tippe: "add type safety to this function"
+  → Inline-Fix erscheint
+  → Akzeptieren oder ablehnen
+
+Cmd+Shift+L
+  → Codebase durchsuchen mit KI
+  → "find all API endpoints that don't have auth"
+```
+
+**Stärken:**
+- Gefühlt beste IDE für AI Coding
+- VS Code volle Kompatibilität
+- Schnell, responsive, polished
+- Chat-Interface im Sidebar
+
+**Schwächen:**
+- Code geht an Cursor-Server (Privacy-Concern)
+- Free Tier limitiert
+- Teuer ($200/Mo Ultra) für unbegrenzt
+
+**Best for:** Individuals. Hochproduktive Entwickler. Teams mit Budget. VS Code-Abhängige.
+
+---
+
+### Windsurf (by Codeium, Leichtgewicht)
+
+| Aspekt | Detail |
+|--------|--------|
+| **Basis** | VS Code Fork (wie Cursor) |
+| **Modelle** | Claude, GPT-4, lokale Modelle |
+| **Free Tier** | Unbegrenzt (mit Limit auf Output-Tokens) |
+| **Pro** | $15/Monat |
+| **Agent Mode** | ✅ "Cascade" Mode (Auto-Edit) |
+| **Code-Privacy** | 🟡 Optional selbst hosten möglich |
+| **Latenz** | Schnell, auch lokal |
+| **Sicherheit** | Codeium hat Privacy als Focus |
+
+**Installation:**
+```bash
+# https://www.windsurf.dev/
+# VS Code mit Codeium Plugin (einfacher)
+```
+
+**Unterschied zu Cursor:**
+- Billigere Pro ($15 vs $20)
+- Bessere Offline-Optionen
+- "Cascade Mode" = Agent-artig
+- Privacy-fokussierter
+
+**Stärken:**
+- Günstiger als Cursor Pro
+- Offline + lokal möglich
+- Privacy-conscious Default
+- Free Tier großzügig (aber Token-limitiert)
+
+**Schwächen:**
+- Cascade Mode noch nicht so polished wie Cursor's Cmd+K
+- Kleinerer Ecosystem als Cursor
+- Weniger Features als Cursor
+
+**Best for:** Budget-Entwickler. Privacy-Concerned Teams. Hybrid Local/Cloud Setup.
+
+---
+
+### GitHub Copilot (Code Completion + Chat)
+
+| Aspekt | Detail |
+|--------|--------|
+| **Integration** | VS Code, Neovim, JetBrains IDEs |
+| **Free Tier** | 2000 Completions/Monat |
+| **Pro** | $10/Monat (unlimited) |
+| **Pro+** | $20/Monat (Claude Opus Zugang) |
+| **Strengths** | Best-in-class Code Completion (GPT-4) |
+| **Agent Mode** | ⚠️ Limited (Chat, kein Auto-Edit wie Cursor) |
+| **Code-Privacy** | 🔴 Code zu GitHub/Microsoft |
+| **Enterprise** | $39/Benutzer/Monat (mit Admin-Controls) |
+
+**Workflow:**
+```
+Tab (oder Cmd+\)
+  → Ghost-Text suggestion appears
+  → Akzeptieren oder weitertippen
+
+Cmd+Shift+A (Chat)
+  → "explain this function"
+  → Chat im Sidebar
+```
+
+**Stärken:**
+- Billigste Standardoption ($10/Mo)
+- Best-in-class Completion (GPT Training)
+- GitHub-Integration (PRs, Issues analysieren)
+- Überall verfügbar (VS Code, JetBrains, etc.)
+
+**Schwächen:**
+- Code an Microsoft (DSGVO-bedenken)
+- Chat ist Chat, kein Auto-Edit
+- Pro+ Upgrade für Opus nötig
+- Kein Agent-Mode
+
+**Best for:** Teams in GitHub. Kostenoptimiert. Completion-fokussiert. Enterprise mit Policy-Anforderungen.
+
+---
+
+## Online-IDEs mit AI
+
+### Replit Agent (Web-basiert)
+
+| Aspekt | Detail |
+|--------|--------|
+| **Zugang** | Browser, Replit Cloud |
+| **Modelle** | Proprietär (Replit-Modell) |
+| **Preis** | Replit Hacker ($20/Mo) |
+| **Agent** | ✅ Full ("complete my project") |
+| **Deployment** | Integrated in Replit Hosting |
+
+**Wann:** Web-Dev schnell deployen. Sharing mit Non-Devs. Schulen.
+
+---
+
+### GitHub Copilot in Codespaces
+
+| Aspekt | Detail |
+|--------|--------|
+| **Zugang** | VS Code im Browser (GitHub) |
+| **Preis** | GitHub Pro ($4/Mo) + Copilot |
+| **Agent** | ⚠️ Nein (Chat-only) |
+| **Vorteil** | Überall verfügbar (Tablet, Chromebook) |
+
+**Wann:** Remote-Work. Multi-Device. Microsoft-Shop.
+
+---
+
+## Vergleich: Coding Scenarios
+
+### Scenario 1: Einzelne Datei schnell debuggen (5 Minuten)
+
+```
+Best Tool: Claude Code CLI
+Cost:      ~$0.10 (prompt-Response)
+Speed:     Instant
+Privacy:   Anthropic (akzeptierbar für Code)
+
+Cmd+K: Cursor
+Cost:      $0.05-0.20 (included in Pro)
+Speed:     Fast
+Privacy:   Cursor Cloud
+```
+
+**Gewinner:** Claude Code CLI (kostenlos, lokal).
+
+---
+
+### Scenario 2: Multi-File Refactoring (30 Minuten)
+
+```
+Best Tool: Aider (Agent Mode)
+Cost:      $1-2 (mehrere Prompts)
+Speed:     Automated (du schaust zu)
+Privacy:   Lokal (mit --no-exec flag)
+Agent:     Full (edits everything)
+
+Alt:       Cursor (manual Cmd+K 5x)
+Cost:      $0.05
+Speed:     Schneller Mensch (5min pro Fix)
+Privacy:   Cursor
+Agent:     Semi (du leitest alles)
+```
+
+**Gewinner:** Aider (Agent übernimmt, Git-Integration).
+
+---
+
+### Scenario 3: Kontinuierliche Productivity (täglich)
+
+```
+Tool               Cost/Mo    Speed    Privacy    IDE-Feel   Verdict
+Claude Code CLI    ~$30       Fast     Okay       Meh        Günstig, gut
+GitHub Copilot Pro $10        Fast     Bad        Gut        Billigste IDE
+Cursor Pro         $20        Fastest  Bad        Best       Gold Standard
+Windsurf Pro       $15        Fast     Better     Good       2. Wahl
+Aider (API)        ~$50       Medium   Okay       CLI-only   Für Agents
+```
+
+**Gewinner:** Cursor Pro oder Windsurf Pro (IDE-Feel, Preis-Balance).
+
+---
+
+## Code-Privacy Matrix: Wo geht dein Code hin?
+
+| Tool | Ziel | DSGVO-Risk | Kann ich öffnen? |
+|------|------|-----------|---|
+| Claude Code CLI | Anthropic (USA) | 🟡 DPA möglich | Ja, DPA-signed |
+| Cursor | Cursor-Cloud | 🔴 Problematisch | Nein, locked |
+| Windsurf | Codeium (USA) | 🟡 Privacy-fokussiert | Ja, lokal optional |
+| GitHub Copilot | GitHub/Microsoft (USA) | 🔴 DSGVO-Probleme | Nein |
+| Aider + Ollama lokal | Nirgends (lokal) | ✅ Perfekt | Ja, open-source |
+
+**DSGVO-sensitive Projekte:** Aider + Ollama lokal, oder Claude Code + DPA.
+
+---
+
+## Hybrid-Setup (best of both)
+
+Viele Teams nutzen mehrere Tools:
+
+```
+Daily Coding (Speed wichtig)
+  → Cursor Pro ($20/Mo)
+
+Bug-Suchen (Privacy wichtig)
+  → Claude Code CLI (pay-per-use)
+
+Multi-File Refactoring (Automation wichtig)
+  → Aider + Claude API ($50/Mo)
+
+Total Cost: $70/Mo (besser als Cursor Ultra $200)
+```
+
+---
+
+## Checkliste: AI Coding Tool wählen
+
+- [ ] Budget/Monat verfügbar? <$20 → GitHub Copilot, $20-40 → Cursor/Windsurf
+- [ ] IDE-Preference? Nein → Claude Code CLI, Ja → Cursor
+- [ ] Code-Privacy kritisch? Ja → Aider lokal oder Claude Code + DPA
+- [ ] Agent-Mode nötig? Ja → Aider oder Cursor Cmd+K
+- [ ] Team/Enterprise? Ja → GitHub Copilot Business oder Cursor Business
+- [ ] Offline-Fähigkeit? Ja → Windsurf lokal oder Aider + Ollama
+- [ ] DSGVO-Kundendaten? Ja → Aider + lokal nur
+
+---
+
+Sources:
+- [Cursor vs Windsurf vs Claude Code 2026](https://www.nxcode.io/resources/news/cursor-vs-windsurf-vs-claude-code-2026)
+- [GitHub Copilot vs Cursor vs Claude Code Pricing 2026](https://modelslab.com/blog/api/github-copilot-vs-cursor-claude-code-pricing-2026)
+- [AI Coding Agents Comparison 2026](https://lushbinary.com/blog/ai-coding-agents-comparison-cursor-windsurf-claude-copilot-kiro-2026/)
+
+## Quellen und Links
+
+- [Aider](https://github.com/Aider-AI/aider)
+- [Cline](https://github.com/cline/cline)
+- [Continue](https://github.com/continuedev/continue)

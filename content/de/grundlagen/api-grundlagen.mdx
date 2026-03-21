@@ -1,0 +1,518 @@
+---
+title: AI API Grundlagen
+date: 2026-03-21
+summary: Wie AI APIs funktionieren. REST, Authentication, Rate Limits, Preismodelle. Anthropic, OpenAI, Google, Mistral APIs erklärt.
+tags: [api, rest, authentication, rate-limits, pricing]
+author: AI Engineering
+---
+
+# AI API Grundlagen
+
+AI APIs sind der praktische Weg, große Modelle zu nutzen. Statt ein 70B Modell selbst zu hosten, machen dich APIs remote zu den Servern und bekommst Responses.
+
+## Was ist ein API?
+
+**API = Application Programming Interface.** Eine Schnittstelle, über die deine Software mit dem Modell redet.
+
+Praktisch:
+```
+Du → POST /v1/messages → OpenAI Server
+OpenAI Server → Modell läuft → Response mit Text
+OpenAI Server → JSON Response → Deine Anwendung
+```
+
+## REST APIs: Das Standard-Format
+
+Die meisten AI APIs sind **REST APIs** (Representational State Transfer).
+
+REST nutzt HTTP-Methoden:
+- **POST:** Sende Daten (Prompt), bekomme Antwort
+- **GET:** Hole Informationen (z.B. Modellstatus)
+- **PUT:** Update etwas
+- **DELETE:** Lösche etwas
+
+Beispiel POST Request (curl):
+
+```bash
+curl -X POST https://api.anthropic.com/v1/messages \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-3-sonnet-20240229",
+    "max_tokens": 1024,
+    "messages": [
+      {"role": "user", "content": "Was ist 2+2?"}
+    ]
+  }'
+```
+
+Response (JSON):
+```json
+{
+  "id": "msg_123abc",
+  "type": "message",
+  "role": "assistant",
+  "content": [
+    {"type": "text", "text": "2 + 2 = 4"}
+  ],
+  "stop_reason": "end_turn"
+}
+```
+
+## Authentication: API Keys
+
+Um eine API zu nutzen, brauchst du einen **API Key**. Das ist wie ein Passwort für die API.
+
+**Wichtig:** Niemals den API Key in Code hardcoden oder auf GitHub posten!
+
+Besser: Environment Variable:
+
+```bash
+# .env Datei (NICHT commitzen!)
+ANTHROPIC_API_KEY=sk-ant-...
+
+# Python
+import os
+api_key = os.getenv("ANTHROPIC_API_KEY")
+```
+
+Oder Secret Management Tools wie Vault, AWS Secrets Manager, etc.
+
+## Rate Limits
+
+APIs haben Limits um Missbrauch zu verhindern.
+
+Typische Limits:
+```
+- 100 Requests pro Minute (RPM)
+- 100,000 Tokens pro Minute (TPM)
+```
+
+Wenn du das Limit überschreitest:
+```
+HTTP 429: Too Many Requests
+```
+
+Lösung: **Exponential Backoff**
+
+```python
+import time
+
+retries = 0
+max_retries = 5
+wait_time = 1
+
+while retries < max_retries:
+    try:
+        response = api.make_request()
+        return response
+    except RateLimitError:
+        wait_time *= 2  # 1s → 2s → 4s → 8s → 16s
+        time.sleep(wait_time)
+        retries += 1
+```
+
+## Preismodelle
+
+### Pay-Per-Token (OpenAI, Anthropic, Google)
+
+Du zahlst pro Token (Input + Output):
+
+```
+Input: $1 pro 1M Tokens
+Output: $3 pro 1M Tokens
+
+Prompt: "Was ist AI?" (4 Tokens Input)
+Antwort: "AI ist..." (50 Tokens Output)
+
+Kosten: (4/1M * $1) + (50/1M * $3) = $0.00016
+```
+
+### Pay-Per-Request (Alternative APIs)
+
+Pauschale pro Request, egal Größe:
+
+```
+$0.10 pro Request
+```
+
+Gut für kleine Requests. Schlecht für große.
+
+### Subscription (z.B. ChatGPT Plus)
+
+$20/Monat unlimited. Einfach, aber teuer wenn du viel nutzt.
+
+## Verschiedene AI APIs: Vergleich
+
+| API | Modell | Input-Preis | Output-Preis | Latenz |
+|-----|--------|-------------|--------------|--------|
+| OpenAI (GPT-4) | 175B+ | $30/1M | $60/1M | Schnell |
+| Anthropic (Claude 3) | 200B+ | $3/1M | $15/1M | Mittel |
+| Google (Gemini) | 200B+ | $1/1M | $2/1M | Schnell |
+| Mistral | 70B+ | $0.25/1M | $0.75/1M | Mittel |
+| Open WebUI (lokal) | - | Gratis | Gratis | Langsam |
+
+## Anthropic API Praktisch
+
+Schritt 1: API Key holen
+
+```bash
+# Von https://console.anthropic.com/
+export ANTHROPIC_API_KEY=sk-ant-...
+```
+
+Schritt 2: Python Request
+
+```python
+import anthropic
+
+client = anthropic.Anthropic()
+
+message = client.messages.create(
+    model="claude-3-sonnet-20240229",
+    max_tokens=1024,
+    messages=[
+        {"role": "user", "content": "Schreib einen Limerick"}
+    ]
+)
+
+print(message.content[0].text)
+```
+
+Schritt 3: Streaming (für bessere UX)
+
+```python
+with client.messages.stream(
+    model="claude-3-sonnet-20240229",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "Hallo"}]
+) as stream:
+    for text in stream.text_stream:
+        print(text, end="", flush=True)
+```
+
+## OpenAI API Praktisch
+
+Ähnlich, aber mit unterschiedlichen Endpoints:
+
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-...")
+
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[{"role": "user", "content": "Hi"}]
+)
+
+print(response.choices[0].message.content)
+```
+
+## Error Handling
+
+APIs schlagen fehl. Sei vorbereitet:
+
+```python
+try:
+    response = client.messages.create(...)
+except anthropic.RateLimitError:
+    print("Rate limited, retry later")
+except anthropic.APIError as e:
+    print(f"API Error: {e}")
+```
+
+Häufige Fehler:
+- **401 Unauthorized:** API Key falsch
+- **429 Too Many Requests:** Rate limit
+- **500 Internal Server Error:** Server Problem
+- **503 Service Unavailable:** API Down
+
+## Best Practices
+
+1. **API Keys sicher:** Environment Variables, Vaults
+2. **Rate Limits beachten:** Backoff implementieren
+3. **Timeouts setzen:** Nicht endlos warten
+   ```python
+   response = client.messages.create(
+       ...,
+       timeout=30  # 30 Sekunden
+   )
+   ```
+4. **Logging:** Alle Requests loggen für Debugging
+5. **Monitoring:** Kosten tracken
+   ```python
+   tokens_used = response.usage.output_tokens
+   cost = tokens_used / 1_000_000 * 0.015
+   print(f"This request cost: ${cost}")
+   ```
+
+## Lokale Alternative: Ollama
+
+Wenn du keine API zahlen möchtest:
+
+```bash
+# Installiere Ollama
+ollama pull llama2
+
+# Starte Server
+ollama serve
+
+# Nutze lokal
+curl -X POST http://localhost:11434/api/generate \
+  -d '{"model":"llama2","prompt":"Hi"}'
+```
+
+Vorteil: Gratis, privat. Nachteil: Langsam (läuft auf deinem Rechner).
+
+## Production API Architecture
+
+### Beispiel: Multi-Provider Fallback
+
+```python
+import anthropic
+from openai import OpenAI
+import time
+
+class APIRouter:
+    def __init__(self):
+        self.providers = [
+            {
+                'name': 'Claude',
+                'client': anthropic.Anthropic(),
+                'priority': 1  # Try first
+            },
+            {
+                'name': 'OpenAI',
+                'client': OpenAI(),
+                'priority': 2  # Fallback
+            }
+        ]
+
+    def call(self, prompt, max_retries=3):
+        sorted_providers = sorted(
+            self.providers,
+            key=lambda x: x['priority']
+        )
+
+        for provider in sorted_providers:
+            for attempt in range(max_retries):
+                try:
+                    if provider['name'] == 'Claude':
+                        response = provider['client'].messages.create(
+                            model="claude-3-sonnet",
+                            max_tokens=1024,
+                            messages=[{"role": "user", "content": prompt}]
+                        )
+                        return response.content[0].text
+
+                    elif provider['name'] == 'OpenAI':
+                        response = provider['client'].chat.completions.create(
+                            model="gpt-4",
+                            messages=[{"role": "user", "content": prompt}]
+                        )
+                        return response.choices[0].message.content
+
+                except anthropic.RateLimitError:
+                    wait_time = 2 ** attempt  # Exponential backoff
+                    time.sleep(wait_time)
+                    continue
+
+                except Exception as e:
+                    print(f"Error with {provider['name']}: {e}")
+                    break  # Try next provider
+
+        raise Exception("All providers failed")
+
+# Nutze es
+router = APIRouter()
+response = router.call("Was ist AI?")
+```
+
+### Cost Tracking in Production
+
+```python
+class APIUsageTracker:
+    def __init__(self):
+        self.usage = {
+            'claude': {'input': 0, 'output': 0},
+            'openai': {'input': 0, 'output': 0}
+        }
+
+    def track_claude(self, response):
+        self.usage['claude']['input'] += response.usage.input_tokens
+        self.usage['claude']['output'] += response.usage.output_tokens
+
+    def calculate_cost(self):
+        claude_cost = (
+            (self.usage['claude']['input'] / 1_000_000) * 0.003 +
+            (self.usage['claude']['output'] / 1_000_000) * 0.015
+        )
+        openai_cost = (
+            (self.usage['openai']['input'] / 1_000_000) * 0.005 +
+            (self.usage['openai']['output'] / 1_000_000) * 0.015
+        )
+        return {
+            'claude': claude_cost,
+            'openai': openai_cost,
+            'total': claude_cost + openai_cost
+        }
+
+# Nutze es
+tracker = APIUsageTracker()
+response = claude_client.messages.create(...)
+tracker.track_claude(response)
+
+costs = tracker.calculate_cost()
+print(f"Total cost today: ${costs['total']:.4f}")
+```
+
+---
+
+## API Security Best Practices
+
+### 1. API Key Rotation
+
+```python
+# Secret Management (mit Vault)
+import os
+from vault import client as vault
+
+# VOR dem Expiry (z.B. monatlich):
+old_key = os.getenv('ANTHROPIC_API_KEY')
+
+# Create new key
+response = vault.create_api_key('anthropic')
+new_key = response['key']
+
+# Update Environment
+os.environ['ANTHROPIC_API_KEY'] = new_key
+
+# Delete old key (nach Transition-Period)
+# vault.delete_api_key(old_key)
+```
+
+### 2. Rate Limiting
+
+```python
+from ratelimit import limits, sleep_and_retry
+import time
+
+# Maximum 100 requests pro Minute
+@sleep_and_retry
+@limits(calls=100, period=60)
+def api_call(prompt):
+    response = client.messages.create(...)
+    return response
+
+# Bei Rate Limit: Automatisch 60s warten und Retry
+```
+
+### 3. Timeout Handling
+
+```python
+import threading
+
+def api_call_with_timeout(prompt, timeout_seconds=30):
+    result = {'response': None, 'error': None}
+
+    def call():
+        try:
+            result['response'] = client.messages.create(
+                model="claude-3-sonnet",
+                messages=[{"role": "user", "content": prompt}],
+                timeout=timeout_seconds
+            )
+        except Exception as e:
+            result['error'] = str(e)
+
+    thread = threading.Thread(target=call)
+    thread.daemon = True
+    thread.start()
+    thread.join(timeout=timeout_seconds + 5)
+
+    if result['error']:
+        raise Exception(f"API Error: {result['error']}")
+    if result['response'] is None:
+        raise Exception("API Call Timeout")
+
+    return result['response']
+```
+
+---
+
+## API Versioning & Compatibility
+
+```python
+# Claude API Example
+client = anthropic.Anthropic(
+    api_key="sk-ant-...",
+    base_url="https://api.anthropic.com",
+    default_headers={
+        "anthropic-version": "2024-06"  # API Version
+    }
+)
+
+# VOR Major Updates:
+# 1. Test mit New API Version
+# 2. Gradual rollout (z.B. 10% → 50% → 100%)
+# 3. Fallback zur Old Version bei Issues
+# 4. Deprecation Warning vor End-of-Life
+```
+
+---
+
+## Production Monitoring Dashboard
+
+```python
+import prometheus_client as prom
+
+# Metrics
+api_requests = prom.Counter(
+    'api_requests_total',
+    'Total API requests',
+    ['provider', 'model']
+)
+
+api_latency = prom.Histogram(
+    'api_latency_seconds',
+    'API response latency',
+    ['provider']
+)
+
+api_costs = prom.Gauge(
+    'api_costs_total',
+    'Total API costs',
+    ['provider']
+)
+
+api_errors = prom.Counter(
+    'api_errors_total',
+    'Total API errors',
+    ['provider', 'error_type']
+)
+
+# Nutze sie
+@api_latency.labels(provider='claude').time()
+def call_claude(prompt):
+    response = client.messages.create(...)
+    api_requests.labels(provider='claude', model='sonnet').inc()
+    api_costs.labels(provider='claude').set(calculate_cost(response))
+    return response
+```
+
+---
+
+## Literatur & Ressourcen
+
+- [Anthropic API Docs](https://docs.anthropic.com)
+- [OpenAI API Docs](https://platform.openai.com/docs)
+- [REST Best Practices](https://restfulapi.net)
+- [Rate Limiting Patterns](https://en.wikipedia.org/wiki/Rate_limiting)
+- [API Security](https://owasp.org/www-project-api-security/)
+
+**Letzte Aktualisierung**: 21.03.2026 | **Nächste Überprüfung**: Juli 2026
+
+## Quellen und Links
+
+- [Anthropic Docs](https://docs.anthropic.com)
+- [OpenAI Docs](https://platform.openai.com/docs)

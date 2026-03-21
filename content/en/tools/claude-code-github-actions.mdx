@@ -1,0 +1,640 @@
+---
+title: "Claude Code GitHub Actions — CI/CD Integration"
+date: "2026-03-21"
+summary: "Complete reference for Claude Code in GitHub Actions. Automated code reviews, PR descriptions, issue triage, test generation, security scanning, and cost management."
+tags: ["claude-code", "github-actions", "ci-cd", "automation", "code-review"]
+author: "AI Engineering"
+---
+
+# Claude Code GitHub Actions — CI/CD Integration
+
+> Practical reference for integrating Claude Code into GitHub Actions workflows. Setup, configuration, use cases, cost management, and troubleshooting.
+
+## Setup & Basic Configuration
+
+### Installing the Action
+
+The official action is available in GitHub Marketplace:
+
+```yaml
+# .github/workflows/claude-code-review.yml
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Claude Code Review
+        uses: anthropics/claude-code-action@v1
+        with:
+          api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: claude-opus
+          max-turns: 20
+```
+
+### Secrets Setup
+
+API keys must be stored in GitHub Secrets:
+
+```bash
+# 1. Add secrets in repository
+# Settings → Secrets and variables → Actions → New repository secret
+
+# Name: ANTHROPIC_API_KEY
+# Value: sk-ant-v1-...
+```
+
+In GitHub UI:
+1. Open repository
+2. Settings → Security → Secrets and variables → Actions
+3. Click "New repository secret"
+4. Name: `ANTHROPIC_API_KEY`
+5. Value: API key from https://console.anthropic.com/account/keys
+
+### CLAUDE.md in CI Context
+
+```yaml
+---
+name: Code Review Agent
+description: >
+  Specialized in security, performance, and maintainability.
+  Trigger: code-review, security-check, performance-audit
+version: 1.0.0
+---
+
+# Code Review for CI/CD
+
+## Context
+
+You work in GitHub Actions with limited context and 300-second timeout.
+
+## Rules
+
+- Focus on: Security, Performance, Best Practices
+- Max 5 critical issues per review
+- Use standard report format (GH comments)
+- No auto-approve — feedback only
+```
+
+## Use Cases
+
+### 1. Automatic Code Review on Pull Requests
+
+```yaml
+name: Auto Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Claude Code Review
+        uses: anthropics/claude-code-action@v1
+        with:
+          api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: claude-opus
+          max-turns: 15
+          custom-instructions: |
+            Review this PR for:
+            1. Security vulnerabilities
+            2. Performance issues
+            3. Code style violations
+            4. Missing tests
+            5. API breaking changes
+          output-format: github-comments
+
+      - name: Post Review as Comment
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const review = fs.readFileSync('claude-review.md', 'utf-8');
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: review
+            });
+```
+
+### 2. Automatic PR Descriptions
+
+```yaml
+name: Generate PR Description
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Analyze Changes
+        id: changes
+        run: |
+          git diff origin/main..HEAD --stat > /tmp/changes.txt
+          echo "changes=$(cat /tmp/changes.txt)" >> $GITHUB_OUTPUT
+
+      - name: Generate Description
+        uses: anthropics/claude-code-action@v1
+        with:
+          api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: claude-sonnet
+          max-turns: 5
+          custom-instructions: |
+            Create a meaningful PR description based on:
+            - Changed files
+            - Git diff
+            - Branch name: ${{ github.head_ref }}
+
+            Format:
+            ## Changes
+            (Brief summary)
+
+            ## Testing
+            (How it was tested)
+
+            ## Breaking Changes
+            (If any)
+          output-format: raw
+
+      - name: Update PR Description
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const description = fs.readFileSync('claude-output.md', 'utf-8');
+
+            github.rest.pulls.update({
+              pull_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: description
+            });
+```
+
+### 3. Issue Triage & Auto-Labeling
+
+```yaml
+name: Issue Triage
+
+on:
+  issues:
+    types: [opened, edited]
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Analyze Issue
+        uses: anthropics/claude-code-action@v1
+        with:
+          api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: claude-sonnet
+          max-turns: 3
+          custom-instructions: |
+            Analyze this GitHub issue and return labels:
+            - bug / feature / enhancement / documentation
+            - priority: critical / high / medium / low
+            - complexity: simple / moderate / complex
+
+            Issue Title: ${{ github.event.issue.title }}
+            Issue Body: ${{ github.event.issue.body }}
+
+            Output Format (JSON):
+            {
+              "labels": ["label1", "label2"],
+              "priority": "high",
+              "suggest_assignee": true
+            }
+          output-format: json
+
+      - name: Apply Labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const labels = JSON.parse(fs.readFileSync('claude-output.json', 'utf-8'));
+
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: labels.labels
+            });
+```
+
+### 4. Test Generation from Code
+
+```yaml
+name: Generate Missing Tests
+
+on:
+  pull_request:
+    paths:
+      - 'src/**/*.ts'
+      - 'src/**/*.js'
+
+jobs:
+  generate-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Find Untested Functions
+        id: untested
+        run: |
+          # Find functions without tests
+          git diff origin/main..HEAD --name-only --diff-filter=AM | grep -E '\.(ts|js)$' > /tmp/new-files.txt
+          echo "files=$(cat /tmp/new-files.txt)" >> $GITHUB_OUTPUT
+
+      - name: Generate Tests
+        uses: anthropics/claude-code-action@v1
+        with:
+          api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: claude-opus
+          max-turns: 10
+          custom-instructions: |
+            Create Vitest tests for these functions:
+            ${{ steps.untested.outputs.files }}
+
+            Requirements:
+            - Minimum 80% code coverage
+            - Test edge cases
+            - Use mocking where needed
+            - Format: TypeScript/Vitest
+
+          output-format: file
+          output-path: test-suggestions.ts
+
+      - name: Create Test Suggestion Comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const tests = fs.readFileSync('test-suggestions.ts', 'utf-8');
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '## Suggested Tests\n\n```typescript\n' + tests + '\n```'
+            });
+```
+
+### 5. Security Scanning & Vulnerability Detection
+
+```yaml
+name: Security Scan
+
+on:
+  pull_request:
+  push:
+    branches: [main, develop]
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Scan for Security Issues
+        uses: anthropics/claude-code-action@v1
+        with:
+          api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: claude-opus
+          max-turns: 20
+          custom-instructions: |
+            Check code for security issues:
+            1. SQL injection vulnerabilities
+            2. XSS/HTML injection
+            3. Authentication bypass
+            4. Exposed API keys/secrets
+            5. Deserialization vulnerabilities
+            6. CSRF issues
+            7. Weak cryptography
+            8. Path traversal bugs
+
+            Format: Markdown with severity (CRITICAL, HIGH, MEDIUM, LOW)
+          output-format: github-comments
+
+      - name: Fail on Critical Issues
+        if: failure()
+        run: |
+          echo "::error::Critical security issues found!"
+          exit 1
+```
+
+### 6. Changelog & Release Notes Generator
+
+```yaml
+name: Generate Changelog
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get Changes
+        id: changes
+        run: |
+          git log $(git describe --tags --abbrev=0)..HEAD --oneline > /tmp/commits.txt
+          echo "commits=$(cat /tmp/commits.txt)" >> $GITHUB_OUTPUT
+
+      - name: Generate Changelog
+        uses: anthropics/claude-code-action@v1
+        with:
+          api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: claude-sonnet
+          max-turns: 5
+          custom-instructions: |
+            Create changelog/release notes from commits:
+            ${{ steps.changes.outputs.commits }}
+
+            Format (Markdown):
+            ## Features
+            - Item 1
+            - Item 2
+
+            ## Bug Fixes
+            - Fix 1
+
+            ## Breaking Changes
+            - If any
+
+            ## Upgrade Guide
+            - Step 1
+            - Step 2
+          output-format: raw
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          body_path: claude-output.md
+          draft: false
+          prerelease: false
+```
+
+## Configuration Options
+
+### Action Input Parameters
+
+```yaml
+with:
+  # Required
+  api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+
+  # Optional - Default: claude-opus
+  model: claude-opus | claude-sonnet | claude-haiku
+
+  # Optional - Default: 20
+  max-turns: 10
+
+  # Optional - Additional instructions
+  custom-instructions: |
+    Do X, Y, Z
+
+  # Optional - Default: raw
+  output-format: raw | json | github-comments | file
+
+  # Optional - For file output
+  output-path: ./results.md
+
+  # Optional - Timeout in seconds (default: 600)
+  timeout: 300
+
+  # Optional - Temperature (0.0 - 1.0)
+  temperature: 0.7
+```
+
+### Model Selection by Task
+
+| Task | Recommendation | Reason |
+|------|-----------------|---------|
+| Code Review | opus | Complex analysis |
+| Test Generation | opus | Comprehensive coverage |
+| PR Description | sonnet | Fast + sufficient |
+| Issue Triage | haiku | Simple categorization |
+| Security Scan | opus | Thorough analysis |
+| Simple Linting | haiku | Fast + cost-effective |
+
+## Cost Management
+
+### Cost Optimization Strategy
+
+```yaml
+name: Cost-Optimized Workflow
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Stage 1: Quick check with Haiku (cheap)
+      - name: Quick Lint Check
+        uses: anthropics/claude-code-action@v1
+        with:
+          api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: claude-haiku
+          max-turns: 3
+          timeout: 60
+
+      # Stage 2: Full review with Sonnet only if flagged
+      - name: Full Code Review
+        if: contains(github.event.pull_request.labels.*.name, 'needs-full-review')
+        uses: anthropics/claude-code-action@v1
+        with:
+          api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: claude-opus
+          max-turns: 15
+          timeout: 300
+
+      # Stage 3: Security scan only on main/protected branches
+      - name: Security Scan
+        if: github.ref == 'refs/heads/main'
+        uses: anthropics/claude-code-action@v1
+        with:
+          api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: claude-opus
+          max-turns: 20
+```
+
+### Token Budgeting
+
+```python
+# Python script for budget tracking
+import json
+import os
+from datetime import datetime
+
+def track_token_usage(run_id, model, tokens_used):
+    """Track Claude API token usage per workflow run"""
+    budget_file = "/tmp/claude-budget.json"
+
+    # Model pricing (as of March 2026)
+    pricing = {
+        "claude-opus": {"input": 0.015, "output": 0.075},
+        "claude-sonnet": {"input": 0.003, "output": 0.015},
+        "claude-haiku": {"input": 0.00080, "output": 0.004}
+    }
+
+    entry = {
+        "timestamp": datetime.now().isoformat(),
+        "run_id": run_id,
+        "model": model,
+        "tokens_used": tokens_used,
+        "cost_usd": (tokens_used * pricing[model]["input"]) / 1000
+    }
+
+    # Append to log
+    if os.path.exists(budget_file):
+        with open(budget_file, 'r') as f:
+            budget = json.load(f)
+    else:
+        budget = []
+
+    budget.append(entry)
+
+    with open(budget_file, 'w') as f:
+        json.dump(budget, f)
+
+    # Weekly summary
+    weekly_cost = sum(e["cost_usd"] for e in budget
+                      if (datetime.now() - datetime.fromisoformat(e["timestamp"])).days < 7)
+
+    print(f"Weekly cost: ${weekly_cost:.2f}")
+```
+
+## Error Handling
+
+### Common Issues & Fixes
+
+#### 1. API Key Not Found
+
+```yaml
+# Problem: secret not configured
+# Solution: Check GitHub secrets
+
+- name: Debug Secret
+  run: |
+    if [ -z "${{ secrets.ANTHROPIC_API_KEY }}" ]; then
+      echo "ERROR: ANTHROPIC_API_KEY not set"
+      exit 1
+    fi
+    echo "API Key configured"
+```
+
+#### 2. Timeout
+
+```yaml
+# Problem: Workflow exceeds time limit
+# Solution: Reduce max-turns or increase timeout
+
+- name: Claude Code Action
+  uses: anthropics/claude-code-action@v1
+  with:
+    api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+    max-turns: 5          # Reduce from 20
+    timeout: 120          # Increase from 60
+```
+
+#### 3. Context Size Exceeded
+
+```yaml
+# Problem: PR too large for single call
+# Solution: Filter to specific files
+
+- name: Review Only Changed Files
+  uses: anthropics/claude-code-action@v1
+  with:
+    api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+    custom-instructions: |
+      Review only these files:
+      - ${{ steps.files.outputs.changed }}
+```
+
+## Best Practices
+
+### 1. Caching for frequent analysis
+
+```yaml
+- name: Cache Analysis Results
+  uses: actions/cache@v3
+  with:
+    path: ./analysis-cache
+    key: claude-analysis-${{ hashFiles('src/**') }}
+```
+
+### 2. Parallel reviews for large PRs
+
+```yaml
+strategy:
+  matrix:
+    chunk: [1, 2, 3]
+steps:
+  - name: Review Chunk ${{ matrix.chunk }}
+    uses: anthropics/claude-code-action@v1
+```
+
+### 3. Notifications on critical issues
+
+```yaml
+- name: Notify on Critical Issues
+  if: contains(env.REVIEW_RESULT, 'CRITICAL')
+  uses: actions/github-script@v7
+  with:
+    script: |
+      github.rest.issues.addLabels({
+        issue_number: context.issue.number,
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        labels: ['security-issue', 'needs-attention']
+      });
+```
+
+## Sources and Links
+
+- [Claude Code GitHub Actions — Official](https://code.claude.com/docs/en/github-actions)
+- [GitHub Actions Documentation](https://docs.github.com/en/actions)
+- [Anthropic API Pricing](https://www.anthropic.com/pricing)
+- [GitHub Marketplace — Claude Code Action](https://github.com/marketplace/actions/claude-code-action)
+- [Claude Code CLI Reference](https://code.claude.com/docs/en/cli)

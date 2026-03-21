@@ -1,0 +1,505 @@
+---
+title: "API Security für KI Systeme"
+description: "Securing AI API endpoints: Authentication, Rate Limiting, Token Management. API Key Rotation, OAuth für AI Services, Audit Logging. DDoS Protection für Inference Endpoints."
+section: "sicherheit"
+---
+
+# API Security für KI Systeme
+
+KI Systeme werden meist über APIs zugänglich gemacht. Diese APIs müssen sicher sein. Diese Seite behandelt Authentication, Rate Limiting, Token Management und Schutz vor DDoS.
+
+---
+
+## 1. API Authentication & Authorization
+
+### 1.1 API Key Management
+
+```python
+import secrets
+import hashlib
+from datetime import datetime, timedelta
+from typing import Dict, Optional
+
+class APIKeyManager:
+    """Manages API keys for AI endpoints"""
+
+    def __init__(self):
+        self.keys: Dict[str, Dict] = {}
+
+    def generate_api_key(self, client_name: str, scopes: list = None, ttl_days: int = 90) -> str:
+        """
+        Generates a new API key
+
+        Args:
+            client_name: Name of the client
+            scopes: What the key can access (e.g., ["inference", "fine-tune"])
+            ttl_days: Time to live in days
+        """
+        # Generate random key
+        raw_key = secrets.token_hex(32)
+        api_key = f"sk-{raw_key}"
+
+        # Hash for storage (never store plaintext)
+        key_hash = hashlib.sha256(api_key.encode()).hexdigest()
+
+        # Metadata
+        self.keys[key_hash] = {
+            "client_name": client_name,
+            "created_at": datetime.now(),
+            "expires_at": datetime.now() + timedelta(days=ttl_days),
+            "scopes": scopes or ["inference"],
+            "rate_limit": 1000,  # requests per hour
+            "requests_today": 0,
+            "active": True,
+        }
+
+        return api_key  # Return plaintext once to client
+
+    def verify_api_key(self, api_key: str) -> Optional[Dict]:
+        """
+        Verifies an API key
+
+        Returns:
+            Key metadata if valid, None if invalid
+        """
+        key_hash = hashlib.sha256(api_key.encode()).hexdigest()
+
+        if key_hash not in self.keys:
+            return None
+
+        key_data = self.keys[key_hash]
+
+        # Check if expired
+        if key_data["expires_at"] < datetime.now():
+            key_data["active"] = False
+            return None
+
+        # Check if active
+        if not key_data["active"]:
+            return None
+
+        return key_data
+
+    def rotate_api_key(self, old_key: str, client_name: str) -> str:
+        """
+        Rotates an API key (invalidates old, generates new)
+        """
+        old_hash = hashlib.sha256(old_key.encode()).hexdigest()
+
+        # Invalidate old key
+        if old_hash in self.keys:
+            self.keys[old_hash]["active"] = False
+
+        # Generate new key
+        new_key = self.generate_api_key(client_name)
+        return new_key
+
+# Verwendung:
+key_mgr = APIKeyManager()
+
+# Generate key for client
+api_key = key_mgr.generate_api_key("Data Analysis Corp", scopes=["inference"])
+print(f"API Key: {api_key}")
+
+# Verify key
+verified = key_mgr.verify_api_key(api_key)
+print(f"Key valid: {verified is not None}")
+
+# Rotate key
+new_key = key_mgr.rotate_api_key(api_key, "Data Analysis Corp")
+print(f"New key: {new_key}")
+```
+
+### 1.2 OAuth for AI Services
+
+```python
+from flask import Flask, request, jsonify, redirect
+import jwt
+import json
+from datetime import datetime, timedelta
+
+class AIServiceOAuth:
+    """OAuth 2.0 implementation for AI services"""
+
+    def __init__(self, secret_key: str):
+        self.secret_key = secret_key
+        self.clients = {}  # client_id -> client_secret, redirect_uri
+
+    def register_client(self, client_id: str, client_secret: str, redirect_uri: str):
+        """Registers an OAuth client"""
+        self.clients[client_id] = {
+            "client_secret": client_secret,
+            "redirect_uri": redirect_uri,
+        }
+
+    def authorize_endpoint(self, client_id: str, redirect_uri: str, scope: str, state: str):
+        """
+        OAuth Authorization Endpoint
+        Returns an authorization code
+        """
+        if client_id not in self.clients:
+            return {"error": "invalid_client"}
+
+        if self.clients[client_id]["redirect_uri"] != redirect_uri:
+            return {"error": "invalid_redirect_uri"}
+
+        # In real implementation: Show user consent screen here
+        auth_code = jwt.encode(
+            {
+                "client_id": client_id,
+                "scope": scope,
+                "exp": datetime.utcnow() + timedelta(minutes=10)
+            },
+            self.secret_key,
+            algorithm="HS256"
+        )
+
+        return f"{redirect_uri}?code={auth_code}&state={state}"
+
+    def token_endpoint(self, client_id: str, client_secret: str, code: str):
+        """
+        OAuth Token Endpoint
+        Exchanges authorization code for access token
+        """
+        if client_id not in self.clients:
+            return {"error": "invalid_client"}
+
+        if self.clients[client_id]["client_secret"] != client_secret:
+            return {"error": "invalid_secret"}
+
+        # Verify code
+        try:
+            payload = jwt.decode(code, self.secret_key, algorithms=["HS256"])
+        except jwt.ExpiredSignatureError:
+            return {"error": "expired_code"}
+
+        # Generate access token
+        access_token = jwt.encode(
+            {
+                "client_id": client_id,
+                "scope": payload["scope"],
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            self.secret_key,
+            algorithm="HS256"
+        )
+
+        return {
+            "access_token": access_token,
+            "token_type": "Bearer",
+            "expires_in": 3600,
+        }
+
+# Verwendung:
+oauth = AIServiceOAuth(secret_key="super-secret-key")
+
+# Register client
+oauth.register_client(
+    client_id="my-app",
+    client_secret="app-secret",
+    redirect_uri="https://myapp.com/callback"
+)
+
+# Authorize
+auth_url = oauth.authorize_endpoint(
+    client_id="my-app",
+    redirect_uri="https://myapp.com/callback",
+    scope="inference fine-tune",
+    state="random-state"
+)
+print(f"Authorization URL: {auth_url}")
+```
+
+---
+
+## 2. Rate Limiting & Quota Management
+
+### 2.1 Token Bucket Rate Limiting
+
+```python
+from time import time
+from typing import Tuple
+import math
+
+class TokenBucket:
+    """Token Bucket algorithm for rate limiting"""
+
+    def __init__(self, capacity: int, refill_rate: float):
+        """
+        Args:
+            capacity: Max tokens in bucket
+            refill_rate: Tokens added per second
+        """
+        self.capacity = capacity
+        self.refill_rate = refill_rate
+        self.tokens = capacity
+        self.last_refill = time()
+
+    def allow_request(self, tokens_needed: int = 1) -> bool:
+        """Checks if request is allowed"""
+        self._refill()
+
+        if self.tokens >= tokens_needed:
+            self.tokens -= tokens_needed
+            return True
+        return False
+
+    def _refill(self):
+        """Refills tokens based on elapsed time"""
+        now = time()
+        elapsed = now - self.last_refill
+        tokens_to_add = elapsed * self.refill_rate
+
+        self.tokens = min(self.capacity, self.tokens + tokens_to_add)
+        self.last_refill = now
+
+    def get_remaining_time(self) -> float:
+        """Returns seconds until next token is available"""
+        if self.tokens >= 1:
+            return 0
+        tokens_needed = 1 - self.tokens
+        return tokens_needed / self.refill_rate
+
+# Verwendung:
+# 100 requests per minute = 1.67 per second
+bucket = TokenBucket(capacity=100, refill_rate=1.67)
+
+for i in range(150):
+    if bucket.allow_request():
+        print(f"Request {i}: ALLOWED")
+    else:
+        wait_time = bucket.get_remaining_time()
+        print(f"Request {i}: RATE LIMITED. Wait {wait_time:.2f}s")
+```
+
+### 2.2 Per-User Quota Management
+
+```python
+from datetime import datetime, timedelta
+from typing import Dict
+
+class QuotaManager:
+    """Manages per-user quotas for AI services"""
+
+    def __init__(self):
+        self.quotas: Dict[str, Dict] = {}
+
+    def set_quota(self, user_id: str, daily_limit: int, monthly_limit: int):
+        """Sets quota for a user"""
+        self.quotas[user_id] = {
+            "daily_limit": daily_limit,
+            "daily_used": 0,
+            "daily_reset_at": datetime.now() + timedelta(days=1),
+            "monthly_limit": monthly_limit,
+            "monthly_used": 0,
+            "monthly_reset_at": datetime.now() + timedelta(days=30),
+        }
+
+    def check_quota(self, user_id: str, tokens_needed: int = 1) -> Tuple[bool, Dict]:
+        """
+        Checks if user has quota available
+
+        Returns:
+            (allowed: bool, quota_info: dict)
+        """
+        if user_id not in self.quotas:
+            return False, {"error": "user not found"}
+
+        quota = self.quotas[user_id]
+
+        # Reset if period expired
+        now = datetime.now()
+        if now > quota["daily_reset_at"]:
+            quota["daily_used"] = 0
+            quota["daily_reset_at"] = now + timedelta(days=1)
+
+        if now > quota["monthly_reset_at"]:
+            quota["monthly_used"] = 0
+            quota["monthly_reset_at"] = now + timedelta(days=30)
+
+        # Check limits
+        daily_ok = quota["daily_used"] + tokens_needed <= quota["daily_limit"]
+        monthly_ok = quota["monthly_used"] + tokens_needed <= quota["monthly_limit"]
+
+        allowed = daily_ok and monthly_ok
+
+        info = {
+            "daily_used": quota["daily_used"],
+            "daily_limit": quota["daily_limit"],
+            "monthly_used": quota["monthly_used"],
+            "monthly_limit": quota["monthly_limit"],
+            "allowed": allowed,
+        }
+
+        if allowed:
+            quota["daily_used"] += tokens_needed
+            quota["monthly_used"] += tokens_needed
+
+        return allowed, info
+
+# Verwendung:
+qm = QuotaManager()
+qm.set_quota("user123", daily_limit=1000, monthly_limit=50000)
+
+# Check quota
+allowed, info = qm.check_quota("user123", tokens_needed=100)
+print(f"Request allowed: {allowed}")
+print(f"Daily usage: {info['daily_used']}/{info['daily_limit']}")
+```
+
+---
+
+## 3. Audit Logging
+
+```python
+import json
+from datetime import datetime
+
+class APIAuditLog:
+    """Logs all API requests for security audit"""
+
+    def __init__(self, log_file: str = "api_audit.jsonl"):
+        self.log_file = log_file
+
+    def log_request(
+        self,
+        client_id: str,
+        endpoint: str,
+        method: str,
+        status_code: int,
+        tokens_used: int,
+        timestamp: datetime = None,
+        error: str = None
+    ):
+        """Logs an API request"""
+        if timestamp is None:
+            timestamp = datetime.now()
+
+        log_entry = {
+            "timestamp": timestamp.isoformat(),
+            "client_id": client_id,
+            "endpoint": endpoint,
+            "method": method,
+            "status_code": status_code,
+            "tokens_used": tokens_used,
+            "error": error,
+        }
+
+        with open(self.log_file, "a") as f:
+            f.write(json.dumps(log_entry) + "\n")
+
+    def analyze_suspicious_activity(self) -> list:
+        """Analyzes logs for suspicious patterns"""
+        suspicious = []
+
+        with open(self.log_file, "r") as f:
+            entries = [json.loads(line) for line in f]
+
+        # Pattern 1: High error rate
+        for client_id in set(e["client_id"] for e in entries):
+            client_entries = [e for e in entries if e["client_id"] == client_id]
+            error_rate = sum(1 for e in client_entries if e["error"]) / len(client_entries)
+
+            if error_rate > 0.5:
+                suspicious.append({
+                    "client_id": client_id,
+                    "issue": "high_error_rate",
+                    "error_rate": error_rate,
+                })
+
+        # Pattern 2: Unusual token consumption
+        for client_id in set(e["client_id"] for e in entries):
+            tokens = sum(e["tokens_used"] for e in entries if e["client_id"] == client_id)
+            if tokens > 1000000:  # 1M tokens
+                suspicious.append({
+                    "client_id": client_id,
+                    "issue": "high_token_consumption",
+                    "tokens": tokens,
+                })
+
+        return suspicious
+
+# Verwendung:
+audit = APIAuditLog()
+
+# Log requests
+audit.log_request("client1", "/inference", "POST", 200, 100)
+audit.log_request("client2", "/inference", "POST", 400, 0, error="Invalid input")
+
+# Analyze
+suspicious = audit.analyze_suspicious_activity()
+print(f"Suspicious activity: {suspicious}")
+```
+
+---
+
+## 4. DDoS Protection
+
+```yaml
+LAYER 1: Network Level
+  - CloudFlare / AWS Shield (DDoS mitigation)
+  - WAF (Web Application Firewall)
+  - Rate limiting at CDN level
+
+LAYER 2: Application Level
+  - Token bucket rate limiting (implemented above)
+  - Per-IP rate limiting
+  - Captcha / challenge for suspicious requests
+
+LAYER 3: Content Delivery
+  - Distribute inference load across multiple servers
+  - Auto-scaling based on demand
+  - Cache common requests
+```
+
+```python
+class DDoSProtection:
+    """Application-level DDoS protection"""
+
+    def __init__(self):
+        self.ip_buckets = {}  # ip -> TokenBucket
+
+    def check_ip_limit(self, ip: str, requests_per_minute: int = 60) -> bool:
+        """Limits requests per IP"""
+        if ip not in self.ip_buckets:
+            # 60 requests per minute = 1 per second
+            self.ip_buckets[ip] = TokenBucket(capacity=requests_per_minute, refill_rate=1)
+
+        return self.ip_buckets[ip].allow_request()
+
+    def should_challenge(self, ip: str, request_pattern: dict) -> bool:
+        """Determines if request should be challenged"""
+        # Challenge if:
+        # 1. Multiple failed auth attempts
+        # 2. Rapid requests in short time
+        # 3. Suspicious user agent
+        # 4. No valid API key
+
+        if request_pattern.get("failed_attempts", 0) > 3:
+            return True
+
+        if request_pattern.get("requests_in_minute", 0) > 50:
+            return True
+
+        return False
+
+# Verwendung:
+ddos = DDoSProtection()
+
+# Check IP rate limiting
+ip = "192.168.1.100"
+for i in range(100):
+    allowed = ddos.check_ip_limit(ip)
+    if not allowed:
+        print(f"Request {i}: Rate limited")
+```
+
+---
+
+## 5. Quellen und Links
+
+- **OWASP API Security**: https://owasp.org/www-project-api-security/
+- **JWT.io**: https://jwt.io/
+- **OAuth 2.0**: https://oauth.net/
+- **NIST DDoS Protection**: https://csrc.nist.gov/
+- **Cloudflare DDoS**: https://www.cloudflare.com/ddos/

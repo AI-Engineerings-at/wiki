@@ -1,0 +1,74 @@
+---
+title: LiteLLM — Universal LLM API Proxy
+date: 2026-03-21
+summary: LiteLLM is a unified interface for 100+ LLM providers. Routing, fallbacks, budget management, caching, self-hosting.
+tags: [litellm, llm-proxy, routing, multi-provider]
+author: AI Engineering
+---
+
+# LiteLLM — Universal LLM Proxy
+
+LiteLLM provides a single API for 100+ LLM providers (OpenAI, Anthropic, local, etc.).
+
+## Installation
+
+```bash
+pip install litellm
+litellm --model ollama/qwen2.5:7b
+```
+
+Server: http://localhost:8000
+
+## Unified API
+
+```python
+from litellm import completion
+
+# Single interface for all providers
+response = completion(
+    model="gpt-4",
+    messages=[{"role": "user", "content": "Hello"}]
+)
+
+# Local model
+response = completion(
+    model="ollama/qwen2.5:7b",
+    messages=[{"role": "user", "content": "Hello"}]
+)
+```
+
+## Routing
+
+```python
+from litellm import Router
+
+router = Router(
+    model_list=[
+        {"model_name": "gpt-4", "litellm_params": {"model": "gpt-4"}},
+        {"model_name": "qwen", "litellm_params": {"model": "ollama/qwen2.5:7b"}},
+    ]
+)
+
+response = router.completion(
+    model="gpt-4",
+    messages=[...],
+    fallback_list=["qwen"]  # Fallback if GPT-4 fails
+)
+```
+
+## Docker
+
+```yaml
+services:
+  litellm:
+    image: ghcr.io/berriai/litellm:main
+    ports:
+      - "8000:8000"
+    environment:
+      OPENAI_API_KEY: your-key
+```
+
+## Sources
+
+- [LiteLLM GitHub](https://github.com/BerriAI/litellm)
+- [Documentation](https://docs.litellm.ai)

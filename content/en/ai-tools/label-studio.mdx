@@ -1,0 +1,60 @@
+---
+title: Label Studio — Data Annotation Platform
+date: 2026-03-21
+summary: Label Studio is an open-source annotation platform for text, images, audio, and video. ML-assisted labeling, active learning, self-hosting, REST API.
+tags: [label-studio, annotation, data-labeling, active-learning]
+author: AI Engineering
+---
+
+# Label Studio — Annotation Platform
+
+Label Studio is the leading open-source platform for annotating training data for ML models.
+
+## Installation
+
+```bash
+pip install label-studio
+label-studio
+```
+
+Browser: http://localhost:8080
+
+## Features
+
+- **Multi-Format**: Text, images, audio, video, PDFs
+- **ML-Assisted**: Auto-labeling with pretrained models
+- **Active Learning**: Prioritize hard examples
+- **Collaboration**: Multi-user projects
+- **API**: REST API for automation
+
+## Labeling Types
+
+- **Text Classification**: Label categories
+- **NER**: Mark named entities
+- **Image Boxes**: Draw bounding boxes
+- **Audio**: Transcribe speech
+- **Segmentation**: Pixel-level labels
+
+## Workflow
+
+```
+Create Project → Upload Data → Define Schema
+→ Annotate → Export → Train Model
+```
+
+## API Example
+
+```python
+from label_studio_sdk import Client
+
+ls = Client(url='http://localhost:8080', api_key='key')
+project = ls.create_project(title='Project')
+project.import_tasks([
+    {'data': {'text': 'Sample'}}
+])
+```
+
+## Sources
+
+- [Label Studio GitHub](https://github.com/heartexlabs/label-studio)
+- [Documentation](https://labelstud.io/)

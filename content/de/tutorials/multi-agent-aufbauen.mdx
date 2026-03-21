@@ -1,0 +1,600 @@
+---
+title: "Multi-Agent System aufbauen — Schritt für Schritt"
+date: 2026-03-21
+summary: "Manager + Worker + Specialist Agenten. Task Delegation via n8n. Monitoring mit Prometheus."
+tags: ["agents", "multi-agent", "automation", "n8n", "orchestration"]
+author: "AI Engineering"
+---
+
+# Multi-Agent System aufbauen — Schritt für Schritt
+
+Du wirst ein verteiltes Agent-System aufbauen, das selbstständig arbeitet: Ein Manager verteilt Tasks, Worker führen sie aus, Specialists kümmern sich um ihre Domain. Kommunikation läuft über n8n, Logs über Prometheus.
+
+**Voraussetzung**: Ollama + n8n + Mattermost/Slack (oder Email) funktioniierend.
+
+## Architektur-Überblick
+
+```
+┌─────────────────────────────────────────────────┐
+│              Task Queue (n8n)                   │
+│  - Manager-Workflow (Tasks vergeben)            │
+│  - Task Storage (PostgreSQL)                    │
+└──────────┬──────────────────────┬───────────────┘
+           │                      │
+     ┌─────▼──────┐        ┌──────▼──────┐
+     │   Worker   │        │  Specialist │
+     │   Agent    │        │   Agents    │
+     │ (Content)  │        │  (Dev, QA)  │
+     └────────────┘        └─────────────┘
+           │                      │
+           └──────────┬───────────┘
+                      │
+            ┌─────────▼─────────┐
+            │  Communication    │
+            │  (Mattermost)     │
+            └───────────────────┘
+                      │
+            ┌─────────▼─────────┐
+            │   Monitoring      │
+            │  (Prometheus)     │
+            └───────────────────┘
+```
+
+## Schritt 1: Task-Datenbank in PostgreSQL
+
+Du brauchst eine Tabelle für offene Tasks. Geh in n8n → Executions → Queries.
+
+Oder per SQL direkt:
+
+```sql
+CREATE TABLE agent_tasks (
+  id SERIAL PRIMARY KEY,
+  task_id UUID DEFAULT gen_random_uuid(),
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  assigned_to VARCHAR(100),  -- "content-worker", "qa-specialist"
+  status VARCHAR(50) DEFAULT 'pending',  -- pending, in_progress, done, failed
+  priority INT DEFAULT 5,  -- 1=critical, 10=low
+  created_at TIMESTAMP DEFAULT NOW(),
+  started_at TIMESTAMP,
+  completed_at TIMESTAMP,
+  result TEXT,  -- Output des Tasks
+  error_message TEXT
+);
+
+CREATE INDEX idx_status ON agent_tasks(status);
+CREATE INDEX idx_assigned ON agent_tasks(assigned_to);
+```
+
+## Schritt 2: Manager-Workflow (Task-Vergabe)
+
+Der Manager wacht über die Task-Queue und verteilt Aufgaben.
+
+**n8n Workflow: "Agent Manager"**
+
+### Nodes
+
+**1. Cron Trigger**: Alle 5 Minuten
+
+```yaml
+Trigger: Every 5 minutes
+```
+
+**2. Query Open Tasks**
+
+```javascript
+// HTTP Request zu PostgreSQL (oder SQL Node)
+// Query: SELECT * FROM agent_tasks WHERE status = 'pending' ORDER BY priority DESC LIMIT 5
+```
+
+Code Node zur Task-Analyse:
+
+```javascript
+const tasks = $json.body.rows || [];
+
+// Gruppiere Tasks nach Typ
+const byAgent = {};
+
+for (const task of tasks) {
+  const agent = task.assigned_to || 'default-worker';
+  if (!byAgent[agent]) byAgent[agent] = [];
+  byAgent[agent].push(task);
+}
+
+return {
+  total_tasks: tasks.length,
+  by_agent: byAgent,
+  tasks: tasks
+};
+```
+
+**3. For Each Agent Type**
+
+- Loop über `by_agent` Keys
+- Pro Agent: Mattermost Message schreiben
+
+Message Template:
+
+```
+Neue Tasks für @{{ $json.agent }}:
+
+{{ $json.tasks.map(t => `- [${t.priority}] ${t.title}`).join('\n') }}
+
+/execute_task {{ $json.tasks[0].task_id }}
+```
+
+**4. Update Task Status**
+
+Nach Mattermost-Post: Status auf "assigned" setzen
+
+```sql
+UPDATE agent_tasks
+SET status = 'assigned'
+WHERE task_id = '{{ $json.task_id }}'
+```
+
+## Schritt 3: Worker-Agents (Task-Execution)
+
+Worker hören auf Mattermost Commands oder Poll eine Queue.
+
+### Option A: Mattermost Slash-Command Trigger
+
+**n8n Workflow: "Content Worker"**
+
+**1. Webhook (POST) für `/execute_task`**
+
+- URL: `/webhook/worker-content`
+- Method: POST
+
+Mattermost schickt:
+
+```json
+{
+  "command": "/execute_task",
+  "text": "123e4567-e89b-12d3-a456-426614174000",
+  "user_id": "user123"
+}
+```
+
+**2. Fetch Task Details**
+
+```sql
+SELECT * FROM agent_tasks WHERE task_id = '{{ $json.text }}'
+```
+
+**3. Execute (abhängig vom Task-Type)**
+
+Beispiel: Content Generation Task
+
+```javascript
+const { task_id, title, description } = $json.body;
+
+// Call Ollama
+const prompt = `${title}\n${description}`;
+const response = await fetch('http://ollama:11434/api/generate', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    model: 'mistral',
+    prompt: prompt,
+    stream: false
+  })
+});
+
+const result = await response.json();
+
+return {
+  task_id: task_id,
+  result: result.response,
+  success: true
+};
+```
+
+**4. Update Task + Notify**
+
+```sql
+UPDATE agent_tasks
+SET status = 'done',
+    completed_at = NOW(),
+    result = '{{ $json.result }}'
+WHERE task_id = '{{ $json.task_id }}'
+```
+
+Mattermost Notification:
+
+```
+✅ Task {{ $json.task_id }} abgeschlossen!
+
+Ergebnis:
+{{ $json.result.substring(0, 500) }}...
+```
+
+### Option B: Polling (für keine Webhooks)
+
+Falls keine Mattermost Webhook-Integration:
+
+**n8n Workflow: "Worker Poller"**
+
+Cron: Alle 5 Minuten
+
+```javascript
+// 1. Get pending tasks
+SELECT * FROM agent_tasks
+WHERE status = 'pending'
+AND assigned_to = 'content-worker'
+LIMIT 1
+
+// 2. If found: Mark as in_progress
+UPDATE agent_tasks SET status = 'in_progress', started_at = NOW()
+WHERE task_id = ...
+
+// 3. Execute work (Ollama call)
+
+// 4. Update to done
+UPDATE agent_tasks SET status = 'done', completed_at = NOW()
+WHERE task_id = ...
+
+// 5. Mattermost notify
+```
+
+## Schritt 4: Specialist Agents (Domain-Experts)
+
+Specialists sind wie Worker, aber mit spezialisiertem Skillset.
+
+**Beispiel: QA Specialist**
+
+**n8n Workflow: "QA Specialist"**
+
+Tasks könnten sein:
+- "Checke ob Artikel grammatisch korrekt ist"
+- "Teste ob Link funktioniert"
+- "Prüfe ob Tonalität zur Brand Guideline passt"
+
+Nodes:
+
+```javascript
+// Task: Text-Quality-Check
+const { content } = task;
+
+// Nutze Ollama zur Analyse
+const prompt = `Prüfe den Text auf:
+1. Grammatik
+2. Tonalität (freundlich, professionell)
+3. Länge (angemessen?)
+
+Text: "${content}"
+
+Antworte mit JSON: { grammatically_correct: bool, tone_ok: bool, suggestions: [] }`;
+
+const response = await fetch('http://ollama:11434/api/generate', {
+  method: 'POST',
+  body: JSON.stringify({
+    model: 'mistral',
+    prompt: prompt,
+    stream: false
+  })
+});
+
+const result = await response.json();
+return JSON.parse(result.response);
+```
+
+Dann basierend auf Ergebnis:
+- Wenn PASSED: Task zu "done"
+- Wenn FAILED: Mattermost Alert, zurück zu "pending"
+
+## Schritt 5: Communication Hub (Mattermost)
+
+Alle Agents reden über Mattermost. Setup:
+
+### Mattermost Webhook für n8n
+
+**In Mattermost**:
+1. Geh zu Main Menu → Integrations → Webhooks
+2. Erstelle einen **Incoming Webhook**
+3. Channel: #agents (oder #agent-logs)
+4. URL kopieren: `http://mattermost:8065/hooks/abc123...`
+
+**In n8n**:
+Jeder Workflow hat einen "Send Message to Mattermost" Node:
+
+```yaml
+Type: Mattermost
+Method: Post Message
+Channel: #agents
+Message: "Agent {{ $json.agent_name }} completed {{ $json.task_title }}"
+Webhook URL: [aus Mattermost kopiert]
+```
+
+### Mattermost Slash Command für Task-Trigger
+
+**In Mattermost**:
+1. Main Menu → Integrations → Slash Commands
+2. Erstelle `/execute_task`
+3. Request URL: `http://n8n:5678/webhook/worker-content`
+4. Method: POST
+
+**Nutzer** schreibt in #agents:
+
+```
+/execute_task 123e4567-e89b-12d3-a456-426614174000
+```
+
+Das triggert den Content Worker Workflow.
+
+## Schritt 6: Monitoring mit Prometheus
+
+Track Agent Performance.
+
+**Python Script: Agent Stats Exporter**
+
+Datei: `monitoring/agent_metrics.py`
+
+```python
+#!/usr/bin/env python3
+import psycopg2
+import time
+from prometheus_client import start_http_server, Gauge, Counter
+
+# Prometheus Metrics
+agent_tasks_pending = Gauge(
+    'agent_tasks_pending',
+    'Pending tasks in queue',
+    ['agent']
+)
+
+agent_tasks_done = Counter(
+    'agent_tasks_completed_total',
+    'Total completed tasks',
+    ['agent', 'status']  # status: success, failed
+)
+
+agent_execution_time = Gauge(
+    'agent_execution_seconds',
+    'Task execution time',
+    ['agent']
+)
+
+def collect_metrics():
+    conn = psycopg2.connect(
+        dbname="n8n",
+        user="n8n",
+        password="n8n_password_change_me",
+        host="postgres"
+    )
+    cursor = conn.cursor()
+
+    # Query pending tasks
+    cursor.execute("""
+        SELECT assigned_to, COUNT(*)
+        FROM agent_tasks
+        WHERE status = 'pending'
+        GROUP BY assigned_to
+    """)
+
+    for agent, count in cursor.fetchall():
+        agent_tasks_pending.labels(agent=agent).set(count)
+
+    # Query done tasks
+    cursor.execute("""
+        SELECT assigned_to,
+               CASE WHEN error_message IS NULL THEN 'success' ELSE 'failed' END,
+               COUNT(*)
+        FROM agent_tasks
+        WHERE status = 'done'
+        AND completed_at > NOW() - INTERVAL '1 hour'
+        GROUP BY assigned_to, error_message IS NULL
+    """)
+
+    for agent, status, count in cursor.fetchall():
+        agent_tasks_done.labels(agent=agent, status=status)._value.get()  # Update
+
+    # Average execution time
+    cursor.execute("""
+        SELECT assigned_to,
+               AVG(EXTRACT(EPOCH FROM (completed_at - started_at)))
+        FROM agent_tasks
+        WHERE status = 'done'
+        AND completed_at IS NOT NULL
+        GROUP BY assigned_to
+    """)
+
+    for agent, avg_time in cursor.fetchall():
+        if agent and avg_time:
+            agent_execution_time.labels(agent=agent).set(avg_time)
+
+    cursor.close()
+    conn.close()
+
+if __name__ == '__main__':
+    start_http_server(8001)  # Expose metrics on port 8001
+
+    while True:
+        try:
+            collect_metrics()
+        except Exception as e:
+            print(f"Metrics error: {e}")
+
+        time.sleep(30)  # Every 30 seconds
+```
+
+**In docker-compose.yml hinzufügen**:
+
+```yaml
+agent-metrics:
+  image: python:3.11-slim
+  container_name: ai-agent-metrics
+  volumes:
+    - ./monitoring/agent_metrics.py:/app/metrics.py
+  command: python /app/metrics.py
+  networks:
+    - ai-network
+  depends_on:
+    - postgres
+```
+
+**In prometheus.yml hinzufügen**:
+
+```yaml
+scrape_configs:
+  - job_name: 'agent-metrics'
+    static_configs:
+      - targets: ['agent-metrics:8001']
+```
+
+## Schritt 7: Task Lifecycle
+
+```
+1. CREATE
+   User/Manager erstellt Task in DB
+   Status: "pending"
+
+2. ASSIGN
+   Manager-Workflow sieht pending Task
+   Versendet Mattermost Message
+   Status: "assigned"
+
+3. START
+   Worker nimmt Task an (Slash Command oder Polling)
+   Status: "in_progress"
+   started_at = NOW()
+
+4. EXECUTE
+   Worker führt Ollama/Code aus
+   Speichert Ergebnis in RAM
+
+5. COMPLETE
+   Worker schreibt Result in DB
+   Status: "done"
+   completed_at = NOW()
+   result = "..."
+
+6. NOTIFY
+   Manager sieht "done" Task
+   Versendet Completion Message
+
+7. ARCHIVE
+   Nach 30 Tagen: Task aus aktiver Tabelle löschen
+   (Optional: In Archiv-Tabelle verschieben)
+```
+
+## Error Handling
+
+Falls ein Agent crasht oder Task fehlschlägt:
+
+```sql
+-- Auto-Timeout nach 1 Stunde
+UPDATE agent_tasks
+SET status = 'failed',
+    error_message = 'Timeout after 1 hour'
+WHERE status = 'in_progress'
+AND started_at < NOW() - INTERVAL '1 hour'
+```
+
+n8n Error Node:
+
+```javascript
+// Falls Ollama nicht antwortet
+if (error) {
+  // Update DB
+  await updateTask(task_id, {
+    status: 'failed',
+    error_message: error.message
+  });
+
+  // Notify Manager
+  await mattermost.post({
+    channel: '#alerts',
+    message: `⚠️ Agent failed on task ${task_id}: ${error.message}`
+  });
+
+  // Retry? Oder manuell priorisieren?
+  throw error;
+}
+```
+
+## Skalierung zu mehreren Maschinen
+
+Falls du mehrere Server hast:
+
+```
+Server A: Manager + Specialist (Dev)
+Server B: Worker (Content) + Worker (QA)
+Server C: PostgreSQL + Mattermost (Zentral)
+```
+
+Alle reden über PostgreSQL Task-Queue und Mattermost Webhooks (Netzwerk-kommunikation).
+
+Prometheus läuft zentral, scrapet alle 3 Server per HTTP.
+
+## Troubleshooting
+
+### Agents hängen fest
+
+```sql
+SELECT * FROM agent_tasks
+WHERE status = 'in_progress'
+AND started_at < NOW() - INTERVAL '2 hours'
+```
+
+Diese Tasks sind wohl gecrasht. Manual Reset:
+
+```sql
+UPDATE agent_tasks
+SET status = 'pending', started_at = NULL
+WHERE task_id = '...'
+```
+
+### Mattermost Webhook antwortet nicht
+
+```bash
+curl -X POST http://mattermost:8065/hooks/abc123 \
+  -H "Content-Type: application/json" \
+  -d '{"text":"Test message"}'
+```
+
+Falls 401: Webhook URL falsch oder abgelaufen.
+
+### Ollama antwortet langsam
+
+Prometheus zeigt: `agent_execution_seconds` > 30s
+
+Lösungen:
+1. Modell zu groß? Wechsel zu `mistral` statt `llama2`
+2. Ressourcen knapp? Limit Parallel Executions in n8n (Settings → Execution)
+
+## Performance-Tuning
+
+| Szenario | Optimierung |
+|----------|------------|
+| Viele kurze Tasks | Batch processing in 1 Execution |
+| Viele lange Tasks | Queuing + längere Timeouts (30min) |
+| Hohe Latenz | Task Caching (Redis) |
+| Viele Agents | Load Balancer vor n8n + mehrere Worker |
+
+## Nächste Schritte
+
+- Erweitere **Task Types** (nicht nur Content, sondern auch Data Processing)
+- Implementiere **Auto-Retry** bei Fehlern
+- Baue **Agent Health Checks** (z.B. alle 10 min Ping)
+- Integriere **Long-Running Tasks** (mit WebSockets statt Polling)
+
+## Checkliste
+
+- [ ] PostgreSQL Tabelle `agent_tasks` erstellt
+- [ ] Manager-Workflow (Task-Vergabe) gebaut
+- [ ] Mindestens 1 Worker-Workflow gebaut
+- [ ] Mindestens 1 Specialist-Workflow gebaut
+- [ ] Mattermost Webhook konfiguriert
+- [ ] Mattermost Slash Command konfiguriert
+- [ ] Agent Metrics Script läuft
+- [ ] Prometheus scrapet Agent Metrics
+- [ ] Grafana Dashboard für Agent Stats erstellt
+- [ ] Error Handling getestet (manuell einen Task crashen lassen)
+- [ ] Task Timeout automatisiert
+- [ ] Alle Workflows aktiviert
+
+## Quellen und Links
+
+- [CrewAI](https://github.com/crewAIInc/crewAI)
+- [AutoGen](https://github.com/microsoft/autogen)

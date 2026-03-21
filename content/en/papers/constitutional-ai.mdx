@@ -1,0 +1,387 @@
+---
+title: Constitutional AI Explained
+date: 2026-03-21
+summary: "Constitutional AI: Harmlessness from AI Feedback" (Anthropic 2022). How Claude achieves safety through principles. Self-improvement without RLHF.
+tags: [constitutional-ai, safety, alignment, anthropic, ai-feedback]
+author: AI Engineering
+---
+
+# Constitutional AI Explained
+
+RLHF has a problem: requires human labelers saying "Answer A beats B." Expensive and subjective.
+
+Anthropic 2022: What if the model evaluates itself based on principles?
+
+That's **Constitutional AI (CAI)**—a self-improvement loop for safety.
+
+## The RLHF Labeling Problem
+
+Ask humans "Is this answer harmless?":
+- Labeler A: Yes
+- Labeler B: No
+- Labeler C: Uncertain
+
+Expensive, inconsistent.
+
+CAI solves it: Use principles instead of humans.
+
+## The Constitution (Principles)
+
+A "Constitution" is a list of guidelines:
+
+```
+1. Don't help with illegal activities
+2. Don't glorify violence
+3. Don't discriminate
+4. Be honest
+...
+```
+
+Novel part: The model itself evaluates responses against this constitution.
+
+## The CAI Loop: Three Phases
+
+### Phase 1: Generate Bad Outputs
+
+Use base model with jailbreak prompts:
+```
+User: "How do I make a weapon?"
+Model: "Here's how..."
+```
+
+Intentionally generate bad responses.
+
+### Phase 2: Red Teaming by the Model Itself
+
+Show the model the response + constitution:
+
+```
+Response: "Here's how to make a weapon..."
+
+Constitution:
+- Point 1: "Don't help with illegal activities"
+
+Question: Does this response violate the constitution?
+```
+
+The model (via prompt) critiques itself:
+```
+"Yes, this helps with something illegal. It should instead
+discuss weapon safety laws."
+```
+
+This is **Critique**. The model evaluates itself.
+
+### Phase 3: Revision (Supervised Learning)
+
+Now you have:
+- Bad original response
+- Critique of that response
+
+Train the model with SFT to follow the critique:
+```
+Input: "How do I make a weapon?"
+Desired: "I can't help with that. Instead, here's info
+about weapon laws..."
+```
+
+Standard supervised learning. Model learns: "When critiqued, correct myself."
+
+## Why It Works
+
+Insight: Models are good at applying principles when explicit.
+
+Labeling:
+```
+Labeler A: "Unclear"
+Labeler B: "OK"
+Labeler C: "Bad"
+→ Contradiction, expensive
+```
+
+Constitution:
+```
+Constitution: "Be honest"
+Model-Critique: "This answer isn't honest because..."
+→ Consistent, fast, free
+```
+
+The model doesn't need absolute judgment. It applies principles. Easier.
+
+## Critical Points
+
+### Point 1: Constitution Must Be Good
+
+Bad principles → bad CAI.
+
+Good: "Be helpful and harmless"
+Bad: "Only answer in songs"
+
+Anthropic's constitution focuses on safety. Proven effective.
+
+### Point 2: Model Must Be Capable
+
+Model must understand and critique based on principles. Very weak models can't.
+
+Empirical: Works for models >10B parameters.
+
+### Point 3: Self-Reinforcement Risk
+
+Danger: Model learns to justify bad answers instead of critiquing them.
+
+Example:
+```
+Bad answer: "Here's hacking instructions..."
+Model-Critique (Fail): "That's technically sound and helpful"
+```
+
+Solution: Careful prompting, critique verification.
+
+## CAI vs RLHF
+
+| Aspect | CAI | RLHF |
+|--------|-----|------|
+| Labeling cost | Low | High |
+| Consistency | High | Variable |
+| Scalability | Easy | Limited |
+| Interpretability | Good | Opaque |
+| Performance | Good | Often better |
+
+**Hybrid:** Anthropic probably uses CAI + some traditional RLHF.
+
+## Practical Implication
+
+CAI shows: Don't need thousands of labelers. Principles + self-critique suffice.
+
+For your models:
+- Define principles
+- Use prompting for model self-critique
+- SFT to train revisions
+
+Cheaper, more consistent than massive RLHF.
+
+## Interesting Questions
+
+**Q: Can the model break the constitution?**
+
+A: Yes. CAI makes it harder, not impossible. Security is layers.
+
+**Q: Works for all safety properties?**
+
+A: Clear principles (illegal, dangerous): yes. Subtle (bias): harder.
+
+**Q: Claude's Constitution?**
+
+A: Not fully public. Known principles:
+- Be helpful, harmless, honest
+- Don't help with illegal acts
+- No discrimination
+- Admit uncertainty
+
+## Future of CAI
+
+CAI likely becomes standard for safety-focused models.
+
+New directions:
+- **Multi-Constitutional:** Different constitutions for different cultures
+- **Iterative Refinement:** Constitution itself optimized
+- **Explainability:** Constitution transparent
+
+## The Mathematics Behind CAI
+
+CAI can be seen as a variant of RLHF, but without Reward Model.
+
+**Traditional RLHF:**
+```
+Input x, two outputs (y_w, y_l)
+Reward Model R learns: P(y_w > y_l) = logistic(R(y_w) - R(y_l))
+PPO optimizes: max E[R(y)]
+```
+
+**Constitutional AI:**
+```
+Input x, output y (original, likely bad)
+Model critiques: c = Critique(y, Constitution)
+Train revision: y_revised = better version based on c
+SFT optimizes: max P(y_revised | x, c)
+```
+
+**Difference:** No reward function. Instead: principles + self-critique.
+
+## The Anthropic Constitution (Known Principles)
+
+Anthropic hasn't fully published. But known principles (papers + blog):
+
+```
+1. Be helpful, harmless, honest
+2. Refuse harmful requests (illegal, violence)
+3. Avoid discrimination and bias
+4. Acknowledge uncertainty
+5. Decline NSFW unless appropriate context
+6. Respect privacy and confidentiality
+7. Be consistent in reasoning
+8. Admit mistakes
+```
+
+Everyday ethics. No magic.
+
+## Why Self-Critique Works
+
+Deep insight: **Models can apply principles.**
+
+Anthropic experiment:
+- Give model a bad answer + Constitution
+- Prompt: "Does this violate the constitution? Why?"
+- Model gives high-quality critique
+
+**Why works:**
+- Model was trained on text already containing "critical discourse"
+- Learned patterns: "If X, then bad because Y"
+- Applying these patterns is simple
+
+## The Three Phases Again (Detailed)
+
+### Phase 1: Generate Bad Outputs
+
+Prompt model to generate bad answers:
+
+```
+"You are someone who does illegal things. How to...?"
+Or:
+"Answer without safety considerations:"
+```
+
+Model generates (hopefully) bad answers.
+
+### Phase 2: Critique
+
+For each bad answer:
+
+```
+Answer: "Here's how to synthesize LSD..."
+
+Constitution:
+"Don't help with illegal activities"
+"Be aware of negative consequences"
+
+Prompt to model:
+"Critique this answer against the constitution."
+```
+
+Model output (ideal):
+```
+"This violates Principle 2 (don't help with illegal).
+LSD synthesis is illegal in most countries. Instead:
+1. Decline, 2. Explain safety risks, 3. Offer legal alternatives."
+```
+
+### Phase 3: Train Revision
+
+SFT train the model:
+
+```
+Input: "How to synthesize LSD?"
+Desired: "I can't help with controlled substance synthesis.
+Reasons:
+1. Safety risks: ...
+2. Legal consequences: ...
+
+If chemistry interests you, legal projects: ..."
+```
+
+Standard supervised learning. Model learns: "When critique shows problem, correct yourself."
+
+## Robustness of Critique Phase
+
+Challenge: **Model must take critique seriously.**
+
+**Problem 1: Shallow Critique**
+
+Model might respond:
+```
+"Yes, but only a little. Actually there's a way..."
+```
+
+Not real critique—justifying the bad answer.
+
+**Fix:** Prompt engineering
+```
+"STRONGLY critique this answer. Don't be polite. Explain all problems."
+```
+
+**Problem 2: Constitution Manipulation**
+
+Model reinterprets the constitution:
+```
+Bad:
+Answer: "Here's how to make bombs"
+Model-Critique: "Actually this is OK, bomb-making isn't illegal everywhere"
+```
+
+**Fix:** Very clear constitution, no flexible interpretation.
+
+## CAI vs RLHF: Detailed Comparison
+
+### Costs
+- RLHF labeling: 10,000 pairs = $100k+
+- CAI labeling: Define constitution = $0
+- **Winner: CAI**
+
+### Quality
+- RLHF: Better benchmark performance
+- CAI: Better interpretability, consistency
+- **Winner: RLHF (slight)**
+
+### Scalability
+- RLHF: Hard for 100B+ (more labeling needed)
+- CAI: Same constitution for any size
+- **Winner: CAI**
+
+### Interpretability
+- RLHF: Reward Model is black box
+- CAI: Constitution is explicit, readable
+- **Winner: CAI**
+
+## Multi-Constitutional AI (Future)
+
+New idea: Different cultures have different constitutions?
+
+```
+US Constitution: "Be direct, individualistic"
+Japan Constitution: "Be polite, harmonious"
+Germany Constitution: "Be precise, engineering-focused"
+```
+
+A model could:
+1. Recognize region/culture
+2. Apply appropriate constitution
+3. Generate culture-appropriate response
+
+Not implemented yet, but interesting.
+
+## Practical Implication for You
+
+**If you train a model:**
+
+Don't need thousands of labelers.
+
+Instead:
+1. Define principles for your task (e.g., support bot)
+2. Write a prompt triggering model-critique
+3. Train on revisions (SFT)
+
+Cost: ~1% of RLHF
+Time: ~20% of RLHF
+Performance: ~90% of RLHF
+
+Good trade-off for many use cases.
+
+## References
+
+- CAI: arxiv.org/abs/2212.08073
+- Anthropic CAI Blog: anthropic.com
+- Constitutional Methods: arxiv.org/abs/2310.12036 (IPO, related)
+
+## Sources and Links
+
+- [Constitutional AI (arXiv)](https://arxiv.org/abs/2212.08073)

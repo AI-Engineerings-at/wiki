@@ -1,0 +1,472 @@
+---
+title: Fortgeschrittene Prompting-Techniken
+date: 2026-03-21
+summary: Professionelle Prompt-Strategien für Claude - Chain of Thought, Few-Shot Learning, XML-Struktur, Reverse Prompting, Extended Thinking
+tags: [prompting, techniques, chain-of-thought, few-shot, structured, prompts]
+author: AI Engineering
+---
+
+# Fortgeschrittene Prompting-Techniken
+
+Du fragst Claude eine Frage und kriegst eine Antwort. Aber die **Qualität der Antwort** hängt stark davon ab, **wie du die Frage stellst**. Diese Techniken zeigen wie du bessere Prompts schreibst.
+
+## Basics (Wiederholung)
+
+Bevor es kompliziert wird — die Fundamentals:
+
+### 1. Klare Anweisungen
+```
+✓ RICHTIG:
+Schreibe einen Python-Funktionstest mit pytest für die login() Funktion.
+Der Test soll 3 Cases abdecken:
+1. Erfolgreicher Login mit validen Credentials
+2. Login mit falsem Passwort
+3. Login mit nicht-existierendem User
+
+✗ FALSCH:
+Schreib einen Test
+```
+
+### 2. Kontext geben
+```
+✓ RICHTIG:
+Wir verwenden pytest für Unit Tests, PostgreSQL für die Datenbank.
+Das Projekt ist ein FastAPI Backend.
+
+Schreibe einen Test für...
+
+✗ FALSCH:
+Schreibe einen Test...
+(Claude weiß nicht welche Tools du nutzt)
+```
+
+### 3. Format angeben
+```
+✓ RICHTIG:
+Gib die Antwort als:
+- JSON object mit Feldern "name", "age", "city"
+- Code-Block (```json...```)
+- Englisch
+
+✗ FALSCH:
+Gib die Antwort
+(Claude wählt zufälliges Format)
+```
+
+## Chain of Thought (CoT)
+
+Chain of Thought bedeutet: "Zeige mir deine Gedankengänge, Schritt für Schritt."
+
+Claude wird viel bessere Ergebnisse liefern wenn er sein Denken zeigt.
+
+### Basis
+```
+Frage: Ist 15 * 18 + 42 größer als 200?
+
+✗ Ohne CoT:
+Claude: "Ja"
+(Schnell, aber wenig Kontext)
+
+✓ Mit CoT:
+Claude: "
+Rechnung:
+1. 15 * 18 = 270
+2. 270 + 42 = 312
+3. 312 > 200? Ja
+"
+(Claude zeigt Arbeit, du siehst wo Fehler sind)
+```
+
+### Prompt-Pattern
+```
+Löse dieses Problem Schritt für Schritt:
+
+Problem: [dein Problem]
+
+Schritte:
+1. [was first?]
+2. [then?]
+3. [finally?]
+
+Antwort: [result]
+```
+
+### Für Code-Reviews
+```
+Reviewe diesen Code auf Bugs:
+
+[Code]
+
+Überdenke folgende Aspekte schrittweise:
+1. Sind alle Variablen initialisiert?
+2. Sind Array-Grenzen gecheckt?
+3. Sind alle Exception-Cases behandelt?
+4. Ist die Performance OK (O(n) oder schlimmer)?
+
+Bugs die ich finde:
+- [Bug 1] → Auswirkung: ...
+- [Bug 2] → Auswirkung: ...
+```
+
+## XML-Tags für Struktur
+
+XML-Tags helfen Claude, verschiedene Abschnitte zu verstehen und zu unterscheiden.
+
+### Beispiel: Anforderungen vs. Einschränkungen
+```
+Schreibe einen Webhook-Handler.
+
+<requirements>
+- POST Endpoint auf /webhook
+- Signatur mit HMAC-SHA256 verifizieren
+- Payload in PostgreSQL speichern
+- HTTP 200 bei Erfolg, 400 bei Validierungsfehler
+</requirements>
+
+<constraints>
+- Nur AsyncIO (nicht Threads)
+- Keine externe Abhängigkeiten außer FastAPI + psycopg
+- Timeout: 5s max
+</constraints>
+
+<context>
+Wir verwenden Pydantic für Validation, ein existierender Pool
+ist in `db.pool` verfügbar.
+</context>
+```
+
+Claude versteht die Struktur besser und macht weniger Fehler.
+
+### Andere nützliche Tags
+```xml
+<goal>Was ist das Ziel?</goal>
+<background>Welcher Kontext ist wichtig?</background>
+<audience>Wer liest das?</audience>
+<constraints>Was darf ich NICHT machen?</constraints>
+<examples>Beispiele</examples>
+<output_format>Was soll raus kommen?</output_format>
+```
+
+## Few-Shot Learning
+
+Few-Shot bedeutet: "Zeige mir ein-zwei Beispiele, dann mach es so."
+
+### Beispiel: API Response formatieren
+```
+Konvertiere diese JSON-Fehler in eine lesbare Form.
+
+Beispiel 1:
+Input: {"code": 401, "message": "Unauthorized"}
+Output: "Zugriff verweigert (401) — Bitte meld dich an"
+
+Beispiel 2:
+Input: {"code": 500, "message": "Internal Server Error"}
+Output: "Fehler auf unserem Server (500) — Versuche später erneut"
+
+Jetzt konvertiere diese:
+1. {"code": 404, "message": "Not Found"}
+2. {"code": 422, "message": "Validation Error"}
+```
+
+Claude sieht das Muster und macht es genauso.
+
+### Few-Shot für Code-Stil
+```
+Schreib Python-Code im folgenden Stil:
+
+Beispiel 1 (Was ich möchte):
+```python
+def process_user(user_id: int) -> dict:
+    """Verarbeite einen User und return Status."""
+    try:
+        user = fetch_user(user_id)
+        return {"status": "ok", "user": user}
+    except UserNotFound:
+        return {"status": "error", "message": "User nicht gefunden"}
+```
+
+Beispiel 2 (Was ich NICHT möchte):
+```python
+def processUser(userID):
+    u = fetchUser(userID)
+    return u
+```
+
+Jetzt schreib eine Funktion die...
+```
+
+Claude ahmt den Stil nach.
+
+## Zero-Shot vs. Few-Shot
+
+```
+Zero-Shot: "Translate this to German" → Claude übersetzt
+           (Claude braucht kein Beispiel)
+
+Few-Shot: "Hier sind 3 Beispiele von German translations...
+          Jetzt translate this" → Claude übersetzt im gleichen Stil
+
+Few-Shot ist besser wenn:
+- Format kompliziert ist
+- Du einen speziellen Stil brauchst
+- Edge Cases wichtig sind
+```
+
+## Reverse Prompting (Interview-Modus)
+
+Statt Claude zu fragen, **fragst du Claude Fragen zu stellen**.
+
+Claude wird bessere Antworten geben wenn er dir Fragen stellt um seinen Context zu verbessern.
+
+### Beispiel 1: Produktkalkulation
+```
+Ich will ein Produkt kalkulieren, die Pricing ist komplex.
+
+Statt mir zu sagen wie, frag MICH Fragen um besser
+zu verstehen was ich brauche.
+```
+
+Claude antwortet:
+```
+Gute Idee! Ich hab ein paar Fragen:
+
+1. Ist das ein SaaS-Produkt (recurring) oder Software-Lizenz (one-time)?
+2. Wie viele Tiers brauchst du? (z.B. Basic/Pro/Enterprise)
+3. Sollen Bundle-Rabatte möglich sein?
+4. Welche Konkurrenz-Preise sind relevant?
+5. Zielgruppe: KMUs (€100-500) oder Enterprise (€10k+)?
+```
+
+Du beantwortest die Fragen → Claude macht eine bessere Kalkulation.
+
+### Beispiel 2: Code-Architektur
+```
+Ich hab eine Microservices-Architektur und bin mir nicht sicher
+ob sie skaliert. Statt mir zu sagen was falsch ist,
+frag mich Fragen um das zu verstehen.
+```
+
+Claude:
+```
+Perfekt, ich hab Fragen:
+
+1. Wie viele Services hast du aktuell?
+2. Wie kommunizieren sie? (REST, gRPC, Message Queue?)
+3. Wo sind Performance-Bottlenecks aktuell?
+4. Ziel: Skalierbarkeit oder Cost-Effizienz?
+```
+
+Das ist viel hilfreicher als eine generische Antwort.
+
+## Meta-Prompting
+
+Meta-Prompting bedeutet: "Claude schreibt seinen eigenen Prompt."
+
+Das ist hilfreich wenn du ein komplexes Problem hast und nicht sicher bist wie du Claude fragen sollst.
+
+### Beispiel
+```
+Ich hab ein Problem und weiß nicht wie ich Claude fragen soll.
+
+Problem: Ich muss eine Reporting-Pipeline bauen die täglich
+Daten aus 5 Datenquellen aggregiert.
+
+Schreib einen Prompt den ich dann verwenden kann um eine
+bessere Anleitung für die Implementierung zu kriegen.
+```
+
+Claude schreibt einen strukturierten Prompt für dich → du benutzt ihn.
+
+## Self-Ask Pattern
+
+Beim Self-Ask Pattern fragt Claude sich selbst Fragen bevor er antwortet.
+
+### Wie es funktioniert
+```
+Frage: Sollten wir zu Kubernetes migrieren?
+
+Self-Ask Pattern:
+1. Claude: "Okay, die Frage ist ob Kubernetes Sinn macht"
+2. Claude: "Was muss ich verstehen?
+   - Aktuelle Infrastruktur
+   - Team-Expertise
+   - Kosten vs. Benefits"
+3. Claude: "Fragen:
+   - Wie viele Server haben wir?
+   - Kennt das Team Kubernetes?
+   - Was kostet das aktuell?
+4. Claude: "Basierend auf [Annahmen]:
+   Meine Empfehlung ist..."
+```
+
+Claude arbeitet systematischer.
+
+### Prompt für Self-Ask
+```
+Beantworte diese Frage mit Self-Ask:
+1. Reformuliere die Frage
+2. Zerlege sie in Sub-Fragen
+3. Beantworte jede Sub-Frage
+4. Gib eine finale Antwort
+
+Frage: [deine Frage]
+```
+
+## Extended Thinking (Claude 3.5+)
+
+Extended Thinking aktiviert tiefes Nachdenken. Claude denkt länger und gründlicher nach.
+
+### Aktivierung
+```
+Ich need extended analysis für dieses komplexe Problem.
+
+Verwende extended thinking:
+- Überdenke das Problem von mehreren Winkeln
+- Prüfe deine Annahmen
+- Erkläre dein Denk-Prozess
+
+Problem: [dein komplexes Problem]
+```
+
+Das gibt bessere Qualität, braucht aber mehr Zeit.
+
+## System Prompts Best Practices
+
+System Prompts sind die Anleitung die du Claude bei Session-Start gibst (in API oder CLAUDE.md).
+
+### Struktur
+```markdown
+# System Prompt — Mein Projekt
+
+## Rolle
+Du bist ein Technical Writer der Code-Dokumentation schreibt.
+
+## Stil
+- Österreichisch-informell (Du-Form)
+- Technisch präzise, kein Marketing-Fluff
+- Praktische Code-Beispiele
+- Markdown-Format
+
+## Kontext
+- Projekt: Playbook01 (E-Commerce Plattform)
+- Tech Stack: Next.js, n8n, PostgreSQL
+- Target Audience: KMU-Gründer
+
+## Regeln
+- KEINE AI-Buzzwords (pivotal, landscape, delve)
+- Deutsche Begriffe wenn möglich, Englisch für Tech-Terms
+- Code-Beispiele MÜSSEN funktionieren
+- Keine Affiliate-Links, keine CTAs
+
+## Output-Format
+- H1 Titel, H2 Sections
+- Code-Blöcke mit Language-Tag
+- Checklisten am Ende jeder Seite
+```
+
+### Do's & Dont's
+
+| Do | Don't |
+|----|--------|
+| Spezifisch sein | Vage Anweisungen |
+| Beispiele geben | Nur Theorie |
+| Constraints nennen | Alles erlauben |
+| Format definieren | Zufällig hoffen |
+| Fehler adressieren | Blind hoffen es passt |
+
+## Claude-spezifische Tips
+
+### 1. Prefill nutzen
+```
+Du kannst Claude die erste Zeile der Antwort vorgeben:
+
+Prompt: "Schreib einen Deployment-Plan"
+Prefill: "## Deployment Plan
+
+1. Pre-flight Checks"
+
+Claude setzt die Antwort fort und folgt automatisch der Struktur
+```
+
+### 2. Thinking Tags (Claude 3.5+)
+```
+<thinking>
+Das ist ein komplexes Problem. Ich sollte:
+1. Die Anforderungen verstehen
+2. Edge Cases überdenken
+3. Verschiedene Lösungsansätze evaluieren
+</thinking>
+
+Jetzt antworte auf Basis meiner Überlegungen.
+```
+
+### 3. Stop-Sequenzen
+```
+Wenn Claude zu viel schreibt, nutze Stop-Sequenzen:
+
+"Antworte kurz und prägnant. Stopp nach 3 Punkten."
+```
+
+### 4. Token-Awareness
+```
+Diese Frage könnte 50k Tokens brauchen.
+Bevor Claude anfängt: "/cost prüfen"
+
+Dann bei Bedarf:
+"Fass dich kürzer — max 5000 Tokens"
+```
+
+## Praktisches Beispiel: Ein kompletter Prompt
+
+```
+# Aufgabe: API-Dokumentation schreiben
+
+## Goal
+Schreibe eine Übersicht für die POST /users Endpoint.
+
+## Context
+- Framework: FastAPI
+- Authentication: JWT Bearer Token
+- Datenbank: PostgreSQL
+- Response Format: JSON
+
+## Requirements
+- Kurze Beschreibung (max 2 Sätze)
+- Request-Body Schema mit Validierungsregeln
+- 3 Response-Beispiele:
+  1. 201 Success
+  2. 400 Validation Error
+  3. 401 Unauthorized
+- Curl-Beispiel
+- Code-Beispiel (Python requests)
+
+## Style
+- Deutsch
+- Technisch präzise
+- Praktische Beispiele nur
+- Markdown format
+
+## Constraints
+- Keine Marketing-Sprache
+- Keine halluzinierten Felder
+- Nur tatsächliche API-Behavior
+```
+
+Dieser Prompt gibt Claude alle Informationen um eine gute Antwort zu schreiben.
+
+## Checkliste
+
+- [ ] Anleitung ist klar, nicht mehrdeutig
+- [ ] Kontext gegeben (Tech Stack, Audience, Ziel)
+- [ ] Format angegeben (JSON, Markdown, Code, etc.)
+- [ ] Beispiele gegeben (Few-Shot wo sinnvoll)
+- [ ] Constraints definiert (Was NICHT machen)
+- [ ] XML-Tags für komplexe Struktur genutzt
+- [ ] Chain-of-Thought aktiviert (für komplexe Tasks)
+- [ ] Stil definiert (wenn relevant)
+- [ ] Fehlerfall adressiert (Was bei Fehler tun)
+- [ ] Nach kritischen Aufgaben: "/cost prüfen"
+
+## Quellen und Links
+
+- [Claude Docs](https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview)

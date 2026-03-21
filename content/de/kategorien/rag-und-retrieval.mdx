@@ -1,0 +1,409 @@
+---
+title: "RAG und Retrieval — Knowledge Augmentation"
+date: "2026-03-21"
+summary: "Retrieval-Augmented Generation: Architektur, Vector DBs, Chunking, LangChain vs LlamaIndex, Enterprise Patterns"
+tags: ["rag", "retrieval", "vector-database", "chunking", "langchain", "llamaindex", "embedding"]
+author: "AI Engineering"
+---
+
+# RAG und Retrieval — Kategorieübersicht
+
+RAG ist die Standardanswort auf "Mein LLM hat veraltetes Wissen" oder "Mein Modell halluziniert Fakten". 2026: Fast jedes Enterprise-LLM-System braucht RAG. Wir zeigen die Architektur, Vector Databases, Chunking-Strategien, und wann RAG vs Fine-Tuning.
+
+## Was ist RAG? (Präzise)
+
+**RAG = Retrieval-Augmented Generation**
+
+Statt nur "Prompt → LLM → Antwort" machst du:
+```
+User Query
+    ↓
+Embedding (Query in Vektor)
+    ↓
+Vector DB Search (finde ähnliche Dokumente)
+    ↓
+Retrieval (hole Top-K Matches)
+    ↓
+Augment (füge Matches zu Prompt hinzu)
+    ↓
+LLM Prompt with Context
+    ↓
+Answer
+```
+
+**Kern-Idee:** Das LLM antwortet basierend auf deine Dokumente, nicht auf Trainings-Daten.
+
+**Beispiel:**
+```
+Ohne RAG:
+User: "Welche ist die neueste Feature in Playbook01?"
+LLM: "Das weiß ich nicht, mein Training endete 2024-01"
+
+Mit RAG:
+User: "Welche ist die neueste Feature in Playbook01?"
+RAG System: [retrieves neueste README.md]
+LLM: "Basierend auf README: die neueste Feature ist ..."
+```
+
+## Die Architektur (5 Komponenten)
+
+### 1. Documents (Input)
+Deine Quellen: PDFs, Web-Seiten, Datenbank, Confluence, Wiki.
+
+**Best Practice:** "Single Source of Truth." Wenn du 3 veraltete Kopien hast, RAG retrieves alle 3 = Verwirrung.
+
+### 2. Chunking (Zerlegen)
+Dokumente sind groß (100 Seiten PDF = zu viel für LLM Context Window). Chunk = teile Dokument in kleinere Pieces.
+
+**Strategien:**
+
+#### Fixed-Size Chunking
+```
+Chunk Size: 512 tokens (±2000 Zeichen)
+Overlap: 50 tokens (um Verluste zwischen Chunks zu vermeiden)
+
+Document: "Das ist Satz 1. Satz 2. Satz 3. Satz 4. Satz 5."
+↓
+Chunk 1: "Das ist Satz 1. Satz 2. Satz 3."
+Chunk 2: "Satz 2. Satz 3. Satz 4. Satz 5."  [overlap = Satz 2+3]
+```
+
+**Vorteile:** Einfach, schnell.
+**Nachteile:** Chunk könnte mitten in Satz enden (Semantik verloren).
+
+#### Recursive Chunking
+```
+Versuche auf Paragraph-Grenzen zu teilen
+Wenn zu groß, teile auf Satz-Grenzen
+Wenn noch zu groß, teile auf Zeichen-Grenzen
+```
+
+**Vorteile:** Erhält Struktur besser.
+**Nachteile:** Komplexer zu implement.
+
+#### Semantic Chunking (2026 Standard)
+```
+Embedde jeden Satz
+Berechne Similarity zwischen benachbarten Sätzen
+Teile wenn Similarity fällt (= Thema-Wechsel)
+```
+
+**Vorteile:** Chunks sind semantisch zusammenhängend.
+**Nachteile:** Expensive (muss embedde N Sätze).
+**Best for:** Production, wenn Qualität kritisch.
+
+#### LLM-basiertes Chunking
+```
+LLM: "Zerlege diesen Text in zusammenhängende Teile"
+LLM: "Hier sind die Chunks: ..."
+```
+
+**Vorteile:** Sehr intelligente Chunks.
+**Nachteile:** Teuer (LLM-Calls), langsam.
+**Best for:** Kleine kritische Dokumente (z.B. Verträge).
+
+#### Late Chunking (neu 2026)
+```
+Nicht chunken, sondern:
+Document → Embedding (ganz) → dann "conceptually split" via Embedding space
+```
+
+Noch experimental, aber vielversprechend.
+
+### 3. Embedding (Vector Conversion)
+Jeder Chunk wird zu einem Vector (Array von Zahlen).
+
+**Modelle:**
+- `text-embedding-3-small` (OpenAI): 1536-dimensional, EUR 0,00002/1K tokens
+- `text-embedding-3-large` (OpenAI): 3072-dimensional, EUR 0,00013/1K tokens
+- `nomic-embed-text-v1` (open-source): 768-dimensional, kostenlos, ähnliche Qualität wie OpenAI-large
+
+**Praktisch:**
+- Document "Stable Diffusion ist eine Text-to-Image KI" → `[0.23, -0.45, 0.12, ...]` (1536 Zahlen)
+- Query "Was ist Diffusion?" → `[0.21, -0.43, 0.14, ...]`
+- Similarity: cos-similarity(doc, query) = 0.98 (sehr ähnlich!)
+
+**Sicherheit:** Embeddings sind nicht reversibel (kannst du Embedding wieder zu Text zurück → nein), also Privat.
+
+### 4. Vector Database
+Speichert embeddings + Metadaten, ermöglicht schnelle Similarity Search.
+
+**Options:**
+- **Pinecone** (Cloud, managed): EUR 0,40/Million vectors/month. Einfach, scalable.
+- **Weaviate** (Self-hosted oder Cloud): Open-source, flexibel, braucht DevOps.
+- **Milvus** (Self-hosted): Open-source, Kubernetes-native, für Scale.
+- **Qdrant** (Self-hosted oder Cloud): Modern, einfach, growing community.
+- **ChromaDB** (Self-hosted): Leicht, für Prototyping.
+
+**Performance-Vergleich (März 2026):**
+- Pinecone: p99 latency 30ms (Cloud)
+- Qdrant Self-hosted (.83 Server): p99 latency 10ms
+- Milvus Cluster: p99 latency 15ms
+
+**Praktische Empfehlung:** Qdrant für Self-Hosted (gutes Preis-Leistungs-Verhältnis), Pinecone für "I don't want ops".
+
+### 5. LLM (Augmented)
+Das LLM erhält Prompt + Top-K Retrieved Chunks.
+
+```python
+context = vector_db.search(query, top_k=3)  # hole 3 ähnlichste Chunks
+prompt = f"""
+Based on the following information:
+{context}
+
+Answer the question: {user_query}
+"""
+answer = llm.complete(prompt)
+```
+
+**Wichtig:** "Garbage in, garbage out"—wenn top_k Chunks falsch sind, LLM kann nicht magisch korrigieren.
+
+## LangChain vs LlamaIndex (für RAG)
+
+### LlamaIndex (spezialisiert auf RAG)
+
+**Was es ist:** Framework speziell für Data→LLM Pipelines. Fokussiert: Indexing, Retrieval, Query Engines.
+
+**Struktur:**
+```python
+from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
+
+# 1. Load Documents
+documents = SimpleDirectoryReader("./data").load_data()
+
+# 2. Create Index (auto chunking + embedding)
+index = VectorStoreIndex.from_documents(documents)
+
+# 3. Query
+query_engine = index.as_query_engine()
+response = query_engine.query("Wie heißt der CEO?")
+```
+
+**Vorteile:**
+- Minimal boilerplate für "simple RAG"
+- Built-in Tools: Document loaders (PDF, Web, Confluence, etc.)
+- Advanced Features: HyDE, BM25, Hybrid Search
+- p99 Latency: 30ms (optimiert)
+
+**Nachteile:**
+- Weniger Kontrolle über Chunking-Details
+- Weniger flexible für non-RAG-Tasks
+- Community kleiner
+
+**Best for:** "Ich will schnell RAG bauen und nicht über Details nachdenken."
+
+### LangChain (Orchestration)
+
+**Was es ist:** General-purpose Framework für LLM-Apps. RAG ist eine UseCase von vielen.
+
+**Struktur:**
+```python
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_pinecone import PineconeVectorStore
+from langchain_openai import OpenAIEmbeddings
+from langchain.chains import RetrievalQA
+
+# 1. Load & Chunk
+splitter = RecursiveCharacterTextSplitter(chunk_size=512)
+chunks = splitter.split_documents(documents)
+
+# 2. Embed & Store
+embeddings = OpenAIEmbeddings()
+vector_store = PineconeVectorStore.from_documents(chunks, embeddings)
+
+# 3. Retrieval QA
+qa = RetrievalQA.from_chain_type(
+    llm=ChatOpenAI(),
+    chain_type="stuff",
+    retriever=vector_store.as_retriever()
+)
+response = qa.run("Wie heißt der CEO?")
+```
+
+**Vorteile:**
+- Volle Kontrolle über jeden Schritt
+- Flexibel für komplexe Workflows (nicht nur RAG, sondern Agents, Tools, etc.)
+- Größere Community
+- LangGraph für Production (Checkpointing, Observability)
+
+**Nachteile:**
+- Mehr Boilerplate
+- Steile Learning Curve
+
+**Best for:** "Ich will RAG + andere Tools kombiniert (Agents, APIs, etc.)."
+
+### Hybrid: LlamaIndex Workflows + LangGraph
+
+**2026 Best Practice:** Viele Produzenten nutzen:
+- **LlamaIndex für Data-Preprocessing:** Dokumente laden, intelligentes Chunking
+- **LangChain + LangGraph für Orchestration:** Complex Workflows, Agents
+- **Qdrant für Vector Storage**
+
+```
+Documents → LlamaIndex (load, chunk, embed) → Qdrant
+Query → LangGraph (planning, retrieval, LLM) → Answer
+```
+
+## Chunking-Entscheidungsbaum (2026)
+
+```
+Hast du < 100 Dokumente?
+  → Fixed-Size Chunking reicht
+  → 512 tokens Chunk-Size, 50 tokens Overlap
+
+Hast du strukturierte Docs (Markdown, Sections)?
+  → Recursive Chunking
+  → Teile auf Headers
+
+Ist Qualität kritisch (Legal, Medical)?
+  → Semantic Chunking
+  → Kostet EUR 0,01-0,05 pro Document, aber worth it
+
+Brauchst du Best Accuracy?
+  → Late Chunking (experimentell)
+```
+
+## Enterprise RAG Patterns
+
+### Pattern 1: Hybrid Retrieval (Keyword + Semantic)
+
+```
+Query "SQL Best Practices"
+↓
+Split into Keywords: ["SQL", "Best", "Practices"]
+↓
+BM25 Search (keyword) + Vector Search (semantic)
+  ↓ BM25: Exact match docs (high recall)
+  ↓ Vector: Semantic-similar docs (high precision)
+↓
+Merge & Rank (z.B. RRF = Reciprocal Rank Fusion)
+↓
+Top-K to LLM
+```
+
+**Vorteil:** Kombiniert best of both worlds (exact match + semantic).
+**Nachteil:** Komplexer.
+**When to use:** Suchresultate sind nicht gut genug mit nur Vector Search.
+
+### Pattern 2: Multi-Index RAG
+
+```
+Customer Docs → Index A (Pinecone)
+Product Catalog → Index B (Qdrant)
+Internal Wiki → Index C (Weaviate)
+
+Query Router: "Welcher Index ist relevant?"
+  → LLM classifies query
+  → Retrieves von passenden Index(en)
+  → Merged Results
+```
+
+**Use Case:** Große Orgs mit verschiedenen Dokumententypen.
+
+### Pattern 3: Hierarchical Retrieval
+
+```
+Level 1: Summaries (kurze Zusammenfassungen)
+  → Quick retrieval, big picture
+
+Level 2: Chunks (detail)
+  → Nach Lesen summaries, lade relevante Chunks
+
+LLM: "Answer mit Details, aber organized"
+```
+
+**Benefit:** Komplexe Dokumente, schneller retrieval, bessere Antwort.
+
+## Häufige Fallstricke
+
+### 1. "Mein RAG retrieves irrelevante Chunks"
+
+**Ursache meist:** Schlechte Embeddings oder falsch Chunk-Size.
+
+**Fix:**
+- Aumentiere Chunk-Size (zu klein = Context verloren)
+- Überprüfe Embedding-Qualität (test mit hand-picked examples)
+- Add Metadata-Filter (z.B. "nur neuere Dokumente")
+
+### 2. "Kosten explodieren (API Calls für Embedding)"
+
+**Wenn du OpenAI Embeddings nutzt:**
+- 1 Million chunks = EUR 20 (one-time)
+- Aber jede Query macht (top-K retrieval) Embedding = schnell EUR 100+/month
+
+**Fix:**
+- Use smaller embedding model (text-embedding-3-small statt large)
+- Self-hosted embeddings (nomic-embed-text, kostenlos)
+- Cache Popular Queries
+
+### 3. "Latency zu hoch (RAG query dauert 2 Sekunden)"
+
+**Ursachen:** Slow Vector DB lookup (unoptimized), slow LLM call, netzwerk.
+
+**Fix:**
+- Optimize Vector DB (Index-Settings, Quantization)
+- Batch Queries (wenn möglich)
+- Use smaller/faster LLM (Sonnet statt Opus)
+
+### 4. "Halluzination noch vorhanden"
+
+**Realität:** RAG reduziert Halluzination aber eliminiert nicht (LLM kann immer noch falsch inventieren).
+
+**Fix:**
+- Ensemble Retrieval (multiple retrievals, merge)
+- Re-ranking (retrieve top-100, dann LLM re-rank top-10)
+- Instruct LLM: "Antworte NUR auf basis der Dokumente, oder sag 'Nicht gefunden'"
+
+## Benchmark 2026: RAG vs Fine-Tuning
+
+| Dimension | RAG | Fine-Tuning | Winner |
+|-----------|-----|-------------|--------|
+| **Update Speed** | Instant (add Dokument) | Days (retrain) | RAG |
+| **Knowledge Cut-off** | None (current data) | Fixed (training-date) | RAG |
+| **Kosten (bei 100k Chunks)** | EUR 20-100/month | EUR 500-2000 (one-time) | FT |
+| **Qualität (structured knowledge)** | Good | Excellent | FT |
+| **Privacy** | Depends (cloud DB) | Full (your model) | FT |
+| **Scalability** | Easy (add DB size) | Hard (retrain needed) | RAG |
+
+## Roadmap 2026-2027
+
+- **Q2 2026:** Adaptive Chunking wird Standard (Modelle erlernen beste Chunk-Size)
+- **Q3 2026:** Multi-Modal Retrieval (Text + Image + Video) wird mainstream
+- **Q4 2026:** RAG + Fine-Tuning Hybrid (beste von beiden) wird Production-ready
+
+## Praktischer Start (30 Minuten)
+
+```python
+# 1. Installiere
+pip install llama-index qdrant-client openai
+
+# 2. Load Docs + Build Index
+from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
+documents = SimpleDirectoryReader("./my_docs").load_data()
+index = VectorStoreIndex.from_documents(documents)
+
+# 3. Query
+query_engine = index.as_query_engine()
+response = query_engine.query("Deine Frage hier")
+print(response)
+```
+
+**Done.** Du hast RAG.
+
+## Fazit
+
+**RAG 2026:**
+- **Standard für Knowledge-Heavy Apps** (Support, Internal Tools)
+- **LlamaIndex** für schnelle Prototypen
+- **LangChain + LangGraph** für komplexe Workflows
+- **Semantic Chunking** für Qualität
+- **Qdrant Self-Hosted** für Ops-Kontrolle
+
+**Kosten Realität:** EUR 0-100/month je nach Scale. ROI ist offensichtlich (eine Support-Query kostet dich EUR 50 durch Agent, RAG spart das).
+
+Start: 30 Minuten mit LlamaIndex. Scale später zu LangGraph wenn nötig.
+
+## Quellen und Links
+
+- [LangChain](https://github.com/langchain-ai/langchain)
+- [LlamaIndex](https://github.com/run-llama/llama_index)

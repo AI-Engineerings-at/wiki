@@ -1,0 +1,547 @@
+---
+title: DSGVO-Ampel — Datenschutz-Rating für KI-Tools 2026
+date: 2026-03-21
+summary: Traffic-Light System (🟢🟡🔴) zur Bewertung von 20+ AI-Tools nach DSGVO-Konformität, Datenspeicherung, DPA-Verfügbarkeit und praktischen Use-Cases für deutsche KMUs.
+tags: [dsgvo, datenschutz, compliance, ai-tools, eu, privacy, gdpr, ampel]
+author: AI Engineering
+---
+
+# DSGVO-Ampel — Datenschutz-Rating für KI-Tools 2026
+
+Die DSGVO-Ampel ist ein einfaches System zur schnellen Bewertung von AI-Tools: Welche sind sicher für Kundendaten, welche problematisch?
+
+## Das System: 3 Farben, 3 Sicherheitsstufen
+
+### 🟢 Grün — DSGVO-Konform, Daten bleiben bei dir
+
+**Definition:** Daten verlassen dein Netzwerk NICHT. Volle lokale Kontrolle, kein Third-Party-Processing.
+
+**Best For:** Kundendaten, Medizinische Daten, Finanzen, Interne Geheimisse.
+
+**Beispiele:**
+
+| Tool | Klasse | Setup | Effort |
+|------|--------|-------|--------|
+| **Ollama (Lokal)** | LLM | Docker/Binary | 5 min |
+| **llama.cpp** | LLM | Compile | 30 min |
+| **LM Studio** | LLM | GUI Download | 2 min |
+| **Whisper (Local)** | Speech-to-Text | Python pip | 10 min |
+| **PostgreSQL (Self)** | Database | Docker | 5 min |
+| **n8n Self-Hosted** | Automation | Docker | 15 min |
+
+**Sicherheits-Checkliste für Grün:**
+- ✅ Keine Cloud-Komponenten
+- ✅ Keine Datenübertragung zu Drittanbietern
+- ✅ Du kontrollierst Hardware physisch
+- ✅ DSGVO-konform OHNE Verträge
+
+### 🟡 Gelb — Bedingt konform mit DPA und EU-Hosting
+
+**Definition:** Cloud-basiert, aber mit Data Processing Agreement (DPA) und EU-Speicherung. Daten fließen durch fremde Server, aber reguliert.
+
+**Best For:** Production wenn lokale Alternative nicht praktisch.
+
+**Beispiele:**
+
+| Tool | DPA? | EU Hosting? | Rating |
+|------|------|-----------|--------|
+| **Claude API** | ✅ Ja | ⚠️ Teilweise | 🟡 Gelb |
+| **Azure OpenAI EU** | ✅ Ja | ✅ UK/Niederlande | 🟡 Gelb |
+| **Google Vertex AI EU** | ✅ Ja | ✅ Frankfurt | 🟡 Gelb |
+| **n8n Cloud EU** | ✅ Ja | ✅ EU | 🟡 Gelb |
+| **Make Cloud (EU-Plan)** | ⚠️ Optional | ⚠️ EU | 🟡→🔴 |
+| **Zapier** | ⚠️ nur Enterprise | ❌ USA | 🔴 Rot |
+
+**Sicherheits-Checkliste für Gelb:**
+- ✅ Expliziter DPA-Vertrag vorhanden
+- ✅ Verbot der Weiterverarbeitung zu Training
+- ✅ Daten gespeichert in EU oder EU-äquivalent
+- ✅ Subprozessoren sind gelistet und transparent
+- ⚠️ Deine Daten fließen DURCH fremde Server (Vertrauen nötig)
+
+**Dokumentation erforderlich:**
+```
+Art. 28 DSGVO Verarbeitungsvertrag:
+- Auftragsverarbeiter: [Tool-Anbieter]
+- Verarbeitungszweck: KI-basierte Analyse
+- Subprozessoren: [Anlage B der DPA]
+- Dauer: Während Abonnement + 30 Tage Delete
+- Datenort: EU mit Backups
+```
+
+### 🔴 Rot — Nicht DSGVO-konform ohne Zusatzmaßnahmen
+
+**Definition:** Daten gehen in USA, unsichere Speicherung, oder Verarbeitung für Training ohne Opt-Out.
+
+**Best For:** Nur Hobby, öffentliche Inhalte, KEINE Kundendaten.
+
+**Beispiele:**
+
+| Tool | Problem | Warum | Rating |
+|------|---------|-------|--------|
+| **Free ChatGPT** | Training | USA, Speicherung zu Training | 🔴 Rot |
+| **Free Gemini** | Training | USA, Google speichert & trainiert | 🔴 Rot |
+| **Perplexity AI** | USA-Daten | Keine explizite EU-Compliance | 🔴 Rot |
+| **Grok (xAI)** | USA, unklar | Speicherung und Nutzung unklar | 🔴 Rot |
+
+**Probleme:**
+- ❌ Daten gehen in USA (ohne Privacy Shield Äquivalent)
+- ❌ Keine DPA oder nur Boilerplate
+- ❌ Speicherung unbestimmt (Training-Datenpool)
+- ❌ Schrader-Entscheidung & Westküsten-Kritik relevant
+
+## Vollständige Tool-Bewertung
+
+### LLMs
+
+| Tool | Ampel | Best For |
+|------|-------|----------|
+| **Ollama** | 🟢 | Kundendaten, Data Science |
+| **Claude API** | 🟡 | Enterprise, gute Qualität |
+| **Azure OpenAI** | 🟡 | Microsoft-Shops |
+| **GPT-4 via API** | 🟡→🔴 | Non-sensitive, Prototypen |
+| **Free ChatGPT** | 🔴 | Hobby nur |
+| **Llama.cpp** | 🟢 | Offline, vollständige Kontrolle |
+
+### Workflow-Automation
+
+| Tool | Ampel | Begründung |
+|------|-------|-----------|
+| **n8n Self-Hosted** | 🟢 | Deine Server, volle Kontrolle |
+| **n8n Cloud (EU)** | 🟡 | EU-Hosting, DPA |
+| **Make.com** | 🟡→🔴 | USA-Standard, DPA nur Business |
+| **Zapier** | 🔴 | USA, DPA nur Enterprise |
+
+### Datenbanken & Speicher
+
+| Tool | Ampel | Begründung |
+|------|-------|-----------|
+| **PostgreSQL (Self)** | 🟢 | Deine Infrastruktur |
+| **Supabase (EU)** | 🟡 | EU-Hosting, DPA |
+| **Firebase** | 🔴 | Google USA, zu viele Tracker |
+
+## So bewertest du selbst ein neues Tool
+
+### 5-Punkte-Checkliste
+
+#### 1. Wo laufen die Server?
+
+```
+🟢 Lokal (dein Computer/Server)
+🟡 EU (mit Beweis: Frankfurt, Amsterdam, etc.)
+🔴 USA oder unbekannt
+```
+
+#### 2. Gibt es einen DPA?
+
+```
+🟢 Ja, kostenlos und explizit
+🟡 Ja, aber nur im Enterprise-Plan
+🔴 Nein, oder nur Boilerplate
+```
+
+#### 3. Speichert der Anbieter zum Training?
+
+```
+🟢 Nein, expliziter Opt-Out und Garantie
+🟡 Nein, aber nur mit Zusatz/Vertrag
+🔴 Ja, oder unklar
+```
+
+#### 4. Sind Sub-Prozessoren transparent?
+
+```
+🟢 Ja, Liste vorhanden und aktuell
+🟡 Ja, aber nur auf Anfrage
+🔴 Nein, oder versteckt
+```
+
+#### 5. Wie wird Datenlöschung gehandhabt?
+
+```
+🟢 Automatisch nach Abo-Ende, max 30 Tage
+🟡 Auf Anfrage möglich
+🔴 Unklar oder indefinite Speicherung
+```
+
+### Scoring
+
+- **5 Grün:** 🟢 DSGVO-konform
+- **3-4 Grün + 1-2 Gelb:** 🟡 Bedingt konform mit DPA
+- **Unter 3 Grün:** 🔴 Problematisch
+
+## Praktische Empfehlungen: Nach Use-Case
+
+### Szenario 1: Kundendaten verarbeiten
+
+**Was:** Kundenlisten, E-Mails, Nummern klassifizieren mit AI
+
+**Pflicht:** 🟢 Grün
+
+**Lösung:**
+1. Ollama lokal (Llama 3.3 8B für Klassifikation)
+2. n8n Self-Hosted für Automation
+3. PostgreSQL lokal für Speicher
+
+**Kosten:** ~€1.500 Hardware einmalig, €0/Monat
+
+**Audit-Trail:** Alle Verarbeitung lokal dokumentiert, Zero Third-Party Access
+
+### Szenario 2: Code-Review in Enterprise
+
+**Was:** Interne Codebases mit AI reviewen
+
+**Pflicht:** 🟡 Gelb oder 🟢 Grün
+
+**Lösung:**
+1. Azure OpenAI EU (🟡 DPA-gesichert)
+2. ODER: Ollama (🟢 lokal)
+3. Privater n8n Flow
+
+**Kosten:** Azure ~€50/Monat ODER Ollama €0/Monat
+
+**Audit-Trail:** DPA mit Microsoft oder lokale Logs
+
+### Szenario 3: Blog-Content-Generierung
+
+**Was:** Public Articles schreiben (KEINE sensiblen Daten)
+
+**Pflicht:** 🟡-🔴 OK, beliebig
+
+**Lösung:**
+1. Claude API (🟡 beste Qualität)
+2. ODER: ChatGPT 4o (🟡 Multimodal)
+3. ODER: Ollama (🟢 kostenlos)
+
+**Kosten:** Claude €3-15 pro 1M Tokens
+
+**Audit-Trail:** Nicht kritisch (Public Content)
+
+### Szenario 4: Medizinische Dokumentation
+
+**Was:** Patient-Daten, Symptome, Diagnosen analysieren
+
+**Pflicht:** 🟢 Grün zwingend
+
+**Lösung:**
+1. Ollama lokal (Medical-Modell wenn möglich)
+2. Lokale PostgreSQL verschlüsselt
+3. Kein Cloud-Zugriff überhaupt
+
+**Kosten:** ~€2.000 Hardware, €0/Monat
+
+**Compliance:** Ärztliches Geheimnis + DSGVO
+
+## Häufige Missverständnisse
+
+### ❌ "Claude ist USA, also Rot"
+✅ **Falsch.** Claude ist 🟡 wegen DPA und Datenschutz-Fokus. USA-Standort ist weniger kritisch als Transparenz.
+
+### ❌ "Kostenlose Tools sind immer Rot"
+✅ **Nein.** Ollama (kostenlos & 🟢), HuggingFace (kostenlos & 🟡). Aber Free ChatGPT trainiert = 🔴.
+
+### ❌ "Ich muss immer Grün verwenden"
+✅ **Nein.** Gelb (mit DPA) ist für Production OK wenn Grün nicht praktisch ist.
+
+### ❌ "DSGVO-Strafen sind klein"
+✅ **Sehr falsch.** Bis zu €20.000.000 oder 4% Jahresumsatz. Für KMUs: Reputationsschaden größer als Geld.
+
+## Audit-Checkliste für dein Projekt
+
+- [ ] Alle Tools inventarisiert?
+- [ ] Jedes Tool mit Ampel-Farbe bewertet?
+- [ ] Sensitive Daten nur auf 🟢 Tools?
+- [ ] 🟡 Tools haben explizite DPA-Verträge?
+- [ ] Sub-Prozessoren dokumentiert?
+- [ ] Datenschutzbeauftragter hat reviewt?
+- [ ] Datensicherheits-Konzept geschrieben?
+- [ ] Team kennt erlaubte Tools?
+- [ ] Daten-Lösch-Prozesse getestet?
+- [ ] Incident Response Plan vorhanden?
+
+## EU AI Act Integration (seit 02.08.2026)
+
+Neue Regeln für High-Risk AI Systems:
+
+```
+High-Risk = AI für kritische Lebens-Entscheidungen:
+├─ Hiring Entscheidungen
+├─ Credit Scoring
+├─ Polizei-Einsätze
+└─ Medizinische Diagnosen
+
+Anforderungen:
+├─ Explainability (warum diese Entscheidung?)
+├─ Human Oversight erforderlich
+├─ Bias Testing & Monitoring
+└─ Dokumentation (Compliance-Trail)
+```
+
+Selbst 🟢 Tools brauchen dann:
+- Algorithmic Audit Trail
+- Bias-Assessment Bericht
+- Human Review für High-Impact Decisions
+
+## Ressourcen
+
+- **DPA-Template:** European Data Protection Board (EDPB) Standard Clauses
+- **Audit-Tool:** Datenschutz-TÜV für Zertifikation
+- **Cloud-Compliance:** CSA (Cloud Security Alliance) CAIQ
+- **AI-Risk:** NIST AI Risk Management Framework
+
+---
+
+**Unsere Empfehlung für deutsche KMUs:** Nutze 🟢 Tools für Kundendaten (Ollama, n8n Self-Hosted). 🟡 Tools nur mit expliziter DPA und EU-Datenspeicherung. 🔴 Tools: Nein zu Kundendaten, aber OK für Marketing/Public Content.
+
+**Jährliche Review-Pflicht:** Tools ändern ihre Policies. Überprüfe mindestens einmal jährlich die Ampel-Bewertung.
+
+---
+
+## Schrader-Entscheidung & USA-Daten (KRITISCH)
+
+Seit Schrader-Urteil 2022 ist klar: USA-Datenfluss problematisch für DSGVO.
+
+**Problem:**
+- US-Regierungbehörden können auf Daten zugreifen (FISA, Executive Order)
+- Kein gleichwertiger Datenschutz
+- Selbst mit Verträgen: Rechtliche Grauzone
+
+**Betroffene Tools:**
+- ❌ CloudGPT (Free) - USA, Training
+- ⚠️ OpenAI (mit DPA) - USA mit "aber"
+- ⚠️ Google (mit DPA) - USA mit Daten-Neulokalisierung in EU
+
+**Praktisch:**
+- Nicht automatisch "DPA = OK"
+- Auch 🟡 Tools verlangen Vorsicht
+- Bei sensiblen Daten: 🟢 bevorzugen
+
+---
+
+## Fallstricke: Die häufigsten Fehler
+
+### Fehler 1: "Wir nutzen Claude API mit DPA, also ist alles OK"
+
+**Realität:**
+- Claude hat DPA ✅
+- ABER Datenspeicherung ⚠️
+- ABER Training-Daten-Boundaries ⚠️
+
+**Richtig:**
+- DPA ist necessary, nicht sufficient
+- Auch mit DPA: Dokumentation notwendig
+- Überprüfe Subprozessoren
+
+### Fehler 2: "Free Tools sind immer rot"
+
+**Falsch!**
+- Free Ollama = 🟢 (lokal)
+- Free HuggingFace = 🟡 (mit DPA)
+- Free ChatGPT = 🔴 (Training)
+
+### Fehler 3: "Wir haben größer 1000 Mitarbeiter, DSGVO-Audit ist nicht nötig"
+
+**SEHR FALSCH!**
+- Größere Unternehmen = MEHR Datenschutz-Risiko
+- Regulärer Audit PFLICHT
+- Strafgelder höher (€20M oder 4% Umsatz)
+
+### Fehler 4: "Datenschutzbeauftragter hat reviewt, wir sind fertig"
+
+**Nein!**
+- Datenschutzbeauftragter macht Empfehlungen
+- DU implementierst die Empfehlungen
+- Jährliche Re-Überprüfung PFLICHT
+- Tools ändern ihre Policies ständig
+
+---
+
+## Praktischer Compliance-Prozess
+
+### Phase 1: Audit (2 Wochen)
+
+```
+1. Liste alle AI Tools auf (Spreadsheet)
+2. Für jedes Tool: Dokumentiere
+   - Welche Daten fließen?
+   - Wo werden sie gespeichert?
+   - Gibt es Training?
+   - Wo ist DPA?
+3. Wende 5-Punkte-Checkliste an
+4. Vergebe Ampel-Farbe
+```
+
+### Phase 2: Dokumentation (1 Woche)
+
+```
+Erstelle eine Verarbeitungsvereinbarung pro Tool:
+
+Art. 28 DSGVO Verarbeitungsvertrag
+├─ Tool: [Tool Name]
+├─ Auftragsverarbeiter: [Anbieter]
+├─ Verarbeitungszweck: [Konkret, z.B. "Kundenklassifikation"]
+├─ Datenarten: [Kundenlisten, Emails, Namen]
+├─ Speicherort: [EU, USA, ...]
+├─ Speicherdauer: [30 Tage nach Löschung]
+├─ Subprozessoren: [Liste aus DPA-Anhang]
+└─ Sicherheitsmaßnahmen: [Encryption, Access Control]
+```
+
+### Phase 3: Team Training (halber Tag)
+
+```
+Erkläre dem Team:
+- Welche Tools dürfen genutzt werden
+- Welche nicht
+- Wann DPA-Zustimmung einholen
+- Incident-Procedure falls Datenleck
+
+Dokumentiere im Team-Wiki
+```
+
+### Phase 4: Kontinuierliche Überwachung (monatlich)
+
+```
+Checklist:
+- [ ] Neue Tools werden evaluiert VOR Nutzung
+- [ ] Tool-Policies wurden überprüft
+- [ ] Team hält sich an Richtlinien
+- [ ] Keine Datenlecks
+- [ ] Datenschutzbeauftragter reviewt quarterly
+```
+
+---
+
+## Kostenlose / Günstige Compliance-Tools
+
+### Datenschutz Audit Tools
+- **Datenschutz-TÜV**: ~€500-2000 (Zertifizierung)
+- **DPA-Vorlagen**: EDPB Standard Clauses (kostenlos)
+- **Compliance-Tracking**: Eigenentwicklung in Spreadsheet
+
+### Dokumentation
+- Confluence / Notion: Verarbeitungsverzeichnis
+- GitHub + Wiki: Policies & Verfahren
+- ERPNext: Task-Tracking für Audit-Findings
+
+### Monitoring
+- Selbst-Audit quarterly
+- Team-Schulungen monatlich
+- Datenschutzbeauftragter reviews
+
+**Kosten:** €0-5000/Jahr (abhängig von Company-Größe)
+
+---
+
+## Häufige DSGVO-Strafen (Real Cases 2024-2026)
+
+| Firma | Land | Problem | Strafe |
+|-------|------|---------|--------|
+| Meta (Irland) | EU | Datenfluss USA | €100M |
+| Google (Frankreich) | EU | Cookies | €90M |
+| Clearview AI | USA | Datenschutz | €20M |
+| TikTok (UK) | GB | Children Data | £12.7M |
+
+**Übersetzung:** DSGVO wird ernst genommen, Strafen sind real.
+
+---
+
+## Best Practices nach Industrie
+
+### SaaS-Unternehmen (Kundendaten = Kern)
+```
+🟢 IMMER für Kundendaten:
+- Self-Hosted Ollama + n8n
+- Lokale PostgreSQL
+- Keine Cloud-Tools mit Kundendaten
+```
+
+### Medizin/Pharma (Health Data = Kritisch)
+```
+🟢 EXCLUSIVE:
+- Nur lokale Lösungen
+- HIPAA-Compliance additional
+- Lokales n8n + PostgreSQL
+- Air-Gapped networks
+```
+
+### Consulting/Services (Confidential Data)
+```
+🟡 Mit DPA:
+- Eloquest Cloud Services
+- Azure OpenAI (EU)
+- n8n Cloud (EU)
+
+🟢 Bevorzugt:
+- Ollama lokal für sensitive Projekte
+```
+
+### Marketing/eCommerce (Public Data)
+```
+🟡-🔴 OK:
+- Claude API (🟡 mit DPA)
+- Perplexity Pro (🟡)
+- Zapier Enterprise (🟡)
+- ABER: Keine Kundendaten!
+```
+
+---
+
+## Eskalations-Pfad: Wenn du unsicher bist
+
+1. **Datenschutzbeauftragter fragen**
+   - "Ist dieses Tool OK für Kundendaten?"
+   - Sie geben offizielle Antwort
+
+2. **Wenn kein Datenschutzbeauftragter:**
+   - Kontaktiere Datenschutzbehörde (z.B. Wiener Datenschutzbehörde)
+   - Berate mit DSGVO-Anwalt (~€300-500 Konsultation)
+
+3. **Wenn Anwalt sagt "Nein":**
+   - Alternative Tool wählen
+   - Oder explizite Kundenzustimmung einholen
+
+4. **Incident Fall (Datenleck):**
+   - Sofort Datenschutzbehörde informieren (< 72 Stunden)
+   - Betroffene Kunden informieren
+   - Dokumentieren was passiert ist
+
+---
+
+## Checkliste: Dein Compliance-Status
+
+- [ ] Alle AI Tools inventarisiert?
+- [ ] Jedes Tool mit Ampel-Farbe bewertet?
+- [ ] Sensible Daten nur 🟢 Tools?
+- [ ] 🟡 Tools haben DPA + Dokumentation?
+- [ ] Team kennt die Richtlinien?
+- [ ] Datenschutzbeauftragter hat reviewt?
+- [ ] Datensicherheits-Konzept geschrieben?
+- [ ] Incident-Procedure dokumentiert?
+- [ ] Daten-Lösch-Prozesse getestet?
+- [ ] Jährliche Review geplant?
+
+**Wenn alle Häkchen:** Du bist DSGVO-konform für AI! 🟢
+
+---
+
+## Ressourcen & Kontakte
+
+- **EDPB (Europäische Datenschutzbehörde):** edpb.europa.eu
+- **Wiener Datenschutzbehörde:** dsb.gv.at
+- **NIST AI Risk Framework:** https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.100-1.pdf
+- **Standard Contractual Clauses:** ec.europa.eu/info/law/law-topic/data-protection_en
+- **DPA Templates:** european-commission.europa.eu
+
+**Letzte Aktualisierung**: 21.03.2026 | **Nächste Überprüfung**: Oktober 2026
+
+## Quellen und Links
+
+- [DSGVO (Official Text)](https://eur-lex.europa.eu/eli/reg/2016/679/oj)
+- [Austrian Data Protection Authority](https://www.dsb.gv.at)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

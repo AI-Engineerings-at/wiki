@@ -1,0 +1,432 @@
+---
+title: "Claude Code Skills — Vollständige Referenz"
+date: 2026-03-21
+summary: "Umfassender Leitfaden zur Erstellung, Konfiguration und Verwaltung von Skills in Claude Code. Frontmatter, String-Substitutionen, Bundled Skills, Verzeichnisstruktur und erweiterte Muster."
+tags: ["claude-code", "skills", "automation", "reference"]
+author: "AI Engineering"
+---
+
+# Claude Code Skills — Vollständige Referenz
+
+## Was sind Skills?
+
+Skills sind erweiterbare Befehle, die du in Claude Code erstellst und verwaltest. Mit einer `SKILL.md` Datei im `.claude/skills/` Verzeichnis kannst du Claude neue Fähigkeiten beibringen. Claude nutzt Skills automatisch bei Bedarf oder du rufst sie manuell mit `/skill-name` auf.
+
+Skills folgen dem offenen [Agent Skills](https://agentskills.io) Standard und werden mit zusätzlichen Features erweitert: Invocation Control (wer darf Skills aufrufen), Subagent-Ausführung und dynamischer Kontext-Injektion.
+
+---
+
+## SKILL.md Frontmatter — Alle Felder
+
+Jeder Skill beginnt mit YAML Frontmatter zwischen `---` Markern. Diese Tabelle dokumentiert alle verfügbaren Felder:
+
+| Feld | Typ | Default | Beschreibung | Beispiel |
+|------|-----|---------|-------------|----------|
+| `name` | String | (Verzeichnisname) | Eindeutige Kennung, kebab-case, max 64 Zeichen. Wird zum `/slash-command`. | `explain-code` |
+| `description` | String | (empfohlen) | Was der Skill tut und wann Claude ihn nutzen soll. Claude benutzt das für Auto-Invocation. Trigger-Keywords einbinden. | Erklärt Code mit visuellen Diagrammen |
+| `argument-hint` | String | (optional) | Hint für Autocomplete, zeigt erwartete Argumente. | `[url] [--option]` |
+| `disable-model-invocation` | Boolean | `false` | Wenn true: Nur User kann Skill aufrufen, Claude nicht. | `true` |
+| `user-invocable` | Boolean | `true` | Wenn false: Skill ist hidden, nur Claude kann aufrufen. | `false` |
+| `allowed-tools` | String | (alle) | Komma-getrennte Tool-Liste ohne Permission-Prompt. | `Read, Grep, Glob` |
+| `model` | String | (erbt) | AI Model: haiku, sonnet, opus, oder volle Model ID. | `sonnet` |
+| `effort` | String | (erbt) | Effort Level: low, medium, high, max (Opus 4.6 only). | `high` |
+| `context` | String | (inline) | Wenn fork: Skill läuft in isoliertem Subagent-Context. | `fork` |
+| `agent` | String | `general-purpose` | Welcher Subagent bei context: fork. | `Explore` |
+| `hooks` | Object | (optional) | Lifecycle-Hooks: PreToolUse, PostToolUse, Stop. | Siehe unten |
+
+### Frontmatter Beispiel
+
+```yaml
+---
+name: deep-research
+description: Recherchiert ein Thema gründlich
+context: fork
+agent: Explore
+allowed-tools: "Read, Grep, Glob"
+model: sonnet
+---
+```
+
+---
+
+## String Substitutionen — Dynamische Werte
+
+Skills unterstützen String-Substitution für dynamische Werte im Skill-Content:
+
+| Variable | Beschreibung | Beispiel |
+|----------|-------------|---------|
+| `$ARGUMENTS` | Alle übergebenen Argumente als String. | `/fix-issue 123 urgent` |
+| `$ARGUMENTS[N]` | Zugriff auf spezifisches Argument (0-based Index). | `$ARGUMENTS[0]`, `$ARGUMENTS[1]` |
+| `$N` | Shorthand für `$ARGUMENTS[N]`. | `$0`, `$1`, `$2` |
+| `${CLAUDE_SESSION_ID}` | Aktuelle Session ID für Logging. | `logs/${CLAUDE_SESSION_ID}.log` |
+| `${CLAUDE_SKILL_DIR}` | Absolute Pfad zum Skill-Verzeichnis. IMMER statt hardcoded! | `${CLAUDE_SKILL_DIR}/scripts/helper.py` |
+
+### Substitutions-Beispiele
+
+**Mit mehreren Argumenten (indexed):**
+
+```yaml
+---
+name: migrate-component
+description: Migriert eine Komponente
+---
+
+Migriere $0 von $1 zu $2. Behalte Verhalten und Tests bei.
+```
+
+Aufruf: `/migrate-component SearchBar React Vue`
+→ $0=SearchBar, $1=React, $2=Vue
+
+**Mit Session-Logging:**
+
+```yaml
+---
+name: session-logger
+description: Loggt Aktivität
+---
+
+Schreibe folgendes zu `logs/${CLAUDE_SESSION_ID}.log`:
+
+$ARGUMENTS
+```
+
+**Mit Skill-Verzeichnis:**
+
+```yaml
+---
+name: codebase-visualizer
+allowed-tools: "Bash(python *)"
+---
+
+python ${CLAUDE_SKILL_DIR}/scripts/visualize.py .
+```
+
+WICHTIG: `${CLAUDE_SKILL_DIR}` verwenden statt hardcoded Pfade!
+
+---
+
+## Dynamische Kontext-Injektion — Live-Daten
+
+Die `` !`<command>` `` Syntax führt Shell-Commands AUS BEVOR der Skill an Claude gesendet wird. Das Output ersetzt den Placeholder:
+
+```yaml
+---
+name: pr-summary
+description: Fasst PR-Änderungen zusammen
+context: fork
+agent: Explore
+allowed-tools: "Bash(gh *)"
+---
+
+## Pull Request Kontext
+- PR diff: !`gh pr diff`
+- PR comments: !`gh pr view --comments`
+- Changed files: !`gh pr diff --name-only`
+
+## Deine Aufgabe
+Fasse diesen Pull Request zusammen...
+```
+
+**Ablauf:**
+1. Jeder `` !`<command>` `` wird SOFORT ausgeführt
+2. Das Output ersetzt den Placeholder
+3. Claude erhält die vollständig gerenderte Prompt mit echten Daten
+
+Das ist Preprocessing, nicht etwas das Claude ausführt!
+
+---
+
+## Bundled Skills — Fertig vorhanden
+
+Claude Code enthält integrierte Skills in jeder Session:
+
+| Skill | Zweck | Beispiel |
+|-------|-------|---------|
+| `/batch <instruction>` | Orchestriert große Änderungen parallel. Researcht Codebase, zerlegt in 5-30 Units, spawnt Agents in Git Worktrees. | `/batch migrate src/ from Solid to React` |
+| `/claude-api` | Lädt Claude API Reference Material. Python, TypeScript, Java, Go, Ruby, C#, PHP, cURL + Agent SDK. | Automatisch aktiviert bei `anthropic` import |
+| `/debug [description]` | Troubleshoot aktuelle Session. Liest Debug Log. | `/debug why files not reading?` |
+| `/loop [interval] <prompt>` | Führt Prompt wiederholt aus auf Interval. Polling, PR-Monitoring, Deployment-Checks. | `/loop 5m check deploy` |
+| `/simplify [focus]` | Reviewed geänderte Files auf Qualität. Spawnt 3 Review-Agents parallel. | `/simplify focus on efficiency` |
+
+Diese Skills sind **prompt-basiert** — können parallel Agents spawnen und sich an Codebase adapten.
+
+---
+
+## Skill Locations — Scope und Priority
+
+Wo du einen Skill speicherst, bestimmt Scope und Priority:
+
+| Location | Pfad | Anwendbar auf | Priority |
+|----------|------|--------------|----------|
+| Enterprise | (Managed Settings) | Alle Org-User | 1 (höchste) |
+| Personal | `~/.claude/skills/<name>/SKILL.md` | Alle deine Projekte | 2 |
+| Project | `.claude/skills/<name>/SKILL.md` | Dieses Projekt nur | 3 |
+| Plugin | `<plugin>/skills/<name>/SKILL.md` | Wo Plugin enabled | 4 (niedrigste) |
+
+**Priority-Regel:** Enterprise > Personal > Project > Plugin.
+
+**Automatic Nested Discovery:** Claude Code findet Skills automatisch in nested `.claude/skills/` Verzeichnissen. In Monorepos: `packages/frontend/.claude/skills/`.
+
+### Verzeichnis-Struktur eines Skills
+
+```
+my-skill/
+├── SKILL.md           # Main Instructions (PFLICHT)
+├── template.md        # Template für Claude
+├── examples/
+│   └── sample.md      # Beispiel-Output
+└── scripts/
+    ├── main.py        # 1 Job pro Script!
+    └── helpers.py     # Support Code
+```
+
+`SKILL.md` ist erforderlich. Referenziere Supporting Files damit Claude weiß wann sie zu laden sind:
+
+```markdown
+## Detaillierte Dokumentation
+- API-Details: [reference.md](reference.md)
+- Usage-Beispiele: [examples.md](examples.md)
+```
+
+**Tipp:** `SKILL.md` unter 500 Zeilen halten.
+
+---
+
+## Wer darf Skills aufrufen?
+
+### `disable-model-invocation: true` — Nur User aufrufen
+
+Verhindert dass Claude automatisch lädt. Nutzen für Workflows mit Seiteneffekten:
+
+```yaml
+---
+name: deploy
+description: Deploye die App zu Production
+disable-model-invocation: true
+---
+```
+
+**Effekt:**
+- Du kannst `/deploy` aufrufen ✅
+- Claude ruft automatisch auf ❌
+- In Claude's Context ❌
+
+### `user-invocable: false` — Nur Claude aufrufen
+
+Skill ist hidden. Nur Claude kann aufrufen. Für Hintergrund-Wissen:
+
+```yaml
+---
+name: legacy-system-context
+description: Erklärt wie das alte System funktioniert
+user-invocable: false
+---
+```
+
+**Effekt:**
+- Du kannst aufrufen ❌
+- Claude ruft automatisch auf ✅
+- In Claude's Context ✅
+
+### Invocation-Matrix
+
+| Frontmatter | User | Claude | Context |
+|-------------|------|--------|---------|
+| (default) | ✅ | ✅ | Description immer |
+| `disable-model-invocation: true` | ✅ | ❌ | Description NICHT |
+| `user-invocable: false` | ❌ | ✅ | Description immer |
+
+---
+
+## Tool-Zugriff limitieren — `allowed-tools`
+
+Mit `allowed-tools` kannst du Tools restricten:
+
+```yaml
+---
+name: safe-reader
+description: Liest Dateien ohne Änderungen
+allowed-tools: "Read, Grep, Glob"
+---
+```
+
+Claude darf NUR Read, Grep, Glob nutzen.
+
+**Best Practice:** Principle of Least Privilege:
+- Read-Only: `Read, Grep, Glob`
+- Content Creation: `Read, Grep, Glob, Write, Edit`
+- Deployment: `Read, Grep, Glob, Bash`
+
+---
+
+## Skills in Subagents — `context: fork`
+
+Mit `context: fork` läuft der Skill in isoliertem Subagent-Context:
+
+```yaml
+---
+name: deep-research
+description: Recherchiert ein Thema gründlich
+context: fork
+agent: Explore
+---
+
+Recherchiere $ARGUMENTS gründlich:
+
+1. Finde relevante Files
+2. Lese und analysiere Code
+3. Fasse Findings zusammen
+```
+
+**Ablauf:**
+1. Neuer isolierter Context
+2. Subagent erhält Skill-Content als Prompt
+3. `agent` bestimmt Execution Environment
+4. Results zurück zur Main-Session
+
+**Subagent-Typen:**
+- `Explore`: Codebase-Suche, Read-only, Haiku
+- `Plan`: Forschung, Architektur, Read-only, Sonnet
+- `general-purpose`: Voller Tool-Zugriff
+
+---
+
+## Hooks in Skills — Lifecycle-Automation
+
+Skills können Hooks definieren für bestimmte Events:
+
+```yaml
+---
+name: code-reviewer
+description: Reviews Code mit automatischem Linting
+hooks:
+  PreToolUse:
+    - matcher: "Bash"
+      hooks:
+        - type: command
+          command: "./scripts/validate-command.sh"
+  PostToolUse:
+    - matcher: "Edit|Write"
+      hooks:
+        - type: command
+          command: "./scripts/run-linter.sh"
+---
+```
+
+**Hook-Events:**
+- `PreToolUse`: Bevor Claude ein Tool nutzt (Validation)
+- `PostToolUse`: Nachdem ein Tool genutzt wurde (Cleanup)
+- `Stop`: Wenn Skill beendet wird
+
+Hook-Scripts bekommen Input via stdin. Exit Code 0 (OK) oder 2 (Block).
+
+---
+
+## Argumente an Skills übergeben
+
+Both du und Claude können Argumente übergeben. Verfügbar über `$ARGUMENTS`:
+
+```yaml
+---
+name: fix-issue
+description: Fixt einen GitHub Issue
+disable-model-invocation: true
+---
+
+Fixe GitHub Issue $ARGUMENTS nach unseren Standards.
+
+1. Lese Issue-Description
+2. Verstehe Requirements
+3. Implementiere Fix
+4. Schreibe Tests
+5. Erstelle Commit
+```
+
+Aufruf: `/fix-issue 123` → "Fixe GitHub Issue 123..."
+
+**Mit mehreren Argumenten:**
+
+```yaml
+---
+name: migrate-component
+---
+
+Migriere $0 von $1 zu $2.
+```
+
+Aufruf: `/migrate-component Button React Vue`
+
+Wenn Skill kein `$ARGUMENTS` enthält, werden sie automatisch angehängt.
+
+---
+
+## Skill Discovery — Wann nutzt Claude Skills?
+
+Claude kennt eure Skills durch ihre `description`. Je besser die Description, desto besser die Auto-Detection:
+
+- **Gut:** "Erklärt Code mit Diagrammen. Nutzen wenn erklärt wird wie etwas funktioniert."
+- **Schlecht:** "Code-Tool" (zu vage)
+
+Claude's Skill Context hat ein Budget (2% des Context Windows, min 16KB). `/context` zeigt ob Descriptions excluded wurden. `SLASH_COMMAND_TOOL_CHAR_BUDGET` Env-Var kann Budget setzen.
+
+---
+
+## Skill-Namen und Präfixe — Konventionen
+
+Standard Präfixe helfen:
+
+| Präfix | Bereich | Beispiel |
+|--------|--------|---------|
+| `deploy-*` | Deployment | `deploy-prod`, `deploy-docker` |
+| `n8n-*` | n8n | `n8n-import`, `n8n-validate` |
+| `content-*` | Content | `content-blog`, `content-social` |
+| `market-*` | Marketing | `market-email`, `market-campaign` |
+| `test-*` | Testing | `test-coverage`, `test-integration` |
+| `dr-*` | Disaster Recovery | `dr-backup`, `dr-restore` |
+
+Name: kebab-case, max 64 Zeichen, eindeutig über alle Repos.
+
+---
+
+## Troubleshooting
+
+### Skill triggert nicht
+
+1. Prüfe ob Description Keywords enthält
+2. Verifiziere in "What skills available?"
+3. Natürlichere Formulierung versuchen
+4. Direkt invoken: `/skill-name`
+
+### Skill triggert zu oft
+
+1. Description präziser machen
+2. `disable-model-invocation: true` setzen
+
+### Claude sieht nicht alle Skills
+
+Skill-Description Budget (~16KB). Mit vielen Skills können manche excluded sein. Lösung: `SLASH_COMMAND_TOOL_CHAR_BUDGET` setzen.
+
+---
+
+## Verwandte Features
+
+- **[Sub-Agents](/de/tools/claude-code-agent-sdk)**: Tasks delegieren
+- **[Plugins](/en/plugins)**: Skills verteilen
+- **[Memory (CLAUDE.md)](/en/memory)**: Persistente Kontext
+- **[Hooks](/en/hooks)**: Workflow-Automation
+- **[Permissions](/en/permissions)**: Tool-Kontrolle
+
+---
+
+*Erstellt: 2026-03-21 | Quelle: code.claude.com/docs/en/skills*
+
+## Quellen und Links
+
+- [Skills Documentation](https://code.claude.com/docs/en/skills)
+- [Plugin Marketplaces](https://code.claude.com/docs/en/plugin-marketplaces)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

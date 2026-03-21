@@ -1,0 +1,217 @@
+---
+title: Reranking
+date: 2026-03-21
+summary: Cross-Encoder vs Bi-Encoder, Reranking Pipeline, Cohere Rerank, BGE-Reranker, ColBERT — RAG Integration
+tags: [reranking, cross-encoder, bi-encoder, information-retrieval, rag]
+author: AI Engineering
+section: Concepts
+---
+
+# Understanding Reranking
+
+Reranking re-sorts candidates by relevance. Typical in RAG: fast retriever finds Top-100, reranker sorts to Top-5.
+
+```
+Retriever (fast, broad):
+  Query: "How to learn Python?"
+  Top 100 candidates: [Blog1, Tutorial, Forum, Wiki, ...]
+
+Reranker (slow, precise):
+  Re-sorts the 100 by actual relevance
+  Top 5: [Python Guide, Introduction, Best Practices, ...]
+```
+
+---
+
+## Cross-Encoder vs Bi-Encoder
+
+### Bi-Encoder (Retriever)
+
+```
+Query: "How to learn Python?"
+embedding_q = [0.1, 0.2, ..., 0.5]  (fast, cached)
+
+Document: "Python Guide"
+embedding_d = [0.15, 0.19, ..., 0.48]  (pre-computed, cached)
+
+Similarity = cosine(embedding_q, embedding_d)
+Time: O(1) - just dot product
+```
+
+**Advantage:** Fast, scalable
+**Disadvantage:** Limited query-document interaction
+
+### Cross-Encoder (Reranker)
+
+```
+[QUERY + DOCUMENT] → Transformer → Relevance Score (0-1)
+
+Transformer sees both together, can interact
+Time: O(n) - n forward passes for n documents
+```
+
+**Advantage:** Much more precise
+**Disadvantage:** Slower
+
+---
+
+## Reranking Pipeline
+
+### Two-Stage Retrieval
+
+```python
+from sentence_transformers import SentenceTransformer, util, CrossEncoder
+
+# Stage 1: Fast Bi-Encoder Retriever
+retriever = SentenceTransformer("all-MiniLM-L6-v2")
+
+# Stage 2: Cross-Encoder Reranker
+reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-12-v2")
+
+documents = ["Doc1: Python...", ..., "Doc100: C++..."]
+query = "How to learn Python?"
+
+# Stage 1: Top 100
+query_embedding = retriever.encode(query)
+doc_embeddings = retriever.encode(documents)
+scores_retriever = util.pytorch_cos_sim(query_embedding, doc_embeddings)[0]
+top100_idx = scores_retriever.argsort(reverse=True)[:100]
+
+# Stage 2: Top 5
+top100_docs = [documents[i] for i in top100_idx]
+pair_scores = reranker.predict([[query, doc] for doc in top100_docs])
+
+top5_idx = sorted(range(100), key=lambda i: pair_scores[i], reverse=True)[:5]
+final_results = [top100_docs[i] for i in top5_idx]
+```
+
+---
+
+## Popular Reranker Models
+
+### Cohere Rerank
+
+API-based, excellent quality.
+
+```python
+import cohere
+
+client = cohere.ClientV2(api_key="...")
+
+response = client.rerank(
+    model="rerank-english-v3.0",
+    query="How to learn Python?",
+    documents=[...],
+    top_n=5
+)
+```
+
+### BGE-Reranker
+
+Open-source, often better than Cohere.
+
+```python
+from sentence_transformers import CrossEncoder
+
+reranker = CrossEncoder("BAAI/bge-reranker-large")
+
+scores = reranker.predict([[query, doc] for doc in documents])
+top_indices = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)[:5]
+```
+
+### ColBERT
+
+Token-level reranking (very precise).
+
+```python
+from colbert.client.client import ColBertClient
+
+client = ColBertClient(checkpoint="colbertv2.0")
+
+client.index(collection=[{"id": i, "text": doc} for i, doc in enumerate(documents)])
+
+results = client.search(query, top_k=5)
+```
+
+---
+
+## Integration with RAG
+
+```python
+from langchain.retrievers import ContextualCompressionRetriever
+from langchain.retrievers.document_compressors import CrossEncoderReranker
+from langchain.vectorstores import FAISS
+
+# Setup
+base_retriever = vectorstore.as_retriever(search_kwargs={"k": 100})
+
+# Reranker
+compressor = CrossEncoderReranker(
+    model_name="BAAI/bge-reranker-large",
+    top_n=5
+)
+
+# Combine
+compression_retriever = ContextualCompressionRetriever(
+    base_compressor=compressor,
+    base_retriever=base_retriever
+)
+
+# Use
+docs = compression_retriever.get_relevant_documents(query)
+# Automatically: Top 100 → Top 5 (reranked)
+```
+
+---
+
+## Performance & Latency
+
+```
+Scenario: 1000 documents, need top 5
+
+Only Bi-Encoder (fast, bad):
+  Retrieval: 10ms
+  Total: 10ms
+  Quality: 3/5 ⭐
+
+Bi-Encoder + Cross-Encoder (standard):
+  Retrieval: 10ms
+  Reranking (100 docs): 5000ms
+  Total: 5010ms
+  Quality: 4.5/5 ⭐⭐⭐⭐
+
+Bi-Encoder + ColBERT (optimized):
+  Retrieval: 10ms
+  Reranking: 500ms
+  Total: 510ms
+  Quality: 4.7/5 ⭐⭐⭐⭐⭐
+```
+
+---
+
+## Optimization Strategies
+
+### 1. Batch Reranking
+
+```python
+# ✅ Fast: Batch all at once
+pairs = [[query, doc] for doc in documents]
+scores = reranker.predict(pairs)
+```
+
+### 2. Progressive Reranking
+
+```
+Stage 1: Fast Bi-Encoder     (Top 100)
+Stage 2: Small Cross-Encoder (Top 20)
+Stage 3: Large Cross-Encoder (Top 5)
+```
+
+---
+
+## Sources and Links
+
+- [Cross-Encoder](https://www.sbert.net/examples/applications/cross-encoders/README.html)
+- [Cohere Rerank](https://docs.cohere.com/reference/rerank)
+- [BGE Reranker](https://huggingface.co/BAAI/bge-reranker-large)
+- [ColBERT](https://github.com/stanford-futuredata/ColBERT)

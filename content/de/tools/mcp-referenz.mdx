@@ -1,0 +1,484 @@
+---
+title: Claude Code MCP — Vollständige Referenz
+date: 2026-03-21
+summary: Umfassende Referenz für Model Context Protocol in Claude Code, einschließlich Server-Management, Transport-Typen, Konfiguration, Umgebungsvariablen, OAuth und Troubleshooting.
+tags: [claude-code, mcp, model-context-protocol, konfiguration, server]
+author: AI Engineering
+---
+
+# Claude Code MCP — Vollständige Referenz
+
+Das Model Context Protocol (MCP) ermöglicht Claude Code, sich mit externen Tools, Services und Datenquellen zu verbinden. Diese Referenz behandelt alle Aspekte der MCP-Konfiguration und des Server-Management.
+
+## Was ist MCP?
+
+MCP ist ein standardisiertes Protokoll, das Claude Code ermöglicht:
+- Zugriff auf externe Tools und Services
+- Abfrage von Datenquellen und APIs
+- Erweiterte Funktionalität ohne Änderung von Claude Code selbst
+- Gemeinsame Nutzung von Tools über mehrere Anwendungen
+
+MCP-Server fungieren als Vermittler zwischen Claude Code und externen Systemen und bieten eine strukturierte Schnittstelle für Tool-Discovery und -Ausführung.
+
+## Transport-Typen
+
+Claude Code unterstützt drei Transportmechanismen für die Verbindung zu MCP-Servern.
+
+### 1. Standard Input/Output (stdio)
+
+Der häufigste Transport-Typ für lokale MCP-Server.
+
+**Konfigurationsformat:**
+```json
+{
+  "mcpServers": {
+    "server-name": {
+      "command": "node",
+      "args": ["/path/to/server.js"],
+      "env": {
+        "CUSTOM_VAR": "value"
+      }
+    }
+  }
+}
+```
+
+**Schlüsselfelder:**
+- `command`: Ausführbare Datei (node, python, npx, etc.)
+- `args`: Array von Kommandozeilen-Argumenten
+- `env`: Umgebungsvariablen für den Server-Prozess (optional)
+
+**Beispiel — Node.js MCP-Server:**
+```json
+{
+  "mcpServers": {
+    "example-server": {
+      "command": "node",
+      "args": ["./dist/index.js"]
+    }
+  }
+}
+```
+
+**Beispiel — Python MCP-Server:**
+```json
+{
+  "mcpServers": {
+    "python-server": {
+      "command": "python",
+      "args": ["-m", "mcp_server_module"]
+    }
+  }
+}
+```
+
+### 2. HTTP
+
+Für Remote-MCP-Server über HTTP oder HTTPS erreichbar.
+
+**Konfigurationsformat:**
+```json
+{
+  "mcpServers": {
+    "remote-server": {
+      "url": "http://example.com:3000"
+    }
+  }
+}
+```
+
+**Schlüsselfelder:**
+- `url`: Vollständige HTTP(S)-URL zum MCP-Server-Endpoint
+
+**Beispiel — lokaler HTTP-Server:**
+```json
+{
+  "mcpServers": {
+    "local-http": {
+      "url": "http://localhost:3000"
+    }
+  }
+}
+```
+
+### 3. Server-Sent Events (SSE)
+
+Für MCP-Server über Server-Sent Events, typischerweise mit HTTP POST für Befehle.
+
+**Konfigurationsformat:**
+```json
+{
+  "mcpServers": {
+    "sse-server": {
+      "url": "http://example.com:3000"
+    }
+  }
+}
+```
+
+## MCP-Server via CLI hinzufügen
+
+Der `claude mcp add`-Befehl konfiguriert neue MCP-Server interaktiv.
+
+**Basis-Syntax:**
+```bash
+claude mcp add
+```
+
+**Flags und Optionen:**
+
+| Flag | Verwendung | Beispiel |
+|------|-----------|----------|
+| `--name <name>` | Server-Name (kebab-case, erforderlich) | `claude mcp add --name my-server` |
+| `--command <cmd>` | Ausführbare Datei | `--command node` |
+| `--args <arg1> <arg2>` | Kommandozeilen-Argumente | `--args ./server.js --debug` |
+| `--env <KEY=VALUE>` | Umgebungsvariablen (wiederholbar) | `--env API_KEY=abc123` |
+| `--url <url>` | HTTP/SSE-Server-URL | `--url http://localhost:3000` |
+
+**Beispiele:**
+
+Node.js-Server hinzufügen:
+```bash
+claude mcp add --name example-server --command node --args ./dist/index.js
+```
+
+HTTP-Server hinzufügen:
+```bash
+claude mcp add --name remote-api --url http://localhost:3000
+```
+
+Server mit Umgebungsvariablen hinzufügen:
+```bash
+claude mcp add --name db-server --command python --args -m mcp_server --env DATABASE_URL=postgres://localhost
+```
+
+## MCP-Konfigurationsdateien
+
+### `.mcp.json` (Projekt-Level)
+
+Befindet sich im Projekt-Root, verfolgt projekt-spezifische MCP-Server.
+
+**Zweck:**
+- Versionskontrolle für projekt-spezifische MCP-Server
+- Mit Team geteilt (committed in Repository)
+- Größtenteils schreibgeschützt (verwaltet durch `claude mcp add`)
+
+**Format:**
+```json
+{
+  "mcpServers": {
+    "server-name": {
+      "command": "node",
+      "args": ["./dist/index.js"]
+    },
+    "another-server": {
+      "url": "http://localhost:3000"
+    }
+  }
+}
+```
+
+### `~/.claude/.mcp.json` (Benutzer-Level)
+
+Im Home-Verzeichnis des Benutzers, verfolgt MCP-Server für alle Projekte.
+
+**Zweck:**
+- Persönliche MCP-Server über alle Projekte hinweg
+- Nicht mit Team geteilt
+- Beständig über Projekt-Wechsel
+
+## MCP-Server-Management
+
+### Server auflisten
+
+**Befehl:**
+```bash
+claude mcp list
+```
+
+**Output:**
+Zeigt alle konfigurierten MCP-Server mit Transport-Typ und Status.
+
+### Server-Details anzeigen
+
+**Befehl:**
+```bash
+claude mcp get <server-name>
+```
+
+Zeigt detaillierte Konfiguration für einen spezifischen Server.
+
+### Server entfernen
+
+**Befehl:**
+```bash
+claude mcp remove <server-name>
+```
+
+**Effekt:**
+- Entfernt Server aus `.mcp.json` oder `~/.claude/.mcp.json`
+- Wirkt sich nach Claude Code-Neustart aus
+- Entfernt Zugriff auf alle Tools des Servers
+
+### Server-Status prüfen
+
+**Befehl:**
+```bash
+/status
+```
+
+Zeigt alle konfigurierten Server und ihren aktuellen Status.
+
+## Umgebungsvariablen in MCP
+
+Umgebungsvariablen ermöglichen MCP-Servern, auf Credentials und Konfiguration zuzugreifen ohne Hardcoding.
+
+### Umgebungsvariablen via Konfiguration übergeben
+
+In `.mcp.json` oder `~/.claude/.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "api-server": {
+      "command": "node",
+      "args": ["./server.js"],
+      "env": {
+        "API_KEY": "abc123",
+        "DATABASE_URL": "postgresql://localhost/mydb",
+        "LOG_LEVEL": "debug"
+      }
+    }
+  }
+}
+```
+
+### Umgebungsvariablen via CLI übergeben
+
+Mit dem `--env`-Flag von `claude mcp add`:
+
+```bash
+claude mcp add --name server \
+  --command node \
+  --args ./server.js \
+  --env API_KEY=abc123 \
+  --env DEBUG=true
+```
+
+### Best Practices für Umgebungsvariablen
+
+**Niemals Secrets hardcoden:**
+```json
+// FALSCH
+{
+  "env": {
+    "API_KEY": "sk-abc123secret"
+  }
+}
+```
+
+**Stattdessen, System-Umgebungsvariablen verwenden:**
+```bash
+export API_KEY="sk-abc123secret"
+```
+
+Dann in Konfiguration referenzieren:
+```json
+{
+  "env": {
+    "API_KEY": "$API_KEY"
+  }
+}
+```
+
+## OAuth in MCP
+
+Einige MCP-Server verwenden OAuth 2.0 für Authentifizierung mit externen Services (GitHub, Google, Slack, etc.).
+
+### Wie OAuth-Flows mit MCP funktionieren
+
+1. **Server-Initiierung**: MCP-Server fordert OAuth-Flow an
+2. **Token-Anfrage**: Claude Code erhält Autorisierungs-URL
+3. **Benutzer-Aktion**: Benutzer öffnet URL im Browser und genehmigt Zugriff
+4. **Token-Callback**: Autorisierungscode zurück zu Claude Code
+5. **Token-Austausch**: MCP-Server tauscht Code für Access-Token
+6. **Tool-Ausführung**: Tool hat jetzt gültigen Token
+
+### OAuth-Server konfigurieren
+
+```json
+{
+  "mcpServers": {
+    "github-server": {
+      "command": "node",
+      "args": ["./github-mcp.js"],
+      "env": {
+        "GITHUB_CLIENT_ID": "your-client-id",
+        "GITHUB_CLIENT_SECRET": "your-client-secret"
+      }
+    }
+  }
+}
+```
+
+## Managed MCP Configuration
+
+Für Organisationen, die zentrales MCP-Server-Management benötigen.
+
+### Erlaubte MCP-Server
+
+In Managed Settings die erlaubten MCP-Server festlegen:
+
+```json
+{
+  "allowedMcpServers": {
+    "server-1": {
+      "command": "node",
+      "args": ["./dist/index.js"]
+    }
+  },
+  "allowManagedMcpServersOnly": true
+}
+```
+
+**Effekt:**
+- Nur aufgelistete Server sind zugänglich
+- Benutzer und Projekt-Settings können keine zusätzlichen Server hinzufügen
+
+### Gesperrte MCP-Server
+
+Spezifische Server in der gesamten Organisation blockieren:
+
+```json
+{
+  "deniedMcpServers": [
+    "untrusted-server",
+    "legacy-server"
+  ]
+}
+```
+
+**Effekt:**
+- Aufgelistete Server können nicht verwendet werden
+- Deny hat immer Vorrang
+
+## Troubleshooting MCP
+
+### Server-Verbindungsprobleme
+
+**Problem: "Failed to connect to MCP server"**
+
+Mögliche Ursachen und Lösungen:
+
+1. **Stdio-Server startet nicht:**
+   ```bash
+   node ./dist/index.js
+   npm install
+   npm run build
+   ```
+
+2. **HTTP-Server nicht erreichbar:**
+   ```bash
+   curl http://localhost:3000/health
+   ```
+
+3. **Falsches Arbeitsverzeichnis:**
+   ```json
+   {
+     "mcpServers": {
+       "server": {
+         "command": "node",
+         "args": ["./dist/index.js"],
+         "directory": "/full/path/to/server"
+       }
+     }
+   }
+   ```
+
+### Tool nicht gefunden
+
+**Problem: "Tool not available from MCP server"**
+
+Lösungen:
+1. Verifizieren Server läuft: `claude mcp list`
+2. Server-Tools prüfen: `claude mcp get server-name`
+3. Claude Code neustarten
+4. Server-Logs prüfen
+
+### Umgebungsvariablen-Probleme
+
+**Problem: "API_KEY is undefined"**
+
+Lösungen:
+1. Variable ist in Shell vor Claude Code-Start gesetzt
+2. Konfigurationssyntax in `.mcp.json` prüfen
+3. Absolute Pfade für `DATABASE_URL` verwenden
+4. Konfiguration neuladen: Claude Code neustarten
+
+### Performance-Probleme
+
+**Problem: "MCP server is slow or timing out"**
+
+Lösungen:
+1. Timeout erhöhen falls unterstützt: `--env TIMEOUT=60`
+2. Server-Logs auf Bottlenecks prüfen
+3. Payload-Größe reduzieren
+4. HTTP-Transport in Betracht ziehen
+5. Server-Ressourcennutzung überwachen
+
+### Debug Logging
+
+Detailliertes MCP Logging aktivieren:
+
+**Via Umgebungsvariable:**
+```bash
+MCP_DEBUG=true claude code
+```
+
+**Via Konfiguration:**
+```json
+{
+  "mcpServers": {
+    "server": {
+      "command": "node",
+      "args": ["./dist/index.js"],
+      "env": {
+        "DEBUG": "mcp:*"
+      }
+    }
+  }
+}
+```
+
+## Best Practices
+
+1. **Projekt-Level-Konfiguration für Team-Server verwenden**: `.mcp.json` in Versionskontrolle committen für Konsistenz.
+
+2. **Benutzer-Level-Konfiguration für persönliche Server verwenden**: In `~/.claude/.mcp.json` speichern, nicht committen.
+
+3. **Secrets in Umgebungsvariablen speichern**: Niemals API Keys in Konfigurationsdateien hardcoden.
+
+4. **Server vor Hinzufügen testen**: MCP-Server unabhängig verifizieren.
+
+5. **Custom Server dokumentieren**: Setup-Anweisungen in Projekt-README einfügen.
+
+6. **Server-Health überwachen**: Regelmäßig `claude mcp list` überprüfen.
+
+## Siehe auch
+
+- [Settings-Referenz](/de/tools/claude-code-einstellungen): Komplette Konfigurationsreferenz
+- [Berechtigungen](/de/tools/claude-code-berechtigungen): Kontrolle über MCP-Tools
+- [Hooks](/de/tools/claude-code-hooks): Erweiterte MCP-Funktionalität
+
+## Quellen und Links
+
+- [MCP Documentation](https://code.claude.com/docs/en/mcp)
+- [MCP Specification](https://github.com/modelcontextprotocol/specification)
+- [MCP Servers](https://github.com/modelcontextprotocol/servers)
+- [Model Context Protocol](https://modelcontextprotocol.io)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

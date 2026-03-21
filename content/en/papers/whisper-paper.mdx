@@ -1,0 +1,138 @@
+---
+title: Whisper — Multilingual Speech Recognition
+date: 2026-03-21
+summary: Radford et al., weak supervision at scale, encoder-decoder transformer architecture, multilingual training, model sizes, accuracy vs speed tradeoffs.
+tags: [whisper, speech, audio, asr, multilingual, paper]
+author: AI Engineering
+section: papers
+---
+
+# Whisper — Multilingual Speech Recognition
+
+Whisper is OpenAI's speech-to-text model trained on 680,000 hours of multilingual audio. It shows that training on diverse, weakly-labeled data scales better than clean, curated datasets.
+
+## The Traditional ASR Problem
+
+Before Whisper, speech recognition systems were:
+
+```
+Traditional ASR:
+1. Collect clean, labeled audio (expensive)
+2. Train on single language
+3. Works perfectly on that language
+4. Fails on accents, background noise, other languages
+```
+
+## Whisper's Insight: Weak Supervision at Scale
+
+```
+Whisper approach:
+1. Collect 680,000 hours of YouTube video-audio
+2. Use existing closed-caption system for labels (weak)
+3. These are NOT hand-labeled, may have errors
+4. Train huge model on this imperfect data
+
+Result:
+- Model learns from noise, accents, background
+- Generalizes better than clean-data models
+- Works in 99 languages!
+```
+
+This is **scale over quality** strategy.
+
+## Training Data
+
+```
+Multilingual audio from YouTube:
+
+English: 117,000 hours
+Spanish: 32,000 hours
+German: 15,000 hours
+Russian: 11,000 hours
+Chinese: 12,000 hours
+French: 12,000 hours
+... (99 languages total)
+
+Total: 680,000 hours = 97 years of continuous audio
+```
+
+Collected without manual labeling!
+
+## Architecture
+
+```
+Encoder:
+- Input: 16 kHz audio (STFT)
+- Output: 1500-dim hidden state
+- 24 Transformer blocks
+- 4 attention heads per layer
+
+Decoder:
+- Autoregressive transformer
+- Generates tokens one-by-one
+- Conditioned on encoder output
+
+Special tokens:
+- <|startoftranscript|>
+- <|en|> (language token)
+- <|transcribe|> or <|translate|>
+```
+
+## Model Sizes
+
+```
+Model | Parameters | Speed | Accuracy
+------|-----------|-------|----------
+Tiny  | 39M       | ~10x  | 85%
+Base  | 74M       | ~8x   | 89%
+Small | 244M      | ~6x   | 91%
+Med.  | 769M      | ~2x   | 92%
+Large | 1.5B      | 1x    | 94%
+
+Speed = relative to real-time speech
+```
+
+Trade-off: smaller is faster, larger is more accurate.
+
+## Performance
+
+```
+Accuracy on test sets:
+
+English (clean audio):
+- Human baseline: 95%
+- Whisper-Large: 96% (better than humans!)
+
+Multilingual:
+- Whisper: 80-85% accuracy across 99 languages
+
+With background noise:
+- Whisper-Large: 92% even with 10dB noise
+```
+
+## Practical Deployment
+
+```python
+from faster_whisper import WhisperModel
+
+model = WhisperModel("base")
+segments, info = model.transcribe("audio.mp3")
+
+for segment in segments:
+    print(segment.text)
+```
+
+## Limitations
+
+Whisper can't:
+1. Handle multiple speakers well
+2. Do speaker identification
+3. Do speaker diarization
+4. Reliably translate between non-English pairs
+
+## Sources and Links
+
+- [Whisper Paper (ArXiv)](https://arxiv.org/abs/2212.04356)
+- [OpenAI Whisper GitHub](https://github.com/openai/whisper)
+- [faster-whisper](https://github.com/guillaumekln/faster-whisper)
+- [OpenAI API Docs](https://platform.openai.com/docs/guides/speech-to-text)

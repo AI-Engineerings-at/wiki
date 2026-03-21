@@ -1,0 +1,763 @@
+---
+title: Open WebUI — Complete Reference Guide
+date: 2026-03-21
+summary: Open WebUI is the most widely-used web interface for local LLMs. Docker setup, Ollama integration, RAG pipeline, model management, REST API, custom tools, and enterprise security hardening.
+tags: [open-webui, llm, interface, docker, ollama, rag, local]
+author: AI Engineering
+---
+
+# Open WebUI — Local LLM Web Interface
+
+Open WebUI is the de-facto standard web interface for local and private LLMs in 2026. It runs in Docker, integrates directly with Ollama, and provides extensive extensibility: native RAG, web search, custom tools, agent support, and multi-user management.
+
+This guide covers v0.3.x production deployments and best practices.
+
+## Quick Start — 5 Minutes
+
+### Docker Compose Setup
+
+```yaml
+version: '3.8'
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:latest
+    container_name: open-webui
+    ports:
+      - "3000:8080"
+    environment:
+      OLLAMA_API_BASE: "http://ollama:11434"
+      RAG_EMBEDDING_ENGINE: "ollama"
+      RAG_EMBEDDING_MODEL: "nomic-embed-text"
+      WEBUI_URL: "http://open-webui:3000"
+      DATABASE_URL: "sqlite:///app/backend/data/webui.db"
+    volumes:
+      - open-webui-data:/app/backend/data
+    networks:
+      - ai-stack
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    environment:
+      OLLAMA_NUM_GPU: "1"
+      OLLAMA_MAX_LOADED_MODELS: "3"
+    volumes:
+      - ollama-models:/root/.ollama
+    networks:
+      - ai-stack
+    restart: unless-stopped
+
+volumes:
+  open-webui-data:
+  ollama-models:
+
+networks:
+  ai-stack:
+    driver: bridge
+```
+
+Start with:
+
+```bash
+docker-compose up -d
+```
+
+Access at `http://localhost:3000`
+
+### Initial Setup
+
+1. Visit `http://localhost:3000`
+2. Click "Sign Up" to create first admin account
+3. Enter credentials — this becomes administrator
+4. After login: Settings → Connections
+5. Verify "Ollama API URL" is correct (e.g., `http://ollama:11434` in Docker)
+
+### Pull Models
+
+Via Open WebUI (once Ollama connected):
+1. Admin Panel → Models
+2. Click "Pull from Ollama"
+3. Select model (e.g., `qwen2.5:7b`, `mistral`)
+4. Wait for download (5-30 min depending on model size)
+
+Or directly in Ollama container:
+
+```bash
+docker exec ollama ollama pull qwen2.5:7b
+docker exec ollama ollama pull mistral:7b
+```
+
+## Architecture Overview
+
+Open WebUI consists of two main components:
+
+- **Frontend (React/TypeScript)**: Browser-based, runs on port 3000, responsive UI
+- **Backend (Python/FastAPI)**: Single container, REST API on port 8080 (mapped to 3000)
+
+```
+Browser → nginx (Port 3000)
+           ↓
+         FastAPI Backend
+           ↓
+    +-- Ollama API (http://ollama:11434)
+    +-- RAG Engine (local embeddings or external)
+    +-- Database (SQLite or PostgreSQL)
+    +-- Vector Store (ChromaDB, Weaviate optional)
+```
+
+### Data Model
+
+```
+User (roles: admin, user, guest)
+  ├── Chat Sessions (1:n)
+  │   ├── Messages (1:n)
+  │   ├── Selected Models (1:n)
+  │   └── RAG Documents (n:m)
+  ├── Custom Tools (1:n)
+  ├── Model Preferences (n:m)
+  └── API Keys (1:n)
+```
+
+## Configuration Details
+
+### Environment Variables (Frontend)
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OLLAMA_API_BASE` | `http://localhost:11434` | Ollama endpoint (Docker: use hostname!) |
+| `OPENAI_API_KEY` | — | Optional: OpenAI access for external models |
+| `OPENAI_API_BASE_URL` | — | Optional: Alternative LLM API base |
+| `RAG_EMBEDDING_ENGINE` | `ollama` | `ollama`, `openai`, or `azure` |
+| `RAG_EMBEDDING_MODEL` | — | E.g., `nomic-embed-text`, `all-minilm` |
+| `WEBUI_URL` | — | External URL for links (critical for emails!) |
+| `WEBUI_SECRET_KEY` | auto-generated | For session encryption — don't change after init |
+| `DATABASE_URL` | `sqlite:///...` | Or PostgreSQL: `postgresql://user:pw@host/db` |
+
+### Environment Variables (Backend)
+
+```bash
+# Security
+WEBUI_SECRET_KEY="your-secret-key"
+WEBUI_AUTH_TRUSTED_EMAIL_HEADER="X-Remote-User"
+
+# File uploads
+MAX_UPLOAD_SIZE_MB=100
+ALLOWED_UPLOAD_EXTENSIONS="pdf,txt,md,docx,xlsx"
+
+# RAG / Embedding
+EMBEDDING_MODEL="nomic-embed-text:latest"
+CHROMA_HOST="localhost"
+CHROMA_PORT=8000
+
+# OAuth (optional)
+GOOGLE_CLIENT_ID="..."
+GITHUB_CLIENT_SECRET="..."
+
+# Email
+SMTP_HOST="smtp.gmail.com"
+SMTP_PORT=587
+SMTP_FROM_EMAIL="webui@example.com"
+SMTP_PASSWORD="..."
+```
+
+## RAG Pipeline — Document Search
+
+Open WebUI integrates Retrieval-Augmented Generation natively:
+
+### Enable RAG
+
+1. Admin Panel → Settings → RAG Configuration
+2. Set "Embedding Engine" to "Ollama"
+3. Select embedding model: `nomic-embed-text:latest`
+4. Configure "RAG Relevance Threshold" (0.3-0.5 recommended)
+
+### Upload Documents
+
+In chat:
+1. Click attachment icon (📎)
+2. Select PDF, TXT, or MD file
+3. Open WebUI auto-chunks and embeds
+4. Embeddings stored in SQLite/ChromaDB
+
+### RAG Query Flow
+
+```
+User Query
+  ↓
+Embedding (local model)
+  ↓
+Vector Search (sqlite-vec or ChromaDB)
+  ↓
+Retrieve top-K similar chunks (k=3-5)
+  ↓
+Append context to LLM: "Based on: [documents]"
+  ↓
+LLM responds
+```
+
+### Advanced: External Vector DB
+
+For production with large document corpora (>100k chunks):
+
+```yaml
+services:
+  open-webui:
+    environment:
+      RAG_EMBEDDING_ENGINE: "ollama"
+      CHROMA_HOST: "chroma"
+      CHROMA_PORT: "8000"
+    depends_on:
+      - chroma
+
+  chroma:
+    image: chromadb/chroma:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma-data:/chroma/data
+```
+
+## Model Management
+
+### List Available Models
+
+```bash
+docker exec ollama ollama list
+
+# Or via API
+curl http://localhost:11434/api/tags | jq '.models[].name'
+```
+
+### Recommended Model Setups
+
+| Use Case | Model | Size | VRAM | Why |
+|---|---|---|---|---|
+| General Chat | `qwen2.5:7b` | 7B | 8GB | Balanced, multilingual |
+| Coding | `qwen2.5:14b` | 14B | 16GB | Best for programming |
+| Fast | `phi3:4b` | 4B | 4GB | Surprisingly competent |
+| Reasoning | `mistral:7b` | 7B | 8GB | Good reasoning despite size |
+| Vision | `llava:13b` | 13B | 12GB | Multimodal |
+
+### Configure Model Parameters
+
+Admin Panel → Models:
+
+- **Context Window**: Higher = more history (typical 2k-8k tokens)
+- **Temperature**: 0.0 (deterministic) to 1.0 (creative)
+- **Top-P**: Diversity sampling (0.9 standard)
+- **Repeat Penalty**: Prevents repetitions
+
+Production defaults:
+
+```
+Temperature: 0.7
+Top-P: 0.9
+Repeat Penalty: 1.1
+Context: 4096 (or model max)
+```
+
+## Custom Tools & Function Calling
+
+Open WebUI v0.3+ supports custom tools (like ChatGPT Actions):
+
+### Create Tool (Admin Panel)
+
+1. Admin Panel → Tools
+2. Click "Create New Tool"
+3. Define JSON schema:
+
+```json
+{
+  "id": "weather-tool",
+  "name": "Weather API",
+  "description": "Get current weather data",
+  "endpoint": "https://api.weather.com/current",
+  "method": "GET",
+  "parameters": {
+    "city": {
+      "type": "string",
+      "description": "City name"
+    },
+    "units": {
+      "type": "string",
+      "enum": ["metric", "imperial"],
+      "default": "metric"
+    }
+  },
+  "headers": {
+    "Authorization": "Bearer {{WEATHER_API_KEY}}"
+  }
+}
+```
+
+4. Save — tool is now available to LLM
+
+### Tool Invocation
+
+LLM automatically calls tool when relevant:
+
+```
+User: "What's the weather in Vienna?"
+LLM: [Calls Weather Tool]
+Tool Response: {"temp": 18, "conditions": "cloudy"}
+LLM: "In Vienna it's 18°C and cloudy."
+```
+
+## User Management & Roles
+
+### Role System
+
+| Role | Permissions |
+|---|---|
+| **admin** | Everything: Settings, Users, Models, Tools, API Keys |
+| **user** | Chats and personal settings only |
+| **guest** | Read-only access to shared chats |
+
+### Add User
+
+```bash
+# Via Admin Panel → Users → Create User
+# Or via API:
+curl -X POST http://localhost:3000/api/auth/users/create \
+  -H "Authorization: Bearer $ADMIN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "secure-password",
+    "name": "John Doe",
+    "role": "user"
+  }'
+```
+
+### API Key Management
+
+For headless integration:
+
+1. Admin Panel → Settings → API Keys
+2. Click "Create API Key"
+3. Set name and expiry
+4. Use in requests:
+
+```bash
+curl http://localhost:3000/api/chat \
+  -H "Authorization: Bearer sk_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "qwen2.5:7b",
+    "messages": [{"role": "user", "content": "Hello"}]
+  }'
+```
+
+## REST API Reference
+
+### Chat Completions (OpenAI-compatible)
+
+```bash
+curl http://localhost:3000/api/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "qwen2.5:7b",
+    "messages": [
+      {"role": "system", "content": "You are helpful."},
+      {"role": "user", "content": "Explain quantum computing"}
+    ],
+    "temperature": 0.7,
+    "max_tokens": 500,
+    "stream": false
+  }'
+```
+
+Response:
+
+```json
+{
+  "id": "chatcmpl-...",
+  "object": "text_completion",
+  "created": 1711000000,
+  "model": "qwen2.5:7b",
+  "choices": [{
+    "index": 0,
+    "message": {
+      "role": "assistant",
+      "content": "A quantum computer uses..."
+    },
+    "finish_reason": "stop"
+  }],
+  "usage": {
+    "prompt_tokens": 45,
+    "completion_tokens": 120,
+    "total_tokens": 165
+  }
+}
+```
+
+### Streaming
+
+Set `"stream": true`:
+
+```bash
+curl http://localhost:3000/api/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "qwen2.5:7b",
+    "messages": [{"role": "user", "content": "Hello"}],
+    "stream": true
+  }' \
+  | grep -oP '"content":"\K[^"]*' | tr -d '\\n'
+```
+
+### List Models
+
+```bash
+curl http://localhost:3000/api/models | jq '.data[].id'
+```
+
+Example response:
+
+```json
+{
+  "data": [
+    {"id": "qwen2.5:7b", "object": "model", "owned_by": "ollama"},
+    {"id": "mistral:7b", "object": "model", "owned_by": "ollama"}
+  ]
+}
+```
+
+## Pipelines System (Advanced)
+
+Open WebUI 0.3.x introduces "Pipelines" — customizable processing chains:
+
+### Pipeline Types
+
+```python
+class TextProcessingPipeline:
+    async def process(self, data):
+        # Pre-processing
+        data = data.strip().lower()
+        # LLM call
+        response = await llm.generate(data)
+        # Post-processing
+        return response.upper()
+```
+
+### Enable Pipelines
+
+Admin Panel → Settings → Pipelines:
+- **Document RAG**: Auto-index and search
+- **Web Search**: Augment with web context
+- **Code Execution**: Safe Python execution
+- **Image Analysis**: For vision models
+
+### Write Custom Pipeline
+
+```python
+# ~/.webui/pipelines/my_pipeline.py
+from typing import List, Dict
+
+class Pipeline:
+    async def process(self, messages: List[Dict], **kwargs) -> Dict:
+        user_msg = messages[-1]["content"]
+
+        if "translate" in user_msg:
+            result = await self.translate(user_msg)
+        else:
+            result = await self.llm(user_msg)
+
+        return {
+            "role": "assistant",
+            "content": result
+        }
+```
+
+Reload in Admin Panel → Pipelines.
+
+## Performance Optimization
+
+### 1. Model Caching
+
+```bash
+docker exec ollama bash -c 'OLLAMA_MAX_LOADED_MODELS=2 ollama serve'
+```
+
+Effect: Save ~40% RAM with 3+ models via smart swapping.
+
+### 2. Embedding Batching
+
+For large document corpuses (>1000 chunks):
+
+```yaml
+environment:
+  EMBEDDING_BATCH_SIZE: 32
+  EMBEDDING_DEVICE: "cuda"
+```
+
+### 3. Database Indexing
+
+For SQLite with many chats:
+
+```bash
+docker exec open-webui sqlite3 /app/backend/data/webui.db << 'EOF'
+CREATE INDEX IF NOT EXISTS idx_messages_chat ON messages(chat_id);
+CREATE INDEX IF NOT EXISTS idx_embeddings_doc ON embeddings(document_id);
+VACUUM;
+EOF
+```
+
+### 4. Frontend Caching
+
+Browser caching is automatic, but for API clients:
+
+```bash
+curl http://localhost:3000/api/models \
+  -H "Cache-Control: max-age=3600"
+```
+
+## Security & Hardening
+
+### 1. Reverse Proxy (nginx)
+
+```nginx
+upstream webui {
+  server open-webui:8080;
+}
+
+server {
+  listen 443 ssl;
+  server_name webui.example.com;
+
+  ssl_certificate /etc/nginx/certs/cert.pem;
+  ssl_certificate_key /etc/nginx/certs/key.pem;
+
+  location / {
+    proxy_pass http://webui;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    # WebSocket support
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+  }
+}
+```
+
+### 2. Authentication
+
+Use OIDC/OAuth via reverse proxy:
+
+```yaml
+environment:
+  WEBUI_AUTH_TRUSTED_EMAIL_HEADER: "X-Remote-User"
+  WEBUI_AUTH_TRUSTED_NAME_HEADER: "X-Remote-Name"
+```
+
+### 3. Rate Limiting
+
+```nginx
+limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
+
+location /api/chat {
+  limit_req zone=api burst=20;
+  proxy_pass http://webui;
+}
+```
+
+### 4. Secrets Management
+
+Use `.env` file instead of environment variables:
+
+```bash
+WEBUI_SECRET_KEY=very-long-random-key-min-32-chars
+OPENAI_API_KEY=sk_...
+```
+
+Docker Compose:
+
+```yaml
+services:
+  open-webui:
+    env_file: .env
+```
+
+## Troubleshooting
+
+### Ollama Connection Failed
+
+**Symptom**: "Failed to connect to Ollama"
+
+**Solution**:
+1. Verify Ollama running: `docker ps | grep ollama`
+2. In Docker network: use hostname, not localhost
+3. Test: `docker exec open-webui curl http://ollama:11434/api/tags`
+
+### RAG Not Working
+
+**Symptom**: No similar documents found
+
+**Solution**:
+1. Admin Panel → RAG Configuration
+2. Verify `nomic-embed-text` downloaded: `docker exec ollama ollama list | grep embed`
+3. Pull if needed: `docker exec ollama ollama pull nomic-embed-text`
+4. Documents auto-re-indexed
+
+### Out of Memory
+
+**Symptom**: "CUDA out of memory" or process killed
+
+**Solution**:
+1. Reduce context: Models → Context Length = 2048
+2. Reduce embedding batch: `EMBEDDING_BATCH_SIZE=8`
+3. Use smaller model: `phi3:4b` instead of `qwen2.5:14b`
+4. Limit active models: `OLLAMA_MAX_LOADED_MODELS=1`
+
+### Slow Responses
+
+**Symptom**: >5 seconds per query
+
+**Solutions** (in order):
+1. Check GPU: `nvidia-smi` during query
+2. If CPU-bound: use smaller model
+3. Limit models: `OLLAMA_MAX_LOADED_MODELS=1`
+4. Check network: `docker network inspect [network]`
+
+## Backup & Recovery
+
+### Database Backup
+
+```bash
+# Manual backup
+docker cp open-webui:/app/backend/data/webui.db ./webui.db.backup
+
+# Daily cron
+0 2 * * * docker cp open-webui:/app/backend/data/webui.db \
+  /backups/webui-$(date +\%Y\%m\%d).db
+```
+
+### Models Backup (optional, large!)
+
+```bash
+docker run --rm -v ollama-models:/data -v /backup:/backup \
+  alpine tar czf /backup/ollama-models.tar.gz -C /data .
+```
+
+### Recovery
+
+```bash
+# Restore database
+docker cp ./webui.db.backup open-webui:/app/backend/data/webui.db
+docker restart open-webui
+
+# Restore models
+docker run --rm -v ollama-models:/data -v /backup:/backup \
+  alpine tar xzf /backup/ollama-models.tar.gz -C /data
+docker restart ollama
+```
+
+## Integration Patterns
+
+### With n8n
+
+n8n webhook to Open WebUI:
+
+```json
+{
+  "method": "POST",
+  "url": "http://open-webui:3000/api/chat/completions",
+  "headers": {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer {{ $secret.WEBUI_API_KEY }}"
+  },
+  "body": {
+    "model": "qwen2.5:7b",
+    "messages": [
+      {"role": "user", "content": "{{ $json.input }}"}
+    ]
+  }
+}
+```
+
+### With Mattermost
+
+Mattermost slash command to Open WebUI:
+
+```bash
+POST http://open-webui:3000/api/chat/completions
+Header: Authorization: Bearer [API_KEY]
+
+/ask What is AI?
+```
+
+### Python Client
+
+```python
+import requests
+
+client = requests.Session()
+client.headers.update({
+    "Authorization": f"Bearer {API_KEY}"
+})
+
+response = client.post(
+    "http://localhost:3000/api/chat/completions",
+    json={
+        "model": "qwen2.5:7b",
+        "messages": [
+            {"role": "system", "content": "You are helpful."},
+            {"role": "user", "content": "Explain XYZ"}
+        ],
+        "temperature": 0.7
+    }
+)
+
+print(response.json()["choices"][0]["message"]["content"])
+```
+
+## Enterprise Deployments
+
+### Multi-Tenant Setup
+
+For true multi-tenancy (isolated data):
+
+```yaml
+services:
+  open-webui-tenant-1:
+    image: ghcr.io/open-webui/open-webui:latest
+    environment:
+      DATABASE_URL: postgresql://user:pw@db/webui_tenant1
+
+  open-webui-tenant-2:
+    image: ghcr.io/open-webui/open-webui:latest
+    environment:
+      DATABASE_URL: postgresql://user:pw@db/webui_tenant2
+```
+
+### PostgreSQL Backend
+
+For production (>100 users):
+
+```yaml
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: webui
+      POSTGRES_PASSWORD: secure-password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  open-webui:
+    environment:
+      DATABASE_URL: postgresql://postgres:secure-password@postgres:5432/webui
+```
+
+## Sources and Links
+
+- [Open WebUI GitHub](https://github.com/open-webui/open-webui)
+- [Open WebUI Documentation](https://docs.openwebui.com)
+- [Ollama API Documentation](https://github.com/ollama/ollama/blob/main/docs/api.md)
+- [OpenAI API Compatibility](https://platform.openai.com/docs/api-reference)
+- [ChromaDB Documentation](https://docs.trychroma.com)
+- [Docker Compose Best Practices](https://docs.docker.com/compose/production/)
+- [OIDC for Enterprise](https://openid.net/connect/)

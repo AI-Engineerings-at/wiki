@@ -1,0 +1,485 @@
+---
+title: Die besten MCP Server — Kuratierte Übersicht 2026
+date: 2026-03-21
+summary: Umfassende Referenz der wichtigsten MCP Server. Official Servers, GitHub, Slack, Google Drive, PostgreSQL, AWS, Cloud Services, Developer Tools. Wie man MCP Server findet, installiert und nutzt.
+tags: [mcp, servers, model-context-protocol, claude-code, integration]
+author: AI Engineering
+section: tools
+---
+
+# Die besten MCP Server — Kuratierte Übersicht 2026
+
+MCP (Model Context Protocol) Servers erweitern Claude Code um externe Services. Hier sind die beste offizielle und Community MCP Server nach Kategorie.
+
+## Offizielle MCP Servers (Anthropic)
+
+**GitHub:** https://github.com/modelcontextprotocol/servers
+
+### Filesystem MCP
+```bash
+claude mcp add github:modelcontextprotocol/servers/filesystem
+```
+
+Was du kannst:
+- Dateien lesen (`read_file`)
+- Dateien schreiben (`write_file`)
+- Directory listing (`list_directory`)
+- Datei suchen (`find_files`)
+
+### GitHub MCP
+```bash
+claude mcp add github:modelcontextprotocol/servers/github
+```
+
+Was du kannst:
+- Repository Operations (clone, fetch, push)
+- Issues & Pull Requests (create, list, update)
+- Gist Management
+- Repository Search
+- Commit History
+
+### Slack MCP
+```bash
+claude mcp add github:modelcontextprotocol/servers/slack
+```
+
+Befehle:
+- Message senden (`send_message`)
+- Channel durchsuchen (`search_messages`)
+- User Information (`get_user`)
+- Workspace Info (`get_workspace_info`)
+
+### Google Drive MCP
+```bash
+claude mcp add github:modelcontextprotocol/servers/google_drive
+```
+
+Features:
+- File browsing
+- File search
+- File creation & updates
+- Share management
+
+### PostgreSQL MCP
+```bash
+claude mcp add github:modelcontextprotocol/servers/postgresql
+```
+
+Operationen:
+- Queries (`query`)
+- Schema Inspection (`describe_table`)
+- Transaction Management
+
+### SQLite MCP
+```bash
+claude mcp add github:modelcontextprotocol/servers/sqlite
+```
+
+Beste Für: Lokale Entwicklung, Prototyping.
+
+## GitHub's Offizieller MCP Server
+
+**GitHub:** https://github.com/github/github-mcp-server
+
+```bash
+git clone https://github.com/github/github-mcp-server.git
+cd github-mcp-server
+npm install && npm run build
+```
+
+### Features:
+
+**Repository Operations:**
+```bash
+/github get-repository --owner anthropics --repo claude-code
+/github list-repositories --user USERNAME
+/github create-repository --name my-project --private
+```
+
+**Issues Management:**
+```bash
+/github create-issue --repo my-project --title "Bug: xyz" --body "Details"
+/github update-issue --repo my-project --issue 42 --state closed
+/github list-issues --repo my-project --labels bug
+```
+
+**Pull Requests:**
+```bash
+/github create-pull-request \
+  --repo my-project \
+  --title "Feature: Add CLI" \
+  --head feature/cli \
+  --base main
+/github get-pull-request --repo my-project --number 15
+```
+
+**Gist Management:**
+```bash
+/github create-gist --description "My code" --files [...] --public
+```
+
+## Cloud Service MCPs
+
+### AWS MCP
+```bash
+pip install aws-mcp
+export AWS_ACCESS_KEY_ID=...
+export AWS_SECRET_ACCESS_KEY=...
+```
+
+Unterstützte Services:
+- EC2 (Instanzen)
+- S3 (Storage)
+- Lambda (Functions)
+- RDS (Databases)
+- CloudWatch (Monitoring)
+
+### Google Cloud MCP
+```bash
+pip install gcp-mcp
+gcloud auth application-default login
+```
+
+Services:
+- Compute Engine
+- Cloud Storage
+- Cloud Run
+- Cloud SQL
+
+### Azure MCP
+```bash
+pip install azure-mcp
+az login
+```
+
+Services:
+- VMs
+- App Service
+- Storage
+- Databases
+
+## Datenbank MCPs
+
+### PostgreSQL
+```bash
+claude mcp add postgresql://user:pass@localhost:5432/dbname
+```
+
+### MySQL / MariaDB
+```bash
+claude mcp add mysql://user:pass@localhost:3306/dbname
+```
+
+### MongoDB
+```bash
+claude mcp add mongodb://user:pass@localhost:27017/dbname
+```
+
+### SQLite (lokal)
+```bash
+claude mcp add sqlite://./local.db
+```
+
+## Kommunikations MCPs
+
+### Slack (offiziell)
+```bash
+claude mcp add github:modelcontextprotocol/servers/slack
+```
+
+### Discord
+```bash
+pip install discord-mcp
+export DISCORD_TOKEN=...
+```
+
+Befehle:
+- Message senden
+- Channel auflisten
+- Role Management
+- User Info
+
+### Email / IMAP
+```bash
+pip install email-mcp
+# Konfiguriert mit Gmail/Outlook Credentials
+```
+
+Features:
+- Emails lesen
+- Emails senden
+- Folder Management
+- Search
+
+## Developer Tool MCPs
+
+### Docker
+```bash
+pip install docker-mcp
+# Benötigt Docker Socket
+```
+
+Befehle:
+- Container managen
+- Images auflisten
+- Logs anschauen
+- Network Management
+
+### Kubernetes
+```bash
+pip install k8s-mcp
+kubectl config use-context my-cluster
+```
+
+Features:
+- Pod Management
+- Deployment Monitoring
+- Service Management
+- Logs Streaming
+
+### Terraform
+```bash
+pip install terraform-mcp
+```
+
+Operationen:
+- Plan
+- Apply
+- Destroy
+- State Management
+
+## Browser & Web MCPs
+
+### Playwright (für Web Automation)
+```bash
+pip install playwright-mcp
+playwright install
+```
+
+Befehle:
+- Website öffnen
+- Click, Type, Fill
+- Screenshot
+- PDF Export
+
+### Puppeteer (Node.js Alternative)
+```bash
+npm install puppeteer-mcp
+```
+
+## AI/ML MCPs
+
+### Ollama (Local LLMs)
+```bash
+pip install ollama-mcp
+export OLLAMA_BASE_URL=http://localhost:11434
+```
+
+Models laden:
+```bash
+/ollama generate --model mistral "Explain MCP"
+```
+
+### HuggingFace
+```bash
+pip install huggingface-mcp
+export HF_TOKEN=...
+```
+
+### Stripe
+```bash
+pip install stripe-mcp
+export STRIPE_API_KEY=...
+```
+
+Operationen:
+- Customers erstellen
+- Payments verwalten
+- Subscriptions
+- Invoicing
+
+## MCP Server Finder & Entdecker
+
+### Punkpeye's Awesome MCP Servers
+**GitHub:** https://github.com/punkpeye/awesome-mcp-servers
+
+Die beste Quelle für neue MCP Servers. 200+ Server kategorisiert.
+
+### mcpcat.io
+Online-Verzeichnis aller verfügbaren MCP Servers.
+
+### mcp.run
+Testing Ground. Probiere MCP Servers online aus, bevor du sie installierst.
+
+## Installation Pattern
+
+### Pattern 1: Offizieller GitHub Server
+```bash
+claude mcp add github:modelcontextprotocol/servers/filesystem
+```
+
+### Pattern 2: GitHub Repo
+```bash
+claude mcp add github:username/repo-name
+```
+
+### Pattern 3: Lokales Verzeichnis
+```bash
+claude mcp add file:///path/to/mcp-server
+```
+
+### Pattern 4: NPM Package
+```bash
+claude mcp add npm:mcp-server-name
+```
+
+### Pattern 5: Python Package
+```bash
+pip install mcp-server-name
+# Dann in Claude Code konfigurieren
+```
+
+## Konfiguration in settings.json
+
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "node",
+      "args": ["./servers/github/index.js"],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "slack": {
+      "command": "python",
+      "args": ["-m", "slack_mcp"],
+      "env": {
+        "SLACK_TOKEN": "${SLACK_BOT_TOKEN}"
+      }
+    },
+    "postgres": {
+      "command": "python",
+      "args": ["-m", "postgresql_mcp"],
+      "env": {
+        "DATABASE_URL": "postgresql://localhost/mydb"
+      }
+    }
+  }
+}
+```
+
+## MCP Servers nach Use Case
+
+### Frontend Development
+- Filesystem (lokale Dateien)
+- Git (Version Control)
+- Browser/Playwright (Testing)
+
+### Backend Development
+- PostgreSQL / MySQL (Datenbanken)
+- GitHub (CI/CD, Code Review)
+- Docker (Container)
+
+### DevOps
+- Kubernetes (Orchestration)
+- AWS / GCP / Azure (Cloud)
+- Terraform (Infrastructure)
+- Slack (Notifications)
+
+### Data Science
+- PostgreSQL (Data Storage)
+- Ollama (Local LLMs)
+- HuggingFace (Models)
+- Google Drive (Files)
+
+### Business Automation
+- Slack (Communication)
+- Email (IMAP)
+- Stripe (Payments)
+- Google Drive (Documents)
+
+## Häufige Setup-Fehler
+
+### Fehler 1: Token nicht gesetzt
+**Problem:** `GITHUB_TOKEN not found`
+
+**Lösung:**
+```bash
+export GITHUB_TOKEN=ghp_xxxxxxxxxxxx
+# Dann in settings.json referenzieren: ${GITHUB_TOKEN}
+```
+
+### Fehler 2: Service nicht erreichbar
+**Problem:** `Connection refused on localhost:5432`
+
+**Lösung:**
+```bash
+# Checke ob Service läuft
+postgres: pg_isready
+docker: docker ps
+kubernetes: kubectl get pods
+```
+
+### Fehler 3: Permissions Error
+**Problem:** `Permission denied reading /home/user/file`
+
+**Lösung:**
+```bash
+chmod u+r /path/to/file
+# oder MCP Server mit sudo starten
+sudo claude mcp add ...
+```
+
+## Performance: Zu viele MCP Server?
+
+**Problem:** Wenn du 20+ MCP Servers hast, wird Claude langsam (jeder Server wird geladen).
+
+**Lösung:** Nutze mcp2cli um nur benötigte Tools zu exposen.
+
+```bash
+mcp2cli convert openapi \
+  https://api.github.com/openapi.json \
+  --tools "repos,issues" \
+  --output github-filtered.json
+```
+
+## MCP Servers Übersichtstabelle
+
+| Server | Kategorie | Setup | Features | Beste Für |
+|--------|-----------|-------|----------|----------|
+| **GitHub** | VCS | 5min | Issues, PRs, Repos | Code Management |
+| **PostgreSQL** | Database | 10min | Query, Inspect | Data Analysis |
+| **Slack** | Communication | 5min | Messages, Channels | Team Notification |
+| **Docker** | DevOps | 10min | Containers, Images | Local Dev |
+| **Kubernetes** | DevOps | 15min | Pods, Services | Production |
+| **AWS** | Cloud | 15min | EC2, S3, Lambda | Infrastructure |
+| **Google Drive** | Files | 5min | Upload, Download | Document Storage |
+| **Stripe** | Payments | 5min | Customers, Charges | E-Commerce |
+| **Playwright** | Testing | 10min | Browser Control | Web Testing |
+| **Ollama** | AI | 5min | Local Models | Privacy-First |
+
+## Quick Start — 3 MCP Servers (Common Setup)
+
+```bash
+# 1. GitHub (für Code Management)
+claude mcp add github:github/github-mcp-server
+
+# 2. Filesystem (lokal)
+claude mcp add github:modelcontextprotocol/servers/filesystem
+
+# 3. PostgreSQL (deine Datenbank)
+claude mcp add postgresql://user:pass@localhost/mydb
+
+# Starten
+claude code
+```
+
+## Quellen und Links
+
+- https://github.com/modelcontextprotocol/servers (Offizielle)
+- https://github.com/github/github-mcp-server
+- https://github.com/punkpeye/awesome-mcp-servers (Awesome List)
+- https://mcpcat.io (Online Directory)
+- https://mcp.run (Testing Ground)
+- https://anthropic.com/docs/model-context-protocol

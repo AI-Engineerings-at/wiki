@@ -1,0 +1,251 @@
+---
+title: Stable Diffusion — Latente Diffusions-Modelle
+date: 2026-03-21
+summary: Latent Diffusion Models Paper (Rombach et al.), VAE + U-Net + CLIP Architektur, Conditioning. SD 1.5 → SDXL → SD3 Evolution.
+tags: [diffusion, stable-diffusion, generative, image, latent, paper]
+author: AI Engineering
+section: papers
+---
+
+# Stable Diffusion — Latente Diffusions-Modelle
+
+Stable Diffusion zeigt, wie man komplexe generative Modelle praktisch nutzbar macht, indem man im latenten Raum (statt im Bild-Raum) arbeitet.
+
+## Das Problem mit Diffusion
+
+Originale Diffusions-Modelle (DDPM, 2020) waren extrem langsam:
+
+```
+Training:
+- Trainiere auf 512x512 Bildern
+- Das sind 262.144 Pixel
+- Braucht ~1000 Diffusion Steps
+- Sehr Memory-intensiv
+
+Inferenz:
+- 50-1000 Iterationen, um ein Bild zu erzeugen
+- Auf GPU: 30+ Sekunden pro Bild
+- Auf CPU: Minuten
+```
+
+**Lösung von Stable Diffusion:** Arbeite nicht im Bild-Raum, arbeite im latenten Raum (VAE).
+
+## Die Architektur: VAE + Diffusion + CLIP
+
+```
+Step 1: VAE Encoder
+Input: 512x512 RGB Image
+Output: 64x64x4 Latent Tensor
+
+Step 2: Diffusion in Latent Space
+Noise + Denoise (4x weniger Daten als original)
+
+Step 3: CLIP Encoding (für Text)
+Input: "A cat on a sunny beach"
+Output: 768-dim Embedding
+
+Step 4: U-Net mit Cross-Attention
+Kombiniere latent + CLIP embedding
+
+Step 5: VAE Decoder
+Input: 64x64x4 Latent
+Output: 512x512 Image
+```
+
+## VAE (Variational Autoencoder)
+
+Der Trick: Komprimiere die Bilder in einen kleineren latenten Raum:
+
+```
+Encoder: 512x512 → 64x64x4
+- 8x8x4 Kompression
+- Verlustfrei (mit Quantization)
+
+Decoder: 64x64x4 → 512x512
+- Trainiert gemeinsam mit Encoder
+- Lernt wie man aus Latents rekonstruiert
+
+Vorteil:
+- 64x weniger Parameter
+- 64x schneller
+- Diffusion im latenten Raum ist praktisch
+```
+
+## CLIP: Der Text-Encoder
+
+CLIP (Contrastive Language-Image Pre-Training) ist das Herzstück:
+
+```
+Input: "A cat on a sunny beach"
+Processing:
+1. Tokenisiere (BPE)
+2. Transformer Encoder
+3. Output: 768-dim Embedding
+
+Dieses Embedding wird als Condition für U-Net verwendet
+```
+
+CLIP wurde auf Milliarden von Image-Text Paaren trainiert, so dass die Embeddings sehr aussagekräftig sind.
+
+## U-Net mit Cross-Attention
+
+Der Diffusion Process selbst:
+
+```python
+def forward(latent, timestep, clip_embedding):
+    # timestep: Sagt dem Modell "wie verrauscht ist das Bild?"
+    # clip_embedding: "Was möchte der User?"
+    
+    # Gehe durch U-Net Blöcke
+    x = latent
+    for block in encoder_blocks:
+        x = block(x, timestep, clip_embedding)  # Cross-Attention!
+    
+    # Predict noise to remove
+    noise_pred = decoder(x)
+    return noise_pred
+```
+
+**Cross-Attention:**
+```
+Self-Attention: Token achtet auf andere Tokens
+Cross-Attention: Latent attends zu CLIP embedding
+
+Query: Latent (512x512/64 = 4096 tokens)
+Key/Value: CLIP (77 tokens)
+
+→ Effizient, weilen CLIP ist klein
+```
+
+## Training vs. Inference
+
+### Training
+```
+Daten: LAION-5B (5 Milliarden Image-Text Paare)
+
+1. Lade Bild, enkodiere zu Latent (VAE Encoder)
+2. Sample random noise level t
+3. Füge Noise hinzu: x_t = sqrt(alpha_t) * x + sqrt(1 - alpha_t) * noise
+4. Sage Modell: "Entferne Noise"
+5. Loss: MSE zwischen predicited noise und actual noise
+
+Effekt: Modell lernt was "relevant" Tokens sind
+```
+
+### Inference
+```
+1. Start: Pure noise (512x512x4 random values)
+2. Loop 50 Schritte:
+   - Frage Modell: "Was ist weniger Noise?"
+   - Subtrahiere predict noise
+   - Reduziere Varianz basierend auf Timestep
+3. Nach 50 Schritten: Halbwegs sauberes Bild
+4. VAE Decoder: Latent → Bild
+5. Output: 512x512 Bild
+```
+
+## Die Evolutions-Kette
+
+### Stable Diffusion v1 (2022)
+```
+Modell: 860M Parameter
+Trained: LAION-5B Subset
+Context: 77 Token CLIP
+Größe: 4 GB
+```
+
+### Stable Diffusion v1.5 (2022)
+```
+Verbesserungen:
+- Fine-tuned auf bessere Daten
+- +5% bessere Qualität
+- Bessere Anatomie, Hände
+```
+
+### SDXL (2023)
+```
+Größer:
+- 3.5B Parameter (4x größer)
+- Zwei CLIP Models statt einem
+- Größerer Latent Space
+- Besser für 1024x1024 Images
+
+Ergebnis: Deutlich bessere Qualität
+```
+
+### Stable Diffusion 3 (2024)
+```
+Architektur-Änderung:
+- Switched von U-Net zu Diffusion Transformer
+- MMDiT (Multimodal Diffusion Transformer)
+- Bessere Scaling Properties
+
+Performance:
+- Besser Text-Alignment
+- Bessere Qualität
+```
+
+## Praktische Auswirkungen
+
+### Performance-Vergleiche
+
+```
+Bild-Generierung Zeit:
+
+DALL-E 2: 30-60 Sekunden
+Midjourney: ~30 Sekunden (aus API)
+Stable Diffusion v1 (A100): 5-10 Sekunden
+Stable Diffusion v1 (RTX 3090): 20-30 Sekunden
+Stable Diffusion v1 (CPU): 5-10 Minuten
+```
+
+### Hardware-Anforderungen
+
+```
+VRAM für Inference:
+
+Optimiert: 2-4 GB (mit Quantization)
+Standard: 8 GB
+Nicht optimiert: 24 GB
+
+Das ist warum Stable Diffusion "Stable" ist:
+- Läuft auf consumer GPUs
+- Nicht nur auf A100/H100
+```
+
+## Fine-tuning und Customization
+
+Stable Diffusion ist extrem anpassbar:
+
+```
+LoRA (Low-Rank Adaptation):
+- Trainiere nur kleine Adapter
+- Nur 1-10 MB Größe
+- Kann neuen "Stil" lehren
+
+Textual Inversion:
+- Lerne neue "Konzepte"
+- Aus 3-5 Bildern
+- Als Token im Text-Space
+
+DreamBooth:
+- Personalisierung
+- Lerne "wie person X aussieht"
+```
+
+## Warum Stable Diffusion "stable" ist
+
+1. **Trainiert auf öffentlich verfügbarer Daten** (LAION, nicht proprietary)
+2. **Offen verfügbares Modell** (nicht nur API)
+3. **Läuft lokal** (nicht abhängig von externem Server)
+4. **Keine NSFW Filter** (Nutzer können selbst entscheiden)
+
+Das macht es zum politisch am wenigsten umstritten Generative Model.
+
+## Quellen und Links
+
+- [Stable Diffusion Paper (Latent Diffusion Models)](https://arxiv.org/abs/2112.10752)
+- [CLIP Paper](https://arxiv.org/abs/2103.14030)
+- [SDXL Paper](https://arxiv.org/abs/2307.01952)
+- [Stable Diffusion GitHub](https://github.com/CompVis/stable-diffusion)
+- [HuggingFace Diffusers](https://huggingface.co/docs/diffusers)

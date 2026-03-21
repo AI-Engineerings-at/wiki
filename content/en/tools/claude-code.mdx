@@ -1,0 +1,440 @@
+---
+title: Claude Code CLI — Complete Guide
+date: 2026-03-21
+summary: Master the Claude Code CLI, skills system, and agent architecture for autonomous coding tasks
+tags: [claude-code, cli, skills, agents, automation]
+author: AI Engineering
+---
+
+# Claude Code CLI — Complete Guide
+
+Claude Code is a command-line interface that brings agentic AI to your development environment. Instead of copying code snippets back and forth, Claude Code works directly with your codebase, runs commands, and solves problems autonomously.
+
+## What Is Claude Code?
+
+Claude Code operates as an AI agent that understands your project structure, executes shell commands, reads and edits files, and manages multi-step development workflows. Think of it as a highly capable engineer who can navigate your entire system and understand context across thousands of files.
+
+The core difference from chat interfaces: Claude Code maintains persistent project context, can navigate worktrees, manage git operations, and orchestrate complex tasks that span multiple files and systems.
+
+## Installation & Setup
+
+### Install Claude Code CLI
+
+```bash
+npm install -g @anthropic/claude-code
+# or
+pip install claude-code
+```
+
+### Initialize a Project
+
+```bash
+cd /path/to/your/project
+claude init
+```
+
+This creates a `.claude/` directory containing:
+- `CLAUDE.md` — Project instructions (loaded every session)
+- `.claudeignore` — Files/directories Claude should skip
+- `skills/` — Custom skills folder
+- `agents/` — Custom agent definitions
+
+### First Session
+
+```bash
+claude
+# You're now in an interactive session. Type commands like you would in chat.
+```
+
+Exit with `exit`, `quit`, or Ctrl+D.
+
+## Skills — The Core Learning System
+
+Skills teach Claude specific techniques for your project. Instead of repeating instructions every session, you write it once as a skill and Claude loads it automatically.
+
+### What's a Skill?
+
+A skill is a folder containing:
+1. **SKILL.md** — Main definition with YAML frontmatter + instructions
+2. **scripts/** — Optional: Executable Python, shell, or Node scripts
+3. **templates/** — Optional: Output templates Claude fills in
+4. **examples/** — Optional: Example outputs showing expected format
+
+### Creating a Skill
+
+```bash
+mkdir -p .claude/skills/my-skill
+```
+
+**SKILL.md example:**
+
+```yaml
+---
+name: database-migrate
+description: >
+  Runs database migrations safely with rollback support.
+  Trigger: database, migrate, schema
+version: 1.0.0
+model: sonnet
+allowed-tools: [Read, Bash]
+---
+
+# Database Migration Skill
+
+This skill safely executes database migrations with automatic rollback on failure.
+
+## How to Use
+
+1. Review the pending migrations in `db/migrations/`
+2. Run the migration safety check
+3. Execute with rollback support
+4. Verify the schema
+
+## Safety Checks
+
+- Backup database before migration
+- Test rollback on staging first
+- Never run on production without approval
+```
+
+Claude will auto-invoke this skill when you mention database operations.
+
+### Built-in Skills
+
+Claude Code ships with essential skills:
+
+- `/simplify` — Reviews recent changes for code reuse and quality issues
+- `/debug` — Reads session logs and diagnoses strange behavior
+- `/review` — Performs code review with suggestions
+- `/batch` — Runs multiple related tasks in parallel
+- `/loop` — Chains multiple operations with feedback loops
+- `/claude-api` — Loads language-specific API documentation
+
+### Skill Discovery
+
+Claude automatically discovers skills in your `.claude/skills/` directory and loads them based on context. When you describe a task, Claude checks skill descriptions for matching keywords and loads relevant skills.
+
+### Dynamic Context Injection
+
+Skills can inject real-time data into Claude's context using shell commands:
+
+```markdown
+## Current Deployment Status
+!`curl -s http://internal-api/health | jq .status`!
+
+The system is currently showing: !`ps aux | grep my-service | wc -l`! instances running.
+```
+
+The command output replaces the `` !`command`! `` markers before Claude sees the skill.
+
+## Agent Definitions
+
+For complex projects, define custom agents with specific permissions and pre-loaded skills.
+
+### Agent Configuration
+
+```yaml
+---
+name: content-writer
+description: >
+  Specialized agent for content creation with brand consistency checks.
+model: sonnet
+tools: [Read, Grep, Write, Edit]
+disallowedTools: [Bash]
+skills:
+  - brand-consistency
+  - content-quality
+maxTurns: 30
+---
+
+# Content Writer Agent
+
+This agent specializes in creating marketing copy, blog posts, and documentation while maintaining brand voice.
+
+## Writing Style
+
+- Conversational but professional
+- No marketing clichés
+- Fact-based, not fluffy
+- Direct sentences
+
+## Workflow
+
+1. Research topic using brand resources
+2. Outline main points
+3. Draft content
+4. Self-review against brand guidelines
+5. Deliver final version
+```
+
+### Invoking Custom Agents
+
+```bash
+claude --agent content-writer "Write a blog post about local AI deployment"
+```
+
+## Project Context & Memory
+
+### CLAUDE.md — Project Instructions
+
+Every session, Claude loads `.claude/CLAUDE.md`. Use it to capture:
+
+- Team conventions
+- Architecture decisions
+- Safety rules
+- Service endpoints
+- Credential vault locations
+- Common gotchas
+
+```markdown
+# Project: MyApp
+
+## Architecture
+- Monorepo with 4 services
+- PostgreSQL 15 backend
+- React 19 frontend
+- n8n workflows for automation
+
+## Conventions
+- Commits: conventional changelog format
+- Branches: feature/*, bugfix/*, release/*
+- Code style: prettier + eslint
+
+## Safety Rules
+- Never commit .env files
+- Always test migrations on staging first
+- Backup production data before deploys
+
+## Services
+- API: http://localhost:3000
+- Database: postgres://localhost/myapp
+- Vault: /opt/vault.db (credentials)
+```
+
+### .claudeignore
+
+Exclude large files and noise:
+
+```
+node_modules/
+.git/
+dist/
+*.log
+__pycache__/
+.env
+secrets/
+*.pdf
+videos/
+```
+
+## Working with Files
+
+### Reading Files
+
+```bash
+# Single file
+read /path/to/file.ts
+
+# Multiple files
+read /path/to/file1.ts /path/to/file2.ts
+
+# With context
+read /src --pattern "*.service.ts" --summary
+```
+
+Claude shows line numbers, making it easy to reference specific sections.
+
+### Editing Files
+
+```bash
+# Edit one file
+edit /path/to/file.ts
+
+# You describe the change, Claude performs the replacement
+```
+
+### Creating Files
+
+```bash
+# Write new file
+write /path/to/new-file.ts "File contents here"
+
+# Or have Claude write it based on a description
+"Create a migration file for the new users table"
+```
+
+## Git & Version Control
+
+Claude integrates with git for safe version control:
+
+```bash
+# Check status
+git status
+
+# Create commits
+"Add user authentication and write a descriptive commit message"
+
+# Review changes before pushing
+git diff main
+```
+
+Claude respects git safety rules:
+- Won't force-push to main
+- Requires confirmation for destructive operations
+- Suggests meaningful commit messages
+
+## Shell Commands & Automation
+
+Execute shell commands directly:
+
+```bash
+# Run tests
+run npm test
+
+# Build project
+run npm run build
+
+# Custom scripts
+run ./scripts/deploy.sh --env production
+```
+
+Claude can chain commands and handle output intelligently:
+
+```bash
+"Run tests, and if they pass, rebuild the Docker image"
+```
+
+## Multi-step Workflows
+
+Describe complex tasks and Claude breaks them into steps:
+
+```
+"Update dependencies, run tests, commit changes, and create a pull request"
+```
+
+Claude will:
+1. List outdated packages
+2. Update them
+3. Run the test suite
+4. Show the diff
+5. Commit with a meaningful message
+6. Suggest PR title and description
+
+## Safety & Guardrails
+
+### Confirmation Gates
+
+Claude requires explicit confirmation before:
+- Deleting files (`rm -rf`)
+- Force-pushing to main
+- Running destructive commands
+- Modifying database schemas
+
+### Principle of Least Privilege
+
+Define exactly which tools each skill and agent can use:
+
+```yaml
+allowed-tools: [Read, Grep, Glob]  # Read-only skill
+```
+
+This prevents accidental damage from less-trusted operations.
+
+### Sandbox Execution
+
+Custom scripts run in isolated contexts:
+- No access to system-wide secrets
+- Limited file system scope
+- Environment variables sandboxed
+- Can't escape the project directory
+
+## Advanced Features
+
+### Forking Context
+
+For isolated research or experimentation, create a fork:
+
+```bash
+"In a new isolated context, explore the authentication system and suggest refactoring ideas"
+```
+
+Claude works in a sandboxed context, leaving your main session clean.
+
+### Cross-device Dispatch (with Claude Cowork)
+
+If using Claude Cowork, Claude Code integrates with Dispatch mode to control your desktop from your phone (research preview as of March 2026).
+
+### Hooks & Lifecycle Integration
+
+Hooks let you run scripts at specific points:
+
+```yaml
+hooks:
+  PreToolUse:
+    - name: validate-commit-message
+      script: ./scripts/validate-commit.sh
+  PostCommand:
+    - name: update-docs
+      script: ./scripts/update-docs.sh
+```
+
+## Common Workflows
+
+### Daily Development Cycle
+
+```
+1. "What's the status of the codebase? Show me the latest commits."
+2. "Create a new feature branch for user authentication"
+3. "Implement password hashing and session management"
+4. "Run tests and fix any failures"
+5. "Create a pull request with detailed description"
+```
+
+### Debugging
+
+```
+1. "The login endpoint is returning 500 errors. Show me recent logs."
+2. "/debug — analyze the debug log for clues"
+3. "Let's reproduce this locally and add debugging"
+4. "Fix the issue and write a test to prevent regression"
+```
+
+### Data Migrations
+
+```
+1. "Create a migration that adds a 'verified_at' column to users"
+2. "Write a data script to backfill existing verified users"
+3. "Test locally, then deploy to staging"
+4. "Verify the migration on staging production"
+```
+
+## Checklist
+
+- [ ] Install Claude Code CLI
+- [ ] Initialize your project with `claude init`
+- [ ] Create `.claude/CLAUDE.md` with project context
+- [ ] Set up `.claudeignore` to exclude noise
+- [ ] Write your first skill for a common task
+- [ ] Test skill auto-invocation
+- [ ] Create a custom agent for specialized work
+- [ ] Run a multi-step workflow
+- [ ] Verify git safety is enabled
+- [ ] Review session logs with `/debug` if issues arise
+
+---
+
+**Sources:**
+- [Extend Claude with skills - Claude Code Docs](https://code.claude.com/docs/en/skills)
+- [Use Skills in Claude | Claude Help Center](https://support.claude.com/en/articles/12512180-use-skills-in-claude)
+- [GitHub - anthropics/skills](https://github.com/anthropics/skills)
+
+## Sources and Links
+
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [Interactive Mode](https://code.claude.com/docs/en/interactive-mode)
+- [npm Package](https://www.npmjs.com/package/@anthropic-ai/claude-code)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

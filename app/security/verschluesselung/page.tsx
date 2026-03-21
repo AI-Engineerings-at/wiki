@@ -1,0 +1,336 @@
+import { Metadata } from "next"
+import Image from "next/image"
+import Callout from "../../../components/Callout"
+import KeyTakeaway from "../../../components/KeyTakeaway"
+import ComparisonTable from "../../../components/ComparisonTable"
+
+import { RelatedArticles } from "../../../components/RelatedArticles"
+
+export const metadata: Metadata = {
+  title: "Verschluesselung: At Rest, In Transit, In Use | AI Engineering Wiki",
+  description:
+    "Verschluesselung fuer Self-Hosted AI: Daten auf der Festplatte, im Netzwerk und waehrend der Verarbeitung schuetzen. LUKS, TLS, Confidential Computing erklaert.",
+}
+
+export default function VerschluesselungPage() {
+  return (
+    <div className="space-y-6">
+      {/* Hero Section */}
+      <div className="border-b border-white/10 pb-6">
+        <p className="text-sm text-blue-400 font-medium mb-2">Security</p>
+        <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight">
+          Verschluesselung: At Rest, In Transit, In Use
+        </h1>
+        <p className="text-lg text-white/60 mt-3 max-w-2xl">
+          Daten muessen in drei Zustaenden geschuetzt werden: gespeichert,
+          uebertragen und waehrend der Verarbeitung. Hier ist was das
+          praktisch bedeutet.
+        </p>
+        <div className="flex items-center gap-4 mt-4 text-sm text-white/40">
+          <span>Lesezeit: 12 min</span>
+          <span className="w-1 h-1 rounded-full bg-white/20" />
+          <span>Zuletzt aktualisiert: Maerz 2026</span>
+        </div>
+      </div>
+
+      <div className="prose prose-invert max-w-none">
+        <Callout type="summary" title="Auf einen Blick">
+          <p>
+            Verschluesselung schuetzt Daten in drei Phasen: <strong>At Rest</strong>{" "}
+            (auf Festplatte/SSD), <strong>In Transit</strong> (im Netzwerk),{" "}
+            <strong>In Use</strong> (waehrend der Verarbeitung im RAM). Fuer einen
+            self-hosted AI-Stack sind die ersten beiden Pflicht, die dritte ist
+            ein Bonus fuer Hochsicherheits-Szenarien.
+          </p>
+        </Callout>
+
+        {/* Section 1: Ueberblick */}
+        <section className="mt-10">
+          <h2 className="text-2xl font-bold text-white mb-4">
+            Die drei Verschluesselungs-Schichten
+          </h2>
+          <p className="text-white/70 leading-relaxed mb-4">
+            Wenn du Daten nur auf der Festplatte verschluesselst aber
+            unverschluesselt uebers Netzwerk schickst, hast du eine Luecke.
+            Verschluesselung muss alle drei Zustaende abdecken.
+          </p>
+
+          <div className="my-6">
+            <Image
+              src="/images/infographics/security-encryption.png"
+              alt="Drei Verschluesselungs-Schichten: At Rest, In Transit, In Use"
+              width={800}
+              height={450}
+              className="rounded-xl border border-white/10"
+            />
+            <p className="text-sm text-white/40 mt-2 text-center">
+              Daten durchlaufen drei Zustaende — jeder braucht eigenen Schutz.
+            </p>
+          </div>
+
+          <ComparisonTable
+            headers={["Phase", "Was", "Bedrohung", "Schutz"]}
+            rows={[
+              ["At Rest", "Daten auf Festplatte/SSD", "Diebstahl der Hardware, Zugriff auf Dateisystem", "LUKS, dm-crypt, Veracrypt"],
+              ["In Transit", "Daten im Netzwerk", "Man-in-the-Middle, Abhoeren", "TLS 1.3, WireGuard VPN, SSH Tunnel"],
+              ["In Use", "Daten im RAM waehrend Verarbeitung", "Memory Dumps, Cold Boot Attacks", "Confidential Computing, Intel SGX, AMD SEV"],
+            ]}
+          />
+        </section>
+
+        {/* Section 2: At Rest */}
+        <section className="mt-10">
+          <h2 className="text-2xl font-bold text-white mb-4">
+            Encryption At Rest: Festplatten-Verschluesselung
+          </h2>
+          <p className="text-white/70 leading-relaxed mb-4">
+            At-Rest-Verschluesselung schuetzt deine Daten wenn jemand physisch
+            an die Festplatte kommt — Einbruch, Entsorgung, Reparatur. Ohne
+            Verschluesselung kann jeder die Platte in einen anderen Rechner
+            stecken und alles lesen.
+          </p>
+
+          <h3 className="text-xl font-bold text-white mt-6 mb-3">
+            LUKS (Linux Unified Key Setup)
+          </h3>
+          <p className="text-white/70 leading-relaxed mb-4">
+            LUKS ist der Standard fuer Festplatten-Verschluesselung unter Linux.
+            Die meisten Linux-Distributionen bieten LUKS-Verschluesselung
+            waehrend der Installation an.
+          </p>
+
+          <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
+            <p className="text-white font-medium mb-3">Existierende Partition verschluesseln</p>
+            <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
+              <code className="text-sm text-green-400">{`# ACHTUNG: Backup VORHER erstellen!
+
+# Partition verschluesseln (alle Daten werden geloescht!)
+sudo cryptsetup luksFormat /dev/sdb1
+
+# Partition oeffnen
+sudo cryptsetup luksOpen /dev/sdb1 encrypted-data
+
+# Dateisystem erstellen
+sudo mkfs.ext4 /dev/mapper/encrypted-data
+
+# Mounten
+sudo mount /dev/mapper/encrypted-data /mnt/secure-data`}</code>
+            </pre>
+          </div>
+
+          <Callout type="warning" title="Performance-Impact">
+            <p>
+              LUKS-Verschluesselung hat auf modernen CPUs mit AES-NI
+              Unterstuetzung nur ca. 1-3% Performance-Overhead bei
+              sequentiellem Lesen/Schreiben. Bei zufaelligem I/O (Datenbanken)
+              kann der Overhead 5-10% betragen. Fuer AI-Workloads wo die GPU
+              der Bottleneck ist, spuerst du den Unterschied nicht.
+            </p>
+          </Callout>
+
+          <ComparisonTable
+            headers={["Was verschluesseln", "Prioritaet", "Begruendung"]}
+            rows={[
+              ["Backup-Volumes", "PFLICHT", "Backups enthalten alles — Datenbanken, Configs, Secrets"],
+              ["Datenbank-Volumes", "HOCH", "Kundendaten, Credentials, AI-Trainingsdaten"],
+              ["System-Partition", "MITTEL", "Schuetzt Configs und Logs bei Diebstahl"],
+              ["Swap-Partition", "HOCH", "RAM-Inhalte werden auf Disk geschrieben (Secrets!)"],
+              ["Modell-Storage", "NIEDRIG", "Modelle sind oeffentlich, aber deine Fine-Tunes nicht"],
+            ]}
+          />
+        </section>
+
+        {/* Section 3: In Transit */}
+        <section className="mt-10">
+          <h2 className="text-2xl font-bold text-white mb-4">
+            Encryption In Transit: Netzwerk-Verschluesselung
+          </h2>
+          <p className="text-white/70 leading-relaxed mb-4">
+            Jede Verbindung zwischen deinen Services und zum Internet muss
+            verschluesselt sein. Auch in deinem lokalen Netzwerk — Netzwerke
+            werden kompromittiert, und ARP Spoofing im LAN ist trivial.
+          </p>
+
+          <ComparisonTable
+            headers={["Verbindungstyp", "Verschluesselung", "Konfiguration"]}
+            rows={[
+              ["Web-Traffic (extern)", "TLS 1.3 (HTTPS)", "Let's Encrypt oder Cloudflare (automatisch)"],
+              ["Remote-Zugriff", "WireGuard VPN", "Peer-to-Peer, <1ms Overhead, UDP-basiert"],
+              ["Server-to-Server", "SSH Tunnel", "ssh -L 5432:localhost:5432 user@db-server"],
+              ["API-Aufrufe (intern)", "mTLS oder SSH Tunnel", "Service Mesh oder manuelle Tunnel"],
+              ["Docker Swarm Overlay", "IPSec (automatisch)", "docker network create --opt encrypted"],
+            ]}
+          />
+
+          <Callout type="info" title="Ollama API verschluesseln">
+            <p>
+              Ollama lauscht standardmaessig auf{" "}
+              <code className="bg-white/10 px-1.5 py-0.5 rounded text-white/90">
+                http://localhost:11434
+              </code>{" "}
+              — unverschluesselt. Wenn andere Rechner im Netzwerk darauf
+              zugreifen, laeuft der gesamte Prompt-Traffic im Klartext. Loesung:
+              Reverse Proxy mit TLS davor oder SSH Tunnel.
+            </p>
+          </Callout>
+
+          <Callout type="tip" title="WireGuard statt OpenVPN">
+            <p>
+              WireGuard ist schneller, einfacher und sicherer als OpenVPN. Die
+              Konfiguration passt in 10 Zeilen. Unter Linux:{" "}
+              <code className="bg-white/10 px-1.5 py-0.5 rounded text-white/90">
+                sudo apt install wireguard
+              </code>
+              . Netbird (netbird.io) bietet eine verwaltete WireGuard-Loesung
+              fuer Zero-Trust Netzwerke.
+            </p>
+          </Callout>
+        </section>
+
+        {/* Section 4: In Use */}
+        <section className="mt-10">
+          <h2 className="text-2xl font-bold text-white mb-4">
+            Encryption In Use: RAM-Schutz
+          </h2>
+          <p className="text-white/70 leading-relaxed mb-4">
+            Waehrend ein LLM deine Daten verarbeitet, liegen sie unverschluesselt
+            im RAM. Ein Angreifer mit Root-Zugriff kann den Speicher auslesen
+            und Prompts, Antworten und Modell-Gewichte extrahieren.
+          </p>
+
+          <ComparisonTable
+            headers={["Technologie", "Verfuegbarkeit", "Schutz", "Overhead"]}
+            rows={[
+              ["Intel SGX", "Xeon (Server-CPUs)", "Enclaves im RAM", "5-30%"],
+              ["AMD SEV-SNP", "EPYC (Server-CPUs)", "Verschluesselter VM-Speicher", "~2%"],
+              ["ARM CCA", "ARMv9+", "Realms (isolierte Bereiche)", "Gering"],
+              ["Software-Loesungen", "Ueberall", "Memory Scrubbing, ASLR", "Minimal"],
+            ]}
+          />
+
+          <Callout type="info" title="Fuer die meisten Homelabs irrelevant">
+            <p>
+              Confidential Computing (Intel SGX, AMD SEV) ist primaer fuer
+              Cloud-Szenarien relevant, wo du dem Hoster nicht vertraust. In
+              deinem eigenen Homelab kontrollierst du die Hardware selbst. Die
+              praktischeren Massnahmen: Swap verschluesseln (verhindert RAM-
+              Auslagerung im Klartext), Bildschirmsperre aktivieren (verhindert
+              physischen Zugriff), und keine unnoetigen Root-Sessions offen
+              lassen.
+            </p>
+          </Callout>
+        </section>
+
+        {/* Section 5: Checkliste */}
+        <section className="mt-10">
+          <h2 className="text-2xl font-bold text-white mb-4">
+            Verschluesselungs-Checkliste fuer Self-Hosted AI
+          </h2>
+
+          <ComparisonTable
+            headers={["Massnahme", "Prioritaet", "Status-Check"]}
+            rows={[
+              ["LUKS auf Backup-Volumes", "PFLICHT", "lsblk -o NAME,TYPE,FSTYPE | grep crypt"],
+              ["Swap verschluesselt", "PFLICHT", "swapon --show + /etc/crypttab"],
+              ["TLS fuer alle Web-Services", "PFLICHT", "curl -vI https://dein-service.local"],
+              ["SSH Key-Only (kein Passwort)", "PFLICHT", "grep PasswordAuth /etc/ssh/sshd_config"],
+              ["WireGuard fuer Remote-Zugriff", "HOCH", "wg show"],
+              ["Docker Overlay verschluesselt", "HOCH", "docker network inspect --format '{{.Options}}'"],
+              ["Ollama hinter Reverse Proxy", "HOCH", "curl -I https://ollama.local"],
+              ["Datenbank-Verbindungen TLS", "MITTEL", "psql 'sslmode=require'"],
+            ]}
+          />
+        </section>
+
+        {/* Section 6: DSGVO */}
+        <section className="mt-10">
+          <h2 className="text-2xl font-bold text-white mb-4">
+            Verschluesselung und DSGVO
+          </h2>
+          <p className="text-white/70 leading-relaxed mb-4">
+            Die DSGVO verlangt &quot;angemessene technische Massnahmen&quot; zum
+            Schutz personenbezogener Daten (Art. 32). Verschluesselung wird
+            explizit als Beispiel genannt. Ohne Verschluesselung riskierst du
+            bei einem Data Breach deutlich hoehere Strafen.
+          </p>
+
+          <Callout type="warning" title="Verschluesselung reduziert Meldepflicht">
+            <p>
+              Art. 34 DSGVO: Wenn personenbezogene Daten verschluesselt waren
+              und der Key nicht kompromittiert wurde, entfaellt die Pflicht zur
+              Benachrichtigung der Betroffenen bei einem Data Breach. Das ist ein
+              starker Anreiz, Verschluesselung ueberall einzusetzen.
+            </p>
+          </Callout>
+
+          <Callout type="tip" title="Weiter vertiefen">
+            <p>
+              Mehr zum Thema Datenschutz fuer AI-Anwendungen findest du in
+              unserem{" "}
+              <a
+                href="/compliance/dsgvo-grundlagen"
+                className="text-blue-400 hover:underline"
+              >
+                DSGVO Grundlagen
+              </a>{" "}
+              Artikel und im{" "}
+              <a
+                href="https://buy.stripe.com/bJe7sLb7N92ha9MejWfQI02"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:underline"
+              >
+                DSGVO Compliance Bundle
+              </a>
+              .
+            </p>
+          </Callout>
+        </section>
+
+        {/* Key Takeaway */}
+        <KeyTakeaway
+          points={[
+            "Drei Verschluesselungs-Phasen: At Rest (Festplatte), In Transit (Netzwerk), In Use (RAM). Die ersten zwei sind Pflicht.",
+            "LUKS fuer Festplatten, TLS 1.3 fuer Web-Traffic, WireGuard fuer Remote-Zugriff. Alles Standard-Tools, kein Spezialwissen noetig.",
+            "Swap-Partition verschluesseln! Sonst landen RAM-Inhalte (Prompts, API Keys) im Klartext auf der Platte.",
+            "DSGVO Art. 32 nennt Verschluesselung explizit. Verschluesselte Daten reduzieren Meldepflicht bei Breaches (Art. 34).",
+            "Ollama-API laeuft unverschluesselt — Reverse Proxy mit TLS oder SSH Tunnel davorsetzen.",
+          ]}
+        />
+
+        {/* Quellen */}
+        <section className="mt-16 pt-8 border-t border-white/10">
+          <h2 className="text-xl font-bold text-white mb-4">Quellen</h2>
+          <ul className="space-y-2 text-sm text-white/50">
+            <li>
+              <a href="https://gitlab.com/cryptsetup/cryptsetup" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+                LUKS / cryptsetup
+              </a>{" "}
+              — Linux Disk Encryption Standard
+            </li>
+            <li>
+              <a href="https://www.wireguard.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+                WireGuard
+              </a>{" "}
+              — Modernes VPN-Protokoll
+            </li>
+            <li>
+              <a href="https://eur-lex.europa.eu/eli/reg/2016/679/oj" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+                DSGVO Art. 32, 34
+              </a>{" "}
+              — Sicherheit der Verarbeitung, Benachrichtigung bei Datenschutzverletzungen
+            </li>
+            <li>
+              <a href="https://confidentialcomputing.io/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+                Confidential Computing Consortium
+              </a>{" "}
+              — Encryption In Use Standards
+            </li>
+          </ul>
+        </section>
+
+        <RelatedArticles />
+      </div>
+    </div>
+  )
+}

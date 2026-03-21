@@ -1,0 +1,387 @@
+---
+title: "AI Monitoring Dashboard in 15 Minutes"
+date: 2026-03-21
+summary: "Set up Grafana and Prometheus to monitor Ollama, n8n, and Open WebUI performance"
+tags: ["grafana", "prometheus", "monitoring", "observability", "ai-stack"]
+author: "AI Engineering"
+---
+
+# AI Monitoring Dashboard in 15 Minutes
+
+Monitor your AI stack's health: token throughput, memory usage, API latency, workflow success rates.
+
+## Architecture
+
+```
+Prometheus (scraper)
+├── Ollama /api/ps (running models)
+├── n8n /rest/executions (completed workflows)
+└── Open WebUI /api/health (uptime)
+
+Grafana (visualization)
+├── Ollama Dashboard (request rate, memory, tokens)
+├── n8n Dashboard (success rate, execution time)
+└── Stack Overview (all metrics)
+```
+
+## Prerequisites
+
+- Existing AI stack (Ollama, n8n, Open WebUI)
+- Docker Compose file
+- 2GB free disk for metrics data
+
+## Step 1: Add Prometheus to docker-compose.yml
+
+Update your existing `docker-compose.yml`:
+
+```yaml
+prometheus:
+  image: prom/prometheus:latest
+  container_name: prometheus
+  ports:
+    - "9090:9090"
+  volumes:
+    - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    - prometheus_data:/prometheus
+  command:
+    - '--config.file=/etc/prometheus/prometheus.yml'
+    - '--storage.tsdb.path=/prometheus'
+    - '--storage.tsdb.retention.time=30d'
+  depends_on:
+    - ollama
+    - n8n
+
+grafana:
+  image: grafana/grafana:latest
+  container_name: grafana
+  ports:
+    - "3001:3000"
+  environment:
+    GF_SECURITY_ADMIN_PASSWORD: admin_change_me
+    GF_INSTALL_PLUGINS: grafana-worldmap-panel,grafana-gauge-panel
+  volumes:
+    - grafana_data:/var/lib/grafana
+  depends_on:
+    - prometheus
+
+volumes:
+  prometheus_data:
+  grafana_data:
+```
+
+## Step 2: Create prometheus.yml
+
+Create `prometheus.yml` in your project directory:
+
+```yaml
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'ai-stack'
+
+scrape_configs:
+  - job_name: 'ollama'
+    static_configs:
+      - targets: ['ollama:11434']
+    metrics_path: '/api/ps'
+    scrape_interval: 30s
+
+  - job_name: 'n8n'
+    static_configs:
+      - targets: ['n8n:5678']
+    metrics_path: '/api/metrics'
+    scrape_interval: 30s
+
+  - job_name: 'open-webui'
+    static_configs:
+      - targets: ['open-webui:8080']
+    metrics_path: '/health'
+    scrape_interval: 30s
+
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+```
+
+## Step 3: Start Services
+
+```bash
+docker-compose up -d prometheus grafana
+docker-compose logs -f prometheus
+```
+
+Wait for "Listening on address" message.
+
+## Step 4: Verify Prometheus
+
+1. Open http://localhost:9090
+2. Top menu → Status → Targets
+3. All three jobs should show "UP" (green)
+
+## Step 5: Add Grafana Data Source
+
+1. Open http://localhost:3001
+2. Login: `admin` / `admin_change_me`
+3. Left menu → Configuration → Data Sources
+4. Add data source:
+   - Name: `Prometheus`
+   - Type: `Prometheus`
+   - URL: `http://prometheus:9090`
+   - Save & Test (should show "Data source is working")
+
+## Step 6: Create Ollama Dashboard
+
+1. Left menu → Dashboards → New → New Dashboard
+2. Add Panel:
+   - **Panel title:** "Ollama Requests/sec"
+   - **Query:** (in PromQL)
+     ```
+     rate(ollama_requests_total[5m])
+     ```
+   - **Visualization:** Graph
+   - Save
+
+3. Add another panel:
+   - **Panel title:** "Memory Usage"
+   - **Query:**
+     ```
+     ollama_memory_bytes / 1024 / 1024 / 1024
+     ```
+   - **Unit:** GB
+   - **Visualization:** Gauge
+   - Save
+
+4. Add panel:
+   - **Panel title:** "Token Generation Rate"
+   - **Query:**
+     ```
+     rate(ollama_tokens_generated[5m])
+     ```
+   - **Visualization:** Graph
+   - Save
+
+5. Dashboard settings → Save dashboard → Name: "Ollama Health"
+
+## Step 7: Create n8n Dashboard
+
+1. New Dashboard
+2. Add Panel:
+   - **Title:** "Workflow Success Rate"
+   - **Query:**
+     ```
+     (n8n_executions_success / (n8n_executions_success + n8n_executions_failed)) * 100
+     ```
+   - **Unit:** Percent
+   - **Min:** 0, **Max:** 100
+
+3. Add Panel:
+   - **Title:** "Avg Execution Time (ms)"
+   - **Query:**
+     ```
+     avg(n8n_execution_time_ms)
+     ```
+   - **Unit:** milliseconds
+
+4. Add Panel:
+   - **Title:** "Failed Executions (24h)"
+   - **Query:**
+     ```
+     sum(increase(n8n_executions_failed[24h]))
+     ```
+   - **Visualization:** Stat
+
+5. Save dashboard → Name: "n8n Workflows"
+
+## Step 8: Stack Overview Dashboard
+
+1. New Dashboard → Name: "Stack Overview"
+2. Add multiple visualizations:
+   - **Top-left:** Ollama requests (graph)
+   - **Top-right:** n8n success rate (gauge)
+   - **Bottom-left:** Memory usage (gauge)
+   - **Bottom-right:** Active workflows (stat)
+
+## Custom Metrics from Ollama
+
+Ollama doesn't expose Prometheus metrics directly. Instead, query via HTTP:
+
+```bash
+# Check running models
+curl http://your-server:11434/api/ps
+
+# JSON response:
+# [
+#   {
+#     "name": "mistral",
+#     "model": "mistral",
+#     "details": {
+#       "format": "gguf",
+#       "families": ["llama"],
+#       "parameter_size": "7B",
+#       "quantization_level": "Q4_0"
+#     }
+#   }
+# ]
+```
+
+Create a custom metric exporter if needed:
+
+```python
+# Save as ollama_exporter.py
+import requests
+import time
+from prometheus_client import start_http_server, Gauge
+
+# Metrics
+ollama_requests = Gauge('ollama_requests_total', 'Total requests')
+ollama_memory = Gauge('ollama_memory_bytes', 'Memory used')
+
+def scrape_ollama():
+    while True:
+        try:
+            resp = requests.get('http://ollama:11434/api/ps')
+            models = resp.json()
+            ollama_requests.set(len(models))
+            # Set other metrics...
+        except Exception as e:
+            print(f"Error: {e}")
+        time.sleep(30)
+
+if __name__ == '__main__':
+    start_http_server(8000)
+    scrape_ollama()
+```
+
+Run in Docker:
+
+```yaml
+ollama-exporter:
+  build:
+    context: .
+    dockerfile: Dockerfile.exporter
+  ports:
+    - "8000:8000"
+  depends_on:
+    - ollama
+```
+
+## Alerting
+
+Set up alerts when thresholds are exceeded:
+
+### In Prometheus
+
+Create `alerts.yml`:
+
+```yaml
+groups:
+  - name: ai-stack
+    rules:
+      - alert: OllamaHighMemory
+        expr: ollama_memory_bytes / 1024 / 1024 / 1024 > 7
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Ollama memory > 7GB"
+
+      - alert: N8NHighFailureRate
+        expr: (n8n_executions_failed / n8n_executions_total) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "n8n failure rate > 10%"
+```
+
+Add to prometheus.yml:
+
+```yaml
+rule_files:
+  - "alerts.yml"
+```
+
+### In Grafana
+
+1. Alert tab → Add notification channel:
+   - Name: `Email`
+   - Type: `Email`
+   - Email addresses: `ops@company.com`
+   - Save
+
+2. Dashboard panel → Edit → Alert → Create Alert:
+   - Condition: `when avg() of B is above 7`
+   - Notification channel: `Email`
+
+## Performance Tips
+
+**Scrape frequency:**
+- Default 15s is fine for non-critical stacks
+- Production: 30s (reduces cardinality)
+- Increase retention: `--storage.tsdb.retention.time=30d`
+
+**Query optimization:**
+- Use `rate()` for counters (requests/sec)
+- Use `gauge` for absolute values (memory, CPU)
+- Downsampling: aggregate over 5m intervals
+
+**Storage:**
+- 15s scrape interval = ~4KB/day per metric
+- 7 metrics × 30 days = ~840KB (minimal)
+- Increase retention only if you have spare disk
+
+## Common Issues
+
+**"No data" in graph**
+- Check Prometheus targets (all should be UP)
+- Verify prometheus.yml syntax: `yamllint prometheus.yml`
+- Check metrics exist: Prometheus → Graph → type metric name
+
+**High memory usage**
+- Reduce scrape frequency
+- Lower retention time
+- Remove unused data sources
+
+**Slow dashboard loads**
+- Use time range selector (last 24h, not 30d)
+- Reduce number of panels
+- Use pre-aggregated metrics (rate over 5m)
+
+## Useful PromQL Queries
+
+```promql
+# Request rate over 5 minutes
+rate(requests_total[5m])
+
+# Memory as percentage
+(memory_used / memory_total) * 100
+
+# Tail latency (95th percentile)
+histogram_quantile(0.95, latency_seconds_bucket)
+
+# Change from 1 hour ago
+delta(value[1h])
+
+# 5-minute moving average
+avg_over_time(metric[5m])
+```
+
+## Checklist
+
+- [ ] Prometheus and Grafana added to docker-compose.yml
+- [ ] prometheus.yml created with 3 scrape configs
+- [ ] `docker-compose up -d` started both services
+- [ ] Prometheus targets all show "UP"
+- [ ] Grafana data source added and tested
+- [ ] Ollama dashboard created with 3+ panels
+- [ ] n8n dashboard created with success/failure metrics
+- [ ] Stack Overview dashboard linked
+- [ ] Alert rules configured
+- [ ] Dashboards saved and accessible
+- [ ] Sample queries tested in Prometheus Graph
+
+## Sources and Links
+
+- [Grafana](https://github.com/grafana/grafana)
+- [Prometheus](https://github.com/prometheus/prometheus)

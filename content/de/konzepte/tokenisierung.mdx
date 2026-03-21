@@ -1,0 +1,430 @@
+---
+title: Tokenisierung
+date: 2026-03-21
+summary: BPE, WordPiece, SentencePiece erklärt — wie Token-Counts funktionieren, Kontext-Fenster, Tokenizer-Unterschiede, Token-Kosten sparen
+tags: [tokenisierung, bpe, tokens, wordpiece, sentencepiece, context-window, llm]
+author: AI Engineering
+---
+
+# Tokenisierung verstehen
+
+Ein Token ist die kleinste Einheit die ein LLM verarbeitet. Nicht ein Wort — oft ein Wort + Whitespace oder sogar Subwort-Teile. Die richtige Tokenisierung ist kritisch für Cost, Performance und Qualität.
+
+---
+
+## Die Token-Realität
+
+### Englisch vs. Deutsch
+
+```
+Text: "The dog jumped over the fence"
+English Tokenizer: ["The", " dog", " jumped", " over", " the", " fence"]
+Tokens: 6
+
+Text: "Der Hund sprang über den Zaun"
+German Tokenizer: ["Der", " Hund", " sprung", " über", " den", " Zaun"]
+Tokens: 6
+
+Aber bei längeren deutschen Sätzen:
+
+Text: "Die unglaubliche Geschwindigkeit"
+English Tokenizer (GPT): ["Die", " un", "glau", "ber", "liche", " G", "e", "sch", "wind", "igkeit"]
+Tokens: 10 (ineffizient! Viele Sub-tokens)
+
+German Tokenizer (BERT): ["Die", "unglaubliche", "Geschwindigkeit"]
+Tokens: 3 (effizient)
+
+→ German ist 3-4× teurer in English Tokenizer!
+```
+
+Warum? Der English Tokenizer wurde auf English Texte trainiert. Deutsche Wörter sind oft länger → brauchen mehr Tokens.
+
+---
+
+## Token-Zählung Praktisch
+
+### Offline-Zählung
+
+```python
+import tiktoken
+
+# OpenAI Models
+enc = tiktoken.encoding_for_model("gpt-4")
+text = "Der Hund springt schnell über den Zaun"
+tokens = enc.encode(text)
+print(len(tokens))  # Beispiel: 11 Tokens
+
+# Alternative: cl100k für GPT-4
+enc = tiktoken.get_encoding("cl100k_base")
+tokens = enc.encode(text)
+```
+
+### Online-Zählung (für nicht-OpenAI Models)
+
+```python
+from transformers import AutoTokenizer
+
+# Llama 3
+tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b")
+tokens = tokenizer.encode("Der Hund springt schnell")
+print(len(tokens))
+
+# Count for German vs English
+en_text = "The dog jumps fast over the fence"
+de_text = "Der Hund springt schnell über den Zaun"
+
+en_tokens = len(tokenizer.encode(en_text))  # Beispiel: 7
+de_tokens = len(tokenizer.encode(de_text))  # Beispiel: 8
+
+print(f"English efficiency: {len(en_text) / en_tokens} chars/token")
+print(f"German efficiency: {len(de_text) / de_tokens} chars/token")
+```
+
+---
+
+## Tokenizer-Technologien
+
+### BPE (Byte Pair Encoding)
+
+**Idee**: Iterativ merge häufige Token-Paare.
+
+```
+Start mit Characters:
+"hugging" = ['h', 'u', 'g', 'g', 'i', 'n', 'g']
+
+Step 1: Zähle Paare
+  ('h', 'u'): 100 times
+  ('u', 'g'): 200 times  ← Häufigste
+  ('g', 'g'): 150 times
+  ...
+
+Merge häufigsten:
+"hugging" = ['h', 'ug', 'g', 'i', 'n', 'g']
+
+Repeat:
+Step 2: Neuer häufigste Pair?
+  ('ug', 'g'): 180 times
+  ...
+
+Until: Vocabulary Größe erreicht (z.B. 50K Tokens)
+```
+
+**Algorithmus**:
+
+```
+vocab = set of all characters (256 Bytes)
+freqs = count of all pairs
+
+while vocab_size < target_vocab_size:
+    most_frequent_pair = max(freqs)
+    merge most_frequent_pair in texts
+    update freqs
+    add merged_token to vocab
+```
+
+**Resultat**: Englisch-optimiert, aber funktioniert auch für andere Sprachen.
+
+**Verwendet**: GPT-4 (mit cl100k Variante)
+
+---
+
+### WordPiece
+
+**Idee** (Google, für BERT): Probabilistisch, basierend auf Likelihood des Vocabs.
+
+```
+Merges nicht nach Häufigkeit, sondern nach:
+
+score(A, B) = freq(AB) / (freq(A) × freq(B))
+
+Beispiel:
+freq(h) = 10000
+freq(u) = 5000
+freq(hu) = 4000
+
+score = 4000 / (10000 × 5000) = 0.00008
+
+freq(##ing) = 8000  (note ## = suffix)
+freq(g) = 8000
+
+score = 8000 / (8000 × 8000) = 0.000125 ← Higher score! Merge.
+```
+
+**Intuition**: Mergen wenn das Paar "gesetzmäßig" ist (nicht zufällig häufig).
+
+**Spezial**: `##` Prefix für Nicht-Start-Tokens.
+```
+"hugging" = ["hu", "##g", "##ging"]
+        nicht ["hu", "gg", "ing"] (WP würde `##gging` lernen wenn häufig)
+```
+
+**Verwendet**: BERT, Llama (modifiziert)
+
+---
+
+### SentencePiece
+
+**Idee** (Google, für mTok etc): Language-agnostic, behandle Whitespace als Token.
+
+```
+Input: "Hallo Welt"
+
+Standard BPE:
+"Hallo" = ['H', 'al', 'lo']
+"Welt" = ['W', 'el', 't']
+Result: ['H', 'al', 'lo', ' ', 'W', 'el', 't']
+
+SentencePiece:
+"Hallo Welt" = ['▁Hallo', '▁Welt']
+             (▁ = underscore, represented whitespace)
+
+Key: Reverse-able
+['▁Hallo', '▁Welt'] → "Hallo Welt" (exakt)
+
+auch Über Languages:
+['▁Der', '▁Hund'] + ['▁The', '▁dog']
+→ Identisches Tokenization-Scheme!
+```
+
+**Eigenschaften**:
+- Truly multilingual (shared vocabulary)
+- Reversible (Token → Text)
+- Behandelt Edge-Cases besser (Punctuation)
+
+**Verwendet**: T5, mBART, Llama 3 (mit modifications)
+
+---
+
+## Token-Counting Formulas
+
+### Rough Estimates (schnell)
+
+```
+English:
+1 Token ≈ 4 Characters
+1 Token ≈ 0.75 Words
+
+Deutsch:
+1 Token ≈ 3 Characters (wegen längerer Wörter)
+1 Token ≈ 0.6 Words
+
+Code:
+1 Token ≈ 2 Characters (viel Whitespace)
+
+JSON:
+1 Token ≈ 3 Characters (Struktur-Overhead)
+```
+
+**Beispiel**:
+```
+Text: "The quick brown fox" (19 Zeichen)
+Tokens: 19 / 4 = 4.75 ≈ 5 Tokens
+Real: 5 Tokens ✓
+
+Text: "Der schnelle braune Fuchs" (26 Zeichen)
+Tokens: 26 / 3 = 8.67 ≈ 9 Tokens
+Real: 8 Tokens ✓
+```
+
+---
+
+## Tokenizer-Vergleiche (2026)
+
+| Modell | Tokenizer | Vocab Size | Efficiency (EN) | Efficiency (DE) |
+|--------|-----------|-----------|-----------------|-----------------|
+| **GPT-4** | BPE (cl100k) | 100K | 4.5 chars/token | 2.5 chars/token |
+| **Claude 3.5** | Proprietary | ~100K | 4.0 chars/token | 2.8 chars/token |
+| **Llama 3 8B** | SentencePiece | 128K | 4.2 chars/token | 3.2 chars/token |
+| **Llama 3 70B** | SentencePiece | 128K | 4.2 chars/token | 3.2 chars/token |
+| **Mistral 7B** | SentencePiece | 32K | 3.8 chars/token | 2.8 chars/token |
+| **BERT** | WordPiece | 30K | 3.5 chars/token | 3.0 chars/token |
+
+---
+
+## Token-Kosten sparen
+
+### Strategie 1: Prompt Compression
+
+```
+Original Prompt:
+"Analysiere den folgenden Text gründlich und
+ gib mir detailliert eine Zusammenfassung
+ mit allen Hauptpunkten und Details."
+
+Tokens: ~25
+
+Compressed:
+"Analyze text. Summary with key points."
+
+Tokens: ~8 (68% sparen!)
+
+Aber: Qualität kann sinken!
+Best: Kurz sein, aber präzise.
+```
+
+### Strategie 2: Context-Reuse
+
+```
+Wenn du 10 Fragen stellst:
+
+Falsch (ineffizient):
+Prompt 1: "System: Du bist Assistent. Frage: Was ist X?" (80 tokens)
+Prompt 2: "System: Du bist Assistent. Frage: Was ist Y?" (80 tokens)
+Prompt 3: ... (80 tokens)
+Total: 800 Tokens für 10 Fragen
+
+Richtig (mit Chat History):
+Message 1: "System: Du bist Assistent." (10 tokens)
+Message 2: "User: Was ist X?" (5 tokens) → Re-use System
+Message 3: "User: Was ist Y?" (5 tokens) → Alles cached
+Total: ~30 Tokens (97% sparen!)
+```
+
+Mit **prompt caching** (Claude, GPT-4) ist old context kostenlos!
+
+### Strategie 3: Effiziente RAG
+
+```
+Falsch:
+1. Retrieve 20 Documents (5000 Tokens)
+2. Put all in Prompt
+Total pro Query: 5000 Tokens
+
+Richtig:
+1. Retrieve top-100 (vector search, fast)
+2. Rerank zu top-5 (with cross-encoder)
+3. Put nur top-3 in Prompt
+Total pro Query: 1500 Tokens (70% sparen!)
+
+Zeit: +50ms für Reranking
+Kosten: -70% Tokens
+Net: Win!
+```
+
+---
+
+## Special Cases
+
+### Code-Tokenisierung
+
+```
+Code ist teuer! Whitespace, Brackets werden Tokens.
+
+Python Code:
+def hello_world():
+    print("Hello")
+
+Tokens: ~12
+
+Grund:
+['def', ' hello', '_', 'world', '(', ')', ':',
+ '\n', '    ', 'print', '(', '"Hello"', ')']
+
+Warum viele? Tokenizer wurde auf Natural Language trainiert.
+Code-optimierte Tokenizer könnten besser sein, aber nicht standard.
+```
+
+### Multilingual-Kosten
+
+```
+Häufig: Englisch < Spanish < German < Chinese < Korean < Turkish
+
+Rough Multiplier:
+English: 1.0× (baseline)
+Spanish: 1.2×
+German: 1.3×
+Japanese: 1.5× (viel mehr sub-tokens)
+Chinese: 1.8× (Character-based, viel Redundanz)
+Korean: 1.9×
+
+Warum? Tokenizer trained hauptsächlich auf English.
+```
+
+### Emoji
+
+```
+Emoji kosten viel!
+
+"😀" = 2-3 Tokens (BPE zerlegt es)
+"Hello 😀 world" = 6-7 Tokens
+vs "Hello world" = 3 Tokens
+
+→ Emoji vermeiden wenn Cost-sensitiv
+```
+
+---
+
+## Context-Window Implications
+
+Ein Modell mit 8K Context hat:
+
+```
+8192 Tokens total
+
+System Prompt: 200 Tokens (üblich)
+User Input: 500 Tokens
+Available for Response: 8192 - 200 - 500 = 7492 Tokens
+
+Mit German:
+System: 150 Tokens (weniger efficient)
+Input: 750 Tokens
+Available: 8192 - 150 - 750 = 7292 Tokens
+
+→ German braucht mehr Tokens, weniger Platz für Antwort!
+```
+
+---
+
+## Praktische Token-Optimierungen
+
+### 1. Batch Requests
+
+```python
+# Falsch (serial)
+for query in queries:
+    tokens_used += count_tokens(system_prompt + query)
+
+# Richtig (batch mit shared system prompt)
+tokens_used = count_tokens(system_prompt)  # Once
+for query in queries:
+    tokens_used += count_tokens(query)
+
+Saving: system_prompt × (N-1) Tokens!
+```
+
+### 2. Summarize Before Store
+
+```
+Raw Document: 5000 Tokens
+Summary: 200 Tokens
+
+RAG mit Raw: 5000 T + Query + Output
+RAG mit Summary: 200 T + Query + Output
+
+→ 96% Einsparung wenn Qualität gut bleibt
+```
+
+### 3. Use Right Model
+
+```
+GPT-4 (Powerful aber teuer):
+Kosten: €0.03 pro 1K Tokens input
+
+Claude 3.5 Sonnet (Often besser, ähnlicher Preis):
+Kosten: €0.003 pro 1K Tokens input
+
+Llama 3 70B (Deployed lokal):
+Kosten: ~€0.0001 pro 1K Tokens input (wenn self-hosted)
+
+100K Tokens:
+- GPT-4: €3
+- Claude 3.5: €0.30
+- Llama (local): €0.01
+```
+
+Tokenisierung ist nicht sexy, aber kostet real Geld. Mit 10% Token-Optimierung sparest du auf lange Sicht über 1000€ pro Jahr.
+
+## Quellen und Links
+
+- [TikToken (OpenAI)](https://github.com/openai/tiktoken)
+- [SentencePiece (Google)](https://github.com/google/sentencepiece)

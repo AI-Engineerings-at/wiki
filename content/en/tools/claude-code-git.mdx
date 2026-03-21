@@ -1,0 +1,576 @@
+---
+title: "Git Integration — Claude Code Reference"
+date: "2026-03-21"
+summary: "Complete reference for Git integration in Claude Code — commit workflows, pull requests, branch management, merge conflicts, git hooks, co-authored-by, diff review, blame integration, worktree support."
+tags: ["claude-code", "git", "version-control", "workflow", "reference"]
+author: "AI Engineering"
+---
+
+# Git Integration in Claude Code
+
+Claude Code integrates deeply with Git for seamless version control. This reference covers commit workflows, PR creation, branch management, merge conflict resolution, hooks, attribution, and advanced features like worktrees.
+
+## Basic Commit Workflows
+
+### Create commits
+
+Claude can automatically create meaningful commits:
+
+```bash
+claude -p "implement feature X and commit"
+```
+
+Claude will:
+- Review changes using `git diff`
+- Create a descriptive commit message
+- Run `git commit`
+- Push to remote (if configured)
+
+### Co-Authored-By Attribution
+
+Add co-author information to commits:
+
+```
+implement feature X
+
+Co-Authored-By: Jane Doe <jane@example.com>
+Co-Authored-By: John Smith <john@example.com>
+```
+
+Request explicitly:
+```bash
+claude -p "implement X with co-authors Jane and John"
+```
+
+## Pull Request Creation
+
+### Direct PR creation
+
+```bash
+claude -p "fix bug X and create a PR"
+```
+
+Claude will:
+- Implement the fix
+- Create commits
+- Open PR with description
+- Return PR URL
+
+### Step-by-step PR workflow
+
+```
+1. Tell Claude to summarize changes
+2. Ask Claude to create a PR
+3. Ask to enhance the PR description
+```
+
+### Session linking with PRs
+
+When Claude creates a PR, the session is automatically linked. Resume later with:
+
+```bash
+claude --from-pr 123
+```
+
+## Branch Management
+
+### Creating branches
+
+```bash
+claude -p "create feature-auth branch and implement X"
+```
+
+### Worktrees (parallel sessions)
+
+Run multiple Claude sessions in parallel without file conflicts:
+
+```bash
+# New session in isolated worktree
+claude --worktree feature-auth
+
+# Another worktree for different task
+claude --worktree bugfix-123
+```
+
+Each worktree:
+- Has its own directory (`.claude/worktrees/<name>/`)
+- Is bound to its own branch (`worktree-<name>`)
+- Is fully isolated from other worktrees
+
+**Cleanup:**
+- No changes → automatically deleted
+- With changes → Claude asks to keep or remove
+- Manual: `git worktree remove <path>`
+
+## Merge Conflict Resolution
+
+### Automatic conflict detection
+
+```bash
+claude -p "resolve merge conflicts"
+```
+
+Claude will:
+1. Identify conflict markers
+2. Analyze both versions
+3. Propose a resolution
+4. Test the fix
+
+### Manual conflict workflow
+
+```
+1. Tell Claude "there's a merge conflict in file X"
+2. Claude reads both versions
+3. Claude suggests resolution
+4. Applies the fix
+5. Tests to verify
+```
+
+## Git Hooks Integration
+
+Claude respects and works with Git hooks.
+
+### Pre-commit hooks
+
+If your repo has pre-commit hooks (linting, formatting):
+
+1. Claude attempts to commit
+2. Hook fails
+3. Claude sees the error
+4. Claude fixes the issue
+5. Claude retries commit
+
+### Post-commit hooks
+
+After successful commits, post-commit hooks run automatically.
+
+## Diff Review
+
+### Review recent changes
+
+```bash
+claude -p "show recent changes and review for issues"
+```
+
+Claude will:
+- Run `git diff`
+- Analyze changes
+- Identify issues
+- Suggest improvements
+
+### Diff against branches
+
+```bash
+claude -p "show differences from main"
+```
+
+Uses `git diff main...HEAD` to show only changes since main.
+
+## Git Blame Integration
+
+Use git blame to understand code history:
+
+```bash
+claude -p "analyze this function and use git blame to understand its history"
+```
+
+Claude will:
+- Run `git blame`
+- Show who changed each line and when
+- Understand context from commits
+- Make better informed decisions
+
+## .gitignore Respect
+
+Claude respects `.gitignore` files. Files in `.gitignore`:
+- Won't be committed
+- Won't be pushed
+- But Claude can read them locally
+
+If Claude tries to commit an ignored file, Git will reject it and Claude will remove it.
+
+## Commit Message Conventions
+
+Claude uses these conventions:
+
+### Imperative present tense
+
+```
+# Correct
+add user authentication module
+fix authentication timeout issue
+
+# Incorrect
+added user authentication module
+fixes authentication timeout issue
+```
+
+### Subject line
+- Max 50 characters
+- Imperative, present tense
+- No period
+
+### Body (optional)
+
+For complex changes:
+
+```
+add user authentication module
+
+Implements OAuth2 flow with JWT support.
+- Handles token refresh automatically
+- Includes proper error handling
+- Adds 95% test coverage
+```
+
+## Remote Management
+
+### Push and pull
+
+```bash
+claude -p "push commits to origin main"
+claude -p "pull latest changes from main"
+```
+
+### Force push (use with caution)
+
+Claude will warn before force pushing:
+
+```bash
+claude -p "force push to origin"
+```
+
+Claude will:
+1. Warn that this is dangerous
+2. Require your confirmation
+3. Execute the force push
+
+## Advanced Workflows
+
+### Rebase and push
+
+```bash
+claude -p "rebase onto main and push"
+```
+
+### Cherry-pick
+
+```bash
+claude -p "cherry-pick commit ABC123"
+```
+
+### Squash commits
+
+```bash
+claude -p "squash the last 3 commits"
+```
+
+Claude will interactively rebase and combine commits.
+
+## Troubleshooting
+
+### Commit fails
+
+Check Git is configured:
+```bash
+git config user.name
+git rev-parse --git-dir
+```
+
+### PR creation fails
+
+- Verify SSH key or token
+- Check you have push permissions
+- Verify remote: `git remote -v`
+
+### Merge conflicts too complex
+
+Conflicts may require manual intervention. Ask Claude for a different approach.
+
+## Advanced Git Features in Claude Code
+
+### Stash and Resume
+
+Save uncommitted changes temporarily:
+
+```bash
+claude -p "stash changes and switch to main"
+```
+
+Claude will:
+1. Run `git stash`
+2. Switch to main branch
+3. Pull latest
+4. Apply stash back (or tell you if conflicts)
+
+### Partial Staging (Interactive Add)
+
+Stage only specific hunks of a file:
+
+```bash
+claude -p "stage only the error handling changes from main.py"
+```
+
+Claude will:
+1. Review the diff
+2. Identify error handling hunks
+3. Stage those specific changes
+4. Leave other changes unstaged
+
+### Commit Archaeology
+
+Understand code history with git blame:
+
+```bash
+claude -p "who changed the authentication logic and when?"
+```
+
+Claude will:
+1. Run git blame on auth files
+2. Show commit hashes and authors
+3. Explain the evolution of the code
+4. Identify potential issues or improvements
+
+### Branch Strategy
+
+**Feature branch workflow:**
+
+```bash
+claude -p "create feature/user-auth branch, implement basic auth, commit with tests"
+```
+
+**Release branch workflow:**
+
+```bash
+claude -p "create release/v1.0 from main, update version numbers, commit"
+```
+
+**Hotfix workflow:**
+
+```bash
+claude -p "create hotfix/critical-bug from main, fix bug, create PR to main and develop"
+```
+
+## Worktree Deep Dive
+
+Worktrees allow parallel development without file conflicts:
+
+### Creating a Worktree Session
+
+```bash
+# Start a new session in an isolated worktree
+claude --worktree feature-auth
+```
+
+What happens:
+1. New worktree directory created: `.claude/worktrees/feature-auth/`
+2. New branch created: `worktree-feature-auth`
+3. Working directory isolated from main repo
+4. Full git history available
+5. Can commit, push, create PRs
+
+### Multiple Worktrees Simultaneously
+
+```
+Main repo (main branch)
+├── Worktree 1: feature-auth (branch: worktree-feature-auth)
+├── Worktree 2: bugfix-123 (branch: worktree-bugfix-123)
+└── Worktree 3: docs-update (branch: worktree-docs-update)
+```
+
+Each can work independently, commit to their own branch, create separate PRs.
+
+### Worktree Cleanup
+
+**Automatic cleanup:**
+- Empty worktree: automatically removed after session
+- Worktree with uncommitted changes: Claude asks to keep or discard
+
+**Manual cleanup:**
+```bash
+git worktree list
+git worktree remove <path>
+```
+
+## Advanced Merge Strategies
+
+### Merge with --no-ff (preserve branch history)
+
+```bash
+claude -p "merge feature-auth into main with --no-ff to preserve branch history"
+```
+
+Output:
+```
+Merge made by the 'recursive' strategy.
+commit abc123 - Merge branch 'feature-auth'
+```
+
+Useful for: Keeping feature branch history visible.
+
+### Merge with --squash (single commit)
+
+```bash
+claude -p "squash feature-auth into main as a single commit"
+```
+
+Result:
+- All feature commits combined into one
+- Single clean commit on main
+- Feature branch history hidden
+
+Useful for: Keeping main history clean, hiding WIP commits.
+
+### Rebase instead of merge
+
+```bash
+claude -p "rebase feature-auth onto latest main"
+```
+
+Result:
+- Linear history (no merge commits)
+- Cleaner git log
+- Feature commits replayed on top of main
+
+Useful for: Monorepos, linear history preference.
+
+## Git Configuration for Teams
+
+### Set signing key
+
+```bash
+claude -p "configure GPG signing for commits"
+```
+
+Claude will:
+1. Check for GPG key
+2. Configure git to sign commits
+3. Verify setup with a test commit
+
+### Configure commit template
+
+```bash
+claude -p "create a commit message template for our team"
+```
+
+Result: `.gitmessage` file with standard format:
+
+```
+[TYPE] Brief description
+
+Longer explanation of changes.
+
+Fixes: #123
+Co-Authored-By: Name <email>
+```
+
+### Team-specific hooks
+
+```bash
+claude -p "add pre-commit hooks to lint and format code"
+```
+
+Result: `.git/hooks/pre-commit` that:
+- Runs linting
+- Formats code
+- Prevents commits with errors
+
+## Performance Optimization
+
+### Large file handling
+
+```bash
+claude -p "implement Git LFS for binary files over 100MB"
+```
+
+Claude will:
+1. Configure git lfs
+2. Track large files (.psd, .mp4, etc)
+3. Commit lfs config
+
+### Shallow clones for speed
+
+```bash
+claude -p "shallow clone the last 100 commits to speed up clone"
+```
+
+Result: Much faster initial clone, but limited history.
+
+## Integration with CI/CD
+
+### Auto-linking commits to issues
+
+```bash
+claude -p "add 'Closes #123' to commit message to auto-close issue"
+```
+
+Commit message:
+```
+Fix authentication bug
+
+Closes #123
+```
+
+GitHub/GitLab will automatically close issue 123 when merged.
+
+### Conventional commits for automation
+
+```bash
+claude -p "format commits using conventional commits (feat:, fix:, docs:)"
+```
+
+Result:
+- `feat: add user authentication`
+- `fix: resolve password reset bug`
+- `docs: update API documentation`
+
+Tools like `semantic-release` can auto-generate changelogs from these.
+
+## Debugging Git Issues
+
+### Recovering lost commits
+
+```bash
+claude -p "find a commit I accidentally deleted"
+```
+
+Claude will:
+1. Run `git reflog`
+2. Locate the commit
+3. Recover it via `git cherry-pick` or branch restore
+
+### Understanding diverged branches
+
+```bash
+claude -p "show me how main and feature-auth diverged"
+```
+
+Claude will:
+1. Find common ancestor
+2. Show commits unique to each branch
+3. Suggest merge strategy
+
+### Analyzing commit patterns
+
+```bash
+claude -p "who commits most often and when?"
+```
+
+Claude will:
+1. Parse git log
+2. Show commit frequency by author
+3. Identify patterns (e.g., "Joe commits Fridays at 3pm")
+
+---
+
+*Last updated: 2026-03-21 | Claude Code Git Integration Reference | Total Lines: 450+*
+
+## Sources and Links
+
+- [Git Workflows](https://code.claude.com/docs/en/common-workflows)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

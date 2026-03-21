@@ -1,0 +1,411 @@
+---
+title: AI Deployment — Models in Production
+date: 2026-03-21
+summary: How to deploy AI models. Docker, vLLM, TGI, Ollama. Scaling, batching, GPU sharing. Monitoring and cost tracking.
+tags: [deployment, production, docker, vllm, scaling, gpu]
+author: AI Engineering
+---
+
+# AI Deployment — Models in Production
+
+A trained model on your laptop isn't enough. Production requires:
+- Scalability (many simultaneous requests)
+- Latency (fast responses)
+- Cost (GPU is expensive)
+- Monitoring (what's running, what breaks)
+
+## Local: Ollama
+
+Easiest way to start:
+
+```bash
+ollama pull llama2
+ollama serve
+
+# In another shell:
+curl -X POST http://localhost:11434/api/generate \
+  -d '{
+    "model": "llama2",
+    "prompt": "What is AI?",
+    "stream": false
+  }'
+```
+
+**Pros:** Simple, local, private.
+**Cons:** Slow, single-request (queue if many requests).
+
+## Production: vLLM
+
+**vLLM** is a high-performance inference server.
+
+```bash
+docker run --gpus all \
+  -p 8000:8000 \
+  vllm/vllm-openai:latest \
+  --model meta-llama/Llama-2-7b-hf \
+  --tensor-parallel-size 2
+
+curl -X POST http://localhost:8000/v1/completions \
+  -d '{
+    "model": "Llama-2-7b-hf",
+    "prompt": "What is AI?",
+    "max_tokens": 100
+  }'
+```
+
+**Advantages:**
+- Fast (paged attention)
+- OpenAI-compatible API
+- GPU-memory efficient
+- Batching (process multiple requests together)
+
+**VRAM (7B model):**
+- Ollama: ~4GB usable
+- vLLM: ~8GB optimal
+- Quantized: ~2GB possible
+
+## Quantization: Save Memory
+
+Compress models. Instead of float32 (4 bytes), use int8 (1 byte):
+
+```bash
+ollama pull neural-chat:7b-v3.2-q4
+
+# vLLM with quantization
+vllm serve meta-llama/Llama-2-7b-hf --quantization awq
+```
+
+**Trade-off:**
+```
+float32: 28GB (7B model)
+  ↓ int8:    7GB (1/4 size)
+  ↓ int4:   3.5GB (1/8 size)
+
+Quality loss: ~5% for int8, ~10% for int4
+```
+
+## Scaling: Load Balancer
+
+Multiple vLLM instances on multiple GPUs:
+
+```yaml
+services:
+  vllm-1:
+    image: vllm/vllm-openai:latest
+    ports:
+      - "8001:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['0']
+
+  vllm-2:
+    image: vllm/vllm-openai:latest
+    ports:
+      - "8002:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['1']
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8000:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+```
+
+nginx.conf:
+```nginx
+upstream backend {
+    server vllm-1:8000;
+    server vllm-2:8000;
+}
+
+server {
+    listen 80;
+    location / {
+        proxy_pass http://backend;
+    }
+}
+```
+
+**Result:** 2 requests run in parallel.
+
+## Batching: Efficient GPU Use
+
+vLLM batches multiple requests automatically:
+
+```
+Request 1: 10 token input
+Request 2: 5 token input
+GPU processes both together
+
+Throughput: 2x faster than sequential
+```
+
+**Batch Size Tuning:**
+```
+batch_size=64:
+- Latency: 500ms
+- Throughput: 128 tokens/s
+
+batch_size=8:
+- Latency: 100ms (faster!)
+- Throughput: 64 tokens/s (slower)
+
+Trade-off: Latency vs. Throughput
+```
+
+## Caching: GPU Memory Optimization
+
+vLLM uses **paged attention caching**:
+- Store KV-cache from previous tokens
+- Enables fast inference for long sequences
+- Page-based memory (less fragmentation)
+
+**Result:** 10x memory efficiency.
+
+## Monitoring: What's Running?
+
+Key metrics:
+
+```python
+import psutil
+import torch
+
+gpu_memory_used = torch.cuda.memory_allocated() / 1e9
+gpu_memory_total = torch.cuda.get_device_properties(0).total_memory / 1e9
+
+cpu_percent = psutil.cpu_percent(interval=1)
+ram_percent = psutil.virtual_memory().percent
+
+requests_per_second = 0
+average_latency_ms = 0
+tokens_per_second = 0
+
+print(f"GPU: {gpu_memory_used:.1f}GB / {gpu_memory_total:.1f}GB")
+print(f"Throughput: {tokens_per_second:.0f} tokens/s")
+print(f"Latency: {average_latency_ms:.0f}ms")
+```
+
+With Prometheus + Grafana:
+
+```python
+from prometheus_client import Counter, Histogram
+
+request_count = Counter('inference_requests_total', 'Total requests')
+request_latency = Histogram('inference_latency_seconds', 'Latency')
+
+@request_latency.time()
+def inference(prompt):
+    ...
+    request_count.inc()
+```
+
+## Cost Tracking
+
+GPU-hours are expensive:
+
+```
+A100 (40GB): ~$1-2 per hour
+RTX 3090: ~$0.50 per hour
+T4: ~$0.10 per hour
+
+7B model, 100 requests/day:
+- A100: ~$2/day = $60/month
+- T4: ~$0.10/day = $3/month
+```
+
+**Cost Optimization:**
+1. Quantize (save VRAM)
+2. Use smaller models
+3. Batch requests
+4. Cheaper hardware (T4 vs. A100)
+
+## Serving Options: Comparison
+
+| Option | Speed | Cost | Complexity | Latency |
+|--------|-------|------|-----------|---------|
+| Ollama | Medium | Low | Low | 500ms+ |
+| vLLM | High | High | Medium | 50-200ms |
+| TGI | High | High | Medium | 50-200ms |
+| Managed | Medium | High | Low | 100-500ms |
+
+## Production Architecture Patterns
+
+### Pattern 1: Single GPU Server
+
+```
+Client → Flask API → vLLM (1 GPU)
+Throughput: 50-100 tokens/sec
+Cost: RTX 4090 ($1,600) + electricity
+Latency: 50-200ms
+```
+
+Use case: Small team, <100 requests/day
+
+### Pattern 2: Multi-GPU Cluster
+
+```
+Load Balancer (Nginx)
+├── vLLM (GPU 0)
+├── vLLM (GPU 1)
+├── vLLM (GPU 2)
+└── vLLM (GPU 3)
+
+Throughput: 400+ tokens/sec
+Cost: 4× RTX 4090 ($6,400)
+Latency: 50ms (via batching)
+```
+
+Use case: Production, >1000 requests/day
+
+### Pattern 3: Cloud-based (Spot GPUs)
+
+```
+App → RunPod / Lambda Labs (H100)
+Cost: $2-4 per hour
+Throughput: 1000+ tokens/sec
+Latency: 30ms
+Reliability: 95% (preemption possible)
+```
+
+Use case: Batch jobs, non-critical inference
+
+## Monitoring in Production
+
+### Key Metrics to Track
+
+```python
+from datetime import datetime
+import json
+
+metrics = {
+    "timestamp": datetime.utcnow().isoformat(),
+    "gpu_memory_mb": 18432,
+    "gpu_memory_percent": 75,
+    "requests_in_queue": 12,
+    "avg_latency_ms": 120,
+    "throughput_tokens_per_sec": 85,
+    "error_rate_percent": 0.2,
+    "model_name": "llama-2-70b",
+    "batch_size": 8
+}
+
+# Log to monitoring system
+prometheus.gauge("gpu_memory_percent", 75)
+prometheus.gauge("queue_size", 12)
+prometheus.histogram("inference_latency_ms", 120)
+```
+
+### Alert Thresholds
+
+```yaml
+rules:
+  - alert: GPUMemoryHigh
+    expr: gpu_memory_percent > 90
+    for: 5m
+    action: page_oncall
+
+  - alert: HighQueueDepth
+    expr: requests_in_queue > 50
+    for: 2m
+    action: scale_up
+
+  - alert: HighErrorRate
+    expr: error_rate > 5%
+    for: 5m
+    action: page_oncall
+```
+
+## Cost Optimization Strategies
+
+### Strategy 1: Quantization
+
+```
+Full precision: 280GB (unfeasible)
+FP16: 140GB (A100 × 2)
+INT8: 70GB (1× A100)
+INT4: 35GB (RTX 4090) ← 88% cost savings
+
+Quality loss: <5% for most tasks
+```
+
+### Strategy 2: Smaller Models
+
+```
+70B model: High quality, high cost
+13B model: 80% quality, 20% cost
+7B model: 70% quality, 10% cost
+
+Sweet spot: 13B with fine-tuning = quality + cost balance
+```
+
+### Strategy 3: Request Batching
+
+```
+Sequential: 100 requests × 100ms = 10 seconds
+Batched: 100 requests ÷ 8-per-batch = 15ms batch × 13 = 195ms total
+
+Speedup: 50x faster
+Cost: Same GPU, 50x more throughput
+```
+
+### Strategy 4: Caching
+
+```
+Request: "Explain quantum computing"
+Result cached for 24 hours
+
+Repeat request: 5ms (from cache) vs 150ms (inference)
+Cost: $0 (cache hit vs $0.02 inference cost)
+```
+
+## Kubernetes Deployment
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-inference
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+      - name: vllm
+        image: vllm/vllm-openai:v0.x.x
+        args:
+          - --model
+          - meta-llama/Llama-2-70b-hf
+          - --tensor-parallel-size=2
+          - --gpu-memory-utilization=0.9
+        resources:
+          limits:
+            nvidia.com/gpu: 2
+          requests:
+            nvidia.com/gpu: 2
+      nodeSelector:
+        gpu-type: a100
+```
+
+## References
+
+- [vLLM Official Docs](https://docs.vllm.ai/)
+- [Hugging Face TGI](https://huggingface.co/docs/text-generation-inference)
+- [Ollama Documentation](https://ollama.ai)
+- [Kubernetes GPU Scheduling](https://kubernetes.io/docs/tasks/manage-gpus/scheduling-gpus/)
+- [vLLM Performance Tuning](https://blog.vllm.ai)
+
+**Last Updated**: 21.03.2026 | **Total Lines**: 400+
+
+## Sources and Links
+
+- [vLLM](https://github.com/vllm-project/vllm)
+- [llama.cpp](https://github.com/ggerganov/llama.cpp)

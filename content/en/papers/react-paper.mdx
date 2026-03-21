@@ -1,0 +1,151 @@
+---
+title: ReAct — Reasoning + Acting in LLMs
+date: 2026-03-21
+summary: ReAct framework, Thought-Action-Observation loop, impact on agent design, practical implementations in n8n and Open WebUI.
+tags: [react, llm, agents, reasoning, action, paper]
+author: AI Engineering
+section: papers
+---
+
+# ReAct — Reasoning + Acting in LLMs
+
+ReAct shows how to turn LLMs into real agents that think (reasoning) and act (action).
+
+## The Core Problem
+
+Previous approaches:
+
+```
+Pure Reasoning (Chain-of-Thought):
+Q: "How old is Albert Einstein now?"
+A: "Albert Einstein was born in 1879..."
+Problem: Factually wrong (Einstein died in 1955)
+
+Pure Actions (Tools):
+Q: "How old is Albert Einstein?"
+search_web("Albert Einstein age")
+Problem: No context, poor query formulation
+```
+
+ReAct combines both: **Think, then act, observe result, repeat.**
+
+## ReAct Loop: Thought-Action-Observation
+
+```
+Input: "When was Albert Einstein born?"
+
+Step 1 - Thought:
+"I might know this, but unsure. Better search."
+
+Step 2 - Action:
+search_wikipedia("Albert Einstein birth")
+
+Step 3 - Observation:
+[Wikipedia] Albert Einstein born March 14, 1879
+
+Step 4 - Thought:
+"I have the answer: March 14, 1879"
+
+Output: March 14, 1879
+```
+
+## Practical Implementation
+
+```
+Prompt template:
+
+Q: [Question]
+Thought: [Your reasoning]
+Action: [tool_name[input]]
+Observation: [Result]
+... (repeat until Final Answer)
+Final Answer: [answer]
+```
+
+### Example from the Paper
+
+```
+Q: What's the elevation range of Great Sand Dunes?
+
+Thought 1: Need to search for Great Sand Dunes info
+Action 1: search[Great Sand Dunes Colorado]
+Observation 1: Great Sand Dunes is located in southern Colorado...
+
+Thought 2: Found location, now need elevation range
+Action 2: search[Great Sand Dunes elevation]
+Observation 2: ...elevation varies from 8,949 to 13,604 feet...
+
+Final Answer: 8,949 to 13,604 feet
+```
+
+## Tools and Actions
+
+```
+Standard tools:
+- search(query): Search knowledge base
+- calculate(expression): Math
+- get_wikipedia(page): Wikipedia lookup
+- get_current_time(): Current time
+- call_api(endpoint, params): External API
+```
+
+## Comparison: ReAct vs. Chain-of-Thought
+
+```
+Task: "What's France's GDP in 2024?"
+
+Chain-of-Thought:
+"France is a large country... GDP is probably around 3 trillion"
+Problem: Outdated, possibly wrong
+
+ReAct:
+Thought: "Need current France GDP"
+Action: search["France GDP 2024"]
+Observation: France GDP 2024: €2.94 trillion
+Final Answer: €2.94 trillion
+```
+
+## Impact on Agent Design
+
+After ReAct, this became standard:
+
+1. Agents use Thought-Action-Observation loops
+2. LLMs delegate to tools instead of hallucinating
+3. Multiple iterations are OK
+
+## ReAct in Modern Systems
+
+### OpenAI Function Calling
+```python
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[...],
+    tools=[
+        {"name": "search", "description": "Search"},
+        {"name": "calculate", "description": "Math"}
+    ]
+)
+# Model responds with action suggestions
+# System executes tool
+# Model sees result and decides next action
+```
+
+## Limitations
+
+```
+ReAct works well up to:
+- ~10 iterations
+- ~10 available tools
+- Simple reasoning tasks
+
+ReAct doesn't work well:
+- Tasks with >20 steps
+- Complex tool interactions
+- When first step is wrong (no backtracking)
+```
+
+## Sources and Links
+
+- [ReAct Paper (ArXiv)](https://arxiv.org/abs/2210.03629)
+- [OpenAI Function Calling](https://platform.openai.com/docs/guides/function-calling)
+- [LangChain ReAct Agent](https://python.langchain.com/docs/modules/agents/)

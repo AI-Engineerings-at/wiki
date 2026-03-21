@@ -1,0 +1,463 @@
+---
+title: Knowledge Distillation
+date: 2026-03-21
+summary: Teacher-Student Paradigm, Soft Labels, Temperature Scaling, Distillation für LLMs — wann distillieren, Code-Beispiele
+tags: [knowledge-distillation, model-compression, transfer-learning, student-teacher, temperature]
+author: AI Engineering
+section: Konzepte
+---
+
+# Knowledge Distillation verstehen
+
+Knowledge Distillation ist eine Technik, um Wissen von großen Modellen (Teacher) auf kleinere Modelle (Student) zu übertragen.
+
+## Kernidee
+
+Ein großes Modell (GPT-4, 70B Llama) trainiert ein kleines Modell (7B Llama), indem es ihm nicht nur "richtige Antworten" gibt, sondern auch seine "Intuition" zeigt.
+
+```
+Teacher (Großes Modell):
+Input: "Was ist die Hauptstadt Deutschlands?"
+Output: Wahrscheinlichkeiten
+  - Berlin: 0.95
+  - München: 0.02
+  - Hamburg: 0.01
+  - Köln: 0.01
+  - (weitere 96 Länder mit <0.01)
+
+Student (Kleines Modell):
+Lernt nicht nur dass Berlin richtig ist,
+sondern auch WARUM es andere Städte gibt und warum nicht!
+```
+
+---
+
+## Teacher-Student Framework
+
+### Standard Training (falsch)
+
+```python
+# Teacher macht vorhersagen
+teacher_predictions = teacher_model(input)  # [0, 1, 0, 0, ...]
+
+# Student trainiert nur auf richtige Labels
+student_predictions = student_model(input)
+
+loss = CrossEntropyLoss(student_predictions, true_labels)
+```
+
+Problem: Student sieht nicht die "Intuition" des Teachers.
+
+### Knowledge Distillation (richtig)
+
+```python
+# Teacher macht Vorhersagen
+teacher_logits = teacher_model(input, output_hidden_states=True)
+
+# Student trainiert auf ZWEI Dinge:
+student_logits = student_model(input)
+
+# 1. Distillation Loss (Wissen vom Teacher)
+distillation_loss = KL_Divergence(
+    softmax(student_logits / temperature),
+    softmax(teacher_logits / temperature)
+)
+
+# 2. Task Loss (Original-Labels)
+task_loss = CrossEntropyLoss(student_logits, true_labels)
+
+# Kombiniere beide
+total_loss = (1 - alpha) * task_loss + alpha * distillation_loss
+# alpha typisch: 0.3-0.7
+```
+
+---
+
+## Soft Labels und Temperature
+
+Temperature ist der Schlüssel zur Distillation.
+
+### Ohne Temperature (T=1)
+
+```
+Teacher Ausgabe für "Berlin ist Hauptstadt":
+  Berlin: 0.99 (sehr sicher)
+  Alle anderen: ~0.0001 (sehr unsicher)
+
+Student sieht:
+  "Berlin ist richtig, alles andere ist Mist"
+  → Keine neuen Informationen von anderen Optionen!
+```
+
+### Mit Temperature (T=5)
+
+```
+Gleiche Teacher Ausgabe mit T=5 "weicher gemacht":
+  Berlin: 0.85 (sicher)
+  München: 0.04 (könnte auch sein)
+  Hamburg: 0.03
+  Köln: 0.03
+  Andere: 0.02
+  ...
+
+Student sieht:
+  "Berlin ist sehr likely, aber München/Hamburg/Köln könnten auch sinnvoll sein"
+  → Student lernt die Intuition des Teachers!
+```
+
+### Mathematik
+
+```
+Soft Label Berechnung:
+
+p_soft = softmax(z / T)
+
+T = 1:   Normale Softmax (sharp, one-hot)
+T = 5:   Weicher, mehr Wahrscheinlichkeit für "falsche" Labels
+T = 20:  Noch weicher, fast uniform
+T = ∞:   Komplett uniform (zu weich, keine Info)
+
+Typischer Wert: T = 3-7
+```
+
+### Praktischer Code
+
+```python
+import torch
+import torch.nn.functional as F
+
+def distillation_loss(student_logits, teacher_logits, temperature=4.0, alpha=0.7):
+    """
+    student_logits: Shape (batch, num_classes)
+    teacher_logits: Shape (batch, num_classes)
+    """
+    # Soft Targets vom Teacher
+    soft_targets = F.softmax(teacher_logits / temperature, dim=-1)
+
+    # Student probabilities mit gleicher Temperature
+    student_log_probs = F.log_softmax(student_logits / temperature, dim=-1)
+
+    # KL Divergence
+    kl_loss = F.kl_div(student_log_probs, soft_targets, reduction='batchmean')
+
+    return kl_loss
+```
+
+---
+
+## Distillation für LLMs
+
+Distillation von großen Language Models auf kleinere.
+
+### Szenario
+
+```
+Teacher: GPT-4 oder Llama-70B
+Student: Llama-7B oder Mistral-7B
+
+Ziel: Kleine Model mit großem Modell Qualität
+```
+
+### Implementierung
+
+```python
+from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch
+
+# Modelle laden
+teacher = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-70b")
+student = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b")
+
+# Beide auf GPU
+device = "cuda:0"
+teacher = teacher.to(device)
+student = student.to(device)
+teacher.eval()  # Teacher in eval mode
+
+# Training Loop
+optimizer = torch.optim.AdamW(student.parameters(), lr=1e-5)
+
+for batch_text in training_data:
+    inputs = tokenizer(batch_text, return_tensors="pt").to(device)
+
+    # Teacher generiert Logits (kein Gradient)
+    with torch.no_grad():
+        teacher_outputs = teacher(**inputs, output_hidden_states=True)
+        teacher_logits = teacher_outputs.logits  # (batch, seq_len, vocab_size)
+
+    # Student generiert Logits
+    student_outputs = student(**inputs)
+    student_logits = student_outputs.logits
+
+    # Distillation Loss
+    T = 4.0
+    soft_targets = F.softmax(teacher_logits / T, dim=-1)
+    student_log_probs = F.log_softmax(student_logits / T, dim=-1)
+
+    kl_loss = F.kl_div(student_log_probs, soft_targets, reduction='batchmean')
+
+    # Backward
+    kl_loss.backward()
+    optimizer.step()
+    optimizer.zero_grad()
+```
+
+### Praktische Ergebnisse
+
+```
+Llama-2-70B Teacher
+  MMLU: 63.4%
+  Hellaswag: 81.3%
+
+Llama-2-7B (vortrainiert, ohne Distillation)
+  MMLU: 46.0%
+  Hellaswag: 71.2%
+
+Llama-2-7B (mit Distillation vom 70B)
+  MMLU: 52.5% ← +6.5 Punkte!
+  Hellaswag: 76.1% ← +4.9 Punkte
+```
+
+---
+
+## Distillation vs Alternatives
+
+### Wann Distillation verwenden
+
+```
+✅ DISTILLATION SINNVOLL:
+- Du hast einen großen Teacher (GPT-4, 70B)
+- Student muss schneller sein
+- Qualität ist wichtig, aber nicht kritisch
+- Budget begrenzt (Inference-Kosten)
+
+❌ NICHT SINNVOLL:
+- Kein guter Teacher vorhanden
+- Qualität muss gleich wie Teacher sein
+- Training-Daten sehr begrenzt (<10K Beispiele)
+```
+
+### Vergleich: Distillation vs Fine-Tuning vs Quantization
+
+| Methode | Modellgröße | Speed | Qualität | Komplexität | Kosten |
+|---------|-------------|-------|----------|-------------|--------|
+| Original | 70B | 1x | 100% | - | $$$$$ |
+| Distillation | 7B | 10x | 85-90% | Hoch | $$$ |
+| Fine-Tuning | 7B | 10x | 75-80% | Niedrig | $$ |
+| Quantization | 70B | 3-4x | 95-98% | Niedrig | $$ |
+| Distill + Quantize | 7B | 15x | 80-85% | Mittel | $ |
+
+---
+
+## Advanced Distillation Techniques
+
+### 1. Feature Distillation
+
+Nicht nur Outputs distillieren, sondern auch versteckte Layer.
+
+```python
+# Standard: Nur letzte Layer
+distillation_loss = KL_Divergence(student_logits, teacher_logits)
+
+# Feature Distillation: Versteckte Layer matchen
+def feature_distillation_loss(student_hiddens, teacher_hiddens):
+    """
+    student_hiddens: List[Tensors] → 13 Layers
+    teacher_hiddens: List[Tensors] → 13 Layers
+
+    Matche intermediate Representations
+    """
+    loss = 0
+    for student_h, teacher_h in zip(student_hiddens, teacher_hiddens):
+        # Projiziere auf gleiche Dimension
+        student_proj = projection_layer(student_h)  # (batch, seq, dim)
+        teacher_proj = teacher_h
+
+        # MSE Loss zwischen Features
+        loss += F.mse_loss(student_proj, teacher_proj)
+
+    return loss
+```
+
+### 2. Attention Transfer
+
+Matche die Attention Patterns zwischen Teacher und Student.
+
+```python
+def attention_transfer_loss(student_attentions, teacher_attentions):
+    """
+    Achte darauf, WO der Teacher Aufmerksamkeit gibt
+    """
+    loss = 0
+    for student_att, teacher_att in zip(student_attentions, teacher_attentions):
+        # student_att shape: (batch, heads, seq_len, seq_len)
+
+        # Summiere über heads um Aufmerksamkeits-Map zu bekommen
+        student_att_map = student_att.sum(dim=1)  # (batch, seq_len, seq_len)
+        teacher_att_map = teacher_att.sum(dim=1)
+
+        # KL Loss zwischen Attention Distributions
+        loss += F.kl_div(
+            F.log_softmax(student_att_map, dim=-1),
+            F.softmax(teacher_att_map, dim=-1)
+        )
+
+    return loss
+```
+
+### 3. Mixed Batch Distillation
+
+Teacher und Student trainieren gemeinsam auf Batch.
+
+```python
+# Batch: 32 Samples
+# Vordere 16: Real data
+# Hintere 16: Teacher-generated data (synthetisch)
+
+# Student sieht auch "künstliche" Beispiele vom Teacher
+# → Besser auf unsichtbare Daten generalisiert
+```
+
+---
+
+## Praktische Implementierung: DistilBERT
+
+DistilBERT ist ein gutes Real-World Beispiel.
+
+```
+BERT (Teacher): 110M Parameter, 12 Layers
+DistilBERT (Student): 66M Parameter, 6 Layers
+
+Training:
+- Distillation Loss: KL zwischen Logits
+- Task Loss: Classification/MLM auf echten Daten
+- Feature Loss: Layer-Matching auf intermediate Representations
+
+Ergebnis:
+- 40% kleiner
+- 60% schneller
+- 97% der Qualität
+```
+
+### Code
+
+```python
+from transformers import AutoModelForSequenceClassification, DistilBertForSequenceClassification
+
+# Teacher
+teacher = AutoModelForSequenceClassification.from_pretrained("bert-base-uncased")
+
+# Student (bereits DistilBERT)
+student = DistilBertForSequenceClassification.from_pretrained("distilbert-base-uncased")
+
+# Trainieren mit Distillation
+def distil_forward(student, teacher, input_ids, attention_mask, labels):
+    # Teacher
+    teacher_outputs = teacher(input_ids, attention_mask=attention_mask)
+    teacher_logits = teacher_outputs.logits
+
+    # Student
+    student_outputs = student(input_ids, attention_mask=attention_mask, labels=labels)
+    student_logits = student_outputs.logits
+    task_loss = student_outputs.loss
+
+    # Distillation
+    T = 3.0
+    soft_targets = F.softmax(teacher_logits / T, dim=-1)
+    student_log_probs = F.log_softmax(student_logits / T, dim=-1)
+    kl_loss = F.kl_div(student_log_probs, soft_targets)
+
+    # Kombiniert
+    loss = 0.3 * task_loss + 0.7 * kl_loss
+    return loss
+```
+
+---
+
+## Häufige Fehler
+
+### 1. Temperature zu niedrig/hoch
+
+```
+❌ T=1: Zu sharp → Student lernt nur "richtige Antwort"
+✅ T=3-7: Balance
+❌ T=50: Zu soft → Student lernt nichts neues
+```
+
+### 2. Falsches Alpha-Verhältnis
+
+```
+❌ alpha=0 (nur Task Loss): Wartet nicht auf Teacher
+❌ alpha=1 (nur Distillation): Ignoriert echte Labels
+
+✅ alpha=0.3-0.7: Balance zwischen beiden
+```
+
+### 3. Student zu klein
+
+```
+❌ Teacher 70B → Student 1B: Zu großer Gap
+  Student kann nicht lernen, zu viel Differenz
+
+✅ Teacher 70B → Student 7B: Machbar
+✅ Teacher 7B → Student 1B: Besser
+
+Regel: Student sollte >= 10% der Größe sein
+```
+
+### 4. Zu lange Training
+
+```
+❌ 100 Epochen auf Distillation: Overfitting
+✅ 5-10 Epochen: Reicht meist
+```
+
+---
+
+## Best Practices
+
+### 1. Teacher Qualität ist kritisch
+
+```python
+# Guter Teacher
+teacher = load_gpt4_api()  # oder lokales großes Modell
+teacher.eval()
+
+# vs. Mittelmäßiger Teacher
+teacher = load_pretrained_7b()
+# → Kleine Verbesserungen nur
+```
+
+### 2. Separate Validation Sets
+
+```python
+# Nicht auf Teacher Daten validieren!
+train_dataset = teacher_generated_data  # Mit Distillation
+val_dataset = original_data              # Task-Spezifisch
+
+# Validiere auf val_dataset!
+```
+
+### 3. Wärm-Up Phase
+
+```python
+# Erste 1000 Steps: Nur Task Loss
+# Dann: Mix mit Distillation Loss
+# Grund: Student braucht Basis-Knowledge
+
+for step, batch in enumerate(train_loader):
+    if step < 1000:
+        loss = task_loss  # Nur Task
+    else:
+        loss = 0.3 * task_loss + 0.7 * kl_loss  # Mix
+```
+
+---
+
+## Quellen und Links
+
+- [Knowledge Distillation (Hinton et al. 2015)](https://arxiv.org/abs/1503.02531)
+- [DistilBERT (Sanh et al. 2020)](https://arxiv.org/abs/1910.01108)
+- [On the Student Becoming the Master (Mirzadeh et al. 2020)](https://arxiv.org/abs/2001.04451)
+- [Feature Distillation (Romero et al. 2015)](https://arxiv.org/abs/1412.1134)
+- [Attention Transfer (Zagoruyko & Komodakis 2017)](https://arxiv.org/abs/1612.03928)

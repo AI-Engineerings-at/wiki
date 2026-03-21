@@ -1,0 +1,228 @@
+---
+title: "Umweltauswirkungen von KI"
+description: "Carbon Footprint beim Training, Inference Energiekosten. Green AI Praktiken, effiziente Architekturen. Carbon-Tracking Tools (CodeCarbon, ML CO2 Impact)."
+section: "ethik"
+---
+
+# Umweltauswirkungen von KI
+
+KI Training benötigt große Mengen Energie. Ein großes Sprachmodell kann so viel CO₂ produzieren wie ein Flugzeug hin und zurück. Diese Seite behandelt Green AI.
+
+---
+
+## 1. Carbon Footprint von KI Training
+
+```python
+import numpy as np
+
+class CarbonCalculator:
+    """Estimates CO2 emissions from model training"""
+
+    def __init__(self, energy_source: str = "grid"):
+        """
+        Args:
+            energy_source: "grid", "renewable", "coal"
+        """
+        # CO2 emissions factor (kg CO2 per kWh)
+        self.emissions_factor = {
+            "grid": 0.4,      # Average grid (mixed sources)
+            "renewable": 0.05,  # Mostly wind/solar
+            "coal": 0.8,      # Coal-heavy grid
+        }
+        self.factor = self.emissions_factor[energy_source]
+
+    def estimate_training_emissions(self,
+                                   training_hours: float,
+                                   gpu_power_watts: int,
+                                   num_gpus: int = 1) -> dict:
+        """
+        Estimates CO2 for training run
+
+        Args:
+            training_hours: Total training time
+            gpu_power_watts: Power per GPU (e.g., 250W for A100)
+            num_gpus: Number of GPUs
+        """
+        total_energy_kwh = (training_hours * gpu_power_watts * num_gpus) / 1000
+        co2_kg = total_energy_kwh * self.factor
+        co2_tons = co2_kg / 1000
+
+        # Comparison: car miles equivalent
+        car_miles = co2_kg / 0.41  # Average car: 0.41 kg CO2 per mile
+
+        return {
+            "energy_kwh": total_energy_kwh,
+            "co2_kg": co2_kg,
+            "co2_tons": co2_tons,
+            "car_miles_equivalent": car_miles,
+        }
+
+    def compare_models(self, models: dict) -> None:
+        """Compares emissions across models"""
+        print("Model\t\tTraining Hours\tGPUs\tCO2 (kg)\tCar Miles")
+        print("-" * 70)
+
+        for model_name, params in models.items():
+            result = self.estimate_training_emissions(
+                params["training_hours"],
+                params["gpu_power"],
+                params["num_gpus"]
+            )
+            print(f"{model_name}\t{params['training_hours']}\t{params['num_gpus']}\t{result['co2_kg']:.1f}\t{result['car_miles_equivalent']:.0f}")
+
+# Beispiele:
+calculator = CarbonCalculator(energy_source="grid")
+
+# GPT-3: 1200 hours on 8x A100 GPUs
+gpt3_result = calculator.estimate_training_emissions(
+    training_hours=1200,
+    gpu_power_watts=250,
+    num_gpus=8
+)
+print(f"GPT-3 estimated emissions: {gpt3_result['co2_tons']:.1f} tons CO2")
+print(f"Equivalent to {gpt3_result['car_miles_equivalent']:.0f} car miles")
+
+# Compare models
+models = {
+    "BERT": {"training_hours": 72, "gpu_power": 250, "num_gpus": 4},
+    "GPT-2": {"training_hours": 360, "gpu_power": 250, "num_gpus": 8},
+    "GPT-3": {"training_hours": 1200, "gpu_power": 250, "num_gpus": 8},
+}
+calculator.compare_models(models)
+```
+
+---
+
+## 2. Inference Energiekosten
+
+```python
+class InferenceEfficiency:
+    """Calculates efficiency of inference at scale"""
+
+    def __init__(self, model_size_gb: float):
+        self.model_size_gb = model_size_gb
+
+    def daily_inference_emissions(self,
+                                 queries_per_day: int,
+                                 avg_inference_time_ms: float,
+                                 gpu_power_watts: int = 100) -> dict:
+        """
+        Calculates daily emissions from inference
+
+        Args:
+            queries_per_day: Number of inference requests per day
+            avg_inference_time_ms: Time per inference in milliseconds
+            gpu_power_watts: GPU power consumption
+        """
+        total_inference_seconds = (queries_per_day * avg_inference_time_ms) / 1000
+        energy_kwh = (total_inference_seconds * gpu_power_watts) / 3_600_000
+        co2_kg = energy_kwh * 0.4  # Grid average
+
+        return {
+            "queries_per_day": queries_per_day,
+            "total_seconds": total_inference_seconds,
+            "energy_kwh": energy_kwh,
+            "co2_kg": co2_kg,
+        }
+
+    def annual_emissions(self, daily_result: dict) -> float:
+        """Extrapolates daily to annual emissions"""
+        return daily_result["co2_kg"] * 365
+
+# Beispiel: ChatGPT API
+inference_calc = InferenceEfficiency(model_size_gb=500)
+
+# 100 million requests per day, 100ms average
+daily = inference_calc.daily_inference_emissions(
+    queries_per_day=100_000_000,
+    avg_inference_time_ms=100,
+    gpu_power_watts=100
+)
+
+annual = inference_calc.annual_emissions(daily)
+print(f"Daily CO2 from inference: {daily['co2_kg']:.0f} kg")
+print(f"Annual CO2 from inference: {annual/1000:.0f} tons")
+```
+
+---
+
+## 3. Green AI Praktiken
+
+```yaml
+ARCHITECTURE LEVEL:
+  - Knowledge Distillation: Trainiere kleineres Modell (Student)
+    vom großen (Teacher)
+    Impact: 90% der Performance mit 50% der Parameter
+
+  - Quantization: Reduziere Bitrate (32-bit → 8-bit)
+    Impact: 4x kleineres Modell, minimal accuracy loss
+
+  - Pruning: Entferne unwichtige Neuronen/Gewichte
+    Impact: Sparsere Modelle, schnellere Inference
+
+  - Mixed Precision: Nutze FP16 statt FP32 wo möglich
+    Impact: 2x schneller, weniger Speicher/Energie
+
+TRAINING LEVEL:
+  - Early Stopping: Stoppe Training wenn validation nicht besser wird
+    Impact: Vermeidet unnötige Trainingstage
+
+  - Learning Rate Scheduling: Reduziere LR über Zeit
+    Impact: Schnellere Konvergenz
+
+  - Data Efficiency: Train auf hochwertige Daten statt große Mengen
+    Impact: Weniger Daten = weniger Training = weniger CO2
+
+DEPLOYMENT LEVEL:
+  - Batch Inference: Verarbeite mehrere Requests gleichzeitig
+    Impact: Bessere GPU-Auslastung
+
+  - Model Caching: Cache häufige Predictions
+    Impact: Vermeidet redundante Inference
+
+  - Regional Inference: Deploy Models in Regionen mit grüner Energie
+    Impact: Signifikante Emissions-Reduktion
+```
+
+---
+
+## 4. CodeCarbon Integration
+
+```python
+# pip install codecarbon
+
+from codecarbon import EmissionsTracker
+import time
+
+# Track emissions während Training
+tracker = EmissionsTracker()
+tracker.start()
+
+# Your training code here
+for epoch in range(10):
+    # Training loop
+    time.sleep(1)  # Simulate training
+
+emissions: float = tracker.stop()
+print(f"Emissions: {emissions} kg CO2")
+
+# Mit offline mode (nutze CPU baseline statt system calls)
+tracker = EmissionsTracker(
+    country_iso_code="AT",  # Austria
+    measure_power_secs=5,
+    log_level="warning",
+    offline=True
+)
+tracker.start()
+# Training code
+emissions = tracker.stop()
+```
+
+---
+
+## 5. Quellen und Links
+
+- **CodeCarbon**: https://codecarbon.io/
+- **Hugging Face CO2 Estimator**: https://huggingface.co/docs/hub/models-cards
+- **Green AI Workshop**: https://www.green-ai.org/
+- **Energy Efficient ML**: https://energy-efficient-ml.github.io/

@@ -1,0 +1,323 @@
+---
+title: Claude Dispatch — Control Agents From Your Phone
+date: 2026-03-21
+summary: Remote-control your desktop AI agents from your phone with Dispatch mode
+tags: [dispatch, mobile, remote-control, cowork, agents]
+author: AI Engineering
+---
+
+# Claude Dispatch — Control Agents From Your Phone
+
+Claude Dispatch (research preview, launched March 2026) lets you command your desktop AI agents from your phone. Send a text prompt and return to a finished dashboard, report, or spreadsheet on your desktop.
+
+## What Is Dispatch?
+
+Dispatch is a walkie-talkie between your phone and your desktop running Claude Cowork. You control what happens on your desktop via natural language from anywhere.
+
+**Key limitation**: Your desktop must remain powered on and Cowork must stay running. When your laptop sleeps or Cowork closes, Dispatch stops. There's no cloud computation—everything happens locally on your computer.
+
+## Setup (2 Minutes)
+
+### Requirements
+
+- Claude Cowork installed on Mac or Windows
+- Claude mobile app on iOS or Android
+- Max subscription (currently)
+- Local network connection (not required if using Claude Desktop's network mode)
+
+### Step 1: Open Cowork
+
+Launch Claude Cowork on your desktop and log in.
+
+### Step 2: Enable Dispatch
+
+Click the "Dispatch" button in the top menu.
+
+Cowork generates a QR code.
+
+### Step 3: Scan QR Code
+
+Open the Claude mobile app on your phone and tap the camera icon. Scan the QR code shown on your desktop.
+
+Your phone and desktop are now paired.
+
+### Done
+
+You're connected. The same conversation context now exists on both devices.
+
+## How It Works
+
+Dispatch creates a **persistent single conversation thread** between your phone and desktop. Type a command on your phone, and Claude processes it using everything available on your desktop:
+
+- Your local files
+- Connected plugins (Slack, email, etc.)
+- Configured workflows
+- Installed skills
+- APIs reachable from your network
+
+All computation happens on your desktop. Your phone is just the remote control.
+
+## Usage Examples
+
+### Simple Lookups
+
+**Phone**: "What was my last Slack message in #product?"
+
+**Desktop**: Queries Slack, retrieves message, sends back context.
+
+**Result**: 30 seconds, reliable.
+
+### File Searches
+
+**Phone**: "Find all spreadsheets with Q1 in the name and send me the locations"
+
+**Desktop**: Searches local files, returns paths.
+
+**Result**: Simple, works well.
+
+### Summaries
+
+**Phone**: "Summarize my emails from today"
+
+**Desktop**: Reads email inbox, creates summary.
+
+**Result**: Works reliably.
+
+### Complex Tasks
+
+**Phone**: "Create an expense report from my receipts folder, categorize by project, and export to Excel"
+
+**Desktop**:
+1. Reads receipt PDFs
+2. Extracts amounts and dates
+3. Categorizes by project
+4. Creates Excel file
+5. Saves to your Documents folder
+
+**Result**: About 50% success rate on complex tasks. May need clarification or manual intervention.
+
+## Reliability & Limitations
+
+Dispatch currently has significant limitations documented in real-world testing:
+
+### Success Rates by Task Type
+
+| Task Type | Success Rate | Notes |
+|-----------|--------------|-------|
+| File search | 90% | Very reliable |
+| Summaries | 85% | Works well on bounded data |
+| Simple analysis | 75% | Short tasks succeed consistently |
+| Complex workflows | 50% | May need debugging or human help |
+| Multi-step sequences | 40% | More steps = more failure points |
+| Real-time operations | 60% | API calls, service interactions |
+
+### Common Issues
+
+**Timeout**: Phone loses connection → command fails silently
+- **Fix**: Resend command, check desktop is awake
+
+**Incomplete output**: Large results truncated
+- **Fix**: Ask for a summary instead of full details
+
+**Lost context**: Complex multi-step tasks lose track
+- **Fix**: Break into smaller, sequential tasks
+
+**API failures**: External APIs timeout or reject requests
+- **Fix**: Build retry logic into workflows
+
+**Desktop asleep**: Laptop goes to sleep mid-task
+- **Fix**: Keep laptop on, disable sleep during important tasks
+
+## Comparison: Dispatch vs Cowork Desktop
+
+| Feature | Dispatch (Phone) | Cowork Desktop |
+|---------|-----------------|----------------|
+| Control | Remote (phone text) | Direct (desktop) |
+| Availability | Anywhere | At your computer |
+| Task complexity | Simple to medium | Any complexity |
+| Success rate | 50% average | 95%+ |
+| Setup time | 2 minutes | 5 minutes |
+| Best for | Quick tasks on-the-go | Complex workflows |
+| Learning curve | Very low | Medium |
+
+## Best Practices
+
+### Do Use Dispatch For
+
+1. **Quick lookups** — Search files, find information
+2. **Simple summaries** — Digest emails, documents
+3. **Status checks** — "Is the server responding?"
+4. **Adding to queues** — "Add a new support ticket"
+5. **Approval tasks** — Review and approve pending items
+
+### Don't Use Dispatch For
+
+1. **Complex multi-step sequences** — Breaks down often
+2. **Real-time interactions** — Too much latency
+3. **Critical operations** — Not reliable enough
+4. **Long-running tasks** — Laptop might sleep
+
+### Writing Better Commands
+
+**Vague**: "Can you do a report?"
+- Result: Confused, incomplete
+
+**Specific**: "Create an expense report from receipts in ~/Documents/March2026/ with columns for date, vendor, amount, and project. Save as March_Expenses.xlsx"
+- Result: Much more likely to succeed
+
+**Sequenced**: "Step 1: Analyze last 30 days of sales data. Step 2: Compare to February. Step 3: Email summary to sales@company.com"
+- Result: Breaks into manageable pieces
+
+## Desktop Requirements
+
+Your computer must meet these requirements for Dispatch to work:
+
+- **Power**: Laptop must stay on and plugged in
+- **Cowork**: Application must be running and logged in
+- **Network**: Connected to the internet
+- **Performance**: Minimal other processes (lots of background apps slow response)
+
+## Security Considerations
+
+### What Dispatch Can Access
+
+With Dispatch enabled, your phone can command your desktop to:
+- Read any local file
+- Execute any command
+- Access any API your desktop can reach
+- Use any integrated service (Slack, email, etc.)
+
+### Protecting Yourself
+
+1. **Strong phone lock** — PIN, fingerprint, or face recognition
+2. **Revoke pairing** — Turn off Dispatch when not in use
+3. **Separate agent** — Create a read-only "mobile" agent with limited permissions
+4. **Audit logs** — Check what Dispatch executed
+5. **VPN** — Use for sensitive tasks from public networks
+
+## Troubleshooting
+
+### Phone Can't Find Desktop
+
+**Issue**: QR code scan doesn't work
+
+**Fixes**:
+- Ensure both on same WiFi network
+- Restart Cowork
+- Generate new QR code
+- Check firewall settings
+
+### Commands Timeout
+
+**Issue**: "Dispatch offline" message
+
+**Fixes**:
+- Check desktop is awake
+- Ping desktop from phone
+- Restart Cowork
+- Check network connection
+
+### Incomplete Results
+
+**Issue**: Task started but didn't finish
+
+**Fixes**:
+- Make request more specific
+- Break into smaller tasks
+- Check desktop logs for errors
+- Increase timeout in settings
+
+### Pairing Lost
+
+**Issue**: Previously paired phone can't connect
+
+**Fixes**:
+- Click "Dispatch" again on desktop to re-enable
+- Scan new QR code
+- Restart both apps
+
+## Advanced Configuration
+
+### Create a Mobile-Only Agent
+
+For more control, create a dedicated agent with limited permissions:
+
+```yaml
+---
+name: mobile-assistant
+description: >
+  Limited agent for Dispatch mode with read-only access.
+model: haiku  # Faster for mobile
+maxTurns: 20
+disallowedTools: [Bash, Write, Edit]
+---
+
+# Mobile Assistant
+
+Fast, read-only agent for phone control.
+Cannot make destructive changes.
+```
+
+Then, in Dispatch settings, specify this agent for phone commands.
+
+### Increase Dispatch Timeout
+
+In Cowork settings → Dispatch:
+
+```yaml
+dispatch:
+  timeout: 60  # seconds (default 30)
+  retry: 2
+  logging: verbose
+```
+
+### Desktop-to-Phone Notifications
+
+Configure Cowork to send results back to your phone:
+
+```yaml
+dispatch_notifications:
+  enabled: true
+  on_complete: true
+  on_error: true
+  on_timeout: true
+```
+
+## When Dispatch Isn't Enough
+
+If Dispatch fails on complex tasks, you have options:
+
+1. **Come back to desktop** — Full Cowork capability
+2. **Redesign as workflow** — Schedule it to run automatically
+3. **Create a skill** — Teach Cowork to do it better
+4. **Split into pieces** — Break complex task into simple steps
+
+## Checklist
+
+- [ ] Have Max subscription and Claude mobile app
+- [ ] Install Claude Cowork desktop
+- [ ] Enable Dispatch and test QR code
+- [ ] Send first simple command from phone
+- [ ] Test file search capability
+- [ ] Try email summary task
+- [ ] Check what tasks fail and why
+- [ ] Create read-only mobile agent
+- [ ] Review security and disable when not needed
+- [ ] Bookmark best practices
+
+---
+
+**Sources:**
+- [Claude Dispatch: Your AI Coworker That Works While You're Away | Medium](https://medium.com/@pvgool/claude-dispatch-your-ai-coworker-that-works-while-youre-away-42662f80c98f)
+- [How Claude Dispatch turns your phone into an AI agent remote control](https://www.howdoiuseai.com/blog/2026-03-19-how-claude-dispatch-turns-your-phone-into-an-ai-agent-remote-control)
+- [Claude Dispatch: Control Cowork From Your Phone (Setup + First Look)](https://findskill.ai/blog/claude-dispatch-remote-cowork/)
+
+## Sources and Links
+
+- [Claude Dispatch](https://claude.com/dispatch)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

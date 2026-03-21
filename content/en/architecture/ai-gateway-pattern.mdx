@@ -1,0 +1,252 @@
+---
+title: "AI Gateway Pattern: Intelligent LLM Routing"
+description: "API Gateway design for LLMs: Load Balancing, Rate Limiting, Fallback Chains, Cost Tracking."
+section: "architecture"
+---
+
+# AI Gateway Pattern: Intelligent LLM Routing
+
+The AI Gateway is more than a load balancer. It's your control point for all LLM requests. This is where you decide which model to use, how much it can cost, which fallbacks trigger, and who gets access.
+
+## The 4 Core Tasks of an AI Gateway
+
+```
+Request
+  ↓
+┌─────────────────────────────────────┐
+│ 1. AUTHENTICATION                   │ Who are you?
+│    Validate API Keys                │
+├─────────────────────────────────────┤
+│ 2. RATE LIMITING                    │ How much can you use?
+│    Tokens/min, Requests/min per Key │
+├─────────────────────────────────────┤
+│ 3. SMART ROUTING                    │ Which model?
+│    Cost vs Speed vs Quality         │
+├─────────────────────────────────────┤
+│ 4. MONITORING & CACHING             │ Did we see this before?
+│    Token Counting, Semantic Cache   │
+└─────────────────────────────────────┘
+  ↓
+LLM Backends (vLLM, OpenAI, Anthropic, ...)
+```
+
+## 1. Authentication and API Key Management
+
+```python
+import secrets
+import hashlib
+
+class APIKeyManager:
+    def create_key(self, user_id: str, quota_tokens: int):
+        """Create an API key with token quota"""
+        key_bytes = secrets.token_bytes(32)
+        key_hex = key_bytes.hex()
+        key_hash = hashlib.sha256(key_hex.encode()).hexdigest()
+
+        self.db.execute("""
+            INSERT INTO api_keys (user_id, hash, quota_tokens, created_at)
+            VALUES (?, ?, ?, datetime('now'))
+        """, (user_id, key_hash, quota_tokens))
+
+        return key_hex
+
+    def validate_key(self, key_hex: str) -> dict | None:
+        """Validate API key and get user limits"""
+        key_hash = hashlib.sha256(key_hex.encode()).hexdigest()
+
+        result = self.db.execute("""
+            SELECT user_id, quota_tokens, tokens_used
+            FROM api_keys WHERE hash = ? AND valid_until > now()
+        """, (key_hash,))
+
+        if not result or result[0]['tokens_used'] >= result[0]['quota_tokens']:
+            return None
+
+        return {
+            'user_id': result[0]['user_id'],
+            'tokens_remaining': result[0]['quota_tokens'] - result[0]['tokens_used']
+        }
+```
+
+## 2. Token-Aware Rate Limiting
+
+Naive rate limiting counts requests. Intelligent rate limiting counts **tokens**:
+
+```python
+from collections import defaultdict
+
+class TokenRateLimiter:
+    def __init__(self, tokens_per_minute=100000):
+        self.limit = tokens_per_minute
+        self.user_buckets = defaultdict(lambda: {
+            "tokens": tokens_per_minute,
+            "last_refill": datetime.now()
+        })
+
+    def check_and_consume(self, user_id: str, tokens_needed: int) -> bool:
+        """Check if user has tokens and consume them"""
+        bucket = self.user_buckets[user_id]
+
+        # Token Refill (Leaky Bucket)
+        now = datetime.now()
+        seconds_since_refill = (now - bucket["last_refill"]).total_seconds()
+        refill_rate = self.limit / 60
+
+        bucket["tokens"] = min(
+            self.limit,
+            bucket["tokens"] + (seconds_since_refill * refill_rate)
+        )
+        bucket["last_refill"] = now
+
+        if bucket["tokens"] < tokens_needed:
+            return False
+
+        bucket["tokens"] -= tokens_needed
+        return True
+```
+
+## 3. Intelligent Routing
+
+The gateway makes strategic decisions—not just "next available server":
+
+```python
+from enum import Enum
+
+class RoutingStrategy(Enum):
+    SPEED = "minimize_latency"
+    COST = "minimize_cost"
+    QUALITY = "maximize_quality"
+
+class GatewayRouter:
+    def select_model(
+        self,
+        request_tokens: int,
+        strategy: RoutingStrategy,
+        budget_remaining: float
+    ) -> str:
+        """Choose best model for request"""
+
+        if strategy == RoutingStrategy.SPEED:
+            return min(self.endpoints, key=lambda ep: ep.latency_p95)
+
+        elif strategy == RoutingStrategy.COST:
+            request_cost = (request_tokens / 1000) * 0.0005  # Example cost
+            if request_cost > budget_remaining:
+                return min(self.endpoints, key=lambda ep: ep.cost_per_1k_tokens)
+            return min(self.endpoints, key=lambda ep: ep.cost_per_1k_tokens)
+
+        else:  # QUALITY
+            return max(self.endpoints, key=lambda ep: ep.quality_score)
+```
+
+## 4. Cost Tracking on Gateway Level
+
+```python
+class CostTracker:
+    def log_completion(self, user_id: str, model: str, tokens: int):
+        """Log API call with cost"""
+        pricing = {
+            "gpt-4": {"prompt": 0.03, "completion": 0.06},
+            "llama-70b": {"prompt": 0.0005, "completion": 0.0008}
+        }
+
+        cost_usd = (tokens / 1000) * pricing.get(model, {}).get("prompt", 0)
+
+        self.db.execute("""
+            INSERT INTO cost_events (user_id, model, tokens, cost_usd)
+            VALUES (?, ?, ?, ?)
+        """, (user_id, model, tokens, cost_usd))
+
+    def get_user_costs(self, user_id: str):
+        """Aggregate costs for user"""
+        result = self.db.execute("""
+            SELECT SUM(cost_usd) as total FROM cost_events
+            WHERE user_id = ? AND timestamp > datetime('now', '-30 days')
+        """, (user_id,))
+
+        return result[0]['total'] if result else 0
+```
+
+## 5. Semantic Caching (GPTCache Pattern)
+
+Cache not exact strings, but meaning:
+
+```python
+class SemanticCache:
+    def __init__(self, embedding_model):
+        self.embedding_model = embedding_model
+        self.cache = []  # (embedding, prompt, response)
+
+    def get(self, prompt: str, threshold: float = 0.95) -> str | None:
+        """Find similar prompts in cache"""
+        query_embedding = self.embedding_model.encode(prompt)
+
+        for cached_embedding, cached_prompt, cached_response in self.cache:
+            similarity = cosine_similarity(query_embedding, cached_embedding)
+            if similarity >= threshold:
+                return cached_response
+
+        return None
+
+    def put(self, prompt: str, response: str):
+        """Store prompt-response pair"""
+        embedding = self.embedding_model.encode(prompt)
+        self.cache.append((embedding, prompt, response))
+```
+
+## 6. Practical Example with LiteLLM
+
+LiteLLM abstracts multiple LLM providers:
+
+```python
+from litellm import completion
+
+litellm.model_list = [
+    {
+        "model_name": "my-gpt4",
+        "litellm_params": {
+            "model": "gpt-4",
+            "api_key": "$OPENAI_API_KEY"
+        }
+    },
+    {
+        "model_name": "my-gpt4",
+        "litellm_params": {
+            "model": "claude-3-opus",
+            "api_key": "$ANTHROPIC_API_KEY"
+        }
+    }
+]
+
+@app.post("/v1/chat/completions")
+async def unified_chat(request: dict):
+    """One endpoint, multiple backends"""
+    response = completion(
+        model="my-gpt4",
+        messages=request["messages"],
+        num_retries=2  # Fallback automatic
+    )
+    return response
+```
+
+## Summary: AI Gateway Pattern
+
+| Component | Task | Tool/Technique |
+|-----------|------|---|
+| **Auth** | Validate API Keys | JWT, API Key Hash |
+| **Rate Limiting** | Throttle by tokens | Leaky Bucket |
+| **Routing** | Smart model selection | Cost/Speed/Quality Score |
+| **Fallback** | Try next model | Chain of Responsibility |
+| **Caching** | Semantic duplicates | Embeddings + Cosine |
+| **Cost Tracking** | Track spending | SQL Events |
+
+The gateway is your control instance. Everything goes through it. This is where every millisecond of optimization pays off.
+
+## Sources and Links
+
+- [LiteLLM Docs](https://docs.litellm.ai/) — Multi-Provider LLM Abstraction
+- [Kong API Gateway](https://docs.konghq.com/) — Production Gateway
+- [tiktoken](https://github.com/openai/tiktoken) — Token Counting
+- [GPTCache](https://docs.gptcache.com/) — Semantic Caching
+- [OpenAI Rate Limits](https://platform.openai.com/docs/guides/rate-limits) — Official Limits
+- [Redis Rate Limiting](https://redis.io/docs/manual/client-side-caching/) — Implementation Guide

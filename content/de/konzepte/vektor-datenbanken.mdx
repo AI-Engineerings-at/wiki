@@ -1,0 +1,532 @@
+---
+title: Vektordatenbanken
+date: 2026-03-21
+summary: Embeddings, Ähnlichkeitsmetriken, Vergleich (ChromaDB, Pinecone, Weaviate, Qdrant, Milvus, pgvector), Self-Hosted vs Cloud, HNSW und IVF Indexing
+tags: [vektordatenbanken, embeddings, semantic-search, similarity, indexing, rag]
+author: AI Engineering
+---
+
+# Vektordatenbanken verstehen
+
+Eine Vektordatenbank speichert und sucht numerische Vektoren (Embeddings) effizient. Sie sind das Rückgrat von RAG-Systemen.
+
+---
+
+## Was ist ein Embedding?
+
+```
+Text: "Der Hund springt schnell"
+      ↓ (Embedding Model: all-MiniLM-L6-v2)
+Vector: [0.234, -0.512, 0.891, ..., 0.123]  (384-dim)
+```
+
+Jede Zahl repräsentiert eine semantische Eigenschaft (z.B. "animal-ness", "movement", "speed").
+
+---
+
+## Ähnlichkeitsmetriken
+
+### Cosine Similarity (Standard)
+
+```
+Vector A: [1, 0, 0]
+Vector B: [0.866, 0.5, 0]  (rotiert um 30°)
+
+cos(A, B) = (A · B) / (||A|| × ||B||)
+          = 0.866 / (1 × 1)
+          = 0.866
+
+Range: [-1, 1]
+      -1 = entgegengesetzt
+       0 = orthogonal (unabhängig)
+       1 = identisch
+```
+
+**Praktisch**:
+- Unabhängig von Magnitude (Länge)
+- "Winkel" zwischen Vektoren
+- Standard für Semantic Search
+
+### Dot Product (schneller)
+
+```
+A · B = 0.234 × 0.156 + (-0.512) × 0.321 + ...
+
+Gleich wie Cosine, aber nicht normalisiert
+→ Nur sinnvoll wenn Vektoren normalisiert sind!
+```
+
+**Vorteil**: Schneller (keine Normalisierung nötig)
+**Nachteil**: Kann zu Magnitude-Bias führen wenn Vektoren variabel groß
+
+### Euclidean Distance
+
+```
+d(A, B) = √(Σ(A_i - B_i)²)
+
+Beispiel:
+A = [1, 2]
+B = [4, 6]
+d = √((1-4)² + (2-6)²) = √(9 + 16) = 5
+
+Range: [0, ∞]
+      0 = identisch
+      > = unähnlich
+```
+
+**Wann**: Manchmal in speziellen Anwendungen, aber meist nicht für Semantic Search.
+
+---
+
+## Vektordatenbank Vergleich (2026)
+
+| Feature | ChromaDB | Pinecone | Weaviate | Qdrant | Milvus | pgvector |
+|---------|----------|----------|----------|--------|--------|----------|
+| **Type** | In-Memory + Persist | Managed Cloud | Graph-Vector | Cloud/Self-Hosted | Distributed | PostgreSQL Plugin |
+| **Setup** | pip install (trivial) | API nur | Container | Container | Kubernetes | SQL Extension |
+| **Lokal** | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ (mit PostgreSQL) |
+| **Skalierung** | Mittel | Unlimited | Gut | Gut | Sehr Gut | Begrenzt (DB) |
+| **Filtering** | Basic | Excellente | Excellente | Gut | Gut | Excellente (SQL) |
+| **Cost (Self)** | Free | - | Free | Free | Free | ~€5-20/Mo |
+| **Cost (Cloud)** | $0.03/M vectors | Pay-per-API | €500+/Mo | Starter Free | Enterprise | PostgreSQL Costs |
+| **Metadata** | Mittel | Excellente | Excellente | Gut | Gut | Excellente (SQL) |
+
+---
+
+## Detaillierte Optionen
+
+### ChromaDB (Anfänger-freundlich)
+
+```python
+from chromadb import Client
+
+client = Client()
+collection = client.create_collection(
+    name="my_documents",
+    metadata={"hnsw:space": "cosine"}
+)
+
+# Add documents
+collection.add(
+    ids=["1", "2", "3"],
+    documents=["Der Hund springt", "Eine Katze ruht", "Der Vogel fliegt"],
+    metadatas=[
+        {"source": "article1"},
+        {"source": "article2"},
+        {"source": "article3"}
+    ]
+)
+
+# Query
+results = collection.query(
+    query_texts=["Hund springt"],
+    n_results=2
+)
+# Returns: [["Der Hund springt", "Der Vogel fliegt"], distances, metadatas]
+```
+
+**Vorteile**:
+- Trivial zu starten (5 Zeilen Code)
+- Embedded möglich (keine separaten Server)
+- Open-Source, aktiv entwickelt
+
+**Nachteile**:
+- Skaliert nicht über 100M vectors
+- Keine komplexen Filtering-Operationen
+- Keine Replikation/HA native
+
+**Best For**: Prototyping, kleine bis mittlere Systeme (<10M vectors)
+
+---
+
+### Pinecone (Managed, Production)
+
+```python
+import pinecone
+
+pinecone.init(api_key="YOUR_KEY", environment="us-west1-gcp")
+index = pinecone.Index("my-index")
+
+# Upsert vectors
+index.upsert(
+    vectors=[
+        ("id1", [0.234, -0.512, ...], {"text": "Der Hund springt"}),
+        ("id2", [0.891, 0.234, ...], {"text": "Eine Katze ruht"}),
+    ],
+    namespace="default"
+)
+
+# Search
+results = index.query(
+    vector=[0.245, -0.501, ...],  # Query vector
+    top_k=5,
+    filter={
+        "source": {"$eq": "article1"}
+    },
+    include_metadata=True
+)
+```
+
+**Stärken**:
+- Vollständig managed (kein Ops-Overhead)
+- Excellente Filtering (metadata search)
+- Unlimited skalierbar
+- 99.99% SLA
+
+**Schwächen**:
+- Nicht open-source
+- Teuer bei großem Volumen (pay-per-vector)
+- Vendor Lock-in
+
+**Best For**: Produktion, hohe Anforderungen, Budgets vorhanden
+
+---
+
+### Weaviate (Knowledge Graphs + Vectors)
+
+```python
+import weaviate
+
+client = weaviate.Client("http://localhost:8080")
+
+# Define schema
+client.schema.create_class({
+    "class": "Document",
+    "vectorizer": "text2vec-openai",  # Auto-embed text
+    "properties": [
+        {
+            "name": "content",
+            "dataType": ["text"]
+        },
+        {
+            "name": "source",
+            "dataType": ["string"]
+        }
+    ]
+})
+
+# Add data
+with client.batch as batch:
+    batch.add_data_object(
+        data_object={
+            "content": "Der Hund springt schnell",
+            "source": "article1"
+        },
+        class_name="Document"
+    )
+
+# Semantic search
+results = client.query.get("Document").with_near_text({
+    "concepts": ["Hund springt"]
+}).with_where({
+    "path": ["source"],
+    "operator": "Equal",
+    "valueString": "article1"
+}).do()
+```
+
+**Strengths**:
+- Knowledge Graph Features (Relations zwischen Objekten)
+- Multi-Modales (Text, Bilder, Audio gleichzeitig)
+- Graph Traversal (kann Relationen folgen)
+- Open-Source
+
+**Schwächen**:
+- Komplexer zu deployen
+- Speicher-hungrig
+- Graphquery-Performance kann problematisch sein bei großen Graphen
+
+**Best For**: Komplexe Relationen, Knowledge Graphs, Multi-Modal
+
+---
+
+### Qdrant (Rust-optimiert, schnell)
+
+```python
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, VectorParams, PointStruct
+
+client = QdrantClient(url="http://localhost:6333")
+
+# Create collection
+client.create_collection(
+    collection_name="documents",
+    vectors_config=VectorParams(size=384, distance=Distance.COSINE),
+)
+
+# Add points
+client.upsert(
+    collection_name="documents",
+    points=[
+        PointStruct(
+            id=1,
+            vector=[0.234, -0.512, ...],
+            payload={"text": "Der Hund springt"}
+        ),
+    ]
+)
+
+# Search
+results = client.search(
+    collection_name="documents",
+    query_vector=[0.245, -0.501, ...],
+    limit=5,
+    query_filter={
+        "must": [
+            {
+                "key": "text",
+                "match": {"text": "Hund"}
+            }
+        ]
+    }
+)
+```
+
+**Strengths**:
+- Geschrieben in Rust (sehr schnell)
+- Hybrid Search (Vector + BM25 Text)
+- Open-Source, selbst-gehostet einfach
+- Kostenlos
+
+**Schwächen**:
+- Kleineres Ökosystem als Weaviate
+- Hybrid Search noch experimentell
+
+**Best For**: Performance-kritisch, Self-Hosted, Cost-sensitive
+
+---
+
+### Milvus (Enterprise, Kubernetes)
+
+```python
+from pymilvus import Collection, connections, CollectionSchema, FieldSchema, DataType
+
+connections.connect("default", host="localhost", port="19530")
+
+fields = [
+    FieldSchema(name="id", dtype=DataType.INT64, is_primary=True),
+    FieldSchema(name="vector", dtype=DataType.FLOAT_VECTOR, dim=384),
+    FieldSchema(name="text", dtype=DataType.VARCHAR, max_length=512),
+]
+
+schema = CollectionSchema(fields, "Document collection")
+collection = Collection("documents", schema)
+
+# Insert
+collection.insert([
+    [1, 2],  # IDs
+    [[0.234, -0.512, ...], [0.891, 0.234, ...]],  # Vectors
+    ["Der Hund springt", "Eine Katze ruht"],  # Texts
+])
+
+# Search
+results = collection.search([0.245, -0.501, ...], "vector", limit=5)
+```
+
+**Strengths**:
+- Massiv skalierbar (Kubernetes native)
+- Enterprise-Features (Replication, Sharding)
+- Open-Source
+- Best für Millionen Vektoren
+
+**Schwächen**:
+- Komplexe Deployment
+- Overkill für kleine bis mittlere Use-Cases
+- DevOps-intensive
+
+**Best For**: Enterprise, massive Scale, Self-Managed Infrastructure
+
+---
+
+### pgvector (PostgreSQL Extension)
+
+```sql
+CREATE EXTENSION vector;
+
+CREATE TABLE documents (
+    id BIGSERIAL PRIMARY KEY,
+    content TEXT,
+    embedding vector(384),
+    source VARCHAR(255)
+);
+
+CREATE INDEX ON documents USING HNSW (embedding vector_cosine_ops);
+
+-- Insert
+INSERT INTO documents (content, embedding, source)
+VALUES (
+    'Der Hund springt schnell',
+    '[0.234, -0.512, ..., 0.123]'::vector,
+    'article1'
+);
+
+-- Search
+SELECT id, content, embedding <=> '[0.245, -0.501, ...]'::vector AS distance
+FROM documents
+WHERE source = 'article1'
+ORDER BY embedding <=> '[0.245, -0.501, ...]'::vector
+LIMIT 5;
+```
+
+**Strengths**:
+- SQL Queries (full power)
+- Integriert mit PostgreSQL (Backup, Replication existieren)
+- Billiger als spezialisierte Lösungen
+- ACID Guarantees
+
+**Schwächen**:
+- Nicht so optimiert wie spezialisierte Vector DBs
+- Scaling begrenzt (noch immer einzelne DB)
+- Neuere Technologie (nicht Enterprise-getestet wie Milvus)
+
+**Best For**: Kleine bis mittlere Systeme, SQL-Heavy Workflows, Existing PostgreSQL Users
+
+---
+
+## Indexing-Strategien
+
+### HNSW (Hierarchical Navigable Small World)
+
+```
+Approximative Nearest Neighbor Search Algorithm
+
+Idee: Baue hierarchisches "Small World" Netzwerk
+      von Vektoren, wo nahe Vektoren verbunden sind
+
+Struktur:
+Level 0: [Alle Vektoren, vollständig verbunden]
+Level 1: [Subset, gröbere Navigation]
+Level 2: [Noch gröberer]
+
+Search:
+1. Start am höchsten Level
+2. Navigiere zu nächstem Nachbarn
+3. Wenn kein besserer Found, geh zum nächsten Level
+4. Repeat
+```
+
+**Properties**:
+- Fast O(log N) Suche
+- Memory-effizient
+- Probabilistisch (beste Annäherung, nicht Garantie)
+
+**Wann**: Standard für ≤100M Vektoren
+
+---
+
+### IVF (Inverted File)
+
+```
+Idee: Cluster Vektoren, speichere Cluster-Indizes
+
+1. Offline: K-means clustering (z.B. 100 Cluster)
+2. Speichere welche Vektoren in welchem Cluster
+
+Search:
+1. Berechne nächste Cluster(s) zur Query
+2. Suche nur in diesen Clustern
+3. → Viel schneller (nur 1-5% der Vektoren durchsucht)
+```
+
+**Trade-off**:
+- Schneller bei großem K (Cluster count)
+- Weniger Speicher als HNSW
+- Aber: Risk von schlechten Clusterings
+
+**Wann**: >100M Vektoren, wenn Speicher kritisch
+
+---
+
+## Self-Hosted vs. Cloud
+
+### Self-Hosted (ChromaDB, Qdrant, Milvus lokal)
+
+```
+Kostenstruktur:
+- Initial: 0€ (Software free)
+- Server: ~€50-200/Mo (VM)
+- Ops: ~10h/Mo (Backup, Monitoring)
+- Total: ~€150-300/Mo
+
+Scaling:
+- Braucht Engineering (Sharding, Replikation)
+- Bottleneck: Network, Speicher
+- Bis ~10M Vektoren machbar solo
+```
+
+### Cloud-Managed (Pinecone, Weaviate Cloud)
+
+```
+Kostenstruktur:
+- Vectors: €0.01-0.10 pro 1M
+- Queries: €0.04-0.10 pro 1M
+- Minimum: ~€50/Mo
+- 10M Vectors: ~€100/Mo + Query Costs
+
+Skalierung:
+- Automatic (kein Ops)
+- Replicated (HA standard)
+- Global (CDN möglich)
+- Bottleneck: Cost bei großem Volume
+```
+
+### Cost Breakeven
+
+```
+ChromaDB/Qdrant (Self-Hosted):
+Initial + Server + Ops = ~€150-300/Mo
+
+Pinecone:
+10M Vectors = ~€100/Mo + Query Costs
+
+Breakeven:
+- Kleine Systeme (<5M vectors): Cloud besser
+- Mittlere (5-50M): Self-Hosted meist besser
+- Große (>50M): Self-Hosted definitiv besser (aber OpsCosts steigen)
+```
+
+---
+
+## Praktische Integration mit RAG
+
+```python
+from langchain.vectorstores import Chroma
+from langchain.embeddings import OpenAIEmbeddings
+
+# 1. Create Vector Store
+embeddings = OpenAIEmbeddings()
+vector_store = Chroma.from_documents(
+    documents=documents,
+    embedding=embeddings,
+    collection_name="my_docs",
+)
+
+# 2. Retrieval
+retriever = vector_store.as_retriever(
+    search_type="similarity",  # oder "mmr"
+    search_kwargs={"k": 3}
+)
+
+# 3. In RAG Pipeline
+from langchain.chains import RetrievalQA
+
+qa_chain = RetrievalQA.from_chain_type(
+    llm=llm,
+    retriever=retriever,
+    chain_type="stuff"  # oder "map_reduce", "refine"
+)
+
+answer = qa_chain.run("Frage?")
+```
+
+Vektordatenbanken sind kritisch für RAG. Wähle basierend auf:
+- **Größe**: <10M → ChromaDB/pgvector, >100M → Qdrant/Milvus
+- **Komplexität**: Einfach → ChromaDB, Komplex → Weaviate
+- **Budget**: Unbegrenzt → Pinecone, Sparen → Self-Hosted
+
+## Quellen und Links
+
+- [Chroma](https://github.com/chroma-core/chroma)
+- [Weaviate](https://github.com/weaviate/weaviate)
+- [Qdrant](https://github.com/qdrant/qdrant)
+- [Milvus](https://github.com/milvus-io/milvus)

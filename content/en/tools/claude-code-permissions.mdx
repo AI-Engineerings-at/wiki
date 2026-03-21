@@ -1,0 +1,810 @@
+---
+title: Claude Code Permissions — Complete Reference
+date: 2026-03-21
+summary: Exhaustive reference for Claude Code permissions system, including permission modes, rule syntax, tool-specific rules, precedence, and managed policies.
+tags: [claude-code, permissions, security, configuration, access-control]
+author: AI Engineering
+---
+
+# Claude Code Permissions — Complete Reference
+
+Claude Code uses a fine-grained permission system to control what actions Claude can perform. This reference covers all permission modes, rule types, tool-specific patterns, and configuration options.
+
+## Permission System Overview
+
+Claude Code balances power and safety with a tiered permission system:
+
+| Tool Category | Example | Approval Required | "Yes, don't ask again" |
+|---|---|---|---|
+| **Read-Only** | File reads, Grep | No | N/A |
+| **Bash Commands** | Shell execution | Yes | Permanently per project directory and command |
+| **File Modification** | Edit/write files | Yes | Until session end |
+
+### Permission Modes
+
+The `defaultMode` setting in configuration files determines how Claude Code evaluates permissions:
+
+| Mode | Behavior | Use Case |
+|------|----------|----------|
+| `default` | Prompts for permission on first use of each tool | Standard interactive development |
+| `acceptEdits` | Automatically accepts file edit permissions for the session | Trusted development environments, pair programming |
+| `plan` | Claude analyzes but cannot modify files or execute commands | Code review, planning phases, read-only audit |
+| `dontAsk` | Auto-denies tools unless pre-approved via `/permissions` or `allow` rules | Strict security, automated workflows |
+| `bypassPermissions` | Skips permission prompts except for protected directories | Isolated environments (Docker, VMs only) |
+
+### Protected Directories in `bypassPermissions` Mode
+
+Even in `bypassPermissions` mode, writes to these directories still require confirmation:
+- `.git/` — Repository metadata
+- `.claude/` — Claude Code configuration
+- `.vscode/` — VS Code settings
+- `.idea/` — IntelliJ settings
+
+**Exception:** Writes to `.claude/commands`, `.claude/agents`, and `.claude/skills` do NOT prompt because Claude routinely writes there when managing skills and agents.
+
+**Security Note:** Only use `bypassPermissions` in isolated environments (Docker containers, VMs) where Claude cannot cause external damage. Administrators can disable this mode with `disableBypassPermissionsMode: "disable"` in managed settings.
+
+## Permission Rule Syntax
+
+Permission rules follow the format `Tool` or `Tool(specifier)` and are evaluated in order: **deny → ask → allow** (first match wins).
+
+### Basic Rule Types
+
+#### Match All Uses of a Tool
+
+Without parentheses, matches all uses:
+
+```json
+{
+  "permissions": {
+    "allow": ["Bash", "Read", "WebFetch"]
+  }
+}
+```
+
+Equivalent to:
+```json
+{
+  "permissions": {
+    "allow": ["Bash(*)", "Read(*)", "WebFetch(*)"]
+  }
+}
+```
+
+#### Fine-Grained Rules with Specifiers
+
+Add a specifier in parentheses to match specific tool uses:
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build)",
+      "Read(./.env)",
+      "WebFetch(domain:example.com)"
+    ]
+  }
+}
+```
+
+### Wildcard Patterns in Bash Rules
+
+Bash rules support glob patterns with `*`. Wildcards can appear at any position:
+
+| Rule | Matches | Does NOT Match |
+|------|---------|---|
+| `Bash(npm run build)` | Exact command: `npm run build` | `npm run dev` |
+| `Bash(npm run *)` | `npm run build`, `npm run test` | `npm test` |
+| `Bash(npm *)` | Any command starting with `npm ` | `npx something` |
+| `Bash(* install)` | Any command ending with ` install` | `uninstall` |
+| `Bash(git * main)` | `git checkout main`, `git merge main` | `git checkout develop` |
+| `Bash(* --version)` | Any command ending with ` --version` | `--version` alone |
+
+### Word Boundary Rules
+
+Space before `*` matters — it enforces word boundaries:
+
+| Rule | Behavior |
+|------|----------|
+| `Bash(ls *)` | Matches: `ls -la`, `ls /tmp` — word boundary enforced |
+| `Bash(ls*)` | Matches: `ls -la`, `lsof` — no word boundary |
+
+The space creates a word boundary requirement:
+- `Bash(safe-cmd *)` — matches `safe-cmd && other-cmd`? **NO** (Claude Code detects shell operators)
+- `Bash(curl http://github.com/ *)` — fragile for URL patterns (see Bash Security section)
+
+### Compound Commands
+
+When you approve a compound command with "Yes, don't ask again", Claude Code creates separate rules for each subcommand:
+
+```bash
+git status && npm test
+```
+
+Creates rules for:
+- `Bash(git status)`
+- `Bash(npm test)`
+
+This allows `npm test` to run later without the `git status` prefix.
+
+**Nested cd commands:** `cd subdir && npm test` also creates:
+- `Read(subdir)` — allows reading the directory
+- `Bash(npm test)`
+
+Up to 5 rules may be saved for a single compound command.
+
+### Legacy Wildcard Syntax
+
+The deprecated `:*` suffix is equivalent to ` *`:
+
+```json
+// DEPRECATED
+"Bash(npm:*)"
+
+// PREFERRED
+"Bash(npm *)"
+```
+
+## Tool-Specific Permission Rules
+
+### Bash
+
+**Full wildcard support** with rules evaluated before Claude Code runs commands.
+
+#### Bash Wildcard Patterns
+
+All position patterns:
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",        // npm run [anything]
+      "Bash(git commit *)",      // git commit [anything]
+      "Bash(git * main)",        // git [anything] main
+      "Bash(* --version)",       // [anything] --version
+      "Bash(* --help *)",        // [anything] --help [anything]
+      "Bash(ls*)"                // ls[anything] (no space)
+    ]
+  }
+}
+```
+
+#### Denying Network Commands
+
+Network commands are fragile to pattern constraints. **Better approach:**
+
+```json
+{
+  "permissions": {
+    "deny": [
+      "Bash(curl *)",
+      "Bash(wget *)",
+      "Bash(nc *)"
+    ],
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:api.example.com)"
+    ]
+  }
+}
+```
+
+This:
+1. Blocks raw `curl`/`wget` in Bash (deny takes precedence)
+2. Allows specific domains via WebFetch permission
+3. More reliable than trying to pattern-match URLs in Bash
+
+#### Bash Security Warning
+
+Patterns attempting to constrain command arguments are **fragile**:
+
+```json
+// INSECURE — easily bypassed
+"Bash(curl http://github.com/ *)"
+```
+
+Can be bypassed by:
+- Options before URL: `curl -X GET http://github.com/...`
+- Different protocol: `curl https://github.com/...`
+- Redirects: `curl -L http://bit.ly/xyz` (redirects to GitHub)
+- Variables: `URL=http://github.com && curl $URL`
+- Extra spaces: `curl  http://github.com` (double space)
+
+**Better strategies:**
+
+1. Deny raw network commands, allow via WebFetch:
+```json
+{
+  "deny": ["Bash(curl *)", "Bash(wget *)"],
+  "allow": ["WebFetch(domain:github.com)"]
+}
+```
+
+2. Use PreToolUse hooks for runtime validation (see Extend Permissions section)
+
+3. Document allowed patterns in CLAUDE.md for Claude Code to understand
+
+### Read and Edit
+
+Rules follow **gitignore specification** for file path matching.
+
+#### Path Pattern Types
+
+| Pattern | Type | Meaning | Example | Matches |
+|---------|------|---------|---------|---------|
+| `//path` | Absolute | From filesystem root | `Read(//Users/alice/secrets/**)` | `/Users/alice/secrets/**` |
+| `~/path` | Home directory | From home | `Read(~/Documents/*.pdf)` | `/Users/alice/Documents/*.pdf` |
+| `/path` | Relative to project | Relative to `.git` root | `Edit(/src/**/*.ts)` | `<project>/src/**/*.ts` |
+| `path` or `./path` | Current directory | Relative to `cwd` | `Read(*.env)` | `<cwd>/*.env` |
+
+#### Important Path Clarifications
+
+**Absolute paths must use double slash:**
+
+```json
+// WRONG — this is relative to project root
+"Read(/Users/alice/file)"
+
+// CORRECT — this is absolute
+"Read(//Users/alice/file)"
+```
+
+**Windows paths are normalized to POSIX:**
+
+```
+C:\Users\alice → /c/Users/alice
+
+// Match any .env on C: drive
+"Read(//c/**/.env)"
+
+// Match across all Windows drives
+"Read(//**/.env)"
+```
+
+#### Gitignore Pattern Semantics
+
+| Pattern | Behavior |
+|---------|----------|
+| `*` | Matches files in single directory only |
+| `**` | Matches recursively across all directories |
+| `**/.env` | All `.env` files at any depth |
+| `.env` | `.env` files in current directory only |
+| `src/*` | Direct children of src only |
+| `src/**` | src and all descendants |
+
+#### Read and Edit Examples
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Read",                          // Read any file
+      "Read(./.env)",                  // Only .env in current dir
+      "Read(~/.ssh)",                  // Home SSH directory
+      "Edit(/docs/**)",                // Edit anything in docs/
+      "Edit(/src/**/*.ts)",            // TypeScript in src/
+      "Edit(//tmp/scratch.txt)"        // Absolute path /tmp
+    ],
+    "deny": [
+      "Read(~/.ssh/id_*)",            // SSH private keys
+      "Edit(.claude/**)",              // Claude configuration
+      "Edit(.git/**)"                  // Git internals
+    ]
+  }
+}
+```
+
+#### Key Restrictions
+
+**Important:** Read/Edit deny rules apply ONLY to Claude's built-in file tools, not Bash subprocesses.
+
+```json
+{
+  "permissions": {
+    "deny": ["Read(./.env)"]  // Blocks Read tool
+  }
+}
+```
+
+This does NOT prevent:
+```bash
+cat .env        # Still allowed via Bash
+grep API_KEY .env
+```
+
+**For OS-level enforcement** that blocks all access, [enable the sandbox](/en/sandboxing).
+
+### WebFetch
+
+Control which domains can be accessed:
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:api.example.com)",
+      "WebFetch(domain:docs.python.org)"
+    ],
+    "deny": [
+      "WebFetch(domain:internal-only.local)"
+    ]
+  }
+}
+```
+
+**Domain pattern matching:**
+- `domain:example.com` — matches `example.com` and `*.example.com`
+- Subdomains automatically included
+- Path and query parameters ignored
+
+**Examples:**
+
+```json
+{
+  "allow": [
+    "WebFetch(domain:github.com)",    // github.com and *.github.com
+    "WebFetch(domain:api.openai.com)" // api.openai.com and *.api.openai.com
+  ]
+}
+```
+
+### MCP (Model Context Protocol)
+
+Control which MCP servers and tools are accessible:
+
+#### Server-Level Rules
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "mcp__puppeteer",        // All tools from puppeteer server
+      "mcp__github",           // All tools from github server
+      "mcp__puppeteer__*"      // Wildcard: all from puppeteer
+    ],
+    "deny": [
+      "mcp__untrusted-server"  // Block entire server
+    ]
+  }
+}
+```
+
+#### Tool-Level Rules
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "mcp__puppeteer__puppeteer_navigate",
+      "mcp__github__github_search_issues"
+    ],
+    "deny": [
+      "mcp__puppeteer__puppeteer_write_file"
+    ]
+  }
+}
+```
+
+**MCP rule patterns:**
+
+| Rule | Matches |
+|------|---------|
+| `mcp__servername` | All tools from server |
+| `mcp__servername__*` | All tools from server (wildcard form) |
+| `mcp__servername__toolname` | Specific tool |
+
+### Agent (Subagents)
+
+Control which agents Claude can spawn:
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Agent(Explore)",
+      "Agent(Plan)",
+      "Agent(my-custom-agent)"
+    ],
+    "deny": [
+      "Agent(dangerous-agent)"
+    ]
+  }
+}
+```
+
+**Common agents:**
+
+| Agent | Purpose |
+|-------|---------|
+| `Explore` | Codebase search and exploration |
+| `Plan` | Architecture and planning |
+| Custom agents | Project-specific agents in `.claude/agents/` |
+
+## Permission Precedence and Evaluation
+
+Rules are evaluated in order: **deny → ask → allow**. First matching rule wins.
+
+### Precedence Examples
+
+```json
+{
+  "permissions": {
+    "deny": ["Bash(rm *)"],
+    "ask": ["Bash(*)"],
+    "allow": ["Bash(npm *)", "Bash(git *)"]
+  }
+}
+```
+
+Evaluation for `rm -rf /`:
+1. Check deny rules first: **matches** `Bash(rm *)` → **BLOCKED**
+2. Never reaches ask/allow rules
+
+Evaluation for `npm run build`:
+1. Check deny rules: no match
+2. Check ask rules: matches `Bash(*)` → **PROMPT**
+3. Never reaches allow rules (ask stops evaluation)
+
+Evaluation for specific pre-allowed command:
+```json
+{
+  "allow": ["Bash(npm run build)"],
+  "ask": ["Bash(*)"]
+}
+```
+
+For `npm run build`:
+1. Deny: no match
+2. Ask: no match (specific allow rule matched first)
+3. Allow: **matches** `Bash(npm run build)` → **ALLOWED**
+
+### Configuration Scope Precedence
+
+When the same permission appears in multiple scopes:
+
+1. **Managed settings** (highest — cannot be overridden)
+2. Command-line arguments
+3. Local project settings (`.claude/settings.local.json`)
+4. Shared project settings (`.claude/settings.json`)
+5. User settings (`~/.claude/settings.json`)
+
+If denied at ANY level, the permission is blocked:
+- Managed deny ≠ overridable by `--allowedTools`
+- Project deny takes precedence over user allow
+- Command-line deny blocks user allow
+
+### Special Precedence Rules
+
+**Deny always wins:**
+```json
+// Even if User allows it, Project deny blocks it
+// User settings
+{
+  "permissions": {
+    "allow": ["Bash(rm *)"]
+  }
+}
+
+// Project settings
+{
+  "permissions": {
+    "deny": ["Bash(rm *)"]
+  }
+}
+
+// Result: Bash(rm *) is BLOCKED in this project
+```
+
+## Extend Permissions with Hooks
+
+Custom shell commands (hooks) can perform runtime permission evaluation.
+
+### PreToolUse Hook for Permission Control
+
+Hooks run before permission prompts. Output can:
+- `"deny"` — Block the tool call
+- `"prompt"` — Force a permission prompt
+- `"allow"` — Allow (but deny rules still apply)
+
+**Hook Precedence:**
+- Hook returns `"deny"` → Blocked
+- Hook returns `"prompt"` → Show user prompt
+- Hook returns `"allow"` → Check permission rules (deny rules still enforced)
+
+Deny rules from settings are NEVER overridden by hook `"allow"`.
+
+### Example: Validate URLs Before Curl
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "tool": "Bash",
+        "matcher": "curl.*https://trusted-domain\\.com",
+        "script": "echo allow"
+      },
+      {
+        "tool": "Bash",
+        "matcher": "curl",
+        "script": "echo deny"
+      }
+    ]
+  }
+}
+```
+
+This:
+1. Allows curl to `https://trusted-domain.com`
+2. Blocks all other curl commands
+
+### Example: Allow npm Commands with Version Check
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "tool": "Bash",
+        "matcher": "npm.*",
+        "script": "npm --version > /dev/null && echo allow || echo deny"
+      }
+    ]
+  }
+}
+```
+
+Only allows npm if it's installed.
+
+## Working Directories and File Access
+
+### Default Working Directory
+
+Claude Code can access files in the directory where it was launched (`cwd`).
+
+### Extending Access with Additional Directories
+
+#### Via CLI Startup
+
+```bash
+claude code --add-dir /path/to/project --add-dir ~/Documents
+```
+
+#### During Session
+
+```
+/add-dir /path/to/another/project
+```
+
+#### Persistent Configuration
+
+In settings files:
+```json
+{
+  "additionalDirectories": [
+    "/full/path/to/project1",
+    "~/Documents/project2",
+    "/mnt/external/data"
+  ]
+}
+```
+
+### File Access for Additional Directories
+
+Files in additional directories:
+- **Readable without prompts** (like the original working directory)
+- Follow the same permission rules for editing
+- Respect deny rules for Read/Edit
+
+## How Permissions Interact with Sandboxing
+
+Permissions and sandboxing are complementary security layers:
+
+### Permissions
+
+- Control which tools Claude Code can use
+- Determine which files and domains can be accessed
+- Apply to all tools (Bash, Read, Edit, WebFetch, MCP, Agent)
+
+### Sandboxing
+
+- Provide OS-level enforcement
+- Restrict Bash tool's filesystem and network access
+- Apply only to Bash commands and their child processes
+
+### Combined Defense
+
+```json
+{
+  "permissions": {
+    "deny": ["Bash(curl *)"],
+    "allow": ["WebFetch(domain:github.com)"]
+  },
+  "sandbox": {
+    "filesystem": {
+      "allowRead": ["/public"],
+      "allowWrite": ["/tmp"]
+    },
+    "network": {
+      "allowedDomains": ["github.com", "api.github.com"]
+    }
+  }
+}
+```
+
+This:
+1. Permission layer blocks raw `curl` attempts
+2. Sandbox blocks any Bash network access outside allowed domains
+3. WebFetch allowed to GitHub via permission rule
+
+## Managed Settings
+
+Organizations can enforce permissions across all machines:
+
+### Managed-Only Settings
+
+These settings can ONLY be set in managed configuration:
+
+| Setting | Effect |
+|---------|--------|
+| `disableBypassPermissionsMode` | Set to `"disable"` to prevent `bypassPermissions` mode and `--dangerously-skip-permissions` flag |
+| `allowManagedPermissionRulesOnly` | When `true`, user and project settings cannot define permission rules — only managed rules apply |
+
+### Configuration with Managed Rules Only
+
+```json
+{
+  "allowManagedPermissionRulesOnly": true,
+  "permissions": {
+    "allow": [
+      "Read",
+      "WebFetch(domain:company.com)",
+      "Bash(git *)"
+    ],
+    "deny": [
+      "Bash(rm *)",
+      "Bash(sudo *)"
+    ]
+  }
+}
+```
+
+When `allowManagedPermissionRulesOnly: true`:
+- User and project settings cannot add `allow`, `ask`, or `deny` rules
+- Only managed settings rules apply
+- Provides org-wide security policy
+
+### Deployment Options
+
+Managed settings can be delivered via:
+1. **Server-managed settings** — Centralized policy server
+2. **MDM/OS Policies** — Mobile Device Management or OS-level policies
+3. **Managed settings files** — `.claude/managed-settings.json` provisioned by IT
+
+## Examples
+
+### Example 1: Strict Security Configuration
+
+For untrusted code review:
+
+```json
+{
+  "defaultMode": "plan",
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep"
+    ],
+    "deny": [
+      "Bash",
+      "Edit",
+      "WebFetch"
+    ]
+  }
+}
+```
+
+Claude can:
+- Read files
+- Search with Grep
+- List files with Glob
+
+Claude cannot:
+- Execute commands
+- Modify files
+- Access external URLs
+
+### Example 2: Trusted Development
+
+For local development:
+
+```json
+{
+  "defaultMode": "acceptEdits",
+  "permissions": {
+    "allow": [
+      "Bash(npm *)",
+      "Bash(git *)",
+      "Edit",
+      "Read",
+      "WebFetch"
+    ],
+    "deny": [
+      "Bash(sudo *)",
+      "Bash(rm *)",
+      "Bash(dd *)"
+    ]
+  }
+}
+```
+
+Claude can:
+- Run npm and git commands
+- Edit files freely
+- Read everything
+- Access web resources
+
+Claude cannot:
+- Run with sudo
+- Delete files
+- Use disk tools
+
+### Example 3: Enterprise Deployment
+
+Managed settings for organization:
+
+```json
+{
+  "allowManagedPermissionRulesOnly": true,
+  "disableBypassPermissionsMode": "disable",
+  "permissions": {
+    "allow": [
+      "Read",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:company.com)",
+      "Bash(npm *)",
+      "Bash(git *)",
+      "Bash(python *)"
+    ],
+    "deny": [
+      "Bash(curl *)",
+      "Bash(wget *)",
+      "Bash(sudo *)",
+      "Edit(/etc/**)",
+      "Edit(/var/**)"
+    ]
+  },
+  "sandbox": {
+    "network": {
+      "allowedDomains": ["github.com", "company.com"]
+    }
+  }
+}
+```
+
+Enforces:
+- User cannot override permission rules
+- Network access restricted to approved domains
+- System files protected
+- No `bypassPermissions` mode available
+
+## See Also
+
+- [Settings Reference](/en/settings): Complete configuration reference
+- [Sandboxing](/en/sandboxing): OS-level filesystem and network isolation
+- [Hooks Guide](/en/hooks-guide): Custom permission scripts
+- [MCP](/en/mcp): Model Context Protocol configuration
+- [Security](/en/security): Security best practices and safeguards
+
+## Sources and Links
+
+- [Permissions](https://code.claude.com/docs/en/permissions)
+- [Sandboxing](https://code.claude.com/docs/en/sandboxing)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

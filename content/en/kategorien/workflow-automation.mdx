@@ -1,0 +1,359 @@
+---
+title: "Workflow Automation Platforms"
+date: 2026-03-21
+summary: "Comparison of n8n, Zapier, Make, Power Automate, and Activepieces for AI automation"
+tags: ["workflows", "automation", "n8n", "zapier", "make", "integrations", "comparison"]
+author: "AI Engineering"
+---
+
+# Workflow Automation Platforms
+
+Workflow platforms connect apps and automate tasks. Choose based on price, flexibility, and AI integration.
+
+## Feature Comparison
+
+| Feature | n8n | Zapier | Make | Power Automate | Activepieces |
+|---------|-----|--------|------|-----------------|---------------|
+| **Pricing** | Free (self-hosted), $20+/mo | $20-1200/mo | $10-500/mo | $15-1000+/mo | Free + pro |
+| **Hosting** | Self-hosted or cloud | Cloud only | Cloud only | Cloud only | Self-hosted |
+| **Integrations** | 500+ | 6000+ | 1000+ | 1000+ | 200+ |
+| **Custom nodes** | Python/JavaScript | Limited | Limited | Limited | JavaScript |
+| **AI nodes** | Ollama, Claude, GPT, etc. | OpenAI only | OpenAI only | Copilot | OpenAI |
+| **Code execution** | Full bash/python | No | Limited | Power Fx | JavaScript |
+| **Monitoring** | Built-in | Basic | Basic | Advanced | Built-in |
+| **Learning curve** | Medium | Easy | Easy | Medium | Medium |
+
+## n8n (Self-Hosted & Cloud)
+
+**Best for:** Full control, LLM integrations, cost at scale
+
+**Pricing:**
+- Self-hosted: Free (unlimited workflows)
+- Cloud: $20/mo (10 workflows), $240/mo (100)
+
+**Strengths:**
+- Can run locally (no vendor lock-in)
+- Unlimited workflows (self-hosted)
+- Full bash/python code nodes
+- Ollama built-in
+- Custom nodes easy to write
+
+**Weaknesses:**
+- Steeper learning curve
+- Smaller integration library
+- Community-driven (vs enterprise)
+
+**When to use:**
+- Long-term project (avoid recurring SaaS)
+- Need local privacy
+- High workflow volume
+- Complex logic
+
+**Example:** Multi-LLM router with Ollama fallback
+
+```yaml
+Trigger
+├── Input: question
+├── Call Claude API
+├─ On error: Fall back to Ollama
+├─ Save result to database
+└── Email notification
+```
+
+## Zapier (The Mainstream Choice)
+
+**Best for:** Non-technical users, integrations, quick automation
+
+**Pricing:**
+- Free: 100 tasks/month
+- Starter: $20/mo (750 tasks)
+- Professional: $50/mo (2k tasks)
+
+**Strengths:**
+- Largest app ecosystem (6000+)
+- Template library (copy-paste automation)
+- Mobile-friendly
+- Great for simple workflows
+
+**Weaknesses:**
+- Expensive at scale (per-task billing)
+- Limited code execution
+- Can't run locally
+- AI limited to OpenAI
+
+**When to use:**
+- Simple integrations (< 5 steps)
+- Don't want to manage servers
+- Team non-technical
+- Light volume (< 5k tasks/month)
+
+**Pricing trap:**
+- 1 workflow × 100 daily runs = 3k tasks/month = $50
+- Scale to 10 workflows = $500/mo
+
+## Make.com (Powerful & Cheaper)
+
+**Best for:** Power users wanting more than Zapier, less complexity than n8n
+
+**Pricing:**
+- Free: 1000 operations/month
+- Pro: $10/mo (10k ops)
+- Team: $99/mo (100k ops)
+
+**Strengths:**
+- Much cheaper than Zapier
+- 1000+ integrations
+- Good monitoring and error handling
+- Flexible data mapping
+
+**Weaknesses:**
+- "Scenario" learning curve
+- Limited code (no bash)
+- Smaller community
+- Operations counting can be confusing
+
+**When to use:**
+- Medium workflows (5-20 steps)
+- Budget-conscious
+- Integration-heavy
+- Avoid running your own server
+
+**Cost comparison (1k tasks/day):**
+- Zapier: $50/mo
+- Make: $10-30/mo
+- n8n self-hosted: $0 (after GPU setup)
+
+## Power Automate (Enterprise Microsoft Stack)
+
+**Best for:** Teams using Office 365, SharePoint, Teams
+
+**Pricing:**
+- Free: Limited (< 20 flows)
+- Attended RPA: $15/user/mo
+- Unattended RPA: $150/month
+
+**Strengths:**
+- Native integration with Microsoft ecosystem
+- Desktop automation (RPA)
+- Advanced approval workflows
+- Enterprise support
+
+**Weaknesses:**
+- Expensive for SMB
+- Proprietary (vendor lock-in)
+- Limited to Windows servers
+- Steep learning curve
+
+**When to use:**
+- Enterprise Microsoft shop
+- Need desktop automation
+- Teams + SharePoint heavy
+
+**Skip if:**
+- Using Google Workspace
+- Want cost control
+- Need local deployment
+
+## Activepieces (Open-Source Alternative)
+
+**Best for:** Open-source advocates, developers
+
+**Pricing:**
+- Self-hosted: Free
+- Cloud: Free tier + pro ($20/mo)
+
+**Strengths:**
+- Open source (can audit/modify)
+- Can self-host for free
+- JavaScript code support
+- Active development
+
+**Weaknesses:**
+- Smaller integration library (200 vs 6000)
+- Smaller community
+- Less mature than competitors
+- Documentation gaps
+
+**When to use:**
+- Want open-source
+- Can self-host
+- Developer-friendly team
+- Custom integrations needed
+
+## Decision Matrix
+
+```
+Do you have a server/GPU?
+├─ YES:
+│  ├─ High workflow volume (>50)?
+│  │  └─ Use: n8n self-hosted (unlimited, $0)
+│  └─ Few workflows (<10)?
+│     └─ Use: Zapier or Make (simplicity)
+│
+└─ NO:
+   ├─ Only Microsoft apps?
+   │  └─ Use: Power Automate
+   ├─ Need lowest cost?
+   │  └─ Use: Make.com
+   └─ Want simplicity?
+      └─ Use: Zapier
+```
+
+## Workflow Complexity by Platform
+
+### Simple (1-5 steps)
+All platforms handle equally well.
+
+**n8n:**
+```yaml
+Webhook → Set Data → Send Email
+```
+
+**Zapier:**
+```
+Trigger: Webhook
+├─ Action 1: Set variable
+└─ Action 2: Send email
+```
+
+### Medium (5-20 steps)
+Advantage: n8n, Make
+
+**Example:** Classify email, route to different handlers
+
+```
+Trigger: Email received
+├─ Parse: Extract subject + body
+├─ Classify: Send to Ollama/OpenAI
+├─ IF bug:
+│  └─ Create GitHub issue
+└─ IF feature:
+   └─ Save to Airtable
+```
+
+**n8n (native):**
+- If node with conditional paths
+- Full data mapping
+- Code nodes for complex logic
+
+**Zapier:**
+- Formatting helper (but limited)
+- Needs multiple zaps (workaround)
+- More expensive
+
+**Make:**
+- Router module
+- Good data mapping
+- Better value than Zapier
+
+### Complex (20+ steps, custom logic)
+Advantage: n8n
+
+**Example:** Multi-agent orchestration
+
+```
+Dispatcher
+├─ Task 1 → Research Agent → Database
+├─ Task 2 → Builder Agent → Database
+├─ Task 3 → Reviewer Agent → Database
+└─ Wait for all → Merge results → Notify
+```
+
+Only n8n handles multi-branch complex workflows with code execution easily.
+
+## AI Integration Comparison
+
+| Platform | Claude | GPT | Ollama | Gemini | Local Fine-tune |
+|----------|--------|-----|--------|--------|-----------------|
+| **n8n** | HTTP node | OpenAI node | Native | HTTP node | Python node |
+| **Zapier** | N/A | Native | N/A | N/A | N/A |
+| **Make** | N/A | Native | N/A | N/A | N/A |
+| **Power Automate** | N/A | Limited | N/A | N/A | N/A |
+| **Activepieces** | HTTP node | HTTP node | HTTP node | HTTP node | JavaScript |
+
+**n8n advantage:** Can connect any LLM via HTTP, bash, or native nodes.
+
+## Migration Path
+
+If you start with Zapier and outgrow it:
+
+```
+Zapier (simple integrations)
+  ↓
+Make.com (better pricing, more power)
+  ↓
+n8n self-hosted (full control, scale)
+```
+
+Each step: export workflows (not always easy), rebuild in new platform.
+
+**Recommendation:** Start with n8n Docker Compose to avoid migration.
+
+## Running Your Own Instance
+
+### n8n Docker Compose
+
+```yaml
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    ports:
+      - "5678:5678"
+    environment:
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - N8N_HOST=localhost
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: n8n
+      POSTGRES_PASSWORD: change_me
+```
+
+### Activepieces Docker
+
+```yaml
+services:
+  activepieces:
+    image: activepieces/activepieces:latest
+    ports:
+      - "80:80"
+    environment:
+      - AP_POSTGRES_HOST=postgres
+```
+
+## Cost Projection
+
+**1-year cost for 10 workflows, 1000 tasks/day:**
+
+```
+Zapier:         $50 × 12 = $600/year
+Make.com:       $20 × 12 = $240/year
+n8n self-hosted: $0 (GPU amortized) = $250/year
+```
+
+**At 10k tasks/day:**
+
+```
+Zapier:         $1200/year (cap out)
+Make.com:       $1200/year (cap out)
+n8n self-hosted: $250/year (scales)
+```
+
+## Checklist
+
+- [ ] Estimate monthly task volume
+- [ ] List required integrations
+- [ ] Check if AI integration needed
+- [ ] Evaluate: self-hosted viable? (server access?)
+- [ ] Cost-project for 1 year
+- [ ] Test 2 platforms with sample workflow
+- [ ] Decide on self-hosted vs SaaS
+- [ ] Document integrations needed
+- [ ] Plan for monitoring/alerting
+- [ ] Train team on platform
+
+## Sources and Links
+
+- [n8n](https://github.com/n8n-io/n8n)
+- [Make](https://www.make.com)

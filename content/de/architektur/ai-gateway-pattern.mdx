@@ -1,0 +1,703 @@
+---
+title: "AI Gateway Pattern: Intelligentes LLM-Routing"
+description: "API Gateway Design für LLMs: Load Balancing, Rate Limiting, Fallback Chains, Kostentracking auf Gateway-Ebene."
+section: "architektur"
+---
+
+# AI Gateway Pattern: Intelligentes LLM-Routing
+
+Das AI Gateway ist mehr als ein Load Balancer. Es ist dein Kontrollpunkt für alle LLM-Requests. Hier entscheidest du, welches Model benutzt wird, wie viel darf es kosten, welche Fallbacks greifen, wer darf anfragen.
+
+## Die 4 Kernaufgaben eines AI Gateways
+
+```
+Request
+  ↓
+┌─────────────────────────────────────┐
+│ 1. AUTHENTIFIZIERUNG                │ Who are you?
+│    API Keys validieren              │
+├─────────────────────────────────────┤
+│ 2. RATE LIMITING                    │ How much can you use?
+│    Tokens/min, Requests/min pro Key │
+├─────────────────────────────────────┤
+│ 3. SMART ROUTING                    │ Which model?
+│    Cost vs Speed vs Quality         │
+├─────────────────────────────────────┤
+│ 4. MONITORING & CACHING             │ Did we see this before?
+│    Token Counting, Semantic Cache   │
+└─────────────────────────────────────┘
+  ↓
+LLM Backends (vLLM, OpenAI, Anthropic, ...)
+```
+
+## 1. Authentifizierung und API Key Management
+
+### API Key Structure
+
+```python
+import secrets
+import hashlib
+from datetime import datetime, timedelta
+
+class APIKeyManager:
+    def __init__(self, db):
+        self.db = db
+
+    def create_key(self, user_id: str, name: str, quota_tokens: int):
+        """Erzeuge einen API Key mit Token-Quota"""
+        key_bytes = secrets.token_bytes(32)
+        key_hex = key_bytes.hex()
+        key_hash = hashlib.sha256(key_hex.encode()).hexdigest()
+
+        self.db.execute("""
+            INSERT INTO api_keys
+            (user_id, name, hash, quota_tokens, created_at, valid_until)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (
+            user_id, name, key_hash, quota_tokens,
+            datetime.now(), datetime.now() + timedelta(days=365)
+        ))
+
+        return key_hex  # Nur einmal zurückgeben!
+
+    def validate_key(self, key_hex: str) -> dict:
+        """Validiere API Key und hole User-Limits"""
+        key_hash = hashlib.sha256(key_hex.encode()).hexdigest()
+
+        result = self.db.execute("""
+            SELECT user_id, quota_tokens, tokens_used, valid_until
+            FROM api_keys WHERE hash = ? AND valid_until > now()
+        """, (key_hash,))
+
+        if not result:
+            return None
+
+        row = result[0]
+        if row['tokens_used'] >= row['quota_tokens']:
+            return None  # Quota exceeded
+
+        return {
+            'user_id': row['user_id'],
+            'tokens_remaining': row['quota_tokens'] - row['tokens_used'],
+            'expires_at': row['valid_until']
+        }
+```
+
+### Gateway Middleware (FastAPI)
+
+```python
+from fastapi import FastAPI, Header, HTTPException, status
+from functools import wraps
+
+app = FastAPI()
+key_manager = APIKeyManager(db)
+
+@app.middleware("http")
+async def authenticate_request(request, call_next):
+    """Middleware: Validiere API Key bei jedem Request"""
+    auth_header = request.headers.get("Authorization")
+
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing or invalid Authorization header"
+        )
+
+    api_key = auth_header[7:]  # Remove "Bearer "
+
+    user_info = key_manager.validate_key(api_key)
+    if not user_info:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid API key or quota exceeded"
+        )
+
+    # Speichere User-Info für Request-Handler
+    request.state.user_id = user_info['user_id']
+    request.state.tokens_remaining = user_info['tokens_remaining']
+
+    response = await call_next(request)
+    return response
+```
+
+## 2. Rate Limiting: Token-Aware vs Request-Based
+
+Naive Rate Limiting zählt Requests. Intelligent Rate Limiting zählt **Tokens**.
+
+### Das Problem mit Request-basiert
+
+```
+User A: 1000 Token Request → 1 Request
+User B: 10 Token Request → 1 Request
+
+Beide verbrauchen 1 Request-Slot, aber A verbraucht 100x mehr Tokens!
+```
+
+### Token-basiertes Rate Limiting
+
+```python
+from datetime import datetime, timedelta
+from collections import defaultdict
+
+class TokenRateLimiter:
+    def __init__(self, tokens_per_minute=100000):
+        self.limit = tokens_per_minute
+        self.user_buckets = defaultdict(lambda: {
+            "tokens": tokens_per_minute,
+            "last_refill": datetime.now()
+        })
+
+    def check_and_consume(self, user_id: str, tokens_needed: int) -> bool:
+        """Prüfe ob User noch Tokens hat und verbrauche sie"""
+        bucket = self.user_buckets[user_id]
+
+        # Token Refill (Leaky Bucket)
+        now = datetime.now()
+        seconds_since_refill = (now - bucket["last_refill"]).total_seconds()
+        refill_rate = self.limit / 60  # Tokens pro Sekunde
+
+        bucket["tokens"] = min(
+            self.limit,
+            bucket["tokens"] + (seconds_since_refill * refill_rate)
+        )
+        bucket["last_refill"] = now
+
+        # Prüfe ob genug Tokens vorhanden
+        if bucket["tokens"] < tokens_needed:
+            return False
+
+        # Verbrauche
+        bucket["tokens"] -= tokens_needed
+        return True
+
+    def get_status(self, user_id: str) -> dict:
+        """Zeige Token-Status für User"""
+        bucket = self.user_buckets[user_id]
+        return {
+            "tokens_available": int(bucket["tokens"]),
+            "tokens_per_minute_limit": self.limit,
+            "reset_in_seconds": 60
+        }
+
+limiter = TokenRateLimiter(tokens_per_minute=100000)
+
+@app.post("/v1/completions")
+async def completions(request: CompletionRequest):
+    user_id = request.state.user_id
+    estimated_tokens = (
+        len(request.prompt.split()) * 1.3 +  # Input
+        request.max_tokens * 1.3  # Output worst case
+    )
+
+    if not limiter.check_and_consume(user_id, estimated_tokens):
+        status = limiter.get_status(user_id)
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Rate limit exceeded. {status['tokens_available']:.0f} tokens available next minute."
+        )
+
+    # Jetzt inference...
+```
+
+## 3. Intelligentes Routing
+
+Das Gateway routet nicht einfach auf den "nächsten Server" — es macht strategische Entscheidungen:
+
+### Routing-Strategien
+
+```python
+from enum import Enum
+from dataclasses import dataclass
+
+class RoutingStrategy(Enum):
+    SPEED = "minimize_latency"
+    COST = "minimize_cost"
+    QUALITY = "maximize_quality"
+    AVAILABLE = "first_available"
+
+@dataclass
+class ModelEndpoint:
+    name: str
+    url: str
+    model: str
+    latency_p95: float  # milliseconds
+    cost_per_1k_tokens: float
+    quality_score: float  # 0-1
+    availability: float  # 0-1 (uptime percentage)
+
+class GatewayRouter:
+    def __init__(self):
+        self.endpoints = {
+            "llama-7b": ModelEndpoint(
+                name="llama-7b",
+                url="http://gpu-1:8000",
+                model="meta-llama/Llama-2-7b-hf",
+                latency_p95=15,
+                cost_per_1k_tokens=0.0001,
+                quality_score=0.7,
+                availability=0.995
+            ),
+            "llama-70b": ModelEndpoint(
+                name="llama-70b",
+                url="http://gpu-2:8000",
+                model="meta-llama/Llama-2-70b-hf",
+                latency_p95=45,
+                cost_per_1k_tokens=0.0005,
+                quality_score=0.95,
+                availability=0.99
+            ),
+            "gpt-4": ModelEndpoint(
+                name="gpt-4",
+                url="https://api.openai.com/v1",
+                model="gpt-4",
+                latency_p95=200,
+                cost_per_1k_tokens=0.03,
+                quality_score=1.0,
+                availability=0.999
+            )
+        }
+
+    def select_model(
+        self,
+        request_tokens: int,
+        strategy: RoutingStrategy,
+        budget_remaining: float,
+        latency_budget_ms: float
+    ) -> ModelEndpoint:
+        """Wähle das beste Model für Request"""
+
+        # Filter: Was ist verfügbar?
+        available = [
+            ep for ep in self.endpoints.values()
+            if ep.availability > 0.95
+        ]
+
+        if strategy == RoutingStrategy.SPEED:
+            # Latenz minimieren
+            selected = min(available, key=lambda ep: ep.latency_p95)
+
+        elif strategy == RoutingStrategy.COST:
+            # Kosten minimieren
+            request_cost = (request_tokens / 1000) * min(
+                ep.cost_per_1k_tokens for ep in available
+            )
+            if request_cost > budget_remaining:
+                # Fallback auf billiges Model
+                selected = min(available, key=lambda ep: ep.cost_per_1k_tokens)
+            else:
+                selected = min(available, key=lambda ep: ep.cost_per_1k_tokens)
+
+        elif strategy == RoutingStrategy.QUALITY:
+            # Qualität maximieren
+            selected = max(available, key=lambda ep: ep.quality_score)
+
+        else:  # AVAILABLE
+            selected = available[0]
+
+        # Latenz-Check
+        if selected.latency_p95 > latency_budget_ms:
+            # Fallback auf schnelleres Model
+            selected = min(
+                (ep for ep in available if ep.latency_p95 <= latency_budget_ms),
+                key=lambda ep: ep.latency_p95,
+                default=available[0]
+            )
+
+        return selected
+
+router = GatewayRouter()
+
+@app.post("/v1/chat/completions")
+async def chat_completions(request: ChatRequest):
+    """Intelligentes Routing basierend auf Request"""
+
+    # Bestimme Strategie
+    if request.get("prefer_fast"):
+        strategy = RoutingStrategy.SPEED
+    elif request.get("budget_tokens"):
+        strategy = RoutingStrategy.COST
+    else:
+        strategy = RoutingStrategy.QUALITY
+
+    # Schätze Token
+    prompt_tokens = len(request.messages[-1]["content"].split()) * 1.3
+    estimated_request_tokens = prompt_tokens + request.get("max_tokens", 512)
+
+    # Berechne verfügbares Budget
+    user_tokens_remaining = request.state.tokens_remaining
+    budget_cost = user_tokens_remaining * 0.001  # Assume avg cost
+
+    # Wähle Model
+    selected = router.select_model(
+        request_tokens=estimated_request_tokens,
+        strategy=strategy,
+        budget_remaining=budget_cost,
+        latency_budget_ms=500
+    )
+
+    print(f"Routing to {selected.name} (strategy: {strategy})")
+
+    # Forward Request
+    response = await forward_request(selected.url, request)
+    return response
+```
+
+### Fallback Chains
+
+```python
+class FallbackChain:
+    def __init__(self, chain: list[str]):
+        """
+        chain = ["gpt-4", "claude-3-opus", "llama-70b"]
+        Versuche der Reihe nach
+        """
+        self.chain = chain
+
+    async def execute(self, request: dict):
+        """Führe aus, fallback wenn fehlschlägt"""
+        errors = []
+
+        for model_name in self.chain:
+            endpoint = router.endpoints[model_name]
+            try:
+                response = await call_endpoint(endpoint, request, timeout=5)
+                return response
+            except TimeoutError:
+                errors.append(f"{model_name}: timeout")
+                continue
+            except Exception as e:
+                errors.append(f"{model_name}: {str(e)}")
+                continue
+
+        # Alle Fallbacks fehlgeschlagen
+        raise Exception(f"All fallbacks failed: {errors}")
+
+# Beispiel: High Quality, aber mit Fallback
+chain = FallbackChain(["gpt-4", "claude-3-opus", "llama-70b"])
+response = await chain.execute({"messages": [...]})
+```
+
+## 4. Kostentracking auf Gateway-Ebene
+
+```python
+from dataclasses import dataclass
+from datetime import datetime
+
+@dataclass
+class CostEvent:
+    user_id: str
+    model: str
+    prompt_tokens: int
+    completion_tokens: int
+    cost_usd: float
+    timestamp: datetime
+    request_id: str
+
+class CostTracker:
+    def __init__(self, db):
+        self.db = db
+
+    def log_completion(
+        self,
+        user_id: str,
+        model: str,
+        prompt_tokens: int,
+        completion_tokens: int
+    ):
+        """Log API Call mit Kosten"""
+        total_tokens = prompt_tokens + completion_tokens
+
+        # Kosten aus Modell-Config
+        pricing = {
+            "gpt-4": {"prompt": 0.03, "completion": 0.06},
+            "gpt-3.5": {"prompt": 0.001, "completion": 0.002},
+            "llama-70b": {"prompt": 0.0005, "completion": 0.0008},
+        }
+
+        if model not in pricing:
+            cost_usd = 0  # Local models
+        else:
+            cost_usd = (
+                (prompt_tokens / 1000) * pricing[model]["prompt"] +
+                (completion_tokens / 1000) * pricing[model]["completion"]
+            )
+
+        event = CostEvent(
+            user_id=user_id,
+            model=model,
+            prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens,
+            cost_usd=cost_usd,
+            timestamp=datetime.now(),
+            request_id=generate_request_id()
+        )
+
+        # Speichere in Datenbank
+        self.db.execute("""
+            INSERT INTO cost_events
+            (user_id, model, prompt_tokens, completion_tokens, cost_usd, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (
+            event.user_id, event.model, event.prompt_tokens,
+            event.completion_tokens, event.cost_usd, event.timestamp
+        ))
+
+        return event
+
+    def get_user_costs(self, user_id: str, days=30):
+        """Aggregiere Kosten für Benutzer"""
+        result = self.db.execute("""
+            SELECT
+                model,
+                SUM(prompt_tokens) as total_prompt,
+                SUM(completion_tokens) as total_completion,
+                SUM(cost_usd) as total_cost,
+                COUNT(*) as request_count
+            FROM cost_events
+            WHERE user_id = ?
+                AND timestamp > datetime('now', '-{} days')
+            GROUP BY model
+        """.format(days), (user_id,))
+
+        return {row['model']: {
+            'prompt_tokens': row['total_prompt'],
+            'completion_tokens': row['total_completion'],
+            'cost_usd': row['total_cost'],
+            'requests': row['request_count']
+        } for row in result}
+
+    def get_dashboard(self, user_id: str):
+        """Dashboard: Kosten heute, diese Woche, dieser Monat"""
+        today = self.db.execute("""
+            SELECT SUM(cost_usd) as cost FROM cost_events
+            WHERE user_id = ? AND date(timestamp) = date('now')
+        """, (user_id,))[0]['cost'] or 0
+
+        this_week = self.db.execute("""
+            SELECT SUM(cost_usd) as cost FROM cost_events
+            WHERE user_id = ? AND timestamp > datetime('now', '-7 days')
+        """, (user_id,))[0]['cost'] or 0
+
+        this_month = self.db.execute("""
+            SELECT SUM(cost_usd) as cost FROM cost_events
+            WHERE user_id = ? AND timestamp > datetime('now', '-30 days')
+        """, (user_id,))[0]['cost'] or 0
+
+        return {
+            'today': today,
+            'this_week': this_week,
+            'this_month': this_month
+        }
+
+tracker = CostTracker(db)
+
+@app.get("/api/costs/dashboard")
+async def cost_dashboard(request):
+    user_id = request.state.user_id
+    dashboard = tracker.get_dashboard(user_id)
+    return dashboard
+```
+
+## 5. Semantic Caching (GPTCache Pattern)
+
+Nicht nur Responses cachen, sondern Cache nach Semantik (Bedeutung):
+
+```python
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
+
+class SemanticCache:
+    def __init__(self, embedding_model, similarity_threshold=0.95):
+        """
+        Cache-Einträge nicht exakt matchen, sondern semantisch ähnlich finden
+        """
+        self.embedding_model = embedding_model  # z.B. all-MiniLM
+        self.threshold = similarity_threshold
+        self.cache = []  # List of (embedding, prompt, response)
+
+    def embed(self, text: str) -> np.array:
+        """Embedde einen Text"""
+        embedding = self.embedding_model.encode(text)
+        return embedding / np.linalg.norm(embedding)  # Normalize
+
+    def get(self, prompt: str) -> str | None:
+        """Suche ähnliche Prompts im Cache"""
+        query_embedding = self.embed(prompt)
+
+        for cached_embedding, cached_prompt, cached_response in self.cache:
+            # Kosinus-Ähnlichkeit
+            similarity = float(
+                cosine_similarity(
+                    query_embedding.reshape(1, -1),
+                    cached_embedding.reshape(1, -1)
+                )[0][0]
+            )
+
+            if similarity >= self.threshold:
+                print(f"Cache HIT: {similarity:.3f} similar to '{cached_prompt[:50]}'")
+                return cached_response
+
+        return None
+
+    def put(self, prompt: str, response: str):
+        """Speichere Prompt-Response Pair"""
+        embedding = self.embed(prompt)
+        self.cache.append((embedding, prompt, response))
+
+# Beispiel: Nutzen im Gateway
+cache = SemanticCache(embedding_model)
+
+@app.post("/v1/completions")
+async def completions(request: CompletionRequest):
+    # Versuche aus Cache zu holen
+    cached = cache.get(request.prompt)
+    if cached:
+        return {"response": cached, "cached": True}
+
+    # Nicht gecacht → LLM aufrufen
+    response = await router.execute(request)
+
+    # Speichere in Cache
+    cache.put(request.prompt, response.text)
+
+    return {"response": response.text, "cached": False}
+```
+
+## 6. Token Counting auf Gateway-Ebene
+
+Token Counting passiert IMMER am Gateway — bevor du das teuren LLM rufst:
+
+```python
+import tiktoken
+
+class TokenCounter:
+    def __init__(self):
+        # Verschiedene Encoding für verschiedene Models
+        self.encoders = {
+            "gpt-4": tiktoken.encoding_for_model("gpt-4"),
+            "gpt-3.5-turbo": tiktoken.encoding_for_model("gpt-3.5-turbo"),
+            "cl100k_base": tiktoken.get_encoding("cl100k_base"),
+        }
+
+    def count_tokens(self, text: str, model: str = "gpt-4") -> int:
+        """Zähle Tokens für Text"""
+        encoder = self.encoders.get(model, self.encoders["cl100k_base"])
+        return len(encoder.encode(text))
+
+    def count_messages(self, messages: list[dict], model: str = "gpt-4") -> int:
+        """Zähle Tokens für Message Array (mit Overhead)"""
+        encoder = self.encoders.get(model, self.encoders["cl100k_base"])
+        total = 0
+
+        # OpenAI Overhead: ~4 Tokens pro Message
+        total += 4 * len(messages)
+
+        for msg in messages:
+            total += len(encoder.encode(msg.get("content", "")))
+            if "name" in msg:
+                total += len(encoder.encode(msg["name"]))
+                total += 1  # Name prefix overhead
+
+        return total
+
+counter = TokenCounter()
+
+@app.post("/api/tokenize")
+async def tokenize(request: dict):
+    """Endpoint: Zeige Token-Count VOR dem API Call"""
+    model = request.get("model", "gpt-4")
+    tokens = counter.count_messages(request.get("messages", []), model)
+
+    return {
+        "tokens": tokens,
+        "estimated_cost_usd": (tokens / 1000) * 0.03  # gpt-4 pricing
+    }
+
+# Vor jedem Request: Token zählen
+@app.post("/v1/completions")
+async def completions(request: CompletionRequest):
+    model = request.get("model", "gpt-4")
+    tokens = counter.count_messages(request.messages, model)
+
+    # Log für Cost-Tracking
+    print(f"Request tokens: {tokens}")
+
+    # Übergebe Estimate an Router
+    selected = router.select_model(tokens, strategy)
+    ...
+```
+
+## 7. Praktisches Gateway-Beispiel mit LiteLLM
+
+LiteLLM abstrahiert mehrere LLM-Provider:
+
+```python
+from litellm import completion
+import litellm
+
+# Fallback Chain konfigurieren
+litellm.set_verbose(True)
+
+litellm.model_list = [
+    {
+        "model_name": "my-gpt4",
+        "litellm_params": {
+            "model": "gpt-4",
+            "api_key": os.getenv("OPENAI_API_KEY")
+        }
+    },
+    {
+        "model_name": "my-gpt4",
+        "litellm_params": {
+            "model": "claude-3-opus-20240229",
+            "api_key": os.getenv("ANTHROPIC_API_KEY")
+        }
+    },
+    {
+        "model_name": "my-gpt4",
+        "litellm_params": {
+            "model": "llama2-70b",
+            "api_base": "http://localhost:8000/v1",
+        }
+    }
+]
+
+@app.post("/v1/chat/completions")
+async def unified_chat(request: dict):
+    """Ein Endpoint, mehrere Backends"""
+    try:
+        response = completion(
+            model="my-gpt4",
+            messages=request["messages"],
+            max_tokens=request.get("max_tokens", 1000),
+            temperature=request.get("temperature", 0.7),
+            num_retries=2,  # Fallback automatisch
+        )
+        return response
+    except Exception as e:
+        return {"error": str(e)}
+```
+
+## Zusammenfassung: AI Gateway Pattern
+
+| Komponente | Aufgabe | Tool/Technik |
+|-----------|---------|-------------|
+| **Auth** | API Keys validieren | JWT, API Key Hash |
+| **Rate Limiting** | Token-basiert drosseln | Leaky Bucket, Redis |
+| **Routing** | Intelligente Model-Wahl | Cost/Speed/Quality Score |
+| **Fallback** | Versuch nächstes Model | Chain of Responsibility |
+| **Caching** | Semantische Duplikate | Embeddings + Cosine Sim |
+| **Token Counting** | Vorher zählen, nicht hinterher | tiktoken, LiteLLM |
+| **Cost Tracking** | Geld zählen | SQL Events, Dashboard |
+
+Das Gateway ist deine Kontrollinstanz. Alles geht da durch. Deshalb lohnt sich hier jede Millisekunde Optimierung.
+
+## Quellen und Links
+
+- [LiteLLM Docs](https://docs.litellm.ai/) — Multi-Provider LLM Abstraction
+- [Kong API Gateway](https://docs.konghq.com/) — Production API Gateway
+- [tiktoken](https://github.com/openai/tiktoken) — Token Counting für OpenAI Models
+- [GPTCache](https://docs.gptcache.com/) — Semantic Caching für LLMs
+- [OpenAI Rate Limits](https://platform.openai.com/docs/guides/rate-limits) — Offizielle Limits
+- [Traefik AI Gateway Pattern](https://traefik.io/blog/traefik-ai-gateway/) — Gateway Pattern
+- [Redis for Rate Limiting](https://redis.io/docs/manual/client-side-caching/) — Implementation Guide

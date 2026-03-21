@@ -1,0 +1,194 @@
+---
+title: Dify — No-Code AI App Builder
+date: 2026-03-21
+summary: Dify is an open-source no-code/low-code platform for rapidly building AI applications. Workflow editor, RAG integration, agent mode, self-hosting, API publication, dataset management.
+tags: [dify, no-code, ai-app, workflow, rag, agent]
+author: AI Engineering
+---
+
+# Dify — Visual AI App Development
+
+Dify is an open-source platform (Apache 2.0) for building AI applications without code. With 50k+ GitHub stars, Dify is the leading no-code solution for LLM apps in 2026.
+
+## Installation
+
+### Docker (Recommended)
+
+```bash
+git clone https://github.com/langgenius/dify.git
+cd dify/docker
+cp .env.example .env
+docker-compose up -d
+```
+
+Access: http://localhost/
+
+### Self-Hosted Requirements
+
+- **Server**: 4GB RAM, 20GB disk
+- **Database**: PostgreSQL 13+
+- **Cache**: Redis 6+
+- **Vector DB**: Optional (Weaviate, Qdrant, Milvus)
+
+## Core Components
+
+### 1. Workflow Editor
+
+Visual drag-and-drop LLM workflow builder:
+
+```
+Trigger
+  ↓
+Input Processing
+  ↓
+LLM Node
+  ↓
+Output Formatting
+  ↓
+API Response
+```
+
+Supports:
+- LLM calls (OpenAI, Ollama, Azure, local)
+- Tool calling (web search, database)
+- Conditional logic
+- Loops and parallel processing
+
+### 2. RAG Integration
+
+Built-in document search:
+
+1. Upload PDF/TXT/Web
+2. Auto-chunk and embed
+3. Vector search in LLM context
+
+### 3. Agent Mode
+
+Agent-based workflows with tool calling.
+
+### 4. API Publishing
+
+Publish as OpenAI-compatible REST API.
+
+## Practical Workflow
+
+### Create New App
+
+1. Dashboard → "Create New App"
+2. Choose "Blank App" or template
+3. Configure:
+   - Icon
+   - Name
+   - Description
+4. Open workflow editor
+
+### Configure LLM Node
+
+```
+├── Model: qwen2.5-7b
+├── System Prompt: "You are helpful..."
+├── Temperature: 0.7
+├── Max Tokens: 500
+└── Context: 4096
+```
+
+### Format Output
+
+```
+LLM Output
+  ↓
+JSON Parser
+  ↓
+Template Formatter
+  ↓
+API Response
+```
+
+## Dataset Management
+
+Training data and context sources:
+
+### Upload Dataset
+
+1. Datasets section
+2. Create Dataset
+3. Upload CSV
+4. Auto-indexed for RAG
+
+### Example CSV
+
+```
+question,answer
+What is AI?,Artificial Intelligence is...
+Explain quantum computing,A quantum computer uses...
+```
+
+### Use in RAG
+
+```
+Query
+  ↓
+Vector Search
+  ↓
+Top Results as Context
+  ↓
+LLM Response
+```
+
+## API & Integration
+
+### REST API Example
+
+```bash
+curl -X POST http://localhost/api/workflows/run \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{"workflow_id": "abc123", "inputs": {"message": "Hello"}}'
+```
+
+### Python Integration
+
+```python
+import requests
+
+response = requests.post(
+    "http://localhost/api/workflows/run",
+    json={
+        "workflow_id": "abc123",
+        "inputs": {"query": "What is AI?"}
+    },
+    headers={"Authorization": "Bearer YOUR_API_KEY"}
+)
+
+print(response.json()["output"])
+```
+
+## Self-Hosting Checklist
+
+### 1. Database
+
+```bash
+docker run -d --name postgres \
+  -e POSTGRES_PASSWORD=secure \
+  postgres:15
+```
+
+### 2. Redis
+
+```bash
+docker run -d --name redis \
+  redis:7
+```
+
+### 3. Environment
+
+```bash
+DATABASE_URL=postgresql://user:pw@postgres:5432/dify
+REDIS_URL=redis://redis:6379
+SECRET_KEY=your-secret-key
+```
+
+## Sources and Links
+
+- [Dify GitHub](https://github.com/langgenius/dify)
+- [Dify Documentation](https://docs.dify.ai)
+- [Self-Hosting Guide](https://docs.dify.ai/getting-started/install-self-hosted)

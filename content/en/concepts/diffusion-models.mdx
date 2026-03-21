@@ -1,0 +1,260 @@
+---
+title: Diffusion Models
+date: 2026-03-21
+summary: Forward/Reverse Diffusion Process, Noise Schedules, DDPM, DDIM, Latent Diffusion, Classifier-Free Guidance — Theory and Practice
+tags: [diffusion, generative, ddpm, ddim, latent-diffusion, image-generation, stable-diffusion]
+author: AI Engineering
+section: Concepts
+---
+
+# Understanding Diffusion Models
+
+Diffusion models are a new class of generative models that create realistic content through an iterative process. Unlike GANs or Autoregressive models, they don't require adversarial training and are more stable.
+
+## Core Idea: Noise is Reversible
+
+**Fundamental Concept:** If you can overwrite an image with noise, you can also reverse noise back into an image.
+
+```
+Training Process (Forward Diffusion):
+Real Image → (+Noise) → Image with 10% Noise → ... → 100% Noise (Gaussian)
+
+Generation (Reverse Diffusion):
+100% Noise → (-Predict Noise) → 90% Noise Image → ... → Real Image
+```
+
+The model learns to predict the noise added at each step.
+
+---
+
+## Forward Diffusion Process (Training Phase)
+
+In the forward pass, a real image is gradually "destroyed" with noise.
+
+### Mathematics (Simplified)
+
+```
+x_t = sqrt(α_t) * x_0 + sqrt(1 - α_t) * ε
+
+where:
+- x_0 = Original image
+- x_t = Image after t diffusion steps
+- α_t = Schedule value (controls noise amount)
+- ε = Gaussian noise ~ N(0, 1)
+```
+
+### Practical Example
+
+```
+t=0:   Clear image
+t=50:  Image with light noise (still recognizable)
+t=500: Image with heavy noise (barely recognizable)
+t=999: Pure Gaussian noise (no information)
+```
+
+### Noise Schedule
+
+The schedule defines how much noise is added at each step.
+
+```python
+# Linear Schedule (simple)
+alphas = torch.linspace(0.999, 0.001, num_steps)
+
+# Cosine Schedule (better, from Improved DDPM)
+def cosine_schedule(t, T=1000):
+    return torch.cos((t / T + 0.008) / 1.008 * π / 2) ** 2
+```
+
+---
+
+## Reverse Diffusion Process (Generation)
+
+The neural network learns to predict noise backward.
+
+### Training the Model
+
+```python
+# Training loop (pseudocode)
+for x_0 in real_images:
+    t = random_timestep(1, T)
+    ε = torch.randn_like(x_0)  # Random noise
+
+    x_t = sqrt(α_t) * x_0 + sqrt(1 - α_t) * ε
+
+    # Network predicts noise
+    ε_predicted = unet(x_t, t)
+
+    # Loss: How close is prediction to actual noise?
+    loss = MSE(ε_predicted, ε)
+    loss.backward()
+```
+
+### Sampling (Generation)
+
+```python
+# Sampling
+x_T = torch.randn(batch_size, 3, 256, 256)  # Pure noise
+
+for t in range(T-1, 0, -1):  # Backward through timesteps
+    z = torch.randn_like(x_T) if t > 1 else 0  # Variance
+
+    # Model predicts noise
+    ε = unet(x_T, t)
+
+    # Remove noise
+    x_T = (x_T - sqrt(1 - α_t) * ε) / sqrt(α_t)
+
+    # Add controlled noise
+    x_T += sqrt(β_t) * z
+
+return x_T  # Final image
+```
+
+---
+
+## DDPM (Denoising Diffusion Probabilistic Models)
+
+DDPM was the first practical implementation (Ho et al. 2020).
+
+### Characteristics
+
+| Aspect | DDPM |
+|--------|------|
+| Steps | 1000 (very many) |
+| Sampling Time | 20-30 seconds per image |
+| Quality | Very good |
+| Efficiency | Not practical for real-time |
+| Application | Academic reference |
+
+### Architecture
+
+```
+Input: Noise x_t + Timestep t
+  ↓
+Sinusoidal Timestep Embedding (time-aware)
+  ↓
+U-Net with ResNet Blocks
+  ↓
+Attention (Self-Attention on smaller features)
+  ↓
+Noise Prediction ε
+```
+
+---
+
+## DDIM (Denoising Diffusion Implicit Models)
+
+DDIM accelerates generation without quality loss (Song et al. 2021).
+
+### Idea: Skip Fewer Steps
+
+```
+DDPM:  1000 → 999 → 998 → ... → 1 → 0  (1000 steps!)
+DDIM:  1000 → 900 → 800 → ... → 100 → 0  (100 steps, 10x faster!)
+```
+
+### Speed Comparison
+
+```
+DDPM 1000 steps: 30 seconds
+DDIM 50 steps:   1-2 seconds (15-30x faster!)
+```
+
+---
+
+## Latent Diffusion Models (Stable Diffusion)
+
+Latent Diffusion works in compressed latent space — much faster.
+
+### Architecture
+
+```
+Real Image (512x512)
+  ↓
+VAE Encoder (compress)
+  ↓
+Latent Space (64x64) — 8x compression
+  ↓
+Diffusion in Latent Space (fast!)
+  ↓
+VAE Decoder (decompress)
+  ↓
+Generated Image (512x512)
+```
+
+### Why It's Faster
+
+```
+Pixel-Level Diffusion:  512x512 = 262.144 pixels per step
+Latent Diffusion:       64x64 = 4.096 dimensions per step
+
+Speedup: ~64x faster at same quality
+```
+
+---
+
+## Classifier-Free Guidance (CFG)
+
+Guidance controls how strongly the model follows the text prompt.
+
+### Problem Without Guidance
+
+The model must switch between "follow text" and "ignore text", causing quality loss.
+
+### Solution: CFG
+
+```python
+# Sampling with Guidance
+ε_uncond = unet(z_t, t, embedding=None)  # Without condition
+ε_cond = unet(z_t, t, embedding=text_emb)  # With condition
+
+# Apply Guidance
+ε = ε_uncond + guidance_scale * (ε_cond - ε_uncond)
+
+# guidance_scale:
+#   1.0  = ignore text completely
+#   7.5  = standard (good balance)
+#   15.0 = very strong text following
+```
+
+---
+
+## Practical Implementation
+
+### Stable Diffusion with Diffusers
+
+```python
+from diffusers import StableDiffusionPipeline
+import torch
+
+# Load model
+pipe = StableDiffusionPipeline.from_pretrained(
+    "runwayml/stable-diffusion-v1-5",
+    torch_dtype=torch.float16
+)
+pipe = pipe.to("cuda")
+
+# Text → Image
+prompt = "A futuristic castle on a mountain peak"
+image = pipe(
+    prompt,
+    height=512,
+    width=512,
+    num_inference_steps=50,  # DDIM steps
+    guidance_scale=7.5,       # CFG strength
+    generator=torch.Generator().manual_seed(42)
+).images[0]
+
+image.save("output.png")
+```
+
+---
+
+## Sources and Links
+
+- [DDPM Paper (Ho et al. 2020)](https://arxiv.org/abs/2006.11239)
+- [DDIM (Song et al. 2021)](https://arxiv.org/abs/2010.02502)
+- [Latent Diffusion / Stable Diffusion](https://arxiv.org/abs/2112.10752)
+- [Classifier-Free Guidance](https://arxiv.org/abs/2207.12598)
+- [Diffusers Library](https://github.com/huggingface/diffusers)
+- [Stable Diffusion](https://stability.ai)

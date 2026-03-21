@@ -1,0 +1,342 @@
+---
+title: "Inference Server for LLMs: vLLM, TGI, Triton"
+description: "Text Generation Inference, vLLM, Triton for Production LLM Serving. Continuous Batching, PagedAttention, Speculative Decoding."
+section: "architecture"
+---
+
+# Inference Server for LLMs: vLLM, TGI, Triton
+
+An inference server is your first line of defense against slow LLM responses. The right server can make you 10x faster than naive implementation.
+
+## The Problem: Naive vs. Optimized Inference
+
+**Naive Implementation (Serial):**
+```
+User 1 Request: "Write a poem"
+  → Tokenize (5ms)
+  → 10x Forward Pass (1000ms, 1 Token/100ms)
+  → Decode (5ms)
+  Total: 1010ms
+
+User 2 Request (while User 1 still running):
+  → WAIT! Server is blocked!
+```
+
+**Optimized with Continuous Batching:**
+```
+User 1: xxxxxxxx__________  (8 tokens generated)
+User 2:     xxxxxx______    (6 tokens, started later)
+GPU:    [Batch 8 + 1] [Batch 5 + 1] ...
+
+With overlapping we use GPU better!
+```
+
+## 1. vLLM: The Production Standard
+
+vLLM is currently the best for Production deployment. Core concepts:
+
+**Continuous Batching:**
+New requests are immediately added to the batch, not waiting for the current request to finish.
+
+**PagedAttention (KV Cache Management):**
+KV Cache is managed like OS Virtual Memory:
+
+```
+Normal KV Cache (inefficient):
+┌─────────────────────────────┐
+│ Request 1 KV (256 MB)       │ ← Fully allocated
+├─────────────────────────────┤
+│ Request 2 KV (256 MB)       │
+└─────────────────────────────┘
+
+With PagedAttention (efficient):
+┌──────────┬──────────┬──────────┐
+│ Request1 │ Request2 │ Request3 │
+│ Page 0-7 │ Page 8-10│ Page 11  │
+└──────────┴──────────┴──────────┘
+```
+
+### vLLM Docker Setup
+
+```dockerfile
+FROM nvidia/cuda:12.1.0-runtime-ubuntu22.04
+
+RUN apt-get update && apt-get install -y python3.11 python3-pip
+RUN pip install vllm
+
+EXPOSE 8000
+
+CMD ["python", "-m", "vllm.entrypoints.openai.api_server", \
+     "--model", "meta-llama/Llama-2-70b-hf", \
+     "--tensor-parallel-size", "2", \
+     "--gpu-memory-utilization", "0.9"]
+```
+
+**docker-compose.yml:**
+```yaml
+version: '3.8'
+services:
+  vllm:
+    build:
+      context: .
+      dockerfile: Dockerfile.vllm
+    environment:
+      MODEL: meta-llama/Llama-2-70b-hf
+      TENSOR_PARALLEL_SIZE: 2
+      GPU_MEMORY_UTILIZATION: 0.9
+      MAX_NUM_BATCHED_TOKENS: 65536
+      MAX_NUM_SEQS: 256
+    ports:
+      - "8000:8000"
+    volumes:
+      - hf-cache:/root/.cache/huggingface
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['0', '1']
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+```
+
+### vLLM Configuration Options
+
+| Option | Effect | Example |
+|--------|--------|---------|
+| `--tensor-parallel-size` | Distribute model over N GPUs | `2` = 2 GPUs |
+| `--gpu-memory-utilization` | GPU memory usage | `0.9` = 90% |
+| `--max-num-batched-tokens` | Max tokens in batch | `65536` |
+| `--max-num-seqs` | Max parallel requests | `256` |
+| `--dtype` | Quantization | `float16`, `int8` |
+| `--use-flash-attn` | Flash Attention | `1` |
+| `--speculative-model` | Draft model for decoding | `meta-llama/Llama-2-7b` |
+
+### vLLM Performance Benchmark
+
+```python
+import requests
+import time
+import statistics
+
+def benchmark_vllm(prompt: str, num_requests: int = 100):
+    """Benchmark vLLM throughput"""
+    latencies = []
+
+    for i in range(num_requests):
+        start = time.time()
+        response = requests.post(
+            "http://localhost:8000/v1/completions",
+            json={
+                "model": "Llama-2-70b",
+                "prompt": prompt,
+                "max_tokens": 200,
+                "temperature": 0.7
+            }
+        )
+        latency = time.time() - start
+        latencies.append(latency)
+
+    print(f"vLLM Benchmark Results:")
+    print(f"  Avg Latency: {statistics.mean(latencies):.2f}s")
+    print(f"  P95 Latency: {sorted(latencies)[int(num_requests*0.95)]:.2f}s")
+    print(f"  Throughput: {num_requests/sum(latencies):.1f} req/s")
+
+benchmark_vllm("Write a poem about Python", num_requests=100)
+```
+
+## 2. Text Generation Inference (TGI)
+
+Hugging Face's simpler alternative:
+
+```dockerfile
+FROM ghcr.io/huggingface/text-generation-inference:latest
+
+ENV MODEL_ID=meta-llama/Llama-2-70b-hf
+ENV PORT=80
+```
+
+**docker-compose.yml:**
+```yaml
+services:
+  tgi:
+    image: ghcr.io/huggingface/text-generation-inference:latest
+    environment:
+      MODEL_ID: meta-llama/Llama-2-70b-hf
+      PORT: 80
+      DTYPE: float16
+      QUANTIZE: bitsandbytes
+      MAX_BATCH_SIZE: 64
+    ports:
+      - "8000:80"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+```
+
+**API Call:**
+```python
+response = requests.post(
+    "http://localhost:8000/generate",
+    json={
+        "inputs": "Write a poem",
+        "parameters": {
+            "max_new_tokens": 200,
+            "temperature": 0.7
+        }
+    }
+)
+
+print(response.json()[0]["generated_text"])
+```
+
+## 3. NVIDIA Triton Inference Server
+
+For enterprise with many models in parallel:
+
+```yaml
+name: "llama"
+platform: "pytorch_libtorch"
+max_batch_size: 64
+
+input [
+  {
+    name: "input_ids"
+    data_type: TYPE_INT64
+    dims: [-1]
+  }
+]
+
+output [
+  {
+    name: "output_ids"
+    data_type: TYPE_INT64
+    dims: [-1]
+  }
+]
+
+instance_group [
+  {
+    kind: KIND_GPU
+    count: 2
+  }
+]
+```
+
+## 4. llama.cpp Server (CPU/Edge)
+
+For SMEs without GPUs:
+
+```bash
+git clone https://github.com/ggerganov/llama.cpp
+cd llama.cpp
+make
+
+./server -m Llama-2-7b-gguf-q4_K_M.bin \
+  --port 8000 \
+  --threads $(nproc) \
+  --ctx-size 2048
+```
+
+**Performance on CPU:**
+- Llama-7b (Q4): ~10 tokens/sec on M1/M2
+- Llama-7b (Q4): ~3 tokens/sec on Intel i7
+- For Production: Expect 1-2 tokens/sec
+
+## 5. Speculative Decoding (2x Speedup)
+
+Use a fast draft model and verify with slow target model:
+
+```python
+# Draft-Model: Fast, less accurate
+draft_model = load_model("Llama-2-7b")
+
+# Target-Model: Slow, precise
+target_model = load_model("Llama-2-70b")
+
+def speculative_decode(prompt, max_tokens=200):
+    tokens = tokenize(prompt)
+
+    for step in range(max_tokens):
+        # 1. Draft generates 4 tokens quickly
+        draft_tokens = []
+        for _ in range(4):
+            logits = draft_model(tokens)
+            next_token = sample(logits)
+            draft_tokens.append(next_token)
+            tokens.append(next_token)
+
+        # 2. Target verifies all 4 tokens in parallel
+        verification = target_model(tokens[-4:])
+
+        # 3. Check if draft predictions correct
+        correct_count = 0
+        for i, draft_token in enumerate(draft_tokens):
+            if draft_token == sample(verification[i]):
+                correct_count += 1
+
+        if correct_count < 2:
+            break
+
+    return decode(tokens)
+```
+
+**Real-World Speedup:**
+- With Draft-Model: 2x-3x faster
+- But only if draft calibrated well
+
+## GPU Memory Optimization
+
+| Technique | Savings | Tradeoff |
+|-----------|---------|----------|
+| **Float16** | 50% | Minimal loss |
+| **Int8** | 75% | Some loss |
+| **Int4** | 87% | Notable loss |
+| **KV Cache Quantization** | 90% KV | Slight latency |
+
+### Memory Math
+
+```
+Model Size (BFloat16) = Parameters * 2 Bytes
+  Llama-70B: 70B * 2 = 140GB
+
+With 2x A100 (80GB each) + Tensor-Parallel:
+  70B / 2 = 35B per GPU
+  35B * 2 = 70GB (fits in 80GB)
+
+With Int8:
+  70B * 1 = 70GB (exact fit)
+
+With Int4 + Flash Attention:
+  70B * 0.5 = 35GB (1x A100!)
+```
+
+## Summary: Inference Server Choice
+
+| Server | Pros | Cons | Best For |
+|--------|------|------|----------|
+| **vLLM** | Fast, modern, optimized | Complex | Production |
+| **TGI** | Simple, HF integrated | Less optimized | Small/Medium |
+| **Triton** | Multi-model, enterprise | Learning curve | Large scale |
+| **llama.cpp** | CPU capable, lightweight | Limited models | Edge, SME |
+
+**Recommendation:**
+Start with vLLM. Use TGI only if vLLM too complex. Triton needed only for 10+ models.
+
+## Sources and Links
+
+- [vLLM GitHub](https://github.com/lm-sys/vllm) — Production-Ready
+- [vLLM Docs](https://docs.vllm.ai/) — Configuration Guide
+- [Text Generation Inference](https://github.com/huggingface/text-generation-inference) — HF Server
+- [NVIDIA Triton](https://developer.nvidia.com/triton-inference-server) — Enterprise Inference
+- [llama.cpp](https://github.com/ggerganov/llama.cpp) — CPU Inference
+- [Speculative Decoding Paper](https://arxiv.org/abs/2211.17192) — Research
+- [Flash Attention](https://github.com/dao-ailab/flash-attention) — Fast KV Cache

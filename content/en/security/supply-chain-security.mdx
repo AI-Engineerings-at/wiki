@@ -1,0 +1,252 @@
+---
+title: "AI Supply Chain Security"
+description: "Model supply chain: Hugging Face trust, model poisoning, safetensors vs pickle. Dependency scanning for ML, SBOM for AI, model cards. Verifying model integrity, hash checking."
+section: "security"
+---
+
+# AI Supply Chain Security
+
+Source code isn't the only threat. Pre-trained models, dependencies, and datasets can be manipulated. This page covers AI supply chain security.
+
+---
+
+## 1. Model Supply Chain Threats
+
+```yaml
+THREAT 1: Poisoned Pre-Trained Models
+  Scenario: Attacker uploads seemingly legitimate model with backdoor
+  Impact: Anyone using model downloads the backdoor
+  Example: ResNet-50 with steganographied ONNX trojan
+
+THREAT 2: Dependency Confusion / Typosquatting
+  Scenario: Attacker creates "tesnorflow" (typo of "tensorflow")
+  Impact: Developer makes typo, loads malicious package
+  Common targets: torch, transformers, scikit-learn
+
+THREAT 3: Data Poisoning in Training
+  Scenario: Training dataset contains manipulated samples
+  Impact: Model develops unintended behaviors
+  Example: Adversarial images causing misclassification
+
+THREAT 4: Model Serialization Exploits
+  Scenario: Pickle format allows arbitrary code execution
+  Impact: Loading .pkl model could trigger RCE
+  Example: pickle.loads() with manipulated object
+
+THREAT 5: License Violations / IP Theft
+  Scenario: Model trained on data without proper licensing
+  Impact: Legal liability, model removal, fines
+```
+
+---
+
+## 2. Model Integrity Verification
+
+### 2.1 Hash-based Verification
+
+```python
+import hashlib
+from typing import Dict
+import json
+
+class ModelIntegrityChecker:
+    """Verifies model authenticity via hashing"""
+
+    @staticmethod
+    def compute_model_hash(model_path: str, algorithm: str = "sha256") -> str:
+        """Compute hash of model file"""
+        hash_func = hashlib.new(algorithm)
+
+        with open(model_path, "rb") as f:
+            for chunk in iter(lambda: f.read(4096), b""):
+                hash_func.update(chunk)
+
+        return hash_func.hexdigest()
+
+    @staticmethod
+    def verify_model_hash(model_path: str, expected_hash: str, algorithm: str = "sha256") -> bool:
+        """Verifies model matches expected hash"""
+        computed = ModelIntegrityChecker.compute_model_hash(model_path, algorithm)
+        return computed == expected_hash
+
+    @staticmethod
+    def create_manifest(model_path: str, metadata: Dict) -> str:
+        """Creates a manifest file for model"""
+        model_hash = ModelIntegrityChecker.compute_model_hash(model_path)
+
+        manifest = {
+            "model_hash": model_hash,
+            "model_size_bytes": len(open(model_path, "rb").read()),
+            "algorithm": "sha256",
+            "metadata": metadata,
+        }
+
+        return json.dumps(manifest, indent=2)
+
+# Usage:
+checker = ModelIntegrityChecker()
+
+model_path = "./resnet50.onnx"
+model_hash = checker.compute_model_hash(model_path)
+print(f"Model SHA-256: {model_hash}")
+```
+
+### 2.2 Safetensors vs Pickle
+
+```python
+"""
+PICKLE (.pkl, .pth)
+  Format: Python-specific serialization
+  Security: DANGEROUS — arbitrary code execution
+  Use: NEVER load untrusted pickle files
+
+SAFETENSORS (.safetensors)
+  Format: JSON header + binary tensors
+  Security: SAFE — no code execution
+  Use: Preferred for untrusted sources
+"""
+
+import torch
+from safetensors.torch import load_file, save_file
+
+class SafeModelLoading:
+    """Safe loading practices"""
+
+    @staticmethod
+    def load_safetensors_safe(path: str) -> dict:
+        """SAFE: Recommended for untrusted sources"""
+        state_dict = load_file(path)
+        return state_dict
+
+    @staticmethod
+    def convert_to_safetensors(pickle_path: str, output_path: str):
+        """Converts pickle to safetensors"""
+        state_dict = torch.load(pickle_path)
+        save_file(state_dict, output_path)
+        print(f"Converted to safetensors: {output_path}")
+```
+
+---
+
+## 3. Hugging Face Model Trust
+
+### 3.1 Model Card Inspection
+
+```python
+import requests
+import json
+
+class HuggingFaceModelVerifier:
+    """Verifies Hugging Face models"""
+
+    HF_API_BASE = "https://huggingface.co/api/models"
+
+    def __init__(self, model_id: str):
+        self.model_id = model_id
+        self.model_info = None
+
+    def fetch_model_info(self) -> dict:
+        """Fetches model info from Hugging Face API"""
+        url = f"{self.HF_API_BASE}/{self.model_id}"
+        response = requests.get(url)
+
+        if response.status_code == 200:
+            self.model_info = response.json()
+            return self.model_info
+        else:
+            raise ValueError(f"Model not found: {self.model_id}")
+
+    def verify_model_safety(self) -> dict:
+        """Checks model for safety indicators"""
+        if not self.model_info:
+            self.fetch_model_info()
+
+        checks = {
+            "has_model_card": "readme_url" in self.model_info,
+            "has_license": bool(self.model_info.get("license")),
+            "downloads_last_month": self.model_info.get("downloads", 0),
+        }
+
+        # Risk score calculation
+        risk = 0.5
+        if checks["has_model_card"]:
+            risk -= 0.2
+        if checks["has_license"]:
+            risk -= 0.1
+        if checks["downloads_last_month"] > 1000:
+            risk -= 0.2
+
+        checks["risk_score"] = max(0.0, risk)
+        return checks
+
+# Usage:
+verifier = HuggingFaceModelVerifier("meta-llama/Llama-2-7b")
+safety = verifier.verify_model_safety()
+print(f"Risk Score: {safety['risk_score']:.2f}")
+```
+
+---
+
+## 4. Dependency Scanning
+
+```python
+import subprocess
+import json
+from typing import List, Dict
+
+class MLDependencyScanner:
+    """Scans ML dependencies for security"""
+
+    def scan_with_pip_audit(self) -> List[Dict]:
+        """Scans pip packages for known CVEs"""
+        result = subprocess.run(
+            ["pip-audit", "--format", "json"],
+            capture_output=True,
+            text=True
+        )
+
+        if result.returncode != 0:
+            return json.loads(result.stdout).get("vulnerabilities", [])
+        return []
+
+    def generate_sbom(self, output_file: str = "sbom.json"):
+        """Generates Software Bill of Materials"""
+        result = subprocess.run(
+            ["pip", "freeze"],
+            capture_output=True,
+            text=True
+        )
+
+        sbom = {
+            "spdx_version": "SPDX-2.3",
+            "packages": []
+        }
+
+        for line in result.stdout.strip().split("\n"):
+            if "==" in line:
+                name, version = line.split("==")
+                sbom["packages"].append({
+                    "name": name,
+                    "version": version,
+                })
+
+        with open(output_file, "w") as f:
+            json.dump(sbom, f, indent=2)
+
+        return sbom
+
+# Usage:
+scanner = MLDependencyScanner()
+vulns = scanner.scan_with_pip_audit()
+sbom = scanner.generate_sbom()
+```
+
+---
+
+## 5. Sources and Links
+
+- **Safetensors**: https://github.com/huggingface/safetensors
+- **pip-audit (PyPA)**: https://github.com/pypa/pip-audit
+- **SBOM Format (SPDX)**: https://spdx.dev/
+- **Hugging Face Model Card**: https://huggingface.co/docs/hub/model-cards
+- **OWASP Dependency Check**: https://owasp.org/www-project-dependency-check/

@@ -1,0 +1,534 @@
+---
+title: "AI Image Generation"
+date: "2026-03-21"
+summary: "Overview of self-hosted and cloud image generation: ComfyUI, Stable Diffusion, Flux, Midjourney. History, architecture, legal considerations"
+tags: ["image-generation", "stable-diffusion", "midjourney", "flux", "self-hosted", "cloud"]
+author: "AI Engineering"
+---
+
+# AI Image Generation — Category Overview
+
+AI image generation in 2026 is production-grade. You have real choices: cloud solutions for maximum quality (Midjourney, DALL-E), self-hosted for privacy and unlimited usage (ComfyUI, Flux). This is no longer experimental—it's a utility.
+
+## History: How We Got Here
+
+### GANs (2014-2018)
+Generative Adversarial Networks were the foundation. Two neural networks competing. Quality was... crude.
+
+### Text-to-Image Transformers (2020-2022)
+DALL-E, CLIP, Imagen appeared. Suddenly you could write "flying unicorn in oil" and get something approaching that. GPT-3 hype met image generation.
+
+### Diffusion Models (2022-2023)
+Stable Diffusion (September 2022) changed everything: open-source, locally runnable, large models trainable with LoRA. Midjourney refined cloud aesthetics in parallel.
+
+### Modern Era (2024-2026)
+Flux.1 (November 2025) is now the open-source quality standard. Stable Diffusion 3.5 follows. Commercial options (Midjourney v7, DALL-E 3.5) are strong, but self-hosted is no longer a compromise—it's a real alternative.
+
+## Self-Hosted Solutions
+
+### Stable Diffusion & Variants
+
+What it is: Open-source base model from Stability AI. No limit on generations, complete control, zero per-image cost.
+
+Why you want it:
+- Unlimited free generations
+- Runs on consumer GPUs (8GB VRAM sufficient for SD1.5)
+- Massive ecosystem: LoRAs, checkpoints, custom nodes
+- Your images never leave your network (privacy gold)
+
+Disadvantages:
+- Setup not trivial (Docker, CUDA, dependencies)
+- Quality below Midjourney and modern Flux (if "perfect" is required)
+- Requires GPU with 8+ GB VRAM
+
+Cost: Free (hardware).
+
+### ComfyUI
+
+What it is: Node-based UI for Stable Diffusion and other models. Instead of "write a prompt," you create a flow graph.
+
+Why it's special:
+- Visual workflow design (like n8n for images)
+- Advanced features: upscaling, inpainting, controlnet in one interface
+- Exportable workflows (share complex pipelines as JSON)
+- Community workflows for Midjourney-like results via LoRA fusion
+
+Best for: Professional workflows, batch generation, custom pipelines.
+
+Cost: Free (self-hosted).
+
+### Flux.1 (Open Source)
+
+What it is: Latest open-source state-of-the-art from Black Forest Labs. Released November 2025, fully available. Two versions: Flux.1-dev (baseline) and Flux.1-pro (better fidelity).
+
+Why it's now the standard:
+- Produces images at Midjourney v6 level (expert consensus)
+- Much larger than Stable Diffusion (12B parameters)—needs 24+ GB VRAM
+- Excellent text-following
+- Runs on RunPod/Lambda for under EUR 0.20 per image
+
+Disadvantages:
+- Not on typical consumer machines (RTX 4090 with 24GB possible but tight)
+- LoRA ecosystem still smaller than SD
+
+Cost: Free (self-hosted with cloud GPU), or EUR 0.15-0.25 per image on RunPod.
+
+## Cloud Solutions
+
+### Midjourney
+
+The quality leader: Midjourney v7 consistently produces aesthetically superior images. Tests show: richness, depth, artistic coherence beats open-source slightly. If best visual quality is non-negotiable and you budget EUR 10-30/month, Midjourney.
+
+Features:
+- Discord integration (command /imagine, upscale, variations)
+- Great side-effect generation with good aesthetics
+- Consistent character details across multiple prompts (with seed)
+- Remix mode and inpainting
+
+Cost: EUR 9/month (Basic), EUR 19/month (Standard), EUR 59/month (Pro). Each plan has monthly GPU-minutes, not per-image.
+
+Best for: Creatives, designers, content where aesthetics are non-negotiable.
+
+### DALL-E 3.5 (OpenAI)
+
+Practical alternative to Midjourney: OpenAI's DALL-E 3.5 is mature in 2026. Text understanding is excellent. Clean UI (web), integration with ChatGPT.
+
+Cost: EUR 0.04-0.08 per image (depends on resolution). Pay-as-you-go, no subscription required.
+
+Best for: Occasional use, if ChatGPT is already part of your workflow.
+
+### Leonardo.ai & Others
+
+Leonardo.ai specializes in realistic product photography generation. Not artistic—you upload your product, Leonardo generates stock photos in various settings.
+
+Cost: EUR 9-30/month depending on credits.
+
+## Comparison: Self-Hosted vs Cloud
+
+| Criterion | Self-Hosted | Cloud (Midjourney) | Cloud (DALL-E) |
+|-----------|--------|---------|---------|
+| **Aesthetics** | Good (Flux) | Excellent | Good |
+| **Cost per Image** | €0 (VRAM) | €0.03-0.05 | €0.04-0.08 |
+| **Privacy** | Maximum | Cloud provider | Cloud provider |
+| **Setup Complexity** | Medium | None | None |
+| **Ecosystem** | Massive | Limited | Limited |
+| **Batch Capability** | Yes (easy) | No | API yes |
+
+**2026 reality:** Anyone generating 50+ images/month, self-hosted on RunPod/Lambda costs EUR 10-20. Anyone generating 5-10, DALL-E pay-as-you-go is cheaper.
+
+## Legal Considerations (Critical)
+
+### Copyright of Generated Images
+- **USA & UK:** Your generated images have no automatic copyright—machine-generated content is less protected
+- **Germany/Austria:** Gray zone. Lawsuits against Stability AI ongoing. Practically: premium licenses from Midjourney/DALL-E give more legal security
+- **EU AI Act Deadline 02.08.2026:** Transparency about AI use becomes mandatory. "Generated with Flux.1" will probably be required for commercial assets
+
+### Training Data
+- Stable Diffusion trained on LAION-5B (web-scraped)—contains copyrighted works
+- Midjourney & DALL-E have proprietary data, but also "internet-scale" material
+- Legally clean: train models only on your own data (LoRA on your product photos etc.)
+
+### Best Practice
+- Buy premium licenses if commercial
+- Mark assets as "AI-generated" (coming: EU requirement)
+- Don't use for deepfakes of realistic people (legal risk)
+
+## Practical Setup for Beginners
+
+You need images for your product, not a PhD:
+
+1. **Quick & Easy:** DALL-E 3.5 CLI or web, EUR 0.50/month for testing
+2. **Professional:** Midjourney, EUR 9-19/month, 1h setup (understand Discord)
+3. **Cost-Effective & Control:** Flux.1 on RunPod, 30min setup, EUR 10-15 per 100 images
+
+Workflow example (product photography):
+1. Photograph your product (iPhone works, 5 angles)
+2. Upload to ComfyUI + ControlNet → use as basis
+3. Flux.1 with ControlNet re-imagines images in different settings
+4. Cost: EUR 1-3 for 50 product variants
+
+## Common Pitfalls
+
+"I blew my cloud GPU budget"
+- ComfyUI queued too many generations = RunPod costs ran
+- Fix: Set batch limits, enable cost monitoring
+
+"My Flux.1 image looks like Stable Diffusion 1.5"
+- Prompt engineering differs by model
+- What works in Midjourney (emotional description) differs with Flux (needs precise quality keywords)
+
+"My LoRA trained for 12 hours and isn't improving"
+- LoRA training too long = overfitting
+- 500-1000 steps sufficient with good examples
+- Use Unsloth or Axolotl for parameter-efficient training
+
+## Roadmap 2026-2027
+
+- **Q2 2026:** Sora 2 video generation becomes text-to-video mainstream—images become "video frames"
+- **Q3 2026:** Consistent character generation becomes open-source standard
+- **Q4 2026:** EU AI Act creates new compliance requirements—licenses become important
+
+## Conclusion
+
+Image generation 2026 is not "AI or traditional"—it's a tool like Photoshop. Your choice:
+
+- **Aesthetics non-negotiable:** Midjourney, EUR 10-20/month
+- **Cost-optimal:** DALL-E pay-as-you-go, EUR 0.50-2/month occasional
+- **Control & batch:** Flux.1 self-hosted, EUR 30-50/month for serious use
+- **Custom/Specialized:** ComfyUI + Stable Diffusion ecosystem, unlimited, but 40h learning curve
+
+Start: Try DALL-E one week. If insufficient, Midjourney. If costs become problem, Flux on RunPod.
+
+## Advanced: Building Custom Image Generation API
+
+```python
+from anthropic import Anthropic
+from PIL import Image
+import requests
+import io
+
+class ImageGenerationOrchestrator:
+    def __init__(self):
+        self.client = Anthropic()
+        self.flux_api = "https://api.replicate.com/v1/predictions"
+        self.replicate_token = "YOUR_TOKEN"
+
+    def generate_with_claude_planning(self, user_request: str) -> list[str]:
+        """Use Claude to plan image generation, then execute."""
+
+        # Step 1: Claude refines the prompt
+        response = self.client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=256,
+            messages=[{
+                "role": "user",
+                "content": f"""Refine this request for image generation API:
+{user_request}
+
+Provide:
+1. Optimized prompt (short, specific)
+2. Recommended model (flux, stable-diffusion, midjourney concept)
+3. Any special parameters (aspect ratio, style keywords)
+
+Format as JSON."""
+            }]
+        )
+
+        import json
+        plan = json.loads(response.content[0].text)
+
+        # Step 2: Generate via Flux
+        images = self._generate_via_flux(
+            plan["optimized_prompt"],
+            plan.get("aspect_ratio", "1:1")
+        )
+
+        return images
+
+    def _generate_via_flux(self, prompt: str, aspect_ratio: str = "1:1") -> list[str]:
+        """Call Flux.1 API via Replicate."""
+
+        import requests
+        response = requests.post(
+            self.flux_api,
+            headers={
+                "Authorization": f"Bearer {self.replicate_token}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "version": "flux-1-pro",
+                "input": {
+                    "prompt": prompt,
+                    "aspect_ratio": aspect_ratio,
+                    "num_outputs": 1
+                }
+            }
+        )
+
+        # Poll for completion
+        prediction_id = response.json()["id"]
+
+        while True:
+            status = requests.get(
+                f"{self.flux_api}/{prediction_id}",
+                headers={"Authorization": f"Bearer {self.replicate_token}"}
+            ).json()
+
+            if status["status"] == "succeeded":
+                return status["output"]  # List of image URLs
+            elif status["status"] == "failed":
+                raise RuntimeError(f"Generation failed: {status['error']}")
+
+            import time
+            time.sleep(1)
+```
+
+## Prompt Engineering for Different Models
+
+### Stable Diffusion (Technical Keywords)
+
+```
+✓ GOOD:
+"a serene mountain landscape at golden hour, volumetric lighting,
+professional photography, sharp focus, 8k, trending on artstation,
+cinematic composition, color grading"
+
+✗ BAD:
+"pretty mountains"
+```
+
+Why: SD trained on technical descriptions. Need specific quality/style keywords.
+
+### Midjourney (Emotional, Artistic)
+
+```
+✓ GOOD:
+"a melancholic autumn morning, mist rolling through ancient forests,
+warm nostalgia, peaceful solitude, oil painting style, very detailed"
+
+✗ BAD:
+"mountains, volumetric lighting, 8k, trending on artstation"
+```
+
+Why: Midjourney trained on art concepts and emotion. Responds to mood/feeling.
+
+### Flux (Balanced)
+
+```
+✓ GOOD:
+"a modern coffee shop interior, warm wood and concrete, afternoon
+sunlight streaming through large windows, minimalist aesthetic,
+professional product photography, sharp details"
+
+Balanced: Technical + emotional
+Works with both approaches
+```
+
+## Cost Deep Dive: Per-Image Breakdown
+
+### Scenario: Generate 100 product images for e-commerce
+
+**Option 1: Midjourney**
+```
+100 images × 0.15 USD each (upscales included) = $15
+Plus: 2 hours human cherry-picking = $50 labor
+Total: $65 (quality: 95%, consistency: 90%)
+```
+
+**Option 2: DALL-E 3**
+```
+100 images × 0.06 USD each = $6
+Plus: 1 hour human cherry-picking = $25 labor
+Total: $31 (quality: 85%, consistency: 75%)
+```
+
+**Option 3: Flux.1 on RunPod**
+```
+100 images × 0.20 USD (GPU rental) = $20
+Plus: 1.5 hours setup + cherry-picking = $35 labor
+Total: $55 (quality: 92%, consistency: 88%)
+```
+
+**Verdict:** For 100 images, DALL-E is cheapest. For 500+, Flux becomes cost-effective.
+
+## LoRA Fine-Tuning (Custom Models)
+
+Create custom style by training a LoRA (Low-Rank Adapter):
+
+```python
+class LoRATrainer:
+    def train_custom_style(self, training_images_path: str):
+        """
+        Training 50 sample images in "my style" = ~2 hours.
+        Result: Reusable LoRA you can apply to any generation.
+        """
+        import subprocess
+
+        # Using Kohya SS trainer (popular, free)
+        result = subprocess.run([
+            "python", "train.py",
+            f"--pretrained_model_name_or_path=runwayml/stable-diffusion-v1-5",
+            f"--train_data_dir={training_images_path}",
+            f"--output_dir=./my-style-lora",
+            f"--steps=1000",  # Adjust based on image count
+            f"--resolution=512",
+            f"--train_batch_size=1",
+            f"--learning_rate=0.0001"
+        ])
+
+        if result.returncode == 0:
+            print("LoRA trained! Use in prompts: 'my-style-lora'")
+        else:
+            print("Training failed")
+```
+
+**Use case:** Brand consistency. Train once on your product photos, apply to all future generations.
+
+## Workflow: Text → Image → Refine → Export
+
+```python
+from anthropic import Anthropic
+import requests
+
+class ImageWorkflow:
+    def execute(self, brief: str):
+        """Complete workflow from text brief to final image."""
+
+        # 1. Claude understands requirements
+        requirements = self.parse_brief(brief)
+
+        # 2. Generate multiple variations
+        variations = self.generate_variations(requirements)
+
+        # 3. Use Claude to evaluate
+        best = self.evaluate_and_select(variations, requirements)
+
+        # 4. Enhance/refine if needed
+        final = self.refine_image(best)
+
+        # 5. Export with metadata
+        self.export(final, brief, requirements)
+
+        return final
+
+    def parse_brief(self, brief: str) -> dict:
+        """Claude analyzes brief, extracts parameters."""
+        response = self.client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=200,
+            messages=[{
+                "role": "user",
+                "content": f"Analyze image generation brief:\n{brief}\n\nExtract: subject, style, mood, technical specs. Output JSON."
+            }]
+        )
+        return json.loads(response.content[0].text)
+
+    def generate_variations(self, requirements: dict) -> list:
+        """Generate 4 variations with different interpretations."""
+        prompts = [
+            f"{requirements['subject']}, {requirements['style']}, {requirements['mood']}",
+            f"{requirements['subject']}, alternative style, {requirements['mood']}",
+            f"{requirements['subject']}, different mood, {requirements['style']}",
+            f"{requirements['subject']}, cinematic, dramatic"
+        ]
+
+        results = []
+        for prompt in prompts:
+            # Call Flux/Midjourney/DALL-E
+            result = self.call_api(prompt, requirements.get('aspect_ratio', '1:1'))
+            results.append(result)
+
+        return results
+
+    def evaluate_and_select(self, variations: list, requirements: dict) -> str:
+        """Claude evaluates which variation best matches brief."""
+        response = self.client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=100,
+            messages=[{
+                "role": "user",
+                "content": f"""Evaluate these 4 image variations for this brief:
+{requirements}
+
+Which image (1-4) best matches? Explain briefly."""
+            }]
+        )
+        # Parse response to get selection
+        return variations[0]  # Simplified
+
+    def refine_image(self, image_url: str):
+        """Use inpainting/upscaling if needed."""
+        # Inpainting: regenerate specific region
+        # Upscaling: enhance resolution
+        return image_url  # Simplified
+
+    def export(self, image_url: str, brief: str, requirements: dict):
+        """Save with metadata for future reference."""
+        import json
+        metadata = {
+            "original_brief": brief,
+            "requirements": requirements,
+            "model": "flux",
+            "timestamp": str(datetime.now())
+        }
+
+        with open("image_metadata.json", "a") as f:
+            f.write(json.dumps(metadata) + "\n")
+```
+
+## 2026 Legal: AI Act Compliance for Images
+
+Starting August 2, 2026, EU AI Act applies to image generation:
+
+### Disclosure Requirements
+- If using AI-generated images commercially, must disclose: "Generated by AI [model name]"
+- Marketing materials: Cannot claim human photography if AI-generated
+- Product images: "AI-generated product visualization" required in store
+
+### Training Data
+- Using copyrighted material in training is under active legal challenge
+- Midjourney/DALL-E: Proprietary data (some legal protection)
+- Open-source (Stable Diffusion): Risk—trained on web-scraped data
+- Safe option: Fine-tune on your own data only (LoRA on your products)
+
+### Deepfakes
+- Realistic images of real people: Must have explicit consent or mark as AI
+- Non-consensual deepfakes: Criminal offense (Austria, Germany)
+- Celebrity likenesses: Increasingly protected
+
+## Troubleshooting Image Generation
+
+### "My prompt doesn't work on Model X"
+
+Different models respond to different prompt styles:
+
+```
+Midjourney: Emotions + artistic description
+DALL-E: Clear, specific, natural language
+Flux: Mix of technical and emotional
+Stable Diffusion: Technical keywords + style
+
+Solution: Translate prompt between models using Claude
+```
+
+### "Quality dropped after regenerating"
+
+Model behavior is probabilistic (not deterministic).
+
+```
+Solution: Use seed parameter if available
+"Generate with seed 12345 so results are reproducible"
+```
+
+### "Generated image looks nothing like prompt"
+
+Token limit: Model interpreted prompt incorrectly.
+
+```
+WRONG: "A beautiful woman in an office, smiling, holding coffee, wearing blue dress, in a modern building with windows, morning light"
+
+RIGHT: "Professional woman in modern office, morning light, blue dress"
+
+Lesson: Most important details first
+```
+
+## Checklist: Getting Started
+
+- [ ] Decide: Cloud (Midjourney/DALL-E) vs Self-hosted (Flux)
+- [ ] Create account or set up RunPod
+- [ ] Test 5 images with different prompts
+- [ ] Evaluate quality vs cost for your use case
+- [ ] If needed: Train custom LoRA for brand consistency
+- [ ] Document compliance: Mark AI-generated images
+- [ ] Set up workflow (brief → variations → select → refine → export)
+- [ ] Budget: €30-100/month for quality work
+
+---
+
+**2026 Reality:** AI image generation is now utility, not experiment. Pick tool by your needs (speed, quality, cost, control), not hype. Most professionals use 2-3 tools in combination.
+
+## Sources and Links
+
+- [ComfyUI: Node-based Image Generation](https://github.com/comfyanonymous/ComfyUI)
+- [Stable Diffusion Web UI](https://github.com/AUTOMATIC1111/stable-diffusion-webui)
+- [Flux: Open-Source Image Generation](https://github.com/black-forest-labs/flux)

@@ -1,0 +1,459 @@
+---
+title: Diffusion-Modelle
+date: 2026-03-21
+summary: Forward/Reverse Diffusion Process, Noise Schedules, DDPM, DDIM, Latent Diffusion, Classifier-Free Guidance — Theorie und Praxis
+tags: [diffusion, generative, ddpm, ddim, latent-diffusion, image-generation, stable-diffusion]
+author: AI Engineering
+section: Konzepte
+---
+
+# Diffusion-Modelle verstehen
+
+Diffusion-Modelle sind eine neue Klasse von generativen Modellen, die durch einen iterativen Prozess realistische Inhalte erzeugen. Im Gegensatz zu GANs oder Autoregressive Modellen brauchen sie kein adversariales Training und sind stabiler zu trainieren.
+
+## Kernidee: Noise ist invertierbar
+
+**Grundkonzept:** Wenn du ein Bild mit Rauschen überschreiben kannst, kannst du Rauschen auch wieder in ein Bild zurückwandeln.
+
+```
+Trainingsprozess (Forward Diffusion):
+Echtes Bild → (+Rauschen) → Bild mit 10% Rauschen → ... → 100% Rauschen (Gaußsches Rauschen)
+
+Generierung (Reverse Diffusion):
+100% Rauschen → (-Rauschen vorhersagen) → Bild mit 90% Rauschen → ... → Echtes Bild
+```
+
+Das Modell lernt, bei jedem Schritt das Rauschen vorherzusagen, das hinzugefügt wurde.
+
+---
+
+## Forward Diffusion Process (Trainingsphase)
+
+Im Forward Pass wird ein echtes Bild schrittweise mit Rauschen "zerstört".
+
+### Mathematik (vereinfacht)
+
+```
+x_t = sqrt(α_t) * x_0 + sqrt(1 - α_t) * ε
+
+wobei:
+- x_0 = Original-Bild
+- x_t = Bild nach t Diffusionsschritten
+- α_t = Schedule-Wert (kontrolliert wie viel Rauschen)
+- ε = Gaußsches Rauschen ~ N(0, 1)
+```
+
+**Praktisches Beispiel:**
+```
+t=0:   Echtes Bild (klar)
+t=50:  Bild mit leichtem Rauschen (noch erkennbar)
+t=500: Bild mit viel Rauschen (kaum noch erkennbar)
+t=999: Pur Gaußsches Rauschen (keine Information mehr)
+```
+
+### Noise Schedule
+
+Der Schedule definiert, wie viel Rauschen bei jedem Schritt hinzugefügt wird.
+
+```python
+# Linear Schedule (einfach)
+alphas = torch.linspace(0.999, 0.001, num_steps)
+
+# Cosine Schedule (besser, wie in Improved DDPM)
+def cosine_schedule(t, T=1000):
+    return torch.cos((t / T + 0.008) / 1.008 * π / 2) ** 2
+
+# Ergebnis: Anfangs langsam → schneller → am Ende schnell
+```
+
+**Warum der Schedule wichtig ist:**
+- Linear: Gleichmäßiges Rauschen, ineffizient
+- Cosine/Quadratic: Bessere Nutzung der Schritte, schneller
+- Custom: Für spezifische Tasks optimiert
+
+---
+
+## Reverse Diffusion Process (Generierung)
+
+Das neuronale Netz lernt, Rauschen rückwärts vorherzusagen.
+
+### Das Modell trainieren
+
+```python
+# Training-Schleife (pseudocode)
+for x_0 in real_images:
+    t = random_timestep(1, T)
+    ε = torch.randn_like(x_0)  # Zufälliges Rauschen
+
+    x_t = sqrt(α_t) * x_0 + sqrt(1 - α_t) * ε
+
+    # Netzwerk sagt Rauschen voraus
+    ε_predicted = unet(x_t, t)
+
+    # Loss: Wie nah ist die Vorhersage am echten Rauschen?
+    loss = MSE(ε_predicted, ε)
+    loss.backward()
+```
+
+### Generierung aus Noise
+
+```python
+# Sampling (Generierung)
+x_T = torch.randn(batch_size, 3, 256, 256)  # Reines Rauschen
+
+for t in range(T-1, 0, -1):  # Rückwärts durch Timesteps
+    z = torch.randn_like(x_T) if t > 1 else 0  # Variance
+
+    # Modell sagt Rauschen voraus
+    ε = unet(x_T, t)
+
+    # Entferne Rauschen
+    x_T = (x_T - sqrt(1 - α_t) * ε) / sqrt(α_t)
+
+    # Füge kontrolliertes Rauschen hinzu (für Stochastizität)
+    x_T += sqrt(β_t) * z
+
+return x_T  # Finales Bild
+```
+
+---
+
+## DDPM (Denoising Diffusion Probabilistic Models)
+
+DDPM war die erste praktische Implementierung (Ho et al. 2020).
+
+### Charakteristiken
+
+| Aspekt | DDPM |
+|--------|------|
+| Schritte | 1000 (sehr viel) |
+| Sampling-Zeit | 20-30 Sekunden pro Bild |
+| Qualität | Sehr gut |
+| Effizienz | Nicht praktisch für Real-Time |
+| Anwendung | Akademische Referenz |
+
+### DDPM Architektur
+
+```
+Input: Rauschen x_t + Timestep t
+  ↓
+Sinusoidal Timestep Embedding (zeitbewusst)
+  ↓
+U-Net mit ResNet Blöcken
+  ↓
+Attention (Self-Attention bei kleineren Features)
+  ↓
+Rauschen-Vorhersage ε
+```
+
+---
+
+## DDIM (Denoising Diffusion Implicit Models)
+
+DDIM beschleunigt die Generierung, ohne Qualität zu opfern (Song et al. 2021).
+
+### Idee: Überschreite weniger Schritte
+
+```
+DDPM:  1000 → 999 → 998 → ... → 1 → 0  (1000 Schritte!)
+DDIM:  1000 → 900 → 800 → ... → 100 → 0  (100 Schritte, 10x schneller!)
+```
+
+### DDIM Sampling
+
+```python
+# DDIM-Schritte (deterministisch)
+def ddim_step(x_t, ε_t, t, t_prev):
+    # Vorhergesagtes ursprüngliches Bild
+    x_0_pred = (x_t - sqrt(1 - α_t) * ε_t) / sqrt(α_t)
+
+    # DDIM-Übergänge (implizit, kein Rauschen nötig)
+    x_t_prev = sqrt(α_t_prev) * x_0_pred + sqrt(1 - α_t_prev) * ε_t
+
+    return x_t_prev
+```
+
+### DDIM vs DDPM
+
+```
+DDPM:  Sampelt stochastisch, braucht viele Schritte
+DDIM:  Deterministisch, weniger Schritte nötig (50 reichen meist)
+
+Speed-Vergleich:
+  DDPM 1000 Schritte: 30 Sekunden
+  DDIM 50 Schritte:   1-2 Sekunden (15-30x schneller!)
+```
+
+---
+
+## Latent Diffusion Models (Stable Diffusion)
+
+Latent Diffusion arbeitet nicht auf Pixel-Ebene, sondern im komprimierten Latent-Space — daher viel schneller.
+
+### Architektur
+
+```
+Echtes Bild (512x512)
+  ↓
+VAE Encoder (komprimieren)
+  ↓
+Latent-Space (64x64) — 8x Kompression
+  ↓
+Diffusion im Latent-Space (schnell!)
+  ↓
+VAE Decoder (dekomprimieren)
+  ↓
+Generiertes Bild (512x512)
+```
+
+### Warum das schneller ist
+
+```
+Pixel-Level Diffusion:  512x512 = 262.144 Pixel pro Schritt
+Latent Diffusion:       64x64 = 4.096 Dimensionen pro Schritt
+
+Speedup: ~64x schneller bei gleicher Qualität
+```
+
+### Training Latent Diffusion
+
+```python
+# VAE - trainiert separat
+encoder = VAE_Encoder()
+decoder = VAE_Decoder()
+
+# Forward Diffusion im Latent Space
+z_0 = encoder(image)  # Beispiel: [1, 4, 64, 64]
+z_t = apply_diffusion(z_0, t)  # Gleiches Rauschen-Prinzip
+
+# U-Net operiert auf Latents
+ε = unet(z_t, t, text_embedding)
+```
+
+### Stable Diffusion Pipeline
+
+```
+Text: "Ein weißes Kaninchen sitzt auf einer Blume"
+  ↓
+CLIP Text Encoder → Text-Embedding (768d)
+  ↓
+U-Net (Cross-Attention mit Text)
+  ↓
+VAE Decoder
+  ↓
+Bild
+```
+
+---
+
+## Classifier-Free Guidance (CFG)
+
+Guidance kontrolliert, wie stark das Modell dem Text-Prompt folgt.
+
+### Problem ohne Guidance
+
+Das Modell muss zwischen "befolge Text" und "ignoriere Text" wechseln. Das führt zu Qualitätsverlust.
+
+### Lösung: CFG
+
+```python
+# Training mit Classifier-Free Guidance
+# 10% der Zeit: Text-Embedding = NULL (unbedingte Vorhersage)
+# 90% der Zeit: Normal trainieren (bedingte Vorhersage)
+
+# Sampling mit Guidance
+ε_uncond = unet(z_t, t, embedding=None)  # Ohne Bedingung
+ε_cond = unet(z_t, t, embedding=text_emb)  # Mit Bedingung
+
+# Guidance-Anwendung
+ε = ε_uncond + guidance_scale * (ε_cond - ε_uncond)
+
+# guidance_scale:
+#   1.0  = ignoriere Text völlig
+#   7.5  = Standard (gutes Gleichgewicht)
+#   15.0 = sehr stark Text folgen (weniger Vielfalt)
+```
+
+### Praktischer Effekt
+
+```
+Prompt: "Katze"
+CFG 1.0:  Zufälliges Bild (ignoriert Prompt)
+CFG 7.5:  Katze mit etwas Vielfalt
+CFG 15.0: Sehr stark erkennbare Katze (aber weniger kreativ)
+```
+
+---
+
+## Praktische Implementierung
+
+### Stable Diffusion mit Diffusers (Hugging Face)
+
+```python
+from diffusers import StableDiffusionPipeline
+import torch
+
+# Modell laden
+pipe = StableDiffusionPipeline.from_pretrained(
+    "runwayml/stable-diffusion-v1-5",
+    torch_dtype=torch.float16
+)
+pipe = pipe.to("cuda")
+
+# Text → Bild
+prompt = "Ein futuristisches Schloss auf einem Berggipfel"
+image = pipe(
+    prompt,
+    height=512,
+    width=512,
+    num_inference_steps=50,  # DDIM Schritte
+    guidance_scale=7.5,       # CFG Stärke
+    generator=torch.Generator().manual_seed(42)
+).images[0]
+
+image.save("output.png")
+```
+
+### DDIM vs DDPM in Praxis
+
+```python
+from diffusers import DDIMScheduler, PNDMScheduler
+
+# DDIM (schnell, 50 Schritte)
+pipe.scheduler = DDIMScheduler.from_config(
+    pipe.scheduler.config
+)
+
+# DDPM (langsam, aber original, 1000 Schritte)
+pipe.scheduler = DDPMScheduler.from_config(
+    pipe.scheduler.config
+)
+```
+
+### LoRA Fine-Tuning (für Custom Styles)
+
+```python
+# Diffusers mit LoRA
+from diffusers import StableDiffusionPipeline
+from peft import get_peft_model, LoraConfig
+
+# LoRA auf U-Net anwenden (nur 1% der Parameter trainieren)
+lora_config = LoraConfig(
+    r=16,
+    lora_alpha=32,
+    target_modules=["to_k", "to_v"],
+    lora_dropout=0.05
+)
+
+unet = get_peft_model(pipe.unet, lora_config)
+
+# Trainieren auf Custom Dataset
+# ... Training Loop ...
+
+# Speichern und Laden
+unet.save_pretrained("custom_lora")
+pipe.load_lora_weights("custom_lora")
+```
+
+---
+
+## Vergleich: Diffusion vs Andere
+
+| Modell | Speed | Qualität | Stabilität | Training |
+|--------|-------|----------|-----------|----------|
+| Diffusion | Mittel (DDIM) | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | Stabil |
+| GAN | Schnell | ⭐⭐⭐⭐ | ⭐⭐⭐ | Schwierig |
+| Autoregressive | Langsam | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | Sehr langsam |
+| Flow-basiert | Mittel | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | Komplex |
+
+---
+
+## Use Cases und Recommendations
+
+### ✅ Wann Diffusion verwenden
+
+- Text-to-Image (Stable Diffusion)
+- Image-to-Image (Inpainting)
+- Style Transfer
+- Upscaling
+- Video-Generierung
+- Super-Resolution
+
+### ⚠️ Wann etwas Anderes verwenden
+
+- Real-Time Anwendungen ohne DDIM → dann GAN
+- Extrem große Bilder (>1024x1024) → weniger praktisch
+- Audio-Generierung → Diffusion ok, aber andere Modelle auch
+- Wenn Latency < 100ms kritisch → nicht geeignet
+
+---
+
+## Neueste Entwicklungen (2024-2026)
+
+### Flux.1 (Black Forest Labs)
+
+```
+- Transformer-basiert statt U-Net
+- Noch schneller (30-50 Schritte)
+- Bessere Text-Treue
+- Verwendet DiT (Diffusion Transformer)
+```
+
+### Consistency Models
+
+```
+- Direktes Sampling in 1-2 Schritten
+- Trainiert auf Diffusion-Modellen
+- Trade-Off: Speed vs Quality
+```
+
+### ControlNet und T2I Adapters
+
+```
+- Struktur-Kontrolle über Edges/Poses/Depth
+- Composable Guidance
+- Mehrere Bedingungen gleichzeitig
+```
+
+---
+
+## Häufige Fehler
+
+### 1. Guidance Scale zu hoch
+
+```
+❌ CFG 30+: Artefakte, verfälschte Farben
+✅ CFG 7-10: Gutes Gleichgewicht
+```
+
+### 2. Zu wenige Schritte
+
+```
+❌ 10 Schritte: Körnig, unfertig
+✅ 50 Schritte (DDIM): Gute Balance
+✅ 100+ Schritte: Maximum Qualität
+```
+
+### 3. Memory Overflow
+
+```python
+# ❌ Zu viel RAM
+image = pipe("prompt", height=2048, width=2048)
+
+# ✅ Mit Optimierungen
+pipe.enable_attention_slicing()
+pipe.enable_memory_efficient_attention()
+image = pipe("prompt", height=768, width=768)
+```
+
+---
+
+## Quellen und Links
+
+- [DDPM Papier (Ho et al. 2020)](https://arxiv.org/abs/2006.11239)
+- [DDIM (Song et al. 2021)](https://arxiv.org/abs/2010.02502)
+- [Latent Diffusion / Stable Diffusion (Rombach et al. 2022)](https://arxiv.org/abs/2112.10752)
+- [Classifier-Free Guidance (Ho & Salimans 2022)](https://arxiv.org/abs/2207.12598)
+- [Diffusers Library (Hugging Face)](https://github.com/huggingface/diffusers)
+- [Stable Diffusion Official](https://stability.ai)
+- [Flux.1 (Black Forest Labs)](https://blackforestlabs.ai)

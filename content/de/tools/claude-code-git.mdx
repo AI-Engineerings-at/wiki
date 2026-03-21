@@ -1,0 +1,456 @@
+---
+title: "Git Integration — Claude Code Referenz"
+date: "2026-03-21"
+summary: "Vollstaendige Referenz zur Git-Integration in Claude Code — Commits, Pull Requests, Branch-Management, Merge Conflicts, Git Hooks, Co-Authored-By, Diff-Review, Git Blame und Worktree-Support."
+tags: ["claude-code", "git", "workflow", "version-control", "reference"]
+author: "AI Engineering"
+---
+
+# Git Integration in Claude Code
+
+Claude Code integrates deeply with Git to make version control seamless. This reference covers commit workflows, PR creation, branch management, merge conflict resolution, hooks, attribution, and advanced features like worktrees.
+
+## Git-Workflows — Grundlagen
+
+### Commits erstellen
+
+Claude Code kann Git-Commits automatisch erstellen. Die Standard-Workflow ist:
+
+1. Claude liest deine aktuelle Verzeichnis-Struktur
+2. Nimmt Aenderungen vor (Write, Edit, NotebookEdit)
+3. Erstellt einen Commit mit aussagekraeftiger Message
+4. Pushed zum Remote (wenn konfiguriert)
+
+**Commit-Kommando:**
+
+```bash
+claude -p "implement feature X and commit with message"
+```
+
+Claude wird:
+- Aenderungen reviewen
+- Eine aussagekraeftige Commit-Message verfassen
+- Den Commit durchfuehren
+- Bei Bedarf weitere Commits machen
+
+### Co-Authored-By Attribution
+
+Claude kann automatisch Co-Authored-By Trailers zu Commits hinzufuegen, um Zusammenarbeit zu dokumentieren.
+
+**Format:**
+
+```
+implement feature X
+
+Co-Authored-By: Name <email@example.com>
+Co-Authored-By: Another Person <another@example.com>
+```
+
+**Verwendung:** Nutze dieses Format in der Commit-Message wenn mehrere Menschen an einem Feature arbeiten.
+
+**Im Claude Code CLI:** Falls Claude selbst den Commit schreibt, kann es Co-Authored-By Informationen hinzufuegen, wenn du es fragst:
+
+```
+Please implement X and add co-author info for Jane and Bob
+```
+
+## Pull Requests erstellen
+
+Claude Code kann Pull Requests direkt erstellen — entweder durch direkten Request oder Schritt-fuer-Schritt.
+
+### Direkte PR-Erstellung
+
+```bash
+claude -p "fix bug X and create a PR"
+```
+
+Claude wird:
+- Änderungen durchfuehren
+- Commits erstellen
+- Eine PR mit aussagekraeftiger Beschreibung oeffnen
+- Die PR-URL zurueckgeben
+
+### Schritt-fuer-Schritt PR-Workflow
+
+```
+1. summarize your changes
+2. create a PR
+3. enhance the PR description with more context
+```
+
+Claude kann die Aenderungen zusammenfassen, die PR erstellen und dann die Beschreibung verfeinern.
+
+### PR-Verknuepfung mit Sessions
+
+Wenn Claude eine PR erstellt, wird die aktuelle Session automatisch mit dieser PR verknuepft. Du kannst die Session spaeter fortsetzen mit:
+
+```bash
+claude --from-pr 123
+```
+
+Dies oeffnet die gleiche Session, verbunden mit PR #123.
+
+## Branch-Management
+
+### Branch erstellen und wechseln
+
+Claude kann Branches erstellen und darauf arbeiten:
+
+```bash
+claude -p "create a feature branch and implement X"
+```
+
+### Worktrees — Parallele Sessions
+
+**Worktrees** erlauben es dir, mehrere Claude-Sessions gleichzeitig in verschiedenen Branches laufen zu lassen, ohne dass Aenderungen kollidieren.
+
+```bash
+# Neue Claude-Session in einem Worktree
+claude --worktree feature-auth
+
+# Anderer Worktree fuer einen anderen Task
+claude --worktree bugfix-123
+```
+
+Jeder Worktree:
+- Hat sein eigenes Verzeichnis (`.claude/worktrees/<name>/`)
+- Ist an einen eigenen Branch gebunden (`worktree-<name>`)
+- Ist vollstaendig isoliert — Aenderungen in einem Worktree beeinflussen andere nicht
+
+**Cleanup:**
+- Wenn du einen Worktree beendest und keine Aenderungen hast → wird er automatisch geloescht
+- Wenn Aenderungen existieren → Claude fragt, ob du den Worktree behalten willst
+- Manuell: `git worktree list` und `git worktree remove <path>`
+
+**Worktrees mit Subagents:**
+
+Subagents koennen auch Worktrees nutzen. Sie bekommen je einen isolierten Worktree und dieser wird nach Abschluss automatisch bereinigt (wenn keine Aenderungen vorhanden sind).
+
+Konfiguriere das in einem Custom-Subagent:
+
+```yaml
+isolation: worktree
+```
+
+### Branch aus dem Main auschecken
+
+Claude kann jederzeit den aktuellen Branch wechseln oder einen neuen Branch erstellen:
+
+```bash
+claude -p "checkout main and then create a new branch for X"
+```
+
+## Merge Conflicts auflosen
+
+Claude Code kann Merge Conflicts automatisch erkunden und Loesungsvorschlaege machen.
+
+### Konflikt-Detection
+
+Wenn ein Merge Conflict auftritt:
+
+```bash
+claude -p "resolve merge conflicts"
+```
+
+Claude wird:
+1. Die Conflict-Marker identifizieren
+2. Beide Versionen analysieren
+3. Eine veroeffentlichte Loesung vorschlagen
+4. Die Aenderungen testen
+
+### Manueller Conflict-Workflow
+
+```
+1. Tell Claude "there's a merge conflict in file X"
+2. Claude reads both versions
+3. Asks clarifying questions if needed
+4. Suggests a resolution
+5. Applies the fix
+6. Tests to verify
+```
+
+## Git Hooks Integration
+
+Claude Code respektiert Git Hooks und kann mit ihnen arbeiten.
+
+### Pre-Commit Hooks
+
+Falls dein Repo Pre-Commit Hooks hat (z.B. Linting, Formatting), werden diese automatisch ausgefuehrt wenn Claude einen Commit erstellt. Wenn der Hook fehlschlaegt:
+
+1. Claude wird vom Fehler benachrichtigt
+2. Claude kann den Fehler fixen
+3. Claude versucht erneut zu committen
+
+**Beispiel:**
+
+```bash
+# Wenn ein Linting-Fehler beim Commit auftritt
+# Claude wird Fehler sehen → Code fixen → Erneut committen
+```
+
+### Post-Commit Hooks
+
+Nach erfolgreicher Commit-Erstellung werden Post-Commit Hooks ausgefuehrt. Claude wird die Ausgabe sehen und kann danach reagieren.
+
+### Custom Hooks nutzen
+
+Du kannst Claude instruieren, spezifische Git-Operationen durchzufuehren, die Hooks auslosen:
+
+```bash
+claude -p "run the test suite via git hooks and commit if passing"
+```
+
+## Diff Review
+
+Claude kann Diffs analysieren und Aenderungen reviewen.
+
+### Recent Changes reviewen
+
+```bash
+claude -p "show me what I changed and review for issues"
+```
+
+Claude wird:
+- `git diff` ausfuehren
+- Aenderungen analysieren
+- Potenzielle Probleme identifizieren
+- Improvements vorschlagen
+
+### Diff gegen Branch/Main
+
+```bash
+claude -p "show differences from main branch"
+```
+
+Claude wird `git diff main...HEAD` verwenden um nur Aenderungen seit dem Main-Branch zu zeigen.
+
+### Staged vs Unstaged Diffs
+
+Claude kann zwischen Staged und Unstaged Aenderungen unterscheiden:
+
+```bash
+claude -p "review staged changes only"
+```
+
+## Git Blame Integration
+
+Git Blame zeigt wer welche Zeile wann geaendert hat. Claude kann das nutzen um Context zu verstehen.
+
+### Blame-Kontext fuer Analyse
+
+```bash
+claude -p "analyze this file and use git blame to understand the history of this function"
+```
+
+Claude wird:
+- `git blame` ausfuehren
+- Zeigen wer welche Zeile geaendert hat
+- Commits analysieren um Context zu verstehen
+- Bessere Entscheidungen treffen basierend auf History
+
+### Blame fuer spezifische Zeilen
+
+```bash
+claude -p "who changed lines 42-50 and why?"
+```
+
+Claude wird die relevanten Commits auschecken und die Kontexte erklaeren.
+
+## .gitignore Respekt
+
+Claude Code respektiert deine `.gitignore` Datei. Dateien die in `.gitignore` aufgelistet sind werden:
+- NICHT committet
+- NICHT an Remote gepushed
+- Aber Claude kann sie lokal lesen und bearbeiten
+
+Falls Claude versucht eine `.gitignore`'d Datei zu committen:
+- Das schlaegt fehl (Git lehnt ab)
+- Claude wird vom Fehler benachrichtigt
+- Claude kann die Datei aus dem Commit entfernen
+
+## Commit-Message Best Practices
+
+Claude erstellt standardmaessig aussagekraeftige Commit-Messages. Hier sind die Conventions die verwendet werden:
+
+### Imperativ Present Tense
+
+```
+# Richtig
+add user authentication module
+fix authentication timeout issue
+
+# Falsch
+added user authentication module
+fixes authentication timeout issue
+```
+
+### Subject Line
+
+- Max 50 Zeichen
+- Imperativ, Present Tense
+- Kein Punkt am Ende
+
+### Body (optional)
+
+Wenn die Aenderung komplex ist:
+
+```
+add user authentication module
+
+Implements OAuth2 flow with JWT token support.
+- Handles token refresh automatically
+- Includes proper error handling for expired tokens
+- Adds 95% test coverage
+```
+
+## Git Status und Staging
+
+Claude kann mit Git Staging arbeiten:
+
+### Status pruefen
+
+```bash
+claude -p "what's the current git status?"
+```
+
+### Selektives Staging
+
+Claude kann spezifische Dateien stagen vor dem Commit:
+
+```bash
+claude -p "stage only the changes in auth.ts and commit"
+```
+
+### Unstaging bei Bedarf
+
+Wenn Claude zu viel stagt, kann es unstagen:
+
+```bash
+claude -p "unstage the config file before committing"
+```
+
+## Remote Management
+
+### Push und Pull
+
+Claude kann mit Remotes arbeiten:
+
+```bash
+claude -p "push commits to origin main"
+claude -p "pull latest changes from main"
+```
+
+### Remote-Tracking Branches
+
+Claude versteht Remote-Tracking Branches:
+
+```bash
+claude -p "compare my changes with origin/main"
+```
+
+Das nutzt `git diff origin/main..HEAD` um nur lokale Aenderungen zu zeigen.
+
+### Force Push (mit Vorsicht!)
+
+Force Push ist gefährlich. Claude wird dich fragen bevor es `git push --force` ausfuehrt:
+
+```bash
+claude -p "force push to origin"
+```
+
+Claude wird:
+1. Dich warnen dass das gefährlich ist
+2. Deine Bestaetigung verlangen
+3. Den Force Push durchfuehren (ODER ABLEHNEN wenn du dich aenderst)
+
+## Advanced Workflows
+
+### Rebase vor Push
+
+```bash
+claude -p "rebase onto main and push"
+```
+
+Claude wird:
+1. Main pullen
+2. Deine Commits rebasieren
+3. Erneut pushen
+
+### Cherry-Pick specific commits
+
+```bash
+claude -p "cherry-pick commit ABC123 to this branch"
+```
+
+Claude wird den spezifischen Commit auf den aktuellen Branch kopieren.
+
+### Squash commits
+
+```bash
+claude -p "squash the last 3 commits into one"
+```
+
+Claude wird interaktiv rebasieren und die Commits zusammenfuehren.
+
+## Session-Verknuepfung mit PRs
+
+PRs die Claude erstellt werden automatisch mit der aktuellen Session verknuepft. Das erlaubt es dir:
+
+1. Eine PR zu erstellen
+2. Die Session zu beenden
+3. Spaeter die Session zu fortsetzen
+
+```bash
+# Later, resume the PR session
+claude --from-pr 123
+```
+
+Die Conversation History, Context und alle bisherigen Aenderungen werden wieder geladen.
+
+## Troubleshooting
+
+### Commit schlaegt fehl
+
+**Problem:** "could not open a file to write patch"
+
+**Loesungen:**
+- Stelle sicher, dass Git konfiguriert ist: `git config user.name`
+- Pruefen ob das Repo initialisiert ist: `git rev-parse --git-dir`
+
+### PR-Erstellung schlaegt fehl
+
+**Problem:** "Unable to create pull request"
+
+**Loesungen:**
+- SSH-Schluessel pruefen (fuer GitHub) oder Token
+- Stelle sicher, dass du Push-Rechte hast
+- Pruefen ob Remote korrekt ist: `git remote -v`
+
+### Merge Conflicts koennen nicht aufgeloest werden
+
+**Problem:** Claude weigert sich, Conflicts zu losen
+
+**Loesungen:**
+- Conflicts sind zu komplex — manuell anschauen
+- Frag Claude um einen andern Approach
+- Cherry-Pick statt Merge wenn das passender ist
+
+## Referenzen
+
+- [Git Documentation](https://git-scm.com/doc)
+- [GitHub Flow Guide](https://guides.github.com/introduction/flow/)
+- [Conventional Commits](https://www.conventionalcommits.org/)
+
+---
+
+*Stand: 2026-03-21 | Claude Code Git Integration Reference*
+
+## Quellen und Links
+
+- [Git Workflows](https://code.claude.com/docs/en/common-workflows)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

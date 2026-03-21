@@ -1,0 +1,465 @@
+---
+title: Claude Code — Umgebungsvariablen Referenz
+date: 2026-03-21
+summary: Vollständige Dokumentation aller Umgebungsvariablen, die Claude Code steuern — einschließlich API-Authentifizierung, Modellauswahl, Sandbox, Netzwerk und Provider-Konfiguration.
+tags: [claude-code, umgebungsvariablen, konfiguration, referenz]
+author: "AI Engineering"
+---
+
+# Claude Code — Umgebungsvariablen Referenz
+
+Diese Seite dokumentiert alle Umgebungsvariablen, die Claude Code unterstützt. Du kannst sie in deiner Shell setzen, bevor du `claude` startest, oder in deiner [`settings.json`](/de/tools/claude-code-einstellungen) unter dem Schlüssel `env` konfigurieren.
+
+## Authentifizierung und API
+
+| Variable | Standard | Beschreibung | Beispiel |
+|----------|----------|-------------|---------|
+| `ANTHROPIC_API_KEY` | (keine) | API-Key für Authentifizierung bei Anthropic. Wird vor OAuth-Anmeldung verwendet. | `sk-ant-v0-abc123...` |
+| `ANTHROPIC_API_VERSION` | `2024-06` | API-Version für Anthropic. | `2024-06` |
+| `ANTHROPIC_BASE_URL` | `https://api.anthropic.com` | Basis-URL für Anthropic API (z.B. für Gateway-Deployments). | `https://custom-gateway.example.com` |
+
+## Modellauswahl
+
+| Variable | Standard | Beschreibung | Beispiel |
+|----------|----------|-------------|---------|
+| `ANTHROPIC_MODEL` | `default` | Standard-Modell für diese Session. Kann `default`, `sonnet`, `opus`, `haiku`, `sonnet[1m]`, `opus[1m]`, `opusplan` oder einen vollständigen Modellnamen sein. | `opus` |
+| `ANTHROPIC_DEFAULT_OPUS_MODEL` | `claude-opus-4-6` | Modell, das die `opus`-Alias verwendet (oder in Plan Mode von `opusplan`). | `claude-opus-4-6` |
+| `ANTHROPIC_DEFAULT_SONNET_MODEL` | `claude-sonnet-4-6` | Modell, das die `sonnet`-Alias verwendet (oder nach Plan Mode von `opusplan`). | `claude-sonnet-4-6` |
+| `ANTHROPIC_DEFAULT_HAIKU_MODEL` | `claude-haiku-4-5` | Modell für `haiku`-Alias und Hintergrund-Funktionalität. | `claude-haiku-4-5` |
+| `CLAUDE_CODE_SUBAGENT_MODEL` | (`ANTHROPIC_DEFAULT_SONNET_MODEL`) | Modell für Sub-Agents. | `sonnet` |
+| `ANTHROPIC_CUSTOM_MODEL_OPTION` | (keine) | Benutzerdefiniertes Modell zur `/model`-Auswahl hinzufügen (ohne eingebaute Aliases zu ersetzen). | `my-gateway/claude-opus-4-6` |
+| `ANTHROPIC_CUSTOM_MODEL_OPTION_NAME` | (keine) | Anzeigename für das benutzerdefinierte Modell. Falls nicht gesetzt, wird die Modell-ID verwendet. | `Opus via Gateway` |
+| `ANTHROPIC_CUSTOM_MODEL_OPTION_DESCRIPTION` | (keine) | Beschreibung des benutzerdefinierten Modells. | `Custom deployment routed through the internal LLM gateway` |
+
+## Reasoning und Denken
+
+| Variable | Standard | Beschreibung | Beispiel |
+|----------|----------|-------------|---------|
+| `CLAUDE_CODE_EFFORT_LEVEL` | (Modell-Standard) | Anpassbares Reasoning-Level. `low`, `medium`, `high`, `max` oder `auto`. `max` nur für Opus 4.6 und verbraucht mehr Tokens. | `medium` |
+| `MAX_THINKING_TOKENS` | (Modell-Standard) | Maximale Tokens für erweiterte Reasoning (wenn `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING=1` gesetzt). | `10000` |
+| `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING` | `0` | Setze auf `1` um adaptives Reasoning zu deaktivieren und zum fixen Thinking-Budget zurückzukehren. | `1` |
+
+## Context-Fenster
+
+| Variable | Standard | Beschreibung | Beispiel |
+|----------|----------|-------------|---------|
+| `CLAUDE_CODE_DISABLE_1M_CONTEXT` | `0` | Setze auf `1` um 1M-Token Context-Fenster zu deaktivieren. | `1` |
+
+## Authentifizierung — Provider
+
+| Variable | Standard | Beschreibung | Beispiel |
+|----------|----------|-------------|---------|
+| `ANTHROPIC_USE_BEDROCK` | `0` | Setze auf `1` um AWS Bedrock für Modelle zu verwenden. | `1` |
+| `AWS_REGION` | `us-east-1` | AWS-Region für Bedrock. | `us-west-2` |
+| `AWS_PROFILE` | (Standard-Profil) | AWS-Profil für Bedrock-Zugriff. | `production` |
+| `AWS_ACCESS_KEY_ID` | (von AWS CLI) | AWS Access Key für Bedrock (falls nicht über AWS CLI konfiguriert). | `AKIA...` |
+| `AWS_SECRET_ACCESS_KEY` | (von AWS CLI) | AWS Secret Key für Bedrock. | `abc123...` |
+| `ANTHROPIC_USE_VERTEX` | `0` | Setze auf `1` um Google Vertex AI zu verwenden. | `1` |
+| `GOOGLE_CLOUD_PROJECT` | (keine) | Google Cloud Projekt-ID für Vertex AI. | `my-project-123` |
+| `GOOGLE_CLOUD_REGION` | `us-central1` | Google Cloud Region für Vertex AI. | `europe-west1` |
+| `ANTHROPIC_USE_GOOGLE` | `0` | Setze auf `1` um Google AI zu verwenden. | `1` |
+| `GOOGLE_API_KEY` | (keine) | API-Key für Google AI. | `AIza...` |
+
+## Proxy und Netzwerk
+
+| Variable | Standard | Beschreibung | Beispiel |
+|----------|----------|-------------|---------|
+| `HTTP_PROXY` | (keine) | HTTP-Proxy für Installer und API-Calls. | `http://proxy.example.com:8080` |
+| `HTTPS_PROXY` | (keine) | HTTPS-Proxy für Installer und API-Calls. | `http://proxy.example.com:8080` |
+| `NO_PROXY` | (keine) | Kommagetrennte Liste von Domains die den Proxy umgehen. | `localhost,127.0.0.1,.internal` |
+| `NODE_EXTRA_CA_CERTS` | (keine) | Pfad zu zusätzlichem CA-Zertifikat für TLS-Inspect-Proxies. | `/path/to/corporate-ca.pem` |
+| `SOCKS_PROXY` | (keine) | SOCKS-Proxy für Netzwerk-Verbindungen. | `socks5://proxy.example.com:1080` |
+
+## Sandbox und Sicherheit
+
+| Variable | Standard | Beschreibung | Beispiel |
+|----------|----------|-------------|---------|
+| `CLAUDE_CODE_DISABLE_SANDBOX` | `0` | Setze auf `1` um Sandboxing vollständig zu deaktivieren (alle Bash-Befehle laufen unsandboxed). | `1` |
+
+## Suche und Discovery
+
+| Variable | Standard | Beschreibung | Beispiel |
+|----------|----------|-------------|---------|
+| `USE_BUILTIN_RIPGREP` | `1` | Setze auf `0` um das System `ripgrep` statt des eingebauten zu verwenden. Ermöglicht Pfad-Suche mit benutzerdefinierten ripgrep-Konfigurationen. | `0` |
+
+## Funktion — Deaktivierung
+
+| Variable | Standard | Beschreibung | Beispiel |
+|----------|----------|-------------|---------|
+| `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS` | `0` | Setze auf `1` um Hintergrund-Task-Funktionalität zu deaktivieren. | `1` |
+| `CLAUDE_CODE_DISABLE_AUTO_UPDATE` | `0` | Setze auf `1` um automatische Updates zu deaktivieren. | `1` |
+| `CLAUDE_CODE_DISABLE_TELEMETRY` | `0` | Setze auf `1` um Anonyme Nutzungs-Telemetrie zu deaktivieren. | `1` |
+| `CLAUDE_CODE_DISABLE_CRASH_REPORTING` | `0` | Setze auf `1` um Crash-Reporting zu deaktivieren. | `1` |
+| `DISABLE_PROMPT_CACHING` | `0` | Setze auf `1` um Prompt Caching für ALLE Modelle zu deaktivieren (überschreibt modell-spezifische Einstellungen). | `1` |
+| `DISABLE_PROMPT_CACHING_HAIKU` | `0` | Setze auf `1` um Prompt Caching NUR für Haiku zu deaktivieren. | `1` |
+| `DISABLE_PROMPT_CACHING_SONNET` | `0` | Setze auf `1` um Prompt Caching NUR für Sonnet zu deaktivieren. | `1` |
+| `DISABLE_PROMPT_CACHING_OPUS` | `0` | Setze auf `1` um Prompt Caching NUR für Opus zu deaktivieren. | `1` |
+
+## Funktion — Aktivierung
+
+| Variable | Standard | Beschreibung | Beispiel |
+|----------|----------|-------------|---------|
+| `CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION` | `1` | Setze auf `0` um automatische Prompt-Vorschläge zu deaktivieren. | `0` |
+| `CLAUDE_CODE_ENABLE_FILE_HISTORY` | (Basis-Build) | Aktiviert Dateiverlauf-Feature (teilweise experimentell). | `1` |
+
+## Terminal und Shell
+
+| Variable | Standard | Beschreibung | Beispiel |
+|----------|----------|-------------|---------|
+| `SHELL` | (von OS) | Shell, die Claude Code für Bash-Befehle verwendet. | `/bin/bash` |
+| `BROWSER` | (vom OS erkannt) | Browser-Programm für OAuth-Login und Link-Öffnen. | `/usr/bin/firefox` |
+| `EDITOR` | (von OS) | Standard-Editor für `Ctrl+G` (externe Bearbeitung). | `vim` |
+| `CLAUDE_CODE_GIT_BASH_PATH` | (automatisch erkannt) | Pfad zu Git Bash auf Windows (falls nicht im PATH). | `C:\\Program Files\\Git\\bin\\bash.exe` |
+| `PYTHON` | `python3` (oder `python` auf Windows) | Python-Interpreter für Claude Code Skripte. | `python3.11` |
+
+## Debugging und Entwicklung
+
+| Variable | Standard | Beschreibung | Beispiel |
+|----------|----------|-------------|---------|
+| `CLAUDE_CODE_DEBUG` | `0` | Setze auf `1` um Debug-Output zu aktivieren. | `1` |
+| `CLAUDE_CODE_DEBUG_MCP` | `0` | Setze auf `1` um detaillierte MCP-Debug-Logs zu aktivieren. | `1` |
+| `CLAUDE_CODE_VERBOSE_MODE` | `0` | Setze auf `1` um verbose Output ähnlich zu `Ctrl+O` zu aktivieren. | `1` |
+| `NODE_DEBUG` | (keine) | Node.js Debug-Module (z.B. `http`, `net`). | `http,net` |
+| `DEBUG` | (keine) | Debug-Muster für verschiedene Module. | `*` |
+
+## Task-Listen
+
+| Variable | Standard | Beschreibung | Beispiel |
+|----------|----------|-------------|---------|
+| `CLAUDE_CODE_TASK_LIST_ID` | (Session-spezifisch) | Benannte Task-Liste um Task-Status über Sessions zu erhalten. Verzeichnis wird unter `~/.claude/tasks/<ID>/` erstellt. | `my-project` |
+
+## Performance und Ressourcen
+
+| Variable | Standard | Beschreibung | Beispiel |
+|----------|----------|-------------|---------|
+| `CLAUDE_CODE_MAX_TURNS` | `unlimited` | Maximale Anzahl von Turns in dieser Session. Nützlich für Kosten-Kontrolle oder zum Erzwingen von Zusammenfassungen. | `50` |
+| `NODE_OPTIONS` | (keine) | Node.js Kommandozeilen-Optionen (z.B. Memory-Limits). | `--max-old-space-size=4096` |
+| `CLAUDE_CODE_MEMORY_LIMIT_MB` | (System-Abhängig) | Speicher-Limit in MB für Claude Code Prozess. | `2048` |
+
+## Windows-spezifisch
+
+| Variable | Standard | Beschreibung | Beispiel |
+|----------|----------|-------------|---------|
+| `LOCALAPPDATA` | (von Windows) | Pfad zu lokalen App-Daten (Claude Code Konfiguration). | `C:\Users\Username\AppData\Local` |
+| `USERPROFILE` | (von Windows) | Pfad zum Benutzer-Home-Verzeichnis auf Windows. | `C:\Users\Username` |
+
+## macOS-spezifisch
+
+| Variable | Standard | Beschreibung | Beispiel |
+|----------|----------|-------------|---------|
+| `TERM_PROGRAM` | (Terminal-spezifisch) | Terminal-Emulator (z.B. `iTerm2.app`, `Apple_Terminal`). | `iTerm.app` |
+
+## Konfiguration in settings.json
+
+Anstatt Umgebungsvariablen in der Shell zu setzen, kannst du sie auch in `~/.claude/settings.json` oder `.claude/settings.json` (Projekt-Level) konfigurieren:
+
+```json
+{
+  "env": {
+    "ANTHROPIC_MODEL": "opus",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku-4-5",
+    "CLAUDE_CODE_EFFORT_LEVEL": "medium",
+    "DISABLE_PROMPT_CACHING": "0",
+    "USE_BUILTIN_RIPGREP": "0"
+  }
+}
+```
+
+Umgebungsvariablen, die direkt in der Shell gesetzt sind, überschreiben die `settings.json`-Werte.
+
+## Precedence (Reihenfolge der Priorität)
+
+1. **Shell-Umgebungsvariablen** (höchste Priorität)
+2. **Projekt-Settings** (`.claude/settings.json`)
+3. **Benutzer-Settings** (`~/.claude/settings.json`)
+4. **System-Standard** (niedrigste Priorität)
+
+## Best Practices
+
+- **API-Keys niemals hardcoden**: Verwende Umgebungsvariablen oder `settings.json` mit `.gitignore`-Einträgen
+- **Provider-Spezifische Keys**: Setze AWS_PROFILE, GOOGLE_CLOUD_PROJECT und ähnliche für deine Deployment-Umgebung
+- **Proxy-Konfiguration**: Verwende HTTP_PROXY und HTTPS_PROXY falls hinter einem Corporate Proxy
+- **Debugging**: Aktiviere `CLAUDE_CODE_DEBUG` nur wenn nötig (verbessert Performance nicht)
+- **Context-Windows**: Nutze `sonnet[1m]` oder `opus[1m]` für große Projekte wenn dein Plan dies unterstützt
+
+## Praktische Use-Cases: Environment Variables in Aktion
+
+### Usecase 1: Entwickler mit mehreren API Keys
+
+```bash
+# .env (nie committen!)
+ANTHROPIC_API_KEY=sk-ant-production-key
+ANTHROPIC_MODEL=opus
+
+# Alternative für Staging:
+# ANTHROPIC_API_KEY=sk-ant-staging-key
+# ANTHROPIC_MODEL=sonnet
+
+# Benutzung:
+claude code "code task"
+# → Nutzt Opus mit Production Key
+```
+
+### Usecase 2: Team mit Custom Gateway
+
+```bash
+# .claude/settings.json (Projekt-Level)
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://custom-gateway.mycompany.com",
+    "ANTHROPIC_API_VERSION": "2024-06",
+    "ANTHROPIC_MODEL": "sonnet"
+  }
+}
+
+# Alle im Team nutzen jetzt den Custom Gateway
+# automatisch, ohne individuelle Setup
+```
+
+### Usecase 3: Corporate Proxy mit Custom CA
+
+```bash
+# Windows:
+set HTTP_PROXY=http://corp-proxy.company.com:8080
+set HTTPS_PROXY=http://corp-proxy.company.com:8080
+set NODE_EXTRA_CA_CERTS=C:\certs\corporate-ca.pem
+
+# Linux/Mac:
+export HTTP_PROXY=http://corp-proxy.company.com:8080
+export HTTPS_PROXY=http://corp-proxy.company.com:8080
+export NODE_EXTRA_CA_CERTS=/etc/ssl/certs/corporate-ca.pem
+
+# Start Claude Code
+claude code "task"
+```
+
+### Usecase 4: Lokale Entwicklung mit großem Codebase
+
+```bash
+# settings.json
+{
+  "env": {
+    "ANTHROPIC_MODEL": "opus",
+    "CLAUDE_CODE_DISABLE_1M_CONTEXT": "0",
+    "CLAUDE_CODE_EFFORT_LEVEL": "max",
+    "DISABLE_PROMPT_CACHING": "0"
+  }
+}
+
+# Nutzt volles 1M Context Window + Maximum Reasoning
+# Für komplexe Refactorings großer Repos
+```
+
+---
+
+## Configuration Precedence in Aktion: Ein Beispiel
+
+Szenario: Du hast mehrere Settings-Dateien und Environment-Variablen gesetzt:
+
+```
+1. Shell:     ANTHROPIC_MODEL=opus
+2. Project:   .claude/settings.json → ANTHROPIC_MODEL=sonnet
+3. User:      ~/.claude/settings.json → ANTHROPIC_MODEL=haiku
+
+Welche gewinnt?
+
+Antwort: Shell (höchste Priorität!)
+
+claude code "complex task"
+→ Nutzt OPUS, nicht sonnet, nicht haiku
+```
+
+---
+
+## Sicherheits-Best-Practices
+
+### DO: API Keys schützen
+
+```bash
+# ✓ Richtig
+export ANTHROPIC_API_KEY=$(cat ~/.secrets/api-key.enc | decrypt)
+
+# ✓ Richtig (mit Pass/1Password/LastPass)
+export ANTHROPIC_API_KEY=$(pass show anthropic/api-key)
+
+# ✗ FALSCH
+export ANTHROPIC_API_KEY=sk-ant-abc123  # In Shell History!
+
+# ✗ FALSCH (in File sichtbar)
+echo "ANTHROPIC_API_KEY=sk-ant-abc123" >> ~/.bashrc
+# Andere User können das lesen!
+```
+
+### DO: Proxy-Konfiguration
+
+```bash
+# ✗ Proxy-Password in Text
+HTTP_PROXY=http://user:password@proxy.com:8080
+
+# ✓ Proxy-Password anderswo speichern
+HTTP_PROXY=http://proxy.com:8080
+# (authentifizierung über .netrc oder credential manager)
+```
+
+### DO: Audit API Usage
+
+```bash
+# Logging aktivieren
+export CLAUDE_CODE_DEBUG=1
+
+# Alle API Calls werden geloggt
+# Überprüfe was Claude Code sendet
+```
+
+---
+
+## Fehlerbehandlung: Environment Variable Issues
+
+### Problem: "API Key wird nicht erkannt"
+
+**Diagnose:**
+```bash
+echo $ANTHROPIC_API_KEY
+# Wenn leer → Variable nicht gesetzt
+
+# Fix:
+export ANTHROPIC_API_KEY=sk-ant-...
+# Oder in settings.json
+```
+
+### Problem: "Proxy blockiert API Calls"
+
+**Diagnose:**
+```bash
+curl -X POST https://api.anthropic.com/v1/messages \
+  -H "x-api-key: $ANTHROPIC_API_KEY" \
+  # Falls timeout → Proxy-Fehler
+
+# Fix:
+export HTTPS_PROXY=http://proxy:port
+export NODE_EXTRA_CA_CERTS=/path/to/ca.pem
+```
+
+### Problem: "Model nicht erkannt"
+
+**Diagnose:**
+```bash
+echo $ANTHROPIC_MODEL
+# Falls "default" → Wird automatisch zu aktuellem Model
+
+# Explizit setzen:
+export ANTHROPIC_MODEL=claude-opus-4-6
+```
+
+### Problem: "Sandbox deaktivieren funktioniert nicht"
+
+**Diagnose:**
+```bash
+export CLAUDE_CODE_DISABLE_SANDBOX=1
+claude code "ls -la /"  # Sollte jetzt ohne Sandbox laufen
+
+# Verifizieren:
+echo $CLAUDE_CODE_DISABLE_SANDBOX
+```
+
+---
+
+## Performance Tuning mit Environment Variables
+
+### Große Codebase? Nutze Full Context
+
+```bash
+# Default: 1M Context deaktiviert = 128K
+export CLAUDE_CODE_DISABLE_1M_CONTEXT=0
+
+# Jetzt: Voller 1M Token Context für dein Projekt
+# Claude sieht ALLES auf einmal
+```
+
+### Timeout Problems?
+
+```bash
+# Default: 30 Sekunden Warten pro Turn
+# Erhöhe es für große Operationen
+
+export CLAUDE_CODE_MAX_TURNS=100
+# (benützt weiterhin 30s/Turn, aber max 100 Turns)
+```
+
+### Memory Usage?
+
+```bash
+export NODE_OPTIONS=--max-old-space-size=4096
+# Erhöhe Node.js Memory zu 4GB (von default 2GB)
+```
+
+---
+
+## Team Rollout: Environment Variables
+
+Wenn dein Team Claude Code nutzen soll:
+
+**Schritt 1: Zentrale Config erstellen**
+```bash
+# .claude/settings.json (ins Git)
+{
+  "env": {
+    "ANTHROPIC_API_VERSION": "2024-06",
+    "ANTHROPIC_MODEL": "sonnet",
+    "CLAUDE_CODE_EFFORT_LEVEL": "medium",
+    "DISABLE_PROMPT_CACHING": "0"
+  }
+}
+
+# Commit und push
+git add .claude/settings.json
+git commit -m "Configure Claude Code for team"
+```
+
+**Schritt 2: API Key Verwaltung**
+```bash
+# User machen einmalig:
+export ANTHROPIC_API_KEY=their-own-key
+
+# Oder in Home-Directory:
+~/.claude/settings.json (NIEMALS versioniert!)
+{
+  "env": {
+    "ANTHROPIC_API_KEY": "sk-ant-user-key"
+  }
+}
+```
+
+**Schritt 3: Dokumentation**
+- Erkläre den Setup in Team-Wiki
+- Zeige welche Keys wo gespeichert werden
+- Dokumentiere Proxy-Konfiguration
+
+---
+
+## Ressourcen & Dokumentation
+
+- [Anthropic API Dokumentation](https://docs.anthropic.com)
+- [Claude Code Official Guide](https://www.anthropic.com/claude-code)
+- [Environment Variables Best Practices](https://12factor.net/config)
+- [Corporate Proxy Setup](https://docs.npmjs.com/using-npm/config#proxy)
+
+**Letzte Aktualisierung**: 21.03.2026 | **Nächste Überprüfung**: Juni 2026
+
+---
+
+## Siehe auch
+
+- [Claude Code Einstellungen](/de/tools/claude-code-einstellungen)
+- [Claude Code Konfiguration](/de/tools/claude-code-konfiguration)
+- [Authentifizierung](/de/tools/claude-code-authentifizierung)
+
+## Quellen und Links
+
+- [Environment Variables](https://code.claude.com/docs/en/env-vars)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

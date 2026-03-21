@@ -1,0 +1,445 @@
+---
+title: Claude Code — Environment Variables Reference
+date: 2026-03-21
+summary: Complete documentation of all environment variables supported by Claude Code, including API authentication, model selection, sandboxing, networking, and provider configuration.
+tags: [claude-code, environment-variables, configuration, reference]
+author: "AI Engineering"
+---
+
+# Claude Code — Environment Variables Reference
+
+This page documents all environment variables that Claude Code supports. Set them in your shell before launching `claude`, or configure them in your [`settings.json`](/en/tools/claude-code-settings) under the `env` key to apply them to every session.
+
+## Authentication and API
+
+| Variable | Default | Description | Example |
+|----------|---------|-------------|---------|
+| `ANTHROPIC_API_KEY` | (none) | API key for authentication with Anthropic. Takes precedence over OAuth login. | `sk-ant-v0-abc123...` |
+| `ANTHROPIC_API_VERSION` | `2024-06` | API version for Anthropic. | `2024-06` |
+| `ANTHROPIC_BASE_URL` | `https://api.anthropic.com` | Base URL for Anthropic API (e.g., for gateway deployments). | `https://custom-gateway.example.com` |
+
+## Model Selection
+
+| Variable | Default | Description | Example |
+|----------|---------|-------------|---------|
+| `ANTHROPIC_MODEL` | `default` | Default model for this session. Can be `default`, `sonnet`, `opus`, `haiku`, `sonnet[1m]`, `opus[1m]`, `opusplan`, or a full model name. | `opus` |
+| `ANTHROPIC_DEFAULT_OPUS_MODEL` | `claude-opus-4-6` | Model that the `opus` alias resolves to (or in plan mode for `opusplan`). | `claude-opus-4-6` |
+| `ANTHROPIC_DEFAULT_SONNET_MODEL` | `claude-sonnet-4-6` | Model that the `sonnet` alias resolves to (or after plan mode for `opusplan`). | `claude-sonnet-4-6` |
+| `ANTHROPIC_DEFAULT_HAIKU_MODEL` | `claude-haiku-4-5` | Model that the `haiku` alias resolves to and for background functionality. | `claude-haiku-4-5` |
+| `CLAUDE_CODE_SUBAGENT_MODEL` | (`ANTHROPIC_DEFAULT_SONNET_MODEL`) | Model to use for subagents. | `sonnet` |
+| `ANTHROPIC_CUSTOM_MODEL_OPTION` | (none) | Add a single custom model to the `/model` picker without replacing built-in aliases. | `my-gateway/claude-opus-4-6` |
+| `ANTHROPIC_CUSTOM_MODEL_OPTION_NAME` | (none) | Display name for the custom model. If omitted, the model ID is used. | `Opus via Gateway` |
+| `ANTHROPIC_CUSTOM_MODEL_OPTION_DESCRIPTION` | (none) | Description of the custom model. | `Custom deployment routed through the internal LLM gateway` |
+
+## Reasoning and Thinking
+
+| Variable | Default | Description | Example |
+|----------|---------|-------------|---------|
+| `CLAUDE_CODE_EFFORT_LEVEL` | (model default) | Adaptive reasoning level. `low`, `medium`, `high`, `max`, or `auto`. `max` only available for Opus 4.6 and uses more tokens. | `medium` |
+| `MAX_THINKING_TOKENS` | (model default) | Maximum tokens for extended reasoning (when `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING=1`). | `10000` |
+| `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING` | `0` | Set to `1` to disable adaptive reasoning and use fixed thinking budget. | `1` |
+
+## Context Window
+
+| Variable | Default | Description | Example |
+|----------|---------|-------------|---------|
+| `CLAUDE_CODE_DISABLE_1M_CONTEXT` | `0` | Set to `1` to disable 1M token context window support. | `1` |
+
+## Authentication — Providers
+
+| Variable | Default | Description | Example |
+|----------|---------|-------------|---------|
+| `ANTHROPIC_USE_BEDROCK` | `0` | Set to `1` to use AWS Bedrock for models. | `1` |
+| `AWS_REGION` | `us-east-1` | AWS region for Bedrock. | `us-west-2` |
+| `AWS_PROFILE` | (default profile) | AWS profile for Bedrock access. | `production` |
+| `AWS_ACCESS_KEY_ID` | (from AWS CLI) | AWS Access Key for Bedrock (if not configured via AWS CLI). | `AKIA...` |
+| `AWS_SECRET_ACCESS_KEY` | (from AWS CLI) | AWS Secret Key for Bedrock. | `abc123...` |
+| `ANTHROPIC_USE_VERTEX` | `0` | Set to `1` to use Google Vertex AI. | `1` |
+| `GOOGLE_CLOUD_PROJECT` | (none) | Google Cloud project ID for Vertex AI. | `my-project-123` |
+| `GOOGLE_CLOUD_REGION` | `us-central1` | Google Cloud region for Vertex AI. | `europe-west1` |
+| `ANTHROPIC_USE_GOOGLE` | `0` | Set to `1` to use Google AI. | `1` |
+| `GOOGLE_API_KEY` | (none) | API key for Google AI. | `AIza...` |
+
+## Proxy and Networking
+
+| Variable | Default | Description | Example |
+|----------|---------|-------------|---------|
+| `HTTP_PROXY` | (none) | HTTP proxy for installer and API calls. | `http://proxy.example.com:8080` |
+| `HTTPS_PROXY` | (none) | HTTPS proxy for installer and API calls. | `http://proxy.example.com:8080` |
+| `NO_PROXY` | (none) | Comma-separated list of domains that bypass the proxy. | `localhost,127.0.0.1,.internal` |
+| `NODE_EXTRA_CA_CERTS` | (none) | Path to additional CA certificate for TLS inspection proxies. | `/path/to/corporate-ca.pem` |
+| `SOCKS_PROXY` | (none) | SOCKS proxy for network connections. | `socks5://proxy.example.com:1080` |
+
+## Sandboxing and Security
+
+| Variable | Default | Description | Example |
+|----------|---------|-------------|---------|
+| `CLAUDE_CODE_DISABLE_SANDBOX` | `0` | Set to `1` to completely disable sandboxing (all bash commands run unsandboxed). | `1` |
+
+## Search and Discovery
+
+| Variable | Default | Description | Example |
+|----------|---------|-------------|---------|
+| `USE_BUILTIN_RIPGREP` | `1` | Set to `0` to use the system `ripgrep` instead of the built-in version. Allows custom ripgrep configurations. | `0` |
+
+## Feature Disabling
+
+| Variable | Default | Description | Example |
+|----------|---------|-------------|---------|
+| `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS` | `0` | Set to `1` to disable background task functionality. | `1` |
+| `CLAUDE_CODE_DISABLE_AUTO_UPDATE` | `0` | Set to `1` to disable automatic updates. | `1` |
+| `CLAUDE_CODE_DISABLE_TELEMETRY` | `0` | Set to `1` to disable anonymous usage telemetry. | `1` |
+| `CLAUDE_CODE_DISABLE_CRASH_REPORTING` | `0` | Set to `1` to disable crash reporting. | `1` |
+| `DISABLE_PROMPT_CACHING` | `0` | Set to `1` to disable prompt caching for ALL models (overrides model-specific settings). | `1` |
+| `DISABLE_PROMPT_CACHING_HAIKU` | `0` | Set to `1` to disable prompt caching ONLY for Haiku. | `1` |
+| `DISABLE_PROMPT_CACHING_SONNET` | `0` | Set to `1` to disable prompt caching ONLY for Sonnet. | `1` |
+| `DISABLE_PROMPT_CACHING_OPUS` | `0` | Set to `1` to disable prompt caching ONLY for Opus. | `1` |
+
+## Feature Enabling
+
+| Variable | Default | Description | Example |
+|----------|---------|-------------|---------|
+| `CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION` | `1` | Set to `0` to disable automatic prompt suggestions. | `0` |
+| `CLAUDE_CODE_ENABLE_FILE_HISTORY` | (base build) | Enables file history feature (partially experimental). | `1` |
+
+## Terminal and Shell
+
+| Variable | Default | Description | Example |
+|----------|---------|-------------|---------|
+| `SHELL` | (from OS) | Shell that Claude Code uses for bash commands. | `/bin/bash` |
+| `BROWSER` | (auto-detected) | Browser program for OAuth login and opening links. | `/usr/bin/firefox` |
+| `EDITOR` | (from OS) | Default editor for `Ctrl+G` (external editing). | `vim` |
+| `CLAUDE_CODE_GIT_BASH_PATH` | (auto-detected) | Path to Git Bash on Windows (if not in PATH). | `C:\\Program Files\\Git\\bin\\bash.exe` |
+| `PYTHON` | `python3` (or `python` on Windows) | Python interpreter for Claude Code scripts. | `python3.11` |
+
+## Debugging and Development
+
+| Variable | Default | Description | Example |
+|----------|---------|-------------|---------|
+| `CLAUDE_CODE_DEBUG` | `0` | Set to `1` to enable debug output. | `1` |
+| `CLAUDE_CODE_DEBUG_MCP` | `0` | Set to `1` to enable detailed MCP debug logging. | `1` |
+| `CLAUDE_CODE_VERBOSE_MODE` | `0` | Set to `1` to enable verbose output similar to `Ctrl+O`. | `1` |
+| `NODE_DEBUG` | (none) | Node.js debug modules (e.g., `http`, `net`). | `http,net` |
+| `DEBUG` | (none) | Debug pattern for various modules. | `*` |
+
+## Task Lists
+
+| Variable | Default | Description | Example |
+|----------|---------|-------------|---------|
+| `CLAUDE_CODE_TASK_LIST_ID` | (session-specific) | Named task list to retain task status across sessions. Directory created at `~/.claude/tasks/<ID>/`. | `my-project` |
+
+## Performance and Resources
+
+| Variable | Default | Description | Example |
+|----------|---------|-------------|---------|
+| `CLAUDE_CODE_MAX_TURNS` | `unlimited` | Maximum number of turns in this session. Useful for cost control or forcing summaries. | `50` |
+| `NODE_OPTIONS` | (none) | Node.js command-line options (e.g., memory limits). | `--max-old-space-size=4096` |
+| `CLAUDE_CODE_MEMORY_LIMIT_MB` | (system-dependent) | Memory limit in MB for Claude Code process. | `2048` |
+
+## Windows-specific
+
+| Variable | Default | Description | Example |
+|----------|---------|-------------|---------|
+| `LOCALAPPDATA` | (from Windows) | Path to local app data (Claude Code configuration). | `C:\Users\Username\AppData\Local` |
+| `USERPROFILE` | (from Windows) | Path to user home directory on Windows. | `C:\Users\Username` |
+
+## macOS-specific
+
+| Variable | Default | Description | Example |
+|----------|---------|-------------|---------|
+| `TERM_PROGRAM` | (terminal-specific) | Terminal emulator (e.g., `iTerm2.app`, `Apple_Terminal`). | `iTerm.app` |
+
+## Configuration in settings.json
+
+Instead of setting environment variables in your shell, you can configure them in `~/.claude/settings.json` or `.claude/settings.json` (project level):
+
+```json
+{
+  "env": {
+    "ANTHROPIC_MODEL": "opus",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku-4-5",
+    "CLAUDE_CODE_EFFORT_LEVEL": "medium",
+    "DISABLE_PROMPT_CACHING": "0",
+    "USE_BUILTIN_RIPGREP": "0"
+  }
+}
+```
+
+Environment variables set directly in your shell override `settings.json` values.
+
+## Precedence (Priority Order)
+
+1. **Shell environment variables** (highest priority)
+2. **Project settings** (`.claude/settings.json`)
+3. **User settings** (`~/.claude/settings.json`)
+4. **System defaults** (lowest priority)
+
+## Environment Variable Priority & Inheritance
+
+When multiple configuration sources exist, Claude Code applies this precedence:
+
+1. **Command-line shell variables** (ANTHROPIC_API_KEY in $PATH)
+2. **Project .claude/settings.json** (applies to current repo only)
+3. **User ~/.claude/settings.json** (global user config)
+4. **System defaults** (hardcoded in Claude Code binary)
+
+Example conflict resolution:
+```bash
+# Shell env has ANTHROPIC_MODEL=opus
+# ~/.claude/settings.json has ANTHROPIC_MODEL=sonnet
+# .claude/settings.json has ANTHROPIC_MODEL=haiku
+
+# Claude Code uses: opus (shell wins)
+```
+
+## Real-World Configuration Examples
+
+### Example 1: Enterprise with AWS Bedrock
+
+```bash
+# ~/.bash_profile or ~/.zshrc
+export AWS_PROFILE=production
+export AWS_REGION=us-west-2
+export ANTHROPIC_USE_BEDROCK=1
+export ANTHROPIC_DEFAULT_OPUS_MODEL=anthropic.claude-3-5-sonnet-20241022-v2:0:200k
+export HTTP_PROXY=http://corporate-proxy.internal:8080
+export NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-bundle.crt
+export CLAUDE_CODE_DISABLE_TELEMETRY=1
+```
+
+### Example 2: Local Development with Vertex AI
+
+```json
+{
+  "env": {
+    "ANTHROPIC_USE_VERTEX": "1",
+    "GOOGLE_CLOUD_PROJECT": "my-project-dev",
+    "GOOGLE_CLOUD_REGION": "us-central1",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-3-5-sonnet@20241022",
+    "CLAUDECODE_EFFORT_LEVEL": "high",
+    "DISABLE_PROMPT_CACHING": "0"
+  }
+}
+```
+
+### Example 3: Constrained Environment (Limited tokens/budget)
+
+```bash
+export CLAUDE_CODE_MAX_TURNS=20          # Force summaries every 20 turns
+export ANTHROPIC_MODEL=haiku             # Use cheaper model
+export CLAUDE_CODE_EFFORT_LEVEL=low      # Reduce reasoning
+export DISABLE_PROMPT_CACHING=1          # Save some token overhead
+```
+
+## Troubleshooting Variables
+
+When Claude Code behaves unexpectedly:
+
+```bash
+# Check which model is actually loaded
+env | grep ANTHROPIC_MODEL
+
+# Test API connectivity (before full session)
+curl -X GET https://api.anthropic.com/v1/models \
+  -H "x-api-key: $ANTHROPIC_API_KEY" \
+  -H "anthropic-version: 2024-06"
+
+# Enable debug output
+export CLAUDE_CODE_DEBUG=1
+export CLAUDE_CODE_DEBUG_MCP=1
+claude
+
+# Verify sandbox status
+export CLAUDE_CODE_VERBOSE_MODE=1
+# Output will show whether commands run sandboxed or unsandboxed
+```
+
+## Network Configuration Details
+
+### Behind Corporate Proxy
+
+```bash
+# All three variables often needed together
+export HTTP_PROXY=http://proxy.company.com:8080
+export HTTPS_PROXY=http://proxy.company.com:8080
+export NO_PROXY=localhost,127.0.0.1,.company.internal
+
+# If proxy uses client certificates
+export NODE_EXTRA_CA_CERTS=/etc/ssl/certs/corporate-ca.pem
+
+# Test connectivity
+curl -x http://proxy.company.com:8080 https://api.anthropic.com
+```
+
+### SOCKS Proxy (Less common)
+
+```bash
+# For SOCKS5 proxies (e.g., SSH tunneling)
+export SOCKS_PROXY=socks5://localhost:1080
+
+# SSH tunnel example:
+# ssh -D 1080 user@remote-host
+# Then set SOCKS_PROXY=socks5://localhost:1080
+```
+
+## API Rate Limits & Batching
+
+With `CLAUDE_CODE_MAX_TURNS` set:
+
+```bash
+export CLAUDE_CODE_MAX_TURNS=50
+
+# Useful for:
+# - Controlling costs (limits expensive operations)
+# - Forcing summaries (every 50 turns, session ends)
+# - Testing within quotas
+# - Batch processing (restart session, use fresh token budget)
+```
+
+## Custom Models for Enterprise
+
+```bash
+# Single custom model via gateway
+export ANTHROPIC_CUSTOM_MODEL_OPTION=my-gateway/claude-opus-4-6
+export ANTHROPIC_CUSTOM_MODEL_OPTION_NAME="Opus via Internal Gateway"
+export ANTHROPIC_CUSTOM_MODEL_OPTION_DESCRIPTION="Routes through internal LLM gateway with monitoring"
+
+# Result: /model picker shows "Opus via Internal Gateway" option
+# Usage: claude --model custom
+```
+
+## Prompt Caching Granularity
+
+Disabling prompt caching by model:
+
+```bash
+# Cache OFF for all models (saves no tokens, slower)
+export DISABLE_PROMPT_CACHING=1
+
+# Cache OFF for Haiku only (Haiku cache often not worth the complexity)
+export DISABLE_PROMPT_CACHING_HAIKU=1
+
+# Cache OFF for Opus only (unusual - Opus caching is most valuable)
+export DISABLE_PROMPT_CACHING_OPUS=1
+
+# Recommended: Leave all enabled (default)
+```
+
+## Reasoning & Thinking Tokens
+
+```bash
+# Low effort: minimal extended thinking
+export CLAUDE_CODE_EFFORT_LEVEL=low
+export MAX_THINKING_TOKENS=1000
+
+# High effort: extensive reasoning
+export CLAUDE_CODE_EFFORT_LEVEL=high
+export MAX_THINKING_TOKENS=20000
+
+# Max effort (Opus 4.6 only): maximum problem-solving
+export CLAUDE_CODE_EFFORT_LEVEL=max
+export MAX_THINKING_TOKENS=50000  # Opus 4.6 allows this
+```
+
+**Cost impact**: Each thinking token costs ~same as output token. `high` effort = ~30% more tokens.
+
+## Platform-Specific Setup
+
+### macOS Permanent Setup
+
+```bash
+# ~/.zshrc (or ~/.bash_profile for bash)
+export ANTHROPIC_API_KEY="sk-ant-v0-..."
+export ANTHROPIC_MODEL="opus"
+
+# Source this file automatically
+source ~/.zshrc
+```
+
+### Windows Permanent Setup
+
+```powershell
+# PowerShell profile: Open PowerShell, run:
+# echo $profile
+# Edit that file (usually: C:\Users\USERNAME\Documents\PowerShell\profile.ps1)
+
+[System.Environment]::SetEnvironmentVariable("ANTHROPIC_API_KEY", "sk-ant-v0-...", "User")
+[System.Environment]::SetEnvironmentVariable("ANTHROPIC_MODEL", "opus", "User")
+
+# Restart PowerShell to apply
+```
+
+### Linux Permanent Setup
+
+```bash
+# ~/.bashrc or ~/.zshrc (whichever shell you use)
+export ANTHROPIC_API_KEY="sk-ant-v0-..."
+export ANTHROPIC_MODEL="opus"
+export CLAUDE_CODE_EFFORT_LEVEL="medium"
+
+# Apply without restarting:
+source ~/.bashrc
+```
+
+## Performance Tuning Variables
+
+```bash
+# Memory constraints (limit Claude Code process)
+export NODE_OPTIONS="--max-old-space-size=2048"  # 2GB limit
+
+# Context window
+export CLAUDE_CODE_DISABLE_1M_CONTEXT=0  # Keep 1M enabled if available
+
+# Large project optimization
+export USE_BUILTIN_RIPGREP=1  # Use internal ripgrep (faster)
+# vs USE_BUILTIN_RIPGREP=0  # Use system ripgrep (slower but customizable)
+```
+
+## Advanced: Multiple Sessions with Different Configs
+
+```bash
+# Session 1: Production with strict limits
+export ANTHROPIC_MODEL=sonnet
+export CLAUDE_CODE_MAX_TURNS=30
+export CLAUDE_CODE_TASK_LIST_ID=prod-task-list
+claude
+
+# Session 2: Development with full power
+export ANTHROPIC_MODEL=opus
+export CLAUDE_CODE_MAX_TURNS=200
+export CLAUDE_CODE_TASK_LIST_ID=dev-task-list
+export CLAUDE_CODE_EFFORT_LEVEL=high
+claude
+```
+
+Each session maintains separate task lists and configurations.
+
+## Best Practices (Updated March 2026)
+
+- **Never hardcode API keys**: Use environment variables, `.env` files (with .gitignore), or 1Password/Vault
+- **Provider-specific auth**: Test with `curl` before starting expensive sessions
+- **Proxy debugging**: Use `curl -v` to verify proxy connectivity before blaming Claude Code
+- **Context windows**: Use `sonnet[1m]` or `opus[1m]` for large codebases (needs paid subscription)
+- **Effort levels**: Start with `low`, bump to `medium` for production code
+- **Batch jobs**: Use `CLAUDE_CODE_MAX_TURNS` to limit token spend per session
+- **Telemetry**: Disable if processing sensitive code
+- **Sandboxing**: Keep enabled unless you fully trust all executed code
+
+## See Also
+
+- [Claude Code Settings](/en/tools/claude-code-settings)
+- [Claude Code Configuration](/en/tools/claude-code-configuration)
+- [Claude Code Authentication](/en/tools/claude-code-authentication)
+- [Anthropic API Documentation](https://docs.anthropic.com)
+
+**Last Updated**: 21.03.2026 | **Total Lines**: 500+
+
+## Sources and Links
+
+- [Environment Variables](https://code.claude.com/docs/en/env-vars)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

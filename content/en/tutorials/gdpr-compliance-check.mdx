@@ -1,0 +1,421 @@
+---
+title: "GDPR Compliance Check for Your AI Stack"
+date: 2026-03-21
+summary: "Practical GDPR checklist for self-hosted AI systems in Europe: data processing, retention, user rights, technical measures"
+tags: ["gdpr", "compliance", "eu-ai-act", "data-protection", "privacy", "legal"]
+author: "AI Engineering"
+---
+
+# GDPR Compliance Check for Your AI Stack
+
+GDPR applies to any system processing personal data of EU residents, even if you're not in Europe. This is your compliance checklist.
+
+## Core GDPR Obligations
+
+### 1. Legal Basis for Processing
+
+GDPR requires one of these before processing any personal data:
+
+- **Consent:** User explicitly agrees
+- **Contract:** Processing needed to fulfill a service
+- **Legal obligation:** Law requires it
+- **Vital interests:** Life-or-death situation
+- **Public task:** Government/official function
+- **Legitimate interests:** You have a valid business reason
+
+**Action:** Document which basis applies to each type of data you process.
+
+Example: If you summarize customer feedback with Ollama:
+- Legal basis: Legitimate interests (improve product)
+- Process: Customer feedback text → Ollama → summary
+- Data categories: Customer names, feedback content
+
+### 2. Data Processing Record (Required)
+
+Create a **Record of Processing Activities** (ROPA) document:
+
+```markdown
+# Record of Processing Activities
+
+| Data Type | Purpose | Legal Basis | Retention | Recipients |
+|-----------|---------|-------------|-----------|------------|
+| User feedback text | Summarization | Legitimate interest | 30 days | Internal team |
+| Email address | Notifications | Consent | Until unsubscribe | n8n mail service |
+| Chat history | Model improvement | Contract | 90 days | Your-server storage |
+| API logs | Security audit | Legal obligation | 1 year | Security team |
+```
+
+## Data Processing Assessment (DPIA)
+
+If you're processing sensitive data (health, finance, location) or at scale, you need a **Data Protection Impact Assessment (DPIA)**.
+
+### DPIA Checklist
+
+- [ ] What personal data is processed?
+- [ ] How long is it stored?
+- [ ] Who has access to it?
+- [ ] What could go wrong? (breach, unauthorized access, loss)
+- [ ] What controls prevent problems?
+- [ ] Is a breach likely? Impact if it happens?
+- [ ] Do users have rights to access/delete their data?
+
+### Example DPIA: Ollama Chat History
+
+```
+Description: Users submit questions via webhook, Ollama responds, conversation stored.
+
+Data: User question text, generated response, timestamp, user IP (optional)
+
+Risk: If database breached, questions exposed (may contain sensitive info)
+
+Controls:
+  - Database encrypted at rest (SQLite with encryption)
+  - Access limited to admins only
+  - Retention: 30 days, then auto-delete
+  - No backup of personally identifiable data
+
+Residual Risk: Low (controls are strong)
+```
+
+## Technical Safeguards (Article 32)
+
+GDPR requires "appropriate" security. For AI stacks:
+
+### Encryption
+
+**At rest (database):**
+```bash
+# PostgreSQL with encryption
+docker run -e POSTGRES_PASSWORD=strong_password \
+  -v /path/to/pgdata:/var/lib/postgresql/data \
+  postgres:15
+
+# Enable pg_tde (transparent data encryption) for production
+# Or use dm-crypt on Linux:
+sudo cryptsetup luksFormat /dev/sda1
+```
+
+**In transit (API calls):**
+```yaml
+# docker-compose.yml
+services:
+  n8n:
+    environment:
+      - N8N_PROTOCOL=https
+      - WEBHOOK_URL=https://your-domain.com  # Not http://
+```
+
+### Access Control
+
+```python
+# Example: Only admins can access user chat data
+from functools import wraps
+from flask import abort, request
+
+def admin_only(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if request.user.role != 'admin':
+            abort(403, "Forbidden")
+        return f(*args, **kwargs)
+    return decorated
+
+@app.route('/api/chat-history')
+@admin_only
+def get_chat_history():
+    # Only admins see this
+    return database.query("SELECT * FROM chats")
+```
+
+### Logging & Monitoring
+
+```yaml
+# Log who accesses what
+n8n:
+  environment:
+    - N8N_LOGGER_LEVEL=debug
+    - LOG_FORMAT=json  # Structured logging
+
+# Audit log example
+{
+  "timestamp": "2026-03-21T10:15:00Z",
+  "user": "admin@company.com",
+  "action": "accessed_user_chat_history",
+  "user_id": "user_123",
+  "result": "success"
+}
+```
+
+## User Rights (Chapter 3, Articles 12-22)
+
+You MUST provide:
+
+### 1. Right to Access (Article 15)
+
+User asks: "What data do you have on me?"
+
+**Your response time:** 30 days
+
+**What to provide:**
+```json
+{
+  "personal_data": {
+    "email": "user@example.com",
+    "feedback_submissions": [
+      {
+        "text": "Great product",
+        "date": "2026-03-20",
+        "processed": "sent to analysis"
+      }
+    ],
+    "chat_history": [
+      {
+        "question": "How to use feature X?",
+        "date": "2026-03-19",
+        "model_used": "mistral"
+      }
+    ]
+  }
+}
+```
+
+**Implementation:**
+```python
+@app.route('/api/user/<user_id>/data-export', methods=['GET'])
+@authenticated
+def export_user_data(user_id):
+    """GDPR Article 15: Right to access"""
+    if request.user.id != user_id:
+        abort(403, "Can only access your own data")
+
+    data = {
+        "personal_data": database.query(
+            "SELECT * FROM users WHERE id = ?", user_id
+        ),
+        "feedback": database.query(
+            "SELECT * FROM feedback WHERE user_id = ?", user_id
+        ),
+        "export_date": datetime.now().isoformat()
+    }
+
+    return jsonify(data)
+```
+
+### 2. Right to Deletion (Article 17, "Right to be Forgotten")
+
+User asks: "Delete all my data"
+
+**Your response time:** 30 days
+
+**Exceptions:** You can keep data if:
+- Required by law
+- User consented to longer retention
+- Data is anonymized (cannot identify them)
+
+**Implementation:**
+```python
+@app.route('/api/user/<user_id>/delete', methods=['POST'])
+@authenticated
+def delete_user_data(user_id):
+    """GDPR Article 17: Right to deletion"""
+    if request.user.id != user_id:
+        abort(403)
+
+    # Delete from all tables
+    database.execute("DELETE FROM chats WHERE user_id = ?", user_id)
+    database.execute("DELETE FROM feedback WHERE user_id = ?", user_id)
+    database.execute("DELETE FROM users WHERE id = ?", user_id)
+
+    # Log deletion for audit
+    log_audit("user_deleted", user_id=user_id, timestamp=now())
+
+    return {"status": "deleted"}
+```
+
+### 3. Right to Rectification (Article 16)
+
+User asks: "My email is wrong, fix it"
+
+**Implementation:**
+```python
+@app.route('/api/user/<user_id>/update', methods=['PUT'])
+@authenticated
+def update_user_data(user_id):
+    if request.user.id != user_id:
+        abort(403)
+
+    updates = request.json
+    database.execute(
+        "UPDATE users SET email = ? WHERE id = ?",
+        updates["email"], user_id
+    )
+    return {"status": "updated"}
+```
+
+### 4. Right to Data Portability (Article 20)
+
+User asks: "Give me my data in machine-readable format"
+
+**Implementation:**
+```python
+@app.route('/api/user/<user_id>/export-json', methods=['GET'])
+@authenticated
+def export_json(user_id):
+    if request.user.id != user_id:
+        abort(403)
+
+    data = {
+        "user": database.query("SELECT * FROM users WHERE id = ?", user_id),
+        "feedback": database.query("SELECT * FROM feedback WHERE user_id = ?", user_id),
+        "format": "JSON",
+        "exported_at": datetime.now().isoformat()
+    }
+
+    response = make_response(json.dumps(data, indent=2))
+    response.headers["Content-Disposition"] = f"attachment; filename=user_{user_id}_data.json"
+    return response
+```
+
+## Data Retention Policies
+
+GDPR: Keep data only as long as necessary.
+
+**Example retention schedule:**
+
+```
+Data Type                     | Retention | Reason
+------------------------------|-----------|----------------------------------
+Chat messages                 | 30 days   | Support purposes only
+Error logs                     | 90 days   | Debugging, then anonymize
+User authentication logs       | 1 year    | Security audit trail
+Payment records               | 7 years   | Tax/accounting requirement
+Model training data           | Until     | With consent, for improvement
+                              | deletion  | (user can revoke)
+Anonymized analytics         | Unlimited | Cannot identify individuals
+```
+
+**Automation:**
+
+```python
+# Cron job to auto-delete old data
+import schedule
+import time
+
+def cleanup_old_data():
+    # Delete chats older than 30 days
+    database.execute("""
+        DELETE FROM chats
+        WHERE created_at < datetime('now', '-30 days')
+    """)
+
+    # Anonymize error logs older than 90 days
+    database.execute("""
+        UPDATE logs
+        SET user_id = NULL, ip_address = NULL
+        WHERE created_at < datetime('now', '-90 days')
+    """)
+
+schedule.every().day.at("02:00").do(cleanup_old_data)
+```
+
+## Privacy Notice
+
+Users must know what you're doing with their data.
+
+**Required content:**
+
+```markdown
+# Privacy Notice
+
+We collect the following personal data:
+- Email address (to send notifications)
+- Chat message text (to improve the model)
+- Usage logs (for debugging)
+
+**Legal basis:** Your consent (you agree to this notice)
+
+**How long we keep it:**
+- Chat messages: 30 days
+- Email: until you unsubscribe
+- Logs: 90 days
+
+**Your rights:**
+- Access your data: /api/my-data
+- Delete your data: /api/delete-my-data
+- Export your data: /api/export-my-data
+- Contact: privacy@your-company.com
+
+**Third parties:** We don't share data with anyone.
+
+**Cookies:** We use session cookies for login only.
+
+**Changes:** We'll notify you 30 days before privacy policy changes.
+```
+
+## Breach Notification (Article 33)
+
+If personal data is breached:
+
+1. **Within 72 hours:** Report to data protection authority (your country's DPA)
+2. **Without undue delay:** Inform affected users
+3. **Keep records:** Document what happened, what you did
+
+```python
+def notify_breach(user_ids, breach_type, severity):
+    """Notify users of data breach"""
+
+    # Log breach
+    breach_id = log_breach(
+        type=breach_type,
+        severity=severity,
+        affected_count=len(user_ids),
+        timestamp=datetime.now()
+    )
+
+    # Notify users
+    for user_id in user_ids:
+        user = database.query("SELECT email FROM users WHERE id = ?", user_id)
+        send_email(
+            to=user.email,
+            subject="Security Notice: Your data may have been exposed",
+            body=f"""
+We discovered a security incident on {date}.
+Your data may have been affected.
+
+What we found: {breach_type}
+What we did: {remediation_steps}
+
+Learn more: https://your-site.com/security/{breach_id}
+            """
+        )
+
+    # Notify DPA
+    submit_to_dpa(
+        incident_id=breach_id,
+        description=breach_type,
+        affected_count=len(user_ids)
+    )
+```
+
+## Checklist
+
+- [ ] Document legal basis for processing (one per data type)
+- [ ] Create Record of Processing Activities (ROPA)
+- [ ] Assess risks in DPIA (if processing sensitive data)
+- [ ] Encrypt database at rest and in transit
+- [ ] Implement access control (role-based)
+- [ ] Enable audit logging
+- [ ] Document data retention policy
+- [ ] Implement user right endpoints (/api/user/my-data, /delete, etc.)
+- [ ] Create privacy notice and publish on website
+- [ ] Test data export (Article 15 response)
+- [ ] Test data deletion (Article 17 response)
+- [ ] Set up breach notification process
+- [ ] Schedule automatic data cleanup
+- [ ] Train team on GDPR obligations
+- [ ] Document processing activities in ERPNext
+
+## Sources and Links
+
+- [GDPR.gv.at](https://www.dsb.gv.at)
+- [EU AI Act](https://eur-lex.europa.eu/eli/reg/2024/1689/oj)

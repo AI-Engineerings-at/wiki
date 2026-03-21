@@ -1,0 +1,509 @@
+---
+title: Claude Dispatch — Desktop-Automation von deinem Handy
+date: 2026-03-21
+summary: Technischer Guide für Claude Dispatch (seit März 2026) — Remote Control von Agents auf deinem Desktop, Cross-Device Konversationen, Memory-System und praktische Anwendungsfälle.
+tags: [dispatch, mobile, remote-control, cowork, agents, automation, desktop]
+author: AI Engineering
+---
+
+# Claude Dispatch — Desktop-Automation von deinem Handy
+
+Dispatch (launched März 2026) ermöglicht es dir, Agents auf deinem Desktop vom Handy aus zu steuern. Absende eine Text-Anweisung von unterwegs und kehre später zu fertigem Code, Bericht oder Spreadsheet auf dem Desktop zurück.
+
+## Was ist Dispatch?
+
+Dispatch ist ein "Walkie-Talkie" zwischen Handy und Desktop. Du kontrollierst via Sprache was auf deinem Computer passiert.
+
+**Wichtiger Hinweis:** Dein Desktop muss AN bleiben und Claude Cowork muss laufen. Es gibt keine Cloud-Berechnung—alles passiert lokal auf deinem Computer.
+
+## Setup (2 Minuten)
+
+### Voraussetzungen
+
+- Claude Cowork auf Mac oder Windows
+- Claude Mobile App (iOS oder Android)
+- Claude Max Subscription (aktuell erforderlich)
+- Lokale Netzwerkverbindung (optional wenn Desktop-Netzwerksmodus)
+
+### Schritt 1: Öffne Cowork
+
+Claude Cowork auf dem Desktop starten und anmelden.
+
+### Schritt 2: Dispatch aktivieren
+
+Klick auf den "Dispatch" Button im oberen Menü.
+
+Cowork generiert einen QR-Code.
+
+### Schritt 3: QR-Code scannen
+
+Öffne Claude App auf deinem Handy und tippe auf das Kamera-Icon. Scanne den QR-Code vom Desktop.
+
+Handy und Desktop sind jetzt gekoppelt.
+
+## Wie es funktioniert
+
+Dispatch erstellt einen **persistenten Konversations-Thread** zwischen Handy und Desktop. Tippe einen Befehl auf deinem Handy und Claude verarbeitet ihn mit allem was auf deinem Desktop verfügbar ist:
+
+- Deine lokalen Dateien
+- Verbundene Plugins (Slack, Email, etc.)
+- Konfigurierte Workflows
+- Installierte Skills
+- APIs die dein Netzwerk erreichen
+
+Die komplette Berechnung passiert auf deinem Desktop. Dein Handy ist nur die Fernbedienung.
+
+## Anwendungsbeispiele
+
+### Einfache Lookups (90% Erfolgsrate)
+
+**Handy:** "Was war meine letzte Slack-Nachricht im #product Channel?"
+
+**Desktop:** Fragt Slack, holt Nachricht, sendet zurück.
+
+**Ergebnis:** ~30 Sekunden, zuverlässig.
+
+### Datei-Suche (85% Erfolgsrate)
+
+**Handy:** "Find all spreadsheets with Q1 in the name and send me locations"
+
+**Desktop:** Searches local files, returns paths.
+
+**Ergebnis:** Simple, funktioniert.
+
+### Zusammenfassungen (80% Erfolgsrate)
+
+**Handy:** "Summarize my emails from today"
+
+**Desktop:** Liest Email-Inbox, erstellt Summary.
+
+**Ergebnis:** Zuverlässig.
+
+### Komplexe Tasks (50% Erfolgsrate)
+
+**Handy:** "Create expense report from my receipts folder, categorize by project, export to Excel"
+
+**Desktop:**
+1. Liest PDF Receipts
+2. Extrahiert Beträge und Daten
+3. Kategorisiert nach Projekt
+4. Erstellt Excel File
+5. Speichert in Documents
+
+**Ergebnis:** ~50% Erfolgsrate bei komplexen Aufgaben. Möglicherweise manuelle Intervention nötig.
+
+## Zuverlässigkeit nach Task-Typ
+
+| Task-Typ | Erfolgsrate | Anmerkungen |
+|----------|-------------|-----------|
+| **Datei-Suche** | 90% | Sehr zuverlässig |
+| **Zusammenfassungen** | 85% | Funktioniert gut bei begrenzten Daten |
+| **Einfache Analyse** | 75% | Kurze Tasks erfolgreich |
+| **Komplexe Workflows** | 50% | Debugging oder manuell oft nötig |
+| **Multi-Step Sequences** | 40% | Mehr Schritte = mehr Fehler |
+| **Real-Time Operationen** | 60% | API-Calls, Service-Interaktionen |
+
+## Häufige Probleme & Lösungen
+
+**Timeout:** Handy verliert Verbindung
+- Fix: Befehl erneut senden, Desktop prüfen ob wach
+
+**Unvollständige Ausgabe:** Große Ergebnisse gekürzt
+- Fix: Um Zusammenfassung statt Details bitten
+
+**Kontext verloren:** Multi-Step Tasks verlieren den Faden
+- Fix: In kleinere, sequenzielle Tasks aufteilen
+
+**API Fehler:** Externe APIs timeout
+- Fix: Retry-Logik in Workflows einbauen
+
+## Best Practices
+
+### DO verwende Dispatch für:
+
+1. **Schnelle Lookups** — Dateien suchen, Info finden
+2. **Einfache Zusammenfassungen** — Emails digesten, Dokumente
+3. **Status-Checks** — "Antwortet der Server?"
+4. **Queue hinzufügen** — "Neues Support-Ticket erstellen"
+5. **Approval Tasks** — Review pending items
+
+### DON'T verwende Dispatch für:
+
+1. **Komplexe Multi-Step Sequences** — Bricht oft ab
+2. **Real-Time Interaktionen** — Zu viel Latenz
+3. **Kritische Operationen** — Nicht zuverlässig genug
+4. **Long-Running Tasks** — Laptop könnte in Sleep gehen
+
+## Desktop-Anforderungen
+
+Dein Computer muss diese Anforderungen erfüllen:
+
+- **Power:** Laptop muss AN und am Strom sein
+- **Cowork:** Applikation muss laufen und angemeldet
+- **Netzwerk:** Verbunden mit Internet
+- **Performance:** Minimal andere Prozesse (viele Apps = langsamer)
+
+## Sicherheit
+
+### Was Dispatch kann
+
+Mit aktiviertem Dispatch kann dein Handy deinen Desktop befehlen:
+- Jede lokale Datei lesen
+- Jeden Befehl ausführen
+- Jede API die dein Desktop erreicht
+- Jedes integrierte Service (Slack, Email, etc.)
+
+### Dich schützen
+
+1. **Starker Handy-Lock** — PIN, Fingerprint, Face Recognition
+2. **Dispatch deaktivieren** — Wenn nicht in Nutzung
+3. **Separater Agent** — Create read-only "mobile" agent mit limited Permissions
+4. **Audit Logs** — Kontrolliere was Dispatch ausgeführt hat
+5. **VPN** — Nutze bei sensitive Tasks von öffentlichen Netzwerken
+
+## Troubleshooting
+
+### Handy findet Desktop nicht
+
+**Issue:** QR-Code Scan funktioniert nicht
+
+**Lösungen:**
+- Beide im gleichen WiFi Netzwerk
+- Cowork neu starten
+- Neue QR-Code generieren
+- Firewall-Einstellungen prüfen
+
+### Commands Timeout
+
+**Issue:** "Dispatch offline" Meldung
+
+**Lösungen:**
+- Desktop Check: Ist der Bildschirm wach?
+- Ping desktop from phone
+- Cowork neu starten
+- Netzwerkverbindung prüfen
+
+### Incomplete Results
+
+**Issue:** Task gestartet aber nicht fertig
+
+**Lösungen:**
+- Request spezifischer machen
+- In kleinere Tasks aufteilen
+- Desktop Logs für Fehler prüfen
+- Timeout in Settings erhöhen
+
+## Advanced: Mobile-Only Agent erstellen
+
+Für mehr Kontrolle: Dedicated Agent mit Limited Permissions:
+
+```yaml
+---
+name: mobile-assistant
+description: >
+  Limited agent for Dispatch mode with read-only access.
+model: haiku  # Schneller für Mobile
+maxTurns: 20
+disallowedTools: [Bash, Write, Edit]
+---
+
+# Mobile Assistant
+
+Fast, read-only agent für Handy-Kontrolle.
+Kann keine destruktiven Änderungen machen.
+```
+
+Dann in Dispatch-Einstellungen diesen Agent für Handy-Befehle nutzen.
+
+## Wann Dispatch nicht ausreicht
+
+Wenn Dispatch bei komplexen Tasks fehlschlägt, hast du Optionen:
+
+1. **Zurück zum Desktop** — Voller Cowork Capability
+2. **Als Workflow umgestalten** — Automatisch ausführen
+3. **Skill erstellen** — Teach Cowork es besser zu machen
+4. **In Teile aufteilen** — Komplexe Task in einfache Steps
+
+## Praktische Anwendungen
+
+### 1. Arbeiten unterwegs
+
+```
+Morgens im Büro: "Schreibe einen Blog-Post"
+Claude arbeitet tagsüber
+Abends zuhause: Feedback geben, fertigstellen
+```
+
+### 2. Code-Review von überall
+
+```
+Team-Meeting → Jemand zeigt Code
+Du: "Sende den Link"
+Du: In Dispatch → "Review diesen Code"
+→ Vom Handy möglich
+```
+
+### 3. Dokumentation schreiben
+
+```
+Gedanke kommt: "Dokumentiere die CLI Struktur"
+Handy: Dispatch → Aufgabe eingeben
+Desktop: Automatisch Task erstellt
+```
+
+## Limits & Quotas
+
+- **Session-Größe:** Max ~200 Messages (dann → Save as Chat)
+- **Storage:** Auto-Memory limited auf ~500 Lines
+- **Retention:** Sessions nach 30 Tagen gelöscht
+- **Simultane Geräte:** 1 Dispatch Session per Account gleichzeitig
+
+## Checkliste
+
+- [ ] Claude Max Subscription haben
+- [ ] Claude Cowork und Mobile App installiert
+- [ ] Dispatch aktivieren und QR-Code scannen
+- [ ] Erste einfache Anfrage vom Handy senden
+- [ ] Datei-Suche-Fähigkeit testen
+- [ ] Email-Zusammenfassungs-Task versuchen
+- [ ] Notieren welche Tasks fehlschlagen und warum
+- [ ] Read-only mobile Agent erstellen
+- [ ] Sicherheit überprüfen und Dispatch bei Nicht-Nutzung deaktivieren
+- [ ] Best Practices merken
+
+---
+
+**Bottom line:** Dispatch ist nützlich für Lookups und einfache Tasks (75% success rate), aber nicht für komplexe Workflows. Nutze es für was es gut kann und kenne die Limits.
+
+---
+
+## Praktische Anwendungsbeispiele (Realworld)
+
+### Beispiel 1: Support Workflow
+```
+Montag 09:00 Büro:
+User (Handy): "Find me all open support tickets from John"
+
+Desktop (läuft):
+→ Queries Support-DB
+→ Schickt Liste zurück
+→ User sieht auf Handy: 7 Tickets, 3 High-Priority
+
+Montag 14:00 Im Meeting:
+User: "What's the status of ticket #4523?"
+→ Dispatch: "Status: Waiting for Customer Reply (2 days)"
+
+Alles vom Handy möglich, ohne Desktop zu öffnen!
+```
+
+### Beispiel 2: Content Creation Pipeline
+```
+Idee kommt spontan:
+User (Handy): "Write blog outline for 'AI in 2026'"
+
+Desktop:
+→ Claude arbeitet (30 Sekunden)
+→ Outline wird in Blog-Folder gespeichert
+→ Notification: "Done, 5 sections, 800 words"
+
+User (später):
+→ Vollständiger Outline wartet
+→ Weitermachen wenn Zeit
+
+Nicht am Desktop gebunden sein, aber trotzdem produktiv!
+```
+
+### Beispiel 3: Data Analysis
+```
+Chef fragt im Standup:
+User: "Send me Q1 Revenue summary"
+
+Desktop (querying Spreadsheet):
+→ 2 Minuten Processing
+→ Summary als Text zurück
+→ "Revenue: €150k, +25% YoY, Top 3 Customers: A, B, C"
+
+Alle Infos im Standup verfügbar!
+```
+
+---
+
+## Dispatch Limits & Fehlerschutzungen
+
+### Was gut funktioniert (90%+ Success)
+- Dateien suchen (z.B. "find all PDFs with Q1 in name")
+- Einfache Lookups (z.B. "last email from X")
+- Status-Checks (z.B. "is the server up?")
+- Zusammenfassungen kurzer Inhalte
+- Simple Commands (z.B. "create new task")
+
+### Was manchmal funktioniert (50-75%)
+- Moderate Datei-Bearbeitung
+- Multi-Step Analyze-Aufgaben
+- API-Calls mit Transformation
+- Größere Zusammenfassungen
+
+### Was selten funktioniert (<30%)
+- Komplexe Multi-Step-Workflows (Zuviele Steps)
+- Real-Time Interaktionen (zu viel Latenz)
+- Große File-Operationen (Timeout)
+- Kontext-abhängige Aufgaben (Kontext-Loss)
+
+---
+
+## Netzwerk-Topologie: Wie Dispatch Arbeitet
+
+```
+Handy (Vordergrund)
+    ↓ WiFi/Cellular
+    ↓
+Dispatch Relay (Cloud, optional)
+    ↓ (nur wenn Handy-Desktop nicht direkt erreichbar)
+    ↓
+Desktop (muss AN sein)
+    ↓
+Dateisystem + APIs
+    ↓
+Response zurück
+```
+
+**Idealfall:** Handy + Desktop im gleichen WiFi
+- Direkte Verbindung
+- Keine Relay-Latenz
+- <100ms Roundtrip
+
+**Realistisch:** Über Internet
+- Relay-Verbindung nötig
+- ~500ms Roundtrip
+- Funktioniert aber
+
+---
+
+## Advanced: Mobile Agent mit Custom Permissions
+
+Für sensitive Workflows, erstelle einen Read-Only Mobile-Agent:
+
+```yaml
+---
+name: mobile-read-only
+description: >
+  Limited agent for Dispatch with read-only access.
+  Can view files, summarize, but cannot create/edit.
+
+model: haiku  # Schneller
+maxTurns: 10
+disallowedTools: [Bash, Write, Edit]  # No destructive actions
+
+allowed-tools: [Read, Grep, Glob]  # Nur Read!
+---
+
+# Mobile Read-Only Assistant
+
+Safe für Handy-Kontrolle. Kann nicht:
+- Dateien löschen
+- Code ändern
+- Bash-Befehle ausführen
+
+Can:
+- Alles lesen
+- Zusammenfassen
+- Suchen
+```
+
+Dann in Dispatch-Einstellungen → "Use mobile-read-only agent for mobile requests"
+
+---
+
+## Debugging: Dispatch-Fehler
+
+### Fehler: "Dispatch offline" (Desktop nicht erreichbar)
+
+1. **Ist Desktop AN?**
+   - Desktop-Bildschirm wach?
+   - Cowork-Applikation läuft?
+   - Netzwerk verbunden?
+
+2. **Firewall blockiert?**
+   - Windows: Firewall Exceptions überprüfen
+   - Mac: System Preferences → Security & Privacy
+   - Router: Port-Forwarding falls über Internet
+
+3. **Neue QR-Code generieren**
+   - Click "Dispatch Settings"
+   - Generate new QR Code
+   - Re-pair auf Handy
+
+### Fehler: "Task gestartet aber nicht beendet"
+
+Häufiger: Complex Task braucht zu viel Zeit
+
+**Lösung:**
+- Request spezifischer machen ("summarize in 100 words")
+- In kleinere Tasks splitten
+- Desktop-Logs überprüfen (`Cowork → View Logs`)
+
+### Fehler: "Ergebnis war unvollständig"
+
+Desktop hat Timeout gehabt
+
+**Lösungen:**
+1. Timeout erhöhen (Settings → Advanced)
+2. Request vereinfachen
+3. Handy in nähe Desktop (bessere WiFi)
+
+---
+
+## Performance-Optimierung
+
+### Für schnellere Responses:
+
+1. **Handy-Agent auf Haiku**
+   ```yaml
+   # Dispatch Auto-Settings
+   - Handy-Requests: Haiku (schnell)
+   - Desktop: Sonnet/Opus (wenn gebraucht)
+   ```
+
+2. **Queries optimieren**
+   ```
+   ❌ Langsam: "Tell me everything about Q1"
+   ✅ Schnell: "Q1 Revenue summary: total + top 3 customers"
+   ```
+
+3. **WiFi nah**
+   - Handy + Desktop im gleichen 5GHz WiFi
+   - Bessere Signal-Stärke
+   - <100ms Latency
+
+---
+
+## Sicherheits-Checkliste
+
+VOR Dispatch aktivieren:
+
+- [ ] Handy mit PIN/Biometric gesichert?
+- [ ] Dispatch deaktiviert wenn nicht genutzt?
+- [ ] Kein sensitives Data auf Desktop sichtbar?
+- [ ] VPN nutzen auf öffentlichem WiFi?
+- [ ] Desktop-Passwort strong?
+- [ ] Audit Logs reviewen regelmäßig?
+
+---
+
+## Ressourcen & Weitere Infos
+
+- [Claude Cowork Official Guide](https://www.anthropic.com/claude-code)
+- [Dispatch Setup & Troubleshooting](https://www.anthropic.com/claude-code)
+- [Mobile Workflow Best Practices](https://www.anthropic.com/claude-code)
+
+**Letzte Aktualisierung**: 21.03.2026 | **Nächste Überprüfung**: Juli 2026
+
+## Quellen und Links
+
+- [Claude Dispatch](https://claude.com/dispatch)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

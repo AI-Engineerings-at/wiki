@@ -1,0 +1,579 @@
+---
+title: Ollama Setup Guide
+date: 2026-03-21
+summary: Lokale LLMs mit Ollama. Installation, Model-Management, GPU-Setup und Integration mit Open WebUI, n8n und Python.
+tags: [ollama, llm, local-ai, gpu, models]
+author: AI Engineering
+---
+
+# Ollama Setup Guide
+
+Ollama lädt große Language Models lokal herunter und läuft sie auf deinem Server. Keine Cloud, keine API-Kosten, volle Kontrolle über deine Daten.
+
+## Installation
+
+### Linux (Ubuntu/Debian)
+
+```bash
+curl -fsSL https://ollama.ai/install.sh | sh
+
+# oder manuell
+wget https://ollama.ai/download/ollama-linux-amd64.tgz
+tar -C /usr -xzf ollama-linux-amd64.tgz
+
+# Starten
+ollama serve
+```
+
+Läuft auf `http://localhost:11434`
+
+### macOS
+
+```bash
+# Homebrew
+brew install ollama
+
+# oder direkt von https://ollama.ai/download
+# dann `/Applications/Ollama.app` öffnen
+```
+
+### Windows
+
+1. Downloade von https://ollama.ai/download
+2. Install und starten
+3. Terminal oder PowerShell:
+```powershell
+ollama serve
+```
+
+Läuft auf `http://localhost:11434`
+
+### Docker
+
+```yaml
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    environment:
+      - OLLAMA_MODELS=/root/.ollama/models
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  ollama_models:
+```
+
+```bash
+docker compose up -d ollama
+```
+
+## Model Management
+
+### Models Herunterladen
+
+```bash
+# Llama 2 (7B—schnell, gut für normale Aufgaben)
+ollama pull llama2
+
+# Mistral (7B—schneller als Llama, mehr Kontext)
+ollama pull mistral
+
+# Llama 2 13B (größer, bessere Qualität)
+ollama pull llama2:13b
+
+# Deepseek (Coding spezialisiert)
+ollama pull deepseek-coder:6.7b
+
+# Neural Chat (schnell, gut für Dialoge)
+ollama pull neural-chat
+
+# Dolphin Mixtral (groß, 8x7B=56B, sehr gut aber langsam)
+ollama pull dolphin-mixtral
+```
+
+Verfügbare Models: https://ollama.ai/library
+
+### Models Verwalten
+
+```bash
+# Alle heruntergeladenen Models auflisten
+ollama list
+
+# Model löschen
+ollama rm llama2
+
+# Model Info
+ollama show llama2
+
+# Model Details (Größe, Parameter)
+ollama show llama2 --modelfile
+```
+
+## GPU Setup
+
+### NVIDIA GPU
+
+**Treiber installieren:**
+```bash
+# Ubuntu/Debian
+sudo apt-get update
+sudo apt-get install nvidia-driver-545
+
+# NVIDIA Container Toolkit (falls Docker)
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
+sudo systemctl restart docker
+```
+
+**Überprüfung:**
+```bash
+nvidia-smi
+```
+
+Sollte deine GPU(s) anzeigen.
+
+**Ollama nutzt automatisch GPU** falls Treiber installiert.
+
+Wenn nicht:
+```bash
+# macOS mit Apple Silicon (automatisch)
+# Linux: CUDA_VISIBLE_DEVICES setzen
+export CUDA_VISIBLE_DEVICES=0
+ollama serve
+```
+
+### AMD GPU (ROCM)
+
+```bash
+# Ubuntu/Debian mit ROCM
+sudo apt-get install rocm-core amdgpu-core
+
+# ROCM_HOME setzen
+export ROCM_HOME=/opt/rocm
+export LD_LIBRARY_PATH=$ROCM_HOME/lib:$LD_LIBRARY_PATH
+export PATH=$ROCM_HOME/bin:$PATH
+
+ollama serve
+```
+
+Überprüfung:
+```bash
+rocm-smi
+```
+
+### Apple Silicon (M1/M2/M3)
+
+GPU wird automatisch genutzt. Kein zusätzliches Setup nötig.
+
+```bash
+ollama pull mistral
+ollama run mistral
+```
+
+## Model Empfehlungen nach Hardware
+
+### < 8GB RAM
+
+```
+mistral:7b       # 4GB VRAM, gute Qualität
+neural-chat      # 4GB VRAM, schnell
+```
+
+```bash
+ollama pull mistral
+ollama run mistral
+```
+
+### 8-16GB RAM
+
+```
+llama2:13b       # 10GB VRAM
+mistral:7b       # 4GB, noch viel Platz
+```
+
+### 16-24GB RAM
+
+```
+dolphin-mixtral  # 8x7B, sehr gut
+llama2:13b       # 10GB
+neural-chat:7b   # Günstig, schnell
+```
+
+### 24GB+ RAM / Enterprise
+
+```
+dolphin-mixtral  # 56B Parameter
+llama2:70b       # Beste Qualität, 40GB VRAM
+command-r        # Kommerzielle Nutzung optimiert
+```
+
+**Tipps:**
+- `ollama list` zeigt Model-Größe
+- Größer ≠ besser: Mistral 7B oft besser als Llama2 7B
+- Context-Größe: 4k (Standard) vs 32k (längere Inputs)
+
+## Modelfile Customization
+
+Erstelle benutzerdefinierte Modelle mit Parameter-Anpassung.
+
+### Einfaches Modelfile
+
+Datei: `my-model.modelfile`
+
+```
+FROM llama2:13b
+
+# System Prompt
+SYSTEM """Du bist ein hilfreicher deutscher Assistent."""
+
+# Parameter
+PARAMETER temperature 0.7
+PARAMETER top_p 0.9
+PARAMETER top_k 40
+PARAMETER num_ctx 4096
+```
+
+Erstellen:
+```bash
+ollama create my-german-llama -f my-model.modelfile
+
+# Nutzen
+ollama run my-german-llama "Erzähle einen Witz"
+```
+
+### Parameter erklärt
+
+```
+temperature     # 0-2.0: Kreativität. 0=deterministisch, 1.0=Standard, 2.0=chaotisch
+top_p           # 0-1: Nucleus Sampling. Höher=mehr Vielfalt
+top_k           # Integer: Nur top k häufigsten Token nutzen
+num_ctx         # Context-Größe: 2048, 4096, 8192, 32768
+num_gpu         # Anzahl GPU-Layer. -1=all auf GPU, 0=CPU only
+```
+
+**Für German beste Einstellungen:**
+```
+PARAMETER temperature 0.5    # Präziser
+PARAMETER top_p 0.85
+PARAMETER num_ctx 4096
+```
+
+## Integration mit Open WebUI
+
+Open WebUI ist eine Web-Oberfläche für Ollama (wie ChatGPT Interface).
+
+### Docker Setup
+
+```yaml
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:latest
+    container_name: open-webui
+    ports:
+      - "3000:8080"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+    volumes:
+      - open-webui_data:/app/backend/data
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
+  open-webui_data:
+```
+
+```bash
+docker compose up -d
+
+# Open WebUI: http://localhost:3000
+```
+
+## Integration mit n8n
+
+Nutze Ollama in n8n Workflows.
+
+### HTTP Request Node
+
+```yaml
+Node: HTTP Request
+
+URL:      http://ollama:11434/api/generate
+Method:   POST
+Headers:  Content-Type: application/json
+Body:     = {
+             "model": "mistral",
+             "prompt": "{{ $json.user_question }}",
+             "stream": false
+           }
+```
+
+Response Parsing:
+```yaml
+Set Node:
+  Key:   answer
+  Value: = {{ $json.response }}
+```
+
+### Open WebUI Integration (falls vorhanden)
+
+```yaml
+HTTP Request:
+URL:      http://open-webui:8080/api/chat/completions
+Method:   POST
+Headers:  Authorization: Bearer {{ $env.OPENAI_API_TOKEN }}
+Body:     = {
+             "model": "mistral",
+             "messages": [
+               { "role": "user", "content": "{{ $json.query }}" }
+             ]
+           }
+```
+
+## Integration mit Python
+
+### Ollama Python Library
+
+```bash
+pip install ollama
+```
+
+**Synchron:**
+```python
+import ollama
+
+response = ollama.generate(
+    model="mistral",
+    prompt="Gib mir einen deutschen Witz",
+    stream=False
+)
+
+print(response['response'])
+```
+
+**Streaming:**
+```python
+import ollama
+
+stream = ollama.generate(
+    model="mistral",
+    prompt="Erzähle eine Geschichte",
+    stream=True
+)
+
+for chunk in stream:
+    print(chunk['response'], end='', flush=True)
+```
+
+**Chat API:**
+```python
+import ollama
+
+message_history = [
+    {
+        "role": "user",
+        "content": "Was ist deine Lieblingsfarbe?",
+    },
+]
+
+response = ollama.chat(model="mistral", messages=message_history)
+print(response['message']['content'])
+```
+
+### Mit HTTP (kein SDK)
+
+```python
+import requests
+import json
+
+url = "http://localhost:11434/api/generate"
+payload = {
+    "model": "mistral",
+    "prompt": "Übersetze ins Deutsche: Hello world",
+    "stream": False
+}
+
+response = requests.post(url, json=payload)
+data = response.json()
+print(data['response'])
+```
+
+## Performance Tuning
+
+### Context Size
+
+Größerer Context = kann längere Texte verarbeiten, aber langsamer.
+
+```bash
+# 4k Context (schnell, Standard)
+ollama run mistral
+
+# 8k Context (langsamer, mehr Info möglich)
+OLLAMA_NUM_CTX=8192 ollama run mistral
+```
+
+In Modelfile:
+```
+PARAMETER num_ctx 8192
+```
+
+### Batch Size
+
+Mehr Batching = schneller bei vielen Requests, aber mehr RAM.
+
+```bash
+OLLAMA_BATCH_SIZE=512 ollama serve
+```
+
+Default: 512. Höher für schneller, niedriger für weniger RAM.
+
+### GPU Layers
+
+Nicht alle Model-Layer müssen auf GPU sein. Manche auf CPU für weniger VRAM.
+
+```
+PARAMETER num_gpu 20  # Erste 20 Layer auf GPU
+```
+
+Balancieren:
+- Höher = schneller, mehr VRAM
+- Niedriger = weniger VRAM, langsamer
+
+```bash
+# Zeige aktuelle Auslastung
+watch nvidia-smi  # Linux
+watch "nvidia-smi --query-gpu=memory.used,memory.free --format=csv"
+```
+
+## Troubleshooting
+
+### "Model not found"
+
+```bash
+# Model herunterladen
+ollama pull mistral
+
+# Nochmal versuchen
+ollama run mistral
+```
+
+### "CUDA not found" oder GPU wird nicht genutzt
+
+```bash
+# NVIDIA Treiber installiert?
+nvidia-smi
+
+# Sollte GPUs zeigen. Wenn nicht: Treiber installieren
+
+# Ollama mit CPU force (zur Not)
+CUDA_VISIBLE_DEVICES=-1 ollama serve
+```
+
+### "Out of Memory" / "Killed"
+
+Model zu groß für deine GPU.
+
+**Lösungen:**
+1. Kleineres Model: `mistral` statt `llama2:13b`
+2. Weniger GPU Layers: `PARAMETER num_gpu 10`
+3. Kleinerer Context: `PARAMETER num_ctx 2048`
+
+```bash
+# Teste mit kleinerem Model
+ollama pull neural-chat  # ~4GB
+ollama run neural-chat
+```
+
+### Langsame Responses
+
+Model auf CPU statt GPU.
+
+```bash
+# Check: nvidia-smi während Request
+# Sollte GPU-Memory nutzen
+
+# Falls nicht: Docker GPU-Support fehlt?
+# https://docs.docker.com/config/containers/resource_constraints/#gpu
+
+docker run --rm --gpus all nvidia/cuda:12.2.0-base-ubuntu22.04 nvidia-smi
+```
+
+### "Connection refused" von anderen Containern
+
+```bash
+# Ollama läuft nur auf localhost, nicht 0.0.0.0
+export OLLAMA_HOST=0.0.0.0:11434
+ollama serve
+
+# Oder in docker-compose:
+environment:
+  - OLLAMA_HOST=0.0.0.0:11434
+```
+
+## Best Practices
+
+- **Model-Auswahl:** Test verschiedene Models mit `ollama run <model>`
+- **Speicher:** `~/.ollama/models/` wird groß. Regelmäßig `ollama rm` alte Models
+- **Backup:** Wichtige Custom-Modelle exportieren
+  ```bash
+  ollama show mistral --modelfile > mistral.modelfile
+  ```
+- **Logs:** Ollama speichert keine Debug-Logs automatisch
+  ```bash
+  # Manuell aktivieren
+  OLLAMA_DEBUG=1 ollama serve
+  ```
+- **Sicherheit:** Ollama läuft lokal—kein Auth. Im Netzwerk mit Reverse Proxy schützen
+
+## Checkliste
+
+- [ ] Ollama installiert (Linux/macOS/Windows/Docker)
+- [ ] NVIDIA Treiber + CUDA Toolkit installiert (falls GPU)
+- [ ] GPU Test: `nvidia-smi` zeigt Grafikkarte
+- [ ] Erstes Model heruntergeladen: `ollama pull mistral`
+- [ ] Lokal getestet: `ollama run mistral "Test"`
+- [ ] API getestet: `curl http://localhost:11434/api/tags`
+- [ ] Open WebUI läuft (optional)
+- [ ] n8n oder Python Integration getestet
+- [ ] Performance-Baseline gemessen (Response-Zeit, GPU-Auslastung)
+- [ ] Modelfile für Custom-Konfiguration erstellt
+
+## Quellen und Links
+
+- [Ollama](https://github.com/ollama/ollama)
+- [Ollama.com](https://ollama.com)

@@ -1,0 +1,221 @@
+---
+title: Embedding Models
+date: 2026-03-21
+summary: How Embeddings Work, Training (Contrastive Learning), MTEB Benchmark, Comparison — Sentence-Transformers, OpenAI, Nomic, BGE, E5
+tags: [embeddings, semantic-search, sentence-transformers, mteb, contrastive-learning]
+author: AI Engineering
+section: Concepts
+---
+
+# Understanding Embedding Models
+
+Embeddings convert text into high-dimensional vectors representing meaning. Similar texts have similar vectors.
+
+```
+Text: "A brown dog sits"
+Embedding: [0.12, -0.45, 0.89, ..., -0.23]  (384 or 768 dimensions)
+
+Text: "The dog is brown"
+Embedding: [0.15, -0.43, 0.87, ..., -0.21]  (Very similar!)
+
+Cosine Similarity = 0.99 (very similar)
+```
+
+---
+
+## Training Embeddings
+
+### Contrastive Learning
+
+Standard training paradigm.
+
+```
+Given: Triplet (Anchor, Positive, Negative)
+  - Anchor: "A dog sits"
+  - Positive: "The dog sits" (similar)
+  - Negative: "An apple lies" (unrelated)
+
+Goal: Anchor close to Positive, far from Negative
+```
+
+### Triplet Loss
+
+```python
+def triplet_loss(anchor, positive, negative, margin=0.5):
+    pos_distance = torch.norm(anchor - positive, dim=1)
+    neg_distance = torch.norm(anchor - negative, dim=1)
+
+    loss = torch.relu(pos_distance - neg_distance + margin)
+    return loss.mean()
+```
+
+---
+
+## MTEB Benchmark
+
+Massive Text Embedding Benchmark - standard evaluation.
+
+### Top Models (2024)
+
+| Model | Size | Retrieval | STS | Clustering | Cost |
+|-------|------|-----------|-----|-----------|------|
+| BGE-M3 | 568M | 64.6 | 86.2 | 46.8 | Free |
+| E5-large-v2 | 335M | 63.2 | 87.1 | 44.2 | Free |
+| Nomic-Embed | 137M | 61.7 | 85.3 | 43.1 | Free |
+| OpenAI ada | 1.2B | 62.3 | 84.9 | 44.5 | $0.00002 |
+
+---
+
+## Popular Embedding Models
+
+### Sentence-Transformers (SBERT)
+
+Basis of most open-source embeddings.
+
+```python
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer('all-MiniLM-L6-v2')  # 22M params, 384-dim
+
+sentences = [
+    "A dog sits on the mat",
+    "The dog lies on the carpet",
+    "A car drives on the street"
+]
+
+embeddings = model.encode(sentences)
+# Shape: (3, 384)
+```
+
+### OpenAI Embeddings
+
+```python
+from openai import OpenAI
+
+client = OpenAI()
+
+response = client.embeddings.create(
+    input="The quick brown fox",
+    model="text-embedding-3-small"  # 1536-dim
+)
+
+embedding = response.data[0].embedding
+```
+
+### BGE (BAAI General Embedding)
+
+Best for retrieval tasks.
+
+```python
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("BAAI/bge-large-en-v1.5")
+# 335M params, 768-dim
+
+# Multi-lingual version
+model = SentenceTransformer("BAAI/bge-m3")  # 100+ languages
+```
+
+---
+
+## Semantic Search
+
+### Vector Database Setup
+
+```python
+from sentence_transformers import SentenceTransformer
+import faiss
+
+# Load model
+model = SentenceTransformer("all-MiniLM-L6-v2")
+
+# Embed documents
+documents = ["Python tutorial", "Java backend", ...]
+doc_embeddings = model.encode(documents, convert_to_numpy=True)
+
+# Create FAISS index
+index = faiss.IndexFlatL2(384)
+index.add(doc_embeddings.astype('float32'))
+
+# Query
+query = "Programming language learning"
+query_embedding = model.encode(query, convert_to_numpy=True)
+
+distances, indices = index.search(
+    query_embedding.astype('float32').reshape(1, -1),
+    k=5  # Top 5 results
+)
+```
+
+---
+
+## Fine-tuning Embeddings
+
+For task-specific improvements.
+
+```python
+from sentence_transformers import SentenceTransformer, InputExample, losses
+from torch.utils.data import DataLoader
+
+model = SentenceTransformer("all-MiniLM-L6-v2")
+
+train_examples = [
+    InputExample(texts=["dog sits", "dog lies"], label=0.9),
+    InputExample(texts=["dog sits", "car drives"], label=0.1),
+    # ... more examples
+]
+
+train_dataloader = DataLoader(train_examples, shuffle=True, batch_size=16)
+train_loss = losses.CosineSimilarityLoss(model)
+
+model.fit(
+    train_objectives=[(train_dataloader, train_loss)],
+    epochs=10,
+    warmup_steps=100
+)
+
+model.save_pretrained("./my-embeddings")
+```
+
+---
+
+## Best Practices
+
+### 1. Model Selection
+
+```
+Retrieval: BGE or E5 (specialized)
+Clustering: Larger models (768-dim+)
+Speed Critical: Nomic or MiniLM
+High Quality: BGE-M3 or OpenAI
+```
+
+### 2. Batch Processing
+
+```python
+# ❌ Slow: One at a time
+for doc in documents:
+    embedding = model.encode(doc)
+
+# ✅ Fast: Batch
+embeddings = model.encode(documents, batch_size=128)
+```
+
+### 3. Normalization
+
+```python
+from sklearn.preprocessing import normalize
+
+# Normalize for Cosine Similarity
+embeddings_norm = normalize(embeddings, norm='l2')
+```
+
+---
+
+## Sources and Links
+
+- [Sentence-BERT (Reimers & Gurevych 2019)](https://arxiv.org/abs/1908.10084)
+- [MTEB Benchmark](https://github.com/embeddings-benchmark/mteb)
+- [BGE - BAAI General Embedding](https://github.com/FlagOpen/FlagEmbedding)
+- [E5 - Entence Embeddings](https://github.com/microsoft/unilm/tree/master/e5)
+- [Nomic Embed](https://huggingface.co/nomic-ai/nomic-embed-text-v1.5)

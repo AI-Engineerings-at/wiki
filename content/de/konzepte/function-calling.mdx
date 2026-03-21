@@ -1,0 +1,465 @@
+---
+title: Function Calling
+date: 2026-03-21
+summary: Wie Function Calling funktioniert, LLM Tool Use Protocol, OpenAI Format, Anthropic tool_use, Open-Source (Hermes, Gorilla) — JSON Schema, Parallel Calls
+tags: [function-calling, tool-use, agents, llm-api, openai-functions, anthropic-tools]
+author: AI Engineering
+section: Konzepte
+---
+
+# Function Calling verstehen
+
+Function Calling ermöglicht LLMs, strukturierte Anfragen zu stellen um externe Tools aufzurufen.
+
+```
+User: "Was ist 2+3?"
+
+Ohne Function Calling:
+  LLM: "2+3 ist 5"  (versucht im Kopf zu rechnen, könnte falsch sein)
+
+Mit Function Calling:
+  LLM: "Ich rufe die Funktion 'add' mit 2 und 3 auf"
+  System: Ruft add(2, 3) auf → 5
+  LLM: "2+3 ist 5"  (garantiert korrekt!)
+```
+
+---
+
+## OpenAI Format
+
+OpenAI's Standard für Function Calling.
+
+### Function Definition
+
+```python
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "add",
+            "description": "Addiert zwei Zahlen",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "a": {
+                        "type": "number",
+                        "description": "Erste Zahl"
+                    },
+                    "b": {
+                        "type": "number",
+                        "description": "Zweite Zahl"
+                    }
+                },
+                "required": ["a", "b"]
+            }
+        }
+    }
+]
+```
+
+### API Call
+
+```python
+from openai import OpenAI
+
+client = OpenAI()
+
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[{
+        "role": "user",
+        "content": "Was ist 2+3?"
+    }],
+    tools=tools,
+    tool_choice="auto"  # Automatisch Function Calling
+)
+
+# Response enthält tool_calls
+tool_calls = response.choices[0].message.tool_calls
+
+for tool_call in tool_calls:
+    if tool_call.function.name == "add":
+        args = json.loads(tool_call.function.arguments)
+        result = add(args["a"], args["b"])
+        print(f"Ergebnis: {result}")
+```
+
+---
+
+## Anthropic Tool Use
+
+Claude's Format ist ähnlich aber strukturiert anders.
+
+### Tool Definition
+
+```python
+tools = [
+    {
+        "name": "add",
+        "description": "Addiere zwei Zahlen",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "a": {
+                    "type": "number",
+                    "description": "Erste Zahl"
+                },
+                "b": {
+                    "type": "number",
+                    "description": "Zweite Zahl"
+                }
+            },
+            "required": ["a", "b"]
+        }
+    }
+]
+```
+
+### API Call
+
+```python
+import anthropic
+import json
+
+client = anthropic.Anthropic()
+
+response = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    max_tokens=1024,
+    tools=tools,
+    messages=[{
+        "role": "user",
+        "content": "Was ist 2+3?"
+    }]
+)
+
+# Tool Use blocks
+for block in response.content:
+    if block.type == "tool_use":
+        print(f"Tool: {block.name}")
+        print(f"Input: {block.input}")
+```
+
+---
+
+## Open-Source Function Calling
+
+### Hermes (NousResearch)
+
+Spezialisiert auf Agentic Verhalten.
+
+```python
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+model_name = "NousResearch/Hermes-2-Pro-Mistral-7B"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForCausalLM.from_pretrained(model_name)
+
+# Definiere Tools
+tools_json = json.dumps([
+    {
+        "name": "add",
+        "description": "Addiere zwei Zahlen",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "a": {"type": "number"},
+                "b": {"type": "number"}
+            }
+        }
+    }
+])
+
+# Prompt mit Tools
+prompt = f"""System: Du kannst folgende Functions aufrufen: {tools_json}
+
+Wenn du eine Function aufrufen willst, antworte mit:
+<tool_call>
+{{"name": "function_name", "arguments": {{"arg1": value1}}}}
+</tool_call>
+
+User: Was ist 2+3?"""
+
+inputs = tokenizer(prompt, return_tensors="pt")
+outputs = model.generate(**inputs, max_new_tokens=200)
+print(tokenizer.decode(outputs[0]))
+```
+
+### Gorilla (UC Berkeley)
+
+Großes Modell speziell für API Calling.
+
+```
+gorilla-7b:  Aus 1000+ APIs trainiert
+gorilla-13b: Noch besser
+gorilla-34b: State-of-the-art Function Calling
+
+Spezialität: Genauigkeit bei komplexen API Calls
+```
+
+---
+
+## JSON Schema für Tools
+
+### Struktur
+
+```python
+tool_schema = {
+    "name": "search_web",
+    "description": "Suche im Internet",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "query": {
+                "type": "string",
+                "description": "Was soll ich suchen?"
+            },
+            "num_results": {
+                "type": "integer",
+                "description": "Wie viele Ergebnisse (1-10)?",
+                "minimum": 1,
+                "maximum": 10
+            },
+            "language": {
+                "type": "string",
+                "enum": ["de", "en", "fr", "es"],
+                "description": "Sprache der Ergebnisse"
+            }
+        },
+        "required": ["query"]  # num_results, language sind optional
+    }
+}
+```
+
+### Validierung
+
+```python
+import jsonschema
+
+def validate_tool_call(tool_name, arguments, schema):
+    """Validiere ob Arguments dem Schema entsprechen"""
+    try:
+        jsonschema.validate(arguments, schema["parameters"])
+        return True
+    except jsonschema.ValidationError as e:
+        print(f"Validierungsfehler: {e.message}")
+        return False
+
+# Usage
+args = {"query": "Python tutorial", "num_results": 5}
+is_valid = validate_tool_call("search_web", args, tool_schema)
+```
+
+---
+
+## Parallel Function Calling
+
+Mehrere Functions gleichzeitig aufrufen.
+
+### OpenAI Parallel Calls
+
+```python
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[{
+        "role": "user",
+        "content": "Was ist 2+3, 5*6 und 10/2?"
+    }],
+    tools=tools
+)
+
+# Multiple tool_calls in einer Response
+tool_calls = response.choices[0].message.tool_calls
+
+# Parallel ausführen
+results = []
+for tool_call in tool_calls:
+    result = execute_tool(tool_call.function.name, tool_call.function.arguments)
+    results.append({
+        "tool_call_id": tool_call.id,
+        "result": result
+    })
+
+# Feedback an LLM
+response2 = client.chat.completions.create(
+    model="gpt-4",
+    messages=[
+        {"role": "user", "content": "..."},
+        {"role": "assistant", "content": "", "tool_calls": tool_calls},
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "tool_result",
+                    "tool_call_id": r["tool_call_id"],
+                    "content": str(r["result"])
+                }
+                for r in results
+            ]
+        }
+    ],
+    tools=tools
+)
+```
+
+---
+
+## Fehlerbehandlung
+
+### Ungültige Arguments
+
+```python
+def safe_tool_call(tool_name, arguments_str):
+    try:
+        # Parse Arguments
+        arguments = json.loads(arguments_str)
+
+        # Validiere gegen Schema
+        schema = get_tool_schema(tool_name)
+        jsonschema.validate(arguments, schema["parameters"])
+
+        # Führe aus
+        result = execute_tool(tool_name, arguments)
+        return {"success": True, "result": result}
+
+    except json.JSONDecodeError:
+        return {
+            "success": False,
+            "error": "Invalid JSON in arguments"
+        }
+    except jsonschema.ValidationError as e:
+        return {
+            "success": False,
+            "error": f"Validation error: {e.message}"
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": f"Execution error: {str(e)}"
+        }
+
+# Gib Fehler zurück an LLM
+result = safe_tool_call("add", '{"a": 2, "b": "3"}')
+# → {"success": False, "error": "Validation error: '3' is not of type 'number'"}
+
+# LLM kann dann korrigieren
+```
+
+---
+
+## Agent Loop (Komplett Beispiel)
+
+```python
+def run_agent(user_input):
+    messages = [
+        {"role": "user", "content": user_input}
+    ]
+
+    while True:
+        # Schritt 1: LLM antwortet (evtl mit Tool Calls)
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=messages,
+            tools=tools
+        )
+
+        # Schritt 2: Wenn Tool Calls, führe aus
+        if response.choices[0].message.tool_calls:
+            # Tool Calls sammeln
+            tool_calls = response.choices[0].message.tool_calls
+            tool_results = []
+
+            for tool_call in tool_calls:
+                result = execute_tool(
+                    tool_call.function.name,
+                    json.loads(tool_call.function.arguments)
+                )
+                tool_results.append({
+                    "tool_call_id": tool_call.id,
+                    "result": str(result)
+                })
+
+            # Feedback an LLM
+            messages.append({"role": "assistant", "content": response.choices[0].message.content})
+            messages.append({
+                "role": "user",
+                "content": [
+                    {
+                        "type": "tool_result",
+                        "tool_call_id": r["tool_call_id"],
+                        "content": r["result"]
+                    }
+                    for r in tool_results
+                ]
+            })
+
+        else:
+            # Schritt 3: Keine Tool Calls, LLM gibt finale Antwort
+            final_response = response.choices[0].message.content
+            print(f"Agent: {final_response}")
+            break
+
+# Usage
+run_agent("Was ist 2+3 und 5*6?")
+```
+
+---
+
+## Best Practices
+
+### 1. Gute Beschreibungen
+
+```python
+# ❌ Schlecht
+{"name": "func", "description": "Do something"}
+
+# ✅ Gut
+{
+    "name": "search_documents",
+    "description": "Suche in Dokumentendatenbank nach relevanten Dokumenten. Nutze diese Funktion um Informationen zu finden.",
+    "parameters": {
+        "properties": {
+            "query": {
+                "description": "Suchbegriff oder Frage (z.B. 'Wie viele Mitarbeiter hat die Firma?')"
+            }
+        }
+    }
+}
+```
+
+### 2. Minimale Tools
+
+```
+❌ 50 Functions: LLM verwirrt, wählt falsche
+✅ 3-5 Functions: LLM wählt richtig
+```
+
+### 3. Timeout und Retry
+
+```python
+import signal
+import time
+
+def execute_with_timeout(func, args, timeout=5):
+    def timeout_handler(signum, frame):
+        raise TimeoutError(f"Tool execution exceeded {timeout}s")
+
+    signal.signal(signal.SIGALRM, timeout_handler)
+    signal.alarm(timeout)
+
+    try:
+        result = func(**args)
+        signal.alarm(0)  # Cancel alarm
+        return result
+    except TimeoutError:
+        return {"error": "Tool execution timeout"}
+```
+
+---
+
+## Quellen und Links
+
+- [OpenAI Function Calling](https://platform.openai.com/docs/guides/function-calling)
+- [Anthropic Tool Use](https://docs.anthropic.com/claude/reference/tool-use)
+- [Hermes by NousResearch](https://huggingface.co/NousResearch/Hermes-2-Pro-Mistral-7B)
+- [Gorilla by UC Berkeley](https://gorilla.cs.berkeley.edu/)

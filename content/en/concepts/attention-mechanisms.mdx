@@ -1,0 +1,288 @@
+---
+title: Attention Mechanisms
+date: 2026-03-21
+summary: Self-Attention, Cross-Attention, Multi-Head, Flash Attention, Multi-Query, Grouped-Query, Sliding Window, Sparse Patterns
+tags: [attention, transformer, self-attention, cross-attention, flash-attention, multi-query]
+author: AI Engineering
+section: Concepts
+---
+
+# Understanding Attention Mechanisms
+
+Attention is the core of Transformers. The model "pays attention" to the most relevant parts of the input.
+
+## Scaled Dot-Product Attention (Foundation)
+
+This is the fundamental operation behind everything.
+
+### Mathematics
+
+```
+Attention(Q, K, V) = softmax(Q * K^T / sqrt(d_k)) * V
+
+where:
+- Q (Query) = "What am I looking for?"
+- K (Key) = "What is this about?"
+- V (Value) = "How important is this?"
+- d_k = Dimension size of Keys
+- sqrt(d_k) = Scaling (prevents exploding softmax)
+```
+
+### Practical Example
+
+```
+Sentence: "The cat sits on the mat"
+
+Token "cat":
+  Query: "What modifies me?"
+
+  Similarity to each token:
+  - "The": 0.1 (low)
+  - "sits": 0.7 (high!) ← "cat sits"
+  - "on": 0.5 (medium)
+  - "mat": 0.3 (low)
+
+  Output: Weighted combination of all values
+```
+
+---
+
+## Self-Attention
+
+Self-Attention means: A token attends to itself and other tokens in the same sequence.
+
+### Causality (Causal Attention)
+
+In language models (GPT), a token can only attend to earlier tokens, not future ones.
+
+```
+Token 0 can see: [0]
+Token 1 can see: [0, 1]
+Token 2 can see: [0, 1, 2]  ← (not 3, 4, 5!)
+
+Masking:
+mask = torch.triu(torch.ones(seq_len, seq_len), diagonal=1).bool()
+scores.masked_fill(mask, -float('inf'))
+```
+
+---
+
+## Multi-Head Attention
+
+One head is limited. Multi-head enables multiple "perspectives" simultaneously.
+
+### Concept
+
+```
+Input (512-dim)
+  ├─ Head 1 (64-dim): Attends to subject-verb relations
+  ├─ Head 2 (64-dim): Attends to temporal structure
+  ├─ Head 3 (64-dim): Attends to dependencies
+  └─ Head 4 (64-dim): Attends to distant tokens
+
+  (8 Heads total)
+
+  All heads combine → Final output
+```
+
+---
+
+## Cross-Attention
+
+Encoder-Decoder attention: One sequence attends to another.
+
+### Applications
+
+```
+1. Text-to-Image (Stable Diffusion)
+   Q = Image Features (what I'm generating)
+   K, V = Text Embedding (what I'm reading)
+
+2. Machine Translation
+   Q = Target Language (what I'm writing)
+   K, V = Source Language (what I'm translating)
+
+3. Question Answering
+   Q = Question
+   K, V = Document
+```
+
+---
+
+## Flash Attention
+
+Optimization that's faster and more memory-efficient (Dao et al. 2022).
+
+### Problem of Standard Attention
+
+```
+Memory Bottleneck:
+
+Q*K^T calculation: (seq_len, seq_len) Matrix
+With seq_len=4096: 4096 * 4096 = 16M entries
+At float32: ~64 MB just for this matrix
+
+With many layers: Memory explodes → OOM
+```
+
+### Flash Attention Solution
+
+```
+Idea: Do attention in blocks, not globally
+
+Standard:    seq_len=4096
+             Compute: 4096*4096 attention matrix
+
+Flash:       Split into blocks: Block_size=128
+             Compute: 128*128 instead of 4096*4096
+             Loop over blocks, accumulate results
+
+Memory:      64x less (for seq_len=4096)
+Speed:       2-4x faster
+```
+
+---
+
+## Multi-Query Attention (MQA)
+
+Reduces number of Key/Value heads — faster inference.
+
+### Difference from Multi-Head
+
+```
+Standard Multi-Head (8 Heads):
+  Q: 8 Heads × (seq_len, 64)
+  K: 8 Heads × (seq_len, 64)  ← Much memory!
+  V: 8 Heads × (seq_len, 64)
+
+Multi-Query Attention:
+  Q: 8 Heads × (seq_len, 64)
+  K: 1 Head × (seq_len, 512)  ← Shared across all queries!
+  V: 1 Head × (seq_len, 512)
+```
+
+### Practical Effect
+
+```
+Speed at Inference:
+  Standard MHA:    100 Tokens/sec
+  MQA:            300 Tokens/sec (3x faster!)
+
+KV-Cache:
+  MHA:    seq_len * num_heads * head_dim
+  MQA:    seq_len * head_dim (8x smaller!)
+```
+
+---
+
+## Grouped-Query Attention (GQA)
+
+Hybrid between Multi-Head and Multi-Query.
+
+### The Compromise
+
+```
+Multi-Head:    8 Q-Heads, 8 K-Heads, 8 V-Heads
+                → Best quality, most memory
+
+Grouped-Query:  8 Q-Heads, 2 K-Heads, 2 V-Heads
+                → Compromise: 4x memory + 4x quality
+
+Multi-Query:    8 Q-Heads, 1 K-Head, 1 V-Head
+                → Fastest, lower quality
+```
+
+---
+
+## Sliding Window Attention
+
+For long sequences, only attend to nearby tokens.
+
+### Motivation
+
+```
+Sentence: "The man with the hat goes to school and buys a coffee."
+
+Standard Attention: "The" attends to "buys" (far away)
+Sliding Window:     "The" attends only to next 64 tokens
+                   → Saves 95% computation!
+```
+
+---
+
+## Sparse Attention Patterns
+
+For very long sequences, only attend to selected tokens.
+
+### Pattern Types
+
+```
+1. Local Attention (Sliding Window)
+   Attends to nearby tokens
+
+2. Strided Attention
+   Attends to every n-th token
+   Pattern: [0, n, 2n, 3n, ...]
+
+3. Fixed Attention
+   Attend to fixed positions
+
+4. Longformer Pattern
+   Mix of local + global (for important tokens)
+```
+
+---
+
+## Performance Tips
+
+### 1. Use Flash Attention where possible
+
+```python
+# Automatic in torch 2.0+
+import torch
+torch.nn.functional.scaled_dot_product_attention
+
+# Or explicit
+from transformers import AutoModelForCausalLM
+model = AutoModelForCausalLM.from_pretrained(
+    "meta-llama/Llama-2-7b",
+    attn_implementation="flash_attention_2"
+)
+```
+
+### 2. Limit length at inference
+
+```python
+# Not: max_new_tokens=4096
+# Instead: max_length=512
+
+outputs = model.generate(
+    input_ids,
+    max_new_tokens=256,  # Shorter = faster
+    do_sample=False      # Deterministic
+)
+```
+
+### 3. Use KV-Cache
+
+```python
+# With KV-Cache
+outputs = model(input_ids, use_cache=True, past_key_values=None)
+
+# Then next token:
+outputs = model(
+    next_token,
+    use_cache=True,
+    past_key_values=outputs.past_key_values  # ← Reuse cache!
+)
+```
+
+---
+
+## Sources and Links
+
+- [Attention Is All You Need (Vaswani et al. 2017)](https://arxiv.org/abs/1706.03762)
+- [Flash Attention (Dao et al. 2022)](https://arxiv.org/abs/2205.14135)
+- [Multi-Query Attention (Shazeer 2019)](https://arxiv.org/abs/1911.02727)
+- [Grouped-Query Attention (Ainslie et al. 2023)](https://arxiv.org/abs/2305.13245)
+- [Longformer (Beltagy et al. 2020)](https://arxiv.org/abs/2004.05150)

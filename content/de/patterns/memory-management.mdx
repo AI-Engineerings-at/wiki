@@ -1,0 +1,439 @@
+---
+title: "Memory Management in Claude Code"
+date: "2026-03-21"
+summary: "Vierschichtiges Memory-System: Managed Memory, Project Rules, User Agents, Auto Memory. Context Loading, .claude/rules/, MEMORY.md Index, Context Compaction."
+tags: ["memory", "pattern", "claude-code", "context", "persistence"]
+author: "AI Engineering"
+---
+
+# Memory Management in Claude Code
+
+Das groesste Problem von AI-Agenten: Sie vergessen alles zwischen Sessions. Claude Code loest dieses Problem mit einem **vierschichtigen Memory-System**, das persistentes Wissen ueber Sessions hinweg bewahrt und intelligent in den Context ladet.
+
+## Das Memory-Problem
+
+Ohne adaequates Memory:
+- Agent startet jede Session bei Null
+- Gleiche Fehler werden wiederholt
+- Keine Learnings aus Erfahrung
+- Kontext muss jedes Mal neu aufgebaut werden
+- Debugging wird ineffizient (wieso die gleiche Fehlerbehandlung erfinden?)
+
+## Vierschichtiges Memory System
+
+Claude Code ladet Memory in dieser Reihenfolge:
+
+### Schicht 1: Managed Memory (.claude/CLAUDE.md)
+
+**Wird automatisch beim Start geladen**, hoechste Prioritaet.
+
+```
+.claude/CLAUDE.md  ← Immer verfuegbar
+├── Project-Rules
+├── Critical Gotchas
+├── Team-Struktur
+├── Current Priorities
+└── Code-Style Guide
+```
+
+**Groessen-Limit**: ~200-400 Zeilen (alles kostet Context Window)
+
+**Inhalt**: Nur das Essenzielle, was in JEDER Session noetig ist.
+
+```markdown
+# Playbook01 — AI Engineering Business Repo
+
+## Project Soul
+Jedes Produkt = Enterprise Value.
+6 Pflicht-Mehrwerte: Enterprise-Architektur, Anleitung, HW/Budget, Top-5 Fehler, Bilingual, Sofort lauffaehig.
+
+## Kritische Gotchas
+- NIEMALS `rm -rf` ohne Pfad-Validierung
+- n8n Passwort NICHT aendern (Joe-Direktive)
+- Stripe Workflow URL zeigt auf Download-Issuer (.99:3002)
+- Vault fuer ALL Credentials (Vault.py get, nie hardcoded)
+
+## Repo-Struktur
+- products/: Produkt-Daten (catalog.json)
+- wiki/content/: DE + EN Wiki-Seiten
+- n8n-workflows/: Versionierte n8n JSONs
+- landing-page/: Next.js (Cloudflare Pages)
+```
+
+### Schicht 2: Project Rules (.claude/rules/)
+
+**Werden beim Start geladen**, definieren Verhalten im Projekt.
+
+```
+.claude/rules/
+├── 01-safety-rules.md          ← Globale Safety Rules
+├── 02-agent-roles.md            ← Team-Struktur, Delegation
+├── 07-gotchas.md                ← Project-spezifische Gotchas
+├── 14-skill-standard.md         ← Skill Creation Standard
+├── 15-skill-quality-gate.md     ← QA Checklist
+├── 18-visual-quality-gate.md    ← n8n Layout Standard
+└── 20-pipeline-standard.md      ← Agent Pipeline
+```
+
+**Wie sie geladen werden**:
+- Alle `.md` Dateien aus `.claude/rules/` werden beim Session-Start eingelesen
+- Claude haelt sich an diese Regeln automatisch
+- Kann per Project ueberschrieben werden (vs global shared rules in phantom-ai)
+
+**Best Practice**: Auf ~50-100 Zeilen pro Rule halten. Details in separate Dateien.
+
+### Schicht 3: User Agent Memory (optional)
+
+**Sub-Agent spezifisches Memory**, persistent across projects.
+
+```yaml
+---
+name: code-reviewer
+memory: user  # Memory scope
+---
+
+System Prompt...
+```
+
+Speichert sich in: `~/.claude/agent-memory/code-reviewer/`
+
+**Automatische Features**:
+- `MEMORY.md` wird ins System Prompt injiziert (erste 200 Zeilen)
+- Agent kann Read/Write/Edit Tools nutzen fuer Wissen-Aufbau
+- Learnings ueberleben Session-Ende
+
+### Schicht 4: Auto Memory (optional)
+
+**Automatisches Session-Memory** bei Claude Code CLI.
+
+```bash
+claude --memory user  # Aktiviert Auto Memory
+```
+
+Speichert in: `~/.claude/projects/<project>/<session-id>/`
+
+Wird automatisch am Session-Ende komprimiert wenn >95% Context voll.
+
+## Die CLAUDE.md Datei (Schicht 1)
+
+Zentrale Hub fuer alle Project-Memoria. Wird beim Start geladen.
+
+### Struktur
+
+```markdown
+---
+title: "Project Name"
+author: "Team"
+date: "2026-03-21"
+---
+
+# Project Name
+
+## Identitaet
+[Was ist dieses Projekt? Wem gehoert es? Wo steht der Code?]
+
+## Krisenplan
+[Was tun wenn X? Wer ist Ansprechpartner?]
+
+## Architektur-Ueberblick
+[Welche Services? Welche Dependencies?]
+
+## Team-Struktur
+[Wer macht was? Eskalationswege?]
+
+## Critical Gotchas
+[Die 5 wichtigsten "Nicht das tun!"]
+
+## Deployment
+[Wie deployed man? Wo ist Prod? Pre-Deploy Checklist?]
+
+## Credentials & Secrets
+[Vault Pfade, API Keys, nicht hardcoded!]
+
+## Weitere Quellen
+- docs/BRAND-BIBLE-V2.md
+- .claude/rules/
+- memory/logs/ (Daily logs)
+```
+
+### @import Syntax (Dynamisches Laden)
+
+CLAUDE.md kann andere Dateien per @import einbinden:
+
+```markdown
+# Playbook01
+
+@import .claude/rules/07-gotchas.md
+@import docs/COMPANY_HANDBOOK.md
+@import memory/logs/YYYY-MM-DD.md
+```
+
+Dateiinhalt wird zur Compile-Zeit eingefuegt. Gut fuer:
+- Grosse, wiederverwendbare Dokumente
+- Daily Logs (werden dynamisch aktualisiert)
+- Shared Rules aus anderem Repo
+
+## Rules Directory (.claude/rules/)
+
+Alle Rules werden beim Start geladen. Keine Limits, aber gut organisieren.
+
+### Rule-Naming Convention
+
+```
+01-XX-TOPIC.md       ← Nummer fuer Prioritaet + Kategorie
+```
+
+**Nummern-Schema** (Playbook01):
+- 01-06: Globale Safety/Hygiene (von phantom-ai SSOT)
+- 07: Project-Gotchas
+- 08: Guardrails (destruktive Aktionen)
+- 09: Memory Protocol
+- 10: Commerce Rules
+- 11: Backup & DR
+- 12-13: Dokumentation (von phantom-ai)
+- 14-16: Skill/Agent Standards
+- 18-21: n8n Layout + Pipelines
+
+### Best Practice
+
+```
+.claude/rules/
+├── 07-gotchas.md              (500-1000 Zeilen)
+├── 10-firma-commerce.md       (300 Zeilen)
+├── 14-skill-standard.md       (400 Zeilen)
+└── 20-pipeline-standard.md    (300 Zeilen)
+```
+
+Jede Rule hat EINE klare Aufgabe. Nicht alle Regeln in eine Datei dumpen.
+
+## tägliche Logs (Schicht 2.5)
+
+Projekt hat ein tägliches Log fuer Kontinuitaet.
+
+```
+memory/logs/
+├── YYYY-MM-DD.md   ← Append-only, heute
+├── YYYY-MM-(DD-1).md ← Gestern (fuer Kontext)
+└── YYYY-MM-DD-old.md ← Archiv
+```
+
+### Log Format
+
+```markdown
+# Daily Log: 2026-03-21
+
+> Friday, March 21, 2026
+
+---
+
+## Events & Notizen
+
+- [09:15] Task started: Wiki expansion (memory-management, 5 pages)
+- [10:45] Agents.mdx completed (1200 lines) + EN counterpart
+- [12:30] Mattermost.mdx completed
+- [14:00] Memory-management.mdx started
+- [Error] /en/tools/agents.mdx deployment failed (commit issue)
+- [15:30] Fixed + re-deployed
+
+## Blockers
+
+- None
+
+## Tomorrow
+
+- Complete memory-management pages
+- Start multi-agent-systems pages
+```
+
+**Wichtig**: Append-only, nie editieren! Am Ende der Session alles Wichtige nachtragen.
+
+## Context Loading Order
+
+Wenn Claude Code startet, werden Memory-Layers in dieser Reihenfolge geladen:
+
+```
+1. .claude/CLAUDE.md (immer)
+    ↓
+2. .claude/rules/ (alle *.md Dateien)
+    ↓
+3. CLAUDE.md @imports (rekursiv)
+    ↓
+4. Agent-Memory falls subagent mit memory: user|project|local
+    ↓
+5. Auto-memory historical context (falls enabled)
+    ↓
+6. User Input (Benutzer schreibt Message)
+```
+
+**Prioritaet**: Frueher geladene Schichten haeben Vorrang. CLAUDE.md ueberschreibt Rule-Konflikte.
+
+## claudeMdExcludes (Path-Spezifische Rules)
+
+Manche Rules sollen NUR in bestimmten Directories gelten:
+
+```json
+{
+  "claudeMdExcludes": [
+    {
+      "path": "/landing-page/**",
+      "excludeRules": ["07-gotchas.md"]
+    },
+    {
+      "path": "/n8n-workflows/**",
+      "excludeRules": ["16-agent-standard.md"]
+    }
+  ]
+}
+```
+
+Gut fuer:
+- Subprojekte mit eigenen Standards
+- Externe Code (andere Team)
+- Spezial-Tools (n8n hat eigene Best Practices)
+
+## Context Compaction
+
+Wenn Context Window >95% voll, wird Kontext automatisch komprimiert:
+
+```
+Original Context: 180.000 Tokens
+↓ /compact Command oder Auto-Trigger
+↓ Claude erstellt Summary der bisherigen Conversation
+↓ Summary wird in MEMORY.md injiziert
+↓ Alte Messages werden entfernt
+↓ Neue Context: 80.000 Tokens
+```
+
+**Manuell triggern**:
+```bash
+/compact
+```
+
+**Automatisch triggern**: Bei 95% wird System automatisch fragen.
+
+**Log**: Compaction events werden dokumentiert:
+```json
+{
+  "type": "system",
+  "subtype": "compact_boundary",
+  "compactMetadata": {
+    "trigger": "auto",
+    "preTokens": 180000,
+    "postTokens": 80000
+  }
+}
+```
+
+## MEMORY.md als Index
+
+Jedes Projekt sollte eine `memory/MEMORY.md` Datei haben:
+
+```markdown
+# Memory Index — Playbook01
+
+## Quick Links
+
+- **Repo**: https://github.com/ai-engineering/playbook01
+- **Live**: https://www.ai-engineering.at
+- **Wiki**: https://wiki.ai-engineering.at
+- **Stripe**: https://dashboard.stripe.com/acct_...
+- **n8n**: http://10.40.10.83:5678
+
+## Produkter
+
+| ID | Name | Price | Status |
+|----|------|-------|--------|
+| P1 | Der Lokale AI-Stack | EUR 49 | AKTIV |
+| P4 | DSGVO Compliance Bundle | EUR 79 | AKTIV (Hero) |
+| P7 | Claude Code AI OS | EUR 249 | BETA |
+
+## Team
+
+| Person | Role | Repo | Contact |
+|--------|------|------|---------|
+| Joe | CEO | Playbook01 | @joe |
+| Jim | Orchestrator | Playbook01 | @jim |
+| Lisa | Infra | Both | @lisa01 |
+
+## Critical Gotchas
+
+- Stripe Workflow: zeigt auf .99:3002
+- n8n: Passwort NICHT aendern!
+- Download-Service: extern via CF Tunnel
+- Gumroad "Show on Profile": manuell aktivieren
+
+## Logs
+
+- Daily: memory/logs/YYYY-MM-DD.md
+- Weekly: /weekly-review Skill
+- Monthly: ERPNext Task Board
+```
+
+**Limit**: <200 Zeilen (wird ins System Prompt injiziert).
+
+## Anti-Patterns
+
+### 1. CLAUDE.md als Muell-Dump
+```markdown
+# FALSCH: 5000 Zeilen alles vermischt
+- API-Call Details
+- Jeden SSH-Command
+- Jeder Bug je fixed
+```
+
+**FIX**: Tier-System. CLAUDE.md = nur essentiell (200 Zeilen).
+
+### 2. Veraltete Rules
+```markdown
+# FALSCH
+- ERPNext Admin PW Reset (gefixed 2026-02-28)
+- Docker Swarm Raft Crash Recovery (never happens now)
+```
+
+**FIX**: Datum bei jeden Rule. Regelmaessig Reviews (quarterly).
+
+### 3. Keine Logs
+```markdown
+# FALSCH: Keine täglichen Logs
+Claude startet, kennt Stand nicht
+```
+
+**FIX**: Append-only Daily Log. Am Session-Ende updaten.
+
+## Best Practices
+
+1. **CLAUDE.md klein halten**: <400 Zeilen total. Alles Weitere in Rules.
+2. **Rules organisiert**: Jede Rule = ein Thema, max 500-1000 Zeilen.
+3. **Daily Logs**: Jeden Abend updaten. Format konsistent halten.
+4. **MEMORY.md als Index**: <200 Zeilen. Nur Links + Quick Facts.
+5. **@import nutzen**: Fuer grosse Docs (Brand Bible, Handbook) statt kopieren.
+6. **claudeMdExcludes**: Fuer Path-spezifische Ausnahmen.
+7. **Compaction**: Wenn >95% Context voll, manuell `/compact` oder Auto-akzeptieren.
+
+## Metriken fuer gutes Memory
+
+Ein gutes Memory-System zeigt sich an:
+
+| Metrik | Target |
+|--------|--------|
+| CLAUDE.md Groesse | <400 Zeilen |
+| Context voll % | <95% (auto-compact) |
+| Gotchas-Wiederholung | 1x pro Fehler |
+| Onboarding-Zeit | <5 Min (neue Session) |
+| Memory Relevanz | >85% aktuelle Infos |
+
+## Weiter lesen
+
+- [Claude Code Dokumentation: Memory](https://code.claude.com/docs/en/memory)
+- [Claude.md Specification](https://code.claude.com/docs/en/claude-md)
+- [Sub-Agents mit Memory](/de/tools/agents) — Persistent Agent Knowledge
+- [Daily Log Protocol](/de/patterns/memory-management#tägliche-logs) — Dokumentationspflicht
+
+---
+
+*Stand: 2026-03-21 | Reference Quality*
+
+## Quellen und Links
+
+- [LangChain Memory](https://github.com/langchain-ai/langchain)
+- [LlamaIndex Memory](https://github.com/run-llama/llama_index)

@@ -1,0 +1,710 @@
+---
+title: RAG Explained
+date: 2026-03-21
+summary: Retrieval Augmented Generation — retrieve relevant documents, augment prompts, generate answers. Embedding models, vector search, chunking, reranking strategies
+tags: [rag, retrieval, augmented-generation, embedding, vector-search, llm]
+author: AI Engineering
+---
+
+# Understanding RAG (Retrieval Augmented Generation)
+
+RAG solves a core LLM problem: **Models know nothing about your data**. An LLM trained in July 2024 doesn't know your December 2025 documents. RAG fetches external data at runtime and includes it in the prompt.
+
+## Sources and Links
+
+- [Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks](https://arxiv.org/abs/2005.11401)
+- [LangChain: Framework for LLM Applications](https://github.com/langchain-ai/langchain)
+- [LlamaIndex: Data Framework for LLMs](https://github.com/run-llama/llama_index)
+
+---
+
+## The Problem RAG Solves
+
+Without RAG, you have three bad options:
+
+**Option 1: Everything in Prompt**
+- Context window not large enough
+- Too much noise (irrelevant chunks)
+- Token costs explode
+
+**Option 2: Fine-Tuning**
+- Expensive (€100-€10,000+)
+- Takes days/weeks
+- New documents = retrain
+- Higher hallucination risk
+
+**Option 3: Hope LLM knows**
+- Doesn't know your specifics
+- Gives confident wrong answers
+
+## RAG Pipeline
+
+```
+User Question
+     ↓
+[1] Find Relevant Documents (Vector Search)
+     ↓
+[2] Insert Into Prompt
+     ↓
+[3] LLM Generates Answer (Data-grounded)
+     ↓
+Answer with Sources
+```
+
+---
+
+## Step 1: Embed Documents
+
+```
+Document: "The dog jumped over the fence"
+            ↓
+Embedding Model (sentence-transformers)
+            ↓
+Vector: [0.234, -0.512, 0.891, ..., 0.123]  (384-1536 dimensional)
+```
+
+Popular models (2026):
+- `all-MiniLM-L6-v2`: 384-dim, fast, open-source
+- `bge-base-en-v1.5`: 768-dim, better quality
+- OpenAI `text-embedding-3-small`: 1536-dim, excellent
+- Cohere Embed-3: 1024-dim, production-grade
+
+---
+
+## Step 2: Store Vectors
+
+```
+Document 1 → [0.234, -0.512, ...] → Vector DB
+Document 2 → [0.891, 0.234, ...]  → Vector DB
+Document 3 → [0.112, -0.444, ...] → Vector DB
+```
+
+Database indexes these with HNSW (fast) or IVF (memory-efficient).
+
+---
+
+## Step 3: Embed User Query
+
+```
+User: "How fast does a dog jump?"
+       ↓
+Same Embedding Model (CRITICAL!)
+       ↓
+Query Vector: [0.245, -0.501, 0.902, ..., 0.115]
+```
+
+**CRITICAL**: Use the same embedding model. Different models = incompatible vector space.
+
+---
+
+## Step 4: Search Similar Documents
+
+```
+Query Vector Similarity to:
+- Document 1: 0.87 cosine similarity
+- Document 2: 0.42
+- Document 3: 0.91  ← Top match!
+- Document 4: 0.23
+
+Top-K retrieval (e.g., k=3):
+[Document 3 (0.91), Document 1 (0.87), Document 2 (0.42)]
+```
+
+**Similarity Metrics**:
+- Cosine: Most common, range [-1, 1]
+- Dot Product: Faster, not normalized
+- Euclidean: Distance metric, less common
+
+---
+
+## Step 5-6: Construct Prompt & Generate
+
+```
+System: "You are helpful. Answer based on these documents:"
+
+Retrieved:
+- Doc 3: "The dog jumped quickly over fence"
+- Doc 1: "Dogs are athletic"
+
+User: "How fast does a dog jump?"
+
+LLM Output: "Based on the documents, dogs jump quickly."
+```
+
+---
+
+## Chunking: Critical for Quality
+
+Document split into chunks (not processed whole).
+
+**Problem: Chunks Too Large**
+```
+"Dog information... Car information... Bird information..."
+
+Query: "How fast does a dog jump?"
+Result: Irrelevant bird/car details included
+```
+
+**Problem: Chunks Too Small**
+```
+"Dog"
+
+Problem: No context, LLM confused
+```
+
+**Sweet Spot**: 300-500 tokens with 50-token overlap.
+
+---
+
+## Reranking: Second-Pass Filtering
+
+Vector similarity is fast but imprecise.
+
+```
+Vector Search Top-100
+       ↓
+Rerank with Cross-Encoder (z.B., bge-reranker-v2)
+       ↓
+Top-3 results (much better quality)
+       ↓
+Pass to LLM
+```
+
+Cost: +50ms, but quality improvement worth it.
+
+---
+
+## RAG vs Fine-Tuning
+
+| Scenario | RAG | Fine-Tuning |
+|----------|-----|-------------|
+| Frequently changing data | ✅ | ❌ |
+| Specific domain knowledge | ❌ | ✅ |
+| Budget < €100 | ✅ | ❌ |
+| Latency critical | ❌ | ✅ |
+| Fact/Data heavy | ✅ | ❌ |
+| Style/Tone heavy | ❌ | ✅ |
+
+---
+
+## Practical RAG Architecture
+
+```
+Document Upload
+     ↓
+Chunking (400 tokens, overlap 50)
+     ↓
+Embedding Model
+     ↓
+Vector DB (ChromaDB, Pinecone, Weaviate)
+     ↓
+     ├─ Vector Search (top-100)
+     │     ↓
+     ├─ Reranking (optional, top-3)
+     │     ↓
+User Query → Embed → Search
+     ↓
+Format Context
+     ↓
+LLM with Augmented Prompt
+     ↓
+Response + Citations
+```
+
+---
+
+## Tools & Frameworks
+
+| Framework | Best For | Learning Curve |
+|-----------|----------|---|
+| LangChain | Biggest ecosystem | Medium |
+| LlamaIndex | RAG-focused | Medium |
+| Haystack | Flexible, German docs | Steep |
+| Verba | Focused, easy deploy | Shallow |
+| Dify | No-code, open-source | Very shallow |
+
+---
+
+## Common RAG Errors
+
+1. **Wrong embedding model for language**: English embedder on German → poor retrieval
+2. **Too much context at once**: Top-50 chunks dumped in prompt → LLM drowns in noise
+3. **No summarization before chunking**: 100-page PDF brute-force chunked → 1000s of chunks
+4. **Not reindexing after updates**: Updated docs but old vectors remain in index
+
+RAG is the practical way to ground LLMs in current, external knowledge. With good embeddings and reranking, you get accurate, sourceable answers without expensive fine-tuning.
+
+---
+
+## Advanced Chunking Strategies
+
+### Static Chunking (Simple, but suboptimal)
+
+```python
+def chunk_by_size(text, chunk_size=500, overlap=50):
+    """Split text into fixed-size chunks."""
+    chunks = []
+    for i in range(0, len(text), chunk_size - overlap):
+        chunks.append(text[i:i + chunk_size])
+    return chunks
+
+# Problem: Splits might break sentences, lose context
+```
+
+### Semantic Chunking (Better)
+
+```python
+from sentence_transformers import SentenceTransformer
+import numpy as np
+
+def semantic_chunk(text, target_chunk_size=500, similarity_threshold=0.5):
+    """Split text at semantic boundaries."""
+    sentences = text.split('. ')
+    model = SentenceTransformer('all-MiniLM-L6-v2')
+
+    embeddings = model.encode(sentences)
+    chunks = []
+    current_chunk = []
+    current_size = 0
+
+    for i, (sentence, embedding) in enumerate(zip(sentences, embeddings)):
+        current_chunk.append(sentence)
+        current_size += len(sentence)
+
+        if i + 1 < len(sentences):
+            next_sim = np.dot(embedding, embeddings[i + 1])  # Cosine similarity
+
+            # Start new chunk if:
+            # 1. Size exceeds target, AND
+            # 2. Next sentence semantically different
+            if current_size > target_chunk_size and next_sim < similarity_threshold:
+                chunks.append('. '.join(current_chunk) + '.')
+                current_chunk = []
+                current_size = 0
+
+    if current_chunk:
+        chunks.append('. '.join(current_chunk) + '.')
+
+    return chunks
+
+# Result: Chunks respect sentence/paragraph boundaries
+```
+
+### Hierarchical Chunking (For large documents)
+
+```python
+def hierarchical_chunk(document):
+    """Create chunks at multiple levels (paragraph → sentence)."""
+    # Level 1: Split by paragraphs
+    paragraphs = document.split('\n\n')
+
+    # Level 2: If paragraph > 800 tokens, split into sentences
+    chunks = []
+    for para in paragraphs:
+        if estimate_tokens(para) > 800:
+            sentences = para.split('. ')
+            chunk = ""
+            for sent in sentences:
+                if estimate_tokens(chunk + sent) < 500:
+                    chunk += sent + '. '
+                else:
+                    chunks.append(chunk.strip())
+                    chunk = sent + '. '
+            if chunk:
+                chunks.append(chunk.strip())
+        else:
+            chunks.append(para)
+
+    return chunks
+```
+
+**Recommendation**: Use semantic chunking for text, hierarchical for documents.
+
+---
+
+## Embedding Model Selection: Detailed Comparison
+
+```python
+from sentence_transformers import SentenceTransformer
+import time
+
+models = {
+    "all-MiniLM-L6-v2": "all-MiniLM-L6-v2",
+    "bge-base": "BAAI/bge-base-en-v1.5",
+    "UAE": "WhereIsAI/UAE-Large-V1",
+    "OpenAI": "text-embedding-3-small",  # API
+}
+
+test_texts = [
+    "The dog jumps over the fence",
+    "A cat rests on the couch",
+    "Birds fly in the sky",
+]
+
+for name, model_id in models.items():
+    if name == "OpenAI":
+        # API-based
+        print(f"{name}: €0.02 per million tokens")
+        continue
+
+    start = time.time()
+    model = SentenceTransformer(model_id)
+    load_time = time.time() - start
+
+    start = time.time()
+    embeddings = model.encode(test_texts)
+    embed_time = time.time() - start
+
+    print(f"{name}")
+    print(f"  Load: {load_time:.2f}s")
+    print(f"  Embed: {embed_time:.4f}s per text")
+    print(f"  Dims: {embeddings[0].shape[0]}")
+    print()
+```
+
+**Selection matrix**:
+
+| Use Case | Recommended | Reason |
+|----------|-------------|--------|
+| Low-latency (< 100ms) | all-MiniLM-L6-v2 | Fastest, sufficient quality |
+| Best quality | UAE-Large-V1 or OpenAI | Superior semantic understanding |
+| Budget-conscious | all-MiniLM-L6-v2 | Free, 384-dim efficient |
+| Production (scale) | OpenAI API | Managed, reliable |
+| Local-only | bge-base-en-v1.5 | Good balance |
+| Multilingual | multilingual-e5-large | Single model for 100+ languages |
+
+---
+
+## Reranking Deep Dive
+
+Why rerank? Vector similarity is fast but imprecise.
+
+```python
+from sentence_transformers import SentenceTransformer, CrossEncoder
+
+def rag_with_reranking(query, documents, k_retrieve=100, k_rerank=5):
+    """Retrieve broadly, rerank precisely."""
+
+    # Step 1: Fast vector search (retrieve many)
+    embedder = SentenceTransformer('all-MiniLM-L6-v2')
+    query_embedding = embedder.encode(query)
+
+    # Assume documents are in vector DB
+    initial_results = vector_db.search(query_embedding, k=k_retrieve)
+    # Returns: [(doc_id, similarity_score), ...]
+
+    # Step 2: Precise reranking (filter to best)
+    reranker = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
+
+    docs_for_rerank = [doc for doc_id, _ in initial_results]
+    rerank_scores = reranker.predict(
+        [[query, doc] for doc in docs_for_rerank]
+    )
+
+    # Step 3: Top K by rerank score
+    ranked = sorted(
+        zip(initial_results, rerank_scores),
+        key=lambda x: x[1],
+        reverse=True
+    )[:k_rerank]
+
+    return [doc for (doc_id, _), _ in ranked]
+
+# Cost analysis:
+# Vector search: O(log N) - fast
+# Reranking: O(K × L) - slower, but K small
+# Total: Nearly free compared to sending all 100 to LLM
+```
+
+**Reranker options** (2026):
+- ms-marco-MiniLM: Fast, good for English
+- bge-reranker-v2: Multilingual, better quality
+- rankGPT: Expensive but highest quality
+
+---
+
+## Hybrid Search (Vector + Keyword)
+
+Combining semantic and keyword search:
+
+```python
+def hybrid_search(query, documents, vector_weight=0.7):
+    """Combine vector similarity + keyword matching."""
+
+    # Vector search
+    embedder = SentenceTransformer('all-MiniLM-L6-v2')
+    query_embedding = embedder.encode(query)
+    vector_scores = vector_db.search(query_embedding, k=100)  # Returns {doc_id: score}
+
+    # Keyword search (BM25)
+    from rank_bm25 import BM25Okapi
+    bm25 = BM25Okapi([doc.split() for doc in documents])
+    keyword_scores = bm25.get_scores(query.split())  # Returns array of scores
+
+    # Normalize and combine
+    vector_scores_norm = {doc_id: score / max(vector_scores.values())
+                          for doc_id, score in vector_scores.items()}
+    keyword_scores_norm = {doc_id: score / max(keyword_scores)
+                          for doc_id, score in enumerate(keyword_scores)}
+
+    combined = {}
+    for doc_id in set(list(vector_scores.keys()) + list(keyword_scores_norm.keys())):
+        combined[doc_id] = (
+            vector_weight * vector_scores_norm.get(doc_id, 0) +
+            (1 - vector_weight) * keyword_scores_norm.get(doc_id, 0)
+        )
+
+    # Sort by combined score
+    ranked = sorted(combined.items(), key=lambda x: x[1], reverse=True)
+    return [doc_id for doc_id, _ in ranked[:5]]
+
+# When to use: Product search (hybrid best), FAQ (keyword only), general (vector)
+```
+
+---
+
+## Metadata Filtering at Scale
+
+Efficient filtering with metadata:
+
+```python
+class AdvancedRAG:
+    def search(self, query, filters=None, k=5):
+        """RAG with advanced filtering."""
+
+        # Step 1: Filter by metadata (cheap)
+        if filters:
+            candidates = self.filter_by_metadata(filters)
+        else:
+            candidates = self.all_documents
+
+        # Step 2: Vector search on candidates only
+        query_embedding = self.embedder.encode(query)
+        results = self.vector_db.search(
+            query_embedding,
+            collection=candidates,  # Search within filtered set
+            k=k
+        )
+
+        return results
+
+    def filter_by_metadata(self, filters):
+        """
+        Example filters:
+        {
+            "source": "wiki",
+            "date": {"$gte": "2026-01-01"},
+            "language": "en",
+            "tags": {"$in": ["technical", "tutorial"]}
+        }
+        """
+        # Index by metadata for O(1) lookup
+        return self.metadata_index.query(filters)
+
+# Usage
+rag = AdvancedRAG()
+results = rag.search(
+    "How to optimize vector search?",
+    filters={
+        "source": "wiki",
+        "tags": {"$in": ["performance", "optimization"]}
+    }
+)
+```
+
+---
+
+## Production RAG Architecture
+
+```
+┌─ Document Ingestion ─┐
+│ • Upload documents    │
+│ • Extract text (OCR)  │
+│ • Quality check       │
+└──────────┬────────────┘
+           │
+┌──────────▼────────────┐
+│ Processing Pipeline   │
+│ • Chunk (semantic)    │
+│ • Deduplicate         │
+│ • Add metadata        │
+│ • Extract entities    │
+└──────────┬────────────┘
+           │
+┌──────────▼────────────┐
+│ Embedding Pipeline    │
+│ • Batch embed         │
+│ • Cache embeddings    │
+│ • Store vectors + MD  │
+└──────────┬────────────┘
+           │
+┌──────────▼────────────┐
+│ Vector DB + Indexes   │
+│ • Qdrant / Pinecone   │
+│ • HNSW / IVF index    │
+│ • Metadata filtering  │
+└──────────┬────────────┘
+           │
+User Query │
+     │     │
+┌────▼─────▼────────────┐
+│ Query Pipeline        │
+│ • Embed query         │
+│ • Vector search (k=100) │
+│ • Filter metadata     │
+│ • Rerank (k=5)        │
+└──────────┬────────────┘
+           │
+┌──────────▼────────────┐
+│ LLM Pipeline          │
+│ • Format context      │
+│ • Add system prompt   │
+│ • Call LLM            │
+│ • Extract citations   │
+└──────────┬────────────┘
+           │
+        Response
+```
+
+---
+
+## Common RAG Failure Modes
+
+### Issue: "Same answer for every question"
+Likely cause: Bad embedding model, all queries retrieving same docs.
+
+```python
+# Debug
+for question in test_questions:
+    embedding = embedder.encode(question)
+    results = vector_db.search(embedding, k=1)
+    print(f"Q: {question}")
+    print(f"Retrieved: {results[0]['text'][:100]}...")
+    print()
+
+# Solution: Switch embedding model or check document variety
+```
+
+### Issue: "Retrieval returns unrelated documents"
+Likely cause: Chunk too large, mixing topics.
+
+```python
+# Debug: Print chunk sizes
+for chunk in chunks:
+    tokens = estimate_tokens(chunk)
+    if tokens > 600:
+        print(f"Large chunk ({tokens} tokens): {chunk[:100]}...")
+
+# Solution: Reduce chunk size or use semantic chunking
+```
+
+### Issue: "LLM hallucinates despite good retrieval"
+Likely cause: Context not properly formatted or overloaded.
+
+```python
+# Solution: Explicit formatting
+context = "\n\n".join([
+    f"Source {i}: {doc['text']}"
+    for i, doc in enumerate(retrieved)
+])
+
+prompt = f"""Answer based ONLY on these sources.
+{context}
+
+Question: {user_query}
+
+If not answerable from sources, say "Not found in sources."
+"""
+```
+
+---
+
+## RAG Evaluation Metrics
+
+```python
+from datasets import Dataset
+
+def evaluate_rag(rag_system, test_set):
+    """Test RAG quality."""
+
+    metrics = {
+        "retrieval_precision": [],
+        "answer_similarity": [],
+        "source_correct": [],
+    }
+
+    for item in test_set:
+        query = item["question"]
+        expected_docs = item["gold_documents"]
+        expected_answer = item["expected_answer"]
+
+        # Retrieval evaluation
+        retrieved = rag_system.retrieve(query)
+        retrieved_ids = [doc["id"] for doc in retrieved]
+
+        precision = len(set(retrieved_ids) & set(expected_docs)) / len(retrieved)
+        metrics["retrieval_precision"].append(precision)
+
+        # Answer evaluation
+        answer = rag_system.answer(query)
+        similarity = sentence_similarity(answer, expected_answer)
+        metrics["answer_similarity"].append(similarity)
+
+        # Source correctness
+        cited_sources = extract_citations(answer)
+        correct_sources = len(set(cited_sources) & set(expected_docs))
+        metrics["source_correct"].append(
+            correct_sources / max(len(cited_sources), 1)
+        )
+
+    # Aggregate
+    for metric, values in metrics.items():
+        print(f"{metric}: {sum(values) / len(values):.2%}")
+
+    return metrics
+```
+
+**Target benchmarks**:
+- Retrieval precision: > 60%
+- Answer similarity: > 0.75
+- Source correctness: > 85%
+
+---
+
+## When NOT to Use RAG
+
+❌ **Poor fit**:
+- Knowledge constantly changing (> 10 updates/hour)
+- Requires reasoning across multiple documents
+- Very large knowledge base (> 1B documents)
+- Exact structured data queries (use SQL)
+- Real-time data (stock prices, live scores)
+
+---
+
+## RAG Cost Optimization
+
+```python
+def optimize_rag_costs(monthly_queries=100000):
+    """Estimate and optimize RAG costs."""
+
+    # Scenario 1: Naive (embed every query + top 50 results)
+    cost_embed = (monthly_queries * 100) / 1000 * 0.001  # Small embed model
+    cost_llm = (monthly_queries * 2000) / 1000 * 0.003   # 2000 tokens context
+    cost_naive = cost_embed + cost_llm
+    print(f"Naive: €{cost_naive:.0f}/month")
+
+    # Scenario 2: Optimized (cache, rerank, compress)
+    # - Cache system prompt (90% free after first use)
+    # - Retrieve top 100 + rerank to 3 (90% docs skipped)
+    # - Compress context (50% tokens)
+    cost_embed_opt = (monthly_queries * 100) / 1000 * 0.001
+    cost_llm_opt = (monthly_queries * 1000) / 1000 * 0.003  # 1000 tokens (50% reduction)
+    cost_optimized = cost_embed_opt + cost_llm_opt
+    print(f"Optimized: €{cost_optimized:.0f}/month")
+
+    savings = cost_naive - cost_optimized
+    print(f"Monthly savings: €{savings:.0f} ({savings/cost_naive:.0%})")
+
+# Result: 100K queries → €400-600 savings/month with optimization
+```

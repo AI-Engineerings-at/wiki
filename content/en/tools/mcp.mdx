@@ -1,0 +1,481 @@
+---
+title: Model Context Protocol (MCP) — Connect AI to Your Tools
+date: 2026-03-21
+summary: Use Model Context Protocol to connect Claude to databases, APIs, local tools, and external services
+tags: [mcp, protocol, integration, tools, context]
+author: AI Engineering
+---
+
+# Model Context Protocol (MCP) — Connect AI to Your Tools
+
+Model Context Protocol (MCP) is a standardized way to connect Claude (and other AI models) to your tools, databases, APIs, and services. Think of it as a universal adapter that lets Claude safely access what it needs without hardcoding credentials or capabilities.
+
+## What Is MCP?
+
+MCP is a specification that lets you expose capabilities to Claude in a structured way:
+
+- **Databases** — Safely query your PostgreSQL, MongoDB, or SurrealDB
+- **APIs** — Call internal services, third-party APIs, webhooks
+- **Local tools** — Run scripts, CLI commands, analyze local files
+- **File systems** — Read/write files with permission boundaries
+- **Custom logic** — Anything you can code into a server
+
+Instead of Claude needing to know your exact database schema or API secrets, MCP provides a clean interface that:
+- Exposes only what you want exposed
+- Hides credentials from Claude
+- Validates all requests
+- Logs all interactions
+- Limits what Claude can do
+
+## How MCP Works
+
+### Simple Flow
+
+```
+Claude                 MCP Server              Your Tool/Service
+  │                       │                          │
+  ├──── request ────────→ │                          │
+  │                       ├──── query ─────────────→ │
+  │                       │                          │
+  │                       │ ← response ──────────────┤
+  │ ← formatted result ──┤
+  │                       │
+```
+
+### Example: Querying a Database
+
+**Claude's request** (natural language):
+> "What are the top 5 customers by revenue this month?"
+
+**MCP translates to** (actual query):
+```sql
+SELECT customer_id, customer_name, SUM(amount) as revenue
+FROM orders
+WHERE created_at >= '2026-03-01'
+GROUP BY customer_id, customer_name
+ORDER BY revenue DESC
+LIMIT 5
+```
+
+**Claude gets back** (formatted result):
+```
+1. Acme Corp: $50,000
+2. TechStart Inc: $35,000
+3. Global Solutions: $28,000
+4. Local Business Co: $15,000
+5. Startup Labs: $12,000
+```
+
+Claude never sees the raw SQL or database connection details.
+
+## MCP Servers — Common Types
+
+### Database Servers
+
+Connect Claude to your database:
+
+```yaml
+# Expose PostgreSQL database
+type: database
+engine: postgresql
+host: internal-db.company
+database: analytics
+schema: public
+tables:
+  - customers
+  - orders
+  - products
+operations: [read]  # Read-only, no writes
+```
+
+Claude can query but not modify.
+
+### API Servers
+
+Expose internal APIs:
+
+```yaml
+# Expose internal microservice
+type: api
+endpoint: http://internal-api.company/
+base_path: /api/v1
+operations:
+  - GET /customers
+  - GET /orders/{id}
+  - GET /products
+  - POST /support-tickets  # Create new tickets
+auth: api-key
+rate_limit: 10/minute
+```
+
+### Command Servers
+
+Run local scripts and tools:
+
+```yaml
+# Expose local CLI tools
+type: command
+commands:
+  - name: analyze-log
+    script: ./scripts/analyze-log.sh
+    args: [logfile]
+  - name: backup-db
+    script: ./scripts/backup.sh
+  - name: deploy
+    script: ./scripts/deploy.sh
+    args: [environment]
+```
+
+### File Servers
+
+Expose file system access:
+
+```yaml
+# Expose specific directories
+type: filesystem
+paths:
+  - path: /data/reports/
+    access: read
+  - path: /documents/
+    access: read-write
+  - path: /tmp/uploads/
+    access: write  # Claude can write but not read
+max_file_size: 10MB
+```
+
+## Setting Up an MCP Server
+
+### Simple Python MCP Server Example
+
+```python
+from mcp.server import Server
+from mcp.types import Tool, TextContent
+import anthropic
+
+# Create MCP server
+mcp = Server("my-database-server")
+
+# Define what Claude can do
+@mcp.tool()
+def query_customers(limit: int = 10) -> str:
+    """Get top customers by revenue"""
+    # Your database logic here
+    results = db.query(
+        "SELECT id, name, revenue FROM customers ORDER BY revenue DESC LIMIT ?",
+        [limit]
+    )
+    return format_results(results)
+
+@mcp.tool()
+def get_customer_details(customer_id: int) -> str:
+    """Get detailed info about a specific customer"""
+    result = db.query(
+        "SELECT * FROM customers WHERE id = ?",
+        [customer_id]
+    )
+    return format_result(result)
+
+# Run the server
+if __name__ == "__main__":
+    mcp.run()
+```
+
+### Configuration in Claude Code
+
+```yaml
+# .claude/mcp-config.yaml
+
+servers:
+  - name: database
+    type: stdio
+    command: python
+    args: ["./mcp-servers/database-server.py"]
+    env:
+      DB_HOST: internal-db.company
+      DB_NAME: analytics
+      DB_USER: claude_user
+
+  - name: internal-api
+    type: http
+    url: http://internal-api.company:8080
+    auth: bearer
+    token_env: INTERNAL_API_TOKEN
+
+  - name: local-tools
+    type: stdio
+    command: python
+    args: ["./mcp-servers/tools-server.py"]
+```
+
+Claude Code automatically discovers and loads these MCP servers.
+
+## Security & Permissions
+
+### Principle of Least Privilege
+
+Only expose what Claude needs:
+
+```yaml
+# Good: Limited read access
+database:
+  operations: [read]
+  tables: [customers, orders]
+  columns:
+    orders: [id, customer_id, amount, created_at]
+    customers: [id, name, email]
+
+# Bad: Full database access
+database:
+  operations: [read, write, delete]
+  tables: [*]  # Access to everything
+```
+
+### Rate Limiting
+
+Prevent runaway requests:
+
+```yaml
+rate_limits:
+  queries_per_minute: 60
+  max_result_size: 1000 rows
+  max_execution_time: 30 seconds
+```
+
+### Audit Logging
+
+Log all MCP operations:
+
+```yaml
+logging:
+  enabled: true
+  log_file: /var/log/mcp-audit.log
+  log_level: INFO
+  include_results: false  # Don't log sensitive data
+```
+
+Review logs regularly:
+```bash
+tail -f /var/log/mcp-audit.log
+
+# Output:
+# 2026-03-21 10:15:22 | QUERY | query_customers(limit=10) | SUCCESS
+# 2026-03-21 10:15:45 | CALL  | create_ticket(title=...) | SUCCESS
+# 2026-03-21 10:16:00 | QUERY | get_customer_details(id=5) | SUCCESS
+```
+
+## Real-World Examples
+
+### Example 1: Sales Analytics
+
+```yaml
+servers:
+  - name: sales-db
+    type: database
+    operations: [read]
+    exposed:
+      - SELECT * FROM orders WHERE created_at >= DATE_SUB(NOW(), INTERVAL 90 DAY)
+      - SELECT customer_id, SUM(amount) as total FROM orders GROUP BY customer_id
+      - SELECT * FROM products WHERE active = 1
+```
+
+Claude can:
+```
+"Analyze orders from the last quarter. Which products have the highest margins?"
+
+Claude queries:
+- SELECT * FROM orders (90 days)
+- SELECT * FROM products
+- Calculates margins
+- Provides analysis
+```
+
+### Example 2: Support Ticket Management
+
+```yaml
+servers:
+  - name: support-api
+    type: api
+    operations:
+      - GET /tickets?status=open
+      - GET /tickets/{id}
+      - POST /tickets  # Create
+      - PATCH /tickets/{id}  # Update
+      - POST /tickets/{id}/reply  # Add message
+```
+
+Claude can:
+```
+"Show me all open support tickets that mention database errors"
+
+Claude:
+1. Lists all open tickets
+2. Filters for "database error" mentions
+3. Shows summary of each
+
+"Reply to ticket #123 with technical troubleshooting steps"
+
+Claude:
+1. Gets ticket details
+2. Generates response
+3. Posts reply
+```
+
+### Example 3: Infrastructure Management
+
+```yaml
+servers:
+  - name: devops-tools
+    type: command
+    commands:
+      - name: deploy
+        script: ./deploy.sh
+        args: [service, environment]
+      - name: check-status
+        script: ./health-check.sh
+      - name: logs
+        script: ./get-logs.sh
+        args: [service, hours]
+```
+
+Claude can:
+```
+"What's the status of the API service?"
+→ Runs health-check script
+
+"Show me the last 2 hours of errors in the database service"
+→ Runs get-logs.sh database 2
+
+"Deploy version 2.4.1 to staging"
+→ Runs deploy.sh api staging
+```
+
+## Troubleshooting
+
+### MCP Server Not Connecting
+
+**Error**: "MCP server not found"
+
+**Fix**:
+1. Check server is running: `ps aux | grep mcp`
+2. Verify connection details in config
+3. Check firewall rules for network MCP servers
+4. Review server logs for errors
+
+### Claude Queries Are Slow
+
+**Issue**: Database queries take too long
+
+**Fix**:
+1. Add indexes to frequently queried columns
+2. Reduce query result limits
+3. Cache frequently requested data
+4. Use read replicas for heavy queries
+
+### Permission Denied Errors
+
+**Issue**: Claude tries to access data it shouldn't
+
+**Fix**:
+1. Check MCP server has correct permissions
+2. Verify database user has only needed grants
+3. Review allowed operations in MCP config
+4. Add explicit deny rules for sensitive tables
+
+## Best Practices
+
+### 1. Start with Read-Only
+
+Let Claude read and analyze before giving write access:
+
+```yaml
+# Phase 1: Read
+operations: [read]
+
+# Phase 2: Write (after testing)
+operations: [read, write]
+```
+
+### 2. Set Realistic Limits
+
+Prevent accidental data spills:
+
+```yaml
+limits:
+  max_rows: 100
+  max_execution_time: 5 seconds
+  max_result_size: 1MB
+```
+
+### 3. Mask Sensitive Data
+
+Hide PII in results:
+
+```python
+def format_result(row):
+    # Mask email addresses
+    row['email'] = '***@***.com'
+    # Mask credit card
+    row['card'] = 'XXXX-XXXX-XXXX-' + row['card'][-4:]
+    return row
+```
+
+### 4. Version Your MCP Servers
+
+Track changes like code:
+
+```yaml
+servers:
+  - name: database
+    version: 1.2.0
+    # v1.2.0: Added product_margin column
+    # v1.1.0: Added time filters
+    # v1.0.0: Initial release
+```
+
+### 5. Monitor Usage
+
+Watch for abuse or errors:
+
+```bash
+# Count queries per minute
+grep "QUERY" /var/log/mcp-audit.log | wc -l
+
+# Find slow queries
+grep "execution_time.*[5-9][0-9]\|[1-9][0-9]{2}" /var/log/mcp-audit.log
+
+# Find errors
+grep "ERROR\|FAILED" /var/log/mcp-audit.log
+```
+
+## Checklist
+
+- [ ] Understand MCP architecture and flow
+- [ ] Choose which services to expose (databases, APIs, tools)
+- [ ] Start with read-only access
+- [ ] Set up audit logging
+- [ ] Configure rate limits and timeouts
+- [ ] Test MCP server connection to Claude
+- [ ] Grant Claude access incrementally
+- [ ] Monitor logs for suspicious activity
+- [ ] Document exposed capabilities
+- [ ] Review quarterly and remove unused access
+
+---
+
+**Sources:**
+- [Extend Claude with skills - Claude Code Docs](https://code.claude.com/docs/en/skills)
+- [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
+- [GitHub - anthropics/anthropic-sdk](https://github.com/anthropics/anthropic-sdk-python)
+
+## Sources and Links
+
+- [MCP Documentation](https://code.claude.com/docs/en/mcp)
+- [MCP Specification](https://github.com/modelcontextprotocol/specification)
+- [MCP Servers](https://github.com/modelcontextprotocol/servers)
+- [Model Context Protocol](https://modelcontextprotocol.io)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

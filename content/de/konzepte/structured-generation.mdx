@@ -1,0 +1,470 @@
+---
+title: Structured Generation
+date: 2026-03-21
+summary: Constrained Decoding, JSON Mode, Grammar-Based Generation — Outlines, Guidance, Instructor, LMQL, Regex Constraints
+tags: [structured-generation, constrained-decoding, json-mode, grammar, outlines, guidance]
+author: AI Engineering
+section: Konzepte
+---
+
+# Structured Generation verstehen
+
+Structured Generation zwingt Language Models, nur gültige Outputs in bestimmten Formaten zu generieren (JSON, SQL, Regex, etc.).
+
+## Problem ohne Struktur
+
+```
+Input: "Extrahiere Name und Alter als JSON"
+Output ohne Struktur:
+{
+  "Name": "Alice",
+  invalid syntax: }{
+  age: 25  # <- Falsch! Sollte "age" sein
+}
+
+Mit Structured Generation:
+{
+  "name": "Alice",
+  "age": 25
+}  # <- Garantiert gültig!
+```
+
+---
+
+## JSON Mode
+
+OpenAI und andere Provider bieten natives JSON Mode.
+
+```python
+from openai import OpenAI
+
+client = OpenAI()
+
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[{
+        "role": "user",
+        "content": "Extrahiere Person Daten als JSON mit Feldern: name, age, city"
+    }],
+    response_format={"type": "json_object"}  # <- JSON Mode!
+)
+
+print(response.choices[0].message.content)
+# Garantiert valides JSON
+```
+
+**Wie es funktioniert (intern):**
+1. Model generiert Token
+2. Nach jedem Token: Prüfe ob noch zu gültigem JSON führen kann
+3. Wenn nicht: Block diese Token, erzwinge andere
+
+---
+
+## Outlines Library
+
+Open-Source Structured Generation.
+
+### JSON Schema Enforcement
+
+```python
+from outlines import models, generate
+from pydantic import BaseModel
+
+class Person(BaseModel):
+    name: str
+    age: int
+    city: str
+
+# Modell laden
+model = models.transformers("meta-llama/Llama-2-7b")
+
+# Generator mit Schema
+generator = generate.json(model, Person)
+
+# Generierung erzwingt Schema
+result = generator("Extrahiere: Alice, 25, Berlin")
+# Garantiert Pydantic-valid!
+print(result)
+# {"name": "Alice", "age": 25, "city": "Berlin"}
+```
+
+### Regex Constraints
+
+```python
+from outlines import models, generate
+
+# Email Format
+EMAIL_REGEX = r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+
+model = models.transformers("mistral-7b")
+generator = generate.regex(model, EMAIL_REGEX)
+
+result = generator("Gib mir eine Email Adresse")
+# Garantiert matches Email Pattern!
+```
+
+### Grammar-Based (EBNF)
+
+```
+Grammar Definition (EBNF):
+number = ("0" | "1" | "2" | ... | "9")+
+float = number "." number
+operator = "+" | "-" | "*" | "/"
+expression = float operator float
+```
+
+```python
+from outlines import models, generate
+
+grammar = r"""
+number = ("0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9")+
+float = number "." number
+operator = "+" | "-" | "*" | "/"
+expression = float operator float
+"""
+
+model = models.transformers("llama-2-7b")
+generator = generate.ebnf(model, grammar)
+
+result = generator("Berechne 3.14 + 2.86")
+# Garantiert: [float] [operator] [float]
+```
+
+---
+
+## Guidance Library
+
+Probabilistic Constraints (nicht hard stops, weiche Constraints).
+
+```python
+import guidance
+
+guidance.llm = guidance.llms.OpenAI("gpt-3.5-turbo")
+
+program = guidance("""
+Extrahiere Person Daten:
+Name: {{name}}
+Age: {{age}}
+City: {{city}}
+""")
+
+result = program(
+    name=guidance.gen(max_tokens=20),
+    age=guidance.gen(regex=r"\d{1,3}"),  # 1-3 Digits
+    city=guidance.gen(max_tokens=15)
+)
+
+print(result)
+```
+
+---
+
+## Instructor Library
+
+Pydantic Integration für strukturierte OpenAI Calls.
+
+```python
+import instructor
+from openai import OpenAI
+from pydantic import BaseModel
+
+# Patch OpenAI Client
+client = instructor.from_openai(OpenAI())
+
+class PersonData(BaseModel):
+    name: str
+    age: int
+    city: str
+    email: str
+
+# Structured Call
+response = client.chat.completions.create(
+    model="gpt-4",
+    response_model=PersonData,
+    messages=[{
+        "role": "user",
+        "content": "Extrahiere: Alice, 25, Berlin, alice@example.com"
+    }]
+)
+
+print(response)
+# <- Garantiert PersonData Instanz!
+# Type hints!
+```
+
+---
+
+## LMQL (Language Model Query Language)
+
+Domain-Specific Language für Structured Generation.
+
+```lmql
+argmax
+    "Q: Welches ist die Hauptstadt von Deutschland?"
+    "A: [ANSWER]"
+from
+    "openai/gpt-3.5-turbo"
+where
+    len(ANSWER) < 50 and
+    "Berlin" in ANSWER
+```
+
+```python
+from lmql.language import lmql_engine
+
+# Query definieren
+query = lmql_engine.parse_lmql("""
+argmax
+    "Person: {{name}}"
+    "Age: {{age}}"
+    "City: {{city}}"
+from
+    "local/mistral-7b"
+where
+    len(name) < 20 and
+    int(age) > 0 and
+    int(age) < 150 and
+    len(city) < 20
+""")
+
+result = query()
+```
+
+---
+
+## Implementierung: Custom Constrained Decoder
+
+```python
+import torch
+import torch.nn.functional as F
+from typing import List
+
+class ConstrainedDecoder:
+    def __init__(self, model, tokenizer):
+        self.model = model
+        self.tokenizer = tokenizer
+
+    def decode_with_regex(self, prompt: str, regex_pattern: str, max_tokens=100):
+        """
+        Generiere Text das Regex Pattern matched
+        """
+        import re
+
+        input_ids = self.tokenizer.encode(prompt, return_tensors="pt")
+        token_seq = []
+
+        for _ in range(max_tokens):
+            # Model Vorhersage
+            outputs = self.model(input_ids)
+            logits = outputs.logits[0, -1, :]
+
+            # Alle Tokens nach Wahrscheinlichkeit
+            probs = F.softmax(logits, dim=-1)
+
+            # Filter: Nur Tokens die regex pattern erlauben
+            valid_tokens = []
+            for token_id in range(len(probs)):
+                token_text = self.tokenizer.decode(token_id)
+                # Test ob diesen Token hinzufügen regex match ermöglicht
+                test_seq = "".join([
+                    self.tokenizer.decode(t) for t in token_seq
+                ]) + token_text
+
+                if re.match(regex_pattern, test_seq):
+                    valid_tokens.append(token_id)
+
+            if not valid_tokens:
+                # Fallback: Beste Token die nicht regex matchen
+                valid_tokens = [probs.argmax().item()]
+
+            # Sample aus validen Tokens
+            valid_probs = torch.zeros_like(probs)
+            valid_probs[valid_tokens] = probs[valid_tokens]
+            valid_probs = valid_probs / valid_probs.sum()
+
+            next_token = torch.multinomial(valid_probs, 1).item()
+            token_seq.append(next_token)
+
+            # Update input
+            input_ids = torch.cat([
+                input_ids,
+                torch.tensor([[next_token]])
+            ], dim=-1)
+
+            # Stop condition
+            if self.tokenizer.decode(next_token) == "<|endoftext|>":
+                break
+
+        return self.tokenizer.decode(token_seq)
+
+# Usage
+decoder = ConstrainedDecoder(model, tokenizer)
+result = decoder.decode_with_regex(
+    "Email: ",
+    r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+)
+```
+
+---
+
+## JSON Schema Validation
+
+OpenAI / Claude API Integration mit JSON Schema.
+
+```python
+import json
+from openai import OpenAI
+
+client = OpenAI()
+
+# Schema Definition
+json_schema = {
+    "type": "object",
+    "properties": {
+        "name": {"type": "string"},
+        "age": {"type": "integer", "minimum": 0, "maximum": 150},
+        "email": {"type": "string", "format": "email"},
+        "hobbies": {
+            "type": "array",
+            "items": {"type": "string"}
+        }
+    },
+    "required": ["name", "age", "email"]
+}
+
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[{
+        "role": "user",
+        "content": "Extrahiere Person Daten: Alice, 25, alice@example.com, liest und programmiert"
+    }],
+    response_format={
+        "type": "json_schema",
+        "json_schema": {
+            "name": "PersonData",
+            "schema": json_schema
+        }
+    }
+)
+
+result = json.loads(response.choices[0].message.content)
+# Garantiert Validation gegen Schema!
+```
+
+---
+
+## Performance Tipps
+
+### 1. Early Exit für Validierung
+
+```python
+# ❌ Langsam: Generiere alles, validiere dann
+output = model.generate(prompt)
+if not is_valid_json(output):
+    try_again()  # Oft nötig
+
+# ✅ Schnell: Validiere während Generierung
+output = constrained_generate(prompt, json_schema)
+# Garantiert gültig nach erstem Versuch!
+```
+
+### 2. Schema Simplification
+
+```python
+# ❌ Komplexes Schema mit vielen Constraints
+# → Langsamere Generierung
+
+# ✅ Einfaches Schema
+# → Schnellere Generierung
+```
+
+### 3. Fallback Strategien
+
+```python
+def safe_structured_generate(prompt, schema):
+    try:
+        # Versuche strukturierte Generierung
+        return constrained_generate(prompt, schema)
+    except ConstraintException:
+        # Fallback: Normale Generierung + Post-Processing
+        result = model.generate(prompt)
+        return fix_json(result)  # Best-effort Fix
+```
+
+---
+
+## Praktische Use Cases
+
+### 1. Data Extraction
+
+```python
+# Extraktion mit genauerem Schema
+schema = {
+    "type": "object",
+    "properties": {
+        "persons": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "role": {"type": "string"},
+                    "salary": {"type": "number"}
+                }
+            }
+        }
+    }
+}
+
+result = structured_generate(
+    "Extract from resume: ...",
+    schema
+)
+```
+
+### 2. Function Calling
+
+```python
+# Erzwinge Function Call Format
+function_schema = {
+    "name": "calculate",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "operation": {"enum": ["add", "subtract", "multiply"]},
+            "a": {"type": "number"},
+            "b": {"type": "number"}
+        }
+    }
+}
+```
+
+### 3. SQL Generation
+
+```python
+sql_grammar = """
+select_stmt = "SELECT" columns "FROM" table ["WHERE" condition]
+columns = "*" | column ("," column)*
+column = identifier
+table = identifier
+condition = identifier operator value
+operator = "=" | ">" | "<"
+value = string | number
+"""
+
+result = generate_with_grammar(
+    "Get alle Users über 18:",
+    sql_grammar
+)
+# SELECT * FROM users WHERE age > 18
+```
+
+---
+
+## Quellen und Links
+
+- [Outlines GitHub](https://github.com/outlines-ai/outlines)
+- [Guidance GitHub](https://github.com/microsoft/guidance)
+- [Instructor GitHub](https://github.com/jxnl/instructor)
+- [LMQL GitHub](https://github.com/lmql-lang/lmql)
+- [Constrained Decoding Survey](https://arxiv.org/abs/2304.03943)

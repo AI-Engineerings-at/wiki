@@ -1,0 +1,398 @@
+---
+title: Embeddings erklärt
+date: 2026-03-21
+summary: Was sind Embeddings? Wie funktionieren sie? text-embedding-3, nomic-embed, BGE. Praktische Anwendung für Similarity Search.
+tags: [embeddings, vectors, similarity, semantic-search, rag]
+author: AI Engineering
+---
+
+# Embeddings erklärt
+
+Ein Embedding ist eine mathematische Repräsentation von Text als Vektor (Liste von Zahlen).
+
+Wichtig: **Ähnliche Texte bekommen ähnliche Vektoren.**
+
+## Das Konzept
+
+```
+Text: "Der Hund ist süß"
+Embedding: [0.2, -0.5, 0.8, ..., 0.1]  (z.B. 1536 Dimensionen)
+
+Text: "Ein süßer Hund"
+Embedding: [0.21, -0.48, 0.79, ..., 0.12]  (ähnlich!)
+
+Text: "Das Auto ist rot"
+Embedding: [-0.8, 0.2, 0.1, ..., -0.5]  (nicht ähnlich)
+```
+
+Die Vektoren sind Punkte in einem hochdimensionalen Raum. Ähnliche Bedeutungen sind räumlich nah beieinander.
+
+## Warum Embeddings?
+
+Reason 1: **Similarity Search**
+
+Du hast 1000 Dokumente. User fragt: "Welches Dokument ist ähnlich zu meiner Frage?"
+
+Ohne Embeddings: Volltexsuche ist schwach (braucht exakte Worte).
+
+Mit Embeddings:
+1. Frage in Vektor konvertieren
+2. Alle Dokumente sind schon Vektoren
+3. Finde den Vektor der Frage am nächsten
+4. Return das Dokument
+
+Das ist die Basis für **RAG (Retrieval-Augmented Generation)**.
+
+Reason 2: **Semantische Ähnlichkeit**
+
+```
+Query: "Wie koche ich Spaghetti?"
+
+Document A: "Pasta kochen: 1. Wasser kochen..."
+Distance: 0.05 (nah) ✓
+
+Document B: "Die Geschichte von Rom"
+Distance: 0.9 (weit weg) ✗
+```
+
+Keyword-Match würde Document B auch finden (hat "kochen"). Embeddings sind intelligenter.
+
+## Wie Embeddings erstellt werden
+
+Ein Embedding-Modell ist ein neuronales Netz, das trainiert wurde um semantisch ähnliche Texte nah beieinander zu platzieren.
+
+Training:
+```
+Input: "Die Katze ist schwarz"
+        "Eine schwarze Katze"
+        "Das Auto ist blau"
+
+Ziel:
+- Die ersten zwei bekommen ähnliche Vektoren
+- Das dritte bekommt einen anderen Vektor
+```
+
+Das nennt sich **Contrastive Learning**—lerne aus Pairs.
+
+## Moderne Embedding-Modelle
+
+### text-embedding-3-small (OpenAI)
+
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-...")
+
+response = client.embeddings.create(
+    input="Hallo, ich bin ein Text",
+    model="text-embedding-3-small"
+)
+
+embedding = response.data[0].embedding  # [0.2, -0.5, ...]
+```
+
+- Dimensionen: 1536
+- Preis: $0.02 / 1M Tokens
+- Qualität: Sehr gut
+
+### nomic-embed-text (Open Source)
+
+Klein, schnell, kostenlos:
+
+```bash
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer('nomic-ai/nomic-embed-text-v1')
+embedding = model.encode("Hallo")  # [0.2, -0.5, ...]
+```
+
+- Dimensionen: 768
+- Preis: Free
+- Qualität: Gut
+- Speed: Schnell (läuft lokal)
+
+### bge-large-en-v1.5 (BAAI)
+
+Spezialisiert für Retrieval:
+
+```python
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("BAAI/bge-large-en-v1.5")
+embedding = model.encode("What is AI?")
+```
+
+- Qualität: Sehr gut für Semantic Search
+- Speed: Medium
+- Overhead: 370MB Model
+
+## Similarity Search Praktisch
+
+```python
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Embeddings already computed
+doc_embeddings = [
+    [0.2, 0.5, 0.1],  # Document 1
+    [0.21, 0.48, 0.12],  # Document 2 (ähnlich zu Doc 1)
+    [-0.8, 0.2, -0.5],  # Document 3 (anders)
+]
+
+query = "Süßer Hund"
+query_embedding = [0.21, 0.49, 0.11]  # (ähnlich zu Doc 1&2)
+
+# Berechne Cosine Similarity
+similarities = cosine_similarity([query_embedding], doc_embeddings)[0]
+# [0.99, 0.95, 0.1]
+
+# Top 2 Ergebnisse
+top_indices = np.argsort(similarities)[::-1][:2]
+# [0, 1]  → Dokumente 1 und 2
+```
+
+## Embeddings speichern
+
+Bei vielen Dokumenten brauchst du eine **Vector Database**:
+
+- **Pinecone:** Managed, Cloud
+- **Weaviate:** Open Source, Selbst-gehostet
+- **Milvus:** Open Source, hochperformant
+- **Qdrant:** Modern, RS geschrieben
+- **ChromaDB:** Einfach, lokal
+
+Beispiel ChromaDB:
+
+```python
+import chromadb
+
+client = chromadb.Client()
+collection = client.create_collection("documents")
+
+# Embeddings hinzufügen
+collection.add(
+    ids=["doc_1", "doc_2"],
+    embeddings=[[0.2, 0.5], [0.21, 0.48]],
+    documents=["Text 1", "Text 2"]
+)
+
+# Abfrage
+results = collection.query(
+    query_embeddings=[[0.21, 0.49]],
+    n_results=2
+)
+# Gibt Top 2 ähnliche Dokumente zurück
+```
+
+## Dimension und Trade-offs
+
+Mehr Dimensionen = mehr Information aber:
+- Höhere Kosten (z.B. OpenAI berechnet pro Dimension)
+- Langsamer zu berechnen
+- Mehr Speicher
+
+```
+text-embedding-3-small: 1536 Dimensionen
+nomic-embed: 768 Dimensionen
+DistilBERT: 384 Dimensionen
+```
+
+Für die meisten Tasks: 768 reicht. Nur für sehr genaue Semantic Search: 1536+.
+
+## Dimensionality Reduction
+
+Wenn du Kosten sparen möchtest, kannst du Embeddings komprimieren:
+
+```python
+from sklearn.decomposition import PCA
+
+# 1536 Dimensionen → 256 Dimensionen
+pca = PCA(n_components=256)
+reduced = pca.fit_transform(embeddings)
+
+# Qualität: ~90% Genauigkeit, Speicher: -83%
+```
+
+Praktisch: Die meisten Anwendungen funktionieren auch mit reduzierten Embeddings.
+
+## Multilinguale Embeddings
+
+Manche Modelle können mehrere Sprachen:
+
+```python
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("intfloat/multilingual-e5-large")
+
+# Deutsch und Englisch mischen
+embeddings = model.encode([
+    "Wie koche ich Pasta?",
+    "How do I cook pasta?",
+    "Qué es la inteligencia artificial?"
+])
+
+# Alle drei sind ähnlich distanziert
+```
+
+Das ist gut für RAG über mehrere Sprachen.
+
+## Literatur
+
+## Practical Production Setup: RAG Pipeline
+
+```python
+from sentence_transformers import SentenceTransformer
+import chromadb
+
+# 1. Load Model
+model = SentenceTransformer('nomic-ai/nomic-embed-text-v1')
+
+# 2. Prepare Documents
+documents = [
+    "Document 1: AI ist...",
+    "Document 2: Machine Learning ist...",
+    "Document 3: Das Auto ist rot",
+]
+
+# 3. Create Embeddings
+embeddings = [model.encode(doc) for doc in documents]
+
+# 4. Store in Vector DB
+client = chromadb.Client()
+collection = client.create_collection("my_docs")
+
+for i, (doc, emb) in enumerate(zip(documents, embeddings)):
+    collection.add(
+        ids=[str(i)],
+        embeddings=[emb.tolist()],
+        documents=[doc]
+    )
+
+# 5. Query
+query = "Was ist Künstliche Intelligenz?"
+query_embedding = model.encode(query)
+
+results = collection.query(
+    query_embeddings=[query_embedding.tolist()],
+    n_results=2
+)
+
+print(results)
+# [Document 1, Document 2] (beide ähnlich zu Query!)
+```
+
+**In Production:**
+- ChromaDB local: ~50ms Query-Time
+- Pinecone cloud: ~100ms Query-Time
+- Scale zu 1M documents: Pinecone empfohlen
+
+---
+
+## Embedding Dimensionalität: Fein-Tuning
+
+```
+Standardgröße: 768-1536 Dimensionen
+
+Kleine Datasets (< 100k Docs):
+→ 384 reicht (DistilBERT)
+→ Speicher: -75%, Geschwindigkeit: +300%
+
+Große Datasets (> 1M Docs):
+→ 1536 empfohlen (text-embedding-3-large)
+→ Speicher: höher, aber bessere Genauigkeit
+
+Edge Devices (Mobile, IoT):
+→ 96-192 Dimensionen (Quantisierung)
+→ Speicher: minimal
+→ Genauigkeit: ~85% der vollen Version
+```
+
+---
+
+## Häufige Fehler mit Embeddings
+
+### Fehler 1: "Meine Searches sind sehr vage"
+
+**Problem:**
+```python
+# FALSCH
+query = "stuff"  # Zu kurz, zu vage
+results = search(query)  # Findet nichts Relevantes
+```
+
+**Fix:**
+```python
+# RICHTIG
+query = "How do I optimize Transformer training with LoRA?"
+# Jetzt: Spezifisch, Query-Embedding ist präzise
+results = search(query)  # Findet relevante Dokumente
+```
+
+### Fehler 2: "Alle Ergebnisse gleichen sich"
+
+**Problem:**
+- Documents zu ähnlich (z.B. alle über gleiche Thema)
+- Query zu breit
+- Embedding-Modell zu einfach
+
+**Fix:**
+- Nutze spezialisierteres Model (BGE statt nomic)
+- Breite Query → spezifischere Sub-Queries
+- Pre-filter Documents by Metadata
+
+### Fehler 3: "Embedding-Speicher explodiert"
+
+**Problem:** 1M Documents × 1536 Dims × 4 Bytes = 6GB
+
+**Lösungen:**
+1. Quantisierung (uint8 statt float32)
+   - 6GB → 1.5GB
+   - Genauigkeit: ~95% der vollen
+
+2. Kleinere Model
+   - 768 Dims statt 1536
+   - 3GB statt 6GB
+
+3. Cloud Vector DB (Pinecone, Weaviate)
+   - Kein Speicher-Overhead lokal
+   - Skaliert zu 100M Docs
+
+---
+
+## Semantische Ähnlichkeit: Praktische Beispiele
+
+```
+Query: "Wie trainiere ich ein Modell?"
+
+Document A: "Fine-tuning mit LoRA ist ein Methode..."
+Distance: 0.12 (sehr ähnlich) ✓
+
+Document B: "Der Hund ist braun"
+Distance: 0.95 (nicht ähnlich) ✗
+
+Document C: "Model Training braucht GPU"
+Distance: 0.15 (sehr ähnlich) ✓
+
+Document D: "Pizza schmeckt gut"
+Distance: 0.98 (nicht ähnlich) ✗
+```
+
+Die Embedding-Distances sind EXAKT was RAG braucht!
+
+---
+
+## Ressourcen
+
+- [Embeddings Erklärt: blog.openai.com/embeddings](https://openai.com/blog/introducing-text-and-code-embeddings)
+- [text-embedding-3: OpenAI Docs](https://platform.openai.com/docs/guides/embeddings)
+- [BGE Models: huggingface.co/BAAI](https://huggingface.co/BAAI)
+- [ChromaDB: docs.trychroma.com](https://docs.trychroma.com)
+- [Sentence Transformers](https://www.sbert.net)
+- [Vector Database Comparison](https://superlinked.com/vector-databases-comparison)
+
+**Letzte Aktualisierung**: 21.03.2026 | **Nächste Überprüfung**: Juli 2026
+
+## Quellen und Links
+
+- [Getting Started with Embeddings](https://huggingface.co/blog/getting-started-with-embeddings)
+- [OpenAI Cookbook](https://github.com/openai/openai-cookbook)

@@ -1,0 +1,373 @@
+---
+title: "Was ist Agent Orchestration?"
+date: "2026-03-21"
+summary: "Koordination mehrerer AI-Agenten fuer komplexe Aufgaben. Orchestration vs Choreography, Tools, Patterns, Probleme & Loesungen."
+tags: ["orchestration", "multi-agent", "einfuehrung", "ai", "automation"]
+author: "AI Engineering"
+---
+
+# Was ist Agent Orchestration?
+
+**Agent Orchestration** ist die zentrale Koordination mehrerer autonomer AI-Agenten, die gemeinsam an komplexen Aufgaben arbeiten. Ein zentraler Orchestrator verteilt spezialisierte Tasks an spezialisierte Agenten, statt einem einzelnen grossen LLM alle Aufgaben zu uebertragen.
+
+## Das Problem mit Single-LLM
+
+Einzelne LLMs stoßen an Grenzen:
+
+```
+User: "Deploy v1.2.3, notify team, create release notes"
+
+Single LLM tries:
+→ Deploy (complex infrastructure code)
+→ Notify (format Slack message)
+→ Create release notes (summarize changes)
+→ Context window: 95% full
+→ Quality: Mittel in allen Tasks
+```
+
+**Probleme**:
+- **Context Window**: Nur X Tokens. Alles muss rein.
+- **Spezialisierung**: Ein Modell kann nicht alles exzellent
+- **Zuverlaessigkeit**: Single point of failure
+- **Audit Trail**: Wer hat was entschieden? Unklar.
+- **Kosten**: Opus ist teuer fuer einfache Lookups
+
+## Agent Orchestration Loesung
+
+```
+User: "Deploy v1.2.3, notify team, create release notes"
+
+Orchestrator (Manager):
+  ├→ Delegiert zu @jim01: "Deploy v1.2.3"
+  │  @jim01: Uses Claude Code, Git, Kubernetes API
+  │  @jim01: Returns "Deployment successful"
+  │
+  ├→ Delegiert zu @echo_log: "Notify team"
+  │  @echo_log: Posts to #deployments (Mattermost)
+  │  @echo_log: Returns "Posted"
+  │
+  └→ Delegiert zu @content-writer: "Create release notes"
+     @content-writer: Summarizes commit history
+     @content-writer: Returns "Release notes ready"
+
+Final Result:
+  ✓ Deployment: SUCCESS
+  ✓ Notification: SENT
+  ✓ Docs: CREATED
+  Context used: 60% (Orchestrator efficient)
+```
+
+## Kernkomponenten
+
+### 1. Orchestrator (zentraler Manager)
+
+Entscheidet welcher Agent welche Task bekommt. Koordiniert, trackт Fortschritt, eskaliert Blocker.
+
+```python
+class Orchestrator:
+    def handle_request(self, request):
+        # Verstehe Request
+        tasks = self.parse(request)  # [deploy, notify, docs]
+
+        # Delegiere
+        results = []
+        for task in tasks:
+            agent = self.select_agent(task)  # Select @jim01 for deploy
+            result = agent.execute(task)
+            results.append(result)
+
+        # Aggregate
+        return self.aggregate_results(results)
+```
+
+### 2. Spezialisierte Agents
+
+Jeder Agent = one job, exzellent.
+
+| Agent | Spezialisierung | Tools | Modell |
+|-------|-----------------|-------|--------|
+| @jim01 | Code, Deployments | Git, Bash, Kubernetes | Sonnet |
+| @lisa01 | Infrastructure | Docker, Terraform | Sonnet |
+| @jim02 | QA, Browser Tests | Playwright, Screenshots | Haiku |
+| @content-writer | Text, Docs, Social | Claude, Write | Sonnet |
+
+### 3. Kommunikationskanal
+
+Agents sprechen ueber strukturierte Channels:
+
+```
+Option 1: Chat (Mattermost)
+  - Slow (~1-5 sec, Polling)
+  - Human-Readable
+  - Good for interactive tasks
+
+Option 2: Queue (n8n, RabbitMQ)
+  - Fast (~100-500ms)
+  - Decoupled
+  - Good for batch jobs
+
+Option 3: API (REST, gRPC)
+  - Very fast (~10-100ms)
+  - Direct call
+  - Good for real-time
+```
+
+### 4. Knowledge/Memory
+
+Persistentes Wissen ueber Sessions:
+
+```
+Orchestrator weiß:
+  - Welche Agents existieren
+  - Ihre Faehigkeiten + Limits
+  - Erfolgsrate (Jim01 deployed 1000x, success 98%)
+  - Learnings (was hat am besten funktioniert)
+
+Agents wissen:
+  - Ihr Kontext (Code patterns, API standards)
+  - Learnings aus bisherigen Tasks
+```
+
+## Orchestration vs Choreography
+
+### Orchestration (Zentral)
+
+```
+       Orchestrator
+      ┌────┬────┬────┐
+      ↓    ↓    ↓    ↓
+    Agent Agent Agent Agent
+
+Orchestrator: "Agent 1: do X. Agent 2: do Y. Agent 3: do Z."
+```
+
+**Vorteile**:
+- Klare Kontrolle
+- Einfaches Debugging
+- Zentrale Fehlerbehandlung
+
+**Nachteile**:
+- Bottleneck (Orchestrator kann ueberlastet sein)
+- Weniger Parallelisierung
+
+### Choreography (Dezentral)
+
+```
+Agent 1 → Agent 2 → Agent 3
+  ↓         ↓         ↓
+Agent 4 ← Agent 5 ← Agent 6
+```
+
+Jeder Agent kennt seine Nachbarn und kommuniziert direkt.
+
+**Vorteile**:
+- Hoehere Parallelisierung
+- Resilient gegen Ausfaelle
+
+**Nachteile**:
+- Schwerer zu debuggen
+- Komplexe Synchronisation
+- Keine globale Kontrolle
+
+**Playbook01 nutzt**: Mostly Orchestration (Jim = Orchestrator)
+
+## Orchestration Patterns
+
+### Pattern 1: Sequential
+
+```
+Task 1 (A) → Task 2 (B) → Task 3 (C)
+   ↓           ↓           ↓
+  Done       Done        Done
+
+Execution time: T1 + T2 + T3
+```
+
+**Gut fuer**: Abhängige Tasks (B braucht Output von A)
+
+### Pattern 2: Parallel
+
+```
+Task 1 (A)
+Task 2 (B)  → All finish
+Task 3 (C)
+
+Execution time: max(T1, T2, T3)
+```
+
+**Gut fuer**: Unabhaengige Tasks
+
+### Pattern 3: Fan-Out/Fan-In
+
+```
+          Task 1 (A)
+Request → Task 2 (B) → Aggregate
+          Task 3 (C)
+
+T1, T2, T3 laufen parallel
+Orchestrator wartet auf alle
+Aggregiert Results
+```
+
+**Gut fuer**: Map-Reduce Pattern (z.B. Analyse vieler Files)
+
+## Echte Probleme & Loesungen
+
+### Problem 1: Agent ist down
+
+```
+Request: Deploy v1.2.3
+Agent @jim01 is dead!
+→ Deployment blocked
+```
+
+**Loesung: Fallback Agents**
+```python
+def get_agent(task_type):
+    primary = agents.get("deploy_primary")
+    if not primary.is_healthy():
+        return agents.get("deploy_fallback")  # Use backup
+    return primary
+```
+
+### Problem 2: Agent ist zu langsam
+
+```
+Task: Create 100 release notes
+@content-writer: 1 note per 30 seconds = 50 minutes
+
+→ Too slow!
+```
+
+**Loesung: Parallelisierung**
+```python
+notes = split_into_batches(100, batch_size=5)
+results = parallel_execute(
+    agent=content_writer,
+    tasks=notes,
+    workers=4  # 4 parallel @content-writers
+)
+# 50 min → 13 min
+```
+
+### Problem 3: Agents liefern inconsistente Results
+
+```
+Request: "Summarize this code"
+
+Agent A: "60 lines, handles authentication"
+Agent B: "Complex security module"
+Agent C: "Bad function"
+
+→ Wildly different results!
+```
+
+**Loesung: Validation & Averaging**
+```python
+def validate_result(result, schema):
+    if not matches(result, schema):
+        return run_again()  # Retry
+
+# Or: Consensus
+results = [agent.execute(task) for agent in [A, B, C]]
+avg_quality = sum(r.quality_score for r in results) / len(results)
+```
+
+### Problem 4: Komplexe Dependencies
+
+```
+Task: Deploy → Notify → Create Docs → Announce
+
+  Deploy depends on: Nothing
+  Notify depends on: Deploy (need deployment ID)
+  Docs depends on: Deploy (need changelog)
+  Announce depends on: Docs + Notify
+
+→ DAG (Directed Acyclic Graph) needed
+```
+
+**Loesung: Task Scheduler**
+```python
+tasks = {
+    "deploy": Task(depends_on=[]),
+    "notify": Task(depends_on=["deploy"]),
+    "docs": Task(depends_on=["deploy"]),
+    "announce": Task(depends_on=["notify", "docs"])
+}
+
+scheduler.execute_dag(tasks)
+# Automatically figures out correct order
+```
+
+## Markttrends
+
+Agent Orchestration ist ein booming Market:
+
+- **2023-2024**: Early adoption (small teams)
+- **2025-2026**: Enterprise adoption (EU AI Act deadline 2.8.2026)
+- **2026-2030**: Estimated $50B+ market
+
+**EU AI Act** (effective 2.8.2026):
+- Kein LLM ohne Audit Trail erlaubt
+- Single LLM = impossible to audit
+- Multi-Agent = clear audit trail (wer hat was getan)
+
+→ **Agent Orchestration wird zur Pflicht**
+
+## Wann ist Agent Orchestration sinnvoll?
+
+| Situation | Single-LLM | Agent Orch |
+|-----------|-----------|-----------|
+| "Fix this bug" | ✓ | ✗ (Overkill) |
+| "Deploy + notify + docs" | ✗ | ✓ |
+| "Audit trail required" | ✗ | ✓ |
+| "Team of 1-2 people" | ✓ | ✗ |
+| "Team of 5+ people" | ✗ | ✓ |
+
+**Faustregel**: Orchestration lohnt sich ab 3+ Tasks parallel oder wenn Audit Trail wichtig ist.
+
+## Getting Started
+
+```
+Step 1: Identify Agents
+  - What specialized roles do you have?
+  - Who does code? Who does content? Who does ops?
+
+Step 2: Choose Communication
+  - Chat-based (interactive): Mattermost + polling
+  - Queue-based (batch): n8n
+  - API-based (real-time): REST
+
+Step 3: Build Orchestrator
+  - Simple: If-then rules
+  - Medium: Task scheduler (DAG)
+  - Advanced: AI-driven (Agent decides flow)
+
+Step 4: Add Memory
+  - .claude/CLAUDE.md (rules)
+  - Agent-specific memory (learnings)
+  - Trace IDs (debugging)
+
+Step 5: Monitor
+  - Heartbeats (is agent alive?)
+  - Success rates
+  - Latency tracking
+```
+
+## Weiter lesen
+
+- [Multi-Agent Systeme erklaert](/de/grundlagen/multi-agent-systeme) — Architektur Patterns
+- [Mattermost Integration](/de/tools/mattermost) — Communication Backbone
+- [n8n Workflows](/de/tools/n8n) — Queue-based Orchestration
+- [Sub-Agents in Claude Code](/de/tools/agents) — Agent Primitives
+
+---
+
+*Stand: 2026-03-21 | Reference Quality*
+
+## Quellen und Links
+
+- [CrewAI](https://github.com/crewAIInc/crewAI)
+- [Microsoft AutoGen](https://github.com/microsoft/autogen)
+- [LangGraph](https://github.com/langchain-ai/langgraph)
+- [Claude Documentation](https://docs.claude.com)

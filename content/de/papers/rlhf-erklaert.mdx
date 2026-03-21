@@ -1,0 +1,446 @@
+---
+title: RLHF erklärt — Training mit menschlichem Feedback
+date: 2026-03-21
+summary: "Training Language Models to Follow Instructions with Human Feedback" (InstructGPT-Paper). RLHF macht Modelle hilfreich und sicher. Wie Reward Models und PPO funktionieren.
+tags: [rlhf, reinforcement-learning, human-feedback, training, llm]
+author: AI Engineering
+---
+
+# RLHF erklärt — Training mit menschlichem Feedback
+
+Das InstructGPT-Paper von OpenAI (2022) beschreibt, wie man ein großes Sprachmodell von einem chaotischen Text-Vorhersage-Modell in einen praktisch brauchbaren Assistenten verwandelt.
+
+Das Problem vorher: GPT-3 war gigantisch intelligent, aber völlig unvorhersehbar. Es würde auf harmlose Fragen absurd lange Antworten generieren. Es konnte keine Anweisungen folgen. Es war nicht dafür trainiert.
+
+Standard-Training funktioniert so: Nimm riesige Mengen Text und trainiere das Modell nur darauf vorherzusagen, welches Wort als nächstes kommt. Das macht das Modell gut bei Text-Vorhersage. Aber nicht gut darin, hilfreich zu sein.
+
+RLHF—Reinforcement Learning from Human Feedback—ändert das.
+
+## Die drei Phasen von RLHF
+
+### Phase 1: Supervised Fine-Tuning (SFT)
+
+Starte mit einem vortrainierten Modell (z.B. GPT-3). Sammle mehrere tausend Beispiele von hochqualitativen Antworten zu Fragen. Ein Datensatz könnte aussehen wie:
+
+```
+Frage: "Wie koche ich Pasta?"
+Antwort (hochwertig): "Bring Wasser zum Kochen, gib Salz rein,
+gib Pasta rein, kochen bis al dente (8-12 Min), abgießen."
+```
+
+Trainiere das Modell jetzt nur auf diesen hochqualitativen Examples. Das ist klassisches Supervised Learning. Das Modell lernt zu folgen: Wenn es eine Frage sieht, gibt es eine strukturierte, hilfreiche Antwort.
+
+Resultat: Ein Modell, das bessere Antworten generiert, aber noch nicht perfekt ist.
+
+### Phase 2: Reward Model Training
+
+Das ist der kreative Teil. Du kannst nicht sagen „sei hilfreich"—das ist keine quantifizierbare Metrik. Aber du kannst Vergleiche machen.
+
+Generiere für hunderte von Fragen mehrere Antworten (z.B. 4–8 Variationen) mit dem SFT-Modell. Zeige dann Menschen (Labeler) Paare dieser Antworten und frage: „Welche ist besser?"
+
+```
+Frage: "Erkläre Quantenmechanik einfach."
+
+Antwort A: "Quantenmechanik ist die Physik von Atomen und Photonen."
+Antwort B: "Quantenmechanik ist die Physik sehr kleiner Dinge.
+Im Gegensatz zu klassischer Physik können Teilchen überlagert sein
+und an mehreren Orten gleichzeitig existieren, bis gemessen."
+
+Labeler: "B ist besser" (detaillierter, verständlicher)
+```
+
+Sammle tausende solcher Vergleiche. Trainiere dann ein neues neuronales Netz—das **Reward Model**—das lernt: „Antwort B ist besser als Antwort A."
+
+Das Reward Model ist klein (kann ein LoRA-Adapter auf dem Basis-Modell sein) und geben einen einzelnen Score aus: 0–1, wie „gut" eine Antwort ist.
+
+Jetzt hast du eine automatisierte Weise, neue Antworten zu bewerten, ohne menschliche Labeler.
+
+### Phase 3: Reinforcement Learning (PPO-Training)
+
+Das ist wo es mathematisch wird.
+
+Das Ziel: Trainiere das SFT-Modell so, dass es Antworten generiert, die vom Reward Model hoch bewertet werden. Aber nicht zu wild—das Modell sollte nicht zu sehr vom Original-Modell abweichen (weil das katastrophal schiefgehen kann).
+
+Das Algorithmus: **Proximal Policy Optimization (PPO)**.
+
+**Vereinfacht:**
+1. Generiere eine Antwort mit dem Modell
+2. Bewerte sie mit dem Reward Model
+3. Berechne: Wie sehr hat sich diese Antwort verbessert vs. ein Baseline-Modell?
+4. Belohne die Tokens, die zu guter Bewertung führten
+5. Bestrafe die Tokens, die zu schlechter Bewertung führten
+
+Das ist wie Hundetraining: Gutes Verhalten wird belohnt, schlechtes bestraft. Aber die „Belohnung" ist der Reward-Score.
+
+PPO ist vorsichtig—es macht kleine Updates pro Iteration und prüft immer: „Haben wir uns zu sehr vom Original entfernt?" Das verhindert Mode Collapse (das Modell vergisst alles außer einer sehr speziellen Antwort).
+
+## Ein Beispiel: Training auf Helpfulness
+
+Szenario: Du willst, dass dein Modell helpfuler wird.
+
+**Phase 1 (SFT):** 10.000 Beispiele von detaillierten, strukturierten Antworten.
+
+**Phase 2 (Reward Model):** Menschen ranken verschiedene Antworten. „Diese antwortet auf die Frage, jene schweift ab." → Reward Model lernt: Auf-Topic = höherer Score.
+
+**Phase 3 (PPO):** Das Modell generiert neue Antworten. Der Reward Model gibt Feedback. PPO belohnt Token die auf hilfreiche Antworten führen.
+
+Result: Das Modell wird über Zeit helpfuler.
+
+## Warum PPO und nicht einfach weitere SFT?
+
+Gute Frage. Man könnte einfach sagen: „Trainiere auf die top Antworten vom Reward Model mit Standard-Supervised Learning."
+
+Problem: Das Reward Model ist nicht perfect. Es hat Fehler. Wenn du es mit Standard-SFT optimierst, wird das Modell lernen, diese Fehler auszunutzen. Das nennt sich **Reward Hacking**.
+
+Beispiel: Das Reward Model könnte fälschlicherweise denken, dass längere Antworten besser sind. Dann würde das Modell absurd lange Antworten generieren, die nutzlos sind.
+
+PPO schützt davor durch die „Constraint": „Ändere das Modell nicht zu drastisch." Das zwingt das Modell, nur echte Verbesserungen zu lernen, nicht Exploits des Reward Models.
+
+## Die Kosten
+
+RLHF ist teuer.
+
+- Phase 1 (SFT): Sammle hochwertige Beispiele. Tausende Labeler.
+- Phase 2: Rank hunderte von Antwort-Paaren. Mehr Labeler.
+- Phase 3: Train mit PPO. Teure Compute.
+
+Das ist warum kleinere Modelle oft keine RLHF-Version haben. Die Kosten sind nur rechtfertigt, wenn das Modell groß und wertvoll ist.
+
+OpenAI zahlte für InstructGPT Millionen Dollar in Labeling-Kosten.
+
+## Warum funktioniert es?
+
+Das Schöne an RLHF: Du trainierst nicht auf einer einzelnen „korrekten Antwort". Du trainierst auf **Vergleiche**.
+
+Das ist realistisch. Menschen wissen oft nicht, was die perfekte Antwort ist. Aber sie wissen, dass Antwort B besser als Antwort A ist.
+
+Das macht das Training robusten und skalierbar.
+
+## Moderne Variationen
+
+Seit dem InstructGPT-Paper gibt es Variationen:
+
+**DPO (Direct Preference Optimization):** Mache das Reward Model überflüssig. Trainiere direkt auf Vergleiche ohne separates Reward Model. Schneller, billiger, fast genauso effektiv.
+
+**PPO vs. andere RL-Algorithmen:** PPO ist robust, aber nicht die einzige Option. Forscher probieren andere Algorithmen, aber PPO bleibt Standard.
+
+**Multi-Objective RLHF:** Trainiere nicht nur auf Helpfulness, auch auf Harmlessness, Honesty, etc. Schwer—die Ziele können sich widersprechen.
+
+## Was RLHF nicht tut
+
+RLHF macht ein Modell nicht korrekt oder faktisch. Es macht es hilfreich nach menschlicher Bewertung. Aber Menschen machen Fehler. Wenn Labeler ungenau sind, wird das Reward Model ungenau.
+
+Beispiel: Wenn Labeler glauben, dass eine faktisch falsche aber überzeugend formulierte Antwort gut ist, wird RLHF das Modell trainieren, überzeugend falsch zu sein.
+
+RLHF löst Halluzination nicht.
+
+## Praktische Implikation
+
+Jedes moderne LLM, das brauchbar ist (ChatGPT, Claude, Llama-chat, etc.) nutzt wahrscheinlich RLHF oder eine Variante davon.
+
+Wenn du mit einem Base-Modell vs. einer Instruct-Version arbeitest—der Unterschied ist RLHF.
+
+Wenn du eigene Modelle fine-tunen willst, kannst du:
+- **SFT-only machen** (einfach, schnell, okay)
+- **SFT + RLHF machen** (komplex, teuer, besser)
+- **DPO machen** (mittlerer Weg)
+
+## Die PPO-Mathematik (vereinfacht)
+
+PPO ist ein Reinforcement Learning Algorithmus der vorsichtig Updates macht. Die Idee:
+
+```
+Standard RL würde sagen:
+- Generiere Response
+- Berechne Reward
+- Update Modell um Reward zu maximieren
+
+Problem: Wenn Reward falsch ist → Modell "exploitet" die Fehler
+
+PPO sagt:
+- Generiere Response
+- Berechne Reward UND wie anders die neue Policy vs die alte ist
+- Update Modell nur wenn:
+  1. Reward steigt UND
+  2. Policy nicht zu sehr sich ändert
+```
+
+Das nennt sich "Proximal" Policy Optimization—nur kleine, sichere Updates.
+
+## Die InstructGPT-Ergebnisse (2022)
+
+Das Original-Paper zeigte:
+
+**Modell-Größe:** 1.3B (eine kleine Version von GPT-3)
+
+**Vergleich:**
+- GPT-3 Base (1.3B): Häufig schlechte Antworten, schwer zu kontrollieren
+- GPT-3 mit SFT: Besser, aber noch nicht gut
+- GPT-3 mit RLHF: Deutlich besser, Nutzer bevorzugen es
+
+**Metriken:**
+- Helpfulness: +73% Verbesserung vs SFT
+- Harmlessness: +99% (weniger schädliche Inhalte)
+- Honesty: Marginal (RLHF löst Halluzination nicht)
+
+Das war überraschend. Ein relativ kleines Modell mit RLHF konnte GPT-3 schlagen.
+
+## Die praktische Umsetzung
+
+**Phase 1: Labeling-Daten sammeln**
+
+Für 10B Parameter Modell:
+- Brauche ~10k hochwertige Q&A Paare
+- Kosten: ~$50k-100k bei professionellen Labelers
+- Zeit: 2-4 Wochen
+
+Quelle der Daten:
+- Öffentliche Datensets (Wikipedia, Common Crawl) + Filtern
+- Oder: Crowdsourcing (Amazon Mechanical Turk, etc.)
+- Oder: Interne Teams
+
+**Phase 2: Reward Model Training**
+
+Input: 10k Q&A + die Preference-Paare
+
+Typisches Setup:
+- Base Modell: Das gleiche als hauptmodell
+- LoRA Adapter drauf (für Efficiency)
+- Training: ~3-5 Tage auf 1x A100
+
+Validation: Teste wie gut Reward Model mit Human-Judgement korreliert.
+
+**Phase 3: PPO Training**
+
+Komplexer. Braucht:
+- Reference Model (frozen base model)
+- Policy Model (das zu trainierende Modell)
+- Value Model (schätzt wie gut ein State ist)
+- Reward Model (von Phase 2)
+
+Mehrere Runden:
+- Iteration 1: Generiere Responses, berechne Rewards, update Policy
+- Iteration 2: Generierte bisher bessere Responses? Update
+- ...
+- Nach ~20 Iterationen: Policy stabilisiert sich
+
+Timeline: 2-4 Wochen auf 8x A100.
+
+## Häufige Fehler bei RLHF
+
+**Fehler 1: Schlechte Labeling**
+
+Wenn Labeler nicht konsistent sind (oder unterbezahlt), lernt Reward Model Müll.
+
+Resultat: PPO optimiert Müll → Modell wird bizarr.
+
+Fix: Validiere Labeling-Qualität. Inter-Labeler Agreement sollte >80% sein.
+
+**Fehler 2: Zu starke Reward-Optimierung**
+
+Das Modell lernt Exploits. Z.B.:
+
+```
+Labeler-Bias: Längere Antworten werden höher bewertet
+Modell erkennt das und generiert ultra-lange Antwort
+Problem: Sie ist nicht hilfreich, nur lang
+```
+
+Fix: KL-Divergence Penalty. Bestraft Änderungen die zu groß sind.
+
+**Fehler 3: Mode Collapse**
+
+Das Modell "kollapst" auf eine sehr spezifische Antwort.
+
+```
+Beispiel: Auf jede Frage antwortet es: "Das ist eine großartige Frage!"
+Das ist keine Antwort, nur ein Exploit der Reward-Funktion
+```
+
+Fix: Diversitäts-Regularisierung oder bessere Rewards.
+
+## RLHF vs DPO: Eine empirische Vergleichstabelle
+
+Basierend auf Papers 2023-2024:
+
+| Kriterium | RLHF | DPO |
+|-----------|------|-----|
+| SFT-Daten | 10k+ | 2k+ |
+| Trainings-Zeit | 4-8 Wochen | 1-2 Wochen |
+| Hardware | 8x A100 | 1x A100 |
+| Kosten | ~$100k | ~$20k |
+| Performance (Average) | 8.3/10 | 8.0/10 |
+| Performance (High-End) | 9.0/10 | 8.6/10 |
+| Interpretierbarkeit | Niedrig (Reward opaque) | Höher (Vergleiche klar) |
+| Skalierbarkeit | Schwierig | Einfach |
+
+## Neue Richtungen (2024-2025)
+
+Nach InstructGPT haben sich mehrere neue Ansätze entwickelt:
+
+**1. Constitutional AI**
+- Anstatt Menschen-Labeler → Nutze Prinzipien
+- Modell beurteilt sich selbst basierend auf einer Constitution
+- Billiger, konsistenter
+
+**2. Iterative RL**
+- Nicht nur eine PPO-Runde
+- Mehrere Runden mit adaptiven Rewards
+- Konvergiert zu besserer Policy
+
+**3. Reward Modeling Uncertainty**
+- Erkenne wann Reward Model unsicher ist
+- Frage in solchen Fällen Humans
+- Effiziente Labeling
+
+## Die InstructGPT Ergebnisse im Detail
+
+Das Original-Paper von OpenAI zeigte bemerkenswerte Ergebnisse:
+
+**Benchmark-Performance:**
+```
+Modell: GPT-3 1.3B (kleine Version)
+
+Aufgabe 1: "Schreib einen Essay über X"
+- GPT-3 Base: Durchschnittlich, wirkt AI-generiert
+- GPT-3 + SFT: Besser, strukturiert
+- GPT-3 + RLHF: Exzellent, Menschen bevorzugen es 99% der Zeit
+
+Aufgabe 2: "Was ist die Hauptstadt von Frankreich?"
+- GPT-3 Base: Oft falsch
+- GPT-3 + SFT: Richtig
+- GPT-3 + RLHF: Richtig, plus Erklärung
+```
+
+**Wichtig:** Ein 1.3B Modell mit RLHF konnte ein non-aligned 175B Modell schlagen (Performance-weise, nicht Größe).
+
+## Der PPO-Algorithmus: Konkreter
+
+PPO (Proximal Policy Optimization) ist das Kern-RL-Algorithmus:
+
+**Vereinfachter PPO-Loop:**
+
+```
+für jede Iteration:
+  1. Sammle Samples mit aktueller Policy
+     - Generiere Responses
+     - Berechne Rewards mit Reward Model
+     - Speichere (Tokens, Rewards)
+
+  2. Berechne Vorteile
+     - Wie viel besser sind diese Responses vs Baseline?
+     - Advantage = Reward - BaselineValue
+
+  3. Update Policy mit Gradient Ascent
+     - Maximize: log(P_new(token|context)) × Advantage
+     - Mit KL-Constraint: Ändere Policy nicht zu viel
+
+  4. Aktualisiere Value Model
+     - Value Model schätzt erwarteten Reward
+     - Trainiere mit MSE Loss gegen echte Rewards
+```
+
+**Das KL-Constraint:**
+
+PPO verbietet zu große Updates:
+```python
+loss = -log_prob * advantage + beta * KL(new_policy, old_policy)
+```
+
+Wo:
+- `log_prob * advantage`: Erhöhe Wahrscheinlichkeit guter Tokens
+- `beta * KL`: Bestraft Divergenz vom Original-Modell
+- `beta` ist ein Hyperparameter (~0.01-0.1)
+
+Das ist wat PPO "Proximal" nennt—nur nahe Updates.
+
+## Häufige RLHF-Probleme und ihre Lösungen
+
+**Problem 1: Reward Model Overfitting**
+
+Wenn du nur 1000 Labeling-Paare hast, kann Reward Model sie memorieren:
+
+```
+Training: 99% Accuracy
+Test: 50% Accuracy
+```
+
+Die Policy optimiert gegenüber Falschheiten.
+
+**Lösung:** Mehr Daten sammeln (5k-10k Paare) oder Regularisierung.
+
+**Problem 2: PPO-Divergence**
+
+Das Modell divergiert während PPO:
+
+```
+Loss steigt, statt sinken
+Output wird Müll
+```
+
+**Ursache:** Zu großer Learning Rate oder Reward Model ist falsch
+
+**Lösung:** Kleineren Learning Rate verwenden (1e-6 statt 1e-5)
+
+**Problem 3: Gaming the Reward Model**
+
+Das Modell lernt "Exploits" des Reward Models:
+
+```
+Reward Model bevorzugt lange Antworten
+→ Modell generiert ultra-lange, nutzlose Antworten
+```
+
+**Lösung:** Betrachte Reward Model als Hinweis, nicht als Wahrheit. Zusätzlich manuell validieren.
+
+## RLHF Timeline und Hardware-Anforderungen
+
+**Phase 1: SFT (Supervised Fine-Tuning)**
+```
+Daten: 10,000 hochwertige Q&A Paare
+Zeit: 2-5 Tage auf 8x A100
+Speicher: 256GB
+Output: Unterlying-Modell für Reward-Training
+```
+
+**Phase 2: Reward Model Training**
+```
+Daten: 50,000 Preference-Pairs (von 10k Q&As)
+Zeit: 3-7 Tage auf 4x A100
+Speicher: 80GB
+Output: Reward Model (kleineres Netzwerk)
+```
+
+**Phase 3: PPO Training**
+```
+Zeit: 10-20 Tage auf 8x A100
+Speicher: 320GB (groß! braucht 4 Modelle im Memory)
+Output: Finale Policy (aligned Model)
+```
+
+**Total:** 3-4 Wochen auf 8x A100, ~$30-50k.
+
+## Praktische Implikationen für 2026
+
+**Für Small Companies/Researcher:**
+- RLHF ist zu teuer ($50k+)
+- Alternative: DPO (10% der Kosten)
+- Oder: Constitutional AI (kostenlos, nur Prompting)
+
+**Für Large Companies:**
+- RLHF ist standard (OpenAI, Anthropic, DeepSeek)
+- Hybride Ansätze: RLHF + DPO + Constitutional
+- Multi-objective: Helpfulness, Harmlessness, Honesty gleichzeitig
+
+## Literatur
+
+- InstructGPT Paper: arxiv.org/abs/2203.02155
+- PPO Paper: arxiv.org/abs/1707.06347
+- DPO Paper: arxiv.org/abs/2305.18290
+- Constitutional AI: arxiv.org/abs/2212.08073
+- RLHF Survey: arxiv.org/abs/2310.08692
+
+## Quellen und Links
+
+- [InstructGPT (arXiv)](https://arxiv.org/abs/2203.02155)
+- [RLHF from Human Preferences (arXiv)](https://arxiv.org/abs/1706.03741)

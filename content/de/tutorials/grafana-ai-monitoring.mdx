@@ -1,0 +1,377 @@
+---
+title: "AI Monitoring Dashboard in 15 Minuten"
+date: 2026-03-21
+summary: "Grafana + Prometheus für Ollama, Docker Container und Systemressourcen. Alerts einbauen."
+tags: ["monitoring", "grafana", "prometheus", "ollama", "observability"]
+author: "AI Engineering"
+---
+
+# AI Monitoring Dashboard in 15 Minuten
+
+Du wirst Grafana und Prometheus aufsetzen, um deinen AI Stack zu überwachen: Ollama Model Health, n8n Execution Stats, Docker Container Metrics, System RAM/CPU.
+
+**Voraussetzung**: Docker + Docker Compose (siehe: AI Stack in 30 Minuten aufsetzen)
+
+## Was wird installiert
+
+- **Prometheus**: Time-Series Datenbank für Metriken
+- **Grafana**: Visualisierung und Alerts
+- **Node Exporter**: System-Metriken (RAM, CPU, Disk)
+- **cAdvisor**: Docker Container-Metriken
+
+## Schritt 1: Docker Compose erweitern
+
+Geh in dein `ai-stack` Verzeichnis (wo schon Ollama/n8n läuft) und aktualisiere `docker-compose.yml`:
+
+```yaml
+version: '3.8'
+
+services:
+  # ... bisherige Services (ollama, open-webui, postgres, n8n) ...
+
+  # Neue Services unten hinzufügen:
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: ai-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - ai-network
+    depends_on:
+      - node-exporter
+      - cadvisor
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: ai-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: change_me_password
+      GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-simple-json-datasource
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana-provisioning:/etc/grafana/provisioning
+    networks:
+      - ai-network
+    depends_on:
+      - prometheus
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: ai-node-exporter
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - ai-network
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: ai-cadvisor
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - ai-network
+
+volumes:
+  prometheus-data:
+  grafana-data:
+
+# network bleibt gleich
+networks:
+  ai-network:
+    driver: bridge
+```
+
+## Schritt 2: Prometheus Konfiguration
+
+Erstelle `prometheus.yml` im `ai-stack` Verzeichnis:
+
+```yaml
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'ai-stack-monitor'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+rule_files:
+  - "alerts.yml"
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  - job_name: 'docker'
+    static_configs:
+      - targets: ['cadvisor:8080']
+
+  - job_name: 'ollama'
+    static_configs:
+      - targets: ['ollama:11434']
+    metrics_path: '/metrics'
+
+  - job_name: 'n8n'
+    static_configs:
+      - targets: ['n8n:5678']
+    metrics_path: '/metrics'
+```
+
+## Schritt 3: Alert Rules (optional)
+
+Erstelle `alerts.yml` im `ai-stack` Verzeichnis:
+
+```yaml
+groups:
+  - name: ai_stack
+    interval: 30s
+    rules:
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) > 0.85
+        for: 5m
+        annotations:
+          summary: "RAM-Auslastung > 85%"
+          description: "Host {{ $labels.instance }} hat nur noch {{ $value | humanizePercentage }} RAM frei"
+
+      - alert: HighCPUUsage
+        expr: (100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)) > 80
+        for: 5m
+        annotations:
+          summary: "CPU-Auslastung > 80%"
+
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes{fstype="ext4"} / node_filesystem_size_bytes{fstype="ext4"}) < 0.1
+        for: 5m
+        annotations:
+          summary: "Weniger als 10% Festplatte frei"
+
+      - alert: OllamaDown
+        expr: up{job="ollama"} == 0
+        for: 1m
+        annotations:
+          summary: "Ollama ist nicht erreichbar"
+```
+
+## Schritt 4: Grafana Provisioning (Auto-DataSource)
+
+Erstelle Verzeichnisse:
+
+```bash
+mkdir -p grafana-provisioning/datasources
+mkdir -p grafana-provisioning/dashboards
+```
+
+Datei: `grafana-provisioning/datasources/prometheus.yml`
+
+```yaml
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+```
+
+## Schritt 5: Stack starten
+
+```bash
+cd ai-stack
+docker-compose down  # Falls noch alt läuft
+docker-compose up -d
+```
+
+Checke Status:
+
+```bash
+docker-compose ps
+```
+
+## Schritt 6: Grafana öffnen und Dashboard bauen
+
+1. Geh auf http://localhost:3001 (nicht 3000 — das ist Open WebUI)
+2. Login: **admin** / **change_me_password**
+3. Linkes Menü → "+ New Dashboard"
+
+### Dashboard 1: Ollama Health
+
+Klick "Add Visualization" → wähle Prometheus → Tabelle / Graph.
+
+**Query 1: Ollama Up/Down**
+
+```
+up{job="ollama"}
+```
+
+Das zeigt 1 (online) oder 0 (offline).
+
+**Query 2: System Metrics**
+
+Gib mehrere Queries ein (klick "+ Add Query"):
+
+```
+# RAM-Auslastung
+(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100
+
+# Freier RAM (Bytes)
+node_memory_MemAvailable_bytes / 1024 / 1024 / 1024
+
+# CPU Usage (Prozent)
+100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+```
+
+Speichern mit Ctrl+S, benenne das Dashboard "AI Stack Status".
+
+### Dashboard 2: n8n Execution Monitoring
+
+Neues Dashboard.
+
+**Query: n8n Executions (falls verfügbar)**
+
+```
+rate(n8n_executions_total[5m])
+```
+
+Falls keine Metriken: n8n sendet standardmäßig keine Prometheus Metriken. Lösung: Custom HTTP Request in n8n bauen, die Metrics sammelt.
+
+## Schritt 7: Alerts konfigurieren (optional)
+
+Linkes Menü → Alerting → Contact Points.
+
+1. Klick "+ New Contact Point"
+2. Type: Email
+3. Email Address: deine-email@example.com
+4. SMTP Server: (wird später konfiguriert)
+
+Falls Mattermost:
+
+1. Type: Webhook
+2. URL: http://mattermost:8065/hooks/abc123 (dein Webhook)
+
+Dann unter "Alert Rules" klick "+ Create alert rule" und verknüpfe deine Queries.
+
+## Wichtige Metriken zum Monitoren
+
+| Metrik | Query | Schwelle |
+|--------|-------|----------|
+| RAM-Auslastung | `node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes` | < 15% = ALERT |
+| CPU-Last | `node_load1 / on(instance) count(count by (cpu) (node_cpu_seconds_total))` | > 4 = WARNING |
+| Disk Frei | `node_filesystem_avail_bytes / node_filesystem_size_bytes` | < 10% = ALERT |
+| Docker Container Restarts | `increase(container_last_seen{name=~".+"}[5m])` | > 1 = ALERT |
+| Ollama Response Time | `histogram_quantile(0.95, rate(ollama_request_duration_seconds_bucket[5m]))` | > 5s = SLOW |
+
+## Troubleshooting
+
+### Prometheus zeigt "No targets"
+
+```bash
+docker-compose logs prometheus
+```
+
+Meist: Netzwerk-Problem. Checke:
+
+```bash
+docker network ls
+docker network inspect ai-stack_ai-network
+```
+
+Alle Container sollten da sein.
+
+### Grafana zeigt keine Daten
+
+1. Geh auf http://localhost:9090 (Prometheus direkt)
+2. "Graph" Tab
+3. Query eingeben: `up`
+4. Sollte zwei Zeilen zeigen (Prometheus sich selbst, Node Exporter)
+
+Falls leer: Scrape Config falsch. `prometheus.yml` checken.
+
+### cAdvisor hängt
+
+cAdvisor kann auf manchen Systemen instabil sein. Wenn `docker-compose up -d` hängt:
+
+```bash
+docker-compose down
+# Entferne cadvisor aus docker-compose.yml
+docker-compose up -d
+```
+
+Du verlierst nur Docker Container Metrics, aber die anderen Metriken laufen noch.
+
+## Dashboard als JSON exportieren
+
+Falls du das Dashboard später wieder brauchst:
+
+Oben rechts → Share → JSON Tab → Copy.
+
+Speichern in `grafana-provisioning/dashboards/my-dashboard.json`.
+
+Beim nächsten Start wird es automatisch importiert.
+
+## Backup von Grafana
+
+Die Datenbank ist im Volume `grafana-data`:
+
+```bash
+docker cp ai-grafana:/var/lib/grafana/grafana.db ./grafana-backup.db
+```
+
+Das ist deine komplette Grafana Config (Dashboards, DataSources, User).
+
+## Nächste Schritte
+
+- Erstelle ein **Custom Dashboard für deine Workflows** (RPM, Error Rate)
+- Konfiguriere **Alert Notifications** (Email, Mattermost)
+- Lies: **Multi-Agent System aufbauen** — Monitor Agent Health
+
+## Checkliste
+
+- [ ] Prometheus + Grafana Docker Compose Datei erstellt
+- [ ] `prometheus.yml` erstellt und validiert
+- [ ] `docker-compose up -d` erfolgreich
+- [ ] Prometheus unter http://localhost:9090 erreichbar
+- [ ] Grafana unter http://localhost:3001 erreichbar
+- [ ] Grafana Passwort geändert
+- [ ] Erstes Dashboard erstellt (Ollama Status)
+- [ ] Node Exporter Metriken sichtbar
+- [ ] cAdvisor Metriken sichtbar (optional)
+- [ ] Alerts konfiguriert (optional)
+
+## Quellen und Links
+
+- [Grafana](https://github.com/grafana/grafana)
+- [Prometheus](https://github.com/prometheus/prometheus)

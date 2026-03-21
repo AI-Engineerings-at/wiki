@@ -1,0 +1,457 @@
+---
+title: Claude Code mit Google Vertex AI
+date: 2026-03-21
+summary: Claude Code über Google Vertex AI einrichten – GCP-Authentifizierung, Region-Konfiguration, Umgebungsvariablen, Modell-Pinning, und Best Practices für Enterprise.
+tags: [claude-code, vertex-ai, gcp, authentication, llm-integration, provider]
+author: AI Engineering
+---
+
+# Claude Code mit Google Vertex AI
+
+Vertex AI ist Googles Managed-Dienst für KI-Modelle. Du kannst Claude Code so konfigurieren, dass Anfragen über Vertex AI (statt direkt über Anthropic API) laufen. Das ist sinnvoll für Organisationen, die bereits in Google Cloud investiert haben, und für Enterprise-Features wie IAM, Monitoring, und Cost-Control.
+
+## Voraussetzungen
+
+Bevor du Claude Code mit Vertex AI konfigurierst:
+
+- **Google Cloud Platform (GCP) Account** mit aktiviertem Billing
+- **GCP-Projekt** mit aktivierter Vertex AI API
+- **Zugriff auf Claude-Modelle** in mindestens einer Region (Approval-Prozess, siehe unten)
+- **Google Cloud SDK (`gcloud`)** installiert und konfiguriert
+- **Speicher-Kontingent** in der gewünschten Region (standard: 1 Million Tokens/Monat)
+
+## Schritt 1: GCP-Projekt vorbereiten
+
+### 1.1 Vertex AI API aktivieren
+
+```bash
+# Projekt-ID setzen
+gcloud config set project YOUR-PROJECT-ID
+
+# Vertex AI API aktivieren
+gcloud services enable aiplatform.googleapis.com
+```
+
+### 1.2 Claude-Modelle freigeben
+
+1. Gehe zur [Vertex AI Model Garden](https://console.cloud.google.com/vertex-ai/model-garden)
+2. Suche nach "Claude"
+3. Wähle dein gewünschtes Modell (z.B. Claude Sonnet 4.6)
+4. Klick auf "Request Access" (oder "Enable")
+5. Warte auf Bestätigung (normalerweise 24-48 Stunden)
+
+**Hinweis:** Falls du Zugriff abbist, siehst du einen grünen Haken neben dem Modell-Namen.
+
+## Schritt 2: GCP-Authentifizierung einrichten
+
+Claude Code nutzt Standard Google Cloud Authentication. Du hast mehrere Optionen:
+
+### Option A: Gcloud CLI Login
+
+```bash
+# Browser-basierter Login
+gcloud auth application-default login
+
+# Folge dem Browser-Dialog und autorisiere deinen Account
+```
+
+Das speichert Credentials lokal in `~/.config/gcloud/application_default_credentials.json`.
+
+### Option B: Service Account (für Server/Automation)
+
+Falls du Claude Code auf einem Server (nicht deinem Laptop) laufen lässt:
+
+1. Gehe zu [GCP Service Accounts](https://console.cloud.google.com/iam-admin/serviceaccounts)
+2. Erstelle einen neuen Service Account
+3. Erstelle einen JSON-Schlüssel
+4. Speichere ihn sicher (z.B. in Vault)
+5. Setze die Umgebungsvariable:
+
+```bash
+export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account-key.json
+```
+
+### Option C: Workload Identity (Kubernetes)
+
+Falls du Claude Code in Kubernetes (GKE) laufen lässt:
+
+```bash
+# GKE Workload Identity binding
+gcloud iam service-accounts add-iam-policy-binding YOUR-SA@YOUR-PROJECT.iam.gserviceaccount.com \
+  --role roles/iam.workloadIdentityUser \
+  --member "serviceAccount:YOUR-PROJECT.svc.id.goog[NAMESPACE/KSA-NAME]"
+
+# Claude Code Pod nutzt automatisch diese Identity
+```
+
+[Mehr zu Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity)
+
+## Schritt 3: Claude Code aktivieren
+
+Setze diese Umgebungsvariablen:
+
+```bash
+# Vertex AI aktivieren
+export CLAUDE_CODE_USE_VERTEX=1
+
+# GCP-Projekt-ID
+export ANTHROPIC_VERTEX_PROJECT_ID=your-project-id
+
+# Region (global oder regional)
+export CLOUD_ML_REGION=global
+
+# Optional: Prompt Caching deaktivieren (falls Problem)
+export DISABLE_PROMPT_CACHING=1
+```
+
+**Wichtig:**
+- `ANTHROPIC_VERTEX_PROJECT_ID` wird genutzt zur Modell-Auflösung
+- `CLOUD_ML_REGION=global` nutzt Googles globale Endpoints (beste Verfügbarkeit)
+- Falls `global` nicht supported ist, nutze eine specific Region (z.B. `us-central1`)
+
+## Schritt 4: Region-Konfiguration
+
+### Global Endpoint (Empfohlen)
+
+Falls deine Modelle den Global Endpoint unterstützen:
+
+```bash
+export CLOUD_ML_REGION=global
+```
+
+**Vorteil:** Automatisches Routing in die beste Region, höhere Verfügbarkeit
+
+**Problem:** Nicht alle Modelle unterstützen Global Endpoints
+
+### Regional Endpoints (Fallback)
+
+Falls Global nicht funktioniert, spezifiziere eine Region:
+
+```bash
+export CLOUD_ML_REGION=us-central1
+# oder: export CLOUD_ML_REGION=europe-west1
+# oder: export CLOUD_ML_REGION=asia-southeast1
+```
+
+[Vertex AI Regionen](https://cloud.google.com/vertex-ai/generative-ai/docs/learn/locations#genai-partner-models)
+
+### Region-Override pro Modell
+
+Falls du Global nutzen möchtest, aber bestimmte Modelle nicht in Global verfügbar sind:
+
+```bash
+export CLOUD_ML_REGION=global
+
+# Override für Modelle, die Global nicht unterstützen
+export VERTEX_REGION_CLAUDE_3_5_HAIKU=us-east5
+export VERTEX_REGION_CLAUDE_3_5_SONNET=us-east5
+export VERTEX_REGION_CLAUDE_4_0_OPUS=europe-west1
+```
+
+Claude Code versucht zuerst Global, fällt dann auf diese Regions zurück.
+
+## Schritt 5: Modelle festlegen (Pinning)
+
+**WARNUNG:** Falls du Modell-Aliase nutzt (z.B. `sonnet`, `opus`, `haiku`) ohne zu pinnen, wird Claude Code bei neuen Releases versuchen, neuere Versionen zu nutzen, die möglicherweise nicht in deinem Projekt verfügbar sind → Deine Nutzer kriegen Fehler.
+
+**Lösung:** Immer spezifische Modell-IDs setzen:
+
+```bash
+# Vertex AI Modell-IDs (keine Inference Profiles wie in Bedrock)
+export ANTHROPIC_DEFAULT_OPUS_MODEL='claude-opus-4-6'
+export ANTHROPIC_DEFAULT_SONNET_MODEL='claude-sonnet-4-6'
+export ANTHROPIC_DEFAULT_HAIKU_MODEL='claude-haiku-4-5@20251001'
+```
+
+### Standard-Modelle ohne Pinning
+
+Falls du nicht pinnen möchtest (nicht empfohlen für Produktion):
+
+| Modell-Typ | Standard-ID |
+|-----------|-----------|
+| **Haupt-Modell** | `claude-sonnet-4-6` |
+| **Schnell-Modell** (Haiku) | `claude-haiku-4-5@20251001` |
+
+## Schritt 6: IAM-Berechtigungen
+
+Weise diese IAM-Rolle zu:
+
+### Einfachste Option: `roles/aiplatform.user`
+
+Diese Rolle enthält die nötigen Berechtigungen:
+- `aiplatform.endpoints.predict` – Model Invocation
+
+```bash
+# Nutzer/Service Account diese Rolle geben
+gcloud projects add-iam-policy-binding YOUR-PROJECT-ID \
+  --member="user:YOUR-EMAIL@example.com" \
+  --role="roles/aiplatform.user"
+```
+
+### Strikte Option: Custom Role
+
+Falls du weniger Berechtigungen geben möchtest:
+
+```json
+{
+  "title": "Claude Code Vertex AI User",
+  "description": "Minimal permissions for Claude Code on Vertex AI",
+  "includedPermissions": [
+    "aiplatform.endpoints.predict"
+  ]
+}
+```
+
+[Vertex AI IAM Dokumentation](https://cloud.google.com/vertex-ai/docs/general/access-control)
+
+### Für Service Accounts
+
+Falls du einen Service Account nutzt:
+
+```bash
+gcloud projects add-iam-policy-binding YOUR-PROJECT-ID \
+  --member="serviceAccount:YOUR-SA@YOUR-PROJECT.iam.gserviceaccount.com" \
+  --role="roles/aiplatform.user"
+```
+
+## Schritt 7: Prompt Caching aktivieren (Optional)
+
+Claude Opus 4.6, Sonnet 4.6, Sonnet 4.5, und Sonnet 4 unterstützen [1M Token Context Window](https://platform.claude.com/docs/en/build-with-claude/context-windows#1m-token-context-window) auf Vertex AI.
+
+Claude Code aktiviert automatisch das Extended Context Window, wenn du ein 1M-Modell nutzt.
+
+**Um 1M Context zu nutzen:** Hänge `[1m]` an die Modell-ID:
+
+```bash
+export ANTHROPIC_DEFAULT_OPUS_MODEL='claude-opus-4-6[1m]'
+```
+
+Prompt Caching ist automatisch enabled. Falls deaktivieren:
+
+```bash
+export DISABLE_PROMPT_CACHING=1
+```
+
+**Hinweis:** Falls du höhere Rate Limits brauchst, kontaktiere Google Cloud Support.
+
+## Deployment für Multiple Nutzer
+
+Falls du Claude Code für dein Team/Org deployst:
+
+### 1. Dedicated GCP Projekt
+
+Erstelle einen separaten GCP-Projekt nur für Claude Code:
+- Einfacheres Cost-Tracking
+- Bessere Access-Control
+- Audit-Logging trennen
+
+### 2. Modell-Overrides
+
+Falls du mehrere Modell-Versionen anbieten möchtest:
+
+```json
+{
+  "modelOverrides": {
+    "claude-opus-4-6": "claude-opus-4-6",
+    "claude-opus-4-5-20251101": "claude-opus-4-5-20251101"
+  }
+}
+```
+
+Nutzer können dann `/model` wählen und sehen alle verfügbaren Versionen.
+
+### 3. Zentrale Settings Datei
+
+Erstelle eine zentrale Settings-Datei (z.B. `/opt/claude-code-settings.json`):
+
+```bash
+export CLAUDE_CODE_SETTINGS=/opt/claude-code-settings.json
+```
+
+Diese Datei enthält:
+- Vertex AI Konfiguration
+- Modell-Pinning
+- GCP-Projekt-ID
+- Region-Einstellungen
+- Custom Headers
+
+## Troubleshooting
+
+### Problem: "Model not found" 404 Fehler
+
+**Ursache 1:** Modell ist in deinem Projekt nicht freigeschaltet
+
+**Lösung:**
+```bash
+# Gehe zu Model Garden und request Access
+# https://console.cloud.google.com/vertex-ai/model-garden
+# Warte 24-48 Stunden auf Approval
+```
+
+**Ursache 2:** Modell ist in deiner Region nicht verfügbar
+
+**Lösung:**
+```bash
+# Checke verfügbare Regionen für dein Modell
+gcloud ai models describe "claude-sonnet-4-6" --region=us-central1
+
+# Nutze eine andere Region
+export CLOUD_ML_REGION=europe-west1
+```
+
+### Problem: "Quota exceeded" oder "429 Too Many Requests"
+
+**Ursache:** Dein Projekt hat zu wenig Kontingent
+
+**Lösung:**
+```bash
+# Checke aktuelles Kontingent
+gcloud compute project-info describe --project=YOUR-PROJECT-ID
+
+# Beantrage mehr Kontingent
+# Gehe zu: https://console.cloud.google.com/iam-admin/quotas
+```
+
+Falls regional ein Problem: Nutze `CLOUD_ML_REGION=global` für besseres Load-Balancing.
+
+### Problem: "Model is not enabled in Model Garden"
+
+**Ursache:** Modell ist nicht aktiviert, nur "Requested"
+
+**Lösung:**
+1. Gehe zu [Model Garden](https://console.cloud.google.com/vertex-ai/model-garden)
+2. Suche dein Modell
+3. Schau nach grünem Haken (= Enabled) oder "Request Access"-Button
+4. Falls nur "Request": Warte 24-48 Stunden
+
+### Problem: "Global endpoint not supported for this model"
+
+**Ursache:** Das Modell unterstützt Global Endpoint nicht
+
+**Lösung:**
+```bash
+# Nutze Region-Override
+export CLOUD_ML_REGION=global
+export VERTEX_REGION_CLAUDE_HAIKU=us-east5
+```
+
+Oder: Nutze nur Regional Endpoint:
+
+```bash
+export CLOUD_ML_REGION=us-central1
+```
+
+## Performance & Cost
+
+### Prompt Caching
+
+Claude Code nutzt automatisch Vertex AI [Prompt Caching](https://platform.claude.com/docs/en/build-with-claude/prompt-caching) mit der `cache_control` Flag. Das spart 90% der Kosten für wiederholte Tokens.
+
+Falls Problem: Deaktivieren mit `DISABLE_PROMPT_CACHING=1`
+
+### Kostenvergleich: Vertex AI vs Direkter API
+
+| Szenario | Vertex AI | Direkter API |
+|----------|-----------|-------------|
+| **Kleine Orgs (<50 Nutzer)** | Meist gleich/teurer (GCP-Overhead) | Günstiger |
+| **Große Orgs (>500 Nutzer)** | Volume-Discounts verfügbar | Teurer |
+| **Enterprise & Compliance** | Besser (IAM, VPC, Audit) | Kompliziert |
+| **Prompt Caching** | Massive Einsparungen (90% Rabatt) | Standard-Preise |
+
+[Vertex AI Preisrechner](https://cloud.google.com/vertex-ai/pricing)
+
+### Kostenoptimierung
+
+```bash
+# 1. Prompt Caching aktivieren (standard, spart 90%)
+# Keine zusätzliche Konfiguration nötig
+
+# 2. Haiku für einfache Tasks nutzen (5-10x billiger)
+export ANTHROPIC_DEFAULT_HAIKU_MODEL='claude-haiku-4-5@20251001'
+
+# 3. Batch-API für nicht-echtzeitliche Anfragen nutzen
+# (70% Rabatt, aber Latenz von Stunden)
+```
+
+## Sicherheit & Compliance
+
+### Daten-Schutz
+- Vertex AI nutzt GCP IAM für Access-Control
+- Optionale VPC Service Controls für private Konnektivität
+- Daten sind verschlüsselt im Transit (TLS) und at-rest
+
+### Audit-Logging
+
+```bash
+# Cloud Audit Logs zeigen alle Vertex AI API-Calls
+gcloud logging read "resource.type=aiplatform.googleapis.com" \
+  --limit 10 \
+  --project=YOUR-PROJECT-ID
+```
+
+### Compliance
+
+- **HIPAA:** Vertex AI ist HIPAA-zertifiziert (USA nur)
+- **FedRAMP:** Moderat authorized
+- **SOC 2:** Type II zertifiziert
+- **GDPR:** EU Data Residency verfügbar (europe-west1)
+- **EU AI Act:** Google stellt Provider-Dokumentation bereit (deine Verantwortung als Deployer bleibt)
+
+## Österreich-Spezifika
+
+### DSGVO & Vertex AI
+
+Falls dein KI-System personenbezogene Daten verarbeitet:
+
+**Datenschutz-Anforderungen:**
+- **Datenverarbeitungsvertrag (DPA):** Google hat einen Standard-DPA für Vertex AI → Unterzeichne ihn
+- **EU Data Residency:** Falls in Österreich oder EU: Nutze `europe-west1` Region (deutsche/europäische Server)
+- **Datentransfer-Mechanismus:** Falls USA-Region nötig: Standard Contractual Clauses
+
+Ressourcen:
+- [Google Cloud GDPR Compliance](https://cloud.google.com/privacy/gdpr)
+- [Österreichische DSB Guidance zu KI](https://www.dsb.gv.at)
+
+### Österreichisches Datenschutz-Audit
+
+Falls Audit:
+
+```
+Audit-Frage: "Wo werden die Daten verarbeitet?"
+Antwort: "Vertex AI in europe-west1 (Deutschland), Google DPA unterzeichnet"
+
+Audit-Frage: "Ist das DSGVO-konform?"
+Antwort: "Ja, mit EU Data Residency und Standard Contractual Clauses"
+```
+
+Dokumentation speichern für Audit-Datei.
+
+## Best Practices
+
+1. **Immer Modelle pinnen** – Aliase können bei neuen Releases brechen
+2. **Global Endpoint nutzen** – Höhere Verfügbarkeit und besseres Load-Balancing
+3. **Cloud Logging aktivieren** – Audit-Trail für Compliance
+4. **IAM-Rollen minimal halten** – Nur `roles/aiplatform.user`, nicht Admin
+5. **Prompt Caching aktivieren** – 90% Kostenersparnis
+6. **Regelmäßig Kontingent checken** – Quotas können ausgereizt werden
+7. **Regionen-Diversity** – Falls eine Region ausfällt, haben andere Nutzer Fallback
+8. **Dokumentation führen** – Welche Systeme, welche Daten, welche Compliance
+
+## Weitere Ressourcen
+
+- [Vertex AI Dokumentation](https://cloud.google.com/vertex-ai/docs)
+- [Vertex AI Generative AI](https://cloud.google.com/vertex-ai/generative-ai/docs)
+- [Vertex AI Preisrechner](https://cloud.google.com/vertex-ai/pricing)
+- [Vertex AI Quotas & Limits](https://cloud.google.com/vertex-ai/docs/quotas)
+- [Google Cloud Compliance](https://cloud.google.com/compliance)
+
+## Quellen und Links
+
+- [Google Vertex AI Integration](https://code.claude.com/docs/en/google-vertex-ai)
+- [Google Vertex AI Documentation](https://cloud.google.com/vertex-ai/docs)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

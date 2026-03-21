@@ -1,0 +1,120 @@
+---
+title: Experiment Tracking — MLflow, W&B, Neptune
+date: 2026-03-21
+summary: MLflow, Weights & Biases, Neptune, tracking runs, metrics, artifacts, setup examples, comparison table, self-hosted options.
+tags: [mlops, experiment-tracking, mlflow, wandb, neptune, ml-infrastructure]
+author: AI Engineering
+section: mlops
+---
+
+# Experiment Tracking — MLflow, W&B, Neptune
+
+Experiment tracking is central to reproducible ML systems. It documents: What was the input? Which hyperparameters? What was the output?
+
+## The Problem
+
+Without tracking:
+
+```
+Notebook 1: model_v1.ipynb → Accuracy 92%
+Notebook 2: model_v2.ipynb → Accuracy 93%
+Notebook 3: model_final.ipynb → Accuracy 93.2%
+
+But: Which hyperparameters in v3? Which data? Which code?
+→ Unreproducible, unmaintainable
+```
+
+With tracking:
+
+```
+Run ID: exp-2026-03-21-001
+- Hyperparameters: lr=0.001, batch_size=32
+- Dataset: training_data_v2.csv (hash: abc123)
+- Code version: commit abc123def456
+- Metrics: accuracy=0.932, loss=0.15
+- Artifacts: model.pkl (100 MB), plots/
+
+→ Fully reproducible!
+```
+
+## MLflow
+
+Most popular open-source tool.
+
+### Basic Setup
+
+```python
+import mlflow
+
+mlflow.set_experiment("fraud-detection")
+
+with mlflow.start_run():
+    # Log Hyperparameters
+    mlflow.log_param("learning_rate", 0.001)
+    mlflow.log_param("batch_size", 32)
+    
+    # Training...
+    model = train()
+    
+    # Log Metrics
+    accuracy = evaluate(model)
+    mlflow.log_metric("accuracy", accuracy)
+    
+    # Log Artifacts
+    mlflow.log_artifact("model.pkl")
+    mlflow.log_artifact("plots/")
+```
+
+### Compare Multiple Runs
+
+```
+Run 1: lr=0.001, accuracy=0.92
+Run 2: lr=0.01, accuracy=0.89
+Run 3: lr=0.0001, accuracy=0.91
+
+MLflow UI: http://localhost:5000
+→ Visualize which run is best
+```
+
+## Weights & Biases (W&B)
+
+Commercial tool, very popular in industry.
+
+### Setup
+
+```python
+import wandb
+
+wandb.init(project="fraud-detection", name="run-v2")
+
+wandb.log({
+    "accuracy": 0.932,
+    "loss": 0.15,
+    "learning_rate": 0.001
+})
+
+wandb.finish()
+```
+
+## Comparison
+
+| Feature | MLflow | W&B | Neptune |
+|---------|--------|-----|---------|
+| Self-hosted | Yes | No | No |
+| UI | Local | Cloud | Cloud |
+| Cost | Free | Freemium | Freemium |
+| Hyperparameter Sweep | Plugins | Built-in | Built-in |
+| Team Collaboration | Medium | Excellent | Excellent |
+
+## Best Practice
+
+1. Log EVERYTHING: Parameters, metrics, code version, data hash
+2. Use descriptive names
+3. Save artifacts: Trained model, plots, config
+4. Version control: Link Git commit SHA with experiment
+
+## Sources and Links
+
+- [MLflow Documentation](https://mlflow.org/docs/)
+- [Weights & Biases](https://wandb.ai/)
+- [Neptune.ai](https://neptune.ai/)

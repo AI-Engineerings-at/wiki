@@ -1,0 +1,438 @@
+---
+title: Reinforcement Learning
+date: 2026-03-21
+summary: RL Basics (States, Actions, Rewards, Policies), PPO, DPO, RLHF Connection, Robotik & Games, LLM Alignment
+tags: [reinforcement-learning, policy-gradient, ppo, dpo, rlhf, rewards, alignment]
+author: AI Engineering
+section: Konzepte
+---
+
+# Reinforcement Learning verstehen
+
+Reinforcement Learning trainiert Agenten durch Trial-and-Error. Der Agent nimmt Actions, erhält Rewards, und optimiert seine Policy.
+
+```
+Agent in Environment:
+  State: [Position des Agenten, Positionen Gegner, ...]
+  Action: [Nach rechts gehen, Schießen, Jump]
+  Reward: [+1 für Treffer, -1 für Treffer bekommen, -0.01 pro Schritt]
+  → Agent lernt optimale Strategy durch Wiederholung
+```
+
+---
+
+## Kernkonzepte
+
+### States (S)
+
+Die aktuelle Situation des Agenten.
+
+```
+Game: State = [Player Position, Enemy Position, Health, Mana]
+       State = [50, 120, 100, 80]
+
+Robot: State = [Joint Angles, Joint Velocities, Sensor Readings]
+       State = [0.5rad, 0.2rad/s, distance_to_obstacle=2m]
+
+Stock Trading: State = [Current Price, Price History (30d), Volume, Volatility]
+```
+
+### Actions (A)
+
+Was der Agent tun kann.
+
+```
+Game: Actions = {UP, DOWN, LEFT, RIGHT, ATTACK, DEFEND}
+
+Robot: Actions = Continuous [θ1, θ2, θ3] (Torques auf Joints)
+
+Trading: Actions = {BUY, HOLD, SELL}
+```
+
+### Rewards (R)
+
+Feedback für Agenten.
+
+```
+Game:
+  +1: Enemy getötet
+  -1: Agent genomen Schaden
+  -0.01: Pro Schritt (motiviert schnelle Lösung)
+
+Robot:
+  +1: Erreiche Goal
+  -0.1: Fall hin
+  -0.001: Pro Schritt mit hohem Torque (energieeffizient)
+
+Trading:
+  +10: Gewinn gemacht
+  -10: Verlust gemacht
+```
+
+### Policies (π)
+
+Die Strategy des Agenten: "Was soll ich tun in dieser Situation?"
+
+```
+Deterministic Policy:
+  π(s) = a  (gegeben State s, immer Action a)
+  z.B. IF enemy_near THEN ATTACK
+
+Stochastic Policy:
+  π(a|s) = P(action | state)
+  z.B. 70% ATTACK, 20% DEFEND, 10% MOVE
+
+Policy Parametrization (Neural Network):
+  θ = Gewichte des Netzwerks
+  π_θ(a|s) = Network(s) → [0.7, 0.2, 0.1]
+```
+
+---
+
+## Policy Gradient Methods
+
+### REINFORCE (Basis)
+
+Einfachster Policy Gradient Algorithmus.
+
+```python
+import torch
+import torch.nn.functional as F
+
+class PolicyNetwork(torch.nn.Module):
+    def __init__(self, state_dim, action_dim):
+        super().__init__()
+        self.fc1 = torch.nn.Linear(state_dim, 128)
+        self.fc2 = torch.nn.Linear(128, action_dim)
+
+    def forward(self, state):
+        x = F.relu(self.fc1(state))
+        action_probs = F.softmax(self.fc2(x), dim=-1)
+        return action_probs
+
+# Training
+policy = PolicyNetwork(state_dim=10, action_dim=4)
+optimizer = torch.optim.Adam(policy.parameters(), lr=0.01)
+
+# Episode
+states, actions, rewards = [], [], []
+state = env.reset()
+
+while not done:
+    probs = policy(state)
+    action = torch.multinomial(probs, 1).item()
+    next_state, reward, done = env.step(action)
+
+    states.append(state)
+    actions.append(action)
+    rewards.append(reward)
+    state = next_state
+
+# Policy Gradient Update
+returns = []
+G = 0
+for r in reversed(rewards):
+    G = r + 0.99 * G
+    returns.insert(0, G)
+
+returns = torch.tensor(returns)
+returns = (returns - returns.mean()) / (returns.std() + 1e-8)
+
+loss = 0
+for state, action, G in zip(states, actions, returns):
+    probs = policy(state)
+    log_prob = torch.log(probs[action])
+    loss -= log_prob * G  # Policy gradient!
+
+optimizer.zero_grad()
+loss.backward()
+optimizer.step()
+```
+
+### PPO (Proximal Policy Optimization)
+
+Stabilere, bessere Version von Policy Gradient.
+
+```python
+class PPOAgent:
+    def __init__(self, state_dim, action_dim, lr=0.001):
+        self.policy = PolicyNetwork(state_dim, action_dim)
+        self.value = ValueNetwork(state_dim)  # Kritiker
+        self.optimizer = torch.optim.Adam(
+            list(self.policy.parameters()) + list(self.value.parameters()),
+            lr=lr
+        )
+
+    def update(self, states, actions, rewards, values, epochs=4, batch_size=64):
+        states = torch.tensor(states)
+        actions = torch.tensor(actions)
+        rewards = torch.tensor(rewards)
+
+        # Berechne Advantages
+        advantages = rewards - values.detach()
+        returns = rewards
+
+        # PPO Update (mehrere Epochs, mit Clipping)
+        for _ in range(epochs):
+            for i in range(0, len(states), batch_size):
+                batch_states = states[i:i+batch_size]
+                batch_actions = actions[i:i+batch_size]
+                batch_advantages = advantages[i:i+batch_size]
+                batch_returns = returns[i:i+batch_size]
+
+                # Berechne neue Probabilities
+                new_probs = self.policy(batch_states)
+                old_probs = # alte Probs (cachet vor Update)
+
+                # Probability Ratio
+                ratio = new_probs[batch_actions] / (old_probs[batch_actions] + 1e-8)
+
+                # PPO Clipping (Kern-Innovation!)
+                surr1 = ratio * batch_advantages
+                surr2 = torch.clamp(ratio, 1-0.2, 1+0.2) * batch_advantages
+                policy_loss = -torch.min(surr1, surr2).mean()
+
+                # Value Loss
+                value_loss = F.mse_loss(
+                    self.value(batch_states).squeeze(),
+                    batch_returns
+                )
+
+                # Total Loss
+                loss = policy_loss + 0.5 * value_loss
+
+                self.optimizer.zero_grad()
+                loss.backward()
+                self.optimizer.step()
+```
+
+**PPO Key Innovation: Trust Region Clipping**
+```
+ratio = new_policy / old_policy
+
+Ohne Clipping: Ratio könnte explosion (z.B. 100x)
+              → Zu großer Update, Policy bricht kaputt
+
+Mit Clipping:  ratio ∈ [0.8, 1.2]  (20% max change)
+              → Stabil, kontrolled Updates
+```
+
+---
+
+## DPO (Direct Preference Optimization)
+
+Moderne Alternative zu RLHF für LLMs.
+
+### Problem mit RLHF
+
+```
+RLHF 3 Stages:
+1. Sammle Human Preferences (teuer!)
+2. Trainiere Reward Model (komplex)
+3. Optimiere Policy mit PPO (instabil)
+
+DPO: Nur 1 Stage!
+```
+
+### DPO Algorithm
+
+```python
+def dpo_loss(model, preferred_text, non_preferred_text, beta=0.5):
+    """
+    preferred_text: "Was ist Python?"
+    non_preferred_text: "Ich kann das nicht beantworten"
+    beta: Temperature (höher = mehr Constraining)
+    """
+    # Berechne Log Probabilities
+    log_prob_preferred = model.logprob(preferred_text)
+    log_prob_non_preferred = model.logprob(non_preferred_text)
+
+    # DPO Loss
+    dpo_loss = -torch.log(
+        torch.sigmoid(
+            beta * (log_prob_preferred - log_prob_non_preferred)
+        )
+    )
+
+    return dpo_loss
+
+# Training
+preferred_texts = ["Antwort 1", "Antwort 2", ...]
+non_preferred_texts = ["Schlechte Antwort 1", ...]
+
+for pref, non_pref in zip(preferred_texts, non_preferred_texts):
+    loss = dpo_loss(model, pref, non_pref)
+    loss.backward()
+    optimizer.step()
+```
+
+---
+
+## RLHF (Reinforcement Learning from Human Feedback)
+
+Verwendet für ChatGPT, Claude Alignment.
+
+```
+Stage 1: Sammle Preferences
+  Human vergleicht: "Antwort A vs Antwort B"
+  Feedback: "A ist besser"
+
+Stage 2: Trainiere Reward Model
+  Input: "Frage + Antwort"
+  Output: Reward Score (wie gut ist die Antwort?)
+
+Stage 3: Optimize Policy
+  LLM generiert Antworten
+  Reward Model bewertet
+  RL optimiert Policy um Rewards zu maximieren
+```
+
+### Implementation
+
+```python
+# Stage 2: Reward Model
+class RewardModel(torch.nn.Module):
+    def __init__(self, lm_model):
+        super().__init__()
+        self.lm = lm_model  # Basierend auf LLM
+        self.reward_head = torch.nn.Linear(768, 1)  # Vorhersagt Reward
+
+    def forward(self, text):
+        logits = self.lm(text).last_hidden_state[:, -1, :]  # Last token
+        reward = self.reward_head(logits).squeeze()
+        return reward
+
+# Training
+reward_model = RewardModel(lm)
+optimizer = torch.optim.Adam(reward_model.parameters())
+
+for preferred, non_preferred in preference_pairs:
+    reward_preferred = reward_model(preferred)
+    reward_non_preferred = reward_model(non_preferred)
+
+    # Loss: Preferred sollte höheres Reward haben
+    loss = -torch.log(
+        torch.sigmoid(reward_preferred - reward_non_preferred)
+    )
+
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+
+# Stage 3: Policy Optimization mit PPO
+ppo_agent = PPOAgent(lm.hidden_size, vocab_size)
+
+for state in environment:
+    # Generiere Response
+    response = lm.generate(state)
+
+    # Reward von Reward Model
+    reward = reward_model(response)
+
+    # PPO Update
+    ppo_agent.update(states, actions, rewards)
+```
+
+---
+
+## Robotik Anwendungen
+
+### Locomotion (Gehen)
+
+```python
+# Reward für Roboter-Gait
+def locomotion_reward(position, velocity, energy):
+    """
+    position: Wie weit ist der Roboter gegangen?
+    velocity: Ist die Bewegung stabil?
+    energy: Wie viel Energie wurde verwendet?
+    """
+    reward = (
+        position * 1.0          # +1 pro Meter gegangen
+        + velocity ** 2 * 0.5   # Bonus für Stabilität
+        - energy * 0.001        # Penalty für Energieuse
+    )
+    return reward
+```
+
+### Grasping (Greifen)
+
+```python
+def grasping_reward(obj_position, gripper_position, gripper_force):
+    """
+    Roboter muss Objekt greifen
+    """
+    distance = ||obj_position - gripper_position||
+
+    if distance < 0.01:  # Nah genug zum greifen
+        if gripper_force > threshold:
+            return +1  # Erfolgreich gegriffen!
+        else:
+            return -0.5  # Zu nah aber nicht gegriffen
+    else:
+        return -0.1 * distance  # Motivation sich zu nähern
+```
+
+---
+
+## Games Anwendungen
+
+### Atari (Breakout)
+
+```
+State: Screenshot der Spielschrift
+Actions: [NOOP, FIRE, UP, DOWN]
+Reward: +1 pro Block zerstört, -1 Leben verloren
+
+AlphaGo (Go Game):
+State: Spielbrett
+Actions: [Platziere Stein an 361 mögliche Positionen]
+Reward: +1 wenn Spiel gewonnen, -1 wenn verloren
+```
+
+---
+
+## Häufige Fehler
+
+### 1. Schlechte Reward Design
+
+```
+❌ reward = +1 wenn Ziel erreicht, -1 sonst
+  → Agent funktioniert zufällig bis zum Glück
+
+✅ reward = +1 Ziel, -0.01 pro Schritt, -0.1 für Fehler
+  → Agent lernt effizient
+```
+
+### 2. Exploding Gradients
+
+```python
+# ❌
+loss.backward()
+optimizer.step()
+
+# ✅
+torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+loss.backward()
+optimizer.step()
+```
+
+### 3. Zu greedy Policy
+
+```
+❌ Immer beste Action (exploitation)
+  → Agent stuck in local optima
+
+✅ Manchmal zufällige Action (exploration)
+  → Findet bessere Solutions
+```
+
+---
+
+## Quellen und Links
+
+- [PPO Paper (Schulman et al. 2017)](https://arxiv.org/abs/1707.06347)
+- [DPO Paper (Rafailov et al. 2023)](https://arxiv.org/abs/2305.18290)
+- [RLHF for LLMs (Ouyang et al. 2022)](https://arxiv.org/abs/2203.02155)
+- [OpenAI Spinning Up](https://spinningup.openai.com/)
+- [DeepMind AlphaGo](https://www.deepmind.com/research/alphago)

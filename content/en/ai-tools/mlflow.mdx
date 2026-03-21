@@ -1,0 +1,60 @@
+---
+title: MLflow — Experiment Tracking and Model Registry
+date: 2026-03-21
+summary: MLflow is an open-source ML Ops platform for experiment tracking, model registry, and serving. Tracking API, model serving, registry, self-hosting.
+tags: [mlflow, experiment-tracking, model-registry, ml-ops]
+author: AI Engineering
+---
+
+# MLflow — ML Experimentation Platform
+
+MLflow is the standard platform for experiment tracking and model management in data science teams.
+
+## Installation
+
+```bash
+pip install mlflow
+mlflow ui
+```
+
+Browser: http://localhost:5000
+
+## Tracking API
+
+```python
+import mlflow
+
+mlflow.start_run()
+mlflow.log_param("n_estimators", 100)
+mlflow.log_metric("accuracy", 0.95)
+mlflow.sklearn.log_model(model, "model")
+mlflow.end_run()
+```
+
+## Model Registry
+
+```python
+mlflow.register_model(
+    "runs:/abc123/model",
+    "my-classifier"
+)
+
+# Promote to production
+client = mlflow.tracking.MlflowClient()
+client.transition_model_version_stage(
+    name="my-classifier",
+    version=1,
+    stage="Production"
+)
+```
+
+## Serving
+
+```bash
+mlflow models serve -m runs:/abc123/model -p 1234
+```
+
+## Sources
+
+- [MLflow GitHub](https://github.com/mlflow/mlflow)
+- [Documentation](https://mlflow.org)

@@ -1,0 +1,524 @@
+---
+title: "Claude Code Hooks — Vollständige Referenz"
+date: "2026-03-21"
+summary: "Erschöpfende Dokumentation aller Hook-Typen, Events, Matcher, Umgebungsvariablen, Exit-Codes und Konfigurationsoptionen"
+tags: ["hooks", "automation", "reference", "claude-code"]
+author: "AI Engineering"
+---
+
+# Claude Code Hooks — Vollständige Referenz
+
+Hooks sind benutzerdefinierte Shell-Kommandos, HTTP-Endpunkte, LLM-Prompts oder Agents, die automatisch an bestimmten Stellen im Claude Code Lebenszyklus ausgeführt werden.
+
+## Hook-Typen
+
+### 1. Command Hooks (`type: "command"`)
+
+Shell-Kommandos mit JSON-Input via stdin und Exit-Codes für Ergebnisse.
+
+```json
+{
+  "type": "command",
+  "command": ".claude/hooks/validator.sh",
+  "timeout": 30,
+  "async": false,
+  "once": false,
+  "statusMessage": "Running validation..."
+}
+```
+
+**Parameter:**
+- `command` (string): Pfad zum Skript. Unterstützt `$CLAUDE_PROJECT_DIR`, `${CLAUDE_PLUGIN_ROOT}`.
+- `timeout` (number): Max. Laufzeit in Sekunden (Standard: 600s).
+- `async` (boolean): Asynchrone Ausführung (Standard: false).
+- `once` (boolean): Einmal pro Session (Standard: false).
+- `statusMessage` (string): Benutzerdefinierte Statusmeldung.
+
+### 2. HTTP Hooks (`type: "http"`)
+
+POST-Anfragen an URLs mit JSON-Payload.
+
+```json
+{
+  "type": "http",
+  "url": "http://localhost:8080/hooks/validate",
+  "headers": {
+    "Authorization": "Bearer $MY_TOKEN"
+  },
+  "allowedEnvVars": ["MY_TOKEN"],
+  "timeout": 30
+}
+```
+
+**Parameter:**
+- `url` (string): HTTP-Endpunkt mit Umgebungsvariablen-Interpolation.
+- `headers` (object): HTTP-Header (Variablen werden interpoliert).
+- `allowedEnvVars` (array): Whitelist für Header-Interpolation.
+- `timeout` (number): Max. Laufzeit (Standard: 30s).
+
+### 3. Prompt Hooks (`type: "prompt"`)
+
+Single-Turn-Evaluation durch Claude mit Ja/Nein-Antwort.
+
+```json
+{
+  "type": "prompt",
+  "prompt": "Should this command be allowed? $ARGUMENTS",
+  "model": "claude-opus",
+  "timeout": 30
+}
+```
+
+**Parameter:**
+- `prompt` (string): Der Prompt. `$ARGUMENTS` wird durch Hook-Input ersetzt.
+- `model` (string): `claude-opus`, `claude-sonnet`, `claude-haiku`.
+- `timeout` (number): Max. Laufzeit (Standard: 30s).
+
+### 4. Agent Hooks (`type: "agent"`)
+
+Spawnen Subagents für komplexe Verifizierungen mit Tool-Zugriff.
+
+```json
+{
+  "type": "agent",
+  "prompt": "Verify that tests pass",
+  "context": "fork",
+  "agent": "Plan"
+}
+```
+
+**Parameter:**
+- `prompt` (string): Anleitung für den Subagent.
+- `context` (string): `fork` für isolierten Context.
+- `agent` (string): `Explore`, `Plan`, `general-purpose`.
+
+---
+
+## Hook-Events — Vollständige Liste
+
+### Session-Events
+
+| Event | Matcher | Blockierbar | Beschreibung |
+|-------|---------|------------|-------------|
+| `SessionStart` | startup\|resume\|clear\|compact | Nein | Neue/fortgesetzte Session. Umgebungsvariable: `CLAUDE_ENV_FILE` |
+| `SessionEnd` | clear\|logout\|other | Ja (Exit 2) | Session-Beendigung. Timeout: 1,5s (hart). |
+| `InstructionsLoaded` | — | Nein | CLAUDE.md/Rules geladen. |
+
+### Tool-Execution-Events
+
+| Event | Matcher | Blockierbar | Beschreibung |
+|-------|---------|------------|-------------|
+| `PreToolUse` | Tool-Name (Bash, Edit\|Write, mcp__.*) | Ja (Exit 2) | Vor Tool-Ausführung. Umgebungsvariablen: `CLAUDE_TOOL_NAME`, `CLAUDE_TOOL_INPUT`. |
+| `PostToolUse` | Tool-Name | Nein | Nach erfolgreicher Ausführung. |
+| `PostToolUseFailure` | Tool-Name | Nein | Nach fehlgeschlagener Ausführung. |
+| `PermissionRequest` | Tool-Name | Ja (Exit 2) | Bestätigungsdialog wird angezeigt. |
+
+### Agent-Events
+
+| Event | Matcher | Blockierbar | Beschreibung |
+|-------|---------|------------|-------------|
+| `SubagentStart` | Agent-Typ (Explore, Plan, ...) | Nein | Subagent wird gespawnt. |
+| `SubagentStop` | Agent-Typ | Ja (Exit 2) | Subagent beendet. |
+| `Stop` | — | Ja (Exit 2) | Hauptagent beendet Antwort. |
+| `StopFailure` | Fehlertyp (rate_limit, auth_failed, server_error, other) | Nein | Turn beendet sich aufgrund API-Fehler. |
+
+### Konfiguration & Kontext
+
+| Event | Matcher | Blockierbar | Beschreibung |
+|-------|---------|------------|-------------|
+| `ConfigChange` | user_settings\|project_settings\|policy_settings | Ja (Exit 2) | Konfigurationsdatei wird geändert. |
+| `Notification` | permission_prompt\|idle_prompt\|other | Nein | Benachrichtigung wird angezeigt. |
+| `PreCompact` | — | Nein | Context-Kompression beginnt. |
+| `PostCompact` | — | Nein | Context-Kompression abgeschlossen. |
+
+### Qualitäts-Gates
+
+| Event | Matcher | Blockierbar | Beschreibung |
+|-------|---------|------------|-------------|
+| `TeammateIdle` | — | Nein | Team-Mitglied wird inaktiv. |
+| `TaskCompleted` | — | Nein | Task wird als abgeschlossen markiert. |
+
+### Git-Worktree-Events
+
+| Event | Matcher | Blockierbar | Beschreibung |
+|-------|---------|------------|-------------|
+| `WorktreeCreate` | — | Ja (Exit 2) | Git-Worktree wird erstellt. Ausgabe: Pfad auf stdout. |
+| `WorktreeRemove` | — | Nein | Worktree wird gelöscht. |
+
+### Benutzer-Input & MCP
+
+| Event | Matcher | Blockierbar | Beschreibung |
+|-------|---------|------------|-------------|
+| `UserPromptSubmit` | — | Ja (Exit 2) | Bevor Benutzer-Prompt verarbeitet wird. |
+| `Elicitation` | MCP-Server-Name | Ja (Exit 2) | MCP-Server fordert Input an. |
+| `ElicitationResult` | MCP-Server-Name | Nein | Benutzer antwortet auf Elicitation. |
+
+---
+
+## Matcher-Syntax
+
+Matcher verwenden reguläre Ausdrücke zum Filtern von Hook-Events.
+
+**Matcher-Unterstützung nach Event:**
+
+| Event | Matcher-Ziel | Beispiele |
+|-------|------------|----------|
+| PreToolUse, PostToolUse, PermissionRequest | Tool-Name | `Bash`, `Edit\|Write`, `Read`, `mcp__.*` |
+| SessionStart | Session-Quelle | `startup`, `resume`, `clear`, `compact` |
+| SessionEnd | Exit-Grund | `clear`, `logout`, `other` |
+| SubagentStart, SubagentStop | Agent-Typ | `Explore`, `Plan`, oder benutzerdefinierte Namen |
+| ConfigChange | Config-Quelle | `user_settings`, `project_settings`, `policy_settings` |
+| StopFailure | Fehlertyp | `rate_limit`, `authentication_failed`, `server_error` |
+| Elicitation, ElicitationResult | MCP-Server-Name | Konfigurierte Server-Namen |
+
+**Regex-Beispiele:**
+```json
+"matcher": "Bash"                  // Exakt: nur Bash
+"matcher": "Edit|Write"            // Alternation: Edit oder Write
+"matcher": "mcp__.*"               // Alle MCP-Tools
+"matcher": "mcp__memory__.*"       // Nur memory MCP-Tools
+"matcher": "^(Read|Grep|Glob)$"    // Read-Only-Tools
+```
+
+**Events OHNE Matcher-Unterstützung:**
+- UserPromptSubmit, Stop, TeammateIdle, TaskCompleted, WorktreeCreate, WorktreeRemove, InstructionsLoaded
+
+---
+
+## Umgebungsvariablen
+
+**Immer verfügbar:**
+```bash
+CLAUDE_PROJECT_DIR           # Absoluter Projekt-Pfad
+CLAUDE_SESSION_ID            # Eindeutige Session-ID
+CLAUDE_CODE_REMOTE="true"    # Gesetzt in Remote-Umgebungen
+```
+
+**SessionStart-exklusiv:**
+```bash
+CLAUDE_ENV_FILE              # Pfad zu Datei für Umgebungsvariablen
+# Beispiel: echo "export NODE_ENV=production" >> "$CLAUDE_ENV_FILE"
+```
+
+**PreToolUse-exklusiv:**
+```bash
+CLAUDE_TOOL_NAME             # Name des aufzurufenden Tools
+CLAUDE_TOOL_INPUT            # JSON-Input des Tools (als String)
+```
+
+**HTTP-Hooks:**
+Alle Umgebungsvariablen in `allowedEnvVars` werden in Header interpoliert.
+
+---
+
+## Exit-Codes
+
+| Code | Bedeutung | Blockierung |
+|------|-----------|-----------|
+| 0 | Erfolg | JSON wird geparst oder Aktion erlaubt |
+| 2 | Blockierender Fehler | stderr als Meldung, Aktion blockiert |
+| 1, 3, ... | Nicht-blockierend | stderr im verbose-Modus |
+
+**Exit-Code 2 Blockierungsverhalten nach Event:**
+
+| Event | Ergebnis |
+|-------|----------|
+| PreToolUse | Tool-Ausführung blockiert |
+| PermissionRequest | Permission verweigert |
+| UserPromptSubmit | Prompt-Verarbeitung blockiert |
+| Stop, SubagentStop | Stopp verhindert |
+| ConfigChange | Konfigurationsänderung blockiert |
+| WorktreeCreate | Worktree-Erstellung blockiert |
+| Elicitation | Elicitation verweigert |
+| PostToolUse, PostToolUseFailure | Nicht-blockierend |
+
+---
+
+## Konfigurationsformat
+
+Hooks werden in `settings.json` (Projekt oder Benutzer) konfiguriert:
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/validate.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/setup.sh",
+            "once": true
+          }
+        ]
+      }
+    ]
+  },
+  "disableAllHooks": false
+}
+```
+
+**Konfigurationsquellen (Priorität, von niedrig zu hoch):**
+1. `~/.claude/settings.json` (Benutzer)
+2. `.claude/settings.json` (Projekt, shareable)
+3. `.claude/settings.local.json` (Projekt, lokal)
+4. Verwaltete Richtlinien (Organisation)
+5. Plugin `hooks/hooks.json`
+6. Skill/Agent-Frontmatter
+
+Höhere Priorität überschreibt niedrigere.
+
+**Hooks deaktivieren:**
+```json
+{
+  "disableAllHooks": true
+}
+```
+
+Einzelne Hooks können nicht deaktiviert werden — müssen aus Konfiguration entfernt werden.
+
+---
+
+## JSON Output-Schema
+
+**Erfolgreiche Antwort (Exit 0):**
+```json
+{
+  "continue": true,
+  "suppressOutput": false,
+  "systemMessage": "Hook executed",
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "allow"
+  }
+}
+```
+
+**Blockierende Antwort (Exit 2):**
+```json
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "deny",
+    "permissionDecisionReason": "Blocked by policy"
+  }
+}
+```
+
+**Allgemeines Schema:**
+```json
+{
+  "continue": true|false,
+  "stopReason": "string (wenn continue=false)",
+  "suppressOutput": false,
+  "systemMessage": "string (an Benutzer)",
+  "hookSpecificOutput": {
+    "hookEventName": "EventName",
+    "permissionDecision": "allow|deny|ask",
+    "permissionDecisionReason": "string",
+    "updatedInput": {},
+    "updatedMCPToolOutput": {},
+    "additionalContext": "string"
+  }
+}
+```
+
+---
+
+## HTTP Hook Fehlerbehandlung
+
+| Response | Verhalten |
+|----------|-----------|
+| 2xx + leerer Body | Erfolg, Aktion erlaubt |
+| 2xx + JSON | JSON wird geparst |
+| 2xx + Text | Text als Kontext hinzugefügt |
+| Non-2xx | Nicht-blockierender Fehler |
+| Timeout | Nicht-blockierender Fehler |
+
+Um zu blockieren: 2xx mit `{"hookSpecificOutput": {"permissionDecision": "deny"}}` zurückgeben.
+
+---
+
+## Timeouts
+
+| Hook-Typ | Standard |
+|----------|----------|
+| Command | 600 Sekunden |
+| Prompt | 30 Sekunden |
+| Agent | 60 Sekunden |
+| HTTP | 30 Sekunden |
+| SessionEnd | 1,5 Sekunden (hart) |
+
+**SessionEnd-Timeout überschreiben:**
+```bash
+CLAUDE_CODE_SESSIONEND_HOOKS_TIMEOUT_MS=5000 claude
+```
+
+---
+
+## Pfad-Substitution
+
+Platzhalter in `command`:
+```json
+"command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/script.sh"
+"command": "${CLAUDE_PLUGIN_ROOT}/scripts/tool.sh"
+"command": "${CLAUDE_PLUGIN_DATA}/dependencies/lib"
+```
+
+**Mit Leerzeichen immer quoten:**
+```json
+"command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/my script.sh\""
+```
+
+---
+
+## Asynchrone & Einmalausführung
+
+**Asynchrone Hooks (blockieren nicht):**
+```json
+{
+  "type": "command",
+  "command": ".claude/hooks/background-task.sh",
+  "async": true
+}
+```
+
+**Einmal pro Session:**
+```json
+{
+  "type": "command",
+  "command": ".claude/hooks/setup.sh",
+  "once": true
+}
+```
+
+---
+
+## Hook-Verwaltung
+
+Tippe `/hooks` in Claude Code für Read-Only-Browser:
+- Alle Hook-Events mit Zählern
+- Quellenort (User, Project, Local, Plugin)
+- Vollständige Handler-Details
+
+---
+
+## Praktische Beispiele
+
+### Destruktive Befehle blockieren
+```bash
+#!/bin/bash
+COMMAND=$(jq -r '.tool_input.command')
+if echo "$COMMAND" | grep -qE '(rm -rf|dd if=)'; then
+  jq -n '{hookSpecificOutput: {hookEventName: "PreToolUse", permissionDecision: "deny"}}'
+  exit 2
+else
+  exit 0
+fi
+```
+
+### Umgebungsvariablen beim Start
+```bash
+#!/bin/bash
+if [ -n "$CLAUDE_ENV_FILE" ]; then
+  echo "export NODE_ENV=production" >> "$CLAUDE_ENV_FILE"
+  exit 0
+fi
+```
+
+### Linter nach Datei-Änderungen
+```bash
+#!/bin/bash
+FILE=$(jq -r '.tool_input.file_path')
+if [[ "$FILE" == *.py ]]; then
+  python -m pylint "$FILE"
+fi
+```
+
+### Prompt-Validierung
+```json
+{
+  "hooks": {
+    "PermissionRequest": [
+      {
+        "matcher": "Edit",
+        "hooks": [{
+          "type": "prompt",
+          "prompt": "Is this change safe? $ARGUMENTS",
+          "model": "claude-opus"
+        }]
+      }
+    ]
+  }
+}
+```
+
+### Secrets filtern
+```bash
+#!/bin/bash
+jq -r '.tool_output // ""' | \
+  sed -E 's/password[=:]\s*[^ ]+/password=***REDACTED***/gi'
+```
+
+### Force-Push verhindern
+```bash
+#!/bin/bash
+COMMAND=$(jq -r '.tool_input.command')
+if echo "$COMMAND" | grep -qE 'git push.*(--force|-f)'; then
+  jq -n '{hookSpecificOutput: {hookEventName: "PreToolUse", permissionDecision: "deny"}}'
+  exit 2
+fi
+```
+
+### MCP-Tools whitelist
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__.*",
+        "hooks": [{
+          "type": "prompt",
+          "prompt": "Allow MCP tool? $ARGUMENTS",
+          "model": "claude-sonnet"
+        }]
+      }
+    ]
+  }
+}
+```
+
+---
+
+## Sicherheitshinweise
+
+- Verwaltete Richtlinien-Hooks können nicht deaktiviert werden.
+- Unternehmen können `allowManagedHooksOnly` nutzen.
+- MCP-Elicitation-Hooks können Schemas nicht überschreiben.
+- `policy_settings` ConfigChange-Blockierungen werden ignoriert.
+
+---
+
+*Dokumentation: 2026-03-21*
+
+## Quellen und Links
+
+- [Hooks Documentation](https://code.claude.com/docs/en/hooks)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

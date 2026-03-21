@@ -1,0 +1,675 @@
+---
+title: Tool Use Patterns — Function Calling für LLMs
+date: 2026-03-21
+summary: Wie LLMs Tools/Functions aufrufen. JSON Schema, Execution Loops, Best Practices, Parallelisierung, Claude vs OpenAI vs Gemini Vergleich
+tags: [Tool Use, Function Calling, LLM Patterns, Claude, OpenAI, Gemini]
+author: "AI Engineering"
+---
+
+# Tool Use Patterns — Function Calling für LLMs
+
+Tool Use ist das "Gehirn" von AI Agents. Das LLM entscheidet WANN und WIE Tools zu nutzen sind.
+
+## Grundkonzept
+
+```
+User: "Was ist das Wetter in Berlin?"
+   ↓
+LLM: "Ich brauche das get_weather Tool mit city=Berlin"
+   ↓
+System: Ruft get_weather("Berlin") auf
+   ↓
+Result: "20°C, sonnig"
+   ↓
+LLM: "In Berlin sind es 20°C und die Sonne scheint"
+   ↓
+User: "Danke für die Info!"
+```
+
+Das ist **Tool Use**: Das LLM denkt, der Code handelt.
+
+## Teil 1: Tool Schema Definition
+
+Tools sind JSON Schema + Beschreibung.
+
+### Basis-Tool
+
+```python
+{
+    "type": "function",
+    "function": {
+        "name": "get_weather",
+        "description": "Ruft das aktuelle Wetter ab",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "city": {
+                    "type": "string",
+                    "description": "Stadtname (z.B. Berlin, New York)"
+                },
+                "unit": {
+                    "type": "string",
+                    "enum": ["celsius", "fahrenheit"],
+                    "description": "Temperatur-Einheit"
+                }
+            },
+            "required": ["city"]
+        }
+    }
+}
+```
+
+**Schema Feld-Erklärung:**
+- `name`: Eindeutige Tool-ID (snake_case)
+- `description`: Was das Tool tut (2-3 Sätze)
+- `parameters`: JSON Schema für Eingaben
+- `required`: Pflicht-Parameter (kann leer sein)
+
+### Multi-Parameter Tool
+
+```python
+{
+    "type": "function",
+    "function": {
+        "name": "search_database",
+        "description": "Sucht in der Datenbank nach Dokumenten",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "Suchterm (z.B. 'AI Trends 2026')"
+                },
+                "date_from": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Start-Datum (YYYY-MM-DD)"
+                },
+                "date_to": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "End-Datum (YYYY-MM-DD)"
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": "Max. Ergebnisse (default: 10)",
+                    "minimum": 1,
+                    "maximum": 100
+                }
+            },
+            "required": ["query"]
+        }
+    }
+}
+```
+
+## Teil 2: Claude Tool Use
+
+### Einfaches Beispiel
+
+```python
+# claude_tools.py
+from anthropic import Anthropic
+
+client = Anthropic()
+
+# Tools definieren
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "calculator",
+            "description": "Führt mathematische Berechnungen durch",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "operation": {
+                        "type": "string",
+                        "enum": ["add", "subtract", "multiply", "divide"],
+                        "description": "Operation"
+                    },
+                    "a": {"type": "number", "description": "Erste Zahl"},
+                    "b": {"type": "number", "description": "Zweite Zahl"}
+                },
+                "required": ["operation", "a", "b"]
+            }
+        }
+    }
+]
+
+# Tool implementieren
+def execute_calculator(operation: str, a: float, b: float) -> str:
+    if operation == "add":
+        return str(a + b)
+    elif operation == "subtract":
+        return str(a - b)
+    elif operation == "multiply":
+        return str(a * b)
+    elif operation == "divide":
+        if b == 0:
+            return "Error: Division by zero"
+        return str(a / b)
+
+# Claude mit Tools
+def solve_math_problem(problem: str) -> str:
+    messages = [
+        {"role": "user", "content": problem}
+    ]
+
+    # Erste Response
+    response = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        max_tokens=1024,
+        tools=tools,
+        messages=messages
+    )
+
+    # Loop bis fertig
+    while response.stop_reason == "tool_use":
+        # Tool-Call extrahieren
+        tool_use = None
+        for content in response.content:
+            if content.type == "tool_use":
+                tool_use = content
+                break
+
+        if not tool_use:
+            break
+
+        # Tool ausführen
+        tool_name = tool_use.name
+        tool_input = tool_use.input
+        tool_use_id = tool_use.id
+
+        print(f"Claude: Rufe {tool_name} auf mit {tool_input}")
+
+        result = execute_calculator(**tool_input)
+        print(f"Result: {result}")
+
+        # Nächster Turn mit Result
+        messages.append({"role": "assistant", "content": response.content})
+        messages.append({
+            "role": "user",
+            "content": [
+                {
+                    "type": "tool_result",
+                    "tool_use_id": tool_use_id,
+                    "content": result
+                }
+            ]
+        })
+
+        # Erneut Claude aufrufen
+        response = client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=1024,
+            tools=tools,
+            messages=messages
+        )
+
+    # Finale Antwort
+    for content in response.content:
+        if hasattr(content, "text"):
+            return content.text
+
+# Test
+answer = solve_math_problem("Was ist 123 mal 456?")
+print(f"\nFinal Answer: {answer}")
+```
+
+Output:
+```
+Claude: Rufe calculator auf mit {'operation': 'multiply', 'a': 123, 'b': 456}
+Result: 56088
+
+Final Answer: 123 mal 456 ergibt 56.088
+```
+
+## Teil 3: Parallel Tool Calling
+
+Moderne LLMs können mehrere Tools gleichzeitig aufrufen.
+
+```python
+# parallel_tools.py
+from anthropic import Anthropic
+
+client = Anthropic()
+
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_stock_price",
+            "description": "Ruft Aktienkurs ab",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "symbol": {
+                        "type": "string",
+                        "description": "Aktien-Symbol (z.B. AAPL, GOOGL)"
+                    }
+                },
+                "required": ["symbol"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_news",
+            "description": "Ruft aktuelle News ab",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "ticker": {
+                        "type": "string",
+                        "description": "Aktien-Symbol"
+                    }
+                },
+                "required": ["ticker"]
+            }
+        }
+    }
+]
+
+def get_stock_price(symbol: str) -> str:
+    prices = {"AAPL": "195.50", "GOOGL": "140.25", "MSFT": "425.00"}
+    return prices.get(symbol, "Symbol nicht gefunden")
+
+def get_news(ticker: str) -> str:
+    news_db = {
+        "AAPL": "Apple präsentiert neues iPhone",
+        "GOOGL": "Google investiert in KI"
+    }
+    return news_db.get(ticker, "Keine News")
+
+# Parallel Tool Calling
+def get_market_insights(symbols: list) -> str:
+    prompt = f"Gib mir Aktienkurse und News für: {', '.join(symbols)}"
+
+    messages = [
+        {"role": "user", "content": prompt}
+    ]
+
+    response = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        max_tokens=1024,
+        tools=tools,
+        messages=messages
+    )
+
+    # Alle Tool-Calls (parallel!) sammeln
+    tool_results = []
+
+    for content in response.content:
+        if content.type == "tool_use":
+            tool_name = content.name
+            tool_input = content.input
+            tool_use_id = content.id
+
+            # Parallel ausführen
+            if tool_name == "get_stock_price":
+                result = get_stock_price(**tool_input)
+            elif tool_name == "get_news":
+                result = get_news(**tool_input)
+
+            tool_results.append({
+                "type": "tool_result",
+                "tool_use_id": tool_use_id,
+                "content": result
+            })
+
+    # Alle Results auf einmal zurück
+    messages.append({"role": "assistant", "content": response.content})
+    messages.append({
+        "role": "user",
+        "content": tool_results
+    })
+
+    # Finale Response
+    final = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        max_tokens=1024,
+        tools=tools,
+        messages=messages
+    )
+
+    for content in final.content:
+        if hasattr(content, "text"):
+            return content.text
+
+# Test
+insights = get_market_insights(["AAPL", "GOOGL"])
+print(insights)
+```
+
+Wichtig: Claude ruft `get_stock_price` und `get_news` **gleichzeitig** auf!
+
+## Teil 4: Claude vs OpenAI vs Gemini
+
+| Aspekt | Claude | OpenAI | Gemini |
+|--------|--------|--------|--------|
+| **Tool Definition** | Anthropic Format | OpenAI Format | Google Format |
+| **Parallel Tools** | ✓ | ✓ | ✓ |
+| **Auto Retry** | ✓ | Manuell | Manuell |
+| **Error Handling** | Gut | OK | OK |
+| **Streaming** | ✓ | ✓ | ✓ |
+
+### OpenAI Function Calling
+
+```python
+# openai_tools.py
+from openai import OpenAI
+
+client = OpenAI()
+
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_weather",
+            "description": "Gets weather",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "location": {
+                        "type": "string"
+                    }
+                },
+                "required": ["location"]
+            }
+        }
+    }
+]
+
+# OpenAI API call
+response = client.chat.completions.create(
+    model="gpt-4-turbo",
+    messages=[{"role": "user", "content": "Was ist das Wetter in Berlin?"}],
+    tools=tools,
+    tool_choice="auto"
+)
+
+# Tool Call extrahieren
+if response.choices[0].message.tool_calls:
+    tool_call = response.choices[0].message.tool_calls[0]
+    print(f"Tool: {tool_call.function.name}")
+    print(f"Args: {tool_call.function.arguments}")
+```
+
+### Google Gemini Function Calling
+
+```python
+# gemini_tools.py
+import google.generativeai as genai
+
+model = genai.GenerativeModel("gemini-2.0-flash")
+
+tools = [
+    genai.types.Tool(
+        function_declarations=[
+            genai.types.FunctionDeclaration(
+                name="get_weather",
+                description="Gets weather",
+                parameters=genai.types.Schema(
+                    type=genai.types.Type.OBJECT,
+                    properties={
+                        "location": genai.types.Schema(
+                            type=genai.types.Type.STRING,
+                            description="City name"
+                        )
+                    },
+                    required=["location"]
+                )
+            )
+        ]
+    )
+]
+
+response = model.generate_content(
+    "Was ist das Wetter in Berlin?",
+    tools=tools
+)
+
+# Function calls sind in response.function_calls
+for call in response.function_calls:
+    print(f"Function: {call.name}")
+    print(f"Args: {call.args}")
+```
+
+## Teil 5: Best Practices
+
+### 1. Tool-Beschreibung ist KRITISCH
+
+**Schlecht:**
+```python
+"description": "Tool"
+```
+
+**Gut:**
+```python
+"description": "Sucht Produkte in unserem Katalog nach Preis, Kategorie und Verfügbarkeit"
+```
+
+Das LLM nutzt die Beschreibung um zu entscheiden OB es das Tool nutzen soll!
+
+### 2. Parameter beschreiben
+
+**Schlecht:**
+```python
+"properties": {
+    "q": {"type": "string"}
+}
+```
+
+**Gut:**
+```python
+"properties": {
+    "q": {
+        "type": "string",
+        "description": "Suchterm (z.B. 'rote Schuhe Größe 42')"
+    }
+}
+```
+
+### 3. Enum für begrenzte Optionen
+
+```python
+"properties": {
+    "status": {
+        "type": "string",
+        "enum": ["pending", "processing", "completed"],
+        "description": "Auftrags-Status"
+    }
+}
+```
+
+Das LLM kann nur diese 3 Werte wählen.
+
+### 4. Max/Min für Zahlen
+
+```python
+"properties": {
+    "max_results": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100,
+        "description": "Max Ergebnisse"
+    }
+}
+```
+
+Verhindert unrealistische Eingaben (z.B. 999.999 Ergebnisse).
+
+### 5. Fehlerbehandlung
+
+```python
+def execute_tool(tool_name: str, tool_input: dict) -> str:
+    """Sichere Tool-Ausführung"""
+
+    try:
+        if tool_name == "get_weather":
+            location = tool_input.get("location", "")
+            if not location:
+                return "Error: location is required"
+            return f"Weather in {location}: 20°C, sunny"
+
+        elif tool_name == "search_database":
+            # ... Implementation ...
+            pass
+
+        else:
+            return f"Unknown tool: {tool_name}"
+
+    except Exception as e:
+        return f"Error: {str(e)}"
+```
+
+## Teil 6: Tool Use Anti-Patterns
+
+### ❌ Tool zu allgemein
+
+```python
+# Falsch: "do_anything" Tool
+{
+    "name": "do_anything",
+    "description": "Does anything you want"
+}
+```
+
+Das LLM weiß nicht wann es sinnvoll ist!
+
+### ❌ Zu viele Tools
+
+Mehr als 20 Tools: Das LLM wird überfordert.
+
+**Besser:** Tools in Kategorien teilen.
+
+### ❌ Tools ohne Error Handling
+
+```python
+# Falsch: Kein Error Handling
+def get_user(user_id):
+    return users[user_id]  # KeyError wenn nicht existiert!
+
+# Richtig:
+def get_user(user_id):
+    if user_id not in users:
+        return f"Error: User {user_id} not found"
+    return users[user_id]
+```
+
+### ❌ Infinite Loops
+
+```python
+# Falsch: LLM ruft Tool auf, das wieder Tool braucht
+Tool A → Tool B → Tool C → Tool A → ...
+
+# Besser: Limit für Tool-Aufrufe
+max_tool_calls = 10
+```
+
+## Teil 7: Production Tool Use
+
+```python
+# production_tools.py
+import logging
+from typing import Optional
+from anthropic import Anthropic
+
+logger = logging.getLogger(__name__)
+
+class ProductionToolUse:
+    def __init__(self, max_tool_calls: int = 10, timeout: int = 30):
+        self.client = Anthropic()
+        self.max_tool_calls = max_tool_calls
+        self.timeout = timeout
+        self.tools = []  # Definieren
+
+    def execute_with_tools(self, prompt: str) -> Optional[str]:
+        messages = [
+            {"role": "user", "content": prompt}
+        ]
+
+        tool_call_count = 0
+
+        while tool_call_count < self.max_tool_calls:
+            try:
+                response = self.client.messages.create(
+                    model="claude-3-5-sonnet-20241022",
+                    max_tokens=1024,
+                    tools=self.tools,
+                    messages=messages,
+                    timeout=self.timeout
+                )
+
+                if response.stop_reason == "end_turn":
+                    # Fertig
+                    for content in response.content:
+                        if hasattr(content, "text"):
+                            return content.text
+                    return None
+
+                elif response.stop_reason == "tool_use":
+                    # Tools ausführen
+                    tool_results = []
+
+                    for content in response.content:
+                        if content.type == "tool_use":
+                            result = self._execute_tool(content.name, content.input)
+                            tool_results.append({
+                                "type": "tool_result",
+                                "tool_use_id": content.id,
+                                "content": result
+                            })
+
+                    messages.append({"role": "assistant", "content": response.content})
+                    messages.append({
+                        "role": "user",
+                        "content": tool_results
+                    })
+
+                    tool_call_count += 1
+
+                else:
+                    logger.warning(f"Unexpected stop_reason: {response.stop_reason}")
+                    return None
+
+            except Exception as e:
+                logger.error(f"Tool execution error: {e}")
+                return None
+
+        logger.warning(f"Max tool calls ({self.max_tool_calls}) reached")
+        return None
+
+    def _execute_tool(self, tool_name: str, tool_input: dict) -> str:
+        # Implementiere Tools hier
+        return "Tool result"
+```
+
+## Zusammenfassung
+
+Tool Use Pattern:
+
+1. **Definieren** → JSON Schema + Beschreibung
+2. **Übergeben** → An LLM API
+3. **LLM entscheidet** → Wann welches Tool
+4. **Ausführen** → Dein Code läuft das Tool
+5. **Zurück** → Result an LLM
+6. **Loop** → Bis LLM fertig
+
+**Best Practices:**
+- ✓ Klare, spezifische Beschreibungen
+- ✓ Enum für Optionen, min/max für Zahlen
+- ✓ Error Handling in jedem Tool
+- ✓ Max 15-20 Tools
+- ✓ Max tool_calls Limit (Sicherheit)
+
+**Nächste Schritte:**
+- RAG Tool integration
+- Database Query Tool
+- API Call Tool (für externe Services)
+
+## Quellen und Links
+
+- [Claude Docs](https://docs.claude.com/en/docs/build-with-claude/tool-use/overview)

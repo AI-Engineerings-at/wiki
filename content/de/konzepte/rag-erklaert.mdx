@@ -1,0 +1,441 @@
+---
+title: RAG erklärt
+date: 2026-03-21
+summary: Retrieval Augmented Generation — wie externe Daten mit LLMs kombiniert werden, praktische Architekturen, Embedding-Modelle, und Reranking-Strategien
+tags: [rag, retrieval, augmented-generation, embedding, vektorsuche, llm]
+author: AI Engineering
+---
+
+# RAG (Retrieval Augmented Generation) verstehen
+
+RAG ist die praktische Lösung für ein Kernproblem von LLMs: **Sie wissen nichts über deine Daten**. Ein LLM trainiert im Juli 2024 kennt deine internen Dokumente von Dezember 2025 nicht. RAG holt aktuelle, externe Daten zur Laufzeit und fügt sie in den Prompt ein.
+
+---
+
+## Das Problem: Kontextverschmutzung vs. Wissenslücken
+
+### Ohne RAG: Drei schlechte Optionen
+
+**Option 1: Alles in den Prompt**
+```
+Prompt: "Hier sind 500 interne Dokumente, antworte auf: ..."
+Problem:
+- Kontext-Fenster nicht groß genug
+- Zu laut (zu viele irrelevante Chunks)
+- Token-kosten explodieren
+```
+
+**Option 2: Fine-Tuning**
+```
+Trainiere LLM auf deinen Daten
+Problem:
+- Teuer (100€-10.000€+)
+- Dauert Tage/Wochen
+- Neue Dokumente = Neutraining nötig
+- Risiko von "Halluzinationen" durch Overfitting
+```
+
+**Option 3: Blinder Glaube**
+```
+"LLMs sind so groß, es muss etwas wissen"
+Problem:
+- Weiß nicht deine Spezifika
+- Gibt Fake-Antworten selbstbewusst
+```
+
+### Lösung: RAG (Retrieval Augmented Generation)
+
+```
+User-Frage
+     ↓
+[1] Relevante Dokumente FINDEN (Vector Search)
+     ↓
+[2] In Prompt EINFÜGEN
+     ↓
+[3] LLM generiert Antwort (mit daten-gestützt)
+     ↓
+Antwort mit Quellen
+```
+
+**Vorteile**:
+- Günstig (nur API-Calls, kein Training)
+- Schnell updatable (neue Daten = sofort nutzbar)
+- Quellen-referenzierbar ("laut Dokument X...")
+- Beliebig viele Daten ohne Kontext-Limit
+
+---
+
+## Die RAG-Pipeline (detailliert)
+
+### Schritt 1: Dokumente Embedding-ieren
+
+```
+Dokument: "Der Hund springt schnell über den Zaun"
+            ↓
+Embedding Model (z.B. sentence-transformers)
+            ↓
+Vector: [0.234, -0.512, 0.891, ..., 0.123]  (384-1536 dimensional)
+```
+
+**Beliebte Embedding-Modelle** (Stand 2026):
+
+| Modell | Größe | Dimension | Qualität | Speed | Lokal |
+|--------|-------|-----------|----------|-------|-------|
+| **all-MiniLM-L6-v2** | 22MB | 384 | OK | Sehr schnell | Ja |
+| **all-mpnet-base-v2** | 438MB | 768 | Gut | Schnell | Ja |
+| **bge-base-en-v1.5** | 438MB | 768 | Sehr Gut | Schnell | Ja |
+| **Cohere Embed-3** | API | 1024 | Excellente | Normal | Cloud |
+| **OpenAI text-embedding-3-small** | API | 1536 | Excellente | Normal | Cloud |
+| **jina-embeddings-v3** | API | 1024 | State-of-Art | Normal | Cloud |
+
+**Dimension erklärt**: Mehr Dimensionen = präzisere Unterscheidung, aber auch:
+- Mehr RAM
+- Langsamer zu berechnen
+- Kleiner Effekt bei >768 dim
+
+### Schritt 2: Vektoren speichern (Vector Database)
+
+```
+Dokument 1 → [0.234, -0.512, ...]  → Vector DB
+Dokument 2 → [0.891, 0.234, ...]   → Vector DB
+Dokument 3 → [0.112, -0.444, ...]  → Vector DB
+...
+```
+
+Die Vektordatenbank indexiert diese mit Algorithmen wie **HNSW** (Hierarchical Navigable Small World) oder **IVF** (Inverted File) für schnelle Suche.
+
+### Schritt 3: User-Frage embedden
+
+```
+User fragt: "Wie schnell springt ein Hund?"
+            ↓
+Gleiche Embedding-Model verwenden!
+            ↓
+Query-Vector: [0.245, -0.501, 0.902, ..., 0.115]
+```
+
+**KRITISCH**: Der selbe Embedding-Model wie bei den Dokumenten. Sonst ist der Vektor-Raum inkompatibel.
+
+### Schritt 4: Ähnliche Dokumente suchen
+
+```
+Query-Vector Ähnlichkeit zu:
+- Dokument 1: 0.87 (cosine similarity)
+- Dokument 2: 0.42
+- Dokument 3: 0.91  ← Top match!
+- Dokument 4: 0.23
+
+Top-K retrieval (z.B. k=3):
+[Dokument 3 (0.91), Dokument 1 (0.87), Dokument 2 (0.42)]
+```
+
+**Ähnlichkeits-Metriken**:
+```
+Cosine Similarity: cos(A, B) = (A · B) / (||A|| × ||B||)
+                   Range: [-1, 1], aber meistens [0, 1]
+
+Dot Product: A · B (schneller, aber nicht normalisiert)
+
+Euclidean Distance: √(Σ(A_i - B_i)²) (größer = unähnlicher)
+
+In der Praxis: Cosine am häufigsten, Dot Product am schnellsten.
+```
+
+### Schritt 5: Prompt konstruieren
+
+```
+System Prompt:
+"Du bist ein Assistent. Antworte basierend auf den folgenden
+Dokumenten. Wenn nicht relevant, sag 'weiß nicht'."
+
+Retrieved Context:
+---
+Dokument 3: "Der Hund springt schnell über den Zaun"
+Dokument 1: "Hunde sind athletisch"
+Dokument 2: "Springer sind trainiert"
+---
+
+User Frage:
+"Wie schnell springt ein Hund?"
+```
+
+### Schritt 6: LLM generiert mit Kontext
+
+```
+LLM liest: System + Context + Query
+           ↓
+       "Basierend auf den Dokumenten:
+        Hunde springen schnell über Zäune.
+        Quellen: Dokument 3, Dokument 1"
+```
+
+---
+
+## Chunk-Strategien (kritisch für RAG-Qualität)
+
+Ein Dokument wird nicht als Ganzes embedded. Es wird in **Chunks** geteilt.
+
+### Problem: Zu große Chunks
+
+```
+Chunk: "Der Hund springt schnell. Ein Auto fährt vorbei.
+        Der Hund heult laut. Die Nachbarin schaut heraus."
+
+Query: "Wie schnell springt ein Hund?"
+Result: Irrelevante Details (Auto, Heul, Nachbarin)
+```
+
+### Problem: Zu kleine Chunks
+
+```
+Chunk: "Der Hund"
+Problem: Zu wenig Kontext, LLM weiß nicht worüber es spricht
+```
+
+### Best-Practice Chunk-Größen
+
+```
+Semantic Search (RAG):        300-500 Tokens
+Summarization:               500-1000 Tokens
+Fine-Tuning:                 2000+ Tokens
+```
+
+Für Tokens-Konvertierung: 1 Token ≈ 4 Zeichen in Englisch, ≈ 3 in Deutsch.
+
+### Overlap-Strategie
+
+```
+Dokument: "Der Hund springt schnell über den Zaun und..."
+
+Ohne Overlap:
+Chunk 1: "Der Hund springt schnell über"
+Chunk 2: "den Zaun und läuft weiter"
+
+Mit Overlap (50 Token Overlap):
+Chunk 1: "Der Hund springt schnell über"
+Chunk 2: "...schnell über den Zaun und läuft weiter"
+         ↑ Overlap-Teil wiederholt
+
+Vorteil: Grenzbereich der Chunks wird nicht verloren
+```
+
+### Strategien
+
+| Strategie | Code | Gut für |
+|-----------|------|---------|
+| **Fixed Size** | size=400, overlap=50 | Schnell, einfach, konsistent |
+| **Semantic** | Split bei Satz/Paragraph-Grenzen | Natürlicher, aber ungleich |
+| **Recursive** | Split zuerst nach "\n\n", dann nach "\n", dann per Char | Flexibel, komplex |
+| **Document-specific** | HTML → per `<section>`, Code → per Funktion | Domänen-aware |
+
+---
+
+## Reranking: Die zweite Runde Filterung
+
+Problem: Vector-Ähnlichkeit ist nicht perfekt.
+
+```
+Query: "Wie viel kostet der Hund?"
+
+Vector-Search Top-3:
+1. "Der Hund springt schnell" (0.87 similarity) ← False Positive!
+2. "Ein Hund kostet 1500€" (0.71 similarity)
+3. "Hunde sind Tiere" (0.68 similarity)
+```
+
+### Reranking-Lösung
+
+```
+Top-K aus Vector-Search (z.B. top-100)
+         ↓
+Rerank mit Cross-Encoder (z.B. bge-reranker-v2-m3)
+         ↓
+Neue Reihenfolge:
+1. "Ein Hund kostet 1500€" (0.95 rerank score) ← Korrigiert!
+2. "Der Hund springt schnell" (0.12 rerank score)
+3. "Hunde sind Tiere" (0.08 rerank score)
+         ↓
+Gib nur top-3 an LLM
+```
+
+**Warum ist das besser?**
+- Vector-Search ist schnell aber oberflächlich
+- Cross-Encoder sind langsamer aber tiefer (Bi-Encoder vs. Cross-Encoder)
+- Combo: Schnelle Vorfilterung + präzise Rerankerung
+
+**Beliebte Reranker**:
+- `bge-reranker-v2-m3` (offen, lokal, gut)
+- `cohere-rerank-3-english` (API, excellente Qualität)
+- `jina-reranker-v2` (API, State-of-Art)
+
+---
+
+## RAG vs. Fine-Tuning: Wann was?
+
+| Szenario | RAG | Fine-Tuning | Combo |
+|----------|-----|-------------|-------|
+| Häufig ändernde Daten | ✅ | ❌ | ✅ + ❌ |
+| Sehr spezialisierts Domänen-Wissen | ❌ | ✅ | ✅ + ✅ |
+| Kostenbudget < 100€ | ✅ | ❌ | ✅ |
+| Latenz kritisch | ❌ | ✅ | Mittel |
+| Stärke: Fakten/Daten | ✅ | ❌ | ✅ |
+| Stärke: Stil/Tone | ❌ | ✅ | ✅ |
+
+**Beispiel-Kombination**:
+- RAG für aktuelle Produktinformationen
+- Fine-Tuning für Support-Tone und Fachsprache
+
+---
+
+## Praktische RAG-Architektur
+
+```
+┌─────────────────────────────────────┐
+│         Dokument Upload             │
+│  (PDF, Markdown, SQL, Web-Scrape)   │
+└────────────┬────────────────────────┘
+             │
+      ┌──────▼──────┐
+      │   Chunking  │ (400 tokens, overlap 50)
+      └──────┬──────┘
+             │
+      ┌──────▼────────────┐
+      │ Embedding Model   │ (all-MiniLM-L6-v2 oder bge)
+      └──────┬────────────┘
+             │
+      ┌──────▼─────────────────┐
+      │  Vector DB (ChromaDB)  │  oder: Pinecone, Weaviate, pgvector
+      │  (persistent storage)  │
+      └──────────────────────┬─┘
+                             │
+                ┌────────────┼────────────┐
+                │            │            │
+         ┌──────▼──────┐     │       ┌────▼─────┐
+         │ User Query  │     │       │ Reranker │
+         └──────┬──────┘     │       └────┬─────┘
+                │            │            │
+         ┌──────▼────────────▼────────────▼────┐
+         │  Vector Search (top-100 from DB)    │
+         └──────┬─────────────────────────────┘
+                │
+         ┌──────▼──────────────────────┐
+         │  Reranking (if enabled)     │ (top-20 → top-3)
+         └──────┬──────────────────────┘
+                │
+         ┌──────▼──────────────────┐
+         │  Context Assembly       │
+         │  (format for LLM)       │
+         └──────┬──────────────────┘
+                │
+         ┌──────▼────────────────────────┐
+         │  LLM with Augmented Prompt    │
+         │  (System + Context + Query)   │
+         └──────┬────────────────────────┘
+                │
+         ┌──────▼──────────────┐
+         │  Generated Response │
+         │  + Source Citations │
+         └──────────────────────┘
+```
+
+---
+
+## Tools & Frameworks
+
+### Integration-Frameworks
+
+| Framework | Sprache | Stärke | Gelernte Kurve |
+|-----------|---------|--------|----------------|
+| **LangChain** | Python/JS | Größtes Ökosystem, viele Integrations | Mittel |
+| **LlamaIndex** | Python/JS | RAG-fokussiert, guter Defaults | Mittel |
+| **Haystack** | Python | Deutsche Dokumentation, flexibel | Steil |
+| **Verba** | Python | Focused, leicht zu deployen | Flach |
+| **Dify** | Python/Web UI | Keine Coding nötig, Open-Source | Sehr flach |
+
+### Vector Databases
+
+| DB | Typ | Lokal | Self-Hosted | Cloud | Filter | Skalierung |
+|----|-----|-------|------------|-------|--------|-----------|
+| **ChromaDB** | In-Memory/Persist | ✅ | ✅ | ✅ | Gut | Mittel |
+| **Pinecone** | Cloud | ❌ | ❌ | ✅ | Excellente | Unlimited |
+| **Weaviate** | Graph + Vector | ✅ | ✅ | ✅ | Excellente | Gut |
+| **Qdrant** | Rust-based | ✅ | ✅ | ✅ | Gut | Sehr gut |
+| **Milvus** | Distributed | ✅ | ✅ | ✅ | Gut | Unlimited |
+| **pgvector** | PostgreSQL | ✅ | ✅ | Varies | Excellente | Limit by DB |
+
+### Embedding-Services
+
+- **Ollama** (lokal): `nomic-embed-text` (768-dim, schnell)
+- **Hugging Face API**: Kostenlos, aber begrenzt
+- **OpenAI**: `text-embedding-3-small` (1536-dim, teuer)
+- **Cohere**: `embed-3` (1024-dim, genau)
+
+---
+
+## Häufige RAG-Fehler
+
+### Fehler 1: Falsche Embedding-Modell für Sprache
+```
+Problem: Englisches Embedding-Modell für deutsche Texte
+Resultat: Schlechte Retrieval-Qualität
+
+Lösung: Multilingual Model (bge-m3, jina-v3) oder sprachspezifisch (bge-base-de-v1.5)
+```
+
+### Fehler 2: Zu viel Context auff auf einmal
+```
+Problem: "Hol top-50 Chunks, schieb alles in Prompt"
+Resultat: LLM ertrinkt in Lärm, schlechte Antworten
+
+Lösung: Top-3 bis Top-10, mit Reranking
+```
+
+### Fehler 3: Keine Zusammenfassung bei langen Dokumenten
+```
+Problem: 100 Seiten PDF, alles brute-force chunken
+Resultat: Tausende Chunks, Search ist langsam + unpräzise
+
+Lösung: Erst zusammenfassen, dann granular chunken
+```
+
+### Fehler 4: Vector-DB nicht neuindexiert nach Updates
+```
+Problem: "Ich habe die Dokumentation aktualisiert, aber RAG gibt alte Infos"
+Resultat: alte Vektoren im Index
+
+Lösung: Incremental Update oder Reindex nach Änderungen
+```
+
+---
+
+## Performance-Metriken für RAG
+
+**Retrieval Quality**:
+```
+Recall@K: Wie viele relevante Docs sind in Top-K?
+          5 relevante Docs gesamt, 3 in Top-10 = Recall@10 = 60%
+
+Precision@K: Wie viele in Top-K sind tatsächlich relevant?
+             Top-10 Ergebnisse, 8 sind relevant = Precision@10 = 80%
+
+MRR (Mean Reciprocal Rank): Wo ist das erste richtige Ergebnis?
+                            Top-1 = 1.0 (perfect)
+                            Top-5 = 0.2
+```
+
+**Generation Quality**:
+```
+BLEU Score: Wort-Overlap mit referenz-Antwort (0-1, höher besser)
+ROUGE Score: Recall-Oriented Understudy for GIST Evaluation
+F1 Score: Balanced Precision/Recall
+
+Aber: Für Domain-spezifische Arbeit → Manual Evaluation besser
+```
+
+RAG ist nicht perfekt (Halluzinationen passieren immer noch), aber es ist der praktischste Weg, LLMs mit aktuellem, externem Wissen zu verbinden.
+
+## Quellen und Links
+
+- [Retrieval-Augmented Generation (arXiv)](https://arxiv.org/abs/2005.11401)
+- [LangChain](https://github.com/langchain-ai/langchain)
+- [LlamaIndex](https://github.com/run-llama/llama_index)

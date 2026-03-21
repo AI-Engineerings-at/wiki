@@ -1,0 +1,202 @@
+---
+title: Structured Generation
+date: 2026-03-21
+summary: Constrained Decoding, JSON Mode, Grammar-Based Generation — Outlines, Guidance, Instructor, LMQL, Regex Constraints
+tags: [structured-generation, constrained-decoding, json-mode, grammar, outlines, guidance]
+author: AI Engineering
+section: Concepts
+---
+
+# Understanding Structured Generation
+
+Structured Generation forces LLMs to generate only valid outputs in specific formats.
+
+## Problem Without Structure
+
+```
+Input: "Extract name and age as JSON"
+Output (wrong):
+{
+  "Name": "Alice",
+  invalid: }{
+  age: 25  # Wrong! Should be "age"
+}
+
+With Structured Generation:
+{
+  "name": "Alice",
+  "age": 25
+}  # Guaranteed valid!
+```
+
+---
+
+## JSON Mode
+
+Native JSON support in OpenAI and other providers.
+
+```python
+from openai import OpenAI
+
+client = OpenAI()
+
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[{
+        "role": "user",
+        "content": "Extract person data as JSON"
+    }],
+    response_format={"type": "json_object"}  # ← JSON Mode!
+)
+
+print(response.choices[0].message.content)
+# Guaranteed valid JSON
+```
+
+---
+
+## Outlines Library
+
+Open-source Structured Generation.
+
+### JSON Schema Enforcement
+
+```python
+from outlines import models, generate
+from pydantic import BaseModel
+
+class Person(BaseModel):
+    name: str
+    age: int
+    city: str
+
+model = models.transformers("meta-llama/Llama-2-7b")
+generator = generate.json(model, Person)
+
+result = generator("Extract: Alice, 25, Berlin")
+# Guaranteed Pydantic-valid!
+```
+
+### Regex Constraints
+
+```python
+from outlines import models, generate
+
+EMAIL_REGEX = r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+
+model = models.transformers("mistral-7b")
+generator = generate.regex(model, EMAIL_REGEX)
+
+result = generator("Give me an email address")
+# Matches email pattern!
+```
+
+---
+
+## Guidance Library
+
+Probabilistic constraints.
+
+```python
+import guidance
+
+guidance.llm = guidance.llms.OpenAI("gpt-3.5-turbo")
+
+program = guidance("""
+Extract person data:
+Name: {{name}}
+Age: {{age}}
+City: {{city}}
+""")
+
+result = program(
+    name=guidance.gen(max_tokens=20),
+    age=guidance.gen(regex=r"\d{1,3}"),  # 1-3 Digits
+    city=guidance.gen(max_tokens=15)
+)
+```
+
+---
+
+## Instructor Library
+
+Pydantic integration for structured OpenAI calls.
+
+```python
+import instructor
+from openai import OpenAI
+from pydantic import BaseModel
+
+client = instructor.from_openai(OpenAI())
+
+class PersonData(BaseModel):
+    name: str
+    age: int
+    city: str
+
+response = client.chat.completions.create(
+    model="gpt-4",
+    response_model=PersonData,
+    messages=[{
+        "role": "user",
+        "content": "Extract: Alice, 25, Berlin"
+    }]
+)
+
+print(response)  # ← PersonData instance!
+```
+
+---
+
+## LMQL
+
+Domain-Specific Language for Structured Generation.
+
+```lmql
+argmax
+    "Q: What is the capital of Germany?"
+    "A: [ANSWER]"
+from
+    "openai/gpt-3.5-turbo"
+where
+    len(ANSWER) < 50 and
+    "Berlin" in ANSWER
+```
+
+---
+
+## Best Practices
+
+### 1. Early Exit for Validation
+
+```python
+# ❌ Slow: Generate all, validate after
+output = model.generate(prompt)
+if not is_valid_json(output):
+    try_again()
+
+# ✅ Fast: Validate during generation
+output = constrained_generate(prompt, schema)
+# Guaranteed valid!
+```
+
+### 2. Schema Simplification
+
+Simpler schemas → Faster generation
+
+### 3. Performance Tips
+
+```
+Large Schemas:        → Slower
+Simple Regex:         → Faster
+Complex Constraints:  → Slower
+```
+
+---
+
+## Sources and Links
+
+- [Outlines GitHub](https://github.com/outlines-ai/outlines)
+- [Guidance GitHub](https://github.com/microsoft/guidance)
+- [Instructor GitHub](https://github.com/jxnl/instructor)
+- [LMQL GitHub](https://github.com/lmql-lang/lmql)

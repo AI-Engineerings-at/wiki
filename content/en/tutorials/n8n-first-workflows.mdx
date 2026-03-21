@@ -1,0 +1,676 @@
+---
+title: "Your First 3 AI Workflows with n8n"
+date: 2026-03-21
+summary: "Step-by-step guides for webhook+Ollama, RSS feed summarization, and form-based classification workflows"
+tags: ["n8n", "workflows", "automation", "ollama", "ai", "beginners"]
+author: "AI Engineering"
+---
+
+# Your First 3 AI Workflows with n8n
+
+Three practical workflows you can build in n8n today. No coding required, just clicking and configuring nodes.
+
+## Workflow 1: Webhook + Ollama Chat API
+
+**What it does:** POST a question via webhook, get AI response from local Ollama.
+
+**Time:** 5 minutes
+
+### Setup
+
+1. Dashboard → New Workflow → Name: "Chat API"
+2. Add **Webhook** node
+   - Authentication: None (test only)
+   - HTTP Method: POST
+   - Path: `/chat`
+   - Save
+
+3. Add **Ollama** node after Webhook
+   - Base URL: `http://ollama:11434`
+   - Model: `mistral`
+   - Prompt: `={{ $json.message }}`
+   - Save
+
+4. Add **Respond to Webhook** node
+   - Response Body:
+     ```json
+     {
+       "response": "={{ $json.response }}"
+     }
+     ```
+
+5. Activate workflow
+
+### Test
+
+```bash
+curl -X POST http://your-server:5678/webhook/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "What is Docker in one sentence?"}'
+```
+
+Expected response:
+```json
+{
+  "response": "Docker is a containerization platform that packages applications and their dependencies into isolated, portable containers that can run consistently across different environments."
+}
+```
+
+**Variation:** Add **Set node** between Webhook and Ollama to format the prompt:
+
+```
+n8n Expression:
+{{ "User question: " + $json.message + "\nAnswer concisely:" }}
+```
+
+## Workflow 2: RSS Feed → AI Summary
+
+**What it does:** Fetch RSS feed items hourly, summarize each with Ollama, save to file or email.
+
+**Time:** 10 minutes
+
+### Setup
+
+1. New Workflow → "RSS Summarizer"
+
+2. Add **Schedule** node (trigger)
+   - Trigger type: Every hours
+   - Interval: 1
+   - Save
+
+3. Add **RSS Read** node
+   - URL: `https://feeds.techcrunch.com/feed/`
+   - Limit: 5 items
+   - Save
+
+4. Add **Item Lists** node
+   - Mode: "Split Out"
+   - Runs workflow for each RSS item
+   - Save
+
+5. Add **Ollama** node
+   - Prompt:
+     ```
+     Summarize this news article in 2 sentences:
+
+     Title: {{ $json.title }}
+     Description: {{ $json.description }}
+     ```
+   - Model: `mistral`
+   - Save
+
+6. Add **Write Binary File** node (to save summaries)
+   - File Name: `/tmp/summaries-{{ $now.format('YYYY-MM-DD') }}.txt`
+   - File Content:
+     ```
+     {{ $json.title }} - {{ $json.response }}
+     ```
+   - Append: true
+   - Save
+
+7. Activate
+
+### Test Run
+
+Click "Test Workflow" to fetch and summarize one item immediately.
+
+**Variation:** Replace **Write Binary File** with **Email Send**:
+- To: your@email.com
+- Subject: "Daily Tech Summary"
+- Text: `{{ $json.title }}\n\n{{ $json.response }}`
+
+## Workflow 3: Form Submission → Classification
+
+**What it does:** Accept form submissions, classify text with Ollama, route to different handlers.
+
+**Time:** 15 minutes
+
+### Setup
+
+1. New Workflow → "Form Classifier"
+
+2. Add **Webhook** node
+   - HTTP Method: POST
+   - Path: `/submit-form`
+   - Save
+
+3. Add **Ollama** node
+   - Prompt:
+     ```
+     Classify the following text as one of: bug_report, feature_request, question, feedback
+
+     Text: {{ $json.text }}
+
+     Reply with ONLY the category name.
+     ```
+   - Model: `mistral`
+   - Save
+
+4. Add **Set** node to clean response
+   - Set:
+     - category: `={{ $json.response.toLowerCase().trim() }}`
+   - Save
+
+5. Add **If** node (conditional)
+   - Condition: `category` contains "bug"
+   - Save
+
+6. TRUE path (bug branch):
+   - Add **Email Send** node
+     - To: `bugs@your-company.com`
+     - Subject: "New Bug Report: {{ $json.title }}"
+     - Text: `{{ $json.text }}`
+
+7. FALSE path (other branches):
+   - Add **Google Sheets** node (or **Write Binary File**)
+     - Sheet: "Feedback"
+     - Action: "Append Row"
+     - Values: `[{{ $json.title }}, {{ $json.text }}, {{ $json.category }}]`
+
+8. Activate
+
+### Test
+
+```bash
+curl -X POST http://your-server:5678/webhook/submit-form \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Login button broken",
+    "text": "The login button does not work on mobile devices"
+  }'
+```
+
+Ollama should classify as "bug_report" and email should be sent to `bugs@your-company.com`.
+
+## Key n8n Concepts
+
+### Expressions
+
+Use `{{ }}` to access data:
+
+```
+{{ $json.field_name }}          # From previous node
+{{ $json.title }}               # Specific field
+{{ $json.0.name }}              # Array element
+{{ $now.format('YYYY-MM-DD') }} # Current date
+{{ $env.MY_VAR }}               # Environment variable
+```
+
+For operations, use `=` prefix:
+
+```
+={{ $json.count + 1 }}          # Add 1
+={{ $json.text.toUpperCase() }} # Uppercase
+={{ $json.items.length }}       # Array length
+```
+
+### Node Chains
+
+1. **Linear:** Trigger → Node A → Node B → Node C
+2. **Conditional:** After **If** node, split into TRUE/FALSE paths
+3. **Loop:** **Item Lists** (split) → process each → **merge**
+4. **Merge:** Combine results from multiple paths back into one
+
+### Common Node Types
+
+| Node | Purpose |
+|------|---------|
+| Webhook | Accept HTTP requests |
+| Schedule | Run on timer (hourly, daily, weekly) |
+| Ollama | LLM requests |
+| Email Send | Send email |
+| Write Binary File | Save output to file |
+| Google Sheets | Append/update rows |
+| If | Conditional logic |
+| Set | Transform data |
+| Item Lists | Loop over arrays |
+| HTTP Request | Call external APIs |
+
+## Error Handling
+
+Every workflow can have an Error workflow:
+
+1. Create new workflow → Name: "Chat API Error Handler"
+2. Trigger: "Error in Workflow"
+3. Add **Email Send**:
+   - To: `admin@your-company.com`
+   - Subject: `Workflow error: {{ $json.workflowName }}`
+   - Text: `{{ JSON.stringify($json.error, null, 2) }}`
+
+Link in main workflow:
+- Settings → On error: Select error handler workflow
+
+## Performance Tips
+
+**Rate limiting (avoid Ollama overload):**
+- Add **Wait** node between workflows
+- Set delay: 1-2 seconds per request
+
+**Caching (avoid repeated calls):**
+- Store Ollama responses in **Google Sheets** or database
+- Check if request was processed before
+
+**Timeout (prevent hanging):**
+- Ollama node → Timeout: 30 seconds
+- Webhook → Response timeout: 30 seconds
+
+## Common Issues
+
+**"Cannot connect to Ollama"**
+- Check: `docker exec ollama ollama serve` is running
+- Verify URL: `http://ollama:11434` (not localhost from within container)
+
+**Workflow never triggers on schedule**
+- Activate workflow (green toggle)
+- Ensure **Schedule** node is set
+- Check n8n logs: `docker logs n8n`
+
+**Memory error with large feeds**
+- Reduce **Limit** in RSS Read node
+- Add **Wait** between items (0.5 seconds)
+
+**Empty email body**
+- Use raw text instead of JSON: `{{ $json.response }}`
+- Preview email before sending
+
+## Next Steps
+
+- Combine all three: Schedule → RSS → Classify → Route
+- Add database persistence (PostgreSQL, MongoDB)
+- Connect to Slack for notifications
+- Export workflow as JSON, share with team
+- Set up error notifications
+
+## Checklist
+
+- [ ] Ollama running with model available
+- [ ] n8n accessible at http://your-server:5678
+- [ ] Workflow 1 (Chat API) created and tested
+- [ ] Workflow 2 (RSS Summarizer) scheduled and running
+- [ ] Workflow 3 (Form Classifier) processing submissions
+- [ ] All three workflows activated
+- [ ] Error handlers configured
+- [ ] Credentials tested in each Ollama node
+- [ ] Sample test data verified
+
+## Workflow 4: Database-Driven Email Campaign
+
+**What it does:** Store contacts in PostgreSQL, send personalized emails based on segments.
+
+**Time:** 20 minutes
+
+### Setup
+
+1. New Workflow → "Email Campaign"
+
+2. Add **Schedule** node
+   - Trigger: Daily at 9 AM
+   - Timezone: UTC
+   - Save
+
+3. Add **PostgreSQL** node
+   - Query:
+     ```sql
+     SELECT id, email, first_name, segment
+     FROM contacts
+     WHERE segment = 'active' AND last_email < NOW() - INTERVAL '7 days'
+     ```
+   - Save
+
+4. Add **Item Lists** (split contacts)
+   - Mode: "Split Out"
+
+5. Add **Email** node
+   - To: `{{ $json.email }}`
+   - Subject: `Hi {{ $json.first_name }}, exclusive offer inside`
+   - Body:
+     ```
+     Dear {{ $json.first_name }},
+
+     We noticed you haven't heard from us in a while.
+     Here's a special {{ $json.segment }} offer just for you.
+
+     Best regards,
+     The Team
+     ```
+   - Save
+
+6. Add **PostgreSQL** node (update sent timestamp)
+   - Query:
+     ```sql
+     UPDATE contacts
+     SET last_email = NOW()
+     WHERE id = {{ $json.id }}
+     ```
+
+7. Activate
+
+### Test
+
+Click "Test Workflow" → Should process contacts and send emails.
+
+## Workflow 5: Slack Notification Hub
+
+**What it does:** Route different event types to different Slack channels with formatting.
+
+**Time:** 15 minutes
+
+### Setup
+
+1. New Workflow → "Slack Hub"
+
+2. Add **Webhook** node
+   - Path: `/slack-notify`
+
+3. Add **Set** node (normalize event)
+   - Set:
+     - event_type: `={{ $json.type.toLowerCase() }}`
+     - urgency: `={{ $json.priority || 'normal' }}`
+     - message: `={{ $json.text }}`
+
+4. Add **If** node (route by event type)
+   - Condition: `event_type` equals "alert"
+
+5. TRUE path (high-priority alerts):
+   - Add **Slack** node
+     - Channel: `#alerts`
+     - Message:
+       ```
+       🚨 URGENT: {{ $json.message }}
+       Priority: {{ $json.urgency }}
+       ```
+     - Icon: ⚠️
+
+6. FALSE path (other events):
+   - Add another **If** node
+     - Condition: `event_type` equals "update"
+
+7. TRUE branch:
+   - **Slack** node → Channel: `#updates`
+   - Message: `📢 {{ $json.message }}`
+
+8. FALSE branch (default):
+   - **Slack** node → Channel: `#general`
+   - Message: `{{ $json.message }}`
+
+9. Add **Respond to Webhook** at end
+   - Response: `{"status": "sent"}`
+
+10. Activate
+
+### Test
+
+```bash
+curl -X POST http://localhost:5678/webhook/slack-notify \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "alert",
+    "priority": "high",
+    "text": "Database connection failed"
+  }'
+```
+
+Message should appear in `#alerts` with 🚨 emoji.
+
+## Workflow 6: Multi-Step Data Pipeline
+
+**What it does:** Extract CSV → Transform → Validate → Load to Sheets.
+
+**Time:** 25 minutes
+
+### Setup
+
+1. New Workflow → "ETL Pipeline"
+
+2. Add **Webhook** node
+   - Path: `/upload-csv`
+   - Accept: File upload
+
+3. Add **CSV to JSON** node
+   - Input: `{{ $json.file }}`
+
+4. Add **Item Lists** (process each row)
+
+5. Add **Set** node (transform)
+   - Clean: `={{ $json.name.trim().toUpperCase() }}`
+   - Email: `={{ $json.email.toLowerCase() }}`
+   - Age: `={{ parseInt($json.age) }}`
+
+6. Add **If** node (validate)
+   - Condition: Email matches regex `\S+@\S+\.\S+`
+
+7. TRUE path (valid):
+   - Add **Google Sheets** node
+     - Append Row: `[{{ $json.clean }}, {{ $json.email }}, {{ $json.age }}]`
+
+8. FALSE path (invalid):
+   - Add **Write Binary File** node
+     - Append to: `/tmp/invalid-records.txt`
+     - Content: `{{ JSON.stringify($json) }}\n`
+
+9. After both paths, **Merge** node
+   - Join: Combine results
+
+10. Add final **Respond to Webhook**
+    - Response: `{"processed": {{ $node.merge.data.length }}, "errors": {{ $node.merge.errors.length }}}`
+
+11. Activate
+
+### Test
+
+Upload CSV:
+```csv
+name,email,age
+John,john@example.com,30
+jane,invalid-email,25
+```
+
+Results:
+- John → Google Sheets
+- Jane → `/tmp/invalid-records.txt`
+
+## Common n8n Patterns
+
+### Loop with Accumulation
+
+Process items and collect results:
+
+```
+Item Lists (split)
+  → Process item
+  → Accumulate in array
+Merge
+  → Final array with all results
+```
+
+### Conditional Retry
+
+```
+Try node
+  → On error: Wait 5s
+  → Retry same node
+  → If still errors: Alert admin
+```
+
+### Rate Limiting
+
+```
+Process item
+  → Wait 1 second
+  → Next item
+```
+
+Prevents API throttling.
+
+## Performance Optimization
+
+### 1. Batch Operations
+
+**Slow:**
+```
+For each contact:
+  → Call API
+  → Process response
+```
+(1000 contacts = 1000 API calls)
+
+**Fast:**
+```
+Collect 100 contacts
+  → Call batch API (1 call)
+  → Process 100 responses
+```
+(10 API calls total)
+
+### 2. Caching Results
+
+```
+Check Cache (Set node with object)
+  → If not found: Fetch from API
+  → If found: Use cached value
+```
+
+### 3. Parallel Processing
+
+```
+Split items into 5 groups
+  → Process each group in parallel
+  → Merge results
+```
+
+(5x faster for I/O-bound tasks)
+
+## Debugging Workflows
+
+### 1. Visual Debugger
+
+Click **Test Workflow** → See each node's output:
+
+```
+Node 1 output: ✓
+  { "contacts": [...] }
+
+Node 2 output: ✓
+  { "filtered": [...] }
+
+Node 3 output: ✗ ERROR
+  "API rate limited"
+```
+
+### 2. Logging
+
+Add **Log** node to inspect data at any point:
+
+```
+Before processing:
+{{ JSON.stringify($json, null, 2) }}
+```
+
+Appears in n8n logs.
+
+### 3. Error Handling per Node
+
+Click node → Error:
+- Handle with: Wait 10s, then continue
+- Or: Stop workflow
+
+## Webhook Security
+
+### Basic Auth
+
+```
+Webhook node settings:
+  Authentication: Basic Auth
+  Username: admin
+  Password: (generated)
+```
+
+Test with:
+```bash
+curl -u admin:password http://localhost:5678/webhook/path
+```
+
+### IP Allowlist
+
+```
+Webhook settings:
+  Allowed IPs: 192.168.1.100, 10.0.0.0/8
+```
+
+Only those IPs can trigger.
+
+## Exporting & Sharing Workflows
+
+### Export JSON
+
+Workflow → Menu → Download:
+
+```json
+{
+  "nodes": [...],
+  "connections": [...],
+  "metadata": {...}
+}
+```
+
+Share this file with team.
+
+### Import
+
+New Workflow → Load from File → Select JSON
+
+Entire workflow imported (nodes, connections, settings).
+
+## Moving Workflows to Production
+
+### 1. Test Thoroughly
+- Mock external APIs
+- Test error paths
+- Verify with real data sample
+
+### 2. Monitor Execution
+- Set error handler (email on failure)
+- Log important events
+- Track execution times
+
+### 3. Credentials Management
+- Never hardcode API keys in workflows
+- Use n8n Credentials system
+- Rotate keys quarterly
+
+### 4. Versioning
+- Keep backup of JSON exports
+- Track changes in Git
+- Document updates
+
+## Advanced Scheduling
+
+### Cron Expressions
+
+```
+0 9 * * 1-5     = Every weekday at 9 AM
+0 0 1 * *       = First of every month
+0 */6 * * *     = Every 6 hours
+```
+
+[Cron reference](https://crontab.guru/)
+
+### Conditional Scheduling
+
+```
+Schedule node every hour
+  → If certain conditions met: Continue workflow
+  → Else: Skip this run
+```
+
+## Resources
+
+- [n8n Documentation](https://docs.n8n.io/)
+- [Community Workflows](https://n8n.io/workflows)
+- [Slack Community](https://community.n8n.io/)
+- [Video Tutorials](https://n8n.io/tutorials/)
+
+## Sources and Links
+
+- [n8n](https://github.com/n8n-io/n8n)
+- [n8n Docs](https://docs.n8n.io)

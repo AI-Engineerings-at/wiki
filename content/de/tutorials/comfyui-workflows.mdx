@@ -1,0 +1,456 @@
+---
+title: ComfyUI Workflows — Stable Diffusion & Flux
+date: 2026-03-21
+summary: AI-Bild-Generierung mit ComfyUI. Installation, erste Workflows, Custom Nodes, Stable Diffusion vs Flux, praktische Beispiele
+tags: [ComfyUI, Stable Diffusion, Flux, Image Generation, AI Art]
+author: "AI Engineering"
+---
+
+# ComfyUI Workflows — Stable Diffusion & Flux
+
+ComfyUI ist eine Node-basierte GUI für Bild-Generierung. Du baust Workflows durch Verschieben von Blöcken.
+
+## Teil 1: Installation
+
+### Option 1: Portable Version (einfach)
+
+1. Geh zu https://github.com/comfyanonymous/ComfyUI
+2. Download "Portable" Version
+3. Entpacken
+4. `run_nvidia_gpu.bat` (Windows) oder `./run.sh` (Linux/Mac)
+5. Browser: http://localhost:8188
+
+### Option 2: Manuell (für Experten)
+
+```bash
+git clone https://github.com/comfyanonymous/ComfyUI
+cd ComfyUI
+
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+pip install -r requirements.txt
+
+python main.py
+```
+
+## Teil 2: Erste Workflow
+
+Öffne ComfyUI. Die UI hat links "Node Palette" und rechts den Canvas.
+
+### Basis: Text-zu-Bild
+
+1. **Checkpoint laden**: Suche "Load Checkpoint" Node
+   - Model: `sd15-v2-1.safetensors` (Stable Diffusion 1.5)
+   - Connect zu "KSampler"
+
+2. **Prompt**: "Load Model" Node
+   - Positive: "A beautiful sunset over mountains, oil painting"
+   - Negative: "ugly, blurry, low quality"
+   - Connect zu "KSampler"
+
+3. **Sampler**: KSampler Node
+   - Steps: 20
+   - CFG: 7.5
+   - Sampler: "euler"
+   - Scheduler: "karras"
+
+4. **Save Image**: "VAE Decode" + "Save Image"
+
+Das ist ein kompletter Workflow! Klick Play.
+
+## Teil 3: Modelle & Checkpoints
+
+Welche Modelle solltest du nutzen?
+
+| Modell | Größe | Qualität | Speed | Nutze für |
+|--------|-------|----------|-------|----------|
+| Stable Diffusion 1.5 | 4 GB | Gut | Schnell | Test, Basis |
+| Stable Diffusion XL | 6.9 GB | Sehr gut | Mittel | Production |
+| Flux.1 Dev | 24 GB | State-of-the-art | Langsam | High-End |
+| Flux.1 Pro | - | Beste | - | Commercial |
+| Realistic Vision | 4 GB | Fotorealistisch | Schnell | Fotos |
+
+### Modelle herunterladen
+
+```bash
+# Modelle gehen in models/checkpoints/
+
+# Stable Diffusion 1.5 (4 GB)
+wget -O "models/checkpoints/sd15.safetensors" \
+  "https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned-emaonly.safetensors"
+
+# SDXL (6.9 GB)
+wget -O "models/checkpoints/sdxl.safetensors" \
+  "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors"
+
+# Flux.1 Dev (24 GB — braucht mindestens 24 GB VRAM)
+# → Manuell von https://huggingface.co/black-forest-labs/FLUX.1-dev herunterladen
+```
+
+**VRAM-Anforderungen:**
+
+| Modell | VRAM |
+|--------|------|
+| SD 1.5 | 4 GB |
+| SDXL | 8 GB |
+| Flux.1 | 24 GB |
+
+Zu wenig VRAM? → Optimize "Use DeepSpeed" oder "Tiling" aktivieren.
+
+## Teil 4: Advanced Workflow
+
+Hier ein komplexer Workflow mit mehreren Funktionen:
+
+### Multi-Step Workflow
+
+```
+Prompt → Load Model → Encode Prompt
+         ↓
+Seed → Sampler
+         ↓
+VAE Decode → Upscale → Save
+```
+
+Node-für-Node:
+
+```
+1. Load Checkpoint (SDXL)
+2. CLIP Text Encode (Positive Prompt)
+3. CLIP Text Encode (Negative Prompt)
+4. KSampler
+   - Model: aus Load Checkpoint
+   - Positive/Negative: aus Text Encodes
+   - Seed: 42
+   - Steps: 30
+   - CFG: 8.0
+5. VAE Decode
+   - Samples: aus KSampler
+   - VAE: aus Load Checkpoint
+6. Upscale Image (4x)
+   - Image: aus VAE Decode
+   - Upscale Model: "RealESRGAN_x4plus"
+7. Save Image
+   - Images: aus Upscale
+   - Filename prefix: "output"
+```
+
+## Teil 5: LoRA (Low Rank Adaptation)
+
+Mit LoRAs machst du spezifische Stile.
+
+### LoRA laden
+
+```
+1. Load Checkpoint (Base Model)
+2. Load LoRA
+   - LoRA Name: "GhibliStyle.safetensors"
+   - Strength: 1.0 (0-1, höher = mehr Effekt)
+3. Connect zu KSampler
+```
+
+### LoRA Quellen
+
+- https://civitai.com (Tausende LoRAs)
+- https://huggingface.co (Filter: LoRA)
+
+### Populäre LoRAs
+
+- **Ghibli Style**: Anime-ähnliche Filme
+- **Oil Painting**: Ölmalerei-Textur
+- **CyberPunk**: Neon-Ästhetik
+- **Photoreal**: Fotorealistisch
+
+Beispiel-Prompt mit LoRA:
+
+```
+Positive: "masterpiece, best quality, girl, ghibli style, fantasy, magical,
+          detailed eyes, soft lighting"
+Negative: "ugly, blurry, low quality, bad anatomy, disfigured"
+```
+
+## Teil 6: Flux.1 Workflow
+
+Flux ist das modernste Modell (2026).
+
+### Flux vs Stable Diffusion
+
+| Aspect | Flux.1 | SDXL |
+|--------|--------|------|
+| Qualität | State-of-the-art | Sehr gut |
+| Text-Verständnis | Ausgezeichnet | Gut |
+| Details | Extreme | Gut |
+| Hände/Gesichter | Perfekt | OK |
+| Speed | Langsam (24s/Bild) | Schnell (8s) |
+| VRAM | 24 GB | 8 GB |
+| Kosten | Hoch | Niedrig |
+
+### Flux Workflow
+
+```
+1. Load Checkpoint ("flux-dev-fp8.safetensors")
+2. CLIP Text Encode
+   - Text: "A beautiful sunset, hyper-realistic, 8k"
+   - CLIP: aus Checkpoint
+3. Flux Sampler
+   - Steps: 30 (Flux braucht mehr Steps)
+   - CFG: 3.5 (Flux mag niedrigere CFG)
+4. VAE Decode
+5. Save Image
+```
+
+**Flux Prompt-Tipps:**
+- Nutze Simpler Language (Flux versteht Englisch besser)
+- "hyper-realistic, 8k, professional lighting"
+- Negative Prompt ist optional bei Flux (schon gut trainiert)
+
+## Teil 7: Custom Nodes
+
+ComfyUI ist erweiterbar durch Custom Nodes.
+
+### Manager installieren
+
+```bash
+# Im ComfyUI-Verzeichnis
+cd custom_nodes
+git clone https://github.com/ltdrdata/ComfyUI-Manager
+# → Restart ComfyUI
+```
+
+### Nodes suchen und installieren
+
+1. Startup-Screen: "Manager"
+2. Suche "Upscaler"
+3. Install "Real-ESRGAN"
+4. Restart
+
+### Beliebte Nodes
+
+| Node | Was es tut |
+|------|-----------|
+| Real-ESRGAN | 4x Upscaling |
+| ControlNet | Pose/Edge/Depth Kontrolle |
+| AnimateDiff | Video-Generierung |
+| IP-Adapter | Style Transfer |
+| Face Detailer | Gesichter verbessern |
+
+## Teil 8: Batch Processing
+
+Generiere 100 Bilder automatisch:
+
+```python
+# batch_generate.py
+import requests
+import json
+import time
+
+# ComfyUI API URL
+API_URL = "http://localhost:8188"
+
+# Workflow Definition
+workflow = {
+    "1": {
+        "class_type": "Load Checkpoint",
+        "inputs": {"ckpt_name": "sd15.safetensors"}
+    },
+    "2": {
+        "class_type": "CLIP Text Encode",
+        "inputs": {
+            "text": "PLACEHOLDER_PROMPT",
+            "clip": ["1", 1]
+        }
+    },
+    "3": {
+        "class_type": "CLIP Text Encode",
+        "inputs": {
+            "text": "ugly, blurry, low quality",
+            "clip": ["1", 1]
+        }
+    },
+    "4": {
+        "class_type": "KSampler",
+        "inputs": {
+            "seed": "PLACEHOLDER_SEED",
+            "steps": 20,
+            "cfg": 7.5,
+            "sampler_name": "euler",
+            "scheduler": "karras",
+            "denoise": 1.0,
+            "model": ["1", 0],
+            "positive": ["2", 0],
+            "negative": ["3", 0]
+        }
+    },
+    "5": {
+        "class_type": "VAE Decode",
+        "inputs": {
+            "samples": ["4", 0],
+            "vae": ["1", 2]
+        }
+    },
+    "6": {
+        "class_type": "Save Image",
+        "inputs": {
+            "images": ["5", 0],
+            "filename_prefix": "PLACEHOLDER_PREFIX"
+        }
+    }
+}
+
+# Prompts generieren
+prompts = [
+    "A beautiful sunset over the ocean",
+    "A cozy cabin in the snow",
+    "A futuristic city at night",
+    # ... mehr Prompts
+]
+
+# Für jeden Prompt
+for i, prompt in enumerate(prompts):
+    wf = json.loads(json.dumps(workflow))  # Deep copy
+
+    # Placeholders ersetzen
+    wf["2"]["inputs"]["text"] = prompt
+    wf["4"]["inputs"]["seed"] = i + 100
+    wf["6"]["inputs"]["filename_prefix"] = f"batch_{i:04d}"
+
+    # API anrufen
+    response = requests.post(
+        f"{API_URL}/prompt",
+        json={"prompt": wf}
+    )
+
+    print(f"Bild {i+1}/{len(prompts)}: {prompt}")
+
+    # Warte bis Generierung fertig
+    time.sleep(30)
+
+print("✓ Batch fertig!")
+```
+
+Laufen:
+
+```bash
+python batch_generate.py
+# Output: 100 Bilder in outputs/
+```
+
+## Teil 9: Performance Tuning
+
+Bilder generieren ist langsam. Hier sind Optimierungen:
+
+### 1. Quantisierung
+
+```
+1. Load Checkpoint → Settings
+2. "Model precision": "fp8" (statt "fp16")
+3. → 2x schneller, minimal weniger Qualität
+```
+
+### 2. Tiling (für große Bilder)
+
+```
+KSampler → "Tile size": 512
+→ Verhindert OOM bei 2K+ Bildern
+→ Etwas langsamer aber weniger VRAM
+```
+
+### 3. Seed setzen (für Reproduzierbarkeit)
+
+```python
+"seed": 42  # Gleicher Seed = gleiches Bild
+"randomize": False
+```
+
+### 4. Lower Steps
+
+```python
+# Schneller aber weniger Details
+"steps": 15  # (statt 30)
+# Nur für Tests, Final braucht 30+
+```
+
+## Top-5 Fehlerbehebung
+
+### Problem 1: "CUDA out of memory"
+
+```
+Ursache: Zu großes Bild oder Model
+
+Lösung:
+1. Load Checkpoint → "Memory mode": "Minimal"
+2. Oder: Resolution reduzieren (1024→512)
+3. Oder: Tile size aktivieren
+```
+
+### Problem 2: Bilder sind hässlich
+
+```
+Gründe:
+1. Schlechter Prompt
+   → Nutze "masterpiece, best quality"
+2. CFG zu hoch (über 15)
+   → Setze auf 7-10
+3. Seed 1000
+   → Probiere verschiedene Seeds
+```
+
+### Problem 3: ComfyUI startet nicht
+
+```bash
+# Port besetzt?
+lsof -i :8188
+kill -9 <PID>
+
+# Oder anderen Port nutzen
+python main.py --listen 0.0.0.0 --port 8189
+```
+
+### Problem 4: Custom Node funktioniert nicht
+
+```bash
+# Manager neu laden
+# Oder manuell:
+cd custom_nodes/ComfyUI-Manager
+git pull origin main
+# → Restart ComfyUI
+```
+
+### Problem 5: Workflow lädt nicht
+
+```
+Fehler beim Laden?
+1. Exportiere Workflow als JSON
+2. Check: Alle Node-Namen korrekt?
+3. Check: Alle Model-Dateien existieren?
+```
+
+## Zusammenfassung
+
+ComfyUI Workflow-Architektur:
+
+1. **Modell laden** (Checkpoint)
+2. **Prompts encoden** (CLIP)
+3. **Sampling** (KSampler)
+4. **VAE Decode** (latent → Bild)
+5. **Upscale** (optional)
+6. **Speichern** (Output)
+
+**Modell-Auswahl:**
+- Anfänger: SD 1.5 (einfach, schnell)
+- Production: SDXL (gute Qualität)
+- High-End: Flux.1 (beste Qualität)
+
+**Nächste Schritte:**
+- ControlNet für Pose-Kontrolle
+- Video-Generierung mit AnimateDiff
+- Fine-Tuned LoRAs für deinen Stil
+- Integration mit APIs (Discord Bot, etc.)
+
+## Ressourcen
+
+- [ComfyUI GitHub](https://github.com/comfyanonymous/ComfyUI)
+- [Civitai Models & LoRAs](https://civitai.com)
+- [ComfyUI Wiki](https://comfyui-wiki.com)
+
+## Quellen und Links
+
+- [ComfyUI](https://github.com/comfyanonymous/ComfyUI)

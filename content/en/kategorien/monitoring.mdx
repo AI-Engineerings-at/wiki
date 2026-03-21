@@ -1,0 +1,445 @@
+---
+title: "Monitoring AI Systems"
+date: 2026-03-21
+summary: "Observability for AI stacks: metrics, logging, alerting with Grafana, Prometheus, Datadog, Uptime Kuma"
+tags: ["monitoring", "observability", "grafana", "prometheus", "datadog", "uptime-kuma", "logging"]
+author: "AI Engineering"
+---
+
+# Monitoring AI Systems
+
+Monitoring tells you when things break before users complain. Essential for production AI stacks.
+
+## What to Monitor
+
+### Infrastructure Layer
+
+- **CPU:** Usage %, core count, thermal
+- **Memory:** Used/available, swap usage
+- **Disk:** Space used, I/O throughput, latency
+- **Network:** Bandwidth, packet loss, latency
+- **GPU:** VRAM used, utilization %, thermal
+- **Docker:** Container health, restart count
+
+### Model Layer (Ollama/LLM)
+
+- **Throughput:** Tokens/second generated
+- **Latency:** Time to first token, total generation time
+- **Queue:** Pending requests waiting
+- **Errors:** Failed requests, OOM (out of memory)
+- **Memory:** VRAM allocated per model
+
+### Application Layer (n8n, Open WebUI)
+
+- **Workflow success rate:** % of workflows completing without error
+- **Execution time:** Total runtime (p50, p95, p99)
+- **Error types:** What's failing (API timeout, resource exhausted)
+- **Queue depth:** Pending workflows
+- **API latency:** Response time per endpoint
+
+### Business Layer
+
+- **User activity:** Active users, API calls/day
+- **Cost:** Cloud API costs (OpenAI, Claude), server uptime $
+- **Performance:** Feature availability (% time working)
+
+## Monitoring Stack
+
+```
+Prometheus (metrics scraper)
+  ├── Scrapes every 15s
+  └── Stores time-series data (30d)
+
+Grafana (visualization)
+  ├── Dashboards (real-time view)
+  ├── Alerts (when thresholds crossed)
+  └── Queries Prometheus
+
+Loki (log aggregation) [optional]
+  ├── Collects logs from all services
+  └── Full-text search
+
+Alert Manager
+  ├── Prometheus triggers alerts
+  ├── Routes to email/Slack
+  └── Silencing & grouping
+```
+
+## Platform Comparison
+
+| Feature | Prometheus + Grafana | Datadog | New Relic | Elastic |
+|---------|----------------------|---------|-----------|---------|
+| **Self-hosted** | Yes (free) | No | No | Yes |
+| **Cloud price** | N/A | $15-50/host/mo | $100-500/mo | $200+/mo |
+| **Setup time** | 30min | 5min | 10min | 1-2 hours |
+| **AI-specific** | None | Built-in APM | APM + RUM | Log analysis |
+| **Learning curve** | Medium | Easy | Medium | Hard |
+
+### Prometheus + Grafana (Recommended for DIY)
+
+**Pros:**
+- Free, no recurring cost
+- Self-hosted (privacy)
+- Powerful queries (PromQL)
+- Perfect for small teams
+
+**Cons:**
+- Need to manage it
+- Limited out-of-box dashboards
+- No built-in log aggregation
+- More setup
+
+**Best for:** Teams with <100 servers, tech-savvy ops
+
+### Datadog (Best for hands-off)
+
+**Pros:**
+- SaaS (no management)
+- Amazing UI
+- Full APM (application performance monitoring)
+- Excellent alerting
+
+**Cons:**
+- Expensive ($50/host/month)
+- Data retention costs extra
+- Vendor lock-in
+- Overkill for small projects
+
+**Best for:** Enterprise teams, high spend
+
+### Uptime Kuma (Simple Uptime Checks)
+
+**Pros:**
+- Free, self-hosted
+- Simple UI
+- Good for website monitoring
+- SMS/email alerts
+
+**Cons:**
+- Not for deep metrics
+- Limited dashboard options
+- Maintenance required
+
+**Best for:** Quick uptime monitoring, no metrics needed
+
+## Setting Up Prometheus + Grafana
+
+### Step 1: docker-compose.yml
+
+```yaml
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    ports:
+      - "9100:9100"
+    command:
+      - '--path.rootfs=/host'
+    volumes:
+      - /:/host:ro,rslave
+
+volumes:
+  prometheus_data:
+  grafana_data:
+```
+
+### Step 2: prometheus.yml
+
+```yaml
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  - job_name: 'ollama'
+    static_configs:
+      - targets: ['ollama:11434']
+    metrics_path: '/api/ps'
+
+  - job_name: 'n8n'
+    static_configs:
+      - targets: ['n8n:5678']
+    metrics_path: '/api/metrics'
+```
+
+### Step 3: Start
+
+```bash
+docker-compose up -d
+# Prometheus: http://localhost:9090
+# Grafana: http://localhost:3000
+```
+
+## Key Metrics to Track
+
+### CPU & Memory
+
+```promql
+# CPU usage percent
+100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+
+# Memory used percent
+(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100
+
+# Container CPU (Docker)
+container_cpu_usage_seconds_total{name="ollama"}
+```
+
+### Model Performance
+
+```promql
+# Token generation rate (tokens/sec)
+rate(ollama_tokens_generated[5m])
+
+# Request latency (milliseconds)
+rate(ollama_request_duration_ms[5m])
+
+# Queue depth (pending requests)
+ollama_queue_pending
+```
+
+### Application Health
+
+```promql
+# n8n success rate
+(n8n_executions_success / (n8n_executions_success + n8n_executions_failed)) * 100
+
+# Error rate (requests/sec)
+rate(http_requests_total{status=~"5.."}[5m])
+
+# API latency (50th, 95th, 99th percentile)
+histogram_quantile(0.50, http_request_duration_seconds_bucket)
+histogram_quantile(0.95, http_request_duration_seconds_bucket)
+```
+
+## Alerting Rules
+
+Create `alerts.yml`:
+
+```yaml
+groups:
+  - name: ai-stack
+    rules:
+      # Ollama OOM
+      - alert: OllamaHighMemory
+        expr: ollama_memory_bytes > 30e9  # > 30GB
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Ollama using {{ $value | humanize }}B VRAM"
+
+      # n8n high failure rate
+      - alert: N8NHighFailureRate
+        expr: (n8n_executions_failed / n8n_executions_total) > 0.1
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "n8n failure rate > 10%"
+
+      # Disk space
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) < 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk < 10% free on {{ $labels.device }}"
+
+      # Server down
+      - alert: InstanceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.instance }} down"
+```
+
+Set up notification channels in Grafana:
+1. Configuration → Notification channels
+2. Add "Email" or "Slack"
+3. Link alerts to channels
+
+## Custom Metrics (Exporting)
+
+For Ollama without built-in Prometheus export:
+
+```python
+# ollama_exporter.py
+from prometheus_client import start_http_server, Gauge, Counter
+import requests
+import time
+
+# Define metrics
+ollama_models = Gauge('ollama_models_loaded', 'Number of loaded models')
+ollama_memory = Gauge('ollama_memory_bytes', 'Memory used by Ollama')
+ollama_requests = Counter('ollama_requests_total', 'Total requests')
+
+def scrape_ollama():
+    while True:
+        try:
+            resp = requests.get('http://ollama:11434/api/ps')
+            data = resp.json()
+
+            # Count loaded models
+            ollama_models.set(len(data))
+
+            # Sum memory usage
+            total_memory = sum(m['size_vram'] for m in data if 'size_vram' in m)
+            ollama_memory.set(total_memory)
+
+            # Increment request counter
+            ollama_requests.inc()
+        except Exception as e:
+            print(f"Error scraping Ollama: {e}")
+
+        time.sleep(30)
+
+if __name__ == '__main__':
+    start_http_server(8000)  # Expose metrics on :8000
+    scrape_ollama()
+```
+
+Run in Docker:
+
+```yaml
+ollama-exporter:
+  build:
+    context: .
+    dockerfile: Dockerfile.exporter
+  ports:
+    - "8000:8000"
+  depends_on:
+    - ollama
+```
+
+Add to prometheus.yml:
+
+```yaml
+scrape_configs:
+  - job_name: 'ollama-exporter'
+    static_configs:
+      - targets: ['ollama-exporter:8000']
+```
+
+## Dashboard Examples
+
+### AI Stack Overview
+
+Panels:
+1. **Status lights:** Ollama, n8n, PostgreSQL (up/down)
+2. **Token/sec:** Rate graph (last 24h)
+3. **Success rate:** Gauge (n8n workflows)
+4. **Memory usage:** Gauge (VRAM)
+5. **Queue depth:** Time series (pending requests)
+6. **Cost:** Stat (daily API costs)
+
+### Alerts
+
+1. **Status page:** Which services are down?
+2. **Recent errors:** Table of failed workflows
+3. **Slowest requests:** Where's the latency?
+
+## Log Aggregation (Optional)
+
+If metrics not enough, add logging:
+
+```yaml
+# loki
+loki:
+  image: grafana/loki:latest
+  ports:
+    - "3100:3100"
+  volumes:
+    - ./loki-config.yml:/etc/loki/local-config.yml
+
+# promtail (ships logs to Loki)
+promtail:
+  image: grafana/promtail:latest
+  volumes:
+    - /var/log:/var/log
+    - ./promtail-config.yml:/etc/promtail/config.yml
+  depends_on:
+    - loki
+```
+
+Query logs in Grafana:
+```
+{job="ollama"} | json | level="error"
+```
+
+## Cost Tracking
+
+Add cost metric:
+
+```python
+# cost_exporter.py
+from prometheus_client import Gauge
+
+cloud_api_cost = Gauge('cloud_api_cost_usd', 'Daily cloud API cost')
+
+def calculate_cost():
+    # OpenAI: track API calls
+    openai_calls = 1000
+    openai_cost = (openai_calls / 1000) * 0.01  # $0.01 per 1k tokens
+
+    # Claude: track tokens
+    claude_tokens = 50000
+    claude_cost = (claude_tokens / 1e6) * 0.003  # $0.003 per 1M input tokens
+
+    total = openai_cost + claude_cost
+    cloud_api_cost.set(total)
+
+# Run as scheduled task (daily)
+schedule.every().day.at("23:59").do(calculate_cost)
+```
+
+Dashboard: Show daily/monthly cloud spend trend.
+
+## Checklist
+
+- [ ] Deploy Prometheus + Grafana
+- [ ] Configure scrape targets (Ollama, n8n, node-exporter)
+- [ ] Create basic dashboard (status, throughput, errors)
+- [ ] Set up 3-5 critical alerts (OOM, high error rate, disk full)
+- [ ] Configure notification channel (email/Slack)
+- [ ] Test alert trigger (manually send test metric)
+- [ ] Document metrics meaning for team
+- [ ] Export custom metrics from services
+- [ ] Set retention policy (30 days minimum)
+- [ ] Backup Prometheus data (optional)
+- [ ] Log aggregation (Loki) if needed
+- [ ] Cost tracking if using cloud APIs
+
+## Sources and Links
+
+- [Grafana](https://github.com/grafana/grafana)
+- [Prometheus](https://github.com/prometheus/prometheus)

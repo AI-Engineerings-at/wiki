@@ -1,0 +1,549 @@
+---
+title: "Inference-Server für LLMs: vLLM, TGI, Triton"
+description: "Text Generation Inference, vLLM, Triton für Production LLM Serving. Continuous Batching, PagedAttention, Speculative Decoding."
+section: "architektur"
+---
+
+# Inference-Server für LLMs: vLLM, TGI, Triton
+
+Ein Inference-Server ist deine erste Verteidigungslinie gegen langsame LLM-Responses. Der richtige Server kann 10x schneller machen als die naïve Implementierung.
+
+## Das Problem: Naive vs. Optimierte Inference
+
+**Naive Implementation (Serial):**
+```
+User 1 Request: "Schreib ein Gedicht"
+  → Tokenize (5ms)
+  → 10x Forward Pass (1000ms, 1 Token/100ms)
+  → Decode (5ms)
+  Total: 1010ms
+
+User 2 Request (während User 1 noch läuft):
+  → WARTEN! Server ist blockiert!
+```
+
+**Optimiert mit Continuous Batching:**
+```
+User 1: xxxxxxxx__________  (8 Tokens generiert)
+User 2:     xxxxxx______    (6 Tokens generiert, später gestartet)
+GPU:    [Batch 8 + 1] [Batch 5 + 1] ...
+
+Mit Overlapping nutzen wir GPU besser aus!
+```
+
+## 1. vLLM: Der Production Standard
+
+vLLM ist derzeit der Beste für DeploymentWie oft denkst du, dass ein einzelnes System alle Anforderungen erfüllt? Fast nie.
+
+### vLLM Kernkonzepte
+
+**Continuous Batching:**
+```python
+# Ohne Continuous Batching (BAD)
+class SimpleInferenceServer:
+    def process_request(self, prompt):
+        tokens = [tokenize(prompt)]
+        for step in range(max_tokens):
+            # Warten auf das längste Request
+            output = model.forward(tokens)
+            tokens.append(output)
+        return tokens
+
+# Mit Continuous Batching (GOOD)
+class vLLMServer:
+    def __init__(self):
+        self.request_queue = []
+        self.running_sequences = {}
+
+    def add_request(self, request_id, prompt):
+        """Neuer Request — wird sofort in Batch aufgenommen"""
+        tokens = tokenize(prompt)
+        self.running_sequences[request_id] = {
+            'tokens': tokens,
+            'position': 0,
+            'finished': False
+        }
+
+    async def generate(self):
+        """Continuous Generation"""
+        while self.running_sequences:
+            # Sammle alle aktiven Sequences
+            batch_tokens = []
+            sequence_ids = []
+
+            for req_id, seq in self.running_sequences.items():
+                if not seq['finished']:
+                    batch_tokens.append(seq['tokens'])
+                    sequence_ids.append(req_id)
+
+            # Batch-Forward (parallel auf GPU)
+            outputs = model.forward(batch_tokens)
+
+            # Update jede Sequence
+            for req_id, output_token in zip(sequence_ids, outputs):
+                seq = self.running_sequences[req_id]
+                seq['tokens'].append(output_token)
+                seq['position'] += 1
+
+                if output_token == EOS or seq['position'] >= max_tokens:
+                    seq['finished'] = True
+
+            # Entferne fertige
+            self.running_sequences = {
+                k: v for k, v in self.running_sequences.items()
+                if not v['finished']
+            }
+
+            await asyncio.sleep(0.01)  # Non-blocking
+```
+
+**PagedAttention (KV Cache Management):**
+
+KV Cache ist ein großer Memory-Hog. PagedAttention behandelt ihn wie OS Virtual Memory:
+
+```
+Normal KV Cache (ineffizient):
+┌─────────────────────────┐
+│ Request 1 KV (256 MB)   │ ← Fully allocated
+├─────────────────────────┤
+│ Request 2 KV (256 MB)   │ ← Fully allocated
+├─────────────────────────┤
+│ Request 3 KV (150 MB)   │ ← Partially used, wasted space!
+└─────────────────────────┘
+
+Mit PagedAttention (effizient):
+┌──────────┬──────────┬──────────┐
+│ Request1 │ Request2 │ Request3 │
+│ Page 0-7 │ Page 8-10│ Page 11  │
+└──────────┴──────────┴──────────┘
+     ↓         ↓          ↓
+Physical GPU Memory (kein Waste)
+```
+
+### vLLM Docker Setup
+
+```dockerfile
+# Dockerfile.vllm
+FROM nvidia/cuda:12.1.0-runtime-ubuntu22.04
+
+RUN apt-get update && apt-get install -y \
+    python3.11 python3-pip git
+
+RUN pip install --no-cache-dir vllm torch
+
+EXPOSE 8000
+
+# Startup script mit Graceful Shutdown
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
+
+CMD ["/app/start.sh"]
+```
+
+**start.sh:**
+```bash
+#!/bin/bash
+
+# Signal Handler für Graceful Shutdown
+cleanup() {
+    echo "Shutting down vLLM..."
+    kill -TERM $VLLM_PID
+    wait $VLLM_PID
+}
+
+trap cleanup SIGTERM SIGINT
+
+# vLLM starten
+python -m vllm.entrypoints.openai.api_server \
+  --model meta-llama/Llama-2-70b-hf \
+  --tensor-parallel-size 2 \
+  --pipeline-parallel-size 1 \
+  --gpu-memory-utilization 0.9 \
+  --max-num-batched-tokens 65536 \
+  --max-num-seqs 256 \
+  --host 0.0.0.0 \
+  --port 8000 &
+
+VLLM_PID=$!
+wait $VLLM_PID
+```
+
+**docker-compose.yml:**
+```yaml
+version: '3.8'
+services:
+  vllm:
+    build:
+      context: .
+      dockerfile: Dockerfile.vllm
+    image: vllm:latest
+    environment:
+      # Model Configuration
+      MODEL: meta-llama/Llama-2-70b-hf
+      TENSOR_PARALLEL_SIZE: 2  # 2 GPUs
+      GPU_MEMORY_UTILIZATION: 0.9
+      MAX_NUM_BATCHED_TOKENS: 65536  # Max tokens in batch
+      MAX_NUM_SEQS: 256  # Max sequences/requests
+
+      # Caching
+      VLLM_USE_KVCACHE: 1
+      VLLM_KV_CACHE_DTYPE: auto
+
+      # Logging
+      VLLM_LOGGING_LEVEL: INFO
+    ports:
+      - "8000:8000"
+    volumes:
+      - hf-cache:/root/.cache/huggingface
+      - logs:/app/logs
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['0', '1']  # GPU 0, 1
+              capabilities: [gpu]
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+
+    stop_grace_period: 120s  # 2 Minuten für laufende Requests
+
+volumes:
+  hf-cache:
+  logs:
+```
+
+### vLLM Konfigurationsoptionen
+
+| Option | Effekt | Beispiel |
+|--------|--------|---------|
+| `--tensor-parallel-size` | Verteil Model über N GPUs | `2` = 2 GPUs |
+| `--pipeline-parallel-size` | Pipeline Parallelism (selten nötig) | `1` |
+| `--gpu-memory-utilization` | Wie viel GPU Memory nutzen | `0.9` = 90% |
+| `--max-num-batched-tokens` | Max Tokens im Batch | `65536` |
+| `--max-num-seqs` | Max Requests parallel | `256` |
+| `--dtype` | Quantization | `float16`, `int8` |
+| `--use-flash-attn` | Flash Attention (wenn möglich) | `1` |
+| `--speculative-model` | Draft Model für Decoding | `meta-llama/Llama-2-7b` |
+
+### vLLM Performance Benchmark
+
+```python
+import requests
+import time
+import statistics
+
+def benchmark_vllm(
+    prompt: str,
+    num_requests: int = 100,
+    max_tokens: int = 200
+):
+    """Benchmark vLLM Throughput"""
+    latencies = []
+
+    for i in range(num_requests):
+        start = time.time()
+        response = requests.post(
+            "http://localhost:8000/v1/completions",
+            json={
+                "model": "Llama-2-70b",
+                "prompt": prompt,
+                "max_tokens": max_tokens,
+                "temperature": 0.7
+            }
+        )
+        latency = time.time() - start
+        latencies.append(latency)
+
+    print(f"vLLM Benchmark Results:")
+    print(f"  Requests: {num_requests}")
+    print(f"  Avg Latency: {statistics.mean(latencies):.2f}s")
+    print(f"  P50 Latency: {statistics.median(latencies):.2f}s")
+    print(f"  P95 Latency: {sorted(latencies)[int(num_requests*0.95)]:.2f}s")
+    print(f"  P99 Latency: {sorted(latencies)[int(num_requests*0.99)]:.2f}s")
+    print(f"  Throughput: {num_requests/sum(latencies):.1f} req/s")
+
+benchmark_vllm("Schreib eine Gedicht über Python", num_requests=100)
+```
+
+## 2. Text Generation Inference (TGI)
+
+TGI ist Hugging Face's Inference-Server. Weniger Optimiert als vLLM, aber "good enough" und einfacher:
+
+```dockerfile
+FROM ghcr.io/huggingface/text-generation-inference:latest
+
+ENV MODEL_ID=meta-llama/Llama-2-70b-hf
+ENV PORT=80
+
+EXPOSE 80
+```
+
+**docker-compose.yml:**
+```yaml
+services:
+  tgi:
+    image: ghcr.io/huggingface/text-generation-inference:latest
+    environment:
+      MODEL_ID: meta-llama/Llama-2-70b-hf
+      PORT: 80
+      DTYPE: float16
+      QUANTIZE: bitsandbytes
+      MAX_BATCH_SIZE: 64
+      MAX_TOTAL_TOKENS: 4096
+    ports:
+      - "8000:80"
+    volumes:
+      - hf-cache:/data
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+```
+
+**API Call:**
+```python
+import requests
+
+response = requests.post(
+    "http://localhost:8000/generate",
+    json={
+        "inputs": "Schreib ein Gedicht",
+        "parameters": {
+            "max_new_tokens": 200,
+            "temperature": 0.7,
+            "top_p": 0.95,
+            "do_sample": True
+        }
+    }
+)
+
+print(response.json()[0]["generated_text"])
+```
+
+## 3. NVIDIA Triton Inference Server
+
+Für Enterprise mit vielen Models parallel:
+
+```yaml
+# config.pbtxt - Triton Config für Llama
+name: "llama"
+platform: "pytorch_libtorch"
+max_batch_size: 64
+
+input [
+  {
+    name: "input_ids"
+    data_type: TYPE_INT64
+    format: FORMAT_NCHW
+    dims: [-1]
+  },
+  {
+    name: "attention_mask"
+    data_type: TYPE_INT64
+    dims: [-1]
+  }
+]
+
+output [
+  {
+    name: "output_ids"
+    data_type: TYPE_INT64
+    dims: [-1]
+  }
+]
+
+instance_group [
+  {
+    kind: KIND_GPU
+    count: 2
+  }
+]
+```
+
+## 4. llama.cpp Server (CPU/Edge)
+
+Für KMU ohne GPUs:
+
+```bash
+# Build und starten
+git clone https://github.com/ggerganov/llama.cpp
+cd llama.cpp
+make
+
+# Quantisiertes Model runterladen (4-bit)
+# Llama-2-7b-gguf-q4_K_M.bin
+
+# Server starten
+./server -m Llama-2-7b-gguf-q4_K_M.bin \
+  --port 8000 \
+  --threads $(nproc) \
+  --ctx-size 2048
+```
+
+**Performance auf CPU:**
+- Llama-7b (Q4): ~10 tokens/sec auf M1/M2
+- Llama-7b (Q4): ~3 tokens/sec auf Intel i7
+- Für Production: Erwarte 1-2 tokens/sec
+
+## 5. Speculative Decoding (2x Speedup)
+
+Mit Speculative Decoding rätst du voraus und verifizierst:
+
+```python
+# Draft-Model: Schnell, weniger genau
+draft_model = load_model("Llama-2-7b")  # Fast
+
+# Target-Model: Langsam, präzise
+target_model = load_model("Llama-2-70b")  # Langsam aber gut
+
+def speculative_decode(prompt, max_tokens=200):
+    tokens = tokenize(prompt)
+
+    for step in range(max_tokens):
+        # 1. Draft-Model generiert 4 Tokens schnell
+        draft_tokens = []
+        for _ in range(4):
+            logits = draft_model(tokens)
+            next_token = sample(logits)
+            draft_tokens.append(next_token)
+            tokens.append(next_token)
+
+        # 2. Target-Model verifiziert alle 4 Tokens parallel
+        verification = target_model(tokens[-4:])
+
+        # 3. Prüfe ob Draft-Vorhersagen korrekt waren
+        correct_count = 0
+        for i, draft_token in enumerate(draft_tokens):
+            target_logits = verification[i]
+            if draft_token == sample(target_logits):
+                correct_count += 1
+            else:
+                # Falsch! Nutze korrektes Token vom Target
+                tokens[-4+i] = sample(target_logits)
+                break
+
+        # Stoppe, wenn wir zu viele Falsch-Vorhersagen haben
+        if correct_count < 2:
+            break
+
+    return decode(tokens)
+```
+
+**Speedup in Real-World:**
+- Mit Draft-Model: 2x-3x schneller
+- Aber nur wenn Draft-Model gut kalibriert ist
+- Beispiel: Mit Llama-2-7b als Draft für Llama-2-70b
+
+## GPU Memory Optimization
+
+| Technik | Memory Saving | Tradeoff |
+|---------|---|---|
+| **Float16** | 50% | Minimal numerical loss |
+| **Int8 Quantization** | 75% | Some accuracy loss |
+| **Int4 Quantization** | 87% | Noticeable loss |
+| **Flash Attention** | 0% Memory | 40% faster, already in vLLM |
+| **KV Cache Quantization** | 90% KV Cache | Slight latency loss |
+| **LoRA Adaptation** | 30-50% | Lower quality than FT |
+
+### Practical Memory Limits
+
+```
+GPU Memory Math:
+
+Model Size (BFloat16) = Parameters * 2 Bytes
+  Llama-70B: 70B * 2 = 140GB (oops!)
+
+Mit 2 A100 (80GB each):
+  Llama-70B mit Tensor-Parallel: 70B / 2 = 35B per GPU
+  35B * 2 = 70GB (fits in 80GB)
+
+Mit Int8 Quantization:
+  70B * 1 = 70GB (fits exactly!)
+
+Mit Int4 + Flash Attention:
+  70B * 0.5 = 35GB (runs on 1x A100!)
+```
+
+## Benchmarking Setup
+
+```python
+import torch
+import nvidia_smi
+from transformers import AutoTokenizer, AutoModelForCausalLM
+
+def benchmark_inference():
+    """Vollständiger Benchmark"""
+    nvidia_smi.nvmlInit()
+
+    model_name = "meta-llama/Llama-2-70b-hf"
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForCausalLM.from_pretrained(
+        model_name,
+        device_map="auto",
+        torch_dtype=torch.float16,
+        load_in_8bit=True  # 8-bit quantization
+    )
+
+    prompt = "Schreib eine Geschichte über einen Programmierer"
+    inputs = tokenizer(prompt, return_tensors="pt")
+
+    # Warm-up
+    with torch.no_grad():
+        model.generate(**inputs, max_length=200)
+
+    # Benchmark
+    import time
+    start = time.time()
+
+    with torch.no_grad():
+        outputs = model.generate(
+            **inputs,
+            max_length=512,
+            do_sample=True,
+            top_p=0.95,
+            temperature=0.7
+        )
+
+    elapsed = time.time() - start
+    tokens_generated = outputs.shape[1]
+
+    print(f"Tokens/sec: {tokens_generated / elapsed:.1f}")
+    print(f"Total time: {elapsed:.2f}s")
+
+    # Memory usage
+    handle = nvidia_smi.nvmlDeviceGetHandleByIndex(0)
+    mem_info = nvidia_smi.nvmlDeviceGetMemoryInfo(handle)
+    print(f"GPU Memory: {mem_info.used / 1e9:.1f}GB / {mem_info.total / 1e9:.1f}GB")
+
+benchmark_inference()
+```
+
+## Zusammenfassung: Inference Server Wahl
+
+| Server | Vorteile | Nachteile | Best For |
+|--------|----------|----------|----------|
+| **vLLM** | Schnell, Continuous Batching, modern | Komplexer | Production LLM Serving |
+| **TGI** | Einfach, HF Integration | Weniger optimiert | Small/Medium Deployments |
+| **Triton** | Multi-Model, Enterprise | Learning Curve | Large Scale, Many Models |
+| **llama.cpp** | CPU fähig, klein, schnell | Limited Models | Edge, On-Premise KMU |
+
+Regel: Start mit vLLM. Nutze TGI nur wenn vLLM zu kompliziert ist. Triton brauchst du erst bei 10+ Models.
+
+## Quellen und Links
+
+- [vLLM GitHub](https://github.com/lm-sys/vllm) — Open Source, Production-Ready
+- [vLLM Docs](https://docs.vllm.ai/) — Konfiguration und Best Practices
+- [Text Generation Inference](https://github.com/huggingface/text-generation-inference) — HuggingFace Server
+- [NVIDIA Triton](https://developer.nvidia.com/triton-inference-server) — Enterprise Inference
+- [llama.cpp](https://github.com/ggerganov/llama.cpp) — CPU Inference
+- [Speculative Decoding Paper](https://arxiv.org/abs/2211.17192) — Original Research
+- [Flash Attention](https://github.com/dao-ailab/flash-attention) — Fast KV Cache

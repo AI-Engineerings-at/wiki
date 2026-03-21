@@ -1,0 +1,389 @@
+---
+title: Grafana Einführung
+date: 2026-03-21
+summary: Monitoring und Visualisierung mit Grafana. Von Installation bis Dashboards, Alerts und Datasources für AI-Infrastruktur.
+tags: [grafana, monitoring, visualization, prometheus, logs]
+author: AI Engineering
+---
+
+# Grafana Einführung
+
+Grafana zeigt deinen Systemen beim Arbeiten zu. CPU-Auslastung, Fehlerquoten, Model-Performance—alles in einem Dashboard. Du fragst deine Daten, Grafana beantwortet sie visuell.
+
+## Installation
+
+### Docker (empfohlen)
+
+```yaml
+version: '3.8'
+
+services:
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=grafana-password
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-piechart-panel
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./provisioning:/etc/grafana/provisioning
+    restart: unless-stopped
+
+volumes:
+  grafana_data:
+```
+
+Starten:
+```bash
+docker compose up -d grafana
+```
+
+Öffne http://localhost:3000
+Login: admin / grafana-password
+
+### Lokale Installation (Linux)
+
+```bash
+# Ubuntu/Debian
+sudo apt-get install -y adduser libfontconfig1 musl
+wget https://dl.grafana.com/oss/release/grafana_10.2.0_amd64.deb
+sudo dpkg -i grafana_10.2.0_amd64.deb
+
+sudo systemctl start grafana-server
+sudo systemctl enable grafana-server
+```
+
+http://localhost:3000
+
+## Datasources verbinden
+
+Eine Datasource ist deine Datenquelle (Prometheus, InfluxDB, PostgreSQL, etc.).
+
+### Prometheus (metrische Daten)
+
+Prometheus sammelt Metriken von Servern, Docker Containern, Anwendungen.
+
+**Setup:**
+1. Administration → Datasources → Add data source
+2. Prometheus wählen
+3. URL: `http://prometheus:9090` (oder `http://dein-server:9090`)
+4. Save & Test
+
+**Was Prometheus liefert:**
+```
+cpu_usage{instance="server1"} = 45.3
+memory_used{instance="server1"} = 8.2GB
+docker_container_cpu_usage{container_name="ollama"} = 60.5
+```
+
+### Loki (Logs)
+
+Loki speichert und durchsucht Logs.
+
+**Setup:**
+1. Datasources → Add → Loki
+2. URL: `http://loki:3100`
+3. Save & Test
+
+**Query Beispiel:**
+```
+{job="ollama"} | json | level="error"
+```
+
+Zeigt alle Error-Logs aus Ollama.
+
+### PostgreSQL (Relationale Daten)
+
+Für Queries auf deiner Datenbank.
+
+**Setup:**
+1. Datasources → Add → PostgreSQL
+2. Host: `postgres:5432`
+3. Database: `mydb`
+4. User/Password: deiner DB
+5. Save & Test
+
+**Query Beispiel:**
+```sql
+SELECT created_at, count(*) FROM events GROUP BY created_at;
+```
+
+### InfluxDB (Zeitreihen)
+
+Alternative zu Prometheus für detaillierte Metriken.
+
+**Setup:**
+1. Datasources → Add → InfluxDB
+2. URL: `http://influxdb:8086`
+3. Database: dein-db
+4. Save & Test
+
+## Dashboards erstellen
+
+Ein Dashboard ist eine Sammlung von Panels (Visualisierungen).
+
+### Neues Dashboard
+
+1. Home → Create → New Dashboard
+2. Panel hinzufügen: + Add Panel
+3. Query schreiben (hängt vom Datasource ab)
+4. Visualization wählen
+5. Title + Description
+6. Save
+
+### Panel Types
+
+**Time Series (Zeitreihe)**
+Daten über Zeit zeigen (CPU, Memory, Requests/sec).
+
+```
+Datasource:  Prometheus
+Query:       cpu_usage{instance="server1"}
+Visualization: Time Series
+Y-Axis:      CPU %
+```
+
+**Stat**
+Eine einzige Zahl prominent anzeigen (jetzt 95% CPU).
+
+```
+Datasource:  Prometheus
+Query:       cpu_usage{instance="server1"}
+Visualization: Stat
+Thresholds:  0 (green), 70 (yellow), 90 (red)
+```
+
+**Table**
+Tabellarische Daten (alle Error-Logs der letzten Stunde).
+
+```
+Datasource:  Loki oder PostgreSQL
+Query:       SELECT timestamp, message FROM errors WHERE timestamp > now() - interval '1 hour'
+Visualization: Table
+```
+
+**Gauge**
+Anzeiger wie ein Dashboard-Messgerät (0-100%).
+
+```
+Datasource:  Prometheus
+Query:       memory_used / memory_total * 100
+Visualization: Gauge
+Min: 0, Max: 100
+```
+
+**Logs**
+Raw Logs durchsuchen und filtern.
+
+```
+Datasource:  Loki
+Query:       {job="n8n"} | json
+Visualization: Logs
+```
+
+### Prometheus Query Examples
+
+Metriken sind Zeitreihen mit Labels.
+
+```
+# Aktuelle Wert
+cpu_usage
+
+# Mit Filter
+cpu_usage{instance="server1"}
+cpu_usage{instance=~"server.*"}  # Regex
+
+# Funktionen
+rate(http_requests[5m])          # Requests pro Sekunde in letzten 5min
+increase(errors[1h])             # Gesamtsteigerung Fehler in letzter Stunde
+topk(5, memory_used)             # Top 5 Memory-Consumer
+
+# Berechnungen
+(used_memory / total_memory) * 100  # Prozent
+```
+
+Prometheus Query Builder hat Auto-Complete—klick auf "Metrics" oben.
+
+## Variablen und Templating
+
+Variablen machen Dashboards interaktiv. Statt einen Wert hardcoden, wählt der User den Wert.
+
+### Dashboard-Variable erstellen
+
+1. Dashboard öffnen → Settings (oben rechts)
+2. Variables → New Variable
+3. Name: `instance`
+4. Datasource: Prometheus
+5. Query: `label_values(cpu_usage, instance)` (alle unterschiedlichen "instance" Werte)
+6. Save
+
+### Variable in Panel nutzen
+
+Query im Panel:
+```
+cpu_usage{instance="$instance"}
+```
+
+Panel rendert sich neu wenn Variable sich ändert.
+
+### Häufige Variablen
+
+```
+# Dropdown mit verfügbaren Services
+label_values(http_requests, job)
+
+# Datum-Bereich (Standard-Variable)
+$__from, $__to  # Wird von Dashboard-Zeitauswahl gesetzt
+
+# Regex-Variablen
+{instance=~"$instance"}  # User wählt mehrere Items
+```
+
+## Alerting
+
+Benachrichtigungen wenn etwas schief läuft.
+
+### Alert Rule erstellen
+
+1. Alerts → Alert Rules → Create alert rule
+2. Query: `cpu_usage > 90`
+3. Condition: "IS ABOVE 90"
+4. Evaluation interval: 1m (jede Minute prüfen)
+5. For: 5m (mindestens 5min über Schwellenwert = Alert)
+6. Labels: `severity: critical`
+7. Annotation: `{{ instance }} CPU über 90%!`
+
+### Benachrichtigungen
+
+Alerts können an verschiedene Kanäle gehen:
+
+**Slack:**
+1. Administration → Notifications → New contact point
+2. Type: Slack
+3. Webhook URL von Slack Integration
+4. Save
+
+**E-Mail:**
+1. Administration → Notifications → New contact point
+2. Type: Email
+3. E-Mail-Adresse eingeben
+4. Save
+
+**PagerDuty/Telegram/Discord:** Gleiches Prinzip
+
+### Notification Policy
+
+Welche Alerts gehen an welche Kontakt-Punkte?
+
+1. Alerts → Notification policies
+2. Define root policy
+3. Match Labels: `severity=critical` → send to Slack
+4. Match Labels: `severity=warning` → send to Email
+
+## Dashboard Provisioning
+
+Dashboards als Code in Git speichern. Beim Container-Start werden sie automatisch importiert.
+
+### Provisioning File (Dashboard als JSON)
+
+1. Bestehendes Dashboard exportieren:
+   - Dashboard öffnen → Share (oben rechts) → Export
+   - "Save to file" klicken
+
+2. JSON-Datei in `./provisioning/dashboards/` speichern:
+```
+provisioning/
+  └── dashboards/
+      ├── ai-monitoring.json
+      └── system-health.json
+```
+
+3. Docker Compose Mount:
+```yaml
+volumes:
+  - ./provisioning:/etc/grafana/provisioning
+```
+
+4. Provisioning Config (`./provisioning/dashboards/dashboards.yml`):
+```yaml
+apiVersion: 1
+
+providers:
+  - name: 'Default'
+    orgId: 1
+    folder: ''
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards
+```
+
+5. Container restart:
+```bash
+docker compose restart grafana
+```
+
+Dashboards sind jetzt automatisch geladen.
+
+## Performance-Tipps
+
+### Große Dashboards optimieren
+
+Ein Dashboard mit 50 Panels kann langsam werden.
+
+**Lösungen:**
+1. Panels in mehrere Dashboards aufteilen
+2. Refresh-Interval erhöhen (nicht jede Sekunde aktualisieren)
+   - Panel Settings → Refresh interval: 30s statt 10s
+3. Query-Range kürzen (z.B. nur letzte 24h statt 30 Tage)
+   - Query: `rate(http_requests[5m])` statt `rate(...[30d])`
+
+### Häufige Query-Fehler
+
+**"No data" Meldung:**
+- Datasource läuft nicht?
+- Query-Syntaxfehler?
+- Daten existieren nicht in diesem Zeitraum?
+
+Test: Datasources → Test Data Source → "Save & Test" Button
+
+**Falsche Metrik-Namen:**
+Prometheus: Metrics Liste anschauen
+- URL: `http://prometheus:9090/api/v1/label/__name__/values`
+- Oder in Grafana Panel: "Metrics" button klicken
+
+**Zu viele Daten = slow query**
+Time-range kürzen oder `rate()` / `increase()` nutzen (komprimiert Daten).
+
+## Best Practices
+
+- **Dashboard pro Service:** Ollama-Dashboard, n8n-Dashboard, System-Dashboard
+- **Aussagekräftige Titel:** "CPU Usage" statt "cpu"
+- **Schwellenwerte setzen:** Panels mit Alerts verbinden
+- **Sharing:** Dashboard → Share → Public URL (mit Read-Only)
+- **Backup:** Regelmäßig Dashboards exportieren
+  ```bash
+  curl http://localhost:3000/api/dashboards/db/<name> -H "Authorization: Bearer <api-key>"
+  ```
+
+## Checkliste
+
+- [ ] Grafana installiert (Docker oder lokal)
+- [ ] Admin-Account konfiguriert
+- [ ] Prometheus als Datasource verbunden
+- [ ] Prometheus Targets läuft (http://prometheus:9090/targets)
+- [ ] Erstes Panel mit Prometheus-Metrik erstellt
+- [ ] Time Series, Stat und Gauge Visualisierungen getestet
+- [ ] Dashboard-Variable (z.B. instance) erstellt
+- [ ] Alert Rule mit Slack/Email Benachrichtigung konfiguriert
+- [ ] Dashboard-JSON exportiert
+- [ ] Provisioning für automatisches Dashboard-Load getestet
+
+## Quellen und Links
+
+- [Grafana](https://github.com/grafana/grafana)
+- [Grafana Docs](https://grafana.com/docs)

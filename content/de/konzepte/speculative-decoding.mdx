@@ -1,0 +1,488 @@
+---
+title: Speculative Decoding
+date: 2026-03-21
+summary: Draft-then-Verify Approach, Acceptance Criteria, vLLM/llama.cpp Implementation, Medusa, Eagle, Lookahead Variants
+tags: [speculative-decoding, inference-optimization, draft-model, token-generation, llm-speed]
+author: AI Engineering
+section: Konzepte
+---
+
+# Speculative Decoding verstehen
+
+Speculative Decoding ist eine Technik, um die Inference-Speed von Language Models bis zu 2-3x zu erhöhen, ohne Qualität zu verlieren.
+
+## Kernidee
+
+Statt einen Token nach dem anderen zu generieren, vermute mehrere Tokens mit einem schnellen Draft-Modell. Dann verifiziere alle mit dem großen Modell auf einmal.
+
+```
+Standard (Autoregressive):
+Input: "Guten"
+Step 1: → "Morgen"
+Step 2: → "das"
+Step 3: → "ist"
+... (langsam, 1 Token pro Schritt)
+
+Speculative Decoding:
+Input: "Guten"
+Draft Phase: Schnelles Modell rät
+  → [Morgen, das, ist, eine, Antwort]  (5 Tokens auf einmal!)
+
+Verify Phase: Großes Modell prüft
+  → Sind alle Token korrekt?
+  → Wenn ja: Alle akzeptiert, sparen 5 Schritte!
+  → Wenn nein: Bis zum ersten Fehler akzeptieren, 1 neu generieren
+```
+
+---
+
+## Draft-then-Verify Prozess
+
+### Schritt 1: Draft-Phase
+
+Ein schnelles Modell generiert mehrere Kandidaten.
+
+```python
+def draft_phase(input_ids, draft_model, num_tokens=5):
+    """
+    Schnelles Modell rät mehrere Tokens
+    """
+    draft_tokens = []
+
+    for i in range(num_tokens):
+        # Schnelles Modell: Kann auf CPU sein, kleineres Modell
+        logits = draft_model(input_ids + draft_tokens)
+
+        # Greedy oder Sampling
+        token = logits.argmax(dim=-1)[-1]
+        draft_tokens.append(token)
+
+    return draft_tokens  # [token1, token2, token3, token4, token5]
+```
+
+### Schritt 2: Verify-Phase
+
+Das große Modell überprüft die gesamte Sequenz parallel.
+
+```python
+def verify_phase(input_ids, draft_tokens, verifier_model):
+    """
+    Großes Modell überprüft alle Draft Tokens auf einmal
+    Parallel-Vorteil!
+    """
+    # Erweiterte Sequenz mit Draft Tokens
+    extended_ids = input_ids + draft_tokens
+    # (1, original_len + draft_len)
+
+    # Großes Modell: Parallel über alle Positionen!
+    logits = verifier_model(extended_ids)
+    # Output: (1, extended_len, vocab_size)
+
+    # Prüfe jeden Draft Token
+    verified = []
+    for i, draft_token in enumerate(draft_tokens):
+        pos = len(input_ids) + i
+
+        # Was wäre die Vorhersage des großen Modells an dieser Position?
+        verifier_distribution = logits[0, pos - 1]  # <- Position!
+
+        # Ist der Draft Token wahrscheinlich unter der Verifier-Distribution?
+        draft_prob = verifier_distribution[draft_token]
+
+        if draft_prob > acceptance_threshold:
+            verified.append(draft_token)
+        else:
+            # Erster Fehler: Hier mit Verifier Sampling stoppen
+            true_token = sample_from(verifier_distribution)
+            verified.append(true_token)
+            break
+
+    return verified
+```
+
+---
+
+## Acceptance Criteria
+
+Nicht alle Draft Tokens werden akzeptiert. Es gibt mehrere Strategien.
+
+### 1. Greedy Acceptance
+
+Akzeptiere Draft Token nur wenn er die beste Vorhersage ist.
+
+```python
+def greedy_acceptance(draft_token, verifier_logits):
+    """
+    Verifier sagt: Welcher Token ist beste Wahl?
+    """
+    best_token = verifier_logits.argmax()
+
+    if draft_token == best_token:
+        return True
+    else:
+        return False
+```
+
+**Problem:** Sehr restriktiv, viele Tokens werden rejected.
+
+### 2. Probabilistic Acceptance
+
+Akzeptiere Draft Token mit bestimmter Wahrscheinlichkeit.
+
+```python
+def probabilistic_acceptance(draft_token, draft_logits, verifier_logits, alpha=0.9):
+    """
+    Acceptiere wenn Draft Prob >= alpha * Verifier Prob
+    """
+    draft_prob = softmax(draft_logits)[draft_token]
+    verifier_prob = softmax(verifier_logits)[draft_token]
+
+    # Akzeptiere wenn Draft nahe bei Verifier Wahrscheinlichkeit
+    if draft_prob >= alpha * verifier_prob:
+        return True
+    else:
+        # Rejection Sampling: Sample aus Verifier, nicht Draft!
+        return False
+```
+
+**Vorteile:**
+- Balance zwischen Geschwindigkeit und Qualität
+- Alpha=0.9: 90% der Draft Prob ist ausreichend
+
+### 3. Position-Based Acceptance
+
+Unterschiedliche Threshold pro Position (früh: streng, spät: locker).
+
+```python
+def position_based_acceptance(draft_token, verifier_logits, position, total_draft=5):
+    """
+    Erste Tokens: Streng (theta=0.95)
+    Letzte Tokens: Locker (theta=0.7)
+    """
+    theta = 0.95 - (position / total_draft) * 0.25
+    # Position 0: 0.95
+    # Position 4: 0.70
+
+    verifier_prob = softmax(verifier_logits)[draft_token]
+
+    if verifier_prob >= theta:
+        return True
+    else:
+        return False
+```
+
+---
+
+## Praktische Implementation
+
+### vLLM Speculative Decoding
+
+```python
+from vllm import LLM
+
+# Großes Modell (Verifier)
+model = LLM(
+    model="meta-llama/Llama-2-70b",
+    tensor_parallel_size=4
+)
+
+# Schnelles Draft Modell
+draft_model = LLM(
+    model="meta-llama/Llama-2-7b",
+    tensor_parallel_size=1  # Kann auch auf CPU sein
+)
+
+# Speculative Decoding aktivieren
+outputs = model.generate(
+    prompt="Erzähle einen Witz:",
+    speculative_model=draft_model,
+    num_speculative_tokens=5,  # Wie viele Tokens der Draft rät
+    temperature=0.8
+)
+```
+
+### llama.cpp Implementation
+
+```bash
+# Großes Modell (Verifier)
+./main -m models/llama-70b.gguf \
+       -p "Erzähle einen Witz:" \
+       --speculative-model models/llama-7b.gguf \
+       --spec-tokens 5 \
+       --temp 0.8
+
+# Speedup Faktor wird angezeigt
+# Beispiel: 2.5x schneller
+```
+
+### Custom Implementation in PyTorch
+
+```python
+class SpeculativeDecoding:
+    def __init__(self, draft_model, verifier_model, num_speculative=5):
+        self.draft = draft_model
+        self.verifier = verifier_model
+        self.num_spec = num_speculative
+
+    def generate(self, input_ids, max_new_tokens=100):
+        tokens = input_ids.clone()
+
+        for _ in range(max_new_tokens):
+            # Draft Phase
+            with torch.no_grad():
+                # Schnelles Modell: Mehrere Tokens raten
+                draft_tokens = []
+                temp_ids = tokens.clone()
+
+                for _ in range(self.num_spec):
+                    logits = self.draft(temp_ids)[-1, :]
+                    token = logits.argmax()
+                    draft_tokens.append(token.item())
+                    temp_ids = torch.cat([temp_ids, token.unsqueeze(0)])
+
+                # Verify Phase
+                extended_ids = torch.cat([tokens, torch.tensor(draft_tokens)])
+                verifier_logits = self.verifier(extended_ids)
+
+                # Check each draft token
+                accepted = []
+                for i, draft_token in enumerate(draft_tokens):
+                    pos = len(tokens) + i - 1
+                    vlogits = verifier_logits[pos]
+
+                    # Probabilistic acceptance
+                    draft_prob = torch.softmax(logits, dim=-1)[draft_token]
+                    verifier_prob = torch.softmax(vlogits, dim=-1)[draft_token]
+
+                    if draft_prob >= 0.9 * verifier_prob:
+                        accepted.append(draft_token)
+                    else:
+                        # Rejection: Verifier sample statt Draft
+                        true_token = torch.multinomial(
+                            torch.softmax(vlogits, dim=-1), 1
+                        ).item()
+                        accepted.append(true_token)
+                        break
+
+            # Append accepted tokens
+            tokens = torch.cat([
+                tokens,
+                torch.tensor(accepted).unsqueeze(1)
+            ])
+
+            if len(tokens) >= max_new_tokens:
+                break
+
+        return tokens
+```
+
+---
+
+## Speedup Analyse
+
+### Theoretischer Speedup
+
+```
+Without Speculative:  N Tokens × T Durchlaufzeit = N*T
+
+With Speculative:
+  - Draft Phase: D Durchlaufzeit (schnelles Modell)
+  - Verify Phase: T Durchlaufzeit (großes Modell)
+  - Per Iteration: D + T (generiert ~num_spec Tokens)
+
+  Speedup ≈ num_spec / (1 + D/T)
+
+Beispiel:
+  Draft (7B auf CPU): D = 100ms
+  Verifier (70B auf GPU): T = 200ms
+  num_spec = 5
+
+  Standard:  5 * 200ms = 1000ms (5 Tokens)
+  Speculative: (100 + 200) * 5/avg_accepted = 300 * (5/4) = 375ms
+
+  Speedup: 1000 / 375 = 2.67x
+```
+
+### Praktische Messungen
+
+```
+Llama 2 70B + Llama 2 7B Draft:
+
+Without Speculative:
+  Throughput: 25 Tokens/Sec
+  Latency (100 tokens): 4 seconds
+
+With Speculative (5 tokens):
+  Throughput: 65 Tokens/Sec (2.6x!)
+  Latency (100 tokens): 1.5 seconds
+
+Schlüssel: Draft ist sehr schnell (7B), Verifier ist wertvoll (70B)
+```
+
+---
+
+## Medusa und Eagle
+
+Neuere Varianten von Speculative Decoding.
+
+### Medusa (Meta)
+
+Statt separates Draft Modell: Zusätzliche Heads auf hauptem Modell.
+
+```
+Standard LLM:    Input → Hidden States → Output Token
+
+Mit Medusa:
+                 Input → Hidden States → Main Head: Token
+                                      ├─ Medusa Head 1: Token[t+1]
+                                      ├─ Medusa Head 2: Token[t+2]
+                                      ├─ Medusa Head 3: Token[t+3]
+                                      └─ Medusa Head 4: Token[t+4]
+```
+
+**Vorteil:** Kein separates Draft Modell nötig!
+
+```python
+from medusa import MedusaModel
+
+model = MedusaModel.from_pretrained("meta-llama/Llama-2-70b-medusa")
+
+outputs = model.generate(
+    input_ids,
+    max_new_tokens=100,
+    medusa_num_heads=4  # 4 zusätzliche Heads
+)
+```
+
+### Eagle (Microsoft)
+
+Autoregressive Heads die mehrere Tokens parallel generieren.
+
+```
+Standard: Token → Token → Token (sequenziell)
+Eagle:    Token → [Token, Token, Token] (parallel Tokens)
+```
+
+**Praktische Performance:**
+- Llama-70B: 2.4x Speedup
+- GPT-4 Qualität mit Llama-70B Speed
+
+---
+
+## Lookahead Decoding
+
+Neuer Ansatz: Deterministisches Speculative Decoding ohne separates Modell.
+
+```
+Idee: Manche Tokens sind "sicher vorherzusagen"
+(z.B. nach "Python" kommt sehr wahrscheinlich ein Newline oder Code)
+
+Lookahead Phase:
+  1. Generiere nächsten Token normal
+  2. Basierend auf diesem Token: Was sind Tokens t+2, t+3, ... die sehr wahrscheinlich?
+  3. Generiere alle diese auf einmal
+
+Vorteil: Kein Draft Modell, deterministische Länge
+Nachteil: Nicht alle Sequenzen haben "sichere" Tokens
+```
+
+---
+
+## Best Practices
+
+### 1. Draft Modell Wahl
+
+```
+Groß für hohe Qualität:
+  70B Verifier + 13B Draft: 1.8x Speedup
+
+Mittel (empfohlen):
+  70B Verifier + 7B Draft: 2.5x Speedup
+
+Schnell:
+  70B Verifier + 1B Draft: 2.0x Speedup (Draft zu schnell, viele Rejections)
+```
+
+### 2. Number of Speculative Tokens
+
+```
+draft_tokens = 1: ~1.1x Speedup (zu wenig)
+draft_tokens = 5: 2-3x Speedup (Goldstandard)
+draft_tokens = 10: 2.5-3x Speedup (aber weniger Acceptances)
+
+Regel: Starten mit 5, optimieren basierend auf Acceptance Rate
+```
+
+### 3. Acceptance Threshold
+
+```python
+# alpha zu hoch (0.99): Zu viele Rejections
+# alpha = 0.9: Balance (empfohlen)
+# alpha zu niedrig (0.7): Zu viele Acceptances, kann Qualität leiden
+
+# Messen: Acceptance Rate
+acceptance_rate = num_accepted / (num_draft * num_iterations)
+# Ziel: 70-80%
+```
+
+### 4. Memory Overhead
+
+```
+Speculative Decoding braucht 2 Modelle im Memory:
+
+72GB für 70B (verifier) + 14GB für 7B (draft) = 86GB
+
+Optimierungen:
+- Draft auf CPU quantisiert
+- Draft auf separater GPU
+- vLLM managed sharing automatisch
+```
+
+---
+
+## Vergleich mit Alternativen
+
+| Methode | Speedup | Speicher | Komplexität |
+|---------|---------|----------|-------------|
+| Standard | 1x | 1x | - |
+| Flash Attention | 1.5x | 1x | Niedrig |
+| vLLM Paging | 1.2x | 0.8x | Niedrig |
+| Speculative | 2.5-3x | 1.5x | Mittel |
+| Quantization (INT8) | 2x | 0.5x | Mittel |
+| Quantization + Spec. | 4-5x | 0.75x | Hoch |
+
+---
+
+## Häufige Fehler
+
+### 1. Draft Modell zu klein
+
+```
+❌ 70B + 0.5B: Draft wird rejected zu oft
+✅ 70B + 7B: Guter Balance
+```
+
+### 2. Zu viele speculative tokens
+
+```
+❌ 10+ tokens: Viele Rejections, nicht schneller
+✅ 5 tokens: Optimal
+```
+
+### 3. Falscher Acceptance Threshold
+
+```
+❌ alpha=1.0: Alles wird rejected
+✅ alpha=0.9: Balance
+❌ alpha=0.5: Zu viele falsche Tokens akzeptiert
+```
+
+---
+
+## Quellen und Links
+
+- [Speculative Decoding (Leviathan et al. 2023)](https://arxiv.org/abs/2211.17192)
+- [Medusa (Cai et al. 2023)](https://arxiv.org/abs/2401.10774)
+- [Eagle (Li et al. 2023)](https://arxiv.org/abs/2401.15335)
+- [vLLM Speculative](https://docs.vllm.ai/en/latest/models/speculative_decoding.html)
+- [Lookahead Decoding (Fu et al. 2024)](https://arxiv.org/abs/2402.02057)

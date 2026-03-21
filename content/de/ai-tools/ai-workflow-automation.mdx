@@ -1,0 +1,401 @@
+---
+title: AI Workflow Automation 2026 — n8n vs Make vs Zapier
+date: 2026-03-21
+summary: n8n vs Make vs Zapier vs ActivePieces vs Windmill. Pricing, Self-Hosted, AI Nodes, Komplexität, Integration Count.
+tags: [automation, n8n, make, zapier, workflow, ai]
+author: AI Engineering
+---
+
+# AI Workflow Automation 2026 — n8n vs Make vs Zapier
+
+2026 hat die Workflow-Automation sich massiv zu AI-nativen Tools entwickelt. Dieser Guide vergleicht die Top-Plattformen mit fokus auf AI-Integration, Skalierbarkeit und Kosten.
+
+## Schnell-Überblick
+
+| Tool | Preis | Self-Hosted | AI Nodes | Integrationen | Best For |
+|------|-------|------------|----------|---------------|----------|
+| **n8n** | Self-free | ✅ Ja | ✅ OpenAI/Claude | 500+ | Teams, Developers |
+| **Make** | $9+/Mo | Nein | ✅ GPT, Anthropic | 1000+ | SMB, Power Users |
+| **Zapier** | $20+/Mo | Nein | ✅ Begrenzt | 7000+ | Anfänger, Non-Tech |
+| **ActivePieces** | Free OSS | ✅ Ja | ✅ OpenAI | 300+ | Budget, Privacy |
+| **Windmill** | Free OSS | ✅ Ja | Code-First | 200+ | Developer-Driven |
+
+## Detaillierter Vergleich
+
+### n8n — Die Developer's Choice
+
+**Pricing**:
+- **Self-Hosted**: Free (unbegrenzte Workflows, Executions)
+- **Cloud Free**: 50 Executions/Monat
+- **Cloud Pro**: $25/Monat (2000 Executions/Monat)
+
+**Besonderheit**: Self-Hosting ist Free & unbegrenzt. Cloud ist optional.
+
+**Stärken**:
+- Dein Server = Deine Daten (no vendor lock-in)
+- Unbegrenzte Workflows + Executions (self-hosted)
+- AI Nodes für OpenAI, Anthropic, Ollama
+- 500+ Integrationen (HTTPs, Webhooks, Custom Code)
+- Große Developer Community
+- Open Source mit Commercial Friendly License
+
+**Schwächen**:
+- Steeper Learning Curve (nicht für Non-Tech)
+- Self-Hosting braucht Server-Knowhow
+- Kleinere Integrations-Library als Zapier/Make
+
+**AI Nodes Verfügbar**:
+- OpenAI (GPT-4, Vision, Assistants)
+- Anthropic Claude
+- Ollama (Local Models!)
+- HuggingFace Inference
+- Replicate
+
+**Use Cases**:
+- Internal Automation (Enterprise)
+- Privacy-Critical Workflows
+- Custom Business Logic
+- High-Volume Automation (unlimited executions = unbegrenzte Skalierung)
+
+**Self-Hosted Setup**:
+```bash
+# Docker-Compose
+git clone https://github.com/n8n-io/n8n
+cd n8n/docker
+docker-compose up
+
+# Zugang: http://localhost:5678
+```
+
+**Kosten bei Scale** (1M Executions/Monat):
+- Self-Hosted: $0 (nur Server-Kosten, ~$20/Mo VPS)
+- Make: $9000+/Mo (1000 Operations/Monat × 1000)
+- Zapier: Nicht praktisch bei diesem Volume
+- n8n Cloud: Unbezahlbar
+
+### Make — Best Value für SMB
+
+**Pricing**:
+- **Free**: 1000 Operations/Monat
+- **Core**: $9/Monat (10k Operations)
+- **Pro**: $19/Monat (50k Operations)
+- **Team**: $149+/Monat (Custom)
+
+**Operations** = 1 Module Action (nicht 1 Workflow)
+
+**Beispiel**: "Gmail → Parse Email → OpenAI → Send Slack" = 4 Operations pro Ausführung
+
+**Stärken**:
+- Best Price-Performance bei 100-100k Operations/Monat
+- UI ist intuitiver als n8n
+- AI Nodes (GPT, Claude) sind native
+- 1000+ Integrationen (umfangreicher als n8n)
+- Fokussiert auf Business User (nicht nur Devs)
+
+**Schwächen**:
+- Keine Self-Hosting (vendor lock-in)
+- Wird teuer bei extremer Scale (>500k Ops)
+- Weniger Kontrolle über Infrastruktur
+
+**AI Nodes**:
+- OpenAI (GPT-4, Vision, TTS)
+- Anthropic Claude
+- Google Vertex AI
+- Azure OpenAI
+
+**Cost Breakdown Beispiel** (10 Simple Automations):
+- 100 Executions/Monat × 10 Ops each = 1000 Ops = Free Tier fits!
+- 1000 Executions/Monat = $9/Mo Core Plan
+
+**Use Cases**:
+- Small Business (unter 5 Mitarbeiter)
+- Marketing Automation
+- Lead Nurturing Workflows
+- Content Distribution
+
+### Zapier — The Easy Path
+
+**Pricing**:
+- **Free**: 100 Tasks/Monat
+- **Starter**: $19.99/Monat (750 Tasks)
+- **Professional**: $49/Monat (7500 Tasks)
+- **Advanced**: $99/Monat (unlimited)
+
+**Task** = 1 Workflow Completion (nicht 1 Module)
+
+**Beispiel**: "Trigger → Step 1 → Step 2 → Step 3" = 1 Task
+
+**Stärken**:
+- Einfachste UI (für Non-Tech)
+- 7000+ Integrationen (größte Library)
+- Offizieller AI Support (OpenAI native)
+- Best Customer Support
+- Largest User Base
+
+**Schwächen**:
+- Teuerster bei hohem Volume (Trigger zählt nicht, aber Schritte)
+- Keine Self-Hosting
+- Weniger Kontrolle über Workflow Logic
+- AI Features sind begrenzt
+
+**AI Nodes**:
+- OpenAI
+- Begrenzte Custom AI Integration
+
+**Cost Breakdown** (Small Business):
+- 10 Zaps × 50 Executions/Monat = 500 Tasks = Starter Plan ($19.99)
+- Problem: 3 Workflows mit Loops schnell über Budget
+
+**Use Cases**:
+- Non-Technical Founders
+- Simple 1-Way Integrations
+- Business Teams ohne Dev Skills
+- wenn Einfachheit > Kontrolle
+
+### ActivePieces — The Privacy-First OSS
+
+**Pricing**:
+- **Self-Hosted**: Free (Open Source)
+- **Cloud Free**: Limited
+- **Cloud Starter**: $50+/Monat
+
+**Stärken**:
+- Vollständig Open Source (MIT License)
+- Self-Hosting kostenlos
+- Datenschutz-fokussiert (GDPR-ready)
+- AI Nodes (OpenAI, local Ollama)
+- Moderne UX (besser als n8n)
+
+**Schwächen**:
+- Nur ~300 Integrationen (vs. 1000+ bei Make)
+- Kleinere Community
+- Noch relativ jung (March 2026)
+
+**Ähnlich wie**: n8n aber mit besserer UX + Privacy-Focus
+
+**Use Cases**:
+- EU-basierte Unternehmen (GDPR)
+- Privacy-Sensitive Data
+- Budget-Conscious Teams
+
+## Workflow Architektur Vergleich
+
+### n8n Workflow (JSON-basiert)
+```json
+{
+  "nodes": [
+    {
+      "name": "Trigger",
+      "type": "webhook"
+    },
+    {
+      "name": "OpenAI",
+      "type": "n8n-nodes-base.openai"
+    },
+    {
+      "name": "Slack",
+      "type": "n8n-nodes-base.slack"
+    }
+  ]
+}
+```
+
+### Make Scenario (Visual)
+- Trigger (Gmail Receive)
+  → Module 1 (Parse Email)
+  → Module 2 (OpenAI GPT-4)
+  → Module 3 (Send Slack)
+  → Module 4 (Log to Database)
+= 4 Operations pro Run
+
+### Zapier Zap (Visual)
+- Trigger (GitHub Issue)
+  → Step 1 (Summarize)
+  → Step 2 (Create in Jira)
+  → Step 3 (Notify Team)
+= 1 Task pro Run
+
+## Pricing Comparison bei Scale
+
+| Volume | Make | Zapier | n8n Self | n8n Cloud |
+|--------|------|--------|----------|-----------|
+| 10k/Mo | $9 | $20 | $20 VPS | $25 |
+| 100k/Mo | $45 | $99+ | $20 VPS | $200+ |
+| 1M/Mo | $450+ | $999+ | $50 VPS | Unbezahlbar |
+| 10M/Mo | $4500+ | Impossible | $100 VPS | Impossible |
+
+**Clear Winner bei Scale**: n8n Self-Hosted ($20-100/Mo for any volume)
+
+## Praktische Szenarien
+
+### Szenario #1: Freelancer (1-2 Einfache Workflows)
+
+**Anforderungen**:
+- Einfache Integration (Email → CRM)
+- Non-Technical
+- Kostenlos oder sehr günstig
+
+**Beste Wahl**: **Zapier Free Tier**
+- 100 Tasks/Monat reicht für 1-2 einfache Zaps
+- UI ist am einfachsten
+- Kostenlos
+- Wenn überschritten: Upgrade zu $19.99
+
+### Szenario #2: Marketing Team (10-50 Workflows)
+
+**Anforderungen**:
+- Mehrere Workflows (Email, Social, CRM)
+- AI-Powered (Lead Scoring, Content Gen)
+- Budget: $100-500/Mo
+
+**Beste Wahl**: **Make Pro ($19/Mo)**
+- 50k Operations/Monat = 5000 Complex Workflows
+- AI Nodes (Claude für Lead Scoring)
+- Integriert Slack, HubSpot, LinkedIn, etc.
+- Total Cost: $19/Mo
+
+**Workflow Beispiel**:
+```
+1. Trigger: New Lead in HubSpot
+2. Extract: Parse Email & Company
+3. OpenAI: Generate Personalized Outreach
+4. Send: Email via Gmail
+5. Log: Add Notes to HubSpot
+= 5 Operations × 100 Leads/Monat = 500 Ops (Free Tier reicht!)
+```
+
+### Szenario #3: Developer Building Internal Tools
+
+**Anforderungen**:
+- Komplexe Custom Logic
+- Unbegrenzte Executions
+- Privacy / On-Premise
+- Full AI Integration
+
+**Beste Wahl**: **n8n Self-Hosted**
+- Free (open source)
+- Server: $20-50/Mo (AWS/DigitalOcean)
+- Unbegrenzte Workflows + Executions
+- Vollständige Kontrolle über Code
+
+**Setup**:
+```bash
+# DigitalOcean App Platform
+docker-compose up n8n
+# n8n läuft jetzt auf deinem Server
+# Integriere OpenAI/Claude for AI
+```
+
+**Kosten**: $0 Software + $25/Mo Server = $25/Mo total
+
+### Szenario #4: Enterprise (1000+ Workflows)
+
+**Anforderungen**:
+- Massive Scale (millions of executions/mo)
+- Full Control & Security
+- Custom Integrations
+- AI-Powered Automation
+
+**Beste Wahl**: **n8n Self-Hosted auf Kubernetes**
+- Software: Free
+- Infrastructure: $500-5000/Mo (je nach Scale)
+- Custom Nodes: Intern entwickelt
+- AI: Claude + OpenAI + Local Ollama
+
+**Architecture**:
+```
+Kubernetes Cluster
+├── n8n Core (3 replicas)
+├── Database (PostgreSQL)
+├── Redis (Queue)
+└── File Storage (S3)
+
+Integrations:
+├── OpenAI/Claude (API)
+├── Ollama (On-Prem LLM)
+├── Internal APIs
+└── 100+ SaaS Services
+```
+
+**Cost**: $500-1000/Mo Infrastructure + $0 Software
+
+## AI Nodes Vergleich
+
+| Feature | n8n | Make | Zapier | ActivePieces |
+|---------|-----|------|--------|--------------|
+| OpenAI | ✅ | ✅ | ✅ | ✅ |
+| Anthropic Claude | ✅ | ✅ | ❌ | ✅ |
+| Ollama (Local) | ✅ | ❌ | ❌ | ✅ |
+| Vision/Images | ✅ | ✅ | Limited | ✅ |
+| Function Calling | ✅ | ✅ | ❌ | ✅ |
+| Streaming | ✅ | ✅ | ❌ | ⚠️ |
+
+**Fazit**: Für AI-Heavy Workflows: n8n oder Make > Zapier
+
+## Top-5 Häufige Fehler
+
+### Problem #1: "Zapier wird zu teuer schnell"
+- **Ursache**: Jeder Schritt = höhere Kosten, Scale ist ineffizient
+- **Lösung**: Wechsel zu Make (operations-based) oder n8n (unlimited)
+- **Einsparung**: 10x bei hohem Volume
+
+### Problem #2: "n8n ist zu kompliziert zu starten"
+- **Ursache**: Steep Learning Curve wenn du Zapier gewöhnt bist
+- **Lösung**: Nutze LM Studio GUI oder starte mit Make
+- **Zeit**: 2 Wochen bis komfortabel
+
+### Problem #3: "Make AI Nodes sind begrenzt"
+- **Ursache**: Nur OpenAI/Claude, kein Ollama
+- **Lösung**: Benutze HTTP Requests zu deinem Ollama Server
+```json
+{
+  "url": "http://ollama:11434/api/generate",
+  "method": "POST",
+  "body": { "model": "llama2", "prompt": "..." }
+}
+```
+
+### Problem #4: "n8n Self-Hosted lädt langsam"
+- **Ursache**: Zu schwache VPS oder zu viele Workflows
+- **Lösung**: Upgrade auf bessere Server oder nutze Cloud n8n
+- **Schwellenwert**: Über 10k Executions/Tag = upgrade
+
+### Problem #5: "Zapier AI generiert schlechte Output"
+- **Ursache**: Zu allgemeine Prompts
+- **Lösung**: Nutze Claude statt nur GPT, oder wechsel zu n8n (mehr Kontrolle)
+
+## Hardware für Self-Hosted
+
+| Setup | CPU | RAM | Disk | Cost |
+|-------|-----|-----|------|------|
+| **Hobby** | 1 vCPU | 2GB | 10GB | $5/Mo |
+| **Small Biz** | 2 vCPU | 4GB | 50GB | $20/Mo |
+| **Medium** | 4 vCPU | 8GB | 100GB | $50/Mo |
+| **Enterprise** | Kubernetes | 32GB+ | 500GB+ | $500+/Mo |
+
+## Budget nach Profil
+
+| Profil | Tool | Preis/Mo |
+|--------|------|----------|
+| **Freelancer** | Zapier Free | $0 |
+| **SMB (10-20 Workflows)** | Make Pro | $19 |
+| **Developer** | n8n Self | $20 |
+| **Agency (100+ Workflows)** | n8n Self + Team | $100-500 |
+| **Enterprise** | n8n Enterprise | Custom |
+
+---
+
+## Ressourcen
+
+- [n8n Official](https://n8n.io)
+- [Make Documentation](https://www.make.com/docs)
+- [Zapier Help](https://zapier.com/help)
+- [ActivePieces GitHub](https://github.com/activepieces/activepieces)
+- [n8n Docker Setup](https://docs.n8n.io/hosting/docker-compose/)
+
+**Letzte Aktualisierung**: 21.03.2026 | **Nächste Überprüfung**: Juni 2026
+
+## Quellen und Links
+
+- [n8n](https://github.com/n8n-io/n8n)
+- [LangChain](https://github.com/langchain-ai/langchain)

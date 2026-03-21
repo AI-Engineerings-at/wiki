@@ -1,0 +1,424 @@
+---
+title: Scaling Laws erklärt — Compute-Optimal Training
+date: 2026-03-21
+summary: "Scaling Laws for Neural Language Models" (Kaplan et al. 2020) + Chinchilla. Wie viele Parameter? Wie viel Daten? Die mathematischen Regeln hinter großen Modellen.
+tags: [scaling-laws, compute, training, efficiency, llm]
+author: AI Engineering
+---
+
+# Scaling Laws erklärt — Compute-Optimal Training
+
+Eine fundamental Frage: Wenn ich 10x mehr Compute habe, wie viel besser wird mein Modell?
+
+Kaplan et al. (2020) antworteten mathematisch: **Scaling Laws**. Die Antwort überraschte die Community.
+
+## Das klassische Problem: Parameter vs. Daten
+
+Frühere Annahme: Mehr Parameter = besser. Also trainiere riesige Modelle.
+
+Problem: Riesige Modelle brauchen auch riesige Mengen Daten. Wenn du 175B Parameter Model trainierst, brauchst du maybe 300B Tokens. Das ist teuer.
+
+Die Frage: Wenn ich 1 Trillion Tokens habe und 10x Compute, sollte ich:
+- Großes Modell (100B Params) mit wenig Daten trainieren?
+- Mittleres Modell (10B Params) mit viel Daten trainieren?
+
+Kaplan fand: **Es gibt ein Optimum.**
+
+## Die Scaling Laws (vereinfacht)
+
+Die Formel:
+```
+Loss = L_0 + (A / N^α) + (B / D^β)
+
+N = Anzahl Parameter
+D = Anzahl Tokens (Daten)
+α ≈ 0.07 (Power-Law)
+β ≈ 0.07 (Power-Law)
+```
+
+Was das bedeutet:
+- Verdopple Parameter → 6% Verbesserung
+- Verdopple Daten → 6% Verbesserung
+
+Beide helfen gleich viel!
+
+## Das überraschende Ergebnis (Chinchilla, 2022)
+
+Kaplan zeigte: Größer ist besser. Aber DeepMind fragte: Was ist optimal?
+
+Die Antwort (Chinchilla Paper): **Compute-Optimal ist wenn Token-Menge ≈ Parameter-Menge.**
+
+Praktisch:
+```
+Wenn du 100B Parameter Modell trainieren kannst,
+trainiere es mit ~100B Tokens (nicht 300B).
+```
+
+Das ist radikal. Die vorherige Praxis war:
+```
+Token = 20 × Parameter
+```
+
+Chinchilla sagt:
+```
+Token ≈ Parameter (Ratio ungefähr 1:1)
+```
+
+Das bedeutet: Bisherige Modelle waren UNDERTRAINED (zu wenig Daten).
+
+## Implikation: Kleinere Modelle, besser trainiert
+
+Ältere Ansatz:
+- Trainiere GPT-3: 175B Parameter mit 300B Tokens
+- Performance: X
+
+Optimal nach Chinchilla:
+- Trainiere 70B Parameter mit 70B Tokens
+- Performance: Besser als GPT-3, mit weniger Parametern
+
+Das ist effizienz-revolutionär.
+
+## Die Praktische Anwendung
+
+Wenn du ein Modell bauen möchtest:
+
+1. **Bestimme dein Compute-Budget** (z.B. 100 GPU-days)
+2. **Berechne optimale Parameter-Zahl**
+   ```
+   Optimal N ≈ Compute / (6 × FLOPs pro Token)
+   ```
+3. **Berechne optimale Tokens**
+   ```
+   Optimal D ≈ N (ungefähr gleich)
+   ```
+
+Beispiel:
+```
+Budget: 100 GPU-days
+FLOPs pro Token für ein 7B-Modell: 14 Trillion
+
+Optimal Parameter: 7B
+Optimal Tokens: 7B
+
+Training-Zeit: ~3 Wochen auf 1 GPU
+```
+
+## Ein Kontrast: Emergent Abilities
+
+Scaling Laws erklärt viel, aber nicht alles.
+
+Ein Phänomen: **Emergent Abilities**—plötzlich kann ein größeres Modell etwas völlig Neues.
+
+Beispiel:
+- GPT-2: Kann Code nicht generieren
+- GPT-3: Kann Code generieren
+- Scaling Laws sagten: „Das sollte graduell besser werden"
+
+Aber es war plötzlich ein Sprung.
+
+Das ist noch nicht vollständig verstanden. Es könnte sein:
+- Es ist kein echter „Sprung", sondern Threshold-Effekt
+- Oder es gibt nicht-skalierbare Komponenten
+
+Aktuelle Forschung untersucht das.
+
+## Variationen: Task-spezifische Scaling
+
+Nicht alle Tasks skalieren gleich.
+
+Einige Ergebnisse:
+- **Reasoning:** Braucht größere Modelle (Parameter-intensiv)
+- **Memorization:** Braucht mehr Daten (Token-intensiv)
+- **Language Understanding:** Skaliert mit beidem
+
+Praktisch: Wenn deine Task Reasoning braucht, investiere in große Parameter.
+
+## Kritik an Scaling Laws
+
+**Kritik 1: Sie ignorieren Architektur**
+
+Scaling Laws sagen „mehr Parameter = besser" aber nicht „welche Architektur?"
+
+Faktisch: Different Architectures skalieren unterschiedlich.
+
+**Kritik 2: Sie sind empirisch, nicht Theoretisch**
+
+Niemand versteht warum die Exponenten gerade 0.07 sind. Es ist fitting an Daten.
+
+**Kritik 3: Sie Extrapolieren**
+
+Wenn du Daten bis 100B hast, kannst du für 1T extrapolieren. Aber vielleicht bricht es irgendwann.
+
+## Die Zukunft von Scaling
+
+Aktuelle Trends:
+- **Beyond Scaling:** Architecture improvements, nicht nur mehr Parameter
+- **Efficient Scaling:** Mittels Quantisierung, Pruning, etc.
+- **Domain-Specific Scaling:** Verschiedene Regeln für verschiedene Domänen
+
+## Die Empirische Bestimmung der Exponenten
+
+Das Erstaunliche: Die Exponenten α ≈ 0.07 und β ≈ 0.07 wurden empirisch gemessen. Sie sind nicht theoretisch hergeleitet.
+
+Wie?
+
+Kaplan trainierte Modelle mit verschiedenen Größen und Datamengen:
+- 70 Million bis 10 Billion Parameter
+- Verschiedene Datenmengen pro Modell
+- Gemessen: Final Loss für jede Kombination
+
+Dann: Fit eine Power-Law Funktion an die Daten.
+
+Resultat: α ≈ β ≈ 0.07 für alle Bereiche (überraschend konsistent!).
+
+## Die Kritik an Scaling Laws
+
+**Kritik 1: Sie sind nicht universell**
+
+Die 0.07-Exponenten gelten für Transformer Language Models. Aber:
+- Vision Transformers haben andere Exponenten
+- Reinforcement Learning Agents folgen anderen Gesetzen
+- Multi-Modal Models (Text + Bilder) skalieren anders
+
+Generalisierung: Scaling Laws sind architektur- und aufgabenspezifisch.
+
+**Kritik 2: Sie sagen nichts über Architektur**
+
+Scaling Laws: "Mehr Parameter = besser"
+
+Aber nicht alle Parameter sind gleich!
+- Ein Transformer-Layer: mehr Effekt
+- Ein konvolutional Layer: weniger Effekt
+- Ein LoRA-Adapter: minimal
+
+Die "Parameter-Count" ist zu simpel.
+
+**Kritik 3: Sie brechen am Ende**
+
+Die Formel stimmt für 70M bis 10B. Aber:
+- Was bei 100B?
+- Was bei 1T?
+
+Die Forschung zeigt: Irgendwann (vielleicht bei 10T+) könnte das Gesetz brechen.
+
+## Praktische Anwendung: Die Chinchilla-Rechnung
+
+Wenn du ein Modell-Training planen willst:
+
+**Input: Dein Compute Budget**
+
+Sagen wir: 1000 GPU-days auf A100 (je 312 TFLOPS)
+
+**Schritt 1: Konvertiere zu FLOPs**
+```
+1000 GPU-days × 86400 seconds/day × 312 TFLOPS
+= 2.7 × 10^19 FLOPs
+```
+
+**Schritt 2: Berechne optimale Parameter (Chinchilla)**
+```
+Formel (vereinfacht):
+Optimal N ≈ Compute^(3/4) / Const
+
+Konkreter:
+N ≈ 2.7 × 10^19 / (6 × 10^9) ≈ 4.5 Billion
+```
+
+**Schritt 3: Berechne optimale Token**
+```
+D ≈ N ≈ 4.5 Billion
+```
+
+**Schritt 4: Training-Plan**
+```
+- Modell: 4.5B Parameter
+- Daten: 4.5B Tokens
+- Batch Size: Typischerweise 0.5M Tokens/Batch
+- Steps: 9000 Steps
+
+- Auf 1x A100 (625 TFLOPs): ~100 GPU-Stunden
+- Auf 8x A100 (5 PFLOPS): ~13 GPU-Stunden
+```
+
+## Was ist Emerging Abilities?
+
+Ein faszinierendes Phänomen: Ab einer bestimmten Größe können Modelle plötzlich Dinge:
+
+Beispiele:
+- GPT-2 (1.5B): Kann kaum Code generieren
+- GPT-3 (175B): Kann Code generieren, sogar komplexe Algorithmen
+- GPT-3.5/4: Kann Code-Review machen und Bugs finden
+
+Scaling Laws sagen: "Graduelle Verbesserung"
+Aber die Sprünge sind nicht graduel—sie sind diskontinuierlich.
+
+**Mögliche Erklärungen:**
+
+1. **Es gibt keine echten Sprünge:** Vielleicht ist die Verbesserung graduell, aber threshold-effects machen es aussehen wie Sprünge (z.B. ein Beispiel trifft plötzlich 50% korrekt statt 49%, führt zu sichtbarem Durchbruch).
+
+2. **Architecture matters:** Vielleicht braucht Code-Generierung eine bestimmte Mindestgröße wo kritische Komponenten der Architektur zusammenkommen.
+
+3. **Datenmixture:** Bei größeren Modellen kann mehr diverse Daten verwendet werden, die neuen Fähigkeiten enablet.
+
+Die Forschung ist still offen.
+
+## Scaling bei Inference vs Training
+
+Die Scaling Laws beziehen sich auf **Training**.
+
+Aber bei **Inference** ist es anders:
+- Größeres Modell = langsamere Inference
+- Längerer Context = noch langsamer
+
+Das ist warum MoE und Distillation wichtig sind:
+- MoE: Große Parameter-Count, aber kleine Inference
+- Distillation: Trainiere kleines Modell von großem → inferiert schnell
+
+## Beyond Scaling: Post-Scaling Era?
+
+Seit 2023 merken Forscher: Scaling allein reicht nicht mehr.
+
+Neue Richtungen:
+- **Architectural Innovations:** Besser als nur Parameter hinzufügen
+- **Training Techniques:** Bessere Optimierung (z.B. DPO statt RLHF)
+- **Data Quality:** Statt mehr Daten, bessere Daten
+- **Mixture of Experts:** Scaling ohne vollständige Dichte
+
+Die Intuition: "Brute-Force Scaling" hat Limits. Die nächsten Durchbrüche kommen von cleverer Design.
+
+## Praktische Anwendung: Dein Training planen
+
+**Szenario:** Du willst dein erstes großes Modell trainieren.
+
+Budget: 1000 GPU-Tage auf RTX 3090 (ähnlich wie 1000/4 ≈ 250 GPU-Tage auf A100)
+
+**Schritt 1: Compute in FLOPs konvertieren**
+```
+1000 GPU-days × 86400 sec/day × 312 TFLOPS (3090)
+= 2.7 × 10^19 FLOPs
+```
+
+**Schritt 2: Mit Chinchilla-Formel berechnen**
+```
+Optimal N ≈ Compute / (6 × FLOPs per token)
+
+Für 3090: ~14 TFLOPS (peak), aber praktisch ~5 TFLOPS
+Optimal N ≈ 2.7 × 10^19 / (6 × 5 × 10^12) ≈ 900 Millionen Parameter
+```
+
+**Schritt 3: Optimale Token berechnen**
+```
+Optimal D ≈ N ≈ 900 Million Tokens
+```
+
+**Schritt 4: Training-Plan**
+```
+- Modell: 900M Parameter
+- Daten: 900M Tokens
+- Batch-Size: 0.5M Tokens/Batch
+- Steps: 1800 Steps
+
+- Pro Iteration FLOPs: ~900M × 900M × 6 ≈ 4.9 × 10^18 FLOPs
+- Iterations: 1800
+- Total: 8.8 × 10^21 FLOPs... Wait, das ist zu viel!
+
+Korrektur: Compute Budget ist 2.7 × 10^19
+→ Realistische Token: 200M Tokens, 200M Parameter
+→ 2 Wochen Training auf 3090
+```
+
+Dieser Ansatz zeigt: Mit limitiertem Budget, trainiere kleinere Modelle, aber mit viel Daten.
+
+## Wichtige Learnings aus Scaling Laws
+
+### Lerning 1: Balanced ist besser als Imbalanced
+
+Früher war die Praxis:
+```
+100B Parameter, 300B Tokens
+(Ineffizient—zu viele Parameter, zu wenig Daten)
+```
+
+Nach Chinchilla:
+```
+Balanced: Parameter ≈ Tokens
+(Beide sollten ähnlich sein)
+```
+
+Das änderte wie Modelle trainiert werden.
+
+### Lerning 2: Es gibt a sweet spot pro Task
+
+Nicht alle Tasks skalieren gleich. Neue Forschung zeigt:
+
+```
+Sprachmodellierung (LM): Parameter und Tokens gleich wichtig
+Code-Verständnis: Parameter-heavy (braucht größere Modelle)
+Mathematik: Token-heavy (braucht mehr Beispiele)
+```
+
+Praktisch: Passe dein Modell-Design der Task an.
+
+### Lerning 3: Quantitative Progress ist measurable
+
+Scaling Laws geben dir konkrete Metriken:
+```
+Wenn ich 2x mehr Compute habe:
+- Perplexity sinkt um ~5-7% (logarithmisch)
+- Loss sinkt um ähnliche Menge
+```
+
+Das ist nicht magisch. Es ist konsistent. Das ermöglicht Planung.
+
+## Die Formel auseinandernehmen
+
+Die Skalierungsgesetz-Formel:
+```
+Loss(N, D) = L0 + A/N^α + B/D^β
+```
+
+Vereinfacht sich unter Chinchilla zu:
+```
+Wenn N = D (optimal):
+Loss(C) ≈ L0 + C^(-α/(α+β))
+
+Mit α ≈ β ≈ 0.07:
+Loss(C) ≈ L0 + C^(-0.14/0.14) ≈ L0 + C^(-1)
+```
+
+Das bedeutet:
+```
+Loss ist umgekehrt proportional zu Compute
+10x Compute → 10x bessere Loss (exponentiell)
+```
+
+Das ist warum Scaling so mächtig ist.
+
+## Kritische Schwelle: Wann brechen die Gesetze?
+
+Eine offene Frage: Gelten Scaling Laws für immer größer?
+
+**Hypothesen:**
+1. Sie gelten bis ~10 Trillion Token (Größe des Internets)
+2. Sie brechen bei einer bestimmten Größe (z.B. 100T Parameter)
+3. Sie gelten asymptotisch, aber es gibt andere Constraints
+
+**Was wir wissen:**
+- Bis 175B Parameter (GPT-3): Gesetze halten perfekt
+- Bis 1T+ Parameter (Modelle von DeepSeek, Grok): Gesetze scheinen zu halten
+- Aber: Wir haben noch keine 100T Parameter Modelle trainiert
+
+Das bleibt Frontier-Forschung.
+
+## Literatur
+
+- Scaling Laws: arxiv.org/abs/2001.08361
+- Chinchilla: arxiv.org/abs/2203.15556
+- Emergent Abilities: arxiv.org/abs/2206.07682
+- Compute-Optimal LLMs: arxiv.org/abs/2302.13971
+- Scaling Laws für Code: arxiv.org/abs/2212.14680
+
+## Quellen und Links
+
+- [Scaling Laws for Neural Language Models (arXiv)](https://arxiv.org/abs/2001.08361)
+- [Chinchilla Paper (arXiv)](https://arxiv.org/abs/2203.15556)

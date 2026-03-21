@@ -1,0 +1,485 @@
+---
+title: Advanced Prompting Techniques — Get Better Results From AI
+date: 2026-03-21
+summary: Proven techniques to improve AI output quality, reliability, and specificity
+tags: [prompting, ai, techniques, optimization, best-practices]
+author: AI Engineering
+---
+
+# Advanced Prompting Techniques — Get Better Results From AI
+
+The quality of your prompts directly determines the quality of AI output. Good prompting is a skill you can develop. This guide covers techniques proven to get consistently better results.
+
+## Principle 1: Be Specific, Not Generic
+
+### Generic (Weak)
+
+```
+"Write about local AI deployment"
+```
+
+**Problem**: Too vague. AI doesn't know what you want. Result: Mediocre generic text.
+
+### Specific (Strong)
+
+```
+"Write a 200-word guide for small business owners in Austria
+about deploying Ollama locally for cost savings.
+Include: hardware requirements, estimated costs, performance expectations,
+and 3 specific use cases (not general).
+Assume no Linux experience."
+```
+
+**Result**: Clear, focused, actionable output.
+
+### The Specificity Checklist
+
+- Who is the audience?
+- What is the exact goal?
+- What constraints apply (length, format, tone)?
+- What should be included?
+- What should be excluded?
+- What assumptions about the reader are valid?
+
+## Principle 2: Provide Context & Examples
+
+### Without Context
+
+```
+"Summarize this database."
+```
+
+AI doesn't know:
+- What database?
+- Which tables matter?
+- At what detail level?
+
+### With Context
+
+```
+"Summarize a PostgreSQL database with the following structure:
+
+Tables:
+- users (id, email, created_at, subscription_status)
+- invoices (id, user_id, amount, date, status)
+- support_tickets (id, user_id, subject, status, created_at)
+
+I need: Count of active users, revenue this month,
+ticket resolution rate, top issue categories.
+Format as a 5-minute executive summary."
+```
+
+**Result**: Precise, actionable summary.
+
+## Principle 3: Use Role-Playing for Consistency
+
+### Without Role
+
+```
+"Explain how to set up a database"
+```
+
+You get generic, surface-level explanation.
+
+### With Role
+
+```
+"You are a database architect with 15 years of experience
+building systems for 50-500 person companies.
+
+Explain how a startup should approach setting up PostgreSQL.
+Include: hardware, backups, monitoring, security,
+and one mistake you've seen too many times."
+```
+
+**Result**: Expert-level guidance with real experience perspective.
+
+## Principle 4: Structure Complex Requests
+
+### Unstructured
+
+```
+"Help me create a workflow"
+```
+
+### Structured (Better)
+
+```
+"I need a workflow with these components:
+
+INPUT:
+- CSV file with customer data (500+ rows)
+
+PROCESSING:
+1. Validate email addresses
+2. Enrich with Clearbit API
+3. Categorize by industry
+4. Filter for high-value targets
+
+OUTPUT:
+- Markdown report with summary
+- CSV file with enriched data
+- Slack notification with key metrics
+
+CONSTRAINTS:
+- Must run daily automatically
+- API calls < 100 per minute
+- Handle failures gracefully
+
+TOOLS AVAILABLE:
+- n8n workflow automation
+- PostgreSQL database
+- Slack integration"
+```
+
+**Result**: Clear requirements Claude can execute against.
+
+## Principle 5: Ask for Structured Outputs
+
+### Unstructured Output
+
+```
+"Analyze this code"
+```
+
+Get rambling prose.
+
+### Structured Output
+
+```
+"Analyze this code and return JSON:
+
+{
+  "quality_score": 1-10,
+  "issues": [{
+    "type": "performance|security|readability",
+    "severity": "high|medium|low",
+    "location": "line number",
+    "description": "brief",
+    "fix": "code snippet"
+  }],
+  "strengths": ["..."],
+  "improvements": ["..."]
+}
+
+Only return valid JSON, no other text."
+```
+
+**Result**: Machine-readable output you can process programmatically.
+
+## Principle 6: Use Few-Shot Examples
+
+When you need a specific format or style, provide examples:
+
+### Without Examples
+
+```
+"Generate 5 technical blog post titles"
+```
+
+You get generic titles.
+
+### With Examples
+
+```
+"Generate 5 technical blog post titles in this style:
+
+Example titles I like:
+1. "PostgreSQL Partial Indexes: The 3% Solution for 90% of Queries"
+2. "Why Your n8n Workflow Is Slow (And How to Fix It)"
+3. "The Docker Mistake That Cost Us $10K/Month"
+
+Style characteristics:
+- Specific numbers or percentages
+- Problem + solution framing
+- Lesson from real experience
+- 10-12 words
+
+Generate 5 titles in this exact style:"
+```
+
+**Result**: Titles that match your preferred style.
+
+## Principle 7: Set Constraints Explicitly
+
+### Open-Ended
+
+```
+"Explain this concept"
+```
+
+Output could be 100 words or 10,000 words.
+
+### Constrained
+
+```
+"Explain OAuth2 in exactly 150 words or less,
+assuming reader knows HTTP basics but not authentication.
+Focus on: what it solves, how it works, real-world example."
+```
+
+**Result**: Focused, appropriately-detailed output.
+
+## Principle 8: Ask for Different Approaches
+
+```
+"Generate 3 different approaches to solve this database scaling problem:
+
+1. Horizontal scaling approach
+2. Vertical scaling approach
+3. Architectural redesign approach
+
+For each, provide:
+- Overview (2 sentences)
+- Pros (3-5 bullets)
+- Cons (3-5 bullets)
+- Cost estimate
+- Time to implement"
+```
+
+**Result**: Comprehensive analysis of options.
+
+## Principle 9: Use Chain-of-Thought Prompting
+
+For complex analysis, ask AI to show its thinking:
+
+### Without Chain-of-Thought
+
+```
+"Should we use PostgreSQL or MongoDB for this project?"
+```
+
+You get an answer but not the reasoning.
+
+### With Chain-of-Thought
+
+```
+"Should we use PostgreSQL or MongoDB?
+
+Please work through this step-by-step:
+
+1. First, analyze our data structure (relational vs document)
+2. Then evaluate query patterns (joins vs lookups)
+3. Consider scalability requirements (read/write ratio, data volume)
+4. Account for team expertise (we know SQL well, no NoSQL experience)
+5. Calculate operational costs and complexity
+6. Make recommendation with clear reasoning
+
+For each step, explain your thinking and trade-offs."
+```
+
+**Result**: Transparent reasoning you can evaluate and challenge.
+
+## Principle 10: Iterative Refinement
+
+Don't expect perfection on first try. Refine through iterations:
+
+### Iteration 1: Start Broad
+
+```
+"Create a framework for evaluating new software tools"
+```
+
+### Iteration 2: Refine Based on Output
+
+```
+"That framework is good but too generic.
+Tailor it specifically for: open-source data tools,
+5-50 person teams, EU privacy requirements.
+
+Include: cost, GDPR compliance, community size,
+ease of integration."
+```
+
+### Iteration 3: Get Specific
+
+```
+"Great. Now apply this framework to evaluate 3 specific tools:
+1. n8n
+2. Zapier
+3. Make.com
+
+Provide detailed comparison table."
+```
+
+## Common Prompting Patterns
+
+### Pattern: Summarization
+
+```
+"Summarize [CONTENT] for [AUDIENCE] focusing on [ASPECT].
+
+Output format: [FORMAT]
+Length: [LENGTH]
+Tone: [TONE]
+
+Exclude: [EXCLUDED_TOPICS]"
+```
+
+### Pattern: Analysis
+
+```
+"Analyze [SUBJECT] from [PERSPECTIVE].
+
+Consider:
+- [FACTOR_1]
+- [FACTOR_2]
+- [FACTOR_3]
+
+Format output as: [FORMAT]
+Depth: [DEPTH]"
+```
+
+### Pattern: Generation
+
+```
+"Generate [QUANTITY] [ITEM_TYPE] that [CONSTRAINT_1]
+and [CONSTRAINT_2].
+
+Requirements:
+- [REQUIREMENT_1]
+- [REQUIREMENT_2]
+
+Style/tone: [DESCRIPTION]"
+```
+
+### Pattern: Debugging
+
+```
+"Debug this [CODE_TYPE].
+
+The problem: [SYMPTOM]
+Expected: [EXPECTED_BEHAVIOR]
+Actual: [ACTUAL_BEHAVIOR]
+
+Provide:
+1. Root cause analysis
+2. Code fix
+3. Prevention strategy
+4. Related issues to watch for"
+```
+
+## Avoiding Common Mistakes
+
+### Mistake 1: Combining Multiple Unrelated Requests
+
+❌ **Wrong**:
+```
+"Write a blog post about AI, analyze our database schema,
+and create a deployment checklist"
+```
+
+✅ **Right**:
+Make three separate, focused requests.
+
+### Mistake 2: Vague Pronouns
+
+❌ **Wrong**:
+```
+"Use it to improve the system as needed"
+(What is "it"? What system? What improvements?)
+```
+
+✅ **Right**:
+```
+"Use PostgreSQL query optimization to improve database response times"
+```
+
+### Mistake 3: Contradictory Instructions
+
+❌ **Wrong**:
+```
+"Be concise but comprehensive"
+```
+
+✅ **Right**:
+```
+"Be concise (max 300 words) while covering all key points"
+```
+
+### Mistake 4: Assuming AI Knowledge It Doesn't Have
+
+❌ **Wrong**:
+```
+"Fix this per our coding standards"
+(AI doesn't know your standards)
+```
+
+✅ **Right**:
+```
+"Fix this to match our coding standards:
+- 2 space indentation
+- Camel case variables
+- JSDoc comments
+[provide examples]"
+```
+
+### Mistake 5: No Quality Bar
+
+❌ **Wrong**:
+```
+"Write some documentation"
+```
+
+✅ **Right**:
+```
+"Write documentation that a new team member (with 2 years experience)
+can follow to set up the system in 30 minutes without asking questions.
+
+Include: prerequisites, step-by-step setup, verification checklist,
+common issues with solutions."
+```
+
+## Testing & Iteration
+
+For important outputs, test your prompt:
+
+```
+1. Draft the prompt
+2. Run on test input
+3. Evaluate output quality (too vague? too long? wrong format?)
+4. Identify what was missing from the prompt
+5. Revise prompt
+6. Re-test
+7. Repeat until satisfied
+```
+
+Keep a log of your best prompts:
+
+```markdown
+# Prompt Library
+
+## Code Review Prompt
+[Effective prompt for code review]
+Last tested: 2026-03-21
+Success rate: 95%
+Common refinements: [...]
+
+## Documentation Prompt
+[...]
+```
+
+## Checklist
+
+- [ ] Start with a specific, detailed prompt
+- [ ] Provide context and examples
+- [ ] Use role-playing for perspective
+- [ ] Structure complex requests clearly
+- [ ] Ask for formatted outputs (JSON, markdown table)
+- [ ] Provide few-shot examples for style consistency
+- [ ] Set explicit constraints (word count, format, scope)
+- [ ] Ask for multiple approaches on complex decisions
+- [ ] Use chain-of-thought for transparent reasoning
+- [ ] Iterate and refine based on results
+- [ ] Keep a prompt library for reuse
+
+---
+
+**Sources:**
+- Various prompting research papers (2023-2026)
+- OpenAI Prompt Engineering Guide
+- Anthropic Claude documentation on advanced prompting
+
+## Sources and Links
+
+- [Claude Docs](https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview)

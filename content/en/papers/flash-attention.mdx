@@ -1,0 +1,249 @@
+---
+title: Flash Attention — Efficient Transformer Inference
+date: 2026-03-21
+summary: IO-aware attention, tiling, memory hierarchy. Flash Attention 1 vs. 2 vs. 3, speed/memory improvements, practical inference impacts.
+tags: [flash-attention, attention, optimization, memory, inference, transformer]
+author: AI Engineering
+section: papers
+---
+
+# Flash Attention — Efficient Transformer Inference
+
+Flash Attention is one of the most important practical optimizations in modern language models. The paper shows: most Transformer inference problems are not algorithmic—they're **memory access problems**.
+
+## The Core Problem
+
+Standard self-attention has O(N²) memory and time complexity:
+
+```python
+# Naive attention
+def attention(Q, K, V):
+    scores = (Q @ K.T) / sqrt(dim)      # Shape: (Seq, Seq)
+    attention_weights = softmax(scores)   # Shape: (Seq, Seq)
+    output = attention_weights @ V        # Shape: (Seq, Dim)
+    return output
+
+# Problem: For Seq_Len = 4096:
+# Attention matrix = 4096 x 4096 = 16 million elements
+# At float32 = 64 MB per head
+# With 32 heads = 2 GB for one layer!
+```
+
+This isn't just memory—it's also **slow** because GPU memory-to-compute ratio is bad.
+
+### GPU Memory Hierarchy
+
+```
+Register (on-chip): 100 TB/s, 1 KB per thread
+L1 cache: 80 TB/s, 128 KB per SM
+L2 cache: 3 TB/s, 40 MB shared
+HBM (GPU VRAM): 2 TB/s, 80 GB shared
+```
+
+The problem: Attention writes 16 million values to HBM, then reads them back immediately. That's **1000x slower** than computing directly in L1.
+
+## Flash Attention v1: Tiling (2022)
+
+**Paper:** "Fast and Memory-Efficient Exact Attention with IO-Aware Heuristics" (Dao et al.)
+
+The idea: **Compute attention in smaller blocks.**
+
+```
+Instead of:
+Scores = Q @ K^T (complete 4096 x 4096 matrix)
+Attention = softmax(Scores)
+Output = Attention @ V
+
+Do:
+Block 1:
+  Q_block (1000 x 64)
+  K_block (1000 x 64)
+  V_block (1000 x 64)
+  → Scores_block (1000 x 1000) fits in L1 cache!
+  → Compute attention locally
+
+Repeat for all blocks
+```
+
+### Tiling Algorithm
+
+```
+for i in range(0, Seq_Len, Block_Size):
+  for j in range(0, Seq_Len, Block_Size):
+    # Load small blocks of Q, K, V
+    Q_i = Q[i:i+B]  # (B, D)
+    K_j = K[j:j+B]  # (B, D)
+    V_j = V[j:j+B]  # (B, D)
+
+    # Compute scores for this block
+    S_ij = (Q_i @ K_j^T) / sqrt(D)  # (B, B)
+
+    # Apply softmax
+    P_ij = softmax(S_ij)  # (B, B)
+
+    # Multiply with values
+    O_i += P_ij @ V_j  # (B, D)
+```
+
+### Trick: Numerical Stability with Softmax
+
+Normal softmax with tiling has a problem: softmax is global.
+
+**Solution:** Online softmax
+
+```python
+m = -inf
+l = 0
+o = 0
+
+for block in blocks:
+    S = compute_scores(block)
+    m_new = max(m, max(S))
+    
+    l = exp(m - m_new) * l + sum(exp(S - m_new))
+    o = (o * exp(m - m_new)) + exp(S - m_new) @ V_block
+    
+    m = m_new
+```
+
+This works! And numerical error is even *smaller* than normal softmax.
+
+### Results
+
+```
+Benchmark: Attention on A100 GPU
+
+Standard Attention:
+- 4096 seq len: 10 ms
+- Memory: 2 GB for 32 heads
+
+Flash Attention v1:
+- 4096 seq len: 1.2 ms
+- Memory: 100 MB
+- Speedup: 8x
+- Memory: 20x less
+```
+
+## Flash Attention v2: Even Better (2023)
+
+**Paper:** "Flash-Decoding for Fast Batched Inference" (Dao et al.)
+
+v2 was optimized based on real GPU measurements.
+
+### Improvements
+
+1. **Warp-Level Parallelization**
+   - Instead of thread-level (slow)
+   - Use warp-shuffle operations (fast)
+   - 2x speedup
+
+2. **Better Work Distribution**
+   - Old: All threads do softmax (synchronization overhead)
+   - New: Only one warp does softmax, others compute
+   - 1.5x speedup
+
+3. **Async Memory Layout**
+   - Optimized for GPU cache access patterns
+   - Empirically 1.3x faster
+
+### Performance v2
+
+```
+Speedup over standard attention:
+
+Seq_Len = 512: 2.3x
+Seq_Len = 1024: 3.8x
+Seq_Len = 2048: 6.2x
+Seq_Len = 4096: 7.6x
+Seq_Len = 8192: 8.1x
+```
+
+## Flash Attention v3: Pipelining (2024)
+
+Flash Attention v3 does true pipelining:
+
+```
+Thread A: Load Q_block HBM → L1
+Thread B: Compute scores (parallel)
+Thread C: Load K_block HBM → L1 (parallel)
+Thread D: Write output (parallel)
+
+Instead of sequential:
+Load → Compute → Store
+```
+
+Difficult to implement, but can provide 1.5x additional speedup.
+
+## Practical Impacts
+
+### Inference Speed
+
+```
+LLaMA 7B on A100:
+
+Without Flash Attention:
+- 1 token/ms (bottleneck: attention)
+- 100 tokens = 100ms
+
+With Flash Attention:
+- 3 tokens/ms (8x attention speedup, but only 3x total)
+- Why not 8x? Other parts also take time
+```
+
+### Memory Usage
+
+```
+Batch 32, Seq 4096:
+
+Without Flash Attention:
+- Model: 7B (28 GB)
+- Attention buffers: 2 GB/layer * 32 = 64 GB
+- Total: 92 GB → needs H100
+
+With Flash Attention:
+- Model: 7B (28 GB)
+- Attention buffers: 64 MB/layer * 32 = 2 GB
+- Total: 30 GB → fits A100
+```
+
+## Where Flash Attention Works
+
+### ✅ Good
+- Inference (exactly what it's optimized for)
+- Training with large batches
+- Long sequences
+
+### ⚠️ Nuanced
+- Very short sequences (< 512): overhead worse than speedup
+- Sparse attention patterns: Flash Attention does full attention
+- Custom attention kernels: Often incompatible
+
+## Framework Integration
+
+```python
+# PyTorch 2.0+: Automatic
+import torch
+output = F.scaled_dot_product_attention(Q, K, V)
+
+# HuggingFace: Opt-in
+from transformers import AutoModelForCausalLM
+model = AutoModelForCausalLM.from_pretrained(
+    "meta-llama/Llama-2-7b",
+    attn_implementation="flash_attention_2"
+)
+
+# vLLM: Default (uses Flash Attention v2)
+```
+
+## Key Takeaway
+
+Flash Attention isn't a new algorithm—it's an **IO-optimized implementation** of the same O(N²) attention.
+
+The lesson: **Many "AI breakthroughs" are actually implementation optimizations.** The gap between theoretically optimal and practically fast is often larger than between Algorithm A and B.
+
+## Sources and Links
+
+- [Flash Attention v1 Paper](https://arxiv.org/abs/2205.14135)
+- [Flash Attention v2 Paper](https://arxiv.org/abs/2307.08691)
+- [Flash Attention GitHub](https://github.com/Dao-AILab/flash-attention)
+- [PyTorch Flash Attention Docs](https://pytorch.org/docs/stable/generated/torch.nn.functional.scaled_dot_product_attention.html)

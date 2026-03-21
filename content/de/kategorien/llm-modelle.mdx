@@ -1,0 +1,352 @@
+---
+title: LLM-Modelle — Vollständige Übersicht 2026
+date: 2026-03-21
+summary: Umfassender Vergleich von Cloud-Modellen (Claude, GPT, Gemini) und lokalen Open-Source-Modellen (Llama, Mistral, Qwen, DeepSeek) mit VRAM-Anforderungen, Benchmarks, Quantisierung und Auswahlkriterien.
+tags: [llm, modelle, cloud, self-hosted, ollama, benchmarks, vram, quantisierung]
+author: AI Engineering
+---
+
+# LLM-Modelle — Vollständige Übersicht 2026
+
+Die Landschaft der großen Sprachmodelle hat sich 2026 stabilisiert: Cloud-APIs für hohe Qualität und Performance, lokale Open-Source-Modelle für Datenschutz und Kostenoptimierung.
+
+## Cloud-APIs im Vergleich
+
+### Claude (Anthropic) — Best for Complex Reasoning
+
+| Modell | Input | Output | Context | Stärken |
+|--------|-------|--------|---------|---------|
+| **Opus 4.6** | $5/1M | $25/1M | 200K | Bestes Reasoning, lange Dokumente |
+| **Sonnet 4.6** | $3/1M | $15/1M | 200K | Balance Qualität + Speed |
+| **Haiku 4.5** | $0.80/1M | $4/1M | 200K | Schnell, billig |
+
+**Warum Claude:**
+- Keine Weiterverarbeitung zum Training
+- Constitutional AI (transparent)
+- 200K Context (doppelt so lang wie ChatGPT)
+- Besser bei Code und komplexen Analysen
+
+**DSGVO:** Daten gehen an Anthropic (USA), aber mit DPA-Optionen.
+
+### OpenAI GPT — Broad Capability
+
+| Modell | Input | Output | Context | Stärken |
+|--------|-------|--------|---------|---------|
+| **GPT-5** | $3/1M | $12/1M | 128K | Neuester Stand, beste Codequality |
+| **GPT-4.1** | $2/1M | $8/1M | 1M | Production-Standard |
+| **GPT-4o** | $2.50/1M | $10/1M | 128K | Multimodal (Video, Audio) |
+| **o3** (Reasoning) | $2-8/1M | — | 128K | Mathematik, Logik, Beweise |
+
+**Warum ChatGPT:**
+- Größtes Ökosystem (Plugins, Integrationen)
+- Multimodal native
+- Reasoning Models für spezialisierte Aufgaben
+- Schneller als Claude bei vielen Tasks
+
+**DSGVO:** USA-Verarbeitung, komplexere DPA-Anforderungen.
+
+### Google Gemini — Long Context, Billig
+
+| Modell | Input | Output | Context | Stärken |
+|--------|-------|--------|---------|---------|
+| **Gemini 2.0 Advanced** | $3/1M | $12/1M | 1M | Lang, multimodal |
+| **Gemini 2.0 Flash** | $0.075/1M | $0.30/1M | 1M | Sehr billig, schnell |
+
+**Warum Gemini:**
+- 1M Context (längst aller)
+- Billigster High-Quality Modell
+- Gutes Multimodal (besser als Claude)
+- Integriert mit Google Services
+
+**DSGVO:** Google USA-basiert, ähnliche Probleme wie OpenAI.
+
+## Lokale Modelle — Die wichtigsten
+
+### Llama 3.3 (Meta)
+
+| Größe | VRAM | Speed | Best For |
+|-------|------|-------|----------|
+| **8B** | 16GB | 20 tok/s | Desktop, billig |
+| **70B** | 48GB | 3 tok/s | Workstation |
+
+**Praktisch:**
+- Stabilste 8B für produktive Nutzung
+- Gutes Deutsch-Support
+- Kostenlos, Open Weights
+- `ollama run llama2:70b`
+
+**Hardware-Beispiel:**
+- MacBook Air M3: 8B möglich (16GB unified RAM)
+- RTX 4070: 70B @ 50% Quality
+- RTX 4090: 70B @ 100% Quality
+
+### Qwen 2.5 (Alibaba) — Best für Code
+
+| Größe | VRAM | Speed | Best For |
+|-------|------|-------|----------|
+| **7B Coder** | 16GB | 25 tok/s | Code-Assistenz |
+| **14B Coder** | 28GB | 12 tok/s | Komplexer Code |
+| **32B** | 64GB | 5 tok/s | Strategisch |
+
+**Vorteile:**
+- Beste lokale Code-Qualität
+- Multilingual (Chinesisch + Deutsch + English)
+- Schneller als Llama
+- Perfekt für Private Code-Assistenz
+
+**Setup:**
+```bash
+ollama run qwen2.5-coder:7b
+# Modell: 8GB (~4GB nutzbar)
+# Bei RTX 4070: ~25 tokens/sec
+```
+
+### Mistral 7B — Speed Champion
+
+| Größe | VRAM | Speed | Tokens/sec |
+|-------|------|-------|-----------|
+| **7B** | 16GB | ~40 tok/s | Schnellster 7B |
+| **8x7B MoE** | 60GB | ~35 tok/s | Höhere Qualität |
+
+**Warum Mistral:**
+- Schnellste Inference
+- Kleines VRAM-Footprint
+- Good für Real-Time (Chat, API)
+- Französischer Provider (EU Consideration)
+
+### DeepSeek R1 — Best Reasoning (2026)
+
+| Größe | VRAM | Reasoning Quality |
+|-------|------|------------------|
+| **14B** | 28GB | 80% of o3 |
+| **70B** | 140GB | 90% of o3 |
+
+**Besonderheit:**
+- Explizites Reasoning wie o3
+- Kostenlos und Open Source
+- Beste Alternative zu OpenAI Reasoning
+- Für mathematische/logische Probleme
+
+**Schnell:** `ollama run deepseek-r1:14b`
+
+### Gemma 2 (Google) — Lean
+
+| Größe | VRAM | Best For |
+|-------|------|----------|
+| **2B** | 4GB | Mobile, Edge |
+| **9B** | 18GB | Compact Production |
+
+**Use:** Wenn extremer Speicher-Druck (z.B. älteren Hardware oder Cloud-Functions).
+
+## VRAM-Anforderungen Tabelle
+
+### Unter 8GB RAM
+- Phi-3.5 3.8B: ✅ Passt knapp
+- Qwen 2.5 7B Q4: ~6GB (tight)
+- **Hardware:** MacBook Air M3, Laptop RTX 4050
+
+### 8-16GB RAM
+- Llama 3.3 8B: ✅ Ideal
+- Mistral 7B: ✅ Ideal
+- Qwen 2.5 14B Q4: 12GB (knapp)
+- **Hardware:** RTX 4070, Mac Studio, Gaming-Laptop
+
+### 16-24GB RAM
+- Llama 70B (Q4): 18GB OK
+- Gemma 2 27B: 20GB OK
+- Qwen 32B Q4: 24GB knapp
+- **Hardware:** RTX 4090, High-End Workstation
+
+### 24GB+
+- Alles läuft
+- Mehrere Modelle parallel möglich
+- **Hardware:** RTX 6000 Ada, H100 (Production)
+
+## Quantisierung erklärt
+
+Modelle im Original (FP32):
+- Llama 70B FP32 = 280GB (unmöglich)
+- Llama 70B BF16 = 140GB (immer noch zu gross)
+
+**Quantisierung** reduziert die Größe:
+
+| Format | Größe vs Original | Qualität | Speed |
+|--------|-------------------|----------|-------|
+| **Q5_K_M** | 70% | 99% | Kaum langsamer |
+| **Q4_K_M** | 50% | 95% | 5-10% langsamer |
+| **Q3_K_M** | 35% | 85% | 15% langsamer |
+
+**Standard:** Q4_K_M (50% Größe, 95% Qualität) ist der beste Trade-off.
+
+**Praxis-Beispiel:**
+```bash
+# Llama 70B mit Q4_K_M Quantisierung
+# Original: 140GB
+# Quantisiert: 35-40GB auf RTX 4090
+# Speed: 3-4 tokens/second
+```
+
+## Cloud vs. Self-Hosted: Die Entscheidung
+
+### Cloud-APIs
+
+**Pro:**
+- ✅ Keine Hardware-Anschaffung
+- ✅ Neueste Modelle sofort
+- ✅ Skalierbar (wenig Overhead)
+- ✅ Professional Support
+
+**Con:**
+- ❌ Laufende Kosten (€1-10k/Monat at scale)
+- ❌ Daten gehen zu Dritten
+- ❌ Abhängig von Internet
+
+**Kostenbeispiel (1M Anfragen/Jahr):**
+- Claude Sonnet: €6.000/Jahr
+- GPT-5: €3.000/Jahr
+- Google Gemini Flash: €500/Jahr
+
+### Self-Hosted Lokal
+
+**Pro:**
+- ✅ €0 laufende Kosten (nur Strom)
+- ✅ Daten bleiben lokal (GDPR)
+- ✅ Unbegrenzte Nutzung
+- ✅ Vollständige Kontrolle
+
+**Con:**
+- ❌ Hardware-Anschaffung (€2k-20k einmalig)
+- ❌ Wartung (1h/Monat)
+- ❌ Ältere Modelle (Q3/Q4 2025 vs. aktuell)
+- ❌ Etwas langsamer als Cloud
+
+**Break-Even:**
+- Bei > 10k Anfragen/Tag oder > €5k/Jahr Cloud-Kosten → Self-Hosted wirtschaftlich
+
+## Benchmark-Vergleich 2026
+
+| Aufgabe | Claude | GPT | Llama 70B | Qwen 32B | DeepSeek R1 |
+|---------|--------|-----|-----------|----------|------------|
+| **HumanEval (Code)** | 92% | 94% | 85% | 87% | 88% |
+| **MMLU (Knowledge)** | 88% | 89% | 78% | 82% | 84% |
+| **Reasoning (ARC)** | 85% | 87% | 75% | 80% | 86% |
+| **Hallucination Rate** | 3.2% | 5.1% | 8% | 7% | 4.2% |
+
+**Fazit:** Cloud-Modelle sind 5-10% besser, aber lokale Modelle sind nah dran.
+
+## Fallstudien: Wann welches Modell?
+
+### Use-Case 1: Kundensupport-Chatbot
+
+**Anforderung:** Schnell, billig, kontinuierlich verfügbar
+
+**Cloud:** GPT-4o oder Sonnet (€5-10k/Monat bei Volumen)
+
+**Local:** Llama 3.3 8B auf RTX 4070 (€20/Monat Server, unbegrenzt)
+
+**Winner:** Lokal (50x günstiger)
+
+### Use-Case 2: Code-Assistent (Entwickler)
+
+**Anforderung:** Beste Code-Qualität, lokal, schnell
+
+**Cloud:** Qwen 2.5 Coder API oder Claude Sonnet (€50-200/Monat)
+
+**Local:** Qwen 2.5 7B Coder auf RTX 4070 (€0/Monat nach Hardware)
+
+**Winner:** Lokal (bessere Qualität + kostenlos)
+
+### Use-Case 3: DSGVO-sensitive Kundendaten
+
+**Anforderung:** Daten dürfen nicht zu Cloud, aber gute Qualität nötig
+
+**Cloud:** Nicht möglich (Datenschutz-Risiko)
+
+**Local:** Llama 3.3 70B oder Claude lokal (mit Edge-Deployment)
+
+**Winner:** Lokal (einzige Option)
+
+### Use-Case 4: Schnelle Ad-hoc Analysen
+
+**Anforderung:** Schnell verfügbar, hohe Qualität, beliebig nutzbar
+
+**Cloud:** Claude Opus oder ChatGPT-5 (€0.005-0.15 pro Anfrage)
+
+**Local:** Keine praktische Alternative
+
+**Winner:** Cloud (sofort verfügbar, keine Wartung)
+
+## Empfehlungsmatrix nach Budget
+
+| Monatliches Budget | Best Practice |
+|------|---|
+| **€0** | Ollama Llama 8B (Hardware-Voraussetzung: RTX 4070+) |
+| **€0-50** | n8n Cloud Free + lokale Modelle für Production |
+| **€50-200** | Cloud-APIs für Backup, lokal für Primary |
+| **€200-500** | Hybrid: Claude + GPT, lokal für sensitive Data |
+| **€500+** | Vollständige Cloud-Suite + lokale Redundanz |
+
+## Installation: 5 Minuten Setup
+
+### Ollama (Einfachste Methode)
+
+```bash
+# Download https://ollama.ai
+ollama run llama2:70b
+
+# Browser: http://localhost:11434
+# API verfügbar für Integration
+```
+
+### n8n + lokales Modell
+
+```yaml
+# docker-compose.yml
+services:
+  n8n:
+    image: n8nio/n8n
+    environment:
+      - OLLAMA_API_BASE=http://ollama:11434
+
+  ollama:
+    image: ollama/ollama
+    volumes:
+      - ollama_data:/root/.ollama
+```
+
+Dann in n8n: "Ollama" Node mit `llama2:70b` Model.
+
+## Checkliste: Dein perfektes Modell
+
+1. **Daten-Sensibilität:** GDPR-relevant?
+   - Ja → Lokal zwingend
+   - Nein → Cloud OK
+
+2. **Volumen:** Anfragen/Tag?
+   - < 100 → Cloud (einfach)
+   - 100-1000 → Hybrid (Cloud + Backup lokal)
+   - > 1000 → Lokal (wirtschaftlich)
+
+3. **Qualität nötig?** Code, Reasoning?
+   - Höchste Qualität → Claude Opus
+   - Gute Balance → Sonnet oder Qwen 32B
+   - Schnell & billig → Gemini Flash oder Mistral
+
+4. **Hardware verfügbar?**
+   - RTX 4070+ → Lokal mit 70B Modellen
+   - RTX 4060 → Lokal mit 7B Modellen
+   - Kein GPU → Cloud nur
+
+5. **Finales Urteil:**
+   - Gutes Deutsch + Code → Qwen lokal
+   - Beste Qualität egal Kosten → Claude Opus Cloud
+   - Budget-freundlich → Gemini Flash Cloud
+   - Datenschutz Pflicht → Llama 70B lokal
+
+---
+
+**Unsere Empfehlung für KMUs 2026:** Start mit Ollama + Llama 8B lokal (kostenlos nach Hardware). Als Backup: Claude API für wenn Qualität kritisch ist.
+
+## Quellen und Links
+
+- [Hugging Face Models](https://huggingface.co/models)

@@ -1,0 +1,549 @@
+---
+title: Cost Optimization — Save 70%+ on AI APIs
+date: 2026-03-21
+summary: Reduce AI API costs without losing quality. Prompt caching, model routing, batch processing, context optimization, embedding reuse
+tags: [Cost Optimization, LLM Economics, Prompt Caching, Model Routing]
+author: "AI Engineering"
+---
+
+# Cost Optimization — Save 70%+ on AI APIs
+
+The dilemma: high performance costs money. We want both: fast AND cheap.
+
+## The Problem
+
+```
+1M API calls/month with Claude:
+- Input: 1M × 500 tokens @ $3/1M = $1,500
+- Output: 1M × 200 tokens @ $15/1M = $3,000
+Total: $54,000/year
+
+But: You can save 70%+
+```
+
+## Part 1: Prompt Caching (90% Saving)
+
+Reuse context for many queries:
+
+```python
+from anthropic import Anthropic
+
+client = Anthropic()
+
+LARGE_CONTEXT = """[Full PDF: 1M Tokens]..."""
+
+def query_with_cache(question: str) -> str:
+    response = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        max_tokens=1024,
+        system=[
+            {"type": "text", "text": "You are a document expert."},
+            {
+                "type": "text",
+                "text": LARGE_CONTEXT,
+                "cache_control": {"type": "ephemeral"}  # Cache these!
+            }
+        ],
+        messages=[{"role": "user", "content": question}]
+    )
+
+    usage = response.usage
+    print(f"Input: {usage.input_tokens}")
+    print(f"Cache Hit: {getattr(usage, 'cache_read_input_tokens', 0)}")
+
+    return response.content[0].text
+
+# First call: ~1M tokens @ $3/1M = $3
+# Second call: 500 tokens @ $3/1M + 1M @ $0.30/1M = $0.33 (90% cheaper!)
+```
+
+**ROI:**
+- Without caching: 100 calls × $3 = $300
+- With caching: $3 + (100 × $0.30) = $33
+- **Savings: 89%!**
+
+## Part 2: Model Routing
+
+Not all tasks need expensive models!
+
+```python
+def classify_complexity(question: str) -> str:
+    """Use cheap Haiku to classify"""
+    response = client.messages.create(
+        model="claude-3-5-haiku-20241022",  # 75% cheaper!
+        max_tokens=100,
+        messages=[
+            {
+                "role": "user",
+                "content": f"Is this SIMPLE or COMPLEX:\n{question}"
+            }
+        ]
+    )
+    return response.content[0].text.strip()
+
+def route_query(question: str) -> dict:
+    complexity = classify_complexity(question)
+
+    if complexity == "SIMPLE":
+        model = "claude-3-5-haiku-20241022"  # $0.80 input
+        max_tokens = 256
+    else:
+        model = "claude-3-5-sonnet-20241022"  # $3 input
+        max_tokens = 1024
+
+    response = client.messages.create(
+        model=model,
+        max_tokens=max_tokens,
+        messages=[{"role": "user", "content": question}]
+    )
+
+    return {"answer": response.content[0].text, "model": model}
+```
+
+**Cost Comparison:**
+```
+Haiku:  $0.80 input, $2.40 output
+Sonnet: $3.00 input, $15.0 output
+
+Simple query (500 input, 100 output):
+- Haiku:  $0.00064
+- Sonnet: $0.00300
+Haiku is 4.7x cheaper!
+
+Over 1M calls:
+- Haiku only: $640
+- Sonnet only: $3,000
+- Hybrid (80% Haiku, 20% Sonnet): $1,200
+Savings: 60%
+```
+
+## Part 3: Batch API (50% Discount)
+
+Batch API has 50% off:
+
+```python
+# Batch requests (runs overnight, cheaper)
+# Not real-time, but half the cost!
+```
+
+## Part 4: Context Optimization
+
+Fewer tokens = less cost.
+
+```python
+def extract_relevant_context(doc: str, question: str) -> str:
+    """Extract only relevant chunks with Haiku"""
+
+    chunks = [doc[i:i+50000] for i in range(0, len(doc), 50000)]
+    relevant = []
+
+    for chunk in chunks:
+        response = client.messages.create(
+            model="claude-3-5-haiku-20241022",  # Cheap!
+            max_tokens=50,
+            messages=[
+                {
+                    "role": "user",
+                    "content": f"Relevant to '{question}'?\n{chunk[:1000]}"
+                }
+            ]
+        )
+
+        if "yes" in response.content[0].text.lower():
+            relevant.append(chunk)
+
+    return "\n---\n".join(relevant)
+
+def query_optimized(doc: str, question: str) -> str:
+    # Extracting: Haiku (cheap)
+    context = extract_relevant_context(doc, question)
+
+    # Answering: Sonnet (quality)
+    response = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        max_tokens=512,
+        system=f"Context:\n{context}",
+        messages=[{"role": "user", "content": question}]
+    )
+
+    return response.content[0].text
+```
+
+**Cost:**
+```
+1M token document:
+- Full: 1M × $0.003 = $3
+- Optimized: 50k × $0.003 = $0.15
+Savings: 95%!
+```
+
+## Part 5: Embedding Cache
+
+Generate once, reuse forever:
+
+```python
+import json
+import hashlib
+
+class EmbeddingCache:
+    def __init__(self):
+        self.cache = {}
+
+    def get_or_create(self, text: str) -> list:
+        text_hash = hashlib.md5(text.encode()).hexdigest()
+
+        if text_hash in self.cache:
+            return self.cache[text_hash]
+
+        # Create embedding (once)
+        from openai import OpenAI
+        client = OpenAI()
+
+        embedding = client.embeddings.create(
+            input=text,
+            model="text-embedding-3-small"
+        )["data"][0]["embedding"]
+
+        self.cache[text_hash] = embedding
+        return embedding
+
+cache = EmbeddingCache()
+
+# First: API call
+emb1 = cache.get_or_create("AI is great")
+
+# Second: Cache hit, free!
+emb2 = cache.get_or_create("AI is great")
+```
+
+## Ultimate Optimization
+
+```python
+def optimize_query(document: str, question: str) -> str:
+    # 1. Check embedding cache
+    query_emb = cache.get_or_create(question)
+
+    # 2. Optimize context
+    context = extract_relevant_context(document, question)
+
+    # 3. Classify complexity
+    complexity = classify_complexity(question)
+
+    # 4. Route to cheap model
+    model = "haiku" if complexity == "SIMPLE" else "sonnet"
+
+    # 5. Use cache for system prompt
+    response = client.messages.create(
+        model=model,
+        system=[
+            {"type": "text", "text": SYSTEM_PROMPT},
+            {"type": "text", "text": context, "cache_control": {"type": "ephemeral"}}
+        ],
+        messages=[...]
+    )
+
+    return response.content[0].text
+```
+
+**Overall Savings: 70-85%!**
+
+## Summary
+
+| Method | Saving | Complexity |
+|--------|--------|-----------|
+| Prompt Cache | 90% | Medium |
+| Model Routing | 60% | Low |
+| Batch API | 50% | High |
+| Context Opt | 95% | High |
+| Embedding Cache | 100% | Low |
+
+## Implementation Priority
+
+1. **Easy (Low Hanging Fruit):**
+   - Model routing (Haiku vs Sonnet)
+   - Embedding cache
+   → 60-70% savings
+
+2. **Medium:**
+   - Context optimization
+   - Prompt caching
+   → Add 20% more
+
+3. **Advanced:**
+   - Batch API
+   - Custom quantization
+   → For massive scale
+
+**Result: 70-85% cost reduction while maintaining quality!**
+
+## Real-World Case Study: Document Processing at Scale
+
+**Scenario:** Process 10,000 invoices/month, extract data with 95%+ accuracy.
+
+**Naive approach (all Sonnet):**
+```
+10,000 invoices × 1,000 tokens avg = 10M tokens
+Cost: 10M × $0.003 = $30,000/month
+Accuracy: 92% (some OCR failures)
+```
+
+**Optimized approach:**
+```
+Step 1: Classify invoice type (Haiku)
+  10,000 × 200 tokens × $0.00008 = $16
+
+Step 2: Route based on type
+  - Simple invoices (70%): Haiku, detailed
+    7,000 × 400 × $0.00008 = $224
+  - Complex invoices (30%): Sonnet
+    3,000 × 1,000 × $0.003 = $9
+
+Step 3: Cache previous extractions
+  - 20% cache hit = 2,000 invoices free
+
+Total: $16 + $224 + $9 = $249/month
+Accuracy: 97% (better!—Sonnet on complex cases)
+```
+
+**Savings: 99% cost reduction**
+
+## Advanced: Dynamic Model Selection
+
+```python
+class DynamicRouter:
+    def __init__(self):
+        self.complexity_threshold = 0.6  # Haiku if score < 0.6
+        self.cache = {}
+
+    def estimate_complexity(self, text: str) -> float:
+        """Simple heuristic: word count, special chars, etc."""
+        word_count = len(text.split())
+        special_chars = sum(1 for c in text if not c.isalnum())
+
+        complexity = (word_count / 1000) * 0.7 + (special_chars / 100) * 0.3
+        return min(complexity, 1.0)
+
+    def process(self, invoice: str) -> dict:
+        # Check cache first
+        invoice_hash = hash(invoice)
+        if invoice_hash in self.cache:
+            return self.cache[invoice_hash]
+
+        # Estimate complexity
+        complexity = self.estimate_complexity(invoice)
+
+        # Route to appropriate model
+        if complexity < self.complexity_threshold:
+            model = "claude-3-5-haiku-20241022"  # 75% cheaper
+        else:
+            model = "claude-3-5-sonnet-20241022"  # Higher accuracy
+
+        # Process
+        response = self.client.messages.create(
+            model=model,
+            max_tokens=512,
+            messages=[{
+                "role": "user",
+                "content": f"Extract data: {invoice}"
+            }]
+        )
+
+        result = response.content[0].text
+        self.cache[invoice_hash] = result
+        return result
+```
+
+## Part 6: Token Optimization Deep Dive
+
+Not all tokens cost the same. Optimize token usage:
+
+```python
+# BEFORE: 2,000 tokens
+long_prompt = """
+You are an expert data analyst. Your role is to carefully examine the provided data and extract key insights.
+Please ensure you provide accurate information. Consider multiple perspectives. Be thorough.
+Take into account potential edge cases. Think about business implications...
+[800 more words of instructions]
+
+Data: [actual data—only 200 tokens]
+"""
+
+# AFTER: 300 tokens (6.7x reduction!)
+optimized_prompt = """
+Extract: [data]
+Format: {field1, field2, field3}
+"""
+
+# Results: Same output, 1/6 the cost
+```
+
+### Prompt Template Optimization
+
+```python
+class OptimizedPrompts:
+    # LONG VERSION (don't use for production)
+    VERBOSE = """
+    You are an expert customer service representative.
+    Please read the following customer message carefully...
+    """
+
+    # SHORT VERSION (use this)
+    TERSE = "Customer issue: {issue}\nRespond briefly:"
+
+    def extract_sentiment(self, text: str) -> str:
+        response = self.client.messages.create(
+            model="claude-3-5-haiku-20241022",
+            max_tokens=10,  # Only need word ("positive", "negative", "neutral")
+            messages=[{
+                "role": "user",
+                "content": f"{self.TERSE} {text}"
+            }]
+        )
+        return response.content[0].text
+
+# Usage: 30 tokens instead of 200 for same task
+```
+
+## Part 7: System Architecture for Optimization
+
+```python
+class OptimizedAIArchitecture:
+    def __init__(self):
+        self.cache = MemoryCache()  # In-memory for speed
+        self.embedding_cache = SQLiteCache()  # Persistent
+        self.router = SmartRouter()
+
+    def process_request(self, query: str) -> str:
+        # 1. Check exact match cache (instant, free)
+        if query in self.cache:
+            return self.cache[query]
+
+        # 2. Check semantic similarity (embedding-based)
+        embedding = self.get_embedding(query)  # Cached!
+        similar = self.embedding_cache.find_similar(embedding)
+        if similar:
+            return similar  # No LLM call needed
+
+        # 3. Classify complexity
+        complexity = self.router.estimate_complexity(query)
+
+        # 4. Route to model
+        if complexity < 0.3:
+            model = "haiku"
+        elif complexity < 0.7:
+            model = "sonnet"
+        else:
+            model = "opus"
+
+        # 5. Use prompt caching
+        system_prompt = [
+            {"type": "text", "text": "You are helpful"},
+            {
+                "type": "text",
+                "text": LARGE_KNOWLEDGE_BASE,
+                "cache_control": {"type": "ephemeral"}
+            }
+        ]
+
+        response = self.client.messages.create(
+            model=f"claude-3-5-{model}-20241022",
+            system=system_prompt,
+            messages=[{"role": "user", "content": query}]
+        )
+
+        result = response.content[0].text
+        self.cache[query] = result
+        return result
+```
+
+## Monitoring & Optimization Over Time
+
+```python
+import json
+from datetime import datetime, timedelta
+
+class CostMonitoring:
+    def __init__(self):
+        self.daily_costs = {}
+        self.model_usage = {}
+
+    def track_request(self, model: str, tokens: int, cost: float):
+        today = datetime.now().date()
+        if today not in self.daily_costs:
+            self.daily_costs[today] = 0
+            self.model_usage[today] = {}
+
+        self.daily_costs[today] += cost
+        if model not in self.model_usage[today]:
+            self.model_usage[today][model] = 0
+        self.model_usage[today][model] += tokens
+
+    def weekly_report(self):
+        """Generate weekly cost analysis."""
+        week_ago = datetime.now().date() - timedelta(days=7)
+        weekly_costs = sum(
+            cost for date, cost in self.daily_costs.items()
+            if date >= week_ago
+        )
+
+        # Find expensive models
+        expensive_models = {}
+        for date, usage in self.model_usage.items():
+            if date >= week_ago:
+                for model, tokens in usage.items():
+                    if model not in expensive_models:
+                        expensive_models[model] = 0
+                    expensive_models[model] += tokens
+
+        return {
+            "weekly_cost_eur": weekly_costs,
+            "model_usage": expensive_models,
+            "avg_daily_cost": weekly_costs / 7,
+            "recommendation": self._optimize_recommendation(expensive_models)
+        }
+
+    def _optimize_recommendation(self, usage: dict) -> str:
+        sonnet_tokens = usage.get("sonnet", 0)
+        haiku_tokens = usage.get("haiku", 0)
+
+        if sonnet_tokens > 2 * haiku_tokens:
+            return "Consider routing more to Haiku—use model classifier"
+        elif sonnet_tokens == 0:
+            return "Consider Sonnet for complex tasks—current quality may be low"
+        else:
+            return "Balanced usage—no immediate optimization"
+```
+
+## Optimization Checklist
+
+- [ ] Enable prompt caching (90% savings on repeated context)
+- [ ] Implement model routing (60% savings)
+- [ ] Use embedding cache for semantic lookups (100% savings)
+- [ ] Batch process if possible (50% discount)
+- [ ] Monitor daily/weekly costs
+- [ ] Set budget alerts (prevent surprises)
+- [ ] Optimize prompts (remove fluff)
+- [ ] Use Haiku for classification (default to Sonnet only if needed)
+- [ ] Implement request deduplication (free hits)
+- [ ] A/B test: cheaper model + retries vs expensive model
+
+## Summary
+
+Cost Optimization Workflow:
+
+```
+1. Caching (embedding + request) = 90% savings
+2. Model routing (Haiku when possible) = 60% savings
+3. Context optimization (only relevant data) = 50% savings
+4. Batch processing (if not real-time) = 50% discount
+5. All combined = 70-85% total reduction
+
+Strategy: Implement in order (easiest → hardest)
+```
+
+**Result: 70-85% cost reduction while maintaining or improving quality!**
+
+## Sources and Links
+
+- [vLLM](https://github.com/vllm-project/vllm)
+- [llama.cpp](https://github.com/ggerganov/llama.cpp)

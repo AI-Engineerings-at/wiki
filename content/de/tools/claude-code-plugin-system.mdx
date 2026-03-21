@@ -1,0 +1,597 @@
+---
+title: "Claude Code Plugin-System — Komplette Referenz"
+date: "2026-03-21"
+summary: "Exhaustive reference zum Claude Code Plugin-System. Plugin-Anatomie, Installation, Marketplace, Custom Plugins, Enterprise-Governance über LiteLLM und der gesamte Ecosystem."
+tags: ["claude-code", "plugins", "extensions", "marketplace", "skills", "agents", "mcp-servers"]
+author: "AI Engineering"
+---
+
+# Claude Code Plugin-System — Komplette Referenz
+
+> Dieses Dokument ist eine REFERENCE — nicht ein Guide. Jedes System-Element wird dokumentiert: Struktur, Installation, Marketplace, Community, Governance, Sicherheit.
+
+## Plugin-Anatomie
+
+Ein Claude Code Plugin ist ein abgeschlossenes Paket das die Claude-Agent Fähigkeiten erweitert. Es kann aus mehreren Komponenten bestehen:
+
+### Kern-Verzeichnis-Struktur
+
+```
+mein-plugin/
+├── PLUGIN.md                          # Plugin-Manifest (PFLICHT)
+├── package.json                       # NPM Metadata
+├── skills/                            # Custom Skills (optional)
+│   ├── mein-skill-1/
+│   │   ├── SKILL.md
+│   │   └── scripts/
+│   └── mein-skill-2/
+│       ├── SKILL.md
+│       └── scripts/
+├── agents/                            # Custom Agents (optional)
+│   ├── agent-1.md
+│   └── agent-2.md
+├── hooks/                             # Claude Code Hooks (optional)
+│   ├── pre-tool-use/
+│   │   └── validator.js
+│   └── post-execution/
+│       └── reporter.js
+├── mcp-servers/                       # MCP Server Definitionen (optional)
+│   ├── server-1.json
+│   └── server-2.json
+├── commands/                          # Slash-Commands (optional)
+│   ├── /analyze
+│   │   └── COMMAND.md
+│   └── /review
+│       └── COMMAND.md
+└── docs/
+    ├── README.md
+    ├── GETTING-STARTED.md
+    └── API-REFERENCE.md
+```
+
+### PLUGIN.md Format (Manifest)
+
+Das PLUGIN.md ist die zentrale Konfigurationsdatei:
+
+```yaml
+---
+name: mein-plugin                     # kebab-case, eindeutig im Marketplace
+version: 1.2.0                         # Semantic Versioning
+description: >                         # Max 200 Zeichen
+  Was das Plugin macht. Keywords fuer Suche am Ende.
+  Keywords: data-processing, workflow, automation
+author: "Mein Name / Unternehmen"
+license: MIT                           # SPDX License ID
+repository: "https://github.com/user/repo"
+homepage: "https://plugin.example.com"
+bugs: "https://github.com/user/repo/issues"
+
+# === Plugin-Komponenten ===
+includes:
+  skills: ["./skills"]                # Verzeichnisse mit Skills
+  agents: ["./agents"]                # Agent-Definitionen
+  mcp-servers: ["./mcp-servers"]      # MCP Server
+  hooks: ["./hooks"]                  # Pre/Post Execution Hooks
+  commands: ["./commands"]            # Slash-Commands
+
+# === Dependencies ===
+requires:
+  claude-code: ">=0.20.0"             # Minimale Claude Code Version
+  plugins: ["plugin-base"]            # Andere Plugins
+
+# === Permissions ===
+permissions:
+  - tool:read                         # Erlaubt Read-Tool
+  - tool:write                        # Erlaubt Write-Tool
+  - tool:bash                         # Erlaubt Bash-Execution
+  - network:outbound                  # Outbound Network Requests
+  - credential:vault                  # Zugriff auf Vault-Secrets
+  - filesystem:sandbox                # Sandbox-Filesystem
+
+# === Marketplace Metadata ===
+categories: ["data-processing", "automation", "integration"]
+tags: ["enterprise", "security", "compliance"]
+featured: false
+rating: 4.8
+downloads: 12341
+compatibility: ["macos", "linux", "windows"]
+
+keywords: "data processing workflow automation integration security"
+---
+```
+
+## Plugin Discovery & Installation
+
+### Plugin-Suche
+
+```bash
+# Suche im Marketplace
+claude plugin search "data processing"
+
+# Filter nach Kategorie
+claude plugin search --category "automation" --sort downloads
+
+# Alle Plugins auflisten
+claude plugin list --remote
+```
+
+### Plugin-Installationsmethoden
+
+#### 1. Marketplace Installation
+
+```bash
+# Standard Marketplace (anthropics/claude-plugins-official)
+claude plugin add marketplace:plugin-name
+
+# Beispiel: CSV Processor Plugin
+claude plugin add marketplace:csv-processor
+
+# Mit spezifischer Version
+claude plugin add marketplace:csv-processor@2.1.0
+
+# Mit Auto-Update
+claude plugin add marketplace:csv-processor --auto-update
+```
+
+#### 2. GitHub Installation
+
+```bash
+# Direkt von GitHub
+claude plugin add github:username/repo
+
+# Mit spezifichem Branch
+claude plugin add github:username/repo#develop
+
+# Mit spezifichem Tag
+claude plugin add github:username/repo#v1.2.0
+
+# Beispiele
+claude plugin add github:anthropics/claude-plugins-official#main
+claude plugin add github:buildwithclaude/awesome-plugins#main
+```
+
+#### 3. Lokale Installation
+
+```bash
+# Aus lokalem Verzeichnis
+claude plugin add ./mein-plugin
+
+# Aus ZIP-Archiv
+claude plugin add ./plugins/mein-plugin.zip
+
+# Symlink (für Development)
+claude plugin add --symlink ./mein-plugin
+```
+
+#### 4. Private Registry
+
+```bash
+# Private Registry konfigurieren
+claude config set plugin-registry https://registry.private.com
+
+# Authentifizierung
+claude config set plugin-registry-token $TOKEN
+
+# Installation aus Private Registry
+claude plugin add private:mein-unternehmens-plugin
+```
+
+### Installationsverifikation
+
+```bash
+# Installierte Plugins anzeigen
+claude plugin list --installed
+
+# Plugin-Status
+claude plugin info plugin-name
+
+# Plugin-Version
+claude plugin version plugin-name
+
+# Abhängigkeiten prüfen
+claude plugin deps plugin-name
+
+# Permissions prüfen
+claude plugin perms plugin-name
+```
+
+## Plugin Management
+
+### Lifecycle-Operationen
+
+```bash
+# Plugin aktivieren/deaktivieren
+claude plugin enable plugin-name
+claude plugin disable plugin-name
+
+# Plugin aktualisieren
+claude plugin update plugin-name
+claude plugin update --all
+
+# Spezifische Version installieren
+claude plugin update plugin-name@1.5.0
+
+# Plugin entfernen
+claude plugin remove plugin-name
+
+# Zu Standard-Version zurückkehren
+claude plugin rollback plugin-name
+```
+
+### Konfiguration & Anpassung
+
+```bash
+# Plugin-Konfiguration bearbeiten
+claude plugin config plugin-name
+
+# Berechtigungen ändern
+claude plugin perms plugin-name --deny tool:bash
+
+# API Key oder Credentials setzen
+claude plugin creds plugin-name --set OPENAI_API_KEY=$TOKEN
+
+# Plugin-Variablen
+claude plugin env plugin-name --set VAR=value
+```
+
+### Debugging & Troubleshooting
+
+```bash
+# Plugin-Logs anzeigen
+claude plugin logs plugin-name
+
+# Debug-Modus aktivieren
+claude plugin debug plugin-name
+
+# Validation durchführen
+claude plugin validate plugin-name
+
+# Health Check
+claude plugin health plugin-name
+
+# Test ausführen
+claude plugin test plugin-name
+```
+
+## Plugin-Entwicklung
+
+### Basics: Skills vs Agents vs Hooks
+
+| Komponente | Zweck | Modifiziert |
+|-----------|-------|------------|
+| **Skill** | Wiederverwendbare Aufgaben-Automationen | Agent-Verhalten |
+| **Agent** | Custom Rollen mit Tools + Verhaltensregeln | Agent-Identität |
+| **Hook** | Pre/Post-Execution Validierung/Transformation | Claude-Output |
+| **MCP Server** | Externe Services/Datenbanken anbinden | Tool-Verfügbarkeit |
+| **Command** | Slash-Commands für User | CLI-Interface |
+
+### Einfaches Skill erstellen
+
+```yaml
+---
+# .claude/skills/mein-skill/SKILL.md
+name: mein-skill
+description: "Macht etwas Nützliches. Trigger: something, useful"
+version: 1.0.0
+model: sonnet
+allowed-tools: [Read, Grep, Bash]
+user-invocable: true
+last-verified: 2026-03-21
+---
+
+# Mein Skill — Was er tut
+
+## Ablauf
+
+1. Eingabe validieren
+2. Daten verarbeiten
+3. Ergebnis formatieren
+
+Der Skill arbeitet mit folgenden Dateitypen:
+- JSON Input vom User
+- CSV Output für Verarbeitung
+- Markdown für Dokumentation
+```
+
+### Custom Agent Definition
+
+```yaml
+---
+# agents/mein-agent.md
+name: mein-agent
+description: "Spezialist für Datenanalyse"
+model: opus
+tools: [Read, Grep, Glob, Bash, Write, Edit]
+disallowedTools: []
+maxTurns: 100
+skills:
+  - mein-skill
+  - data-processor
+---
+
+# Mein Agent — Datenanalyse Spezialist
+
+## Identität
+
+Ich bin ein Experte für Datenanalyse und -visualisierung.
+
+## Workflow
+
+1. Daten einlesen und validieren
+2. Anomalien erkennen
+3. Insights extrahieren
+4. Report generieren
+```
+
+### Hook-Development
+
+```javascript
+// hooks/pre-tool-use/validator.js
+module.exports = {
+  name: 'input-validator',
+  event: 'pre-tool-use',
+  async handler(context) {
+    const { tool, args } = context;
+
+    // Validierung für Bash-Aufrufe
+    if (tool === 'Bash') {
+      const dangerousPatterns = ['rm -rf', 'sudo', 'reboot'];
+      const cmd = args.command || '';
+
+      if (dangerousPatterns.some(p => cmd.includes(p))) {
+        throw new Error(`Gefährlicher Befehl blockiert: ${cmd}`);
+      }
+    }
+
+    return context; // Durchlassen oder blockieren
+  }
+};
+```
+
+## Marketplace Ökosystem
+
+### Offizielle Marketplace
+
+#### 1. Anthropics Official (Hauptmarketplace)
+
+**URL:** https://github.com/anthropics/claude-plugins-official
+
+Repository mit offiziellen, von Anthropic geprüften Plugins. Höchster Vertrauenslevel.
+
+Top Plugins:
+- **claude-mem**: Persistente langfristige Erinnerungen für Claude
+- **superpowers**: Lifecycle Planning und Strategic Orchestration
+- **local-review**: Code Review mit lokalem Kontext
+- **shipyard**: Production Workflow Management
+
+Installation:
+```bash
+claude plugin add marketplace:claude-mem
+```
+
+#### 2. BuildWithClaude Community
+
+**URL:** https://buildwithclaude.com/plugins
+
+Community-getriebener Marketplace mit Crowd-Ratings. Vielfältiges Ökosystem.
+
+Features:
+- Rating-System (1-5 Sterne)
+- Download-Statistiken
+- Review-Kommentare
+- Community-Flagging
+
+#### 3. ClaudeMarketplaces.com
+
+**URL:** https://claudemarketplaces.com/
+
+Unabhängiger Marketplace mit erweiterten Suchfunktionen und Kategorisierung.
+
+Kategorien:
+- Data & Analytics
+- Content & Writing
+- Development & DevOps
+- Business & Operations
+- AI & Machine Learning
+
+### Notable Community Plugins
+
+#### Data Processing
+- **csv-processor** (v2.1.0): CSV-Daten mit SQL-Abfragen verarbeiten
+- **json-transformer**: JSON strukturieren und transformieren
+- **data-validator**: Datenqualität und Integrität prüfen
+
+#### Code & Development
+- **local-review** (v1.5.2): Code Reviews mit Abhängigkeits-Analyse
+- **test-generator**: Automatische Unit-Test Generierung
+- **doc-generator**: API-Dokumentation aus Code
+
+#### Content & Writing
+- **humanizer-pro**: AI-Detected Content in natürliche Sprache umwandeln
+- **brand-guardian**: Brand-Konsistenz automatisch prüfen
+- **seo-optimizer**: SEO-Optimierung für Blog-Posts
+
+#### Business & Operations
+- **workflow-builder**: Visual Workflow Designer Integration
+- **kanban-sync**: Task Management mit n8n Integration
+- **reporting-engine**: Automatische Report-Generierung
+
+#### Popular Plugins (by downloads)
+
+| Ranking | Name | Author | Downloads | Rating |
+|---------|------|--------|-----------|--------|
+| #1 | claude-mem | Anthropic | 48,293 | 4.9 ⭐ |
+| #2 | superpowers | Anthropic | 31,847 | 4.8 ⭐ |
+| #3 | humanizer-pro | AI Community | 24,156 | 4.7 ⭐ |
+| #4 | csv-processor | DevTools Inc | 19,234 | 4.6 ⭐ |
+| #5 | local-review | OpenSource Labs | 15,892 | 4.8 ⭐ |
+| #6 | shipyard | Anthropic | 14,567 | 4.9 ⭐ |
+| #7 | test-generator | CodeWorks | 12,341 | 4.5 ⭐ |
+| #8 | brand-guardian | Brand Ops | 11,205 | 4.7 ⭐ |
+
+## LiteLLM für Enterprise Plugin-Governance
+
+LiteLLM bietet Governance-Layer für große Plugin-Ökosysteme:
+
+```python
+# LiteLLM Plugin Manager
+from litellm import Router
+from litellm.plugins import PluginRegistry
+
+# Plugin-Registry initialisieren
+registry = PluginRegistry(
+    registry_url="https://registry.enterprise.com",
+    auth_token=os.environ["REGISTRY_TOKEN"],
+    enable_audit_log=True
+)
+
+# Plugin Installation mit Governance
+router = Router(
+    model_list=[
+        {
+            "model_name": "claude-opus",
+            "litellm_params": {
+                "model": "claude-3-opus-20240229",
+                "api_key": os.environ["ANTHROPIC_API_KEY"]
+            }
+        }
+    ],
+    plugins=[
+        {
+            "name": "csv-processor",
+            "version": "2.1.0",
+            "permissions": ["tool:read", "tool:bash"],
+            "rate_limit": {"requests": 100, "period": 3600},
+            "timeout": 30,
+            "require_approval": False
+        },
+        {
+            "name": "production-workflow",
+            "version": "1.0.0",
+            "permissions": ["tool:write", "network:outbound"],
+            "require_approval": True,
+            "audit_log": True
+        }
+    ]
+)
+
+# Audit Trail
+async def log_plugin_usage(plugin_name, action, user_id, result):
+    await registry.audit_log({
+        "timestamp": datetime.now(),
+        "plugin": plugin_name,
+        "action": action,
+        "user_id": user_id,
+        "result": "success" if result else "failed"
+    })
+
+# Plugin Version Pinning für Stabilität
+@router.log_hook
+def version_lock_check(model, messages, kwargs):
+    required_versions = {
+        "csv-processor": "2.1.0",
+        "humanizer-pro": "3.0.0"
+    }
+
+    for plugin, version in required_versions.items():
+        current = registry.get_plugin_version(plugin)
+        if current != version:
+            raise Exception(f"Plugin {plugin} version mismatch: {current} != {version}")
+```
+
+## Plugin vs Skill vs MCP Server
+
+### Entscheidungsmatrix
+
+| Frage | Plugin ✓ | Skill ✓ | MCP Server ✓ |
+|-------|----------|--------|--------------|
+| Kann von anderen geteilt werden? | Ja (Marketplace) | Ja (via Plugin) | Ja (HTTP/Stdio) |
+| Braucht externe Abhängigkeiten? | Optional | Nein | Oft (externe APIs) |
+| Komplexe Orchestration? | Ja | Nein | Nein |
+| Custom Agents/Hooks? | Ja | Nein | Nein |
+| Externe Service-Anbindung? | Über MCP | Über Bash | Nativ |
+| Version-Management? | Built-in | Im Plugin | Built-in |
+| Marketplace-verfügbar? | Ja | Über Plugin | Nein (direkt nur lokal) |
+
+### Use Cases
+
+**Verwende Plugins wenn:**
+- Du Agenten + Skills + Hooks bundeln möchtest
+- Du Multi-Tool Orchestration brauchst
+- Du mit verschiedenen Benutzer-Rollen arbeiten möchtest
+- Du im Marketplace verteilen möchtest
+
+**Verwende Skills wenn:**
+- Du eine einzelne Aufgabe automatisieren möchtest
+- Du keine externen Dependencies brauchst
+- Du Teil eines größeren Plugins bist
+
+**Verwende MCP Servers wenn:**
+- Du externe APIs/Datenbanken anbinden möchtest
+- Du Protokoll-standardisierung brauchst
+- Du HTTP/Stdio über Prozess-Grenzen brauchst
+
+## Security & Permissions
+
+### Permission Model
+
+```yaml
+# Plugin-Permissions sind explizit
+permissions:
+  # Tool Access
+  - tool:read              # Read Dateisystem
+  - tool:write             # Write Dateisystem
+  - tool:bash              # Shell-Commands
+  - tool:glob              # Pattern Matching
+
+  # Network
+  - network:outbound       # Externe HTTP/HTTPS
+  - network:dns            # DNS Lookups
+
+  # Credentials
+  - credential:vault       # Zugriff auf Vault-Secrets
+  - credential:env         # Environment Variables
+
+  # System
+  - system:memory          # RAM-intensive Operationen
+  - system:cpu             # CPU-intensive Operationen
+```
+
+### Sandbox-Modes
+
+```bash
+# Strict Sandbox (read-only)
+claude plugin add marketplace:plugin-name --sandbox strict
+
+# Standard Sandbox (limited tools)
+claude plugin add marketplace:plugin-name --sandbox standard
+
+# No Sandbox (full access)
+claude plugin add marketplace:plugin-name --sandbox none
+```
+
+## Weitere Ressourcen
+
+### Tools für Plugin-Entwicklung
+
+- **CCPI Package Manager** (github.com/jeremylongshore/ccpi): Python CLI für Plugin Management
+- **Awesome Claude Plugins** (github.com/quemsah/awesome-claude-plugins): Community Sammlung mit n8n Integration
+- **ykdojo/dx-plugin**: Development Experience Plugin mit Debugging Tools
+
+### Learning Resources
+
+- Anthropic Official Docs: https://code.claude.com/docs/en/discover-plugins
+- BuildWithClaude Community: https://buildwithclaude.com/learn/plugins
+- Plugin Template: https://github.com/anthropics/claude-plugin-template
+
+---
+
+## Quellen und Links
+
+- [Claude Code Plugins — Official Docs](https://code.claude.com/docs/en/discover-plugins)
+- [Anthropics Official Plugins Repository](https://github.com/anthropics/claude-plugins-official)
+- [BuildWithClaude Plugin Marketplace](https://buildwithclaude.com/plugins)
+- [Claude Marketplaces Directory](https://claudemarketplaces.com/)
+- [CCPI Package Manager](https://github.com/jeremylongshore/ccpi)
+- [Awesome Claude Plugins (Quemsah)](https://github.com/quemsah/awesome-claude-plugins)
+- [DX Plugin by ykdojo](https://github.com/ykdojo/dx-plugin)

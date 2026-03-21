@@ -1,0 +1,328 @@
+---
+title: Multimodale Modelle
+date: 2026-03-21
+summary: Vision-Language Models, Audio Models, Video Understanding — Architektur, Vergleich (GPT-4V, Claude 3.5 Vision, Gemini, LLaVA), praktische Use-Cases
+tags: [multimodal, vision-language, image-understanding, video, audio, llm]
+author: AI Engineering
+---
+
+# Multimodale Modelle verstehen
+
+Multimodale Modelle können Text, Bilder, Audio und Video gleichzeitig verstehen und generieren. Sie kombinieren spezialisierte Encoder für jeden Modalität.
+
+---
+
+## Architektur: Wie Bilder "tokenisiert" werden
+
+```
+Text: "Der Hund springt"
+      → Token: ["Der", "Hund", "springt"]
+
+Bild: [Pixel-Gitter 224×224]
+      → Bildencoder (Vision Transformer oder CNN)
+      → Image Tokens: [tok_1, tok_2, ..., tok_256]  (z.B. 256 Tokens aus 16×16 Patches)
+
+Audio: [Waveform 16kHz]
+      → Audio Encoder (Mel-Spectrogram → Transformer)
+      → Audio Tokens: [tok_1, tok_2, ..., tok_512]
+
+Video: [30 Frames, 224×224]
+      → Temporal Encoder (3D CNN oder Transformer)
+      → Video Tokens: [tok_1, tok_2, ..., tok_4096]  (256 pro Frame × 30 Frames)
+
+Dann: Alle Tokens werden in Transformer eingefüttert, LLM generiert Antwort
+```
+
+**Patch-basierte Tokenisierung** (häufig):
+```
+Bild 224×224
+→ Split in 16×16 Patches (14×14 = 196 Patches)
+→ Jeder Patch: Lineare Projection → 768-dim Vector (Embedding)
+→ Positional Encoding + Class Token
+→ 197 Tokens insgesamt (196 Patches + 1 Class)
+```
+
+---
+
+## Vergleich 2026
+
+| Modell | Vision | Audio | Video | Best Für | Kosten |
+|--------|--------|-------|-------|----------|--------|
+| **GPT-4V** | ✅ Excellente | ❌ | ✅ OK | Allzweck | €0.03/K Token |
+| **GPT-4o** | ✅ Excellente | ✅ | ✅ Gut | Allzweck | €0.005/K Input |
+| **Claude 3.5 Vision** | ✅ Brillante | ✅ | ✅ Mittelmäßig | Bilder analysieren | €0.003/K Input |
+| **Gemini 2.0** | ✅ Gut | ✅ | ✅ Excellente | Video verstehen | €0.0075/K Input |
+| **LLaVA 1.5 (7B)** | ✅ Mittel | ❌ | ❌ | Local, Open-Source | Free (Self-Hosted) |
+| **Qwen VL Max** | ✅ Gut | ❌ | ❌ | Chinese optimiert | €0.002/K Input |
+
+---
+
+## Vision-Language Models Details
+
+### Claude 3.5 Sonnet (Best für Bilder)
+
+```python
+import anthropic
+
+client = anthropic.Anthropic()
+
+response = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    max_tokens=1024,
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "image",
+                    "source": {
+                        "type": "base64",
+                        "media_type": "image/jpeg",
+                        "data": base64_image_data,
+                    },
+                },
+                {
+                    "type": "text",
+                    "text": "Was siehst du in diesem Bild? Beschreib die Details."
+                }
+            ],
+        }
+    ],
+)
+```
+
+**Stärken**:
+- Beste Detailgenauigkeit (100x PDFs, Grafiken, Code)
+- Kann Text in Bildern OCR
+- Exzellente Rechteck-Erkennung
+
+**Limitationen**:
+- ~100K Tokens Context limit (für Video: max 10min)
+- Kann Audio nicht direkt verarbeiten (nur Transkript)
+
+---
+
+### GPT-4o (Allzweck, Audio-Support)
+
+```python
+from openai import OpenAI
+
+client = OpenAI()
+
+# Vision
+response = client.messages.create(
+    model="gpt-4o",
+    messages=[{
+        "role": "user",
+        "content": [
+            {"type": "image_url", "image_url": {"url": "https://..."}},
+            {"type": "text", "text": "Erkläre dieses Diagramm"}
+        ]
+    }]
+)
+
+# Audio (nur als input, kein output generation)
+# Benötigt speech-to-text zuerst
+with open("audio.m4a", "rb") as f:
+    transcript = client.audio.transcriptions.create(
+        model="whisper-1",
+        file=f
+    )
+```
+
+**Stärken**:
+- Schnell (bessere Latency)
+- Günstig (~0.005/K Token)
+- Native Audio Support via Whisper
+
+---
+
+### Gemini 2.0 Pro (Best für Video)
+
+```python
+import anthropic
+
+# Hinweis: Nutze Claude für Text+Bilder, nicht Gemini API via Anthropic
+# Für echtes Gemini: Google Cloud Vertex AI
+
+# Beispiel Architektur:
+# Video (MP4)
+#   → Split in Keyframes (alle 500ms)
+#   → Pass an Vision Encoder
+#   → Temporal Attention Layer
+#   → LLM generiert Beschreibung
+```
+
+**Stärken**:
+- 1M Context (können längere Videos verstehen)
+- Gutes Video-Reasoning
+- Google integriert (Suche, Docs etc.)
+
+**Schwächen**:
+- Kosten höher
+- API etwas kompliziert (Google Cloud)
+
+---
+
+## Audio Models
+
+### Whisper (Speech-to-Text, OpenAI)
+
+```python
+from openai import OpenAI
+
+client = OpenAI()
+
+audio_file = open("audio.mp3", "rb")
+transcript = client.audio.transcriptions.create(
+    model="whisper-1",
+    file=audio_file,
+    language="de"  # Deutsch
+)
+
+# Resultat: String mit Transkript
+# Accuracy: ~94-97% (State-of-Art)
+# Speed: ~Echtzeit
+```
+
+**Praktisch für RAG**:
+```
+Podcast Audio → Whisper → Text → Vector Embedding → Vector DB → RAG
+
+Cost: €0.02 pro Minute Audio (teuer!)
+Alternative: AssemblyAI (€0.01/min), Groq Whisper (billiger)
+```
+
+---
+
+## Video Understanding
+
+### Multimodal Video Analysis
+
+```
+Workflow:
+1. Video in Frames teilen (30fps = 1800 Frames pro Minute)
+2. Keyframes samplen (z.B. jede 10. Frame = 180 Frames/Min)
+3. Patch + Embed jedes Keyframe
+4. Audio separat:
+   - Whisper Transkript
+   - Emotion/Tone detection
+5. Combine: [Video Tokens] + [Audio Tokens] + [Transcript] → LLM
+
+Result: Video Summary, Object Detection, Scene Understanding
+```
+
+**Praktische Tools**:
+```python
+# Mit LLaVA (Open-Source)
+from llava.mm_utils import get_model_name_from_layer_idx
+from llava.models import load_pretrained_model
+from llava.image_processing import load_image
+
+model, processor, image_processor = load_pretrained_model(
+    model_path="liuhaotian/llava-v1.5-13b",
+    model_base=None,
+    model_name="llava-v1.5-13b"
+)
+
+# Per Frame:
+for frame_idx, frame in enumerate(video_frames):
+    image = load_image(frame)
+    image_tensor = image_processor.preprocess(
+        image, return_tensors='pt'
+    )["pixel_values"]
+
+    output = model.generate(
+        image_tensor,
+        do_sample=True,
+        temperature=0.7,
+        max_new_tokens=100,
+        use_cache=True,
+    )
+```
+
+---
+
+## Praktische Use-Cases
+
+### 1. Document Analysis
+
+```
+Input: Scanned PDF mit 100 Seiten
+Workflow:
+- PDF → Images (1 pro Seite)
+- Claude Vision: Analyze page
+- Extract: Text, Tables, Charts
+- OCR: Handwriting recognition
+- Output: Structured Data
+
+Cost: ~€0.03 pro Seite
+Accuracy: 95%+ für gedruckten Text
+```
+
+### 2. Product Detection (E-Commerce)
+
+```
+Input: Produktfoto
+Claude: "Was sind die features?"
+Output:
+  - Material: Baumwolle
+  - Farbe: Blau
+  - Größe: Groß
+  - Defekte: Keine erkannt
+
+Für Katalog-Automation (100+ Fotos/Tag)
+```
+
+### 3. Medical Imaging
+
+```
+Input: X-Ray oder CT Scan
+Vision Model: "Was siehst du?"
+⚠️ WARNUNG: Nicht für klinische Diagnosen ohne Radiologe!
+
+LLM Limitations:
+- Kann Pathologien übersehen
+- Bias in Training-Daten
+- Keine Lizenzierung
+```
+
+### 4. Video Summarization
+
+```
+Input: 1h Recorded Meeting
+Process:
+1. Audio Extract + Whisper
+2. Key Frames (alle 30s)
+3. Vision + Transcript zusammen
+4. Summarize mit Claude
+
+Output: 5-Min Summary + Action Items
+Cost: ~€0.50 für 1h Meeting
+```
+
+---
+
+## Limitationen & Fallstricke
+
+```
+Limitation 1: Halluzinationen bei visuellen Details
+Fix: "Describe only what you actually see, not what you think should be there"
+
+Limitation 2: Small Text in Images
+Fix: Zerhacker vergrößern Text wenn möglich
+     oder OCR zuerst (PaddleOCR, Tesseract)
+
+Limitation 3: Video ist TEUER (viele Frames = viele Tokens)
+Fix: Sampling (jede 10. Frame), oder Key-scene detection
+
+Limitation 4: Audio nicht native in Tokens
+Fix: Whisper zuerst → Text → dann LLM
+```
+
+Multimodale Modelle sind noch nicht perfekt, aber bei Bildanalyse und Document Processing sind Claude 3.5 Vision und GPT-4o Production-ready.
+
+## Quellen und Links
+
+- [LLaVA (arXiv)](https://arxiv.org/abs/2304.08485)
+- [LLaVA GitHub](https://github.com/haotian-liu/LLaVA)

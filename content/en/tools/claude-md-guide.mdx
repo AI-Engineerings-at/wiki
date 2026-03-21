@@ -1,0 +1,748 @@
+---
+title: CLAUDE.md Masterclass — Project Configuration
+date: 2026-03-21
+summary: Deep guide to writing effective CLAUDE.md files for your project. Covers inheritance hierarchy, what to include, architecture documentation, team conventions, anti-patterns, and 3 real-world examples.
+tags: [claude-code, configuration, claude-md, project-setup, documentation]
+author: AI Engineering
+---
+
+# CLAUDE.md Masterclass — Project Configuration
+
+CLAUDE.md is the persistent knowledge document Claude reads at session start. It establishes project architecture, coding standards, conventions, and workflows. Without it, Claude treats every project the same. With a well-written CLAUDE.md, Claude becomes a domain expert in your codebase.
+
+## The Hierarchy: Where Instructions Live
+
+Claude Code has a 3-tier configuration hierarchy:
+
+```
+User Level        ~/.claude/CLAUDE.md           (Global defaults)
+          ↓
+Project Level     ./CLAUDE.md                   (This project)
+          ↓
+Rules Level       ./.claude/rules/*.md          (Rules 01-21)
+```
+
+When Claude needs information, it searches top-to-bottom:
+1. Check `./.claude/rules/` (specific rules)
+2. Check `./CLAUDE.md` (project-wide conventions)
+3. Fall back to `~/.claude/CLAUDE.md` (user defaults)
+
+**Consequence**: Don't put everything in CLAUDE.md. Put project-specific stuff there; put reusable rules in `.claude/rules/`.
+
+## What Goes in Each Level
+
+### User Level (~/.claude/CLAUDE.md) — Your Defaults
+
+Your global preferences that apply to ALL projects:
+
+```markdown
+# Claude Code Global Configuration
+
+## Your Preferred Workflow
+- Always prefer editing existing files to creating new ones
+- Commit frequently with atomic, descriptive messages
+- Use Python 3.10+ style (type hints, walrus operator)
+- Always read code before refactoring
+
+## Your Development Environment
+- Terminal: zsh (oh-my-zsh with git plugin)
+- Editor conventions: spaces, 2-space indent for YAML/JSON, 4-space for Python
+- Node: v18+, Python: 3.10+
+- Git hooks: pre-commit installed, husky for npm projects
+
+## Global Safety Rules
+- Never hardcode credentials
+- Always anonymize IPs/hostnames in examples
+- Use vault.py for secrets management
+```
+
+You write this ONCE and use it everywhere.
+
+### Project Level (./CLAUDE.md) — Project-Specific Context
+
+Project-unique information Claude must know:
+
+```markdown
+# MyProject — AI Engineering Platform
+
+## Architecture Overview
+- Backend: Python FastAPI, PostgreSQL
+- Frontend: React 18 + TypeScript
+- ML: PyTorch + Hugging Face transformers
+- Deployment: Docker Compose (dev), Kubernetes (prod)
+
+## Key Directories
+```
+src/
+  ├── api/           # FastAPI routes
+  ├── models/        # PyTorch models
+  └── db/            # Database schemas
+frontend/
+  ├── components/    # Reusable React components
+  └── pages/         # Next.js pages
+```
+
+## Critical Files (Don't Edit Without Understanding)
+- `src/config.py` — Global config, changes affect all services
+- `docker-compose.yml` — Development environment
+- `migration_*.py` — Database migrations, NEVER reorder
+
+## Testing
+- Unit tests: `pytest src/tests/` (70% coverage minimum)
+- Integration: `pytest tests/integration/`
+- E2E: `npm run test:e2e` in frontend/
+
+## Deployment Commands
+```bash
+# Development
+docker-compose up -d
+
+# Production
+kubectl apply -f k8s/
+```
+
+## Common Issues & Fixes
+- GPU memory errors: Reduce batch_size in config.py
+- Tests hang: Kill stuck processes: `pkill -f pytest`
+- DB migration stuck: Check migration_*.py file — may need manual reset
+```
+
+### Rules Level (./.claude/rules/*.md) — Reusable Standards
+
+Rules that apply across multiple projects:
+
+```markdown
+# 01-safety-rules.md
+Safety principles every agent must follow:
+- S1: Never expose secrets in output
+- S2: Always verify destructive commands
+- ...
+```
+
+Create rules for:
+- Safety (authentication, permissions, sensitive data)
+- Code quality (linting, testing, type checking)
+- Documentation (API docs, README format)
+- Team conventions (git workflow, PR process)
+- Infrastructure (Docker, Kubernetes, cloud)
+
+**Key insight**: Rules are VERSION CONTROLLED. They're stable across time. CLAUDE.md changes per project and per sprint.
+
+## Writing High-Quality CLAUDE.md
+
+### 1. Start with Architecture (The "Why")
+
+Don't list commands. Explain the system:
+
+```markdown
+## Architecture Philosophy
+
+This project uses a microservices architecture:
+- API Gateway (nginx) routes requests
+- Each service owns its database (no shared DB)
+- Services communicate via gRPC
+- Async work via Kafka queue
+
+Why this design?
+- Allows teams to work independently
+- Scales individual services based on load
+- Easier to deploy/rollback individual services
+
+Consequences:
+- Distributed debugging is harder
+- Must handle eventual consistency
+- API versioning is critical
+```
+
+### 2. Document the Happy Path
+
+Show Claude how to succeed:
+
+```markdown
+## Development Workflow
+
+1. Create feature branch: `git checkout -b feature/my-feature`
+2. Make changes (see "Coding Standards" below)
+3. Write tests for new code (see "Testing" section)
+4. Run `make test` locally before pushing
+5. Push and open PR
+6. GitHub Actions run tests automatically
+7. Merge when all checks pass
+
+## Coding Standards
+
+**Python**: Follow PEP 8, use type hints
+```python
+def fetch_user(user_id: int) -> User:
+    """Docstring describing function."""
+    return db.query(User).filter_by(id=user_id).first()
+```
+
+**React**: One component per file, prop types required
+```typescript
+interface ButtonProps {
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+}
+
+export const Button: React.FC<ButtonProps> = ({label, onClick, disabled}) => (
+  <button onClick={onClick} disabled={disabled}>{label}</button>
+);
+```
+```
+
+### 3. Document the Sad Path
+
+Show Claude how to recover from failures:
+
+```markdown
+## Common Problems & Solutions
+
+**Problem**: Tests fail with "No module named 'myapp'"
+- Solution: Run `pip install -e .` to install in dev mode
+- Root cause: Virtual environment not activated or stale install
+
+**Problem**: Database migration fails with "constraint violation"
+- Solution: Check `migrations/migration_001.py` for order
+- This happens when migrations are applied out of order
+- Fix: Manually reset dev DB: `python scripts/reset_db.py`
+
+**Problem**: Docker image build fails with "permission denied"
+- Solution: Check your user can read all source files
+- Run: `chmod -R 755 src/` then retry
+
+**Problem**: Kubernetes deployment hangs
+- Check pod logs: `kubectl logs deployment/myapp -f`
+- Usually means service can't reach database
+- Verify DATABASE_URL secret exists: `kubectl get secrets`
+```
+
+### 4. Document Non-Obvious Conventions
+
+Tell Claude about quirks only humans know:
+
+```markdown
+## Project-Specific Conventions
+
+- **Imports**: Absolute imports only. `from src.models import User`, never relative
+- **Naming**: Database tables singular (table: `user`, not `users`)
+- **Dates**: Always store in UTC, convert to local time in API response only
+- **Errors**: Use custom exception classes (HTTPException, ValidationError), never raw Exception
+- **Config**: Environment variables override defaults — see src/config.py
+- **Database**: SQLAlchemy ORM required, no raw SQL except migrations
+- **API versions**: Current version is v2 (v1 deprecated 2025-06-01)
+```
+
+### 5. Document Tools & Services
+
+Show Claude what's available:
+
+```markdown
+## Available Tools & Services
+
+| Tool | Purpose | Command | Notes |
+|------|---------|---------|-------|
+| pytest | Unit testing | `pytest src/tests/` | 70% coverage min |
+| black | Code formatter | `black src/` | Auto-fix style |
+| mypy | Type checking | `mypy src/` | Strict mode |
+| docker | Containerization | `docker-compose up` | Includes DB, Redis |
+| psql | DB client | `psql postgres://...` | Use for manual queries |
+| redis-cli | Cache client | `redis-cli` | Running in port 6379 |
+
+## External Services
+
+- **GitHub**: Repo access, Actions for CI/CD
+- **DataDog**: Monitoring, logs stored 30 days
+- **Stripe**: Payment processing (API key in vault.py)
+```
+
+### 6. Set Boundaries
+
+Tell Claude what NOT to do:
+
+```markdown
+## Off-Limits
+
+These files should NEVER be modified without explicit approval:
+- `docker-compose.yml` — Changing this breaks dev environment for entire team
+- `requirements.txt` — Must pin versions, document breaking changes
+- Database schemas — Manual migration required, can't auto-generate
+- GitHub Actions workflows — Changes affect all developers' CI/CD
+
+Tell the user if you need to change these files. Ask for confirmation first.
+```
+
+## Real-World Examples
+
+### Example 1: Django REST API Project
+
+```markdown
+# MyDjango Project — REST API
+
+## Architecture
+
+Django REST Framework backend serving React frontend.
+- Backend: Django 4.2 + DRF, PostgreSQL 14, Redis
+- Frontend: React 18 (separate repo)
+- Deployment: Docker + Railway
+
+## Project Structure
+
+```
+myproject/
+├── manage.py
+├── requirements.txt
+├── docker-compose.yml
+├── api/
+│   ├── views.py           # DRF ViewSets
+│   ├── serializers.py     # DRF serializers
+│   ├── models.py
+│   ├── tests/
+│   │   ├── test_views.py
+│   │   └── test_models.py
+│   └── migrations/
+├── config/
+│   ├── settings.py        # Django settings
+│   ├── urls.py
+│   └── wsgi.py
+└── scripts/
+    ├── reset_db.py
+    └── seed_data.py
+```
+
+## Setup
+
+```bash
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+```
+
+## Coding Standards
+
+**Models**: Add `verbose_name`, proper indexing
+```python
+class User(models.Model):
+    email = models.EmailField(unique=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        verbose_name = "User"
+        indexes = [models.Index(fields=['email'])]
+```
+
+**Serializers**: Include validation
+```python
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'email', 'created_at']
+
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise ValidationError("Email already exists")
+        return value
+```
+
+**Views**: Use ViewSets
+```python
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+```
+
+## Testing
+
+All views must have tests. Minimum 70% coverage.
+```bash
+pytest api/tests/ --cov=api
+```
+
+## Deployment
+
+On push to main:
+1. GitHub Actions runs tests
+2. Builds Docker image
+3. Deploys to Railway
+
+Database migrations run automatically on deploy.
+
+## Common Errors
+
+**Error**: `psycopg2.OperationalError: could not connect to server`
+- Solution: Run `docker-compose up -d` to start PostgreSQL
+
+**Error**: `ValidationError: email already exists`
+- This is expected if user tries to register with existing email
+- API correctly rejects with 400 status
+
+**Error**: `ImportError: cannot import name 'UserSerializer'`
+- Check circular imports in serializers.py
+- Run `python manage.py shell` and manually import to debug
+```
+
+### Example 2: Next.js SaaS Frontend
+
+```markdown
+# SaaS Dashboard — Next.js 14
+
+## Architecture
+
+Next.js 14 frontend + API routes, TypeScript, Tailwind CSS.
+- Framework: Next.js 14 (App Router)
+- Language: TypeScript
+- Styling: Tailwind CSS
+- Data fetching: TanStack Query (React Query)
+- State: Zustand
+- API: OpenAPI via OpenAPI-Generator
+
+## Directory Structure
+
+```
+app/
+├── (auth)/
+│   ├── login/page.tsx
+│   └── signup/page.tsx
+├── (dashboard)/
+│   ├── layout.tsx
+│   ├── page.tsx           # Main dashboard
+│   └── settings/page.tsx
+├── api/
+│   ├── auth/[...nextauth].ts
+│   └── webhooks/stripe.ts
+└── layout.tsx             # Root layout
+
+components/
+├── navigation/
+├── forms/
+│   └── LoginForm.tsx      # Form validation with react-hook-form
+└── ui/                    # Headless UI wrappers
+
+lib/
+├── api-client.ts          # Fetch wrapper + error handling
+├── hooks.ts               # Custom React hooks
+└── utils.ts               # Helpers
+
+__tests__/
+├── components/
+└── pages/
+```
+
+## Coding Standards
+
+**Components**: Use functional components with TypeScript
+```typescript
+interface DashboardProps {
+  userId: string;
+  initialData?: User;
+}
+
+export default function Dashboard({ userId, initialData }: DashboardProps) {
+  const [user, setUser] = useState<User | null>(initialData || null);
+
+  return <div>{user?.name}</div>;
+}
+```
+
+**Forms**: Use react-hook-form + validation
+```typescript
+interface LoginFormData {
+  email: string;
+  password: string;
+}
+
+export const LoginForm = () => {
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>();
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <input {...register('email', { required: true })} />
+      {errors.email && <span>Email required</span>}
+    </form>
+  );
+};
+```
+
+**Data Fetching**: Use TanStack Query with custom hook
+```typescript
+function useUser(userId: string) {
+  return useQuery({
+    queryKey: ['user', userId],
+    queryFn: () => apiClient.get(`/api/users/${userId}`),
+  });
+}
+```
+
+## Testing
+
+Unit tests with Vitest, E2E with Playwright.
+```bash
+npm run test              # Unit tests
+npm run test:e2e          # E2E tests
+```
+
+## Deployment
+
+```bash
+npm run build             # Build for production
+npm start                 # Run production server
+```
+
+Deployed to Vercel. Automatic deploy on push to main.
+
+## API Integration
+
+API client handles auth, retries, errors:
+```typescript
+const apiClient = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
+});
+
+apiClient.interceptors.request.use((config) => {
+  const token = getAuthToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+```
+
+## Common Issues
+
+**Issue**: "next build fails with out of memory"
+- Solution: Increase Node memory: `NODE_OPTIONS=--max-old-space-size=4096 npm run build`
+
+**Issue**: API requests fail with "401 Unauthorized"
+- Solution: Check auth token in localStorage
+- Run: `localStorage.getItem('auth_token')` in dev console
+
+**Issue**: Styles not applying (Tailwind)
+- Solution: Ensure file is in `app` or `components` directory
+- Tailwind only scans these directories
+```
+
+### Example 3: Python Data Pipeline
+
+```markdown
+# ETL Pipeline — Data Processing
+
+## Architecture
+
+Python data pipeline: Extract from APIs, Transform, Load to data warehouse.
+- Language: Python 3.11
+- Orchestration: Apache Airflow
+- Data warehouse: Snowflake
+- Data validation: Great Expectations
+- Monitoring: Datadog
+
+## Project Structure
+
+```
+pipeline/
+├── dags/                  # Airflow DAGs
+│   ├── daily_etl.py
+│   └── weekly_report.py
+├── operators/
+│   ├── api_extractor.py   # Custom operators
+│   └── snowflake_loader.py
+├── transformers/
+│   ├── cleaner.py         # Data cleaning
+│   └── aggregator.py
+├── tests/
+│   ├── test_transformers.py
+│   └── test_operators.py
+├── configs/
+│   └── expectations.yaml  # Great Expectations configs
+└── requirements.txt
+```
+
+## Running Locally
+
+```bash
+pip install -r requirements.txt
+airflow db init
+airflow webserver --port 8080
+airflow scheduler
+```
+
+## DAG Structure
+
+All DAGs follow this pattern:
+1. **Extract**: Pull data from source API
+2. **Validate**: Check schema with Great Expectations
+3. **Transform**: Clean, deduplicate, aggregate
+4. **Load**: Insert into Snowflake
+5. **Notify**: Send success/failure alert
+
+```python
+from airflow import DAG
+from datetime import datetime, timedelta
+
+default_args = {
+    'owner': 'data-team',
+    'retries': 1,
+    'retry_delay': timedelta(minutes=5),
+}
+
+with DAG(
+    'daily_etl',
+    default_args=default_args,
+    schedule_interval='0 2 * * *',  # 2 AM daily
+) as dag:
+    extract = ApiExtractor(api_endpoint='...')
+    validate = DataValidator(expectations_file='...')
+    transform = DataTransformer()
+    load = SnowflakeLoader()
+
+    extract >> validate >> transform >> load
+```
+
+## Error Handling
+
+- **API timeout**: Retry 3x with exponential backoff
+- **Snowflake connection failed**: Alert ops team, pause downstream DAGs
+- **Data validation failed**: Log sample, alert analyst for manual review
+
+## Testing
+
+```bash
+pytest tests/ -v
+pytest tests/test_transformers.py::test_cleaner_handles_nulls -s
+```
+
+## Debugging
+
+Check Airflow logs:
+```bash
+# View DAG logs
+airflow logs daily_etl task_name
+
+# Test operator locally
+python -c "from operators.api_extractor import ApiExtractor; op = ApiExtractor(); op.execute()"
+```
+
+## Common Issues
+
+**Issue**: DAG fails with "Snowflake connection timeout"
+- Check network connectivity: `curl snowflake.compute.amazonaws.com`
+- Verify credentials in Airflow Connections
+
+**Issue**: Data validation fails, DAG pauses
+- Check Great Expectations report in `ge_reports/`
+- Often caused by unexpected NULL values
+- Update expectation if schema changed legitimately
+
+**Issue**: DAG runs too slowly
+- Check Airflow logs for slow tasks
+- Profile transformers: `python -m cProfile transformers/cleaner.py`
+- Consider parallelizing with more workers
+```
+
+## Anti-Patterns to Avoid
+
+### Anti-Pattern 1: The Instruction Dump
+
+```markdown
+# DON'T: Wall of disconnected commands
+
+## Useful Commands
+- `npm start` — start dev server
+- `npm test` — run tests
+- `npm run build` — production build
+- `docker build -t myapp .` — build image
+- `git commit -m "message"` — commit changes
+- `curl http://localhost:3000` — check if running
+- `ps aux | grep node` — find processes
+```
+
+This doesn't teach Claude ANYTHING. It's a random command list.
+
+### Anti-Pattern 2: Copy-Pasting Documentation
+
+```markdown
+# DON'T: Stealing from official docs
+
+## Django Models (from django.readthedocs.io)
+
+Model fields include:
+- AutoField
+- BigAutoField
+- BigIntegerField
+- BinaryField
+- BooleanField
+...
+```
+
+Claude already knows Django. Tell it YOUR project's conventions instead.
+
+### Anti-Pattern 3: Overly Long CLAUDE.md
+
+If CLAUDE.md exceeds 1000 lines, you're putting too much in it. Break into rules:
+
+```markdown
+# Better structure:
+
+# Main CLAUDE.md (200-400 lines)
+- Architecture overview
+- Quick start
+- Critical files
+- Common errors
+
+# .claude/rules/
+- 01-coding-standards.md (details on style)
+- 02-testing-strategy.md (how to test this project)
+- 03-database-rules.md (schema, migrations)
+- 04-deployment.md (how to ship)
+```
+
+## Maintenance: Keep CLAUDE.md Current
+
+CLAUDE.md is documentation. It rots if you don't maintain it:
+
+- **After architecture changes**: Update architecture section immediately
+- **After adding a new service**: Add it to "Available Tools"
+- **After a deployment disaster**: Add to "Common Issues"
+- **Monthly review**: Check if instructions are still accurate
+
+Add this to your CLAUDE.md:
+
+```markdown
+## Last Updated: 2026-03-21
+Review this document monthly. Stale docs cause bad decisions.
+
+Recent changes:
+- 2026-03-21: Updated deployment command (now uses Railway)
+- 2026-03-10: Added Redis caching architecture
+- 2026-02-28: Migrated from SQLite to PostgreSQL
+```
+
+## Checklist
+
+- [ ] Created CLAUDE.md at project root (not in `.claude/`)
+- [ ] Included architecture overview (Why this design?)
+- [ ] Documented project structure (Key directories)
+- [ ] Added coding standards with code examples
+- [ ] Wrote testing instructions with real commands
+- [ ] Documented deployment process
+- [ ] Listed critical files that shouldn't be changed
+- [ ] Added "Common Issues" section with solutions
+- [ ] Documented non-obvious conventions (naming, imports, etc.)
+- [ ] Listed available tools and services
+- [ ] Set boundaries on what Claude shouldn't modify
+- [ ] Kept file under 500 lines (break big sections into rules/)
+- [ ] Added "Last Updated" date
+- [ ] Tested that Claude reads and follows CLAUDE.md
+- [ ] Added to git with meaningful commit message
+
+## Sources and Links
+
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

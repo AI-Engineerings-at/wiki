@@ -1,0 +1,599 @@
+---
+title: Claude Code Workflows & Patterns — Praxis-Guide
+date: 2026-03-21
+summary: Praktische tägliche Workflows mit Claude Code — Git Patterns, Code-Migration, Refactoring, Testing, Dokumentation, Debugging, Multi-File Operations mit konkreten Beispielen.
+tags: [claude-code, workflows, patterns, entwicklung, best-practices]
+author: AI Engineering
+---
+
+# Claude Code Workflows & Patterns — Praxis-Guide
+
+Das ist nicht die "Theory", das ist die **Praxis**. Wie du Claude Code wirklich im Alltag nutzt.
+
+## Täglicher Entwicklungs-Workflow
+
+### Morning Standup Loop
+
+```
+1. du: "Was steht auf der Agenda?"
+2. Claude: [Liest TASK_BOARD.md oder Jira Integration]
+3. du: "Hier ist die aktuelle Aufgabe..."
+4. Claude: [Schaut den Code an, fragt nach Kontext]
+5. du: "/claude read CLAUDE.md"
+   [Claude hat jetzt Kontext und Projekt-Details]
+6. du: "Implement feature X"
+7. Claude: [Fragt nach Anforderungen]
+8. du: [Gib Details]
+9. Claude: [Code schreiben, Tests, Dokumentation]
+10. du: "/review" [Claude reviewt seinen eigenen Code]
+11. du: "/pr" [Erstellt PR]
+```
+
+**Dauer:** 1-2 Minuten für Context Setup, dann Arbeit.
+
+### Die wichtigsten Claude Code Commands im Daily Use
+
+| Command | Was | Wann |
+|---------|-----|------|
+| `/init` | Initialisiert CLAUDE.md für neues Projekt | Einmalig am Anfang |
+| `/doctor` | Diagnost: Ist alles OK? | Wenn etwas nicht funktioniert |
+| `/review` | Claude reviewt seinen Code | Vor Commit |
+| `/pr` | Claude erstellt einen PR | Wenn Feature fertig |
+| `/test` | Claude schreibt Tests | Nach Feature-Implementation |
+| `/compact` | Komprimiert Context | Wenn Context voll wird (~80k tokens) |
+| `/permissions` | Welche Tools kann Claude nutzen? | Wenn Claude blockiert ist |
+
+### Context Sparen — wann man /compact nutzt
+
+Der Context hat ein Limit (normalerweise 200k tokens). Wenn er zu voll wird:
+
+```
+Claude: "Context window is getting full, consider /compact"
+```
+
+Das ist das Signal: `/compact` jetzt!
+
+```
+/compact
+→ Claude speichert wichtige Learnings in Memory
+→ Verwirft alte Konversation
+→ Session läuft weiter, aber mit leerem Context
+```
+
+## Git Workflow Pattern
+
+### Standard Feature Branch Workflow
+
+```bash
+# 1. Start Feature
+du: "Ich möchte Feature X bauen. User-ID Login"
+
+# 2. Claude erstellt Branch
+du: "/branch feature/user-id-login"
+→ Creates branch, updates CLAUDE.md
+
+# 3. Zusammen coden
+du: "Implementiere User-ID Validation"
+Claude: [Schreibt Code, fragt Fragen]
+
+# 4. Tests schreiben
+du: "/test"
+Claude: [Schreibt Unit Tests, Integration Tests]
+
+# 5. Review-Loop
+du: "/review"
+Claude: [Schaut Code an, findet Probleme]
+Claude: "❌ Hier ist SQL Injection möglich. Fix:"
+Claude: [Bietet Fix an]
+
+# 6. Final Check
+du: "/review --strict"
+Claude: [Nochmal durchgehen, sehr streng]
+
+# 7. PR erstellen
+du: "/pr --title 'Add User-ID Login Feature'"
+Claude: [Erstellt PR mit Beschreibung, Deployment Steps, Known Issues]
+
+# 8. Merge
+[Im GitHub/GitLab: Approve + Merge]
+```
+
+### PR Review Workflow (Wenn ANDERE einen PR machen)
+
+```bash
+du: "Review PR #42"
+
+Claude: [Schaut PR an]
+Claude: "📝 Reviewing..."
+Claude: [Liest alle Dateien, die sich geändert haben]
+
+# Claude erstellt strukturierten Review:
+1. 🟢 Was ist gut?
+2. 🟡 Was könnte besser sein?
+3. 🔴 Blocking Issues (MUSS gefixt werden)
+4. 💭 Fragen an Author
+
+du: "Sind die Fehler Critical?"
+Claude: "Ja, #3 und #5 sind Blocking. Der Rest ist Minor."
+```
+
+### Git Conflict Resolution
+
+```bash
+git pull origin main
+# → CONFLICT in src/index.ts
+
+du: "Löse den Conflict in index.ts"
+
+Claude: [Liest beide Versionen, versteht die Logik]
+Claude: "Ich sehe: Main hat neue Imports, dein Branch hat neue Exports"
+Claude: [Löst intelligent, nicht einfach beide behalten]
+
+du: [Reviewt die Lösung]
+du: "Looks good"
+
+git add src/index.ts
+git commit -m "Merge: resolve conflict in index.ts"
+git push
+```
+
+## Code Migration Patterns
+
+### Pattern: JavaScript zu TypeScript
+
+Großes, scarry Projekt: 500+ JS-Dateien. Migration zu TypeScript.
+
+```bash
+du: "Konvertiere src/utils.js zu TypeScript"
+
+Claude: [Liest utils.js]
+Claude: "Ich sehe: 12 Funktionen, 3 ohne Type-Hints"
+Claude: [Schreibt utils.ts mit vollständigen Types]
+
+du: "Mache das für alle Utils"
+
+Claude: [Batch-Migration]
+1. Finde alle *.js in src/utils/*
+2. Für jede Datei:
+   - Konvertiere zu TS
+   - Schreibe korrekte Types
+   - Test-Datei aktualisieren
+3. Aktualisiere import-Statements
+
+Result: 20 Dateien konvertiert, alle Tests grün
+
+du: "/review"
+Claude: [Schaut jede Konvertierung an]
+```
+
+### Pattern: Framework-Migration (Express → Fastify)
+
+```bash
+du: "Wir wechseln von Express zu Fastify. Migrier alle Routes."
+
+Claude: [Versteht die Unterschiede]
+- Express: app.get(), middleware mit next()
+- Fastify: fastify.get(), async/await
+
+# Phase 1: Auth Route
+du: "Start with src/routes/auth.js"
+Claude: [Migrier eine Route als Template]
+Claude: "Hier ist auth.js in Fastify. Bereit für die anderen?"
+
+du: "Ja, mache alle Routes"
+Claude: [Batch-Migration aller Routes]
+
+# Phase 2: Middleware
+Claude: [Konvertiert Express middleware zu Fastify Hooks]
+- Express: app.use(cors())
+- Fastify: app.register(require('cors'))
+
+# Phase 3: Tests updaten
+du: "Fix the tests"
+Claude: [Tests nutzen fastify test runner, nicht supertest]
+
+# Phase 4: Performance
+du: "Benchmark old vs new"
+Claude: [Vergleicht Response Times]
+Result: 40% schneller! 🚀
+```
+
+## Refactoring Patterns
+
+### Pattern: Große Funktion aufteilen
+
+```bash
+du: "Diese Funktion hat 150 Zeilen. Split sie auf."
+
+# BEFORE (150 Zeilen)
+async function processOrder(order) {
+  // Validate
+  // Calculate
+  // Save to DB
+  // Send Email
+  // Update Inventory
+  // Create Notification
+  // Log
+}
+
+du: "Refactor: extract methods"
+
+Claude: [Erstellt 6 kleinere Funktionen]
+# AFTER
+async function processOrder(order) {
+  await validateOrder(order);
+  const total = calculateTotal(order);
+  await saveToDatabase(order, total);
+  await Promise.all([
+    sendConfirmationEmail(order),
+    updateInventory(order),
+    createNotification(order)
+  ]);
+  logProcessing(order);
+}
+
+async function validateOrder(order) { ... }
+async function calculateTotal(order) { ... }
+// etc.
+
+du: "/test"
+Claude: [Schreibt Tests für jede neue Funktion]
+du: "/review"
+Claude: [Schaut auf Fehler]
+Result: Clean, testbar, maintainable
+```
+
+### Pattern: Dead Code Removal
+
+```bash
+du: "Es gibt zu viel Legacy Code. Finde und remove dead code."
+
+Claude: [Nutzt Grep/Ast parsing]
+Claude: "Ich habe 47 Funktionen gefunden, die nie aufgerufen werden:"
+- parseOldFormat() [nur in deprecated v1 API]
+- calculateLegacyDiscount() [nie aufgerufen]
+- sendFaxNotification() [alle sind jetzt per Email]
+
+du: "Sind die wirklich sicher zu löschen?"
+Claude: [Prüft Call Sites, Datenbank, Config-Files]
+Claude: "Ja, 100% sicher. Das letzte Call war 2023."
+
+du: "Delete them"
+Claude: [Removes all 47 functions, updates Tests]
+
+Result: 500 Zeilen weniger Code, keine Breaking Changes
+```
+
+### Pattern: Architecture Refactoring
+
+```bash
+# Szenario: Monolith → Microservices
+du: "Extrahiere Payment Service aus Monolith"
+
+# Schritt 1: Identifizieren
+Claude: [Liest Codebase]
+Claude: "Payment hat diese Dependencies:"
+- Order Model
+- Invoice Model
+- Email Service
+- Database
+
+# Schritt 2: Decouple
+Claude: [Erstellt Payment-Abstraction]
+- Vorher: Order ruft direkt Payment.charge() auf
+- Nachher: Order sendet Event, Payment Service abonniert
+
+# Schritt 3: API
+Claude: [Erstellt REST API für Payment]
+POST /api/payments
+- Charge card
+- Refund
+- Get status
+
+# Schritt 4: Database
+Claude: [Splitet Datenbank]
+- Monolith: postgres.main
+- Payment: postgres.payment (Replikation)
+
+# Schritt 5: Tests
+Claude: [Schreibt E2E Tests für beide Services]
+
+# Schritt 6: Deploy Strategy
+Claude: [Dual-write für Migration]
+- Beide Services schreiben
+- Liest von monolith zuerst (dann wechseln)
+
+Result: Payment ist jetzt unabhängig, kann einzeln skalieren
+```
+
+## Testing Patterns
+
+### Pattern: Test-Driven Development (TDD)
+
+```bash
+# Feature: "User can reset password"
+
+# Schritt 1: Red (Test schreiben, wird fehlschlagen)
+du: "Schreib einen Test für Password Reset"
+
+Claude:
+```typescript
+test('user can reset password with valid token', async () => {
+  const user = await createTestUser();
+  const token = await requestPasswordReset(user.email);
+  const newPassword = 'new-password-123';
+
+  const result = await resetPassword(token, newPassword);
+
+  expect(result.success).toBe(true);
+  const updated = await getUser(user.id);
+  expect(updated.password).not.toBe(user.password);
+});
+```
+```
+
+Test läuft: ❌ FAIL (Feature existiert noch nicht)
+
+# Schritt 2: Green (Code schreiben, Test wird grün)
+du: "Implementiere Password Reset"
+
+Claude: [Schreibt minimal Code, Test wird grün]
+
+# Schritt 3: Refactor (Code verbessern, Test bleibt grün)
+du: "Refactor und add edge cases"
+
+Claude: [Verbessert Code, fügt Tests hinzu]
+- What if token is expired?
+- What if password is weak?
+- What if user doesn't exist?
+
+Result: Sichere, testbare Feature
+```
+
+### Pattern: Regression Testing
+
+```bash
+du: "Wir haben gerade Bug #123 gefixt. Schreib Test damit es nicht wieder passiert."
+
+Bug: "Login funktioniert nicht wenn Email uppercase ist"
+
+Claude: [Schreibt Test]
+```typescript
+test('login works with uppercase email', async () => {
+  const user = await createUser('test@example.com', 'password123');
+
+  // Bug war: Suche sensitiv auf Case
+  const result = await login('TEST@EXAMPLE.COM', 'password123');
+
+  expect(result.success).toBe(true);
+  expect(result.userId).toBe(user.id);
+});
+```
+
+Result: Bug kann sich nicht wiederholen
+```
+
+## Dokumentation Patterns
+
+### Pattern: Auto-Generate API Docs
+
+```bash
+du: "Erstelle API Dokumentation für unsere REST API"
+
+Claude: [Liest alle Route-Definitionen]
+Claude: "Ich habe 23 Endpoints gefunden. Generiere ich OpenAPI Spec?"
+
+du: "Ja!"
+
+Claude: [Erstellt openapi.json]
+```json
+{
+  "paths": {
+    "/api/users/{id}": {
+      "get": {
+        "summary": "Get user by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "integer"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User found",
+            "content": {"application/json": {"schema": {...}}}
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+# Alternative: Swagger/Redoc UI
+
+du: "Erstelle eine schöne Dokumentation UI"
+Claude: [Generiert HTML mit Swagger UI oder Redoc]
+
+Result: Interaktive API Docs auf /api/docs
+```
+
+### Pattern: README Auto-Update
+
+```bash
+du: "Update README mit neuen Features"
+
+Claude: [Liest CHANGELOG.md]
+Claude: "Neue Features seit letztem Release:"
+- Feature A
+- Feature B
+- Feature C
+
+Claude: [Updated README]
+- Installation section
+- Usage examples (mit aktuellem Code)
+- API reference
+- Troubleshooting
+
+Result: README ist immer aktuell
+```
+
+## Debugging Patterns
+
+### Pattern: "It Works on My Machine But Not in Prod"
+
+```bash
+du: "Feature X funktioniert lokal, aber nicht in Production. Debug!"
+
+Claude: [Startet Fragen]
+Q1: "Was ist der Fehler in Prod?"
+du: "Timeout nach 30s. Lokal dauert 1s."
+
+Q2: "Unterschiede zwischen Dev und Prod?"
+du: "Prod hat größere Datenbank, andere Server"
+
+Claude: [Vermutet N+1 Queries oder zu großen Dataset]
+Claude: "Lasse mich die Queries analysieren..."
+
+[Liest Code, erstellt Query-Analyse]
+Claude: "❌ Found it! Select statement lädt ALLE User mit ihren Orders"
+```sql
+-- FALSCH
+SELECT * FROM users
+  LEFT JOIN orders ON users.id = orders.user_id
+
+-- Wenn 100k Users mit je 5 Orders:
+-- = 500k Rows transferiert!
+
+-- RICHTIG
+SELECT * FROM users WHERE id IN (...)
+SELECT * FROM orders WHERE user_id IN (...)
+-- Batch load statt JOIN
+```
+
+Claude: [Schreibt Fix]
+Result: 30s → 0.5s 🎉
+```
+
+### Pattern: Memory Leak Detection
+
+```bash
+du: "Unser Service crasht nach 24h. Memory leak?"
+
+Claude: [Liest den Code, schaut auf bekannte Probleme]
+Claude: "Ich sehe: Ihr nutzt setTimeout ohne clearing"
+
+```javascript
+// LEAK
+useEffect(() => {
+  setTimeout(() => {
+    // ... do something
+  }, 1000);
+}, []);  // ← Kein Cleanup! Läuft immer wieder!
+
+// FIX
+useEffect(() => {
+  const timer = setTimeout(() => {
+    // ...
+  }, 1000);
+
+  return () => clearTimeout(timer);  // Cleanup
+}, []);
+```
+
+Claude: [Findet 7 ähnliche Probleme]
+Result: Memory leak gefixt
+```
+
+## Multi-File Operations Patterns
+
+### Pattern: Coordinated Changes Across Files
+
+Szenario: Datenbank-Schema ändert sich (User.email → User.emails[])
+
+```bash
+du: "Migriere von email (string) zu emails (array)"
+
+Claude: [Plant die Änderungen]
+"Das betrifft:"
+1. Database: Migration erstellen
+2. Model: User model updaten
+3. API: POST /users/:id/emails endpoint
+4. Frontend: Email-List UI
+5. Tests: 4 Test-Files
+6. Docs: API docs, README
+
+Claude: [Macht sequenzielle Änderungen]
+
+# File 1: Database migration
+du: "Erstelle die Migration"
+Claude: [migration_2026_03_21_emails.sql]
+
+# File 2: Model
+du: "Update User model"
+Claude: [Ändert model/User.ts]
+
+# File 3: Seed Data
+Claude: [migration_data.sql]
+
+# Files 4-7: Tests updaten
+Claude: [test_users.ts, test_api.ts, ...]
+
+# File 8: Docs
+Claude: [Updates API.md, README.md]
+
+du: "/test"
+Claude: "✓ Alle Tests grün"
+
+du: "/review"
+Claude: "✓ No issues"
+
+Result: Kohärente, konsistente Änderung über 8 Dateien
+```
+
+### Pattern: Batch File Updates (Search & Replace)
+
+```bash
+du: "Ersetze alle Vorkommen von 'app.use' mit 'app.register' (Express → Fastify)"
+
+Claude: [Nutzt Glob um alle Dateien zu finden]
+Claude: "Gefunden 23 matches in 8 Dateien"
+
+Claude: [Macht intelligente replacements]
+- app.use(cors()) → app.register(cors)
+- app.use(bodyParser.json()) → app.register(fastifyJson)
+- app.use(logger) → app.register(fastifyLogger)
+
+Result: Batch-Migration erfolgreich
+```
+
+## Checkliste: Daily Workflow
+
+- [ ] Projekt-CLAUDE.md ist aktuell
+- [ ] Branch-Name ist aussagekräftig (`feature/...`, `fix/...`, `refactor/...`)
+- [ ] `/review` vor jedem Commit
+- [ ] Tests grün (`npm test`)
+- [ ] `/test` um Tests zu generieren/updaten
+- [ ] Keine hardcoded Values (nutze Constants/Config)
+- [ ] Dokumentation mitaktualisiert
+- [ ] PR-Beschreibung ist aussagekräftig (Was? Warum? Wie getestet?)
+- [ ] Keine Secrets in Commits (checke mit `/doctor`)
+- [ ] Context saubern wenn > 150k tokens (`/compact`)
+
+---
+
+**Sources:**
+- [Claude Code Docs - Workflows](https://code.claude.com/docs/en/workflows)
+- [GitHub - zebbern/claude-code-guide](https://github.com/zebbern/claude-code-guide)
+
+## Quellen und Links
+
+- [Common Workflows](https://code.claude.com/docs/en/common-workflows)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

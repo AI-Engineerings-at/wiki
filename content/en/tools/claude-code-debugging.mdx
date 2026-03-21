@@ -1,0 +1,783 @@
+---
+title: Claude Code Debugging & Troubleshooting
+date: 2026-03-21
+summary: Diagnostic guide for Claude Code issues. Covers common errors with solutions, /doctor command, logging, performance optimization, platform-specific issues, and version conflicts.
+tags: [claude-code, debugging, troubleshooting, performance, errors]
+author: AI Engineering
+---
+
+# Claude Code Debugging & Troubleshooting
+
+When Claude Code misbehaves, systematic diagnosis is faster than guessing. This guide covers common errors, diagnostic tools, and recovery strategies.
+
+## Error Categories & Solutions
+
+### Category 1: Authentication & API Errors
+
+#### Error: "Invalid API Key"
+
+```
+Error: Authentication failed. Check your API key.
+```
+
+Diagnosis:
+
+```bash
+# 1. Check if key is set
+echo $ANTHROPIC_API_KEY
+
+# 2. Verify key format (should start with sk-proj-)
+# 3. Check key is not expired
+# 4. Try a fresh key from https://console.anthropic.com
+```
+
+Solution:
+
+```bash
+# Set key explicitly
+export ANTHROPIC_API_KEY="sk-proj-your-actual-key"
+
+# Or configure in settings
+echo 'apiKey: sk-proj-...' >> ~/.claude/settings.local.json
+
+# Test
+claude-code -p "Say hello"
+```
+
+#### Error: "Rate Limit Exceeded"
+
+```
+Error: Rate limit exceeded. Too many requests.
+```
+
+Diagnosis:
+
+```bash
+# Check how many calls you've made today
+# Anthropic has rate limits per API key
+
+# Solution: Wait and retry
+# - Free tier: 10 requests/hour
+# - Paid: Higher limits (check console.anthropic.com)
+```
+
+Solution:
+
+```bash
+# Option 1: Wait (simplest)
+sleep 3600  # Wait 1 hour
+
+# Option 2: Batch requests more carefully
+# Instead of: 10 small requests
+# Do: 1 large request with all questions
+
+# Option 3: Upgrade your plan for higher limits
+```
+
+#### Error: "API Connection Timeout"
+
+```
+Error: Connection timed out connecting to api.anthropic.com
+```
+
+Diagnosis:
+
+```bash
+# 1. Check network connectivity
+ping 8.8.8.8
+
+# 2. Check if Anthropic API is accessible
+curl -I https://api.anthropic.com
+
+# 3. Check firewall/proxy settings
+echo $HTTP_PROXY
+echo $HTTPS_PROXY
+
+# 4. Check if running behind corporate proxy
+# May need to configure proxy
+```
+
+Solution:
+
+```bash
+# If behind proxy:
+export HTTPS_PROXY="http://proxy.company.com:8080"
+claude-code -p "test"
+
+# If firewall blocks outbound:
+# Contact IT to whitelist api.anthropic.com
+
+# If network is down:
+# Work offline or fix network
+```
+
+### Category 2: Context & Memory Errors
+
+#### Error: "Context Window Full"
+
+```
+Error: Maximum context length exceeded (200k tokens used).
+Agent can no longer process requests.
+```
+
+Diagnosis:
+
+```bash
+# Check token usage
+echo "Context: $CLAUDE_CONTEXT_USAGE%"
+
+# This happens when:
+# 1. Large codebase
+# 2. Long conversation history
+# 3. Large files in context
+```
+
+Solution:
+
+```bash
+# Option 1: Compact context (summarize history)
+claude-code /compact
+
+# Option 2: Start fresh session
+# Kill current session, start new one
+# (Old messages are discarded)
+
+# Option 3: Work on smaller piece of codebase
+# Instead of: "Refactor entire app"
+# Do: "Refactor src/api.py"
+
+# Option 4: Use subagents (context: fork) for isolated work
+```
+
+#### Error: "Could Not Load Project Context"
+
+```
+Error: Failed to load .claude/ configuration.
+Check that CLAUDE.md and rules are valid.
+```
+
+Diagnosis:
+
+```bash
+# 1. Check if files exist
+ls -la .claude/CLAUDE.md
+ls -la .claude/settings.json
+
+# 2. Check syntax (if JSON)
+jq . .claude/settings.json
+
+# 3. Check YAML syntax
+python -c "import yaml; yaml.safe_load(open('.claude/CLAUDE.md'))"
+
+# 4. Check file permissions
+chmod 644 .claude/*.json
+```
+
+Solution:
+
+```bash
+# If JSON is invalid, fix syntax
+# Invalid: {"key": value}  (missing quotes)
+# Valid: {"key": "value"}
+
+# If file missing, create it
+cat > .claude/settings.json << 'EOF'
+{
+  "model": "sonnet",
+  "maxTokens": 4096
+}
+EOF
+
+# If permissions wrong, fix
+chmod 755 .claude/
+chmod 644 .claude/*
+```
+
+### Category 3: Tool & Execution Errors
+
+#### Error: "Command Not Found"
+
+```
+Error: Command 'pytest' not found
+```
+
+Diagnosis:
+
+```bash
+# 1. Check if tool is installed
+which pytest
+pytest --version
+
+# 2. Check if in correct virtual environment
+python -m venv
+source venv/bin/activate
+which python
+```
+
+Solution:
+
+```bash
+# Install missing tool
+pip install pytest
+
+# Or use absolute path
+/usr/local/bin/pytest tests/
+
+# Or activate correct environment
+source venv/bin/activate
+pytest tests/
+```
+
+#### Error: "Permission Denied"
+
+```
+Error: Permission denied reading /path/to/file
+```
+
+Diagnosis:
+
+```bash
+# Check file permissions
+ls -la /path/to/file
+
+# Check if you're in correct group
+groups
+id -u
+
+# Check if working directory is readable
+pwd
+ls -la .
+```
+
+Solution:
+
+```bash
+# Fix file permissions
+chmod 644 /path/to/file
+chmod 755 /path/to/directory
+
+# Or run with sudo (not recommended)
+# Better: Fix ownership
+# sudo chown $USER /path/to/file
+
+# Check ~/.claude permissions
+chmod 700 ~/.claude
+chmod 600 ~/.claude/settings.local.json
+```
+
+#### Error: "File Too Large"
+
+```
+Error: File exceeds maximum size (100MB limit)
+```
+
+Solution:
+
+```bash
+# Option 1: Work on smaller files
+# Instead of reading entire database dump
+# Read just the schema
+
+# Option 2: Use file filtering
+# Instead of: read /data/huge-file.csv
+# Do: grep "pattern" /data/huge-file.csv | head -1000
+
+# Option 3: Increase limit (if possible)
+# Edit .claude/settings.json
+# "maxFileSize": 500000000  # 500MB
+```
+
+#### Error: "Bash Exit Code Non-Zero"
+
+```
+Error: Command exited with code 1
+Command: npm test
+Output: Test suite failed
+```
+
+Diagnosis:
+
+```bash
+# 1. Read the error message (usually has details)
+# 2. Run the command manually to see full output
+npm test 2>&1
+
+# 3. Check what changed since last success
+git diff HEAD~1
+
+# 4. Check dependencies
+npm list
+pip list
+```
+
+Solution:
+
+```bash
+# Usually the fix is in the error message
+# Common fixes:
+# - Install missing dependencies: npm install
+# - Update code to pass tests: fix failing test
+# - Reset database state: python manage.py migrate
+
+# If unclear, narrow down the problem:
+npm test -- --testNamePattern="specific test"  # Run one test
+npm test -- --verbose                          # More details
+```
+
+### Category 4: MCP & Integration Errors
+
+#### Error: "MCP Server Connection Failed"
+
+```
+Error: Failed to connect to MCP server at [url]
+```
+
+Diagnosis:
+
+```bash
+# Check if MCP server is running
+curl -s http://localhost:5678/health
+
+# Check configuration
+cat .claude/mcp.json
+
+# Check network connectivity
+netstat -tlnp | grep 5678
+```
+
+Solution:
+
+```bash
+# Start MCP server
+mcp-server start
+
+# Or check if it's already running on different port
+lsof -i :5678
+
+# Check MCP configuration
+cat > .claude/mcp.json << 'EOF'
+{
+  "servers": {
+    "my-mcp": {
+      "command": "mcp-server",
+      "url": "http://localhost:5678"
+    }
+  }
+}
+EOF
+```
+
+#### Error: "Hook Execution Failed"
+
+```
+Error: PreToolUse hook failed with exit code 1
+Hook: ./.claude/hooks/pre-tool-validate.sh
+```
+
+Diagnosis:
+
+```bash
+# Run hook manually to see error
+bash ./.claude/hooks/pre-tool-validate.sh
+
+# Check hook syntax
+shellcheck ./.claude/hooks/pre-tool-validate.sh
+
+# Check hook environment
+env | grep CLAUDE
+```
+
+Solution:
+
+```bash
+# Fix hook script
+# Common issues:
+# - Missing shebang: #!/bin/bash
+# - Syntax error: if missing semicolon before then
+# - Variable not set: $CLAUDE_TOOL_INPUT might be empty
+
+# Debug hook
+bash -x ./.claude/hooks/pre-tool-validate.sh  # Run with trace
+
+# Temporarily disable hook to unblock
+# Remove from .claude/settings.json
+```
+
+## The /doctor Command
+
+Claude Code includes a diagnostic tool:
+
+```bash
+claude-code /doctor
+```
+
+Output:
+
+```
+Claude Code Installation Health Check
+=====================================
+
+✓ CLI installed: /usr/local/bin/claude-code (v1.2.3)
+✓ Node.js: v18.16.0
+✓ Python: 3.11.2
+✗ API Key: Not configured in ANTHROPIC_API_KEY
+✓ Network: Can reach api.anthropic.com
+✓ .claude/: Directory exists with settings.json
+✗ .claude/settings.json: Invalid JSON (syntax error at line 5)
+✓ Git: Initialized (.git exists)
+✗ Git: Uncommitted changes (may cause confusion)
+
+Recommendations:
+- Set ANTHROPIC_API_KEY environment variable
+- Fix JSON syntax in .claude/settings.json
+- Run: git status (and commit/stash changes)
+
+Run 'claude-code /doctor --fix' to auto-fix some issues.
+```
+
+## Verbose Logging & Debugging
+
+Enable detailed logging to diagnose issues:
+
+```bash
+# Run with verbose output
+claude-code --verbose "My task"
+
+# Even more detail
+claude-code --debug "My task"
+
+# Log to file for analysis
+claude-code --verbose "My task" 2>&1 | tee claude-debug.log
+
+# Tail logs in real-time
+tail -f ~/.claude/logs/claude-code.log
+```
+
+Logs show:
+- All tool invocations (Read, Write, Bash, etc)
+- Token counts
+- API calls
+- Hook execution
+- Error details
+
+## Performance Optimization
+
+### Problem: Sessions are Slow
+
+Diagnosis:
+
+```bash
+# Check which tools take longest
+# Look at logs: claude-debug.log
+# Each tool shows execution time
+
+# Example log:
+# [Bash] pwd (0.2s)
+# [Grep] search src/ (3.4s) ← Slow!
+# [Read] README.md (0.5s)
+```
+
+Solution:
+
+```bash
+# 1. Optimize grep patterns
+# Slow: grep -r "pattern" src/  (searches all files)
+# Fast: grep -r "pattern" src/*.py  (specific extension)
+
+# 2. Use smaller file sets
+# Slow: Read entire large file
+# Fast: Read specific section, use grep first
+
+# 3. Cache frequently accessed info
+# Instead of: Asking for git log each time
+# Do: Get it once, reference in conversation
+
+# 4. Use /compact when context is large
+claude-code /compact
+```
+
+### Problem: Tokens Being Wasted
+
+Diagnosis:
+
+```bash
+# Check context usage
+echo "Context: $CLAUDE_CONTEXT_USAGE%"
+
+# If approaching 100%, compact
+```
+
+Solution:
+
+```bash
+# Compact before context fills up
+claude-code /compact
+
+# Use focused prompts
+# Bad: "What's wrong with my app?"  (vague, uses lots of thinking)
+# Good: "Why does login fail with invalid token?" (specific)
+
+# Don't paste huge error logs
+# Bad: Paste 10MB error.log into chat
+# Good: grep "ERROR" error.log | tail -20
+```
+
+## Platform-Specific Issues
+
+### macOS Issues
+
+#### Issue: "Command Not Found: claude-code"
+
+```bash
+# Check if installed
+which claude-code
+
+# If not found, install via Homebrew
+brew install anthropic/claude-code/claude-code
+
+# Or npm
+npm install -g @anthropic-ai/claude-code
+
+# Add to PATH if needed
+export PATH="/usr/local/bin:$PATH"
+```
+
+#### Issue: "Permission Denied" on .claude/
+
+```bash
+# Fix permissions
+chmod 755 ~/.claude/
+chmod 644 ~/.claude/settings.local.json
+```
+
+### Windows Issues
+
+#### Issue: "Claude Code Not Found" in PowerShell
+
+```powershell
+# Install via npm
+npm install -g @anthropic-ai/claude-code
+
+# Or via scoop
+scoop install claude-code
+
+# Check installation
+claude-code --version
+
+# Add to PATH if needed
+$env:Path += ";C:\Users\YourUser\AppData\Roaming\npm"
+```
+
+#### Issue: Paths with Spaces Don't Work
+
+```powershell
+# Problem: cd My Project  (fails, space in path)
+
+# Solution: Use quotes
+cd "My Project"
+
+# Or use full path
+cd "C:\Users\YourUser\My Project"
+```
+
+#### Issue: Line Ending Issues
+
+```bash
+# Git might convert line endings (CRLF vs LF)
+# Configure git to preserve line endings
+git config core.autocrlf false
+
+# Or check file
+file script.sh
+# Should show: LF, not CRLF
+```
+
+### Linux Issues
+
+#### Issue: "sudo: claude-code: command not found"
+
+```bash
+# sudo clears PATH, use full path
+sudo /usr/local/bin/claude-code
+
+# Or add to sudoers (not recommended)
+# Better: don't use sudo for claude-code
+
+# If you need root for a command:
+> I need to read /root/config. Request using sudo
+# Claude will say it can't, you run: sudo cat /root/config
+```
+
+#### Issue: Virtual Environment Not Activated
+
+```bash
+# Create venv
+python -m venv venv
+
+# Activate
+source venv/bin/activate
+# (Now python points to venv version)
+
+# Check
+which python
+# Should show: /path/to/venv/bin/python
+```
+
+## Version Conflicts & Upgrades
+
+### Issue: "Claude Code Version Mismatch"
+
+```
+Error: CLI version 1.0, expected 1.2+
+```
+
+Diagnosis:
+
+```bash
+claude-code --version
+
+# Check if update available
+npm outdated -g @anthropic-ai/claude-code
+```
+
+Solution:
+
+```bash
+# Upgrade
+npm install -g @anthropic-ai/claude-code@latest
+
+# Or specific version
+npm install -g @anthropic-ai/claude-code@1.2.3
+
+# Verify
+claude-code --version
+```
+
+### Issue: "Node.js Version Too Old"
+
+```
+Error: Node 14 is not supported. Upgrade to 16+
+```
+
+Solution:
+
+```bash
+# Check current version
+node --version
+
+# Upgrade via nvm (recommended)
+nvm install 18
+nvm use 18
+
+# Or via Homebrew
+brew upgrade node
+
+# Or via apt
+sudo apt update && sudo apt upgrade nodejs
+```
+
+## Reporting Bugs
+
+If you hit an unsolved issue, report it:
+
+```bash
+# Use the /bug command
+claude-code /bug
+
+# This captures:
+# - Claude Code version
+# - Node/Python versions
+# - Error details
+# - Relevant logs
+# - Reproduction steps
+
+# Then file issue on GitHub:
+# https://github.com/anthropics/claude-code/issues
+```
+
+Include:
+
+1. **Exact error message** (copy-paste)
+2. **Steps to reproduce** (minimal, just the key steps)
+3. **System info** (OS, Node version, Python version)
+4. **Logs** (output of `/doctor` command)
+5. **What you expected** (the correct behavior)
+
+## Recovery Strategies
+
+### Strategy 1: Start Fresh Session
+
+When stuck in a bad state:
+
+```bash
+# Kill current session
+# Then start new one
+claude-code --new-session "My fresh task"
+
+# Or delete session history
+rm ~/.claude/sessions/*
+```
+
+### Strategy 2: Reset Project Config
+
+If configuration is corrupted:
+
+```bash
+# Backup current config
+cp .claude/settings.json .claude/settings.json.bak
+
+# Reset to defaults
+rm .claude/settings.json
+claude-code /init
+
+# Or manually recreate
+cat > .claude/settings.json << 'EOF'
+{
+  "model": "sonnet",
+  "maxTokens": 4096
+}
+EOF
+```
+
+### Strategy 3: Incremental Reproduction
+
+When debugging a complex issue:
+
+```bash
+# Test 1: Simplest possible command
+claude-code -p "Say hello"
+
+# If that works, add complexity
+claude-code -p "Read README.md and summarize"
+
+# Keep adding until it breaks
+# The last working step tells you what caused issue
+```
+
+## Checklist
+
+- [ ] Ran `/doctor` command to diagnose issues
+- [ ] Checked API key is set and valid
+- [ ] Verified network connectivity to api.anthropic.com
+- [ ] Ensured .claude/settings.json has valid JSON
+- [ ] Checked file permissions (.claude/ directory)
+- [ ] Verified required tools installed (Node, Python, git)
+- [ ] Reviewed error logs with `/debug` flag
+- [ ] Tried starting fresh session if stuck
+- [ ] Checked for version conflicts (node, python, claude-code)
+- [ ] Considered platform-specific issues (Windows/Mac/Linux)
+- [ ] Tested with minimal reproduction case
+- [ ] Ran hooks manually to debug hook failures
+- [ ] Compacted context if approaching limits
+- [ ] Checked for rate limiting issues
+- [ ] Reported bug with full details if unresolved
+
+## Sources and Links
+
+- [Debugging & Troubleshooting](https://code.claude.com/docs/en/troubleshooting)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
+- [CLI Reference](https://code.claude.com/docs/en/cli-reference)
+- [GitHub (Anthropic)](https://github.com/anthropics)
+- [Anthropic SDK Python](https://github.com/anthropics/anthropic-sdk-python)
+- [Anthropic SDK TypeScript](https://github.com/anthropics/anthropic-sdk-node)
+- [Claude Code Docs Index](https://code.claude.com/docs/llms.txt)

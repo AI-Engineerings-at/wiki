@@ -1,0 +1,226 @@
+---
+title: Knowledge Distillation
+date: 2026-03-21
+summary: Teacher-Student Paradigm, Soft Labels, Temperature Scaling, Distillation for LLMs — When to Distill, Code Examples
+tags: [knowledge-distillation, model-compression, transfer-learning, student-teacher, temperature]
+author: AI Engineering
+section: Concepts
+---
+
+# Understanding Knowledge Distillation
+
+Knowledge Distillation transfers knowledge from large models (Teacher) to smaller models (Student).
+
+## Core Idea
+
+A large model (GPT-4, 70B Llama) trains a small model (7B Llama) by giving it not just "correct answers" but also its "intuition".
+
+```
+Teacher (Large Model):
+Input: "What is the capital of Germany?"
+Output: Probabilities
+  - Berlin: 0.95
+  - Munich: 0.02
+  - Hamburg: 0.01
+  - Cologne: 0.01
+  - (other 96 countries with <0.01)
+
+Student (Small Model):
+Learns not just that Berlin is correct,
+but WHY other cities exist and why not!
+```
+
+---
+
+## Teacher-Student Framework
+
+### Standard Training (wrong)
+
+```python
+# Teacher makes predictions
+teacher_predictions = teacher_model(input)
+
+# Student trains only on correct labels
+student_predictions = student_model(input)
+loss = CrossEntropyLoss(student_predictions, true_labels)
+```
+
+Problem: Student doesn't see Teacher's "intuition".
+
+### Knowledge Distillation (right)
+
+```python
+# Teacher predictions
+teacher_logits = teacher_model(input)
+
+# Student trains on TWO things:
+student_logits = student_model(input)
+
+# 1. Distillation Loss (knowledge from Teacher)
+distillation_loss = KL_Divergence(
+    softmax(student_logits / temperature),
+    softmax(teacher_logits / temperature)
+)
+
+# 2. Task Loss (original labels)
+task_loss = CrossEntropyLoss(student_logits, true_labels)
+
+# Combine both
+total_loss = (1 - alpha) * task_loss + alpha * distillation_loss
+# alpha typically: 0.3-0.7
+```
+
+---
+
+## Soft Labels and Temperature
+
+Temperature is key to distillation.
+
+### Without Temperature (T=1)
+
+```
+Teacher output for "Berlin is capital":
+  Berlin: 0.99 (very sure)
+  All others: ~0.0001 (very unsure)
+
+Student sees:
+  "Berlin is correct, everything else is garbage"
+  → No new information from other options!
+```
+
+### With Temperature (T=5)
+
+```
+Same Teacher output with T=5 "softened":
+  Berlin: 0.85 (sure)
+  Munich: 0.04 (could also work)
+  Hamburg: 0.03
+  Cologne: 0.03
+  Others: 0.02
+  ...
+
+Student sees:
+  "Berlin is very likely, but Munich/Hamburg/Cologne could work too"
+  → Student learns Teacher's intuition!
+```
+
+---
+
+## Advanced Distillation Techniques
+
+### 1. Feature Distillation
+
+Match hidden layers, not just outputs.
+
+```python
+def feature_distillation_loss(student_hiddens, teacher_hiddens):
+    """
+    student_hiddens: List[Tensors] → 13 Layers
+    teacher_hiddens: List[Tensors] → 13 Layers
+    """
+    loss = 0
+    for student_h, teacher_h in zip(student_hiddens, teacher_hiddens):
+        student_proj = projection_layer(student_h)
+        teacher_proj = teacher_h
+
+        loss += F.mse_loss(student_proj, teacher_proj)
+
+    return loss
+```
+
+### 2. Attention Transfer
+
+Match attention patterns.
+
+```python
+def attention_transfer_loss(student_attentions, teacher_attentions):
+    """
+    Make Student attend to same places as Teacher
+    """
+    loss = 0
+    for student_att, teacher_att in zip(student_attentions, teacher_attentions):
+        student_att_map = student_att.sum(dim=1)
+        teacher_att_map = teacher_att.sum(dim=1)
+
+        loss += F.kl_div(
+            F.log_softmax(student_att_map, dim=-1),
+            F.softmax(teacher_att_map, dim=-1)
+        )
+
+    return loss
+```
+
+---
+
+## Practical Results
+
+```
+Llama-2-70B Teacher
+  MMLU: 63.4%
+  Hellaswag: 81.3%
+
+Llama-2-7B (without distillation)
+  MMLU: 46.0%
+  Hellaswag: 71.2%
+
+Llama-2-7B (with distillation from 70B)
+  MMLU: 52.5% ← +6.5 points!
+  Hellaswag: 76.1% ← +4.9 points
+```
+
+---
+
+## When to Distill
+
+### ✅ Distillation Makes Sense
+
+- You have a large Teacher (GPT-4, 70B)
+- Student must be faster
+- Quality matters but not critical
+- Budget limited (inference costs)
+
+### ❌ Avoid Distillation
+
+- No good Teacher available
+- Quality must match Teacher
+- Training data very limited (<10K examples)
+
+---
+
+## Best Practices
+
+### 1. Teacher Quality is Critical
+
+Good Teacher → Significant Student Improvement
+Bad Teacher → Marginal gains
+
+### 2. Separate Validation Sets
+
+```python
+train_dataset = teacher_generated_data  # With distillation
+val_dataset = original_data              # Task-specific
+
+# Validate on val_dataset!
+```
+
+### 3. Warm-up Phase
+
+```python
+# First 1000 steps: Only Task Loss
+# Then: Mix with Distillation Loss
+
+for step, batch in enumerate(train_loader):
+    if step < 1000:
+        loss = task_loss
+    else:
+        loss = 0.3 * task_loss + 0.7 * kl_loss
+```
+
+---
+
+## Sources and Links
+
+- [Knowledge Distillation (Hinton et al. 2015)](https://arxiv.org/abs/1503.02531)
+- [DistilBERT (Sanh et al. 2020)](https://arxiv.org/abs/1910.01108)
+- [Feature Distillation (Romero et al. 2015)](https://arxiv.org/abs/1412.1134)
+- [Attention Transfer (Zagoruyko & Komodakis 2017)](https://arxiv.org/abs/1612.03928)

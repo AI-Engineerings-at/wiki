@@ -1,0 +1,570 @@
+---
+title: Risikoklassifizierung von KI-Systemen (EU AI Act)
+date: 2026-03-21
+summary: Die vier Risikostufen des EU AI Acts erklärt – unzulässig, hochrisiko, begrenzt, minimal. Mit praktischen Beispielen und Klassifizierungs-Entscheidungsbaum.
+tags: [compliance, risikoklassifizierung, eu-ai-act, hochrisiko]
+author: AI Engineering
+---
+
+# Risikoklassifizierung von KI-Systemen (EU AI Act)
+
+Der EU AI Act teilt KI-Systeme in vier Risikoklassen ein. Die Klassifizierung bestimmt, welche Anforderungen für dich gelten. Dieser Guide zeigt dir, wie du dein System korrekt einordnest.
+
+## Die vier Risikoklassen – Übersicht
+
+| Risikoklasse | Regulierung | Beispiele | Deine Pflicht |
+|--------------|-------------|----------|---------------|
+| **Unzulässig** | VERBOTEN | Social Scoring, RT Gesichtserkennung | Nicht einsetzen |
+| **Hochrisiko** | Streng reguliert | HR-Entscheidungen, Kreditvergabe | Dokumentation, Audit, menschliche Kontrolle |
+| **Begrenzt** | Transparenz | Chatbots, Deepfakes | Nutzer informieren |
+| **Minimal** | Keine Pflicht | Spamfilter, Spiele-KI | Nichts |
+
+## Klasse 1: Unzulässige KI-Systeme
+
+Diese Systeme sind **illegal und dürfen nicht betrieben werden**. Es gibt keine Grauzone und keine Ausnahmen für KMUs.
+
+### Was ist verboten?
+
+#### 1. Social Scoring
+
+Ein System, das Personen aufgrund ihres Verhaltens, ihrer Gewohnheiten oder ihrer Merkmale bewertet und auf Basis dieser Bewertung ihre Zugänge zu Diensten einschränkt.
+
+**Praktisches Beispiel:**
+- ❌ **Verboten:** Ein System, das Kunden-Bonität nicht nur auf Zahlungshistorie prüft, sondern auch auf Social-Media-Verhalten, Einkaufsgewohnheiten, Religion oder Wohnort und dann automatisiert Kredite ablehnt
+- ✅ **OK:** Ein System, das nur nachweisbare finanzielle Kennzahlen nutzt (Einkommen, Kredithistorie, Schulden)
+
+#### 2. Real-Time Biometric Surveillance in der Öffentlichkeit
+
+Live-Gesichtserkennung (oder andere biometrische Echtzeit-Überwachung) durch Behörden/Sicherheitskräfte in öffentlichen Räumen.
+
+**Praktisches Beispiel:**
+- ❌ **Verboten:** Eine Polizeibehörde nutzt Live-Kameras mit KI-Gesichtserkennung an öffentlichen Plätzen, um verdächtige Personen zu finden
+- ✅ **OK (mit engen Ausnahmen):** Erkennung nur nach richterlicher Genehmigung bei schweren Straftaten; Post-Event-Analyse (nachträgliche Auswertung von Videomaterial, nicht Live)
+
+#### 3. Manipulative Systeme
+
+KI, die gezielt das Verhalten von Personen beeinflusst, um ihnen zu schaden (besonders vulnerable Gruppen wie Kinder, ältere Menschen, Menschen mit Behinderungen).
+
+**Praktisches Beispiel:**
+- ❌ **Verboten:** Ein Chatbot, der gezielt Minderjährige zu gefährlichen Verhaltensweisen (Suizid, Gewalt) verleitet
+- ❌ **Verboten:** Ein System, das psychische Schwächen von älteren Menschen nutzt, um sie zu betrügen
+- ✅ **OK:** Personalisierte Werbung, die Nutzer-Vorlieben nutzt (das ist Targeting, nicht Manipulation zu Schaden)
+
+#### 4. Ausbeutung von Schwachstellen
+
+KI, die bewusst Schwachstellen (Alter, Behinderung, wirtschaftliche Lage) ausnutzt, um durch Manipulation Schaden zu verursachen.
+
+**Praktisches Beispiel:**
+- ❌ **Verboten:** Ein System, das älteren Menschen mit kognitiven Einschränkungen automatisiert teure, unnötige Verträge verkauft
+- ❌ **Verboten:** Algorithmen, die wissen, dass eine Person arm ist, und dann bewusst teurere Varianten zeigen
+
+---
+
+**Konsequenz:** Einsatz eines unzulässigen Systems = Bußgeld bis 35 Millionen EUR oder 7% des globalen Umsatzes. Sofortige Stillegung des Systems wird angeordnet.
+
+## Klasse 2: Hochrisiko-KI-Systeme
+
+Diese Systeme dürfen betrieben werden, unterliegen aber **streng regulierten Anforderungen**. Hochrisiko bedeutet: Das System kann grundlegende Rechte oder wichtige Interessen von Menschen stark beeinflussen.
+
+### Welche Systeme sind hochrisiko?
+
+Der AI Act definiert Hochrisiko in zwei Wegen:
+1. **Annex III (explizit aufgelistet):** Bestimmte Bereiche sind immer hochrisiko
+2. **Artikel 6:** Systeme, die fundamental wichtige Prozesse beeinflussen
+
+#### Annex III – Explizit hochrisiko
+
+**Biometrische Systeme (außer Verbot):**
+- Gesichtserkennung für Identifizierung (z.B. in Grenzkontrollen)
+- Fingerabdruck-Erkennung
+
+**Kritische Infrastruktur:**
+- KI, die Stromnetze, Wasserversorgung, oder Verkehrssysteme steuert
+
+**Strafverfolgung und Grenzkontrolle:**
+- Gesichtsidentifikation für Ermittlungen
+- Risikoanalyse für Grenzkontrolle
+- Vorhersage kriminellen Verhaltens
+
+**Bildung:**
+- Systeme, die Schüler bewerten, einstufen oder platzieren
+
+**Beschäftigung:**
+- KI, die Bewerbungen filtert
+- KI, die Mitarbeiter evaluiert
+- KI, die Kündigungen empfielt oder trifft
+
+**Zutritt zu Diensten:**
+- Kreditvergabe
+- Versicherungspreisgestaltung (dynamisches Pricing basierend auf KI)
+- Vermietung (automatisierte Ablehnung)
+
+**Justiz:**
+- Systeme, die Richter bei Urteilen unterstützen
+- Freilassungsprognosen
+- Bewährungsentscheidungen
+
+**Sicherheit:**
+- Zutritt zu kritischen Gebäuden
+- Explosivstofferkennung
+
+#### Praktische Beispiele
+
+**Hochrisiko-Systeme, die ein KMU einsetzen könnte:**
+
+1. **Kreditvergabe-Tool**
+   - System bewertet automatisiert Kreditanfragen
+   - → **Hochrisiko** (beeinflusst finanzielle Rechte)
+
+2. **Bewerbungs-Filter**
+   - KI sortiert Bewerbungen vor, bevor ein Mensch sie sieht
+   - → **Hochrisiko** (beeinflusst Beschäftigungszugang)
+
+3. **Preisgestaltungs-KI**
+   - Algorithmus berechnet individualisierte Preise für Kunden
+   - → Kann hochrisiko sein, wenn diskriminierend (z.B. nach Alter, Geschlecht)
+
+4. **Fraud-Detection im Banking**
+   - System erkennt Betrugstransaktionen
+   - → **Hochrisiko** (wenn Transaktionen automatisch blockiert werden, ohne Prüfung)
+
+### Anforderungen für Hochrisiko – Providers
+
+Falls du ein hochrisiko-System **anbietest** (verkaufst, vertreibst):
+
+1. **Risiko-Management-System**
+   - Dokumentiere: Welche Risiken hat das System? Wie minimierst du sie?
+
+2. **Datenqualität**
+   - Trainingsdaten müssen: repräsentativ, ausreichend, frei von großen Fehlern sein
+   - Für sensitive Bereiche: dokumentierte Qualitätschecks
+
+3. **Technische Dokumentation**
+   - Vollständige Beschreibung: Input, Output, Training, Genauigkeit, Grenzen
+
+4. **Konformitätsbewertung**
+   - Nachweis, dass das System die Anforderungen erfüllt (selbst durchgeführt oder extern auditiert)
+
+5. **Conformity Assessment (ab 2026)**
+   - Unabhängige Überprüfung durch "notified bodies" (wie bei Medizinprodukten)
+
+6. **Cybersecurity**
+   - Schutz vor Manipulation und unbefugtem Zugriff
+
+7. **Post-Market-Monitoring**
+   - Nach Veröffentlichung: Aufzeichnung von Fehlern und Auswirkungen
+
+### Anforderungen für Hochrisiko – Deployer (Nutzer)
+
+Falls du ein hochrisiko-System **einsetzt**:
+
+1. **Menschliche Kontrolle** (Critical!)
+   - Vor kritischen Entscheidungen muss immer ein Mensch prüfen und bestätigen
+   - Beispiel: Kreditantrag wird von KI analysiert, aber von einem Sachbearbeiter genehmigt/abgelehnt
+
+2. **Dokumentation**
+   - Aufzeichnung: Wer nutzt das System? Für welche Entscheidungen? Welche Auswirkungen?
+
+3. **Monitoring und Logging**
+   - Aufzeichnung aller Entscheidungen des Systems
+   - Tracking von Fehlern und Bias
+   - Aufbewahrung für 3+ Jahre
+
+4. **Incident-Reporting**
+   - Falls etwas schiefgeht (z.B. diskriminierendes Ergebnis), muss die Behörde informiert werden
+
+5. **Transparenz**
+   - Betroffene Personen müssen wissen, dass KI eine Entscheidung trifft
+   - Sie haben Recht auf Erklärung
+
+6. **Fairness-Tests**
+   - Regelmäßige Überprüfung: Diskriminiert das System bestimmte Gruppen?
+
+---
+
+## Klasse 3: Begrenzte Risiken
+
+Diese Systeme haben **Transparenz-Anforderungen, aber nicht viel mehr**. Nutzer müssen informiert werden, dass KI involviert ist.
+
+### Was gehört zu begrenzt?
+
+#### 1. Chatbots und Conversational AI
+Jedes System, das natürliche Gespräche führt und den Nutzer täuschen könnte.
+
+**Anforderung:** Nutzer muss zu Anfang klar wissen, dass er mit einer KI spricht.
+
+**Praktisches Beispiel:**
+- ❌ **Nicht OK:** Chatbot auf deiner Website, bei dem Nutzer 2 Minuten lang nicht merkt, dass es kein Mensch ist
+- ✅ **OK:** „Du sprichst mit unserem KI-Kundenservice (ChatGPT). Es kann Fehler machen. Tippe 'Mensch' um weitergeleitet zu werden."
+
+#### 2. Deepfakes und synthetische Medien
+Künstlich erstellte oder manipulierte Audio/Video, die echte Personen darstellen.
+
+**Anforderung:** Klare Kennzeichnung als synthetisch/manipuliert.
+
+**Praktisches Beispiel:**
+- ❌ **Nicht OK:** Deepfake-Video eines Politikers, das ohne Hinweis auf Social Media geteilt wird
+- ✅ **OK:** Satire-Video mit Wasserzeichen und Hinweis „KI-generiert zu Demonstrationszwecken"
+
+#### 3. Emotion Recognition
+Systeme, die Gefühle, Emotionen oder psychische Zustände aus Stimme, Gesichtsausdrücken oder Körpersprache erkennen.
+
+**Anforderung:** Transparenzoffenlegung, dass Emotionen erkannt werden.
+
+**Praktisches Beispiel:**
+- ❌ **Nicht OK:** Kamera im Schulzimmer, die Schüler-Aufmerksamkeit misst, ohne dass sie es wissen
+- ✅ **OK:** Nutzer wird bei der Installation informiert: „Dieses System nutzt Emotion Recognition zur Lernunterstützung"
+
+#### 4. KI in kritischen Infrastruktur-Überwachung
+Systeme, die ausfallsicher sein müssen, aber nicht direkt steuern.
+
+**Anforderung:** Transparenz über KI-Einsatz.
+
+### Anforderungen für begrenzte Risiken
+
+Für Provider und Deployer:
+
+- **Offenlegung:** Nutzer wird informiert, dass KI beteiligt ist
+- **Bei Deepfakes:** Zusätzlich Kennzeichnung des Inhalts als synthetisch
+- **Dokumentation (einfach):** Wer nutzt das? Wie funktioniert es?
+
+Das ist deutlich leichter als Hochrisiko. Keine Audits, keine notified bodies nötig.
+
+---
+
+## Klasse 4: Minimale Risiken
+
+Diese Systeme sind **praktisch unreglementiert**. Sie haben keine speziellen Anforderungen.
+
+### Beispiele
+
+- Spamfilter in Email
+- Autokorrektur in Word/Google Docs
+- Spielelogik in Videospielen
+- Musik-Empfehlungen auf Spotify
+- Bilder-Verbesserung in Fotoapps
+
+**Begründung:** Diese Systeme können grundlegende Rechte nicht beeinflussen. Ein Fehler ist ärgerlich, aber nicht existenzbedrohend.
+
+### Anforderung für minimal
+
+Keine speziellen Anforderungen des AI Act. Du kannst das System einsetzen wie bisher.
+
+---
+
+## Entscheidungsbaum: Wie klassifiziere ich mein System?
+
+```
+Frage 1: Ist mein System eines der verbotenen Systeme?
+├─ JA → UNZULÄSSIG (nicht einsetzen!)
+└─ NEIN → Frage 2
+
+Frage 2: Beeinflusst mein System grundlegende Rechte von Menschen?
+├─ JA → Ist es ein Annex-III-Fall? (siehe oben: Biometrie, HR, Kreditvergabe, etc.)
+│       ├─ JA → HOCHRISIKO
+│       └─ NEIN → Aber beeinflussend genug für Hochrisiko? (Gericht, Kritische Infrastruktur)
+│                ├─ JA → HOCHRISIKO
+│                └─ NEIN → Frage 3
+└─ NEIN → Frage 3
+
+Frage 3: Könnte mein System Menschen täuschen oder manipulieren?
+├─ JA → Chatbot? Deepfake? Emotion Recognition?
+│       ├─ JA → BEGRENZT
+│       └─ NEIN → Frage 4
+└─ NEIN → Frage 4
+
+Frage 4: Hat mein System sonst irgendwelche Auswirkungen auf Nutzer?
+├─ JA → Ist der Fehler kritisch? (z.B. Leben, Freiheit, Geld bedrohend)
+│       ├─ JA → HOCHRISIKO (besondere Fälle)
+│       └─ NEIN → BEGRENZT (für Transparenz sicher besser)
+└─ NEIN → MINIMAL
+```
+
+## Praktische Klassifizierungs-Beispiele
+
+### Beispiel 1: Lokales Ollama-Modell für interne Dokumentation
+
+**System:** Mitarbeiter nutzen lokales LLM (z.B. Mistral 7B auf lokaler GPU) um technische Dokumentation zu schreiben.
+
+**Analyse:**
+- Beeinflusst externe Personen? Nein (nur intern)
+- Kritische Entscheidung? Nein (Schreibunterstützung)
+- Täuschungspotential? Nein (Mitarbeiter weiß, dass er mit KI spricht)
+
+**Klassifizierung:** **MINIMAL** → Keine Compliance-Anforderungen
+
+---
+
+### Beispiel 2: Automatisierter Bewerbungs-Screener
+
+**System:** Ein Tool, das Bewerbungen automatisiert nach Keywords filtered und die beste Hälfte an HR weiterleitet. Die andere Hälfte wird automatisiert abgelehnt.
+
+**Analyse:**
+- Beeinflusstes grundlegende Rechte? Ja (Beschäftigungszugang)
+- Ist es in Annex III? Ja (HR/Recruitment)
+- Menschliche Kontrolle? Teilweise (HR prüft die besten, Rest automatisch abgelehnt)
+
+**Klassifizierung:** **HOCHRISIKO** → Dokumentation, menschliche Kontrolle vor Ablehnung, Fairness-Tests nötig
+
+---
+
+### Beispiel 3: Chatbot auf Website
+
+**System:** Ein ChatGPT-basierter Kundensupport-Bot, der Anfragen beantwortet. Bei komplexen Fragen wird an einen Menschen weitergeleitet.
+
+**Analyse:**
+- Täuschung möglich? Ja (Nutzer könnte anfangs nicht merken, dass es KI ist)
+- Manipulation? Nein (nur Support)
+- Beeinflusste grundlegende Rechte? Nein
+
+**Klassifizierung:** **BEGRENZT** → Transparenz (z.B. Hinweis am Anfang: "Powered by AI")
+
+---
+
+### Beispiel 4: Versicherungs-Pricing mit KI
+
+**System:** Algorithmus berechnet Versicherungsprämien basierend auf: Alter, Geschlecht, Wohnort, Gesundheitsdaten.
+
+**Analyse:**
+- Annex III? Ja (Versicherungspreisgestaltung ist explizit erwähnt)
+- Beeinflusste Rechte? Ja (finanzielle Belastung)
+- Diskriminierungspotential? Hoch (wenn Alter/Geschlecht stark gewichtet werden)
+
+**Klassifizierung:** **HOCHRISIKO** → Compliance-Anforderungen: Dokumentation, Bias-Tests, menschliche Überprüfung vor Prämienofferte
+
+---
+
+## Selbstbewertungs-Framework für KMUs
+
+Nutze diesen Fragebogen zur Klassifizierung deiner Systeme:
+
+### Frage 1: Sicherheit & Verbot
+**Ist mein System eines der verbotenen Systeme?**
+- [ ] Social Scoring (Bewertung der Person basierend auf Verhalten/Merkmale)
+- [ ] Real-Time Biometric Surveillance (Live-Gesichtserkennung auf öffentlichen Plätzen)
+- [ ] Manipulative Systeme (gezielt schädlich für Verhalten)
+- [ ] Ausbeutung von Schwachstellen (gezielt vulnerable Gruppen ausnutzen)
+
+**Falls JA zu irgendeinem:** UNZULÄSSIG → System nicht einsetzen
+
+---
+
+### Frage 2: Annex III Prüfung
+**Ist mein System in einer dieser Kategorien?** (Diese sind automatisch hochrisiko)
+
+**Biometrie:**
+- [ ] Gesichtsidentifikation
+- [ ] Fingerabdruck-Erkennung
+- [ ] Iris/Netzhaut-Erkennung
+
+**Beschäftigung:**
+- [ ] Bewerbungs-Screening
+- [ ] Mitarbeiter-Evaluierung
+- [ ] Kündigungs-Empfehlung
+- [ ] Schicht-Planung (mit automatisierter Reduktion)
+
+**Finanzielle Dienste:**
+- [ ] Kreditvergabe (automatisiert oder als Entscheidungshilfe)
+- [ ] Versicherungs-Pricing
+- [ ] Vermietung (automatisierte Ablehnung)
+
+**Bildung:**
+- [ ] Schüler-Bewertung
+- [ ] Aufnahme-Entscheidungen
+- [ ] Einstufung in Leistungsgruppen
+
+**Justiz:**
+- [ ] Richter-Unterstützung
+- [ ] Freilassungsprognose
+- [ ] Bewährungsentscheidung
+
+**Strafverfolgung:**
+- [ ] Ermittlungsunterstützung (Profilierung)
+- [ ] Risikovorhersage
+- [ ] Gesichtsidentifikation
+
+**Kritische Infrastruktur:**
+- [ ] Stromnetze
+- [ ] Wasserversorgung
+- [ ] Verkehrssysteme
+- [ ] Atomkraftwerke
+
+**Falls JA zu irgendeinem:** HOCHRISIKO (Punkt 3)
+
+---
+
+### Frage 3: Vertrauens-Täuschungs-Potential
+**Könnte mein System Menschen täuschen?**
+
+- [ ] Chatbot (Nutzer könnte denken, es ist ein Mensch)
+- [ ] Deepfake oder synthetisches Audio/Video
+- [ ] Emotion Recognition (Gefühle auslesen)
+- [ ] KI-generierte Texte (die echt aussehen)
+
+**Falls JA zu irgendeinem:** BEGRENZT (Transparenz nötig)
+
+---
+
+### Frage 4: Sonstige Auswirkungen
+**Hat mein System andere Auswirkungen?**
+
+- [ ] Beeinflussst es existenzielle Rechte? (Leben, Freiheit, finanzielle Sicherheit)
+- [ ] Könnten Fehler kritisch sein?
+- [ ] Werden persönliche Daten verarbeitet?
+- [ ] Ist es kritisch für Geschäfte von Menschen?
+
+**Falls JA + kritisch:** HOCHRISIKO oder BEGRENZT
+**Falls JA + unkritisch:** BEGRENZT oder MINIMAL
+**Falls NEIN:** MINIMAL
+
+---
+
+## Dokumentations-Template pro System
+
+Erstelle diese Dokumentation für JEDES System in deinem Inventar:
+
+```markdown
+# System: [Name]
+
+## Basis-Infos
+- **Anbieter:** [Unternehmen/Projekt]
+- **Typ:** [LLM / Klassifizierung / Computer Vision / sonstiges]
+- **Version:** [z.B. Gemini 2.0, Llama 3.1]
+- **Hosting:** [Cloud / Lokal / Hybrid]
+- **Kosten:** [EUR/Monat oder einmalig]
+
+## Funktionalität
+**Was macht das System?**
+[Kurzbeschreibung in 2-3 Sätzen]
+
+**Wer nutzt es?**
+[Mitarbeiter, Kunden, Öffentlichkeit?]
+
+**Welche Daten verarbeitet es?**
+- [ ] Personendaten (Name, Email, etc.)
+- [ ] Kundendaten (Kaufhistorie, Zahlungen)
+- [ ] Interne Daten (Dokumente, Meetings)
+- [ ] Sensor-Daten (Video, Audio, Biometrie)
+- [ ] Sonstige: [Welche?]
+
+## Klassifizierung
+**Risikoklasse:** [Minimal / Begrenzt / Hochrisiko / Unzulässig]
+
+**Begründung:**
+[Warum? Welche Kriterien treffen zu?]
+
+## Hochrisiko-Anforderungen (falls zutreffend)
+
+### Risiko-Management
+- [ ] Dokumentiert: Welche Risiken hat das System?
+- [ ] Dokumentiert: Wie minimierst du sie?
+- [ ] Regelmäßige Überprüfung geplant (wie oft?)
+
+### Datenqualität
+- [ ] Trainingsdaten dokumentiert
+- [ ] Qualitätschecks durchgeführt
+- [ ] Bias-Tests geplant/durchgeführt
+
+### Technische Dokumentation
+- [ ] Input-Output beschrieben
+- [ ] Genauigkeit/Metriken dokumentiert
+- [ ] Grenzen/Limitationen dokumentiert
+- [ ] Fehlerquote gemessen
+
+### Menschliche Kontrolle
+- [ ] Wer kontrolliert die Entscheidungen?
+- [ ] Wie oft wird kontrolliert?
+- [ ] Kann die Person die Entscheidung überschreiben?
+- [ ] Wird dies dokumentiert?
+
+### Monitoring & Logging
+- [ ] Alle Entscheidungen werden geloggt
+- [ ] Fehler-Tracking aktiv
+- [ ] Log-Speicherung: mindestens 3 Jahre
+
+### Incident Reporting
+- [ ] Prozess definiert: Wer meldet was?
+- [ ] Eskalations-Pfad: An wen?
+- [ ] Behörden-Kontakt dokumentiert (RTR, DSB)
+
+## Transparenz (für Begrenzt + Hochrisiko)
+- [ ] Nutzer weiß, dass KI beteiligt ist
+- [ ] Wie wird informiert? [Chat-Hinweis / Datenschutz / Pop-up / sonstiges]
+- [ ] Timing: Wird informiert BEVOR Nutzer interagiert?
+
+## Status
+- [ ] Compliant bis 02.08.2026
+- [ ] Teilweise compliant → Plan bis [Datum]
+- [ ] Nicht compliant → Abstellen oder Fehler fixen bis [Datum]
+- [ ] Noch nicht geprüft
+
+## Kontakt-Person
+- **Name:**
+- **Email:**
+- **Telefon:**
+```
+
+---
+
+## Dokumentations-Checkliste
+
+**Vor 02.08.2026 PFLICHT:**
+- [ ] Für ALLE Systeme: Basis-Infos (Name, Anbieter, Typ)
+- [ ] Für ALLE Systeme: Klassifizierung (ist es minimal/begrenzt/hochrisiko?)
+- [ ] Für Hochrisiko: Risiko-Management dokumentiert
+- [ ] Für Hochrisiko: Menschliche Kontrolle eingerichtet
+- [ ] Für Hochrisiko: Monitoring/Logging aktiv
+- [ ] Für Begrenzt: Transparenz-Maßnahmen geplant
+- [ ] Für ALLE: Incident-Reporting-Prozess definiert
+
+**Danach (fortlaufend):**
+- [ ] Log-Dateien gesammelt und archiviert
+- [ ] Alle 6 Monate: Klassifizierung überprüfen (hat sich was geändert?)
+- [ ] Alle 6 Monate: Hochrisiko-Anforderungen überprüfen (erfüllt?)
+- [ ] Bei neue Systemen: Sofort klassifizieren
+
+---
+
+## Häufige Klassifizierungs-Fehler
+
+**Fehler 1: "Chatbot ist minimal"**
+- Falsch! Jeder Chatbot könnte einen täuschen → **BEGRENZT**
+- Richtig: Klare Transparenz erforderlich ("Du sprichst mit KI")
+
+**Fehler 2: "Unsere lokale KI hat keine Anforderungen"**
+- Falsch! Lokal oder Cloud spielt keine Rolle – die Aufgabe zählt
+- Ein lokales KI-System zur Kreditvergabe ist genauso **HOCHRISIKO** wie eines in der Cloud
+
+**Fehler 3: "Wir haben menschliche Kontrolle weil ein Mensch es unterschreibt"**
+- Falsch! Menschliche Kontrolle heißt: Der Mensch versteht es UND kann es ablehnen
+- Eine blinde Unterschrift unter einer KI-Entscheidung zählt nicht als Kontrolle
+
+**Fehler 4: "Unser KI-Tool ist vom Anbieter, also ist SEIN Problem"**
+- Falsch! Du als Deployer bist genauso verantwortlich wie der Provider
+- Beide müssen compliance sein
+
+**Fehler 5: "Risikoklassifizierung ist einmalig"**
+- Falsch! Falls sich dein System ändert (neue Features, neue Daten), neuklassifizieren
+- Beispiel: Du fügst Emotion-Recognition hinzu → Mindestens BEGRENZT
+
+---
+
+## Glossar
+
+| Begriff | Definition |
+|---------|-----------|
+| **Provider** | Der Anbieter des KI-Systems (Anthropic, OpenAI, dein Unternehmen wenn selbst gebaut) |
+| **Deployer** | Wer das System nutzt/einsetzt (du, wenn du ChatGPT nutzt) |
+| **Hochrisiko** | System beeinflusst grundlegende Rechte von Menschen |
+| **Begrenzt** | System könnte täuschen oder manipulieren, aber nicht kritisch |
+| **Minimal** | System hat praktisch keine speziellen Anforderungen |
+| **Unzulässig** | System ist verboten – punkt |
+| **Konformität** | Einhaltung aller Anforderungen |
+| **Menschliche Kontrolle** | Ein Mensch überprüft und kann die KI-Entscheidung ablehnen |
+| **Incident Reporting** | Behörde über schwerst Fehler informieren |
+| **Annex III** | Liste der automatisch hochrisiko Systeme (HR, Kredit, Justiz, etc.) |
+| **GPAI** | General Purpose AI (ChatGPT, Gemini, Llama – kann alles machen) |
+
+## Quellen und Links
+
+- [EU AI Act](https://eur-lex.europa.eu/eli/reg/2024/1689/oj)

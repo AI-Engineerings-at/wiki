@@ -1,0 +1,163 @@
+---
+title: "Environmental Impact of AI"
+description: "Carbon footprint of training, inference energy costs. Green AI practices, efficient architectures. Carbon tracking tools (CodeCarbon, ML CO2 Impact)."
+section: "ethics"
+---
+
+# Environmental Impact of AI
+
+AI training consumes massive energy. Training a large language model can produce as much CO₂ as a round-trip flight. This page covers Green AI.
+
+---
+
+## 1. Carbon Footprint of AI Training
+
+```python
+class CarbonCalculator:
+    """Estimates CO2 emissions from model training"""
+
+    def __init__(self, energy_source: str = "grid"):
+        # CO2 emissions (kg CO2 per kWh)
+        self.emissions_factor = {
+            "grid": 0.4,        # Average grid
+            "renewable": 0.05,  # Wind/solar
+            "coal": 0.8,        # Coal-heavy
+        }
+        self.factor = self.emissions_factor[energy_source]
+
+    def estimate_training_emissions(self,
+                                   training_hours: float,
+                                   gpu_power_watts: int,
+                                   num_gpus: int = 1) -> dict:
+        """Estimates CO2 for training"""
+        total_energy_kwh = (training_hours * gpu_power_watts * num_gpus) / 1000
+        co2_kg = total_energy_kwh * self.factor
+        co2_tons = co2_kg / 1000
+
+        # Car miles equivalent
+        car_miles = co2_kg / 0.41
+
+        return {
+            "energy_kwh": total_energy_kwh,
+            "co2_kg": co2_kg,
+            "co2_tons": co2_tons,
+            "car_miles_equivalent": car_miles,
+        }
+
+# Usage:
+calculator = CarbonCalculator(energy_source="grid")
+
+# GPT-3: 1200 hours on 8x A100 GPUs
+result = calculator.estimate_training_emissions(
+    training_hours=1200,
+    gpu_power_watts=250,
+    num_gpus=8
+)
+print(f"GPT-3 emissions: {result['co2_tons']:.1f} tons CO2")
+print(f"Equivalent to {result['car_miles_equivalent']:.0f} car miles")
+```
+
+---
+
+## 2. Inference Efficiency
+
+```python
+class InferenceEfficiency:
+    """Calculates efficiency of inference at scale"""
+
+    def daily_inference_emissions(self,
+                                 queries_per_day: int,
+                                 avg_inference_time_ms: float,
+                                 gpu_power_watts: int = 100) -> dict:
+        """Calculates daily emissions"""
+        total_seconds = (queries_per_day * avg_inference_time_ms) / 1000
+        energy_kwh = (total_seconds * gpu_power_watts) / 3_600_000
+        co2_kg = energy_kwh * 0.4
+
+        return {
+            "energy_kwh": energy_kwh,
+            "co2_kg": co2_kg,
+        }
+
+# Usage:
+calc = InferenceEfficiency()
+
+# 100M requests/day, 100ms average
+daily = calc.daily_inference_emissions(
+    queries_per_day=100_000_000,
+    avg_inference_time_ms=100,
+    gpu_power_watts=100
+)
+
+annual = daily['co2_kg'] * 365
+print(f"Daily CO2: {daily['co2_kg']:.0f} kg")
+print(f"Annual CO2: {annual/1000:.0f} tons")
+```
+
+---
+
+## 3. Green AI Practices
+
+```yaml
+ARCHITECTURE LEVEL:
+  - Knowledge Distillation: Train smaller student model from teacher
+    Impact: 90% performance with 50% parameters
+
+  - Quantization: Reduce bitrate (32-bit → 8-bit)
+    Impact: 4x smaller model, minimal accuracy loss
+
+  - Pruning: Remove unimportant neurons/weights
+    Impact: Sparse models, faster inference
+
+  - Mixed Precision: Use FP16 instead of FP32 where possible
+    Impact: 2x faster, less memory/energy
+
+TRAINING LEVEL:
+  - Early Stopping: Stop when validation plateaus
+    Impact: Avoids unnecessary training days
+
+  - Learning Rate Scheduling: Reduce LR over time
+    Impact: Faster convergence
+
+  - Data Efficiency: Train on quality data
+    Impact: Less data = less training = less CO2
+
+DEPLOYMENT LEVEL:
+  - Batch Inference: Process multiple requests
+    Impact: Better GPU utilization
+
+  - Model Caching: Cache frequent predictions
+    Impact: Avoids redundant inference
+
+  - Green Hosting: Deploy in renewable energy regions
+    Impact: Significant emissions reduction
+```
+
+---
+
+## 4. CodeCarbon Integration
+
+```python
+from codecarbon import EmissionsTracker
+
+# Track emissions during training
+tracker = EmissionsTracker()
+tracker.start()
+
+# Training code
+for epoch in range(10):
+    # Training loop
+    pass
+
+emissions = tracker.stop()
+print(f"Emissions: {emissions} kg CO2")
+```
+
+---
+
+## 5. Sources and Links
+
+- **CodeCarbon**: https://codecarbon.io/
+- **Green AI Workshop**: https://www.green-ai.org/
+- **Energy Efficient ML**: https://energy-efficient-ml.github.io/
+- **Hugging Face Model Cards**: https://huggingface.co/docs/hub/models-cards

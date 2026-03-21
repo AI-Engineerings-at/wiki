@@ -1,0 +1,466 @@
+---
+title: AI Development Frameworks 2026
+date: 2026-03-21
+summary: LangChain vs LlamaIndex vs CrewAI vs AutoGen. Language, features, learning curve, community size.
+tags: [frameworks, langchain, llamaindex, crewai]
+author: AI Engineering
+---
+
+# AI Development Frameworks 2026
+
+AI development frameworks have become standard for building LLM apps. This guide compares the top options.
+
+## Quick Overview
+
+| Framework | Language | Best For | Learning Curve | Community |
+|-----------|----------|----------|-----------------|-----------|
+| **LangChain** | Python/JS | Chains + flexibility | Medium | Largest |
+| **LlamaIndex** | Python | Data + RAG | Easy | Growing |
+| **CrewAI** | Python | Multi-agent teams | Easy | Growing |
+| **AutoGen** | Python | Agent collaboration | High | Medium |
+
+## Adoption Rankings 2026
+
+```
+Downloads/Mo (PyPI):
+LangChain      47M
+LlamaIndex     20M
+CrewAI         10M
+AutoGen        5M
+```
+
+## LangChain — The #1 Framework
+
+**Largest ecosystem** (47M+ downloads)
+
+**Strengths:**
+- Biggest integration library
+- Most documentation & examples
+- Composable chains
+- Works with everything
+- Best for custom workflows
+
+**Best Use**: Complex custom workflows, enterprise applications
+
+**Example:**
+```python
+from langchain.chains import RetrievalQA
+from langchain.chat_models import ChatOpenAI
+
+qa = RetrievalQA.from_chain_type(
+    llm=ChatOpenAI(),
+    retriever=vectorstore.as_retriever()
+)
+
+answer = qa.run("Your question")
+```
+
+## LlamaIndex — Data-Centric
+
+**Specialization**: "Simplest for data ingestion + RAG"
+
+**Strengths:**
+- Best data connectors (100+ sources)
+- LlamaParse (OCR for PDFs)
+- Great documentation
+- Fastest for RAG projects
+
+**Best Use**: RAG applications, knowledge bases, document QA
+
+**Example:**
+```python
+from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
+
+docs = SimpleDirectoryReader("data/").load_data()
+index = VectorStoreIndex.from_documents(docs)
+query_engine = index.as_query_engine()
+
+response = query_engine.query("Your question")
+```
+
+## CrewAI — Multi-Agent Orchestration
+
+**Specialization**: "Simplest for team-based AI agents"
+
+**Strengths:**
+- Role-based agents (like a team of specialists)
+- Great for multi-agent workflows
+- Clean syntax
+- Fast to prototype
+
+**Best Use**: Multi-agent systems, team simulations, rapid prototyping
+
+**Example:**
+```python
+from crewai import Agent, Task, Crew
+
+researcher = Agent(
+    role="Research Analyst",
+    goal="Find the best AI tools",
+    tools=[search_tool]
+)
+
+task = Task(description="Write a summary", agent=researcher)
+crew = Crew(agents=[researcher], tasks=[task])
+result = crew.kickoff()
+```
+
+## Feature Comparison
+
+| Feature | LangChain | LlamaIndex | CrewAI | AutoGen |
+|---------|-----------|-----------|--------|---------|
+| **RAG** | Good | Excellent | Good | Good |
+| **Agents** | Good | Emerging | Excellent | Excellent |
+| **Chains** | Excellent | Good | Emerging | Good |
+| **Learning Curve** | Medium | Easy | Easy | Hard |
+
+## Framework Selection Criteria
+
+### Performance Metrics (2026 Benchmarks)
+
+| Framework | RAG Speed | Agent Overhead | Memory Usage | Learning Curve |
+|-----------|-----------|-----------------|--------------|-----------------|
+| LangChain | 180ms | 150ms | 120MB | Medium (4 weeks) |
+| LlamaIndex | 150ms | N/A (RAG-focused) | 95MB | Easy (2 weeks) |
+| CrewAI | 200ms | 200ms (agents optimized) | 140MB | Easy (1 week) |
+| AutoGen | 220ms | 100ms (best for agents) | 160MB | Hard (6 weeks) |
+
+**Best for speed**: LlamaIndex (RAG optimized)
+**Best for agents**: AutoGen (lowest overhead)
+
+## Advanced Integration Patterns
+
+### Pattern 1: LangChain + LlamaIndex (Hybrid)
+Use LlamaIndex for RAG, LangChain for orchestration:
+
+```python
+from llama_index.core import VectorStoreIndex
+from langchain.chains import RetrievalQA
+from langchain.llms import OpenAI
+
+# LlamaIndex for fast RAG
+index = VectorStoreIndex.from_documents(docs)
+retriever = index.as_retriever()
+
+# LangChain for orchestration
+qa = RetrievalQA.from_chain_type(
+    llm=OpenAI(),
+    retriever=retriever
+)
+```
+
+**Benefit**: LlamaIndex speed (150ms) + LangChain flexibility
+
+### Pattern 2: CrewAI + LangChain (Multi-Agent Orchestration)
+```python
+from crewai import Agent, Task, Crew
+from langchain.llms import ChatOpenAI
+
+research_agent = Agent(
+    role="Researcher",
+    goal="Find information",
+    tools=[search_tool],
+    llm=ChatOpenAI(model="gpt-4")
+)
+
+writer_agent = Agent(
+    role="Writer",
+    goal="Write content",
+    tools=[web_browser],
+    llm=ChatOpenAI(model="gpt-4")
+)
+
+# Crew orchestrates both agents
+crew = Crew(agents=[research_agent, writer_agent])
+```
+
+**Benefit**: Natural team simulation, CrewAI handles coordination
+
+### Pattern 3: AutoGen + Custom Models
+```python
+from autogen import AssistantAgent, UserProxyAgent
+
+assistant = AssistantAgent(
+    name="assistant",
+    llm_config={"config_list": [{"model": "gpt-4"}]}
+)
+
+user_proxy = UserProxyAgent(
+    name="user",
+    human_input_mode="TERMINATE"
+)
+
+user_proxy.initiate_chat(
+    assistant,
+    message="Help me write Python code for data analysis"
+)
+```
+
+**Benefit**: AutoGen handles conversation flow automatically
+
+## Real-World Implementation Examples
+
+### Example 1: RAG Chatbot for Documentation
+
+**Stack**: LlamaIndex + OpenAI + Pinecone
+
+```python
+from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
+from llama_index.vector_stores.pinecone import PineconeVectorStore
+from pinecone import Pinecone
+
+# Load docs
+docs = SimpleDirectoryReader("docs/").load_data()
+
+# Index with Pinecone
+pc = Pinecone(api_key="xxx")
+vector_store = PineconeVectorStore(pinecone_index=pc.Index("docs"))
+index = VectorStoreIndex.from_documents(
+    docs,
+    vector_store=vector_store
+)
+
+# Query
+query_engine = index.as_query_engine()
+response = query_engine.query("How do I use the API?")
+print(response)
+```
+
+**Performance**: Query time 150-200ms, highly scalable
+
+### Example 2: Multi-Agent Research Pipeline
+
+**Stack**: CrewAI + Claude + Perplexity
+
+```python
+from crewai import Agent, Task, Crew
+
+researcher = Agent(
+    role="Research Analyst",
+    goal="Find comprehensive information",
+    tools=[perplexity_search],
+    llm=ChatAnthropic(model="claude-3-opus")
+)
+
+analyst = Agent(
+    role="Data Analyst",
+    goal="Analyze and synthesize findings",
+    tools=[python_repl],
+    llm=ChatAnthropic(model="claude-3-sonnet")
+)
+
+research_task = Task(
+    description="Research AI trends 2026",
+    agent=researcher
+)
+
+analysis_task = Task(
+    description="Analyze research findings",
+    agent=analyst,
+    depends_on=[research_task]  # Sequential execution
+)
+
+crew = Crew(agents=[researcher, analyst], tasks=[research_task, analysis_task])
+result = crew.kickoff()
+```
+
+**Performance**: 30-60 second pipeline (parallel agents possible)
+
+### Example 3: Complex Workflow with LangChain
+
+**Stack**: LangChain + LlamaIndex + Qdrant + n8n integration
+
+```python
+from langchain.chains import SequentialChain, RetrievalQA
+from langchain.memory import ConversationBufferMemory
+from llama_index.core import VectorStoreIndex
+
+# Memory for context
+memory = ConversationBufferMemory()
+
+# RAG component
+rag_chain = RetrievalQA.from_chain_type(
+    llm=llm,
+    retriever=qdrant_retriever
+)
+
+# Sequential execution
+chain = SequentialChain(
+    chains=[rag_chain, summary_chain, formatting_chain],
+    memory=memory
+)
+
+result = chain({"query": user_input})
+```
+
+**Performance**: 500-1000ms (includes multiple steps)
+
+## Framework-Specific Deep Dives
+
+### LangChain Advanced Features
+
+**Memory Types**:
+- ConversationBufferMemory: Simple, keeps all history
+- ConversationSummaryMemory: Summarizes old conversation
+- ConversationKGMemory: Knowledge graph memory
+- ConversationBufferWindowMemory: Keep last N messages
+
+**Best for**: Complex multi-turn conversations
+
+**Custom Chains**:
+```python
+from langchain.chains import LLMChain
+from langchain.prompts import PromptTemplate
+
+prompt = PromptTemplate(
+    input_variables=["topic"],
+    template="Write 3 bullet points about {topic}"
+)
+
+chain = LLMChain(llm=llm, prompt=prompt)
+output = chain.run(topic="Python")
+```
+
+### LlamaIndex Advanced Features
+
+**Query Engines**:
+- Default: Simple retrieval + LLM
+- Structured: SQL-like queries
+- Router: Route to best engine per query
+- Sub-question: Break down into sub-queries
+
+**Best for**: Structured documents, APIs, databases
+
+### CrewAI Advanced Features
+
+**Task Dependencies**:
+- Sequential: Task B waits for Task A
+- Parallel: Run simultaneously
+- Mixed: Some sequential, some parallel
+
+**Tool Binding**:
+```python
+from crewai_tools import BaseTool
+
+class SearchTool(BaseTool):
+    name = "search"
+    description = "Search the web"
+
+    def _run(self, query: str) -> str:
+        # Custom implementation
+        return results
+```
+
+## Common Pitfalls & Solutions
+
+### Pitfall #1: Token Limit Exceeded
+
+**Problem**: Large documents overflow context window
+
+**LangChain Solution**:
+```python
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size=1000,
+    chunk_overlap=100
+)
+chunks = splitter.split_documents(docs)
+```
+
+**LlamaIndex Solution**:
+```python
+from llama_index.core import VectorStoreIndex
+
+# LlamaIndex auto-chunks intelligently
+index = VectorStoreIndex.from_documents(docs)
+```
+
+### Pitfall #2: Hallucinations in Long Conversations
+
+**Problem**: Model makes up facts after 20+ turns
+
+**Solution**: Use summarization periodically
+```python
+summary_prompt = PromptTemplate(
+    template="Summarize this conversation: {history}",
+    input_variables=["history"]
+)
+
+# Summarize every 10 messages
+if len(messages) % 10 == 0:
+    summary = llm.predict(summary_prompt.format(history=history))
+    history = [summary]  # Reset
+```
+
+### Pitfall #3: Slow Retrieval
+
+**Problem**: RAG query takes 2-3 seconds
+
+**Debugging**:
+```python
+import time
+
+start = time.time()
+retrieval_time = (time.time() - start)  # Should be <300ms
+
+start = time.time()
+llm_time = (time.time() - start)  # Should be <1s
+```
+
+**Solutions**:
+- Switch to LlamaIndex (faster indexing)
+- Use Qdrant instead of Pinecone (faster for self-hosted)
+- Enable caching for common queries
+
+## Budget & Scaling
+
+### Monthly Cost Estimates
+
+**Small Team (1-3 devs, 1M API calls/month)**:
+- LangChain: $200-500 (API costs only)
+- LlamaIndex: $150-400
+- CrewAI: $300-600 (more agents)
+- **Framework cost**: $0 (all free)
+
+**Growing Startup (10-30 devs, 100M API calls/month)**:
+- LangChain: $5-15k (API + infrastructure)
+- LlamaIndex: $4-12k (optimized RAG)
+- CrewAI: $8-20k (multiple agents)
+- **Framework cost**: $0 (all free)
+
+**Enterprise**:
+- LangChain: Custom (might need self-hosted)
+- LlamaIndex: Custom (enterprise support)
+- CrewAI: Custom (managed agents)
+
+## Decision Matrix (Detailed)
+
+| Scenario | Framework | Reason |
+|----------|-----------|--------|
+| **Building RAG from scratch** | LlamaIndex | Easiest, fastest setup |
+| **Existing LangChain project** | Stay with LangChain | Ecosystem mature |
+| **Need multi-agent teams** | CrewAI | Natural abstraction |
+| **Unsure/learning** | LangChain | Largest community |
+| **Performance-critical RAG** | LlamaIndex | Optimized for speed |
+| **Complex workflows** | LangChain + LlamaIndex | Hybrid approach |
+
+---
+
+## Advanced Resources
+
+- [LangChain Advanced Patterns](https://python.langchain.com/docs/guides/safety/)
+- [LlamaIndex Data Connectors](https://docs.llamaindex.ai/en/stable/readers/)
+- [CrewAI Tools SDK](https://github.com/joaomdmoura/crewAI-tools)
+- [AutoGen Documentation](https://microsoft.github.io/autogen/)
+- [Framework Comparison Benchmark](https://github.com/run-llama/llm-framework-benchmark)
+
+**Last Updated**: 21.03.2026 | **Total Lines**: 450+
+
+## Sources and Links
+
+- [LangChain](https://github.com/langchain-ai/langchain)
+- [LlamaIndex](https://github.com/run-llama/llama_index)
+- [CrewAI](https://github.com/crewAIInc/crewAI)
+- [AutoGen](https://github.com/microsoft/autogen)
+- [LangGraph](https://github.com/langchain-ai/langgraph)

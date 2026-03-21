@@ -1,0 +1,416 @@
+---
+title: "RAG and Retrieval — Knowledge Augmentation"
+date: "2026-03-21"
+summary: "Retrieval-Augmented Generation: Architecture, Vector DBs, chunking, LangChain vs LlamaIndex, enterprise patterns"
+tags: ["rag", "retrieval", "vector-database", "chunking", "langchain", "llamaindex", "embedding"]
+author: "AI Engineering"
+---
+
+# RAG and Retrieval — Category Overview
+
+RAG is the standard answer to "My LLM has outdated knowledge" or "My model hallucinates facts". 2026: Almost every enterprise LLM system needs RAG. We show the architecture, vector databases, chunking strategies, and when RAG vs fine-tuning.
+
+## What is RAG? (Precise)
+
+**RAG = Retrieval-Augmented Generation**
+
+Instead of just "Prompt → LLM → Answer" you do:
+```
+User query
+    ↓
+Embedding (convert query to vector)
+    ↓
+Vector DB search (find similar documents)
+    ↓
+Retrieval (fetch top-K matches)
+    ↓
+Augment (add matches to prompt)
+    ↓
+LLM prompt with context
+    ↓
+Answer
+```
+
+**Core idea:** The LLM answers based on your documents, not training data.
+
+**Example:**
+```
+Without RAG:
+User: "What's the latest feature in Playbook01?"
+LLM: "I don't know, my training ended 2024-01"
+
+With RAG:
+User: "What's the latest feature in Playbook01?"
+RAG system: [retrieves latest README.md]
+LLM: "Based on README: the latest feature is ..."
+```
+
+## The Architecture (5 Components)
+
+### 1. Documents (Input)
+Your sources: PDFs, web pages, database, Confluence, wiki.
+
+**Best practice:** "Single source of truth." If you have 3 outdated copies, RAG retrieves all 3 = confusion.
+
+### 2. Chunking (Breaking Down)
+Documents are large (100-page PDF = too much for LLM context window). Chunk = divide document into smaller pieces.
+
+**Strategies:**
+
+#### Fixed-Size Chunking
+```
+Chunk size: 512 tokens (±2000 characters)
+Overlap: 50 tokens (prevent loss between chunks)
+
+Document: "This is sentence 1. Sentence 2. Sentence 3. Sentence 4. Sentence 5."
+↓
+Chunk 1: "This is sentence 1. Sentence 2. Sentence 3."
+Chunk 2: "Sentence 2. Sentence 3. Sentence 4. Sentence 5."  [overlap = sentence 2+3]
+```
+
+**Advantages:** Simple, fast.
+**Disadvantages:** Chunk might end mid-sentence (semantics lost).
+
+#### Recursive Chunking
+```
+Try to split on paragraph boundaries
+If too large, split on sentence boundaries
+If still too large, split on character boundaries
+```
+
+**Advantages:** Preserves structure better.
+**Disadvantages:** More complex to implement.
+
+#### Semantic Chunking (2026 Standard)
+```
+Embed each sentence
+Calculate similarity between adjacent sentences
+Split when similarity drops (= topic change)
+```
+
+**Advantages:** Chunks are semantically coherent.
+**Disadvantages:** Expensive (must embed N sentences).
+**Best for:** Production when quality critical.
+
+#### LLM-based Chunking
+```
+LLM: "Break this text into coherent parts"
+LLM: "Here are the chunks: ..."
+```
+
+**Advantages:** Very intelligent chunks.
+**Disadvantages:** Expensive (LLM calls), slow.
+**Best for:** Small critical documents (e.g., contracts).
+
+#### Late Chunking (new 2026)
+```
+Don't chunk, instead:
+Document → Embedding (whole) → then "conceptually split" via embedding space
+```
+
+Still experimental, but promising.
+
+### 3. Embedding (Vector Conversion)
+Each chunk becomes a vector (array of numbers).
+
+**Models:**
+- `text-embedding-3-small` (OpenAI): 1536-dimensional, EUR 0.00002/1K tokens
+- `text-embedding-3-large` (OpenAI): 3072-dimensional, EUR 0.00013/1K tokens
+- `nomic-embed-text-v1` (open-source): 768-dimensional, free, similar quality to OpenAI-large
+
+**Practically:**
+- Document "Stable Diffusion is text-to-image AI" → `[0.23, -0.45, 0.12, ...]` (1536 numbers)
+- Query "What is diffusion?" → `[0.21, -0.43, 0.14, ...]`
+- Similarity: cos-similarity(doc, query) = 0.98 (very similar!)
+
+**Security:** Embeddings aren't reversible (can't convert embedding back to text → private).
+
+### 4. Vector Database
+Stores embeddings + metadata, enables fast similarity search.
+
+**Options:**
+- **Pinecone** (Cloud, managed): EUR 0.40/million vectors/month. Simple, scalable.
+- **Weaviate** (Self-hosted or cloud): Open-source, flexible, needs DevOps.
+- **Milvus** (Self-hosted): Open-source, Kubernetes-native, for scale.
+- **Qdrant** (Self-hosted or cloud): Modern, simple, growing community.
+- **ChromaDB** (Self-hosted): Lightweight, for prototyping.
+
+**Performance comparison (March 2026):**
+- Pinecone: p99 latency 30ms (cloud)
+- Qdrant self-hosted (.83 server): p99 latency 10ms
+- Milvus cluster: p99 latency 15ms
+
+**Practical recommendation:** Qdrant for self-hosted (good price-performance), Pinecone for "I don't want ops".
+
+### 5. LLM (Augmented)
+The LLM receives prompt + top-K retrieved chunks.
+
+```python
+context = vector_db.search(query, top_k=3)  # fetch 3 similar chunks
+prompt = f"""
+Based on the following information:
+{context}
+
+Answer the question: {user_query}
+"""
+answer = llm.complete(prompt)
+```
+
+**Important:** "Garbage in, garbage out"—if top_k chunks are wrong, LLM can't magically fix it.
+
+## LangChain vs LlamaIndex (for RAG)
+
+### LlamaIndex (specialized for RAG)
+
+**What it is:** Framework specifically for data → LLM pipelines. Focus: indexing, retrieval, query engines.
+
+**Structure:**
+```python
+from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
+
+# 1. Load documents
+documents = SimpleDirectoryReader("./data").load_data()
+
+# 2. Create index (auto chunking + embedding)
+index = VectorStoreIndex.from_documents(documents)
+
+# 3. Query
+query_engine = index.as_query_engine()
+response = query_engine.query("Who is the CEO?")
+```
+
+**Advantages:**
+- Minimal boilerplate for "simple RAG"
+- Built-in tools: document loaders (PDF, web, Confluence, etc.)
+- Advanced features: HyDE, BM25, hybrid search
+- p99 latency: 30ms (optimized)
+
+**Disadvantages:**
+- Less control over chunking details
+- Less flexible for non-RAG tasks
+- Smaller community
+
+**Best for:** "I want RAG quickly without thinking about details."
+
+### LangChain (Orchestration)
+
+**What it is:** General-purpose framework for LLM apps. RAG is one use case among many.
+
+**Structure:**
+```python
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_pinecone import PineconeVectorStore
+from langchain_openai import OpenAIEmbeddings
+from langchain.chains import RetrievalQA
+
+# 1. Load & chunk
+splitter = RecursiveCharacterTextSplitter(chunk_size=512)
+chunks = splitter.split_documents(documents)
+
+# 2. Embed & store
+embeddings = OpenAIEmbeddings()
+vector_store = PineconeVectorStore.from_documents(chunks, embeddings)
+
+# 3. Retrieval QA
+qa = RetrievalQA.from_chain_type(
+    llm=ChatOpenAI(),
+    chain_type="stuff",
+    retriever=vector_store.as_retriever()
+)
+response = qa.run("Who is the CEO?")
+```
+
+**Advantages:**
+- Full control over each step
+- Flexible for complex workflows (not just RAG, but agents, tools, etc.)
+- Larger community
+- LangGraph for production (checkpointing, observability)
+
+**Disadvantages:**
+- More boilerplate
+- Steep learning curve
+
+**Best for:** "I want RAG + other tools combined (agents, APIs, etc.)."
+
+### Hybrid: LlamaIndex workflows + LangGraph
+
+**2026 best practice:** Many production teams use:
+- **LlamaIndex for data preprocessing:** Load documents, intelligent chunking
+- **LangChain + LangGraph for orchestration:** Complex workflows, agents
+- **Qdrant for vector storage**
+
+```
+Documents → LlamaIndex (load, chunk, embed) → Qdrant
+Query → LangGraph (planning, retrieval, LLM) → Answer
+```
+
+## Chunking Decision Tree (2026)
+
+```
+Have < 100 documents?
+  → Fixed-size chunking is enough
+  → 512 tokens chunk-size, 50 tokens overlap
+
+Have structured docs (Markdown, sections)?
+  → Recursive chunking
+  → Split on headers
+
+Quality critical (legal, medical)?
+  → Semantic chunking
+  → Costs EUR 0.01-0.05 per document, but worth it
+
+Need best accuracy?
+  → Late chunking (experimental)
+```
+
+## Enterprise RAG Patterns
+
+### Pattern 1: Hybrid Retrieval (keyword + semantic)
+
+```
+Query "SQL best practices"
+↓
+Split into keywords: ["SQL", "Best", "Practices"]
+↓
+BM25 search (keyword) + vector search (semantic)
+  ↓ BM25: Exact match docs (high recall)
+  ↓ Vector: Semantic-similar docs (high precision)
+↓
+Merge & rank (e.g., RRF = reciprocal rank fusion)
+↓
+Top-K to LLM
+```
+
+**Advantage:** Combines best of both worlds (exact match + semantic).
+**Disadvantage:** More complex.
+**When to use:** Search results not good enough with vector search alone.
+
+### Pattern 2: Multi-Index RAG
+
+```
+Customer docs → Index A (Pinecone)
+Product catalog → Index B (Qdrant)
+Internal wiki → Index C (Weaviate)
+
+Query router: "Which index is relevant?"
+  → LLM classifies query
+  → Retrieves from matching index(es)
+  → Merged results
+```
+
+**Use case:** Large orgs with different document types.
+
+### Pattern 3: Hierarchical Retrieval
+
+```
+Level 1: Summaries (short summaries)
+  → Quick retrieval, big picture
+
+Level 2: Chunks (detail)
+  → After reading summaries, load relevant chunks
+
+LLM: "Answer with details, but organized"
+```
+
+**Benefit:** Complex documents, faster retrieval, better answers.
+
+## Common Gotchas
+
+### 1. "My RAG retrieves irrelevant chunks"
+
+**Root cause usually:** Bad embeddings or wrong chunk-size.
+
+**Fix:**
+- Increase chunk-size (too small = lost context)
+- Check embedding quality (test with hand-picked examples)
+- Add metadata filter (e.g., "only recent documents")
+
+### 2. "Costs explode (API calls for embedding)"
+
+**If using OpenAI embeddings:**
+- 1 million chunks = EUR 20 (one-time)
+- But each query embedding = costs EUR 0.00002, quickly EUR 100+/month
+
+**Fix:**
+- Use smaller embedding model (text-embedding-3-small vs large)
+- Self-hosted embeddings (nomic-embed-text, free)
+- Cache popular queries
+
+### 3. "Latency too high (RAG query takes 2 seconds)"
+
+**Causes:** Slow vector DB lookup (unoptimized), slow LLM call, network.
+
+**Fix:**
+- Optimize vector DB (index settings, quantization)
+- Batch queries (if possible)
+- Use smaller/faster LLM (Sonnet vs Opus)
+
+### 4. "Hallucination still there"
+
+**Reality:** RAG reduces hallucination but doesn't eliminate (LLM can still invent).
+
+**Fix:**
+- Ensemble retrieval (multiple retrievals, merge)
+- Re-ranking (retrieve top-100, LLM re-rank top-10)
+- Instruct LLM: "Answer ONLY based on documents, or say 'Not found'"
+
+## Benchmark 2026: RAG vs Fine-Tuning
+
+| Dimension | RAG | Fine-Tuning | Winner |
+|-----------|-----|-------------|--------|
+| **Update speed** | Instant (add doc) | Days (retrain) | RAG |
+| **Knowledge cutoff** | None (current data) | Fixed (training date) | RAG |
+| **Cost (100k chunks)** | EUR 20-100/month | EUR 500-2000 (one-time) | FT |
+| **Quality (structured knowledge)** | Good | Excellent | FT |
+| **Privacy** | Depends (cloud DB) | Full (your model) | FT |
+| **Scalability** | Easy (add DB size) | Hard (retrain needed) | RAG |
+
+## Roadmap 2026-2027
+
+- **Q2 2026:** Adaptive chunking becomes standard (models learn best chunk-size)
+- **Q3 2026:** Multi-modal retrieval (text + image + video) becomes mainstream
+- **Q4 2026:** RAG + fine-tuning hybrid (best of both) becomes production-ready
+
+## Practical Start (30 Minutes)
+
+```python
+# 1. Install
+pip install llama-index qdrant-client openai
+
+# 2. Load docs + build index
+from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
+documents = SimpleDirectoryReader("./my_docs").load_data()
+index = VectorStoreIndex.from_documents(documents)
+
+# 3. Query
+query_engine = index.as_query_engine()
+response = query_engine.query("Your question here")
+print(response)
+```
+
+**Done.** You have RAG.
+
+## Conclusion
+
+**RAG 2026:**
+- **Standard for knowledge-heavy apps** (support, internal tools)
+- **LlamaIndex** for quick prototypes
+- **LangChain + LangGraph** for complex workflows
+- **Semantic chunking** for quality
+- **Qdrant self-hosted** for ops control
+
+**Cost reality:** EUR 0-100/month depending on scale. ROI is obvious (one support query costs EUR 50 via agent, RAG saves that).
+
+Start: 30 minutes with LlamaIndex. Scale to LangGraph later if needed.
+
+## Sources and Links
+
+- [RAG Original Paper (Lewis et al., 2020)](https://arxiv.org/abs/2005.11401)
+- [LangChain GitHub](https://github.com/langchain-ai/langchain)
+- [LlamaIndex GitHub](https://github.com/run-llama/llama_index)
+- [ChromaDB GitHub](https://github.com/chroma-core/chroma)
+- [Qdrant GitHub](https://github.com/qdrant/qdrant)
+- [Weaviate GitHub](https://github.com/weaviate/weaviate)
+- [Milvus GitHub](https://github.com/milvus-io/milvus)
+- [LangGraph GitHub](https://github.com/langchain-ai/langgraph)
+- [HuggingFace MTEB Leaderboard](https://huggingface.co/spaces/mteb/leaderboard)

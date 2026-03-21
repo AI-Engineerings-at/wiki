@@ -1,0 +1,355 @@
+---
+title: "Skills — AI Engineering Toolkit"
+date: "2026-03-21"
+summary: "49 custom-built skills for Claude Code — Infrastructure, marketing, organization"
+tags: ["skills", "claude-code", "automation", "toolkit"]
+author: "AI Engineering"
+---
+
+# Skills — AI Engineering Toolkit
+
+> 49 custom-built skills | 6 categories | 2 repos | Quality gate for every skill
+
+All skills are **custom-built** — developed and maintained by AI Engineering.
+They run as Claude Code auto-load skills in `.claude/skills/` directories.
+
+## What Are Skills?
+
+Skills are reusable prompt templates for Claude Code. Each skill consists of a `SKILL.md` file with YAML frontmatter (metadata) and a body (instructions). Claude Code loads them automatically when you work in the corresponding directory.
+
+**Official Anthropic standard + custom extensions:**
+- Anthropic fields: `name`, `description`, `instructions`, `command_injection`
+- Our extensions: `version`, `requires`, `produces`, `error-refs`, `learning-refs`
+- String substitutions: `$ARGUMENTS`, `${CLAUDE_SKILL_DIR}`, `${workspaceFolder}`
+
+## Skill Repos
+
+| Repo | Focus | Skills | Categories |
+|------|-------|--------|-----------|
+| **phantom-ai** | Infrastructure, agents, voice gateway | 25 | Infra, agent, content, meta |
+| **Playbook01** | Business, marketing, organization | 24 | Marketing, firma, operations |
+
+---
+
+## Category Overview
+
+### Infrastructure & Ops (6)
+
+| Skill | Trigger | Description |
+|-------|---------|-------------|
+| `deploy` | deploy, VG, dashboard | Deploy VG/Dashboard to Docker Swarm |
+| `pve-operations` | VM, Proxmox, migrate | Proxmox VM management |
+| `swarm-recovery` | services down, recover | Docker Swarm service recovery |
+| `swarm-raft-recovery` | raft, quorum loss | Nuclear: Raft quorum loss recovery |
+| `n8n-workflow-ops` | n8n, workflow, RSS | n8n workflow CRUD and management |
+| `version-bump` | version, bump, release | Atomic version bump |
+
+### Agent Management (7)
+
+| Skill | Trigger | Description |
+|-------|---------|-------------|
+| `jim-manager` | delegate, team status | Team delegation and tracking |
+| `agent-vault` | credentials, tokens | Central credential database |
+| `agent-task` | task create | ERPNext task management |
+| `mm-wait` | @jim polling | Mattermost polling for @jim |
+| `mm-wait-echo` | @echo_log polling | Mattermost polling for @echo_log |
+| `mm-wait-jim01` | @jim01 polling | Mattermost polling for @jim01 |
+| `echo-log-learning` | teach echo_log | Learning sessions for echo_log |
+
+### Documentation & Orchestration (4)
+
+| Skill | Trigger | Description |
+|-------|---------|-------------|
+| `doc-updater` | update docs, sync | Update docs after changes |
+| `docs-navigator` | find doc, where is | Navigate across 97+ docs |
+| `echo-log-context` | stack overview | Instant stack context |
+| `full-sync` | full-sync, update all | 10-step sync pipeline |
+
+### Content & Creative (5)
+
+| Skill | Trigger | Description |
+|-------|---------|-------------|
+| `kroki-diagrams` | diagram, mermaid | Diagrams via Kroki |
+| `content-quality` | content review | Content quality gate |
+| `comfyui-workflows` | comfyui, flux, image | ComfyUI workflow design |
+| `dashboard-verifier` | dashboard verify | Ops dashboard health check |
+| `sigma-upgrade` | sigma, network graph | Sigma.js force-atlas upgrade |
+
+### PDF & Output (3)
+
+| Skill | Trigger | Description |
+|-------|---------|-------------|
+| `pdf-enterprise-lite` | PDF, report, lightweight | PDF lite for free products |
+| `pdf-enterprise-pro` | PDF, branded, pro | PDF pro for paid products |
+| `pdf-dark-theme-generator` | pdf, dark theme | Dark-theme PDFs via WeasyPrint |
+
+### Meta (2)
+
+| Skill | Trigger | Description |
+|-------|---------|-------------|
+| `skill-router` | which skill, routing | Route requests to right skill |
+| `skill-creator` | new skill | Scaffold new skills |
+
+---
+
+### Marketing (10)
+
+| Skill | Trigger | Description |
+|-------|---------|-------------|
+| `content-calendar` | blog, content plan | Blog content pipeline |
+| `social-media-pipeline` | social media, post | Multi-platform posting |
+| `brand-consistency` | brand check, before publish | Brand guidelines check |
+| `market-copy` | copywriting, headlines | Sales copy generation |
+| `market-seo` | seo, keywords, meta | SEO analysis + optimization |
+| `market-ads` | ads, werbung, campaign | Ad copy + strategy |
+| `market-funnel` | funnel, conversion | Sales funnel analysis |
+| `market-landing` | landing page, CRO | Landing page CRO |
+| `market-proposal` | proposal, quote | Customer proposals |
+| `market-audit` | marketing audit | Marketing audit (score 0-100) |
+
+### Organization & Firma (5)
+
+| Skill | Trigger | Description |
+|-------|---------|-------------|
+| `firma-okr` | OKR, goals | OKR tracking |
+| `firma-meeting` | meeting, standup | Meeting notes |
+| `firma-sprint` | sprint, planning | Sprint planning |
+| `firma-finance` | cashflow, revenue | Financial overview |
+| `firma-onboarding` | onboarding, new agent | Agent onboarding |
+
+### Operations (7)
+
+| Skill | Trigger | Description |
+|-------|---------|-------------|
+| `email-assistant` | email, triage | Email triage + drafts |
+| `dr-recovery` | disaster recovery | DR quick reference |
+| `weekly-review` | weekly review | Weekly review |
+| `competitor-watch` | competitor, market | Competitor scan |
+| `multi-shop-manager` | shop, listing | Multi-platform shop |
+| `notebooklm-audio` | notebooklm, audio | Audio guide production |
+| `task-manager` | *(deprecated)* | Replaced by ERPNext tasks |
+
+---
+
+## Quality Gate
+
+Every skill must meet these requirements:
+
+- [ ] `SKILL.md` with complete YAML frontmatter
+- [ ] `name` and `description` set
+- [ ] At least 1 trigger keyword defined
+- [ ] Body with clear instructions (no filler)
+- [ ] Tested in the respective repo context
+- [ ] Documented in skill catalog
+
+## Skill Lifecycle
+
+```
+CREATE → Idea + /skill-creator → scaffold SKILL.md
+  ↓
+DEVELOP → Write body, set frontmatter
+  ↓
+TEST → Execute in context, check result
+  ↓
+CATALOG → Register in skill catalog
+  ↓
+MAINTAIN → Bump version, maintain error/learning refs
+  ↓
+ARCHIVE → Set deprecated flag, document replacement
+```
+
+## External Skills
+
+Currently **no external skills installed**. Evaluated sources:
+
+| Source | Skills | Status |
+|--------|--------|--------|
+| [alirezarezvani/claude-skills](https://github.com/alirezarezvani/claude-skills) | 169 skills | Evaluated |
+| [anthropics/skills](https://github.com/anthropics/skills) | 6 official | Evaluated |
+| [openPawDev/pawmode](https://github.com/openPawDev/pawmode) | 38 skills | Research |
+
+---
+
+## Skill Architecture in Detail
+
+### Frontmatter Fields (Complete Reference)
+
+| Field | Type | Required | Description |
+|------|-----|---------|-------------|
+| `name` | String | Yes | Unique ID (kebab-case) |
+| `description` | String | Yes | Brief description with trigger keywords |
+| `version` | String | Yes | Semantic versioning (X.Y.Z) |
+| `requires` | Array | Yes | Dependencies (rules, skills, tools) |
+| `produces` | Array | Yes | Output types (file, notification, etc.) |
+| `disable-model-invocation` | Boolean | No | true = manual invocation only |
+| `user-invocable` | Boolean | No | false = Claude invokes only |
+| `model` | String | No | haiku\|sonnet\|opus |
+| `context` | String | No | fork = isolated subagent context |
+| `agent` | String | No | Explore\|Plan\|general-purpose |
+| `allowed-tools` | Array | No | Tool whitelist |
+| `error-refs` | Array | No | References to ERROR_REGISTRY.md |
+| `learning-refs` | Array | No | References to LEARNINGS_REGISTRY.md |
+| `last-verified` | String | Yes | Last verification date (YYYY-MM-DD) |
+
+### String Substitutions (Dynamic Values)
+
+Claude Code replaces these at runtime:
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `$ARGUMENTS` | All user input after skill name | `/skill-name arg1 arg2` → `arg1 arg2` |
+| `$0` | First argument | `arg1` |
+| `$1` | Second argument | `arg2` |
+| `$N` | N-th argument | `$3` for third argument |
+| `${CLAUDE_SESSION_ID}` | Unique session identifier | `abc-def-ghi-jkl` |
+| `${CLAUDE_SKILL_DIR}` | Absolute path to skill directory | `/Users/name/.claude/skills/skill-name/` |
+
+### Dynamic Context Injection
+
+Shell commands run before skill executes with `` !`command`! `` syntax:
+
+```markdown
+---
+command_injection: "git log --oneline -5"
+---
+
+## Current Status
+!`curl -s http://api.example.com/status | jq .`!
+
+This value gets inserted before Claude sees the body.
+```
+
+Useful for:
+- Current system states
+- Git history
+- Deployment status
+- API data
+
+## Bundled Skills (Standard)
+
+These skills come with Claude Code:
+
+| Skill | Description | Usage |
+|-------|-------------|--------|
+| `/batch` | Parallelize large changes across worktrees | `/batch migrate src/ from React to Vue` |
+| `/claude-api` | Load Claude API reference (Python, TypeScript, etc.) | Auto-load on `import anthropic` |
+| `/debug` | Debug current session (logs, errors) | `/debug why is this failing?` |
+| `/loop` | Repeat prompt on interval | `/loop 5m check if deploy finished` |
+| `/simplify` | Review code for reuse and efficiency | `/simplify focus on memory usage` |
+
+## Skill Lifecycle (Extended)
+
+```
+IDEATION
+  ↓ (User has skill idea)
+CREATE
+  ↓ (Create SKILL.md with frontmatter)
+DRAFT
+  ↓ (Write body, not yet productive)
+DEVELOP
+  ↓ (Add tests, scripts, templates)
+TEST
+  ↓ (Manual test in context)
+QUALITY_GATE
+  ↓ (Pass checklist)
+CATALOG
+  ↓ (Register in catalog)
+PUBLISH
+  ↓ (Skill is productive)
+MAINTAIN
+  ↓ (Monthly — update last-verified)
+DEPRECATE
+  ↓ (Replace with better alternative)
+ARCHIVE
+  └ (Move to _archive/)
+```
+
+## Skill Best Practices
+
+### One skill, one job
+
+Create focused skills:
+- ✅ `/deploy` — Deploy VG
+- ✅ `/test-suite` — Run tests
+- ❌ `/do-everything` — Does everything (too much)
+
+### Explicit Trigger Keywords
+
+Description should have clear keywords:
+
+```yaml
+description: "Deploy Voice Gateway or Dashboard — Trigger: deploy, VG, dashboard"
+```
+
+Claude uses keywords for auto-loading.
+
+### Document Error Handling
+
+Write top 5 errors and fixes:
+
+```markdown
+## Error Handling
+
+- SSH timeout → Retry after 10s, max 3x
+- Build failure → Show logs, don't rebuild
+- Health check failed → Manual check needed
+```
+
+### No Secrets in Skills
+
+```markdown
+# CORRECT
+Load credentials via: vault.py get <service> <key>
+
+# WRONG
+token="sk-abc123def456"  ❌ NEVER
+```
+
+## Skill Discovery & Auto-Loading
+
+Claude Code:
+1. Loads **all skill descriptions** into context (so Claude knows what's available)
+2. Loads **only the body** of a skill when:
+   - User executes `/skill-name`, OR
+   - Claude auto-loads based on description
+
+**Example:**
+```
+User: "How does the auth system work?"
+Claude sees: description "explain-code: explains code with diagrams"
+→ Auto-loads the skill
+→ Gives diagram + explanation
+```
+
+## Distribute Skills in Plugins
+
+Skills can be distributed as part of plugins:
+
+```
+my-plugin/
+├── .claude-plugin/plugin.json
+└── skills/
+    └── code-review/
+        └── SKILL.md
+```
+
+Users install:
+```bash
+/plugin install my-plugin
+/code-review-plugin:code-review  # With namespace
+```
+
+## Further Reading
+
+- [Creating Skills](/skills/creating) — Step-by-step guide
+- [Extending Skills](/skills/extending) — Advanced patterns
+- [Skill Catalog (Full Version)](https://github.com/AI-Engineerings-at/Playbook01/blob/main/docs/SKILL-CATALOG.md) — All details
+- [Quality Gate](/tools/skill-quality-gate) — Skill verification
+
+---
+
+*Last updated: 2026-03-21 | 49 custom-built skills + Anthropic bundled skills*
+
+## Sources and Links
+
+- [Claude Code Skills Documentation](https://code.claude.com/docs/en/skills)

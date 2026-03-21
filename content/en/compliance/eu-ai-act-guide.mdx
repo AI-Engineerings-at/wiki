@@ -1,0 +1,418 @@
+---
+title: EU AI Act — Complete SMB Compliance Guide
+date: 2026-03-21
+summary: Step-by-step guide for small and medium businesses to understand and comply with the EU AI Act
+tags: [eu-ai-act, compliance, legal, regulation, 2026]
+author: AI Engineering
+---
+
+# EU AI Act — Complete SMB Compliance Guide
+
+The EU AI Act becomes enforceable on August 2, 2026. This is Europe's primary regulation of artificial intelligence systems. For SMBs in Austria and across the EU, this represents significant compliance obligations and potential penalties.
+
+**Key date**: August 2, 2026 — Bulk of enforcement begins
+
+**Max penalty**: EUR 35 million or 7% of global annual turnover (whichever is higher)
+
+This guide explains what you need to do and by when.
+
+## Quick Start: Am I Affected?
+
+### You're Affected If You...
+
+- Use AI in your business (ChatGPT, Claude, machine learning, automation)
+- Sell products or services in the EU
+- Process personal data of EU residents
+- Use AI for hiring, credit decisions, or legal determinations
+- Deploy AI publicly or to customers
+
+### You're Probably Not Affected If You...
+
+- Use AI only for internal admin tasks
+- Use well-known, compliant third-party services (Zapier, n8n with DPA)
+- Have zero EU customers or data subjects
+- Use AI only for research/experimentation
+
+**If unsure**: Consult a lawyer. The cost of compliance review (EUR 500-2000) is cheaper than fines.
+
+## Risk Categories (The Core Framework)
+
+The EU AI Act classifies AI systems by risk level. Your obligations depend on this classification.
+
+### 🔴 Prohibited (Banned Completely)
+
+These AI applications are **illegal**, no matter what:
+
+- Social credit scoring
+- Real-time facial recognition in public spaces (with exceptions for law enforcement)
+- Subliminal manipulation (using hidden content to change behavior)
+- Exploiting vulnerabilities of vulnerable groups
+
+**Action**: If you do any of these, stop immediately.
+
+### 🔴 High-Risk (Strict Requirements)
+
+These AI systems require extensive documentation, testing, and controls:
+
+#### Employment & Labor
+
+- Resume screening, interview analysis, performance evaluation
+- Hiring decisions or promotion systems
+
+#### Education
+
+- Student grade evaluation, course recommendations
+- Admissions decisions
+
+#### Credit & Loans
+
+- Credit scoring, loan approval, loan pricing
+- Insurance underwriting
+
+#### Law Enforcement
+
+- Crime prediction, suspect identification
+- Evidence assessment
+
+#### Biometric Identification
+
+- Facial recognition, fingerprint matching
+- Any AI analyzing faces or biometrics
+
+#### Critical Infrastructure
+
+- AI managing power grids, water systems, transportation
+
+#### Benefits & Social Services
+
+- Welfare eligibility determination
+- Social security decisions
+
+#### Justice & Legal Systems
+
+- Court outcome prediction
+- Sentencing recommendations
+
+**Your actions if you use high-risk AI**:
+
+1. Create a Risk Management Plan (Article 9)
+2. Perform Fundamental Rights Impact Assessment (Article 27)
+3. Document your data, training, testing
+4. Implement human oversight mechanisms
+5. Keep detailed logs of AI system operation
+6. Test for bias and discrimination
+7. Be able to explain AI decisions
+8. Register on EU AI registry (by August 2)
+
+### 🟡 Transparency (Mid-Risk)
+
+These systems have modest requirements:
+
+- AI-generated content (deepfakes, synthetic media)
+- Chatbots and conversational AI
+- Biometric emotion recognition
+- Content recommendation systems
+
+**Your actions**:
+
+1. Disclose that content was AI-generated
+2. Document how the system works (at high level)
+3. Implement safeguards against misuse
+4. Monitor for harms
+
+### 🟢 Low-Risk
+
+Basic systems with minimal requirements:
+
+- Traditional machine learning (spam filters, recommendation systems)
+- Simple chatbots (FAQ bots, basic automation)
+- Predictive analytics (demand forecasting, etc.)
+
+**Your actions**:
+
+1. Maintain basic documentation
+2. Comply with GDPR if handling personal data
+3. Document what data you use
+
+## August 2, 2026 — What Must Be Ready?
+
+### For High-Risk Systems
+
+By August 2, 2026:
+
+- ✓ Risk Management Plan completed
+- ✓ Fundamental Rights Impact Assessment done
+- ✓ Training data documented and tested
+- ✓ Conformity assessment completed
+- ✓ Technical documentation finalized
+- ✓ Human oversight procedures in place
+- ✓ CE marking applied (if applicable)
+- ✓ System registered on EU AI registry
+
+### For Transparency (Mid-Risk)
+
+By August 2, 2026:
+
+- ✓ Disclosure mechanisms implemented
+- ✓ Documentation of system capabilities
+- ✓ Harm prevention safeguards
+- ✓ Monitoring procedures established
+
+### For All Companies
+
+- ✓ AI governance structure (who's responsible?)
+- ✓ Compliance documentation
+- ✓ Record of all AI systems in use
+- ✓ Data Protection Impact Assessment (DPIA, GDPR requirement)
+
+## Step-by-Step: What to Do Now
+
+### Step 1: Audit Your AI Systems (Week 1)
+
+List every AI system you use:
+
+```
+System: ChatGPT for customer support
+Use case: Answering customer inquiries
+Risk level: Transparency (mid-risk)
+Personal data? Yes (customer names, issues)
+Decision-making? No (just recommendations)
+Status: Needs disclosure implementation
+
+System: Resume screening tool
+Use case: Filtering job applications
+Risk level: HIGH RISK
+Personal data? Yes (candidate data)
+Decision-making? Yes (auto-reject/accept)
+Status: Needs full high-risk compliance
+
+System: n8n automation workflows
+Use case: Data processing
+Risk level: Low-risk (unless involving decisions)
+Personal data? Yes (customer data)
+Decision-making? No (just transforming data)
+Status: Needs basic documentation
+```
+
+### Step 2: Classify Each System (Week 2)
+
+For each AI system, determine if it's:
+
+```
+Prohibited?           → Remove immediately
+High-risk?            → Needs extensive compliance
+Transparency risk?    → Needs disclosure
+Low-risk?             → Basic documentation needed
+Not AI?               → Monitor (it might become AI)
+Third-party service?  → Verify their compliance
+```
+
+### Step 3: Plan Compliance by Type
+
+**For High-Risk Systems**:
+
+1. **Risk Management Plan** — Document potential harms and how you mitigate them
+2. **FRIA (Fundamental Rights Impact Assessment)** — How does this affect fundamental rights?
+3. **Data documentation** — Where training data came from, quality, bias testing
+4. **Human oversight** — Who reviews AI decisions? How can they override?
+5. **Testing & validation** — Test for bias, accuracy, edge cases
+6. **Logging** — Record all significant decisions the AI makes
+7. **EU Registry** — Register your system by August 2
+
+**For Transparency Systems**:
+
+1. **Disclosure** — Tell users when they're interacting with AI
+2. **Documentation** — Explain how your system works
+3. **Safeguards** — Prevent misuse (deepfakes labeled as synthetic)
+
+### Step 4: Get Help (Weeks 3-4)
+
+Depending on complexity:
+
+- **Simple audit**: You can do it (1-2 days)
+- **Compliance documentation**: Consider hiring consultant (EUR 2000-5000)
+- **High-risk systems**: Definitely get legal review (EUR 5000-15000)
+- **External audit**: Optional but recommended for high-risk (EUR 5000-10000)
+
+### Step 5: Implement Controls
+
+#### For High-Risk Hiring AI
+
+```
+1. Document what data you use (education, experience, etc.)
+2. Test for bias:
+   - Does it discriminate by gender? (test with identical resumes)
+   - Does it discriminate by age, origin, disability? (test systematically)
+3. Have human review all AI recommendations
+4. Log every decision (for audit trail)
+5. Allow candidates to request explanation
+6. Allow candidates to challenge decision
+```
+
+#### For Transparency (ChatGPT for Support)
+
+```
+1. Disclose: "You're talking with an AI" at start of conversation
+2. Document: ChatGPT's capabilities and limitations
+3. Escalation: Easy path to human agent
+4. Monitoring: Track if AI gives bad advice
+```
+
+### Step 6: Document Everything
+
+Create a compliance folder:
+
+```
+/compliance/
+  ├── AI-Systems-Audit.md           # Your AI inventory
+  ├── Risk-Classification.md        # High/mid/low for each
+  ├── Data-Processing-Record.md     # GDPR documentation
+  ├── Fundamental-Rights-IA.docx    # For high-risk only
+  ├── Risk-Management-Plan.docx     # For high-risk only
+  ├── Vendor-DPAs/                  # Data Processing Agreements
+  ├── Testing-Logs/                 # Bias testing results
+  ├── EU-Registry-Submission.md     # Application submitted
+  └── Compliance-Checklist.md       # Status tracker
+```
+
+## GDPR + EU AI Act = Double Compliance
+
+The EU AI Act **does not replace** GDPR. You must comply with both.
+
+### Overlap Areas
+
+| Requirement | GDPR | EU AI Act |
+|-------------|------|-----------|
+| Data Protection Impact Assessment | Yes (DPIA) | Yes (FRIA) |
+| Automated decision-making | Yes (Article 22) | Yes (high-risk) |
+| Data minimization | Yes | Implied (good practices) |
+| Transparency to data subjects | Yes | Yes (disclosure) |
+| Right to explanation | Yes (legal decisions) | Yes (high-risk) |
+| Right to object/challenge | Yes | Yes (high-risk) |
+
+**Practical approach**:
+
+1. Conduct DPIA first (GDPR requirement)
+2. Expand DPIA to include fundamental rights (becomes FRIA)
+3. Single compliance document serves both regulations
+
+## By August 2, 2026 — Timeline
+
+### Now until April 2026 (Next 4 Months)
+
+- ✓ Audit all AI systems (month 1)
+- ✓ Classify risk levels (month 1)
+- ✓ Get legal consultation if high-risk (month 2)
+- ✓ Plan compliance for high-risk systems (month 2)
+- ✓ Implement basic controls (months 2-3)
+
+### April-June 2026
+
+- ✓ Complete documentation
+- ✓ Testing and validation
+- ✓ EU Registry preparation
+- ✓ Final legal review
+
+### June-August 2026
+
+- ✓ Submit to EU Registry
+- ✓ Train staff on procedures
+- ✓ Final verification
+- ✓ Ready for enforcement
+
+## Common Compliance Mistakes
+
+### Mistake 1: Ignoring It
+
+**Wrong**: "We'll deal with it after August 2"
+
+**Right**: Compliance takes 3-6 months for high-risk systems. Start now.
+
+### Mistake 2: Over-Classifying as Low-Risk
+
+**Wrong**: Claiming your hiring AI is "low-risk"
+
+**Right**: Honestly assess. Hiring AI is almost always high-risk.
+
+### Mistake 3: Only Looking at Your AI
+
+**Wrong**: Checking only your direct AI development
+
+**Right**: Audit all AI use (vendor tools, third-party services, etc.)
+
+### Mistake 4: Weak FRIA
+
+**Wrong**: Writing fake Fundamental Rights Assessment
+
+**Right**: Genuinely consider: How could this AI harm people?
+
+### Mistake 5: No Documentation
+
+**Wrong**: "We'll explain it if inspected"
+
+**Right**: Document everything now. Show good faith effort.
+
+## Penalties (Why This Matters)
+
+| Violation | Penalty |
+|-----------|---------|
+| Using prohibited AI | EUR 30M or 6% annual revenue |
+| High-risk non-compliance | EUR 20M or 4% revenue |
+| Documentation failures | EUR 10M or 2% revenue |
+| False statements/registry | EUR 5M or 1% revenue |
+
+For context:
+- EUR 10M fine = 1000+ SMBs in Austria
+- EUR 30M fine = major national issue
+
+## Resources & Tools
+
+### Free Resources
+
+- EU AI Act text: https://artificialintelligenceact.eu/
+- Implementation timeline: https://artificialintelligenceact.eu/implementation-timeline/
+- AI Act Service Desk: https://ai-act-service-desk.ec.europa.eu/
+- IAPP AI Act tracker: https://iapp.org/
+
+### Austria-Specific
+
+- Austrian Data Protection Authority: https://www.dsb.gv.at/
+- Austrian Chamber of Commerce AI guidance
+
+### Affordable Tools
+
+- Compliance checklist templates (free online)
+- DPIA templates (GDPR)
+- Self-assessment questionnaires
+- Bias testing tools (many open-source)
+
+## Checklist
+
+- [ ] List all AI systems you use
+- [ ] Classify each by risk level
+- [ ] Identify high-risk systems needing intensive compliance
+- [ ] Get initial legal consultation
+- [ ] Create Risk Management Plan for high-risk systems
+- [ ] Conduct Fundamental Rights Impact Assessment
+- [ ] Document training data and testing results
+- [ ] Implement human oversight procedures
+- [ ] Test for bias and unfair discrimination
+- [ ] Prepare EU Registry submission
+- [ ] Brief team on compliance requirements
+- [ ] Set calendar reminders for August 2, 2026
+- [ ] Plan for ongoing compliance monitoring
+
+---
+
+**Sources:**
+- [Implementation Timeline | EU Artificial Intelligence Act](https://artificialintelligenceact.eu/implementation-timeline/)
+- [EU AI Act 2026 Updates: Compliance Requirements and Business Risks](https://www.legalnodes.com/article/eu-ai-act-2026-updates-compliance-requirements-and-business-risks)
+- [The EU AI Act: 6 Steps to Take Before 2 August 2026](https://www.orrick.com/en/Insights/2025/11/The-EU-AI-Act-6-Steps-to-Take-Before-2-August-2026)
+- [AI Act Service Desk](https://ai-act-service-desk.ec.europa.eu/en/ai-act/timeline/timeline-implementation-eu-ai-act)
+
+**Disclaimer**: This is informational only, not legal advice. Consult a lawyer for specific compliance decisions.
+
+## Sources and Links
+
+- [EU AI Act (EUR-Lex)](https://eur-lex.europa.eu/eli/reg/2024/1689/oj)
+- [Artificial Intelligence Act](https://artificialintelligenceact.eu)

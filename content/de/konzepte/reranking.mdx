@@ -1,0 +1,296 @@
+---
+title: Reranking
+date: 2026-03-21
+summary: Cross-Encoder vs Bi-Encoder, Reranking Pipeline, Cohere Rerank, BGE-Reranker, ColBERT — RAG Integration
+tags: [reranking, cross-encoder, bi-encoder, information-retrieval, rag, cohere-rerank]
+author: AI Engineering
+section: Konzepte
+---
+
+# Reranking verstehen
+
+Reranking ist das Re-Sortieren von Kandidaten nach Relevanz. Typisch in RAG: schnelle Retriever findet Top-100, Reranker sortiert zu Top-5.
+
+```
+Retriever (schnell, breit):
+  Query: "Wie lernt man Python?"
+  Top 100 Kandidaten: [Blog1, Tutorial, Forum, Wiki, ...]
+
+Reranker (langsam, präzise):
+  Re-sortiert die 100 nach echter Relevanz
+  Top 5: [Python-Anleitung, Einführung, Best Practices, ...]
+```
+
+---
+
+## Cross-Encoder vs Bi-Encoder
+
+### Bi-Encoder (Retriever)
+
+```
+Query: "Wie lernt man Python?"
+embedding_q = [0.1, 0.2, ..., 0.5]  (schnell berechnet, gecacht)
+
+Document: "Python Anleitung"
+embedding_d = [0.15, 0.19, ..., 0.48]  (vorher berechnet, gecacht)
+
+Similarity = cosine(embedding_q, embedding_d)
+Zeit: O(1) - nur Dot Product nötig
+```
+
+**Vorteil:** Schnell, skalierbar
+**Nachteil:** Begrenzte Interaction zwischen Query und Document
+
+### Cross-Encoder (Reranker)
+
+```
+Query: "Wie lernt man Python?"
+Document: "Python Anleitung für Anfänger"
+
+[QUERY + DOCUMENT] → Transformer → Relevanz Score (0-1)
+
+Der Transformer sieht beide zusammen, kann interaktiv lernen
+Zeit: O(n) - für n Dokumente n Forward Passes
+```
+
+**Vorteil:** Viel präziser, bessere Relevanz-Bewertung
+**Nachteil:** Langsamer
+
+---
+
+## Reranking Pipeline
+
+### Zwei-Stufen Retrieval
+
+```python
+from sentence_transformers import SentenceTransformer, util, CrossEncoder
+
+# Stage 1: Schneller Bi-Encoder Retriever
+retriever = SentenceTransformer("all-MiniLM-L6-v2")
+
+# Stage 2: Cross-Encoder Reranker
+reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-12-v2")
+
+# Dokumente
+documents = ["Doc1: Python...", "Doc2: Java...", ..., "Doc100: C++..."]
+
+# Query
+query = "Wie lernt man Python?"
+
+# Stage 1: Schnelle Retrieval (Top 100)
+query_embedding = retriever.encode(query)
+doc_embeddings = retriever.encode(documents)
+scores_retriever = util.pytorch_cos_sim(query_embedding, doc_embeddings)[0]
+top100_idx = scores_retriever.argsort(reverse=True)[:100]
+
+# Stage 2: Reranking (Top 5 aus Top 100)
+top100_docs = [documents[i] for i in top100_idx]
+pair_scores = reranker.predict([[query, doc] for doc in top100_docs])
+
+# Re-sort nach Reranker Scores
+top5_idx = sorted(
+    range(100),
+    key=lambda i: pair_scores[i],
+    reverse=True
+)[:5]
+
+final_results = [top100_docs[i] for i in top5_idx]
+```
+
+---
+
+## Popular Reranker Modelle
+
+### Cohere Rerank
+
+API-basiert, sehr gut.
+
+```python
+import cohere
+
+client = cohere.ClientV2(api_key="...")
+
+query = "Wie lernt man Python?"
+documents = [
+    "Python ist eine Programmiersprache",
+    "Java ist älter als Python",
+    "Python tutorial für Anfänger",
+    # ... 97 weitere
+]
+
+response = client.rerank(
+    model="rerank-english-v3.0",
+    query=query,
+    documents=documents,
+    top_n=5
+)
+
+for result in response.results:
+    print(f"Doc {result.index}: score {result.relevance_score:.2f}")
+```
+
+### BGE-Reranker
+
+Open-Source, oft besser als Cohere.
+
+```python
+from sentence_transformers import CrossEncoder
+
+# BGE Reranker (spezialisiert auf chinesisch/englisch)
+reranker = CrossEncoder("BAAI/bge-reranker-large")
+
+query = "Wie lernt man Python?"
+documents = [...]
+
+scores = reranker.predict([[query, doc] for doc in documents])
+
+# Top 5
+top_indices = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)[:5]
+```
+
+### ColBERT
+
+Token-level Reranking (sehr präzise).
+
+```python
+from colbert.client.client import ColBertClient
+
+# Initalisiere Client
+client = ColBertClient(
+    checkpoint="colbertv2.0"  # Vortrainiertes Checkpoint
+)
+
+# Index erstellen (einmalig)
+client.index(
+    collection=[{"id": i, "text": doc} for i, doc in enumerate(documents)]
+)
+
+# Query und Reranking
+query = "Wie lernt man Python?"
+results = client.search(query, top_k=5)
+
+for i, (doc_id, score) in enumerate(results):
+    print(f"{i+1}. Doc {doc_id}: {score:.3f}")
+```
+
+---
+
+## Integration mit RAG
+
+### Implementierung
+
+```python
+from langchain.retrievers import ContextualCompressionRetriever
+from langchain.retrievers.document_compressors import CrossEncoderReranker
+from langchain.embeddings import HuggingFaceEmbeddings
+from langchain.vectorstores import FAISS
+
+# Setup
+embeddings = HuggingFaceEmbeddings()
+base_vectorstore = FAISS.load_local("./index", embeddings)
+base_retriever = base_vectorstore.as_retriever(search_kwargs={"k": 100})
+
+# Reranker
+compressor = CrossEncoderReranker(
+    model_name="BAAI/bge-reranker-large",
+    top_n=5
+)
+
+# Compression Retriever kombiniert beide
+compression_retriever = ContextualCompressionRetriever(
+    base_compressor=compressor,
+    base_retriever=base_retriever
+)
+
+# Verwenden in RAG
+query = "Was ist Python?"
+compressed_docs = compression_retriever.get_relevant_documents(query)
+# Automatisch: Top 100 → Top 5 (reranked)
+```
+
+---
+
+## Performance & Latency
+
+```
+Scenrio: 1000 Dokumente, Top 5 brauchen
+
+Nur Bi-Encoder (schnell, schlecht):
+  - Retrieval: 10ms
+  - Total: 10ms
+  - Top 5 Qualität: 3/5 ⭐
+
+Bi-Encoder + Cross-Encoder (Standard):
+  - Retrieval (Top 100): 10ms
+  - Reranking (100 * 50ms/doc): 5000ms
+  - Total: 5010ms
+  - Top 5 Qualität: 4.5/5 ⭐⭐⭐⭐
+
+Bi-Encoder + ColBERT (Optimiert):
+  - Retrieval (Top 100): 10ms
+  - Reranking (Token-level, 500ms/100docs): 500ms
+  - Total: 510ms
+  - Top 5 Qualität: 4.7/5 ⭐⭐⭐⭐⭐
+
+Bi-Encoder + Cohere (API):
+  - Retrieval (Top 100): 10ms
+  - Reranking (API, 200ms): 200ms
+  - Total: 210ms
+  - Top 5 Qualität: 4.8/5 ⭐⭐⭐⭐⭐
+```
+
+---
+
+## Optimization Strategien
+
+### 1. Batch Reranking
+
+```python
+# ❌ Langsam: Dokument für Dokument
+for doc in documents:
+    score = reranker.predict([[query, doc]])
+
+# ✅ Schnell: Alle auf einmal
+pairs = [[query, doc] for doc in documents]
+scores = reranker.predict(pairs)
+```
+
+### 2. Filtered Reranking
+
+```python
+# ❌ Alle 100 Reranken
+scores = reranker.predict(pairs_100)
+
+# ✅ Nur Top 50 nach BM25, dann 5 Reranken
+bm25_scores = bm25.score(query, documents)
+top50_idx = sorted(range(100), key=lambda i: bm25_scores[i])[:50]
+pairs_50 = [[query, documents[i]] for i in top50_idx]
+scores = reranker.predict(pairs_50)
+```
+
+### 3. Progressive Reranking
+
+```python
+# Multi-stage: Mehrere Reranker
+retriever = BiEncoder()      # Schnell
+reranker1 = SmallCrossEncoder()  # Schnell
+reranker2 = LargeCrossEncoder()  # Langsam, präzise
+
+# Stage 1: Top 100
+top100 = retriever.get(query, k=100)
+
+# Stage 2: Top 20
+top20 = reranker1.rerank(query, top100, k=20)
+
+# Stage 3: Top 5
+top5 = reranker2.rerank(query, top20, k=5)
+```
+
+---
+
+## Quellen und Links
+
+- [Cross-Encoder](https://www.sbert.net/examples/applications/cross-encoders/README.html)
+- [Cohere Rerank](https://docs.cohere.com/reference/rerank)
+- [BGE Reranker](https://huggingface.co/BAAI/bge-reranker-large)
+- [ColBERT](https://github.com/stanford-futuredata/ColBERT)

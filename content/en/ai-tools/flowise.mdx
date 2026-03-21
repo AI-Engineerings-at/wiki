@@ -1,0 +1,47 @@
+---
+title: Flowise — Visual LLM Flow Builder
+date: 2026-03-21
+summary: Flowise is a visual no-code platform for building LLM flows. Node-based, integrates with Ollama, vector stores, custom tools, self-hosting.
+tags: [flowise, llm-flow, visual-builder, no-code]
+author: AI Engineering
+---
+
+# Flowise — Visual LLM Flow Builder
+
+Flowise is an open-source visual node editor for LLM applications. Drag-and-drop interface for rapid workflow creation.
+
+## Installation
+
+```bash
+docker run -d \
+  -p 3000:3000 \
+  -v flowise:/root/.flowise \
+  flowiseai/flowise:latest
+```
+
+Access: http://localhost:3000
+
+## Node Types
+
+- **LLM**: OpenAI, Claude, Ollama, local models
+- **Memory**: Chat history, buffers
+- **Vector Store**: Weaviate, Qdrant, ChromaDB
+- **Tools**: Web search, calculators, APIs
+
+## Workflow Example
+
+```
+Input → Memory → Vector Search → LLM → Output
+```
+
+## API Usage
+
+```bash
+curl -X POST http://localhost:3000/api/v1/prediction/workflow-id \
+  -d '{"question": "Hello"}'
+```
+
+## Sources
+
+- [Flowise GitHub](https://github.com/FlowiseAI/Flowise)
+- [Documentation](https://docs.flowiseai.com)

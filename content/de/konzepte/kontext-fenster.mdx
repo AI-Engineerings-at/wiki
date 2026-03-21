@@ -1,0 +1,351 @@
+---
+title: Kontext-Fenster
+date: 2026-03-21
+summary: Was Kontext-Fenster sind, Vergleich aller Modelle 2026, Long-Context Strategien, Needle-in-Haystack Problem, effektiv vs. beworbene Länge
+tags: [kontext-fenster, context-window, long-context, needle-in-haystack, llm, sequence-length]
+author: AI Engineering
+---
+
+# Kontext-Fenster verstehen
+
+Das Kontext-Fenster ist die maximale Anzahl von Tokens die ein Modell "sehen" kann. Ein größeres Fenster = kann längere Dokumente verarbeiten. Aber nicht alle großen Fenster sind gleich!
+
+---
+
+## Was ist ein Kontext-Fenster?
+
+```
+Input Tokens (können alle sehen):    [tok1, tok2, tok3, ..., tok_N]
+                                      └─ max N = context window ─┘
+
+Outputs Tokens (generiert):          [response_tok1, response_tok2, ...]
+
+Beispiel:
+Context = 4K (4096 Tokens)
+Input: 3500 Tokens
+Output: max 596 Tokens (4096 - 3500)
+
+Context = 128K
+Input: 127K Tokens
+Output: max 1K Tokens
+```
+
+**Kritisch**: Input + Output müssen zusammen ≤ Context sein!
+
+---
+
+## 2026 Modell-Vergleich
+
+| Modell | Context | Training Data | Gpt4-Turbo | Claude 3.5 | Gemini | Notes |
+|--------|---------|---------------|------------|-----------|--------|-------|
+| **GPT-4 Turbo** | 128K | Data bis April 2024 | Reference | Similar | Weniger | |
+| **GPT-4o** | 128K | Data bis Mai 2024 | Reference | Besser | Ähnlich | Multimodal |
+| **Claude 3.5 Sonnet** | 200K | Data bis April 2024 | Ähnlich | Reference | Weniger | Best Long-Context |
+| **Claude 3 Opus** | 200K | Data bis Aug 2023 | Besser | Ähnlich | Weniger | |
+| **Gemini 2.0 Pro** | 1M | Data bis Nov 2024 | ? | Weniger | Reference | Experimentell |
+| **Llama 3 8B** | 8K | Data bis März 2024 | Much worse | Much worse | Much worse | Open-source |
+| **Llama 3 70B** | 8K | Data bis März 2024 | Much worse | Much worse | Much worse | Open-source |
+| **Mistral 7B** | 32K | Data bis Sept 2023 | Worse | Worse | Worse | Open-source |
+| **Mixtral 8x7B** | 32K | Data bis Juni 2024 | Worse | Worse | Worse | Open-source MoE |
+| **Yi 34B** | 200K | Data bis Juni 2024 | Worse | Besser | Worse | Chinese-optimized |
+
+---
+
+## Context-Qualität: Beworbenes vs. Effektives
+
+Eine wichtige Unterscheidung:
+
+```
+Beworbene Größe: Was der Hersteller sagt
+Effektive Größe: Was wirklich funktioniert
+
+Beispiel:
+Llama 3 70B bewirbt 8K context
+Aber mit RoPE Extrapolation:
+  - 16K ist instabil
+  - 32K halluziniert stark
+→ Effektives Context: ~8K
+
+Claude 3.5 bewirbt 200K context
+Needle-in-Haystack (NiH) Test (einfach):
+  - 200K: ~95% Accuracy
+  - 150K: ~98% Accuracy
+  - 100K: ~99% Accuracy
+→ Effektives Context: Wirklich 200K
+```
+
+**Lesson**: Beworbenes Context ÷ 2-4 = Sicher nutzbar (außer Claude)
+
+---
+
+## Needle-in-Haystack Problem
+
+Ein Test ob Modell auch im Kontext-Fenster Informationen verliert:
+
+```
+Experiment:
+1. Gib Kontext: 100K Tokens "irrelevante Informationen"
+2. Verstecke Faktum: "Im Jahr 1823 wurde die Kapitel 3 geschrieben"
+   (an Position 50K, unten in der Mitte)
+3. Frage: "Wann wurde Kapitel 3 geschrieben?"
+
+Ergebnisse (Test mit verschiedenen Modellen):
+
+GPT-4 Turbo (128K context):
+- Needle bei 5%: 100% Accuracy
+- Needle bei 50%: 94% Accuracy
+- Needle bei 95%: 87% Accuracy
+Problem: Mittelpunkt schlechter!
+
+Claude 3.5 Sonnet (200K context):
+- Needle bei 5%: 100% Accuracy
+- Needle bei 50%: 99% Accuracy
+- Needle bei 95%: 98% Accuracy
+Problem: Minimal! (besser Position-aware)
+
+Gemini 2.0 (1M context):
+- Alle Positionen: ~95-98% (mittel)
+- Problem: Sehr großes Fenster, aber nicht perfekt
+```
+
+**Lesson**: Größeres Fenster ≠ besseres Fenster. Claude 3.5 ist praktisch best-in-class trotz "nur" 200K (vs Gemini 1M).
+
+---
+
+## Long-Context Strategien
+
+### Strategie 1: Chunking + RAG (Best)
+
+```
+Sehr langes Dokument (1M Tokens)?
+
+Falsch:
+1. Gib alles in Prompt (wenn Context ermöglicht)
+Result: Modell hat Attention-Overload, vergisst Details
+
+Richtig:
+1. Split in 10K Token Chunks
+2. Embed + Vector Search
+3. Retrieve top-5 Chunks basierend auf Query
+4. Put nur diese in Prompt (~50K Tokens)
+Result: Modell fokussiert, bessere Antwort
+
+Overhead: +100ms für Vector Search
+Qualität: +20-30%
+```
+
+### Strategie 2: Summarization + Hierarchisch
+
+```
+Struktur:
+Document (1000 Seiten)
+  ├─ Chapter 1 (100 Seiten) → Summary (2 Seiten)
+  ├─ Chapter 2 (100 Seiten) → Summary (2 Seiten)
+  └─ ... (8 more Chapters)
+
+Prompt:
+System + Summaries aller Chapters (~50K Tokens)
++ Volltext von Chapter 5 (aktuell relevant, 50K Tokens)
++ Query
+
+Result: Modell hat Überblick + Detail
+```
+
+### Strategie 3: Streaming / Progressive Retrieval
+
+```
+User fragt: "Summarize alles über AI bis 2024"
+
+Iterativ:
+Schritt 1: Retrieve "AI 2020-2021"
+          Process 100K Tokens
+          Extract key facts
+
+Schritt 2: Retrieve "AI 2022-2023"
+          Process
+          Extend summary
+
+Schritt 3: Retrieve "AI 2024"
+          Process
+          Final summary
+
+Result: Multiple Calls, aber jeder unter Context-Limit
+        + User kann Progressive Results sehen
+```
+
+### Strategie 4: In-Context Learning mit Exemplaren
+
+```
+Wenn Context groß, nutze es für Few-Shot Examples!
+
+Prompt (mit 200K Claude 3.5):
+- System Instructions: 1K
+- 100× Examples von Task: 150K
+  (z.B. "Übersetze X zu Y")
+- User Query: 1K
+- Available for Response: 48K
+
+Result: Modell hat massiv gelernt aus Exemplaren
+        Qualität kann >50% besser sein
+```
+
+---
+
+## Position Bias (Warum Context nicht gleich ist)
+
+Beobachtung: Modelle "sehen" nicht überall gleich gut.
+
+```
+Effektivität nach Position:
+
+First 10%:     ████████████ 98% (Modell schaut hier zuerst)
+Next 20%:      ███████████  95%
+Middle 40%:    ██████████   85% (Attention verliert Focus)
+Last 20%:      ███████████  95%
+Last 10%:      ████████████ 98% (Recency Bias)
+
+→ "U-shaped" Kurve!
+  Start und End sind besser als Mitte.
+
+Warum?
+Transformer Attention: Multi-Head Attention kann
+nicht perfekt über alle Positionen verteilen
+wenn Fenster sehr groß ist.
+```
+
+**Optimale Struktur**:
+```
+[Important Context At Start]
+→ [Details/Support in Middle]
+→ [User Query At End]
+
+nicht:
+
+[User Query At Start]
+→ [Middle Details]
+→ [Important Context At End]
+```
+
+---
+
+## Praktische Context-Management
+
+### Context-Budget Tracker
+
+```python
+def calculate_available_context(model, system_prompt, input_text):
+    encoder = get_tokenizer(model)
+
+    context_limit = {
+        "gpt-4-turbo": 128_000,
+        "claude-3-5-sonnet": 200_000,
+        "llama-3-70b": 8_000,
+    }[model]
+
+    system_tokens = len(encoder.encode(system_prompt))
+    input_tokens = len(encoder.encode(input_text))
+
+    available_for_response = context_limit - system_tokens - input_tokens
+
+    utilization = (system_tokens + input_tokens) / context_limit * 100
+
+    return {
+        "context_limit": context_limit,
+        "used": system_tokens + input_tokens,
+        "available": available_for_response,
+        "utilization_percent": utilization,
+        "safe": available_for_response > 500,  # Mindestens 500 Tokens Buffer
+    }
+
+# Beispiel
+result = calculate_available_context(
+    "claude-3-5-sonnet",
+    system_prompt="Du bist Assistent",
+    input_text="[1000 Tokens von Kontext + Query]"
+)
+
+print(f"Utilization: {result['utilization_percent']}%")
+print(f"Safe to use: {result['safe']}")  # True wenn < 95% Auslastung
+```
+
+### Wann welche Strategie?
+
+```
+< 10K Text:
+Use Model's full Context? Ja, einfach embedden
+
+10K - 50K Text:
+RAG Best? Ja, aber einfach als Ganzes auch OK
+
+50K - 200K Text:
+RAG Required? Ja, empfohlen
+Strategie: Chunking + Vector Search
+
+> 200K Text:
+RAG + Hierarchical? Ja, zwingend erforderlich
+Strategie: Summaries + Selective Retrieval
+```
+
+---
+
+## Kosten-Implikationen
+
+### Long-Context Pricing
+
+```
+OpenAI GPT-4 Turbo (128K):
+Input: $0.01 per 1K tokens
+Output: $0.03 per 1K tokens
+
+Claude 3.5 Sonnet (200K):
+Input: $0.003 per 1K tokens
+Output: $0.015 per 1K tokens
+
+Llama 3 70B Local (8K):
+Input: ~$0.0001 per 1K tokens (selbst-gehostet)
+
+Für 100K Token Input:
+- GPT-4: $1.00
+- Claude: $0.30
+- Llama: $0.01
+
+→ Claude ist 10× günstiger als GPT-4 für Long-Context!
+→ Self-hosted Llama ist 300× günstiger, aber nur 8K
+```
+
+### Context vs. Token Cost Tradeoff
+
+```
+Option A: RAG + 10K Context
+- Vector Search: 100ms
+- Tokens: 10K
+- Cost: €0.03
+- Latency: 200ms
+- Quality: 95%
+
+Option B: Full Document + 200K Context (Claude)
+- No Vector Search
+- Tokens: 200K
+- Cost: €0.60
+- Latency: 800ms
+- Quality: 98%
+
+Option C: Summarization + RAG
+- Summarize: 500ms
+- Vector Search: 100ms
+- Tokens: 30K
+- Cost: €0.09
+- Latency: 1000ms initial, dann schnell
+- Quality: 96%
+
+Best für Production: Option A oder C, nicht B
+```
+
+Kontext-Fenster sind größer geworden (8K → 200K → 1M), aber nicht unbegrenzt nützlich. RAG ist immer noch beste Strategie für wirklich lange Dokumente (>100K Tokens).
+
+## Quellen und Links
+
+- [Claude Documentation](https://docs.claude.com)
+- [Anthropic Research](https://www.anthropic.com/research)
+- [LangChain](https://github.com/langchain-ai/langchain)
+- [LlamaIndex](https://github.com/run-llama/llama_index)

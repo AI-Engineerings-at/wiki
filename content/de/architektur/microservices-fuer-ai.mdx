@@ -1,0 +1,750 @@
+---
+title: "Microservices für AI: Skalierung von LLM-Systemen"
+description: "Microservice-Patterns für KI: Model Serving, API Gateways, Sidecar-Pattern. Praktische Docker-Compose und Kubernetes-Beispiele."
+section: "architektur"
+---
+
+# Microservices für AI: Skalierung von LLM-Systemen
+
+Microservices sind das Fundament skalierbarer AI-Systeme. Anstatt ein monolithisches System zu bauen, zerlegst du deine KI-Pipeline in kleine, unabhängige Services, die über APIs kommunizieren. Das ermöglicht Scaling, Redundanz und Failover auf Enterprise-Level.
+
+## Das Problem: Monolith vs. Microservice
+
+**Monolithische AI-App (NICHT SKALIERBAR):**
+```
+┌─────────────────────────────┐
+│  Flask App (Single Instance) │
+├─────────────────────────────┤
+│ • Embedding Generation       │
+│ • Vector Search              │
+│ • LLM Inference              │
+│ • Document Processing        │
+│ • Cache Management           │
+└─────────────────────────────┘
+```
+
+Problem: Eine Komponente überlastet → ganze App reagiert nicht.
+
+**Microservice-Architektur (SKALIERBAR):**
+```
+┌──────────────────┐       ┌──────────────────┐       ┌──────────────────┐
+│  Embedding       │       │  Vector          │       │  LLM Inference   │
+│  Service         │       │  Database Proxy  │       │  Service         │
+│  (CPU-bound)     │       │  (I/O-bound)     │       │  (GPU-bound)     │
+└──────────────────┘       └──────────────────┘       └──────────────────┘
+        ↑                           ↑                           ↑
+        └───────────────────────────┼───────────────────────────┘
+                         ┌──────────┴────────────┐
+                         │   API Gateway         │
+                         │  • Rate Limiting      │
+                         │  • Load Balancing     │
+                         │  • Fallback Routing   │
+                         └───────────────────────┘
+```
+
+Vorteil: Jeder Service läuft unabhängig. Wenn LLM-Service überlastet ist, funktionieren Embedding und Vector Search weiter.
+
+## 1. Model Serving als Service
+
+Model Serving bedeutet: Stelle deine LLMs als HTTP/gRPC Service bereit, nicht als Library im App-Code.
+
+### Warum Model Serving?
+
+1. **Unabhängige Skalierung**: GPU-Server können hochgefahren werden, ohne App-Server zu starten
+2. **Sprachunabhängig**: Services können in unterschiedlichen Sprachen geschrieben sein
+3. **Einfaches Deployment**: Model-Updates ohne App-Restart
+4. **Resource-Isolation**: OOM in einem Service bricht nicht alle ab
+
+### Architektur eines Model-Servers
+
+```
+Client Request
+     ↓
+┌─────────────────────────────┐
+│ HTTP Listener :5678         │
+├─────────────────────────────┤
+│ Route Dispatcher            │
+│ ├─ /v1/completions         │
+│ ├─ /v1/embeddings          │
+│ ├─ /v1/chat/completions    │
+├─────────────────────────────┤
+│ Request Validation          │
+│ ├─ Token counting          │
+│ ├─ Request logging         │
+├─────────────────────────────┤
+│ Model Inference             │
+│ ├─ Continuous batching     │
+│ ├─ KV Cache management     │
+│ ├─ GPU memory tracking     │
+├─────────────────────────────┤
+│ Response Formatting         │
+│ ├─ JSON encoding           │
+│ ├─ Streaming               │
+└─────────────────────────────┘
+     ↓
+Response (JSON/Stream)
+```
+
+### vLLM: Der Standard für Model Serving
+
+vLLM ist heute der Industrie-Standard für High-Performance LLM Serving. Features:
+- **Continuous Batching**: Neue Requests werden sofort verarbeitet, nicht nach Request-Ende
+- **PagedAttention**: KV-Cache wird effizient wie OS Virtual Memory verwaltet
+- **Multi-LoRA Support**: Mehrere Adapter parallel laden
+- **OpenAI-kompatible API**: Drop-in Replacement für OpenAI Client
+
+**Docker-Deployment für vLLM:**
+
+```dockerfile
+FROM nvidia/cuda:12.1.0-runtime-ubuntu22.04
+
+RUN apt-get update && apt-get install -y python3.11 python3-pip
+RUN pip install vllm
+
+EXPOSE 8000
+
+CMD ["python", "-m", "vllm.entrypoints.openai.api_server", \
+     "--model", "meta-llama/Llama-2-7b-hf", \
+     "--tensor-parallel-size", "1", \
+     "--gpu-memory-utilization", "0.9", \
+     "--host", "0.0.0.0", \
+     "--port", "8000"]
+```
+
+**Health Check und Graceful Shutdown:**
+
+```yaml
+healthcheck:
+  test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+  interval: 10s
+  timeout: 5s
+  retries: 3
+  start_period: 30s
+
+stop_grace_period: 60s  # Zeit für laufende Requests
+```
+
+## 2. API Gateway für LLMs
+
+Das API Gateway ist der Traffic Cop deines Systems. Es ist NICHT nur Load Balancer, sondern:
+
+- Authentifizierung (API Keys, OAuth)
+- Rate Limiting (Token-aware, nicht nur Request-Count)
+- Request Validation
+- Routing zu verschiedenen Model-Versionen
+- Fallback Chains (llama → mistral → gpt-4)
+- Cost Tracking
+- Caching Layer
+
+### Gateway-Architektur
+
+```
+Client
+  ↓
+[API Gateway]
+  ├─ Auth Check (API Key valid?)
+  ├─ Rate Limit Check (tokens/min exceeded?)
+  ├─ Request Validation (JSON schema)
+  ├─ Routing Decision
+  │  ├─ Size-based: "small" → llama-7b, "large" → llama-70b
+  │  ├─ Cost-based: budget exhausted → use cheaper model
+  │  ├─ Latency-SLA: need <500ms → use fastest available
+  ├─ Cache Lookup (semantic cache)
+  └─ Load Balance
+     ├─ Instance 1 (vLLM on GPU-A)
+     ├─ Instance 2 (vLLM on GPU-B)
+     ├─ Instance 3 (Fallback: API Provider)
+```
+
+### LiteLLM: Gateway mit LLM-Abstraktionen
+
+LiteLLM ist eine Python-Library, die alle LLM-APIs einheitlich anspricht:
+
+```python
+from litellm import completion, embedding
+import litellm
+
+# Fallback Chain definieren
+litellm.model_list = [
+    {
+        "model_name": "gpt-4",
+        "litellm_params": {
+            "model": "gpt-4",
+            "api_key": "$OPENAI_API_KEY"
+        }
+    },
+    {
+        "model_name": "gpt-4",
+        "litellm_params": {
+            "model": "claude-3-opus-20240229",
+            "api_key": "$ANTHROPIC_API_KEY"
+        }
+    },
+    {
+        "model_name": "gpt-4",
+        "litellm_params": {
+            "model": "llama-2-70b",
+            "api_base": "http://localhost:8000/v1"
+        }
+    }
+]
+
+# Erste verfügbare nutzen
+response = completion(
+    model="gpt-4",
+    messages=[{"role": "user", "content": "Hallo!"}],
+    fallbacks=[("claude-opus", 2), ("llama-70b", 1)]  # Retry-Strategie
+)
+```
+
+### Kong Gateway mit AI-Plugins
+
+Kong ist ein Production-Grade API Gateway mit AI-Plugins:
+
+```yaml
+# kong.yml - Kong Konfiguration
+version: '3.1'
+services:
+  kong-database:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: kong
+      POSTGRES_USER: kong
+      POSTGRES_PASSWORD: kongpwd
+
+  kong:
+    image: kong:3.4-alpine
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-database
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: kongpwd
+    ports:
+      - "8000:8000"  # Proxy
+      - "8443:8443"  # Proxy HTTPS
+      - "8001:8001"  # Admin API
+    depends_on:
+      - kong-database
+
+  konga:  # Kong Admin UI
+    image: pantsel/konga:latest
+    environment:
+      NODE_ENV: production
+    ports:
+      - "1337:1337"
+    depends_on:
+      - kong
+```
+
+**Kong Route für Model Server:**
+
+```bash
+# Service erstellen
+curl -X POST http://localhost:8001/services \
+  -d "name=llm-backend" \
+  -d "url=http://vllm-gpu-1:8000"
+
+# Route erstellen (mit Rate Limiting)
+curl -X POST http://localhost:8001/services/llm-backend/routes \
+  -d "paths[]=/v1/completions"
+
+# Rate Limit Plugin hinzufügen (1000 tokens/min pro API Key)
+curl -X POST http://localhost:8001/services/llm-backend/plugins \
+  -d "name=rate-limiting" \
+  -d "config.minute=1000"
+```
+
+## 3. Sidecar-Pattern für AI
+
+Der Sidecar-Pattern platziert einen Helfer-Container neben deinem Haupt-Container. Für AI-Systeme ist das perfekt für:
+
+- **LLM-Sidecar**: Embeddings, Inference lokal
+- **Cache-Sidecar**: Redis für Token/Response Caching
+- **Monitoring-Sidecar**: Prometheus metrics, token counting
+- **Auth-Sidecar**: OAuth, API Key validation
+
+### Praktisches Beispiel: RAG App mit LLM Sidecar
+
+```yaml
+# docker-compose.yml
+version: '3.8'
+services:
+  app:
+    image: my-rag-app:latest
+    environment:
+      VLLM_HOST: localhost:8000
+      EMBEDDING_HOST: localhost:8001
+      CACHE_HOST: cache:6379
+    ports:
+      - "5000:5000"
+    depends_on:
+      - vllm
+      - embedding-server
+      - cache
+
+  # Sidecar 1: LLM Inference
+  vllm:
+    image: vllm/vllm:latest
+    environment:
+      MODEL: meta-llama/Llama-2-13b-hf
+      TENSOR_PARALLEL_SIZE: 1
+      GPU_MEMORY_UTILIZATION: 0.9
+    volumes:
+      - hf-cache:/root/.cache/huggingface
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Sidecar 2: Embedding Server
+  embedding-server:
+    image: vllm/vllm:latest
+    environment:
+      MODEL: all-MiniLM-L6-v2
+    ports:
+      - "8001:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # Sidecar 3: Cache
+  cache:
+    image: redis:7-alpine
+    command: redis-server --maxmemory 4gb --maxmemory-policy allkeys-lru
+    volumes:
+      - cache-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  hf-cache:
+  cache-data:
+```
+
+**App Code (Python/Flask):**
+
+```python
+from flask import Flask, request, jsonify
+import requests
+import json
+
+app = Flask(__name__)
+
+VLLM_HOST = "http://localhost:8000"
+EMBEDDING_HOST = "http://localhost:8001"
+CACHE_HOST = "localhost:6379"
+
+@app.route("/api/chat", methods=["POST"])
+def chat():
+    data = request.json
+    prompt = data.get("prompt")
+
+    # 1. Embedding (parallel query)
+    embedding_response = requests.post(
+        f"{EMBEDDING_HOST}/v1/embeddings",
+        json={"input": prompt, "model": "all-MiniLM-L6-v2"},
+        timeout=5
+    )
+    embedding = embedding_response.json()["data"][0]["embedding"]
+
+    # 2. LLM Inference
+    llm_response = requests.post(
+        f"{VLLM_HOST}/v1/chat/completions",
+        json={
+            "model": "Llama-2-13b",
+            "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 512,
+            "temperature": 0.7
+        },
+        timeout=30
+    )
+
+    completion = llm_response.json()["choices"][0]["message"]["content"]
+
+    return jsonify({
+        "response": completion,
+        "embedding_dim": len(embedding),
+        "tokens_used": llm_response.json()["usage"]["total_tokens"]
+    })
+```
+
+## 4. gRPC vs REST für Inference
+
+Für Performance-kritische Szenarien ist gRPC schneller als REST:
+
+| Aspekt | REST (HTTP/1.1) | gRPC (HTTP/2) |
+|--------|---|---|
+| Serialisierung | JSON (Text) | Protobuf (Binär) |
+| Verbindung | Neue TCP pro Request | Multiplexed HTTP/2 |
+| Latenz | ~50-200ms | ~5-20ms |
+| Payload-Größe | 2-5x größer | Compact |
+| Streaming | Chunked | Built-in bidirektional |
+
+**gRPC Service Definition:**
+
+```protobuf
+// inference.proto
+syntax = "proto3";
+
+package inference;
+
+service LLMInference {
+  rpc Complete(CompletionRequest) returns (CompletionResponse);
+  rpc Embed(EmbeddingRequest) returns (EmbeddingResponse);
+  rpc StreamComplete(CompletionRequest) returns (stream CompletionChunk);
+}
+
+message CompletionRequest {
+  string prompt = 1;
+  int32 max_tokens = 2;
+  float temperature = 3;
+  string model = 4;
+}
+
+message CompletionResponse {
+  string text = 1;
+  int32 prompt_tokens = 2;
+  int32 completion_tokens = 3;
+  string stop_reason = 4;
+}
+
+message EmbeddingRequest {
+  string text = 1;
+  string model = 2;
+}
+
+message EmbeddingResponse {
+  repeated float embedding = 1;
+  int32 dimensions = 2;
+}
+
+message CompletionChunk {
+  string delta = 1;
+  int32 index = 2;
+}
+```
+
+**gRPC Server (Python):**
+
+```python
+import grpc
+from concurrent import futures
+import inference_pb2
+import inference_pb2_grpc
+
+class LLMInferenceServicer(inference_pb2_grpc.LLMInferenceServicer):
+    def __init__(self, vllm_client):
+        self.vllm = vllm_client
+
+    def Complete(self, request, context):
+        response = self.vllm.completions.create(
+            prompt=request.prompt,
+            max_tokens=request.max_tokens,
+            temperature=request.temperature,
+            model=request.model
+        )
+        return inference_pb2.CompletionResponse(
+            text=response.choices[0].text,
+            prompt_tokens=response.usage.prompt_tokens,
+            completion_tokens=response.usage.completion_tokens,
+            stop_reason=response.choices[0].finish_reason
+        )
+
+    def StreamComplete(self, request, context):
+        stream = self.vllm.completions.create(
+            prompt=request.prompt,
+            stream=True,
+            model=request.model
+        )
+        for chunk in stream:
+            yield inference_pb2.CompletionChunk(
+                delta=chunk.choices[0].delta.content or "",
+                index=0
+            )
+
+def serve():
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=100))
+    inference_pb2_grpc.add_LLMInferenceServicer_to_server(
+        LLMInferenceServicer(vllm_client),
+        server
+    )
+    server.add_insecure_port('[::]:50051')
+    server.start()
+    server.wait_for_termination()
+```
+
+**gRPC Client:**
+
+```python
+import grpc
+import inference_pb2
+import inference_pb2_grpc
+
+channel = grpc.insecure_channel('localhost:50051')
+stub = inference_pb2_grpc.LLMInferenceStub(channel)
+
+response = stub.Complete(inference_pb2.CompletionRequest(
+    prompt="Erkläre Microservices",
+    max_tokens=200,
+    model="Llama-2-7b"
+))
+
+print(response.text)
+```
+
+## 5. Health Checks und Graceful Shutdown
+
+Ein robustes System braucht Health Checks (ist der Service noch am Leben?) und Graceful Shutdown (Requests beenden, bevor Process killt):
+
+### Health Check Endpoints
+
+```python
+from flask import Flask, jsonify
+import psutil
+import time
+
+app = Flask(__name__)
+start_time = time.time()
+
+@app.route("/health", methods=["GET"])
+def health():
+    """Minimal health check - ist der Service aktiv?"""
+    return jsonify({"status": "ok"}), 200
+
+@app.route("/healthz", methods=["GET"])
+def healthz():
+    """Detailed health check für Kubernetes"""
+    gpu_memory = get_gpu_memory_usage()  # Prozentual
+    cpu_usage = psutil.cpu_percent(interval=1)
+
+    if gpu_memory > 95 or cpu_usage > 90:
+        return jsonify({
+            "status": "degraded",
+            "gpu_memory_percent": gpu_memory,
+            "cpu_percent": cpu_usage
+        }), 503  # Service Unavailable
+
+    return jsonify({
+        "status": "healthy",
+        "uptime_seconds": time.time() - start_time,
+        "gpu_memory_percent": gpu_memory,
+        "cpu_percent": cpu_usage
+    }), 200
+
+@app.route("/ready", methods=["GET"])
+def ready():
+    """Readiness check - ist der Service bereit für Traffic?"""
+    # Beispiel: Prüfe ob Model geladen ist
+    try:
+        model_loaded = check_model_loaded()
+        if not model_loaded:
+            return jsonify({"ready": False}), 503
+        return jsonify({"ready": True}), 200
+    except Exception as e:
+        return jsonify({"ready": False, "error": str(e)}), 503
+```
+
+### Graceful Shutdown
+
+```python
+import signal
+import time
+from threading import Event
+
+shutdown_event = Event()
+active_requests = 0
+request_lock = asyncio.Lock()
+
+@app.before_request
+async def track_request():
+    global active_requests
+    async with request_lock:
+        active_requests += 1
+
+@app.after_request
+def finish_request(response):
+    global active_requests
+    active_requests -= 1
+    return response
+
+def signal_handler(signum, frame):
+    """Graceful Shutdown: Neue Requests ablehnen, laufende beenden"""
+    print("SIGTERM empfangen, fahre herunter...")
+    shutdown_event.set()
+
+    # Warte max 60 Sekunden auf laufende Requests
+    timeout = 60
+    start = time.time()
+    while active_requests > 0 and time.time() - start < timeout:
+        print(f"Warte auf {active_requests} Requests...")
+        time.sleep(1)
+
+    print(f"Fahre herunter mit {active_requests} ausstehenden Requests")
+    exit(0)
+
+signal.signal(signal.SIGTERM, signal_handler)
+signal.signal(signal.SIGINT, signal_handler)
+
+@app.route("/v1/completions", methods=["POST"])
+def completions():
+    if shutdown_event.is_set():
+        return jsonify({"error": "Server shutting down"}), 503
+
+    # ... inference logic ...
+```
+
+## 6. Kubernetes Deployment Pattern
+
+Für große Systeme brauchst du Kubernetes. Hier ist ein komplettes Pattern:
+
+```yaml
+# llm-service-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llm-service
+  labels:
+    app: llm-service
+spec:
+  replicas: 2  # 2 Instanzen für Failover
+  selector:
+    matchLabels:
+      app: llm-service
+
+  template:
+    metadata:
+      labels:
+        app: llm-service
+
+    spec:
+      containers:
+      - name: vllm
+        image: vllm/vllm:v0.3.0
+
+        ports:
+        - containerPort: 8000
+
+        env:
+        - name: MODEL
+          value: meta-llama/Llama-2-70b-hf
+        - name: TENSOR_PARALLEL_SIZE
+          value: "2"  # 2 GPUs
+        - name: GPU_MEMORY_UTILIZATION
+          value: "0.85"
+
+        resources:
+          requests:
+            nvidia.com/gpu: 2  # 2 GPUs required
+            memory: "40Gi"
+            cpu: "8"
+          limits:
+            nvidia.com/gpu: 2
+            memory: "45Gi"
+            cpu: "16"
+
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 20
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 2
+
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 60"]  # 60s drain before kill
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: llm-service
+spec:
+  type: ClusterIP
+  selector:
+    app: llm-service
+  ports:
+  - protocol: TCP
+    port: 8000
+    targetPort: 8000
+  sessionAffinity: ClientIP  # Sticky sessions für Token-State
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800  # 3 Stunden
+
+---
+apiVersion: autoscaling.k8s.io/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: llm-service-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: llm-service
+
+  minReplicas: 2
+  maxReplicas: 10
+
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 75
+```
+
+## Zusammenfassung: Microservices für AI
+
+| Pattern | Wann | Beispiel |
+|---------|------|---------|
+| **Model Serving** | Immer wenn LLMs genutzt werden | vLLM, TGI, Triton |
+| **API Gateway** | Mehrere Models oder Fallbacks | Kong, LiteLLM, Traefik |
+| **Sidecar** | Separierte Concerns (Cache, Auth) | Redis Sidecar, Embedding Server |
+| **gRPC** | Performance-kritisch (<20ms) | Multi-token streams, real-time |
+| **Kubernetes** | Production scale (>10 Replicas) | HPA, LoadBalancing, Monitoring |
+
+Die Kunst ist nicht, alle Patterns gleichzeitig zu nutzen, sondern die richtige Kombination für dein Problem auszuwählen. Starte mit Model Serving + API Gateway. Alles andere kommt, wenn du es brauchst.
+
+## Quellen und Links
+
+- [vLLM GitHub](https://github.com/lm-sys/vllm) — Open-Source LLM Serving Engine
+- [LiteLLM Documentation](https://docs.litellm.ai/) — Unified LLM API
+- [Kong Docs](https://docs.konghq.com/) — API Gateway
+- [Kubernetes Documentation](https://kubernetes.io/docs/) — Container Orchestration
+- [gRPC Guides](https://grpc.io/docs/guides/) — Protocol Buffers & RPC
+- [vLLM Serving with Kubernetes](https://docs.vllm.ai/en/latest/serving/deploying_with_docker/) — Production Deployment
+- [Model Serving Pattern](https://martinfowler.com/articles/patterns-of-distributed-systems/process-pair.html) — Design Patterns

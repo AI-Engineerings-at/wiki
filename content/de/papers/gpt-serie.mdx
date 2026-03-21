@@ -1,0 +1,260 @@
+---
+title: Die GPT-Serie — Von GPT-1 bis GPT-4
+date: 2026-03-21
+summary: Die Entwicklungsgeschichte von GPT-1 über GPT-2, GPT-3 bis zur aktuellen GPT-4. Architektur-Evolution, Scaling Laws, und warum die Serie den KI-Markt revolutioniert hat.
+tags: [gpt, transformer, llm, openai, scaling, paper, nlp]
+author: AI Engineering
+section: papers
+---
+
+# Die GPT-Serie — Von GPT-1 bis GPT-4
+
+Die GPT-Serie (Generative Pre-trained Transformer) ist eine der wichtigsten Entwicklungslinien in der modernen KI-Forschung. Sie zeigt, wie systematische Skalierung, Datenmengen und Modellarchitektur zusammenwirken, um emergente Fähigkeiten freizusetzen.
+
+## GPT-1: Der Anfang (2018)
+
+**Paper:** "Language Models are Unsupervised Multitask Learners" (Radford et al., OpenAI)
+
+GPT-1 war das erste Modell der Serie und hatte etwa **110 Millionen Parameter**. Das klingt heute winzig, war aber revolutionär.
+
+### Architektur
+- Decoder-only Transformer (nicht Encoder-Decoder wie das Original-Paper)
+- 12 Transformer-Blöcke
+- Hidden Size: 768 Dimensionen
+- 12 Attention Heads
+- Trainiert auf **BookCorpus** (~7 GB Text)
+
+### Innovationen
+- **Unsupervised Pretraining + Task-Specific Fine-Tuning**: Das Modell wurde zuerst auf rohem Text trainiert, dann auf spezifischen Tasks fine-getuned
+- **Transfer Learning für NLP**: Zeigt, dass das, was in Computer Vision schon funktioniert (ImageNet Pretraining), auch bei Sprache funktioniert
+- **Zero-Shot und Few-Shot Learning**: GPT-1 könnte auch auf neuen Tasks arbeiten, ohne fine-tuned zu werden
+
+### Ergebnisse
+- SOTA (State of the Art) auf mehreren Benchmarks
+- Aber: Noch Fehler bei längeren Dokumenten, Qualität nicht konsistent
+
+## GPT-2: Das umstrittene Modell (2019)
+
+**Paper:** "Language Models are Unsupervised Multitask Learners" (Radford et al., OpenAI)
+
+OpenAI traute sich etwas: Sie veröffentlichten GPT-2 nicht sofort im vollen Umfang. Das Modell war „zu gefährlich", weil es so gute gefälschte Texte schreiben konnte.
+
+### Architektur
+- 48 Transformer-Blöcke (4x größer als GPT-1)
+- Hidden Size: 1600 Dimensionen
+- 25 Attention Heads
+- **1.5 Milliarden Parameter**
+- Trainiert auf **40 GB Text** aus Internetquellen (Common Crawl)
+
+### Großer Unterschied zu GPT-1
+- **Viel größerer Datensatz**: Nicht nur Bücher, sondern auch Webseiten
+- **Größeres Modell**: 10x Parameter
+- **Keine Task-Specific Fine-Tuning nötig**: GPT-2 könnte direkt auf neuen Aufgaben arbeiten
+
+### Überraschende Fähigkeiten
+```
+Prompt: "Eine Liste von Zahlen:"
+Output: "1, 2, 3, 4, 5, 6, 7, 8, 9, 10"
+
+Prompt: "Die Hauptstadt von Frankreich ist"
+Output: "Paris"
+
+Prompt: "Schreibe eine Geschichte über ein Roboter-Abenteuer"
+Output: [Vollständige, zusammenhängende Geschichte mit Handlung]
+```
+
+Das Modell hatte offensichtlich „verstanden", was die verschiedenen Aufgaben sind, ohne dafür explizit trainiert zu werden.
+
+### Warum die Kontroverse?
+- GPT-2 konnte sehr überzeugend falsche Informationen schreiben
+- Es konnte automatisiert Desinformation erstellen
+- OpenAI zeigte anfangs nur eine kleinere Version (355M Parameter) der Öffentlichkeit
+- Nach 6 Monaten gab OpenAI die volle Version frei (weil andere ähnliche Modelle bauten)
+
+## GPT-3: Das Wendepunkt-Modell (2020)
+
+**Paper:** "Language Models are Few-Shot Learners" (Brown et al., OpenAI)
+
+GPT-3 war das Modell, das den KI-Winter endgültig beendete. Ein Modell mit **175 Milliarden Parametern**.
+
+### Größen-Vergleich
+```
+GPT-1:   110M Parameter
+GPT-2:  1.5B Parameter
+GPT-3: 175B Parameter
+→ GPT-3 ist 1000x größer als GPT-2
+```
+
+### Was ist anders?
+1. **Emergentes Verhalten**: Bei GPT-3 entstanden Fähigkeiten, die GPT-1 und 2 nicht hatten
+   - **Arithmetic**: 175B Parameter-GPT-3 kann addieren/subtrahieren
+   - **Coding**: Es kann einfachen Code schreiben (Python, JavaScript)
+   - **Translation**: Es kann zwischen Sprachen übersetzen
+   - **Q&A**: Es kann Fragen beantworten ohne fine-tuning
+
+2. **Few-Shot Learning funktioniert besser**: Mit nur 1-2 Beispielen im Prompt kann das Modell neue Tasks lösen
+
+3. **Größer Scale**:
+   - 300 Milliarden Tokens Trainingsdaten
+   - Trainiert auf TPU-Pods (Google Tensor Processing Units)
+   - Kostet ~$10 Millionen zum Trainieren (zu dieser Zeit extrem teuer)
+
+### Die berühmteste Fähigkeit: In-Context Learning
+```
+Prompt:
+"""
+Addition:
+2 + 3 = 5
+4 + 6 = 10
+
+7 + 8 = ?
+"""
+
+Output: 15
+```
+
+GPT-3 „verstand" aus 2 Beispielen, was Addition ist, ohne dafür trainiert zu werden.
+
+### Chinchilla-Paper (2022 — wichtig!)
+Ein späteren Paper zeigte: GPT-3 war *nicht optimal trainiert*. Die Balance zwischen Modellgröße und Datenmenge war nicht ideal.
+
+**Chinchilla Ratio**: Für optimales Training sollte Datamenge ≈ Modellgröße sein (in Tokens)
+```
+Nicht-optimal:
+- Großes Modell, zu wenige Tokens
+- GPT-3: 175B Parameter, aber nur 300B Tokens
+- Das ist unbalanciert
+
+Optimal (Chinchilla):
+- Modellgröße = Datamenge
+- 70B Parameter würde mit 1.4 Billionen Tokens trainiert
+- Besser Performance pro Flop
+```
+
+Das bedeutet: **GPT-3 war wahrscheinlich 10-20% nicht optimal trainiert.**
+
+## GPT-3.5: Der InstructGPT-Übergang (2022)
+
+Zwischen GPT-3 und GPT-4 kam eine wichtige Zwischenstufe: **InstructGPT** / **GPT-3.5**.
+
+### Was ist anders?
+1. **Instruction Fine-Tuning**: Das Modell wurde nicht nur auf rohen Text, sondern auf Anweisungen trainiert
+2. **RLHF (Reinforcement Learning from Human Feedback)**:
+   - Menschen bewerteten Outputs von GPT-3
+   - Ein Reward-Modell wurde trainiert, um gute von schlechten Outputs zu unterscheiden
+   - Das Hauptmodell wurde mit diesem Reward-Modell optimiert
+
+### Ergebnis
+- GPT-3.5 war nicht größer als GPT-3
+- Aber es war in praktischen Aufgaben viel besser
+- Es konnte bessere Anweisungen folgen
+- Weniger wahrscheinlich, die Anweisung zu ignorieren oder unhilfreiche Antworten zu geben
+
+**Das war die Basis für ChatGPT** (November 2022).
+
+## GPT-4: Multimodal und Reasoning (2023)
+
+**Technischer Report:** OpenAI GPT-4 Report
+
+### Was ist neu?
+1. **Multimodal**: Kann nicht nur Text, sondern auch Bilder verarbeiten
+2. **Größer und besser**: Wahrscheinlich 1+ Billionen Parameter (nicht offiziell bestätigt)
+3. **Besseres Reasoning**: Kann komplexere Probleme lösen
+4. **Zutreffender**: Weniger Halluzinationen als GPT-3.5
+
+### Architecture Details
+OpenAI hat nie die exakte Architektur veröffentlicht, aber:
+- Wahrscheinlich Mixture of Experts (nicht Dense Transformer)
+- Multimodale Embedding: Text + Image tokenisiert gemeinsam
+- Verstärktes Sicherheits-Training
+
+### Praktische Unterschiede
+```
+Task: Barexam (US law exam)
+GPT-3.5: 49. Percentil (unterdurchschnittlich)
+GPT-4:   88. Percentil (Anwalt-Level)
+
+Task: Math Olympiad
+GPT-3.5: 0/42 Punkte
+GPT-4:  25/42 Punkte (nicht perfekt, aber signifikant)
+```
+
+### Vision Capabilities
+GPT-4 kann:
+- Bilder analysieren und beschreiben
+- Text in Bildern lesen (OCR)
+- Diagramme interpretieren
+- Fehler in Code-Screenshots finden
+
+## Scaling Laws — Die Mathematik dahinter
+
+Eine der wichtigsten Erkenntnisse aus der GPT-Serie: **Es gibt Muster beim Skalieren**.
+
+### Das Kaplan-Scaling Law
+```
+Loss ≈ E / N^α + C / D^β
+
+Loss = Training Error
+N = Anzahl der Parameter
+D = Anzahl der Trainings-Tokens
+α, β ≈ 0.07-0.1 (empirisch gemessen)
+E, C = Konstanten
+```
+
+**Was bedeutet das?**
+- Je größer das Modell, desto besser (aber mit Diminishing Returns)
+- Je mehr Daten, desto besser (auch mit Diminishing Returns)
+- Beide müssen zusammen wachsen
+
+### Chinchilla Insight
+```
+Optimal Training Budget (T = Total Flops):
+- Parameter N ≈ sqrt(T / 6)
+- Tokens D ≈ 20 * N
+
+Beispiel:
+- Wenn T = 10^20 Flops (Budget)
+- Dann N ≈ 13B Parameter, D ≈ 260B Tokens
+- (Nicht 175B Parameter mit 300B Tokens wie GPT-3)
+```
+
+## Die Trend: Vom Dense zum Sparse Modell
+
+```
+GPT-1:    110M (Dense)
+GPT-2:   1.5B (Dense)
+GPT-3:    175B (Dense)
+GPT-4:   ???B (Wahrscheinlich Mixture of Experts = Sparse)
+```
+
+**Was ist Sparse?**
+- Nicht alle Parameter werden bei jedem Input aktiviert
+- Nur relevante „Experten" werden angeschaltet
+- Effizienter, schneller bei Inferenz
+
+## Zusammenfassung: Die Entwicklung
+
+| Modell | Jahr | Größe | Daten | Schlüssel-Innov. | Impact |
+|--------|------|-------|-------|------------------|--------|
+| GPT-1 | 2018 | 110M | 7GB | Unsupervised Pretraining | Proof of Concept |
+| GPT-2 | 2019 | 1.5B | 40GB | Größer Scale, kein FT nötig | Publikums-Aufmerksamkeit |
+| GPT-3 | 2020 | 175B | 300B Tokens | Few-Shot Learning, Emergenz | KI-Hype startet |
+| GPT-3.5 | 2022 | 175B | + RLHF | Instruction Tuning, Alignment | ChatGPT Release |
+| GPT-4 | 2023 | ~1T? | ? | Multimodal, MoE | Production-Ready |
+
+## Lektionen für jeden KI-Engineer
+
+1. **Skalierung ist nicht linear**: 10x mehr Parameter ≠ 10x bessere Performance
+2. **Daten-Qualität > Datenmenge**: Aber der Trend ist: Mehr Daten hilft immer noch
+3. **Emergence ist real**: Bei bestimmten Größen entstehen Fähigkeiten plötzlich
+4. **Alignment matters**: GPT-3.5 war praktisch besser als GPT-3, obwohl nicht größer
+5. **Benchmarks sind trügerisch**: Die beste Metrik ist oft: "Kann ein Mensch damit arbeiten?"
+
+## Quellen und Links
+
+- [GPT-1 Paper: Language Models are Unsupervised Multitask Learners](https://openai.com/research/language-models-are-unsupervised-multitask-learners/)
+- [GPT-2 Paper & Release](https://openai.com/research/better-language-models/)
+- [GPT-3 Paper (ArXiv)](https://arxiv.org/abs/2005.14165)
+- [Chinchilla Scaling Laws](https://arxiv.org/abs/2203.15556)
+- [GPT-4 Technical Report](https://openai.com/research/gpt-4/)
+- [InstructGPT & RLHF](https://arxiv.org/abs/2203.02155)

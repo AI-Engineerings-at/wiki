@@ -1,0 +1,351 @@
+---
+title: Function Calling
+date: 2026-03-21
+summary: How Function Calling Works, LLM Tool Use Protocol, OpenAI Format, Anthropic tool_use, Open-Source (Hermes, Gorilla) — JSON Schema, Parallel Calls
+tags: [function-calling, tool-use, agents, llm-api, openai-functions, anthropic-tools]
+author: AI Engineering
+section: Concepts
+---
+
+# Understanding Function Calling
+
+Function Calling enables LLMs to request structured information to call external tools.
+
+```
+User: "What is 2+3?"
+
+Without Function Calling:
+  LLM: "2+3 is 5"  (guesses, might be wrong)
+
+With Function Calling:
+  LLM: "I'll call the 'add' function with 2 and 3"
+  System: Calls add(2, 3) → 5
+  LLM: "2+3 is 5"  (guaranteed correct!)
+```
+
+---
+
+## OpenAI Format
+
+OpenAI's standard for Function Calling.
+
+### Function Definition
+
+```python
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "add",
+            "description": "Add two numbers",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "a": {
+                        "type": "number",
+                        "description": "First number"
+                    },
+                    "b": {
+                        "type": "number",
+                        "description": "Second number"
+                    }
+                },
+                "required": ["a", "b"]
+            }
+        }
+    }
+]
+```
+
+### API Call
+
+```python
+from openai import OpenAI
+
+client = OpenAI()
+
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[{
+        "role": "user",
+        "content": "What is 2+3?"
+    }],
+    tools=tools,
+    tool_choice="auto"
+)
+
+tool_calls = response.choices[0].message.tool_calls
+
+for tool_call in tool_calls:
+    if tool_call.function.name == "add":
+        args = json.loads(tool_call.function.arguments)
+        result = add(args["a"], args["b"])
+        print(f"Result: {result}")
+```
+
+---
+
+## Anthropic Tool Use
+
+Claude's approach, slightly different structure.
+
+### Tool Definition
+
+```python
+tools = [
+    {
+        "name": "add",
+        "description": "Add two numbers",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "a": {"type": "number", "description": "First number"},
+                "b": {"type": "number", "description": "Second number"}
+            },
+            "required": ["a", "b"]
+        }
+    }
+]
+```
+
+### API Call
+
+```python
+import anthropic
+import json
+
+client = anthropic.Anthropic()
+
+response = client.messages.create(
+    model="claude-3-5-sonnet-20241022",
+    max_tokens=1024,
+    tools=tools,
+    messages=[{
+        "role": "user",
+        "content": "What is 2+3?"
+    }]
+)
+
+for block in response.content:
+    if block.type == "tool_use":
+        print(f"Tool: {block.name}")
+        print(f"Input: {block.input}")
+```
+
+---
+
+## Open-Source Function Calling
+
+### Hermes (NousResearch)
+
+Specialized in agentic behavior.
+
+```python
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+model = AutoModelForCausalLM.from_pretrained(
+    "NousResearch/Hermes-2-Pro-Mistral-7B"
+)
+
+tools_json = json.dumps([
+    {
+        "name": "add",
+        "description": "Add two numbers",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "a": {"type": "number"},
+                "b": {"type": "number"}
+            }
+        }
+    }
+])
+
+prompt = f"""You can call: {tools_json}
+
+To call a function:
+<tool_call>
+{{"name": "function_name", "arguments": {{"arg1": value1}}}}
+</tool_call>
+
+User: What is 2+3?"""
+```
+
+### Gorilla (UC Berkeley)
+
+Specialized API calling model.
+
+```
+Gorilla-7B:  Trained on 1000+ APIs
+Gorilla-13B: Better quality
+Gorilla-34B: State-of-the-art
+
+Specialty: Accuracy on complex API calls
+```
+
+---
+
+## JSON Schema for Tools
+
+### Structure
+
+```python
+tool_schema = {
+    "name": "search_web",
+    "description": "Search the internet",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "query": {
+                "type": "string",
+                "description": "What to search for?"
+            },
+            "num_results": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10,
+                "description": "How many results (1-10)?"
+            },
+            "language": {
+                "type": "string",
+                "enum": ["en", "de", "fr", "es"],
+                "description": "Result language"
+            }
+        },
+        "required": ["query"]
+    }
+}
+```
+
+---
+
+## Parallel Function Calling
+
+Call multiple functions simultaneously.
+
+```python
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[{
+        "role": "user",
+        "content": "What is 2+3, 5*6 and 10/2?"
+    }],
+    tools=tools
+)
+
+tool_calls = response.choices[0].message.tool_calls
+
+# Execute in parallel
+results = []
+for tool_call in tool_calls:
+    result = execute_tool(
+        tool_call.function.name,
+        json.loads(tool_call.function.arguments)
+    )
+    results.append({
+        "tool_call_id": tool_call.id,
+        "result": result
+    })
+```
+
+---
+
+## Agent Loop (Complete Example)
+
+```python
+def run_agent(user_input):
+    messages = [{"role": "user", "content": user_input}]
+
+    while True:
+        # Step 1: LLM responds
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=messages,
+            tools=tools
+        )
+
+        # Step 2: If tool calls, execute them
+        if response.choices[0].message.tool_calls:
+            tool_calls = response.choices[0].message.tool_calls
+            tool_results = []
+
+            for tool_call in tool_calls:
+                result = execute_tool(
+                    tool_call.function.name,
+                    json.loads(tool_call.function.arguments)
+                )
+                tool_results.append({
+                    "tool_call_id": tool_call.id,
+                    "result": str(result)
+                })
+
+            # Add feedback
+            messages.append({"role": "assistant", "content": ""})
+            messages.append({
+                "role": "user",
+                "content": [
+                    {
+                        "type": "tool_result",
+                        "tool_call_id": r["tool_call_id"],
+                        "content": r["result"]
+                    }
+                    for r in tool_results
+                ]
+            })
+
+        else:
+            # Step 3: Final response
+            print(f"Agent: {response.choices[0].message.content}")
+            break
+
+# Usage
+run_agent("What is 2+3 and 5*6?")
+```
+
+---
+
+## Best Practices
+
+### 1. Good Descriptions
+
+```python
+# ❌ Bad
+{"name": "func", "description": "Do something"}
+
+# ✅ Good
+{
+    "name": "search_documents",
+    "description": "Search document database for relevant documents. Use to find information.",
+    "parameters": {...}
+}
+```
+
+### 2. Minimal Tools
+
+```
+❌ 50 functions: LLM confused, wrong choices
+✅ 3-5 functions: LLM chooses correctly
+```
+
+### 3. Error Handling
+
+```python
+def safe_tool_call(tool_name, arguments_str):
+    try:
+        arguments = json.loads(arguments_str)
+        jsonschema.validate(arguments, schema[tool_name]["parameters"])
+        return {"success": True, "result": execute_tool(tool_name, arguments)}
+    except json.JSONDecodeError:
+        return {"success": False, "error": "Invalid JSON"}
+    except jsonschema.ValidationError as e:
+        return {"success": False, "error": f"Validation error: {e.message}"}
+```
+
+---
+
+## Sources and Links
+
+- [OpenAI Function Calling](https://platform.openai.com/docs/guides/function-calling)
+- [Anthropic Tool Use](https://docs.anthropic.com/claude/reference/tool-use)
+- [Hermes by NousResearch](https://huggingface.co/NousResearch/Hermes-2-Pro-Mistral-7B)
+- [Gorilla by UC Berkeley](https://gorilla.cs.berkeley.edu/)

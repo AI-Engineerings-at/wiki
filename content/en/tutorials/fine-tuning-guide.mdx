@@ -1,0 +1,431 @@
+---
+title: Fine-Tuning with Unsloth QLoRA
+date: 2026-03-21
+summary: Step-by-step QLoRA fine-tuning with Unsloth for Llama 3. Dataset preparation, training, evaluation, VRAM requirements, ROI calculation
+tags: [Fine-Tuning, QLoRA, Unsloth, Llama, LoRA]
+author: "AI Engineering"
+---
+
+# Fine-Tuning with Unsloth QLoRA
+
+Fine-tuning transforms a generic model into an expert on your domain. With QLoRA, even on budget hardware.
+
+## Installation
+
+```bash
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+pip install unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git
+pip install xformers transformers datasets peft trl bitsandbytes
+```
+
+## Basic Training
+
+```python
+# train_simple.py
+from unsloth import FastLanguageModel
+from datasets import load_dataset
+from trl import SFTTrainer
+from transformers import TrainingArguments
+
+# Load model (4-bit quantized)
+model, tokenizer = FastLanguageModel.from_pretrained(
+    model_name="unsloth/Llama-3.2-7B-Instruct-bnb-4bit",
+    max_seq_length=2048,
+    dtype=None,
+    load_in_4bit=True
+)
+
+# Configure LoRA
+model = FastLanguageModel.get_peft_model(
+    model,
+    r=16,
+    lora_alpha=16,
+    lora_dropout=0.05,
+    bias="none",
+    use_gradient_checkpointing="unsloth",
+    random_state=42,
+)
+
+# Load dataset
+dataset = load_dataset("json", data_files="training_data.jsonl")
+
+# Training config
+training_args = TrainingArguments(
+    per_device_train_batch_size=4,
+    gradient_accumulation_steps=1,
+    warmup_steps=5,
+    num_train_epochs=3,
+    learning_rate=2e-4,
+    fp16=True,
+    logging_steps=1,
+    output_dir="./outputs",
+    optim="paged_adamw_8bit",
+    save_strategy="epoch"
+)
+
+# Train
+trainer = SFTTrainer(
+    model=model,
+    tokenizer=tokenizer,
+    args=training_args,
+    train_dataset=dataset["train"],
+    dataset_text_field="text",
+    max_seq_length=2048,
+)
+
+trainer.train()
+
+# Save
+model.save_pretrained("my-model")
+tokenizer.save_pretrained("my-model")
+```
+
+## Inference
+
+```python
+# inference.py
+from unsloth import FastLanguageModel
+
+model, tokenizer = FastLanguageModel.from_pretrained(
+    model_name="./my-model",
+    max_seq_length=2048,
+    dtype=None,
+    load_in_4bit=True,
+)
+
+FastLanguageModel.for_inference(model)
+
+prompt = "User: What is RAG?\nAssistant:"
+inputs = tokenizer(prompt, return_tensors="pt").to("cuda")
+
+outputs = model.generate(**inputs, max_new_tokens=200, temperature=0.3, do_sample=True)
+response = tokenizer.decode(outputs[0])
+print(response)
+```
+
+## Cost Analysis
+
+Without fine-tuning:
+```
+1M API calls × $3 input, $15 output = $54,000/year
+```
+
+With fine-tuned local model:
+```
+GPU: ~$0 (already have)
+Electricity: $50/month = $600/year
+Savings: $53,400/year (98%)
+```
+
+## When to Fine-Tune
+
+- ✓ >50k API calls/month
+- ✓ Specific domain (support, medical, code)
+- ✓ Quality control important
+- ✗ <1k API calls/month
+- ✗ Generic tasks (prompt engineering enough)
+
+## Troubleshooting
+
+### CUDA Out of Memory
+
+```python
+per_device_train_batch_size=1,  # Reduce
+max_seq_length=512,  # Shorter context
+```
+
+### Loss Doesn't Decrease
+
+```python
+learning_rate=5e-5,  # Try smaller
+warmup_steps=20,  # More warmup
+```
+
+### Output is Nonsense
+
+```python
+num_train_epochs=10,  # More epochs
+# Or model too small: 7b → 13b
+```
+
+## Dataset Preparation Deep Dive
+
+### Format Requirements
+
+Unsloth expects JSONL (JSON Lines):
+
+```jsonl
+{"text": "User: What is AI?\nAssistant: AI is..."}
+{"text": "User: Explain regression.\nAssistant: Regression is..."}
+```
+
+Or HuggingFace format with chat templates:
+
+```jsonl
+{"messages": [
+  {"role": "user", "content": "What is AI?"},
+  {"role": "assistant", "content": "AI is..."}
+]}
+```
+
+### Data Quality Checklist
+
+```python
+# validate_dataset.py
+import json
+
+with open("training_data.jsonl") as f:
+    for i, line in enumerate(f):
+        data = json.loads(line)
+
+        # Check 1: Content exists
+        assert "text" in data or "messages" in data, f"Row {i}: missing content"
+
+        # Check 2: Reasonable length
+        text = data.get("text", "")
+        assert 20 < len(text) < 10000, f"Row {i}: text too short/long"
+
+        # Check 3: Assistant has response
+        if "messages" in data:
+            assert data["messages"][-1]["role"] == "assistant", f"Row {i}: doesn't end with assistant"
+
+        # Check 4: No corrupted UTF-8
+        try:
+            text.encode('utf-8').decode('utf-8')
+        except:
+            print(f"Row {i}: encoding error")
+
+print("✓ Dataset valid")
+```
+
+### Recommended Dataset Size by Model
+
+| Model | Min Examples | Optimal | Max (Diminishing) |
+|-------|-------------|---------|-------------------|
+| **7B** | 100 | 500-1000 | 5000 |
+| **13B** | 200 | 1000-2000 | 10000 |
+| **70B** | 500 | 2000-5000 | 20000 |
+
+More data > larger model for most practical tasks.
+
+## Advanced Training Configuration
+
+### LoRA Hyperparameters
+
+```python
+# More complex LoRA config
+model = FastLanguageModel.get_peft_model(
+    model,
+    r=32,                    # Rank (8-64): Higher = more capacity, slower
+    lora_alpha=64,           # Usually 2x rank
+    lora_dropout=0.1,        # 0.05-0.2: regularization
+    bias="none",             # Can be "none", "all", "lora_only"
+    use_gradient_checkpointing="unsloth",
+    use_rslora=True,         # Ranked LoRA: better convergence
+    use_dora=False,          # DoRA: optional, slower but sometimes better
+)
+```
+
+**r=16** → Light fine-tuning, small improvement
+**r=32** → Balanced, good for domain adaptation
+**r=64** → Heavy fine-tuning, risk of overfitting
+
+### Training Stability
+
+```python
+training_args = TrainingArguments(
+    per_device_train_batch_size=4,
+    gradient_accumulation_steps=4,     # Effective batch: 16
+    warmup_steps=100,                  # Critical: prevents early overfitting
+    warmup_ratio=0.1,                  # Or use ratio
+    num_train_epochs=3,
+    learning_rate=2e-4,
+    lr_scheduler_type="cosine",        # Smooth LR decay
+    optim="paged_adamw_8bit",
+    max_grad_norm=1.0,                 # Gradient clipping
+    seed=42,
+)
+```
+
+**Warmup**: Start with low LR, increase gradually. Prevents divergence.
+**Scheduler**: Cosine decay slowly reduces LR over epochs.
+**Gradient clipping**: Prevents exploding gradients.
+
+## Evaluation & Metrics
+
+### ROUGE Score (Machine Translation, Summarization)
+
+```python
+from datasets import load_metric
+
+rouge = load_metric("rouge")
+
+# Your fine-tuned model outputs
+predictions = ["The cat sat on the mat"]
+references = ["A cat was sitting on the mat"]
+
+scores = rouge.compute(predictions=predictions, references=references)
+print(f"ROUGE-1: {scores['rouge1'].mid.fmeasure:.3f}")  # Unigram overlap
+print(f"ROUGE-2: {scores['rouge2'].mid.fmeasure:.3f}")  # Bigram overlap
+print(f"ROUEGEL: {scores['rougeL'].mid.fmeasure:.3f}")  # Longest common subsequence
+```
+
+ROUGE-1 < 0.3 = Poor
+ROUGE-1 > 0.5 = Good
+
+### Perplexity (General Language)
+
+```python
+# Lower is better
+import torch
+from torch.nn import CrossEntropyLoss
+
+def calculate_perplexity(model, tokenizer, text):
+    inputs = tokenizer(text, return_tensors="pt").to("cuda")
+
+    with torch.no_grad():
+        outputs = model(**inputs, labels=inputs["input_ids"])
+
+    loss = outputs.loss
+    perplexity = torch.exp(loss)
+    return perplexity.item()
+
+# Expected: < 20 for good fine-tuning
+```
+
+### Custom Evaluation
+
+```python
+# Task-specific: QA accuracy
+def evaluate_qa(model, tokenizer, qa_pairs):
+    correct = 0
+    for question, expected_answer in qa_pairs:
+        prompt = f"Q: {question}\nA:"
+
+        inputs = tokenizer(prompt, return_tensors="pt").to("cuda")
+        outputs = model.generate(**inputs, max_new_tokens=100)
+        predicted = tokenizer.decode(outputs[0])
+
+        # Simple exact match
+        if expected_answer.lower() in predicted.lower():
+            correct += 1
+
+    accuracy = correct / len(qa_pairs)
+    return accuracy
+```
+
+## Deployment Options
+
+### Option 1: Ollama (Local)
+
+```bash
+# Copy adapter to Ollama format
+ollama create my-model -f Modelfile
+
+# Modelfile:
+# FROM llama2:7b-chat-q4_K_M
+# ADAPTER ./my-model
+```
+
+Run locally: `ollama run my-model`
+
+### Option 2: Hugging Face Hub
+
+```python
+model.push_to_hub("my-username/my-fine-tuned-model")
+tokenizer.push_to_hub("my-username/my-fine-tuned-model")
+
+# Others can load:
+# from transformers import AutoModelForCausalLM
+# model = AutoModelForCausalLM.from_pretrained("my-username/my-fine-tuned-model")
+```
+
+### Option 3: Inference API (vLLM)
+
+```python
+from vllm import LLM, SamplingParams
+
+llm = LLM(model="./my-model", gpu_memory_utilization=0.9)
+sampling_params = SamplingParams(temperature=0.3, max_tokens=200)
+
+outputs = llm.generate(["User: What is AI?\nAssistant:"], sampling_params)
+```
+
+## Common Pitfalls & Solutions
+
+### Pitfall 1: Overfitting (Training Loss ↓ Eval Loss ↑)
+
+```
+Symptom: Training loss decreases but model memorizes
+Solution:
+- Reduce num_train_epochs (1 epoch might be enough)
+- Add more varied training data
+- Increase LoRA dropout (0.1 → 0.2)
+- Use early stopping (eval_strategy="steps", eval_steps=100)
+```
+
+### Pitfall 2: Catastrophic Forgetting
+
+```
+Symptom: Fine-tuned model forgets general knowledge
+Solution:
+- Include general tasks in training mix (20% general, 80% specific)
+- Use smaller learning_rate (2e-5 instead of 2e-4)
+- Reduce r value (16 instead of 32)
+```
+
+### Pitfall 3: Wrong Output Format
+
+```
+Problem: Model outputs raw text instead of JSON
+Solution:
+- Training data must show desired format in examples
+- Use instruction: "Respond in JSON format"
+- Verify examples during dataset validation
+```
+
+## Cost-Benefit Analysis
+
+| Scenario | Fine-Tuning Cost | API-Only Cost | Breakeven |
+|----------|-----------------|---------------|-----------|
+| 100k calls/month | $50 (hardware) | $300 (API) | < 1 month |
+| 10k calls/month | $50 (hardware) | $30 (API) | Never |
+| 1M calls/month | $200 (infra) | $3000 (API) | < 1 week |
+
+**Rule of Thumb**: >50k API calls/month = fine-tune locally.
+
+## Production Checklist
+
+- [ ] Dataset: 200+ quality examples
+- [ ] Validation: 20% of dataset
+- [ ] Training: 3-5 epochs, monitor loss
+- [ ] Evaluation: ROUGE > 0.4, Perplexity < 50
+- [ ] Testing: Manual QA on 10 examples
+- [ ] Deployment: Ollama, vLLM, or HF Hub
+- [ ] Monitoring: Track inference time, error rate
+- [ ] Documentation: Training command, config, results
+
+## Summary
+
+Fine-tuning workflow:
+
+1. **Prepare dataset** → 100+ quality examples, JSONL format
+2. **Load model** → Unsloth quantized version
+3. **Configure LoRA** → r=16-32 based on task complexity
+4. **Train** → 1-3 epochs with warmup & scheduler
+5. **Evaluate** → ROUGE, perplexity, task-specific metrics
+6. **Deploy** → Ollama, vLLM, or HuggingFace Hub
+7. **Monitor** → Track performance in production
+
+References:
+- [Unsloth GitHub](https://github.com/unslothai/unsloth)
+- [Fine-Tuning Best Practices](https://unsloth.ai/docs)
+- [LoRA Paper](https://arxiv.org/abs/2106.09685)
+- [QLoRA Paper](https://arxiv.org/abs/2305.14314)
+
+**Last Updated**: 21.03.2026 | **Total Lines**: 450+
+
+## Sources and Links
+
+- [Unsloth](https://github.com/unslothai/unsloth)
+- [Axolotl](https://github.com/axolotl-ai-cloud/axolotl)
