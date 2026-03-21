@@ -18,9 +18,9 @@ export default function OllamaTutorial() {
       <div className="prose prose-invert max-w-none">
         <Callout type="summary" title="Auf einen Blick">
           <p>
-            Ollama ist ein CLI-Tool fuer lokale LLMs. Installation in 5 Minuten,
-            200+ Modelle verfuegbar, REST API auf Port 11434. Keine Cloud noetig,
-            keine API-Kosten, DSGVO-konform. Fuer den Einstieg reicht eine GPU
+            Ollama ist ein CLI-Tool für lokale LLMs. Installation in 5 Minuten,
+            200+ Modelle verfügbar, REST API auf Port 11434. Keine Cloud noetig,
+            keine API-Kosten, DSGVO-konform. Für den Einstieg reicht eine GPU
             mit 6 GB VRAM.
           </p>
         </Callout>
@@ -89,7 +89,7 @@ export default function OllamaTutorial() {
 
         <figure className="my-8">
           <img src="/images/screenshots/ollama-install.png" alt="Ollama Installation im Terminal" className="rounded-xl border border-white/10 w-full" />
-          <figcaption className="text-center text-white/40 text-sm mt-2">Ollama Installation: Ein Befehl genuegt</figcaption>
+          <figcaption className="text-center text-white/40 text-sm mt-2">Ollama Installation: Ein Befehl genügt</figcaption>
         </figure>
 
         <h3 className="text-lg font-medium text-white mt-4">macOS</h3>
@@ -299,8 +299,8 @@ services:
 
         <Callout type="tip" title="GPU-Tipp">
           <p>
-            Fuer Modelle bis 8B reicht eine GPU mit 6-8 GB VRAM (z.B. RTX 3060).
-            Fuer 14B-24B Modelle brauchst du mindestens 12-16 GB (RTX 3080/3090).
+            Für Modelle bis 8B reicht eine GPU mit 6-8 GB VRAM (z.B. RTX 3060).
+            Für 14B-24B Modelle brauchst du mindestens 12-16 GB (RTX 3080/3090).
             CPU-only geht auch, ist aber deutlich langsamer.
           </p>
         </Callout>
@@ -322,8 +322,8 @@ services:
           <ul className="space-y-2 text-sm text-white/50">
             <li><a href="https://ollama.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Ollama — Offizielle Website</a></li>
             <li><a href="https://github.com/ollama/ollama" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">GitHub: ollama/ollama</a> — Source Code und Dokumentation</li>
-            <li><a href="https://ollama.com/library" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Ollama Model Library</a> — Alle verfuegbaren Modelle</li>
-            <li><a href="https://github.com/open-webui/open-webui" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">GitHub: Open WebUI</a> — ChatGPT-aehnliches Interface fuer Ollama</li>
+            <li><a href="https://ollama.com/library" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Ollama Model Library</a> — Alle verfügbaren Modelle</li>
+            <li><a href="https://github.com/open-webui/open-webui" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">GitHub: Open WebUI</a> — ChatGPT-aehnliches Interface für Ollama</li>
           </ul>
         </section>
       </div>

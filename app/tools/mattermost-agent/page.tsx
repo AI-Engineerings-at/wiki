@@ -18,9 +18,9 @@ export default function MattermostAgent() {
         <Callout type="summary" title="Auf einen Blick">
           <p>
             Mattermost ist ein self-hosted Messaging-Tool und dient als zentraler
-            Kommunikationsbus fuer AI-Agenten. Webhooks, Bot-Integration,
+            Kommunikationsbus für AI-Agenten. Webhooks, Bot-Integration,
             Thread-Support und DSGVO-konform — alles was ein Multi-Agent System
-            fuer Koordination braucht.
+            für Koordination braucht.
           </p>
         </Callout>
 

@@ -52,7 +52,7 @@ function getConfig(pathname: string): CtaConfig {
           'Aus eigener Runtime entwickelt',
           'Made in Austria',
         ],
-        legalNote: 'Kein Ersatz fuer Rechtsberatung.',
+        legalNote: 'Kein Ersatz für Rechtsberatung.',
       }
 
   if (isTools) {
@@ -63,7 +63,7 @@ function getConfig(pathname: string): CtaConfig {
         : 'Naechster Schritt: Workflows sauber in Betrieb bringen',
       body: isEn
         ? 'Use proven n8n patterns, templates and integrations for workflows that stay local, documented, and auditable.'
-        : 'Nutze bewaehrte n8n-Patterns, Templates und Integrationen fuer Workflows, die lokal, dokumentiert und auditierbar bleiben.',
+        : 'Nutze bewaehrte n8n-Patterns, Templates und Integrationen für Workflows, die lokal, dokumentiert und auditierbar bleiben.',
       primaryHref: n8nHref,
       primaryLabel: isEn ? 'View n8n Bundle' : 'n8n Bundle ansehen',
     }
@@ -77,7 +77,7 @@ function getConfig(pathname: string): CtaConfig {
         : 'Naechster Schritt: Compliance in den Betrieb bringen',
       body: isEn
         ? 'Use ready-to-run GDPR templates, checklists and practical guidance for AI systems that need documentation and auditability.'
-        : 'Nutze fertige DSGVO-Templates, Checklisten und Praxis-Guides fuer AI-Systeme, die dokumentiert und auditierbar sein muessen.',
+        : 'Nutze fertige DSGVO-Templates, Checklisten und Praxis-Guides für AI-Systeme, die dokumentiert und auditierbar sein muessen.',
       primaryHref: dsgvoHref,
       primaryLabel: isEn ? 'View GDPR Bundle' : 'DSGVO Bundle ansehen',
     }
@@ -90,7 +90,7 @@ function getConfig(pathname: string): CtaConfig {
       : 'Naechster Schritt: vom Wissen in die Umsetzung',
     body: isEn
       ? 'If you want more than theory: setups, workflows and templates from real operations for teams that want local, documented AI systems.'
-      : 'Wenn du mehr willst als Theorie: Setups, Workflows und Vorlagen aus dem echten Betrieb fuer Teams, die lokale und dokumentierte AI-Systeme wollen.',
+      : 'Wenn du mehr willst als Theorie: Setups, Workflows und Vorlagen aus dem echten Betrieb für Teams, die lokale und dokumentierte AI-Systeme wollen.',
     primaryHref: playbookHref,
     primaryLabel: isEn ? 'View AI-Stack Playbook - EUR 49' : 'AI-Stack Playbook ansehen - EUR 49',
   }

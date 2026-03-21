@@ -29,7 +29,7 @@ export default function AiAgentTeam() {
 
         <figure className="my-8">
           <img src="/images/diagrams/ai-agent-typen-uebersicht.png" alt="AI Agent Typen — ReAct, Tool, Planner, Critic" className="rounded-xl border border-white/10 w-full" />
-          <figcaption className="text-center text-white/40 text-sm mt-2">AI Agent Typen: Von ReAct bis Critic — welcher Agent fuer welchen Zweck</figcaption>
+          <figcaption className="text-center text-white/40 text-sm mt-2">AI Agent Typen: Von ReAct bis Critic — welcher Agent für welchen Zweck</figcaption>
         </figure>
 
         <h2 className="text-xl font-semibold text-white mt-8">Was ist ein AI Agent?</h2>
@@ -116,7 +116,7 @@ Manager (Planner)
 
         <Callout type="warning" title="Guardrails sind Pflicht">
           <p>
-            Ohne Guardrails kann ein Agent destruktive Aktionen ausfuehren —
+            Ohne Guardrails kann ein Agent destruktive Aktionen ausführen —
             Dateien loeschen, falsche Deployments machen, Credentials leaken.
             Definiere klare Grenzen was ein Agent NICHT darf, bevor du ihm
             Tools gibst.

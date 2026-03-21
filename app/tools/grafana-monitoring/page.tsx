@@ -18,7 +18,7 @@ export default function GrafanaMonitoring() {
       <div className="prose prose-invert max-w-none">
         <Callout type="summary" title="Auf einen Blick">
           <p>
-            Grafana + Prometheus bilden den Monitoring-Stack fuer dein Homelab.
+            Grafana + Prometheus bilden den Monitoring-Stack für dein Homelab.
             Prometheus sammelt Metriken, Grafana visualisiert sie. Mit Alertmanager
             bekommst du Benachrichtigungen bei Problemen. Open Source, self-hosted,
             100+ Datenquellen.
@@ -34,7 +34,7 @@ export default function GrafanaMonitoring() {
         <CaseStudyBox
           tool="Grafana + Prometheus"
           stat="6 Dashboards auf 6 Nodes"
-          description="die 31 Docker Services, GPU-Auslastung und LLM-Requests ueberwachen"
+          description="die 31 Docker Services, GPU-Auslastung und LLM-Requests überwachen"
           blogLink="/blog/2026-03-08-31-docker-services-monitoring"
           productLink="https://buy.stripe.com/3cIdR95Nt2DT81E0t6fQI03"
           productName="Grafana Dashboard Pack (EUR 39)"
@@ -298,7 +298,7 @@ nvidia_gpu_power_draw_watts`}</code>
           <p>
             Nach Aenderungen an prometheus.yml musst du nicht den Container neu
             starten. Ein einfaches curl -X POST http://localhost:9090/-/reload
-            genuegt, damit Prometheus die neue Konfiguration laedt.
+            genügt, damit Prometheus die neue Konfiguration laedt.
           </p>
         </Callout>
 
@@ -316,7 +316,7 @@ nvidia_gpu_power_draw_watts`}</code>
           <ul className="space-y-2 text-sm text-white/50">
             <li><a href="https://grafana.com/docs/grafana/latest/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Grafana Dokumentation</a></li>
             <li><a href="https://prometheus.io/docs/introduction/overview/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Prometheus Docs: Overview</a></li>
-            <li><a href="https://github.com/google/cadvisor" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">GitHub: google/cadvisor</a> — Container Advisor fuer Docker-Metriken</li>
+            <li><a href="https://github.com/google/cadvisor" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">GitHub: google/cadvisor</a> — Container Advisor für Docker-Metriken</li>
             <li><a href="https://grafana.com/grafana/dashboards/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Grafana Dashboard Library</a> — Fertige Dashboards zum Importieren</li>
           </ul>
         </section>

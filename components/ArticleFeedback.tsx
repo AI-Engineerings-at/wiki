@@ -10,8 +10,8 @@ export function ArticleFeedback() {
       <div className="mt-8 pt-6 border-t border-slate-800">
         <p className="text-sm text-slate-400">
           {voted === 'yes'
-            ? 'Danke fuer dein Feedback! Freut uns, dass der Artikel geholfen hat.'
-            : 'Danke fuer dein Feedback! Wir arbeiten daran, den Artikel zu verbessern.'}
+            ? 'Danke für dein Feedback! Freut uns, dass der Artikel geholfen hat.'
+            : 'Danke für dein Feedback! Wir arbeiten daran, den Artikel zu verbessern.'}
         </p>
       </div>
     )

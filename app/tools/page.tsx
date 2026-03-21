@@ -27,7 +27,7 @@ export default function ToolsPage() {
     {
       title: 'n8n: Workflow-Automatisierung',
       description: 'Grundlagen, Nodes, Workflow-Beispiele, AI-Integration.',
-      href: '/tools/n8n-fuer-anfaenger',
+      href: '/tools/n8n-für-anfaenger',
       date: '2026-03-01',
     },
     {
@@ -50,13 +50,13 @@ export default function ToolsPage() {
     },
     {
       title: 'Model Selection Guide',
-      description: 'Waehle das richtige AI-Modell fuer deinen Anwendungsfall — von Llama bis Mistral.',
+      description: 'Waehle das richtige AI-Modell für deinen Anwendungsfall — von Llama bis Mistral.',
       href: '/tools/model-selection',
       date: '2026-03-01',
     },
     {
       title: 'MCP Server Setup',
-      description: 'Model Context Protocol Server fuer AI-Integrationen aufsetzen.',
+      description: 'Model Context Protocol Server für AI-Integrationen aufsetzen.',
       href: '/tools/mcp-server',
       date: '2026-03-01',
     },

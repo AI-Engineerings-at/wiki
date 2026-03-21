@@ -91,7 +91,7 @@ export function SearchBar({ className = '' }: { className?: string }) {
 
       {isOpen && query.length >= 2 && results.length === 0 && (
         <div className="absolute top-full mt-2 w-full bg-slate-900 border border-slate-700 rounded-xl shadow-2xl shadow-black/50 z-50 p-4 text-center text-sm text-slate-500">
-          Keine Artikel gefunden fuer &ldquo;{query}&rdquo;
+          Keine Artikel gefunden für &ldquo;{query}&rdquo;
         </div>
       )}
     </div>

@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: 'Workflow automation with n8n. Getting started, nodes, triggers, integrations.',
 }
 
-export default function N8nAnfaenger() {
+export default function N8nAnfänger() {
   return (
     <div className="space-y-6">
       <div>

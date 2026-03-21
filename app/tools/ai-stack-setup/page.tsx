@@ -8,7 +8,7 @@ import { RelatedArticles } from "../../../components/RelatedArticles"
 export const metadata: Metadata = {
   title: "AI Stack Setup in 30 Minuten: Ollama + Open WebUI + Docker | AI Engineering Wiki",
   description:
-    "Schritt-fuer-Schritt: Ollama installieren, LLM herunterladen, Open WebUI starten. In 30 Minuten laeuft dein eigener AI-Stack lokal.",
+    "Schritt-für-Schritt: Ollama installieren, LLM herunterladen, Open WebUI starten. In 30 Minuten laeuft dein eigener AI-Stack lokal.",
 }
 
 export default function AiStackSetupPage() {
@@ -63,7 +63,7 @@ export default function AiStackSetupPage() {
             <p>
               Ollama laeuft auch auf der CPU — nur deutlich langsamer. Ein 7B
               Modell auf einer modernen CPU (i7/Ryzen 7) liefert ca. 5-10 tok/s.
-              Zum Testen reicht das, fuer produktive Nutzung brauchst du eine
+              Zum Testen reicht das, für produktive Nutzung brauchst du eine
               GPU.
             </p>
           </Callout>
@@ -103,7 +103,7 @@ ollama --version`}</code>
             <p className="text-white font-medium mb-3">Windows</p>
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`# Download von https://ollama.com/download
-# Installer ausfuehren
+# Installer ausführen
 # Ollama laeuft als Hintergrund-Service`}</code>
             </pre>
           </div>
@@ -131,7 +131,7 @@ ollama --version`}</code>
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
             <p className="text-white font-medium mb-3">Modell herunterladen und testen</p>
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
-              <code className="text-sm text-green-400">{`# Empfehlung fuer den Einstieg: Llama 3.3 (8B)
+              <code className="text-sm text-green-400">{`# Empfehlung für den Einstieg: Llama 3.3 (8B)
 ollama pull llama3.3
 
 # Direkt testen
@@ -146,7 +146,7 @@ ollama list`}</code>
             headers={["Modell", "Groesse", "VRAM", "Staerke", "Befehl"]}
             rows={[
               ["Llama 3.3 (8B)", "4.7 GB", "~5 GB", "Schneller Allrounder", "ollama pull llama3.3"],
-              ["Mistral Small 3.1 (24B)", "14 GB", "~16 GB", "Starkes Deutsch, uebertrifft GPT-4o Mini", "ollama pull mistral-small3.1"],
+              ["Mistral Small 3.1 (24B)", "14 GB", "~16 GB", "Starkes Deutsch, übertrifft GPT-4o Mini", "ollama pull mistral-small3.1"],
               ["Qwen3 14B", "9 GB", "~10 GB", "Gutes Reasoning, 100+ Sprachen", "ollama pull qwen3:14b"],
               ["DeepSeek R1 14B", "9 GB", "~10 GB", "Starkes Chain-of-Thought Reasoning", "ollama pull deepseek-r1:14b"],
             ]}
@@ -184,7 +184,7 @@ ollama list`}</code>
             Schritt 3: Open WebUI starten (5 Minuten)
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
-            Terminal-Chat ist OK zum Testen, aber fuer den Alltag willst du ein
+            Terminal-Chat ist OK zum Testen, aber für den Alltag willst du ein
             Web-Interface. Open WebUI sieht aus wie ChatGPT, laeuft aber lokal
             und verbindet sich mit deinem Ollama.
           </p>
@@ -229,7 +229,7 @@ docker compose up -d
               <code className="bg-white/10 px-1.5 py-0.5 rounded text-white/90">
                 host.docker.internal
               </code>{" "}
-              automatisch verfuegbar.
+              automatisch verfügbar.
             </p>
           </Callout>
 
@@ -312,7 +312,7 @@ docker compose ps
                 curl http://localhost:11434/api/chat -d
                 &#123;&quot;model&quot;:&quot;llama3.3&quot;,&quot;messages&quot;:[&#123;&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;Hallo&quot;&#125;]&#125;
               </code>
-              . Perfekt fuer Integration mit n8n, Python-Scripts oder eigene
+              . Perfekt für Integration mit n8n, Python-Scripts oder eigene
               Tools.
             </p>
           </Callout>
@@ -328,16 +328,16 @@ docker compose ps
             headers={["Was", "Warum", "Wiki-Artikel"]}
             rows={[
               ["Docker Grundlagen lernen", "Verstehen was unter der Haube passiert", "/tools/docker-grundlagen"],
-              ["Mehrere Modelle testen", "Verschiedene Staerken fuer verschiedene Aufgaben", "/tools/model-selection"],
-              ["n8n Workflows bauen", "LLM in automatisierte Prozesse einbinden", "/tools/n8n-fuer-anfaenger"],
-              ["Monitoring einrichten", "GPU-Auslastung und Container-Health ueberwachen", "/tools/grafana-monitoring"],
+              ["Mehrere Modelle testen", "Verschiedene Staerken für verschiedene Aufgaben", "/tools/model-selection"],
+              ["n8n Workflows bauen", "LLM in automatisierte Prozesse einbinden", "/tools/n8n-für-anfaenger"],
+              ["Monitoring einrichten", "GPU-Auslastung und Container-Health überwachen", "/tools/grafana-monitoring"],
               ["Security pruefen", "Lokal heisst nicht automatisch sicher", "/security/self-hosted-sicherheit"],
             ]}
           />
 
           <Callout type="tip" title="Komplett-Anleitung">
             <p>
-              Dieses Tutorial deckt den Schnellstart ab. Fuer eine umfassende
+              Dieses Tutorial deckt den Schnellstart ab. Für eine umfassende
               Anleitung mit Hardware-Empfehlungen, Network Setup, Backup-Strategie
               und Produktionshärtung — unser{" "}
               <a
@@ -357,7 +357,7 @@ docker compose ps
         <KeyTakeaway
           points={[
             "30 Minuten: Ollama installieren (5 min), Modell laden (10 min), Open WebUI starten (5 min), verifizieren (5 min).",
-            "Minimum: 8 GB VRAM fuer 7B Modelle. Empfohlen: RTX 3090 (24 GB) fuer bis zu 34B Modelle.",
+            "Minimum: 8 GB VRAM für 7B Modelle. Empfohlen: RTX 3090 (24 GB) für bis zu 34B Modelle.",
             "Open WebUI ist ein vollwertiges ChatGPT-Interface — lokal, ohne Cloud, ohne monatliche Kosten.",
             "Ollama REST API (Port 11434) erlaubt Integration in Scripts, n8n Workflows und eigene Anwendungen.",
             "Keine GPU? Geht auch auf CPU, nur langsamer (~5-10 tok/s statt 40-112 tok/s).",

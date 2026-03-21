@@ -25,7 +25,7 @@ export default function SafetyHooksPage() {
 
         <figure className="my-8">
           <img src="/images/diagrams/patterns-safety-hooks.png" alt="Safety Hooks Pattern — Input Validation, Output Filter, Memory Capture" className="rounded-xl border border-white/10 w-full" />
-          <figcaption className="text-center text-white/40 text-sm mt-2">Safety Hooks: Automatische Sicherheitsschichten fuer jeden AI-Agent Call</figcaption>
+          <figcaption className="text-center text-white/40 text-sm mt-2">Safety Hooks: Automatische Sicherheitsschichten für jeden AI-Agent Call</figcaption>
         </figure>
 
         <h2>Lösung: Safety Hooks</h2>

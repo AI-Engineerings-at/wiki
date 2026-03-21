@@ -5,7 +5,7 @@ import ComparisonTable from "../../../components/ComparisonTable"
 export const metadata = {
   title: 'Lokal vs Cloud: TCO Vergleich | AI Engineering Wiki',
   description:
-    'TCO-Vergleich fuer AI-Workloads: Cloud API vs lokaler AI-Stack (Ollama, n8n, Monitoring). Kosten, Risiken, DSGVO und Betrieb in der Praxis.',
+    'TCO-Vergleich für AI-Workloads: Cloud API vs lokaler AI-Stack (Ollama, n8n, Monitoring). Kosten, Risiken, DSGVO und Betrieb in der Praxis.',
 }
 
 export default function LokalVsCloud() {
@@ -55,8 +55,8 @@ export default function LokalVsCloud() {
         </figure>
 
         <figure className="my-8">
-          <img src="/images/infographics/lokal-vs-cloud-tco-vergleich.png" alt="Lokal vs Cloud TCO Vergleich — Gesamtkosten ueber 24 Monate" className="rounded-xl border border-white/10 w-full" />
-          <figcaption className="text-center text-white/40 text-sm mt-2">TCO Vergleich: Lokale AI vs Cloud ueber 24 Monate — wann sich lokal rechnet</figcaption>
+          <img src="/images/infographics/lokal-vs-cloud-tco-vergleich.png" alt="Lokal vs Cloud TCO Vergleich — Gesamtkosten über 24 Monate" className="rounded-xl border border-white/10 w-full" />
+          <figcaption className="text-center text-white/40 text-sm mt-2">TCO Vergleich: Lokale AI vs Cloud über 24 Monate — wann sich lokal rechnet</figcaption>
         </figure>
 
         <h2 className="text-xl font-semibold text-white mt-8">Kostenvergleich (pro Monat)</h2>
@@ -187,7 +187,7 @@ export default function LokalVsCloud() {
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
           <pre className="text-gray-300">
-{`TCO Faustregel (Consumer Hardware, Oesterreich):
+{`TCO Faustregel (Consumer Hardware, Österreich):
 
 Hardware (einmalig):
   RTX 3090 gebraucht:     ~EUR 900
@@ -215,9 +215,9 @@ Cloud API Preise (Maerz 2026, pro 1M Tokens):
 
         <Callout type="info" title="Break-Even ist nutzungsabhaengig">
           <p>
-            Der Break-Even fuer Self-Hosting liegt bei 50-200 Millionen Tokens pro Monat.
+            Der Break-Even für Self-Hosting liegt bei 50-200 Millionen Tokens pro Monat.
             Unter 2M Tokens/Tag ist die Cloud API guenstiger. Der finanzielle Vorteil von
-            lokal wird oft ueberschaetzt — der echte Vorteil liegt bei Datenschutz (DSGVO),
+            lokal wird oft überschaetzt — der echte Vorteil liegt bei Datenschutz (DSGVO),
             Verfuegbarkeit (offline) und Unabhaengigkeit von Anbietern.
           </p>
         </Callout>
@@ -227,7 +227,7 @@ Cloud API Preise (Maerz 2026, pro 1M Tokens):
         <ComparisonTable
           headers={["GPU", "VRAM", "Preis (EUR)", "Was laeuft darauf", "Einschraenkung"]}
           rows={[
-            ["RTX 3060 12GB", "12 GB", "~350", "7B Modelle (Mistral 7B, Llama 3.2 8B)", "NUR kleine Modelle, fuer 14B+ zu wenig VRAM"],
+            ["RTX 3060 12GB", "12 GB", "~350", "7B Modelle (Mistral 7B, Llama 3.2 8B)", "NUR kleine Modelle, für 14B+ zu wenig VRAM"],
             ["RTX 4070 Ti Super", "16 GB", "~800", "Bis 14B komfortabel (Qwen 2.5 14B)", "32B nur stark quantisiert, 70B unmoeglich"],
             ["RTX 3090 (gebraucht)", "24 GB", "750-1.123", "Bis 34B quantisiert (Q4_K_M)", "70B passt NICHT (braucht ~40 GB VRAM)"],
             ["RTX 4090", "24 GB", "1.800-2.000", "Bis 34B komfortabel", "Gleiche 24 GB VRAM-Grenze wie RTX 3090"],
@@ -251,7 +251,7 @@ Cloud API Preise (Maerz 2026, pro 1M Tokens):
 
         <p className="text-gray-300 mt-2 mb-4">
           &quot;Kostenlos nach Anschaffung&quot; ist falsch. GPUs brauchen Strom, und der kostet
-          in Oesterreich EUR 0,34/kWh (Privat, inkl. Steuern, Stand 2026). Hier die echten Zahlen bei 24/7 Betrieb:
+          in Österreich EUR 0,34/kWh (Privat, inkl. Steuern, Stand 2026). Hier die echten Zahlen bei 24/7 Betrieb:
         </p>
 
         <ComparisonTable
@@ -267,12 +267,12 @@ Cloud API Preise (Maerz 2026, pro 1M Tokens):
         <Callout type="warning" title="Stromkosten nicht vergessen">
           <p>
             Bei realistischem Betrieb (50% Last, 24/7) einer RTX 3090 zahlst du ca. EUR 49/Monat
-            Strom in Oesterreich. Das sind ~EUR 588/Jahr. Peak-Verbrauch kann bis 560W gehen
-            (60% ueber TDP). Strompreis AT Privat: EUR 0,34/kWh (EU-Durchschnitt: EUR 0,258).
+            Strom in Österreich. Das sind ~EUR 588/Jahr. Peak-Verbrauch kann bis 560W gehen
+            (60% über TDP). Strompreis AT Privat: EUR 0,34/kWh (EU-Durchschnitt: EUR 0,258).
           </p>
         </Callout>
 
-        <h2 className="text-xl font-semibold text-white mt-8">Die Qualitaetsluecke (ehrlich)</h2>
+        <h2 className="text-xl font-semibold text-white mt-8">Die Qualitätsluecke (ehrlich)</h2>
 
         <p className="text-gray-300 mt-2 mb-4">
           Lokale Modelle sind gut — aber nicht so gut wie die besten Cloud-Modelle.
@@ -284,12 +284,12 @@ Cloud API Preise (Maerz 2026, pro 1M Tokens):
           rows={[
             ["Reasoning / Logik", "69%", "44%"],
             ["Klassifikation", "73%", "70%"],
-            ["Code Generation", "Sehr gut", "~85-90% der Cloud-Qualitaet"],
+            ["Code Generation", "Sehr gut", "~85-90% der Cloud-Qualität"],
             ["Einfache Extraktion", "Exzellent", "~95% gleichwertig"],
           ]}
         />
 
-        <Callout type="warning" title="Die Qualitaetsluecke ist REAL">
+        <Callout type="warning" title="Die Qualitätsluecke ist REAL">
           <p>
             Vor allem bei komplexem Reasoning (logische Schluesse, mehrstufige Analyse,
             juristische Argumentation) liegt Cloud deutlich vorne. Wer behauptet lokale
@@ -299,9 +299,9 @@ Cloud API Preise (Maerz 2026, pro 1M Tokens):
 
         <Callout type="tip" title="Wo lokal trotzdem reicht">
           <p>
-            Fuer 80% der alltaeglichen Tasks (Daten-Extraktion, Klassifikation,
+            Für 80% der alltaeglichen Tasks (Daten-Extraktion, Klassifikation,
             einfache Q&amp;A, Zusammenfassungen) sind lokale Modelle ausreichend.
-            Fuer komplexes Reasoning: Cloud-API als Backup.
+            Für komplexes Reasoning: Cloud-API als Backup.
           </p>
         </Callout>
 
@@ -310,10 +310,10 @@ Cloud API Preise (Maerz 2026, pro 1M Tokens):
         <div className="bg-green-900/30 border border-green-700 rounded-lg p-4 mt-4">
           <h3 className="font-semibold text-white mb-2">Hybrid-Ansatz (unser Setup)</h3>
           <ul className="text-gray-300 space-y-2">
-            <li><strong>Lokal:</strong> Ollama fuer regelmaessige Tasks (Extraktion, Klassifikation, einfache Q&amp;A)</li>
-            <li><strong>Cloud:</strong> GPT-4o / Claude fuer komplexe Reasoning-Tasks (wenige Calls/Monat)</li>
+            <li><strong>Lokal:</strong> Ollama für regelmaessige Tasks (Extraktion, Klassifikation, einfache Q&amp;A)</li>
+            <li><strong>Cloud:</strong> GPT-4o / Claude für komplexe Reasoning-Tasks (wenige Calls/Monat)</li>
             <li><strong>Kosten:</strong> ~EUR 49/Monat Strom (AT, 50% Last) + EUR 20-40/Monat Cloud-API</li>
-            <li><strong>Ergebnis:</strong> Guter Kompromiss aus Kosten, Qualitaet und Datenschutz</li>
+            <li><strong>Ergebnis:</strong> Guter Kompromiss aus Kosten, Qualität und Datenschutz</li>
           </ul>
         </div>
 
@@ -321,8 +321,8 @@ Cloud API Preise (Maerz 2026, pro 1M Tokens):
           <h3 className="font-semibold text-white mb-2">Fazit</h3>
           <p className="text-gray-300">
             Lokal ist nach 6-12 Monaten guenstiger — BEI regelmaessiger Nutzung. Bei
-            geringer Nutzung ist Cloud finanziell besser. Die Qualitaet ist fuer 80% der
-            Tasks ausreichend, fuer komplexes Reasoning braucht man Cloud-APIs als
+            geringer Nutzung ist Cloud finanziell besser. Die Qualität ist für 80% der
+            Tasks ausreichend, für komplexes Reasoning braucht man Cloud-APIs als
             Ergaenzung. Der EHRLICHSTE Ansatz ist Hybrid: lokal wo es reicht, Cloud wo
             es zaehlt. Dazu kommen die DSGVO-Vorteile (kein Drittlandtransfer) und die
             Unabhaengigkeit von Cloud-Anbietern.

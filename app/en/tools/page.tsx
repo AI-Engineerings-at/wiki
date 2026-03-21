@@ -27,7 +27,7 @@ export default function ToolsPage() {
     {
       title: 'n8n for Beginners',
       description: 'Workflow automation with n8n. Nodes, triggers, integrations.',
-      href: '/en/tools/n8n-fuer-anfaenger',
+      href: '/en/tools/n8n-für-anfaenger',
       date: '2026-03-01',
     },
     {

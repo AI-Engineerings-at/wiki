@@ -1,7 +1,7 @@
 export const metadata = {
   title: 'Agent Rollen & Verantwortung | AI Engineering Wiki',
   description:
-    'Rollenmodell fuer Multi-Agent Systeme: Orchestrator, Worker, QA/Review und Infra. Klare Verantwortung, Boundaries und Eskalation in der Praxis.',
+    'Rollenmodell für Multi-Agent Systeme: Orchestrator, Worker, QA/Review und Infra. Klare Verantwortung, Boundaries und Eskalation in der Praxis.',
 }
 
 export default function AgentRollen() {
@@ -20,7 +20,7 @@ export default function AgentRollen() {
 
         <figure className="my-8">
           <img src="/images/diagrams/agent-rollen-pyramide.png" alt="Agent Rollen Pyramide — CEO, Manager, Worker, Guard" className="rounded-xl border border-white/10 w-full" />
-          <figcaption className="text-center text-white/40 text-sm mt-2">Agent Rollen Pyramide: Von CEO ueber Manager zu spezialisierten Workern</figcaption>
+          <figcaption className="text-center text-white/40 text-sm mt-2">Agent Rollen Pyramide: Von CEO über Manager zu spezialisierten Workern</figcaption>
         </figure>
 
         <h2 className="text-xl font-semibold text-white mt-8">Das Minimum Viable Team</h2>

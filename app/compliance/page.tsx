@@ -1,20 +1,20 @@
 export const metadata = {
   title: 'Compliance | AI Engineering Wiki',
   description:
-    'DSGVO und EU AI Act in der Praxis: Grundlagen, Transparenzpflichten, verbotene Praktiken und Checklisten fuer AI-Systeme.',
+    'DSGVO und EU AI Act in der Praxis: Grundlagen, Transparenzpflichten, verbotene Praktiken und Checklisten für AI-Systeme.',
 }
 
 export default function CompliancePage() {
   const articles = [
     {
       title: 'DSGVO Grundlagen',
-      description: 'Was bedeutet DSGVO fuer AI-Anwendungen — Datenschutz, Einwilligung, Loeschfristen.',
+      description: 'Was bedeutet DSGVO für AI-Anwendungen — Datenschutz, Einwilligung, Loeschfristen.',
       href: '/compliance/dsgvo-grundlagen',
       date: '2026-02-28',
     },
     {
       title: 'EU AI Act',
-      description: 'Risikoklassen, Verbote, Transparenzpflichten fuer AI-Systeme in der EU.',
+      description: 'Risikoklassen, Verbote, Transparenzpflichten für AI-Systeme in der EU.',
       href: '/compliance/eu-ai-act',
       date: '2026-02-28',
     },
@@ -38,7 +38,7 @@ export default function CompliancePage() {
     },
     {
       title: 'Chatbot Transparenzpflichten',
-      description: 'Kennzeichnungspflichten fuer Chatbots und KI-generierte Inhalte.',
+      description: 'Kennzeichnungspflichten für Chatbots und KI-generierte Inhalte.',
       href: '/compliance/chatbot-transparenzpflichten',
       date: '2026-03-01',
     },
@@ -61,7 +61,7 @@ export default function CompliancePage() {
       <div>
         <h1 className="text-3xl font-bold text-white">Compliance</h1>
         <p className="text-slate-400 mt-2">
-          DSGVO und EU AI Act — rechtliche Anforderungen fuer AI-Systeme.
+          DSGVO und EU AI Act — rechtliche Anforderungen für AI-Systeme.
         </p>
       </div>
 

@@ -96,7 +96,7 @@ export default function SelfImprovingAgentsPage() {
               LLMs haben ein begrenztes Context Window. Wenn die HOT-Memory
               1.000 Zeilen hat, verbraucht sie bei jedem Call Tokens, auch wenn
               90% irrelevant sind. 100 Zeilen in HOT = ca. 2.000 Tokens.
-              Das laesst genug Platz fuer die eigentliche Aufgabe.
+              Das laesst genug Platz für die eigentliche Aufgabe.
             </p>
           </Callout>
         </section>
@@ -107,8 +107,8 @@ export default function SelfImprovingAgentsPage() {
             Automatische Promotion und Demotion
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
-            Wissen ist nicht statisch. Manche Learnings sind fuer 2 Wochen relevant,
-            andere fuer immer. Das System erkennt das automatisch.
+            Wissen ist nicht statisch. Manche Learnings sind für 2 Wochen relevant,
+            andere für immer. Das System erkennt das automatisch.
           </p>
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6 space-y-4">
@@ -190,7 +190,7 @@ export default function SelfImprovingAgentsPage() {
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`VOR Credential-Zugriff → Wie? (Vault, nicht stdout)
 VOR Browser-Aktion    → Existierende Session? MCP offen?
-VOR Remote-Zugriff    → Lokal verfuegbar? Lokale Daten zuerst
+VOR Remote-Zugriff    → Lokal verfügbar? Lokale Daten zuerst
 VOR Daten-Nutzung     → Echt? Keine Mock-Daten?
 VOR API-Call          → Docs der API gelesen?`}</code>
             </pre>
@@ -217,7 +217,7 @@ VOR API-Call          → Docs der API gelesen?`}</code>
           </p>
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6 space-y-4">
-            <p className="text-white font-medium mb-2">Trigger fuer Self-Eskalation:</p>
+            <p className="text-white font-medium mb-2">Trigger für Self-Eskalation:</p>
             {[
               { trigger: "2 eigene Fehler in einer Session", action: "SOFORT PAUSE, Fehler auflisten, relevante Rules re-lesen" },
               { trigger: "2 User-Korrekturen in einer Session", action: "PAUSE, korrigierte Annahme benennen, neuen Plan vorlegen" },
@@ -285,7 +285,7 @@ VOR API-Call          → Docs der API gelesen?`}</code>
   ├── Pre-Action Gate prueft Voraussetzungen
   │     └── Gate FAIL → corrections.md pruefen
   │
-  ├── Task ausfuehren
+  ├── Task ausführen
   │     ├── Erfolg → Nutzungszaehler in corrections.md erhoehen
   │     └── Fehler → corrections.md Eintrag erstellen
   │           └── 2. Fehler? → Self-Eskalation (PAUSE)

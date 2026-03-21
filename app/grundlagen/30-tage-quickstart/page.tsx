@@ -31,7 +31,7 @@ export default function Quickstart30TagePage() {
 
         <figure className="my-8">
           <img src="/images/infographics/30-tage-quickstart-timeline.png" alt="30 Tage Quickstart Timeline — Von Null zum produktiven AI-Stack" className="rounded-xl border border-white/10 w-full" />
-          <figcaption className="text-center text-white/40 text-sm mt-2">30-Tage Timeline: Schritt fuer Schritt zum eigenen lokalen AI-Stack</figcaption>
+          <figcaption className="text-center text-white/40 text-sm mt-2">30-Tage Timeline: Schritt für Schritt zum eigenen lokalen AI-Stack</figcaption>
         </figure>
 
         <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-6">
@@ -48,8 +48,8 @@ export default function Quickstart30TagePage() {
         <h2>Phase 1: Foundation (Tag 1-7)</h2>
 
         <figure className="my-8">
-          <img src="/images/infographics/30-tage-quickstart-hardware.png" alt="Hardware-Empfehlungen fuer lokale AI — GPU, RAM, CPU" className="rounded-xl border border-white/10 w-full" />
-          <figcaption className="text-center text-white/40 text-sm mt-2">Hardware-Empfehlungen: Was du fuer deinen lokalen AI-Stack brauchst</figcaption>
+          <img src="/images/infographics/30-tage-quickstart-hardware.png" alt="Hardware-Empfehlungen für lokale AI — GPU, RAM, CPU" className="rounded-xl border border-white/10 w-full" />
+          <figcaption className="text-center text-white/40 text-sm mt-2">Hardware-Empfehlungen: Was du für deinen lokalen AI-Stack brauchst</figcaption>
         </figure>
 
         <h3>Tag 1: Hardware-Check</h3>
@@ -203,8 +203,8 @@ ollama pull mistral`}</code>
         <Callout type="tip" title="Hardware-Budget">
           <p>
             Ein gebrauchter Mini-Server mit 32 GB RAM und einer gebrauchten
-            RTX 3090 (ab ca. 750 Euro) reicht fuer die meisten lokalen AI-Workloads.
-            Fuer den Einstieg tut es auch ein Desktop-PC mit 16 GB RAM.
+            RTX 3090 (ab ca. 750 Euro) reicht für die meisten lokalen AI-Workloads.
+            Für den Einstieg tut es auch ein Desktop-PC mit 16 GB RAM.
           </p>
         </Callout>
 

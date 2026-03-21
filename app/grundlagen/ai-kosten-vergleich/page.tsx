@@ -25,7 +25,7 @@ export default function AiKostenVergleich() {
           <figcaption className="text-center text-white/40 text-sm mt-2">AI Kosten 2026: Cloud, Lokal und Hybrid im direkten Vergleich</figcaption>
         </figure>
 
-        <h2 className="text-xl font-semibold text-white mt-8">Kostenuebersicht 2026 (ehrlich)</h2>
+        <h2 className="text-xl font-semibold text-white mt-8">Kostenübersicht 2026 (ehrlich)</h2>
 
         <ComparisonTable
           headers={["Option", "Hardware (einmalig)", "Laufend/Monat", "Was du bekommst"]}
@@ -35,13 +35,13 @@ export default function AiKostenVergleich() {
             ["Cloud API (Gemini 2.5 Pro)", "EUR 0", "EUR 30-150", "Stark bei Reasoning — $1.25/$10 pro 1M Tokens"],
             ["Lokal (RTX 3090, gebr.)", "EUR 750-1.123", "~EUR 49 (Strom, AT)", "Bis 34B Modelle, 80% der Tasks gut"],
             ["Lokal (RTX 4090)", "EUR 1.800-2.000", "~EUR 49 (Strom, AT)", "Wie 3090, etwas schneller, gleiche VRAM-Grenze"],
-            ["Hybrid (unser Setup)", "EUR 750-1.123", "EUR 70-90 (Strom + Cloud)", "Bester Kompromiss aus Kosten und Qualitaet"],
+            ["Hybrid (unser Setup)", "EUR 750-1.123", "EUR 70-90 (Strom + Cloud)", "Bester Kompromiss aus Kosten und Qualität"],
           ]}
         />
 
         <Callout type="warning" title="Hardware-Kosten nicht vergessen">
           <p>
-            Lokale AI kostet EUR 750-2.000 einmalig fuer die GPU plus EUR 500-800 fuer das System.
+            Lokale AI kostet EUR 750-2.000 einmalig für die GPU plus EUR 500-800 für das System.
             Dazu kommen ~EUR 49/Monat Stromkosten bei 50% Last (AT: EUR 0,34/kWh).
             &quot;Kostenlos nach Anschaffung&quot; ist falsch. TCO Jahr 1: ca. EUR 2.000-2.300,
             ab Jahr 2: ca. EUR 588/Jahr (nur Strom).
@@ -67,17 +67,17 @@ export default function AiKostenVergleich() {
 
         <h2 className="text-xl font-semibold text-white mt-8">Break-Even (ehrlich)</h2>
         <p className="text-gray-300 mt-2">
-          Der echte Break-Even fuer Self-Hosting liegt laut DevTk.AI bei 50-200 Millionen
+          Der echte Break-Even für Self-Hosting liegt laut DevTk.AI bei 50-200 Millionen
           Tokens pro Monat. Unter 2M Tokens/Tag ist die Cloud API guenstiger (Prem AI).
           Die versteckten Kosten (Engineering, Wartung, Updates) werden laut AISuperior
           3-5x unterschaetzt, der Engineering-Anteil macht 45-55% des TCO aus.
         </p>
 
-        <Callout type="info" title="Qualitaetsluecke beachten">
+        <Callout type="info" title="Qualitätsluecke beachten">
           <p>
-            Selbst wenn lokal guenstiger ist: Fuer komplexes Reasoning (Logik, juristische
+            Selbst wenn lokal guenstiger ist: Für komplexes Reasoning (Logik, juristische
             Analyse, mehrstufige Aufgaben) liegt Cloud ~25% vorne. Der Break-Even gilt nur
-            fuer Tasks, die lokale Modelle auch wirklich gut koennen.
+            für Tasks, die lokale Modelle auch wirklich gut koennen.
           </p>
         </Callout>
 
@@ -86,7 +86,7 @@ export default function AiKostenVergleich() {
           rows={[
             ["Reasoning / Logik", "69%", "44%"],
             ["Klassifikation", "73%", "70%"],
-            ["Code Generation", "Sehr gut", "~85-90% der Cloud-Qualitaet"],
+            ["Code Generation", "Sehr gut", "~85-90% der Cloud-Qualität"],
             ["Einfache Extraktion", "Exzellent", "~95% gleichwertig"],
           ]}
         />
@@ -110,16 +110,16 @@ export default function AiKostenVergleich() {
         <h2 className="text-xl font-semibold text-white mt-8">Empfehlung</h2>
         <p className="text-gray-300 mt-2">
           Starte mit Cloud, wenn du schnell testen willst oder geringe Nutzung hast.
-          Fuer laufende Workloads (Automation, interne Tools) lohnt sich lokal nach
-          6-12 Monaten. Der ehrlichste Ansatz ist Hybrid: lokal fuer Volumen-Tasks
-          (Extraktion, Klassifikation, Q&amp;A), Cloud-API fuer komplexes Reasoning.
+          Für laufende Workloads (Automation, interne Tools) lohnt sich lokal nach
+          6-12 Monaten. Der ehrlichste Ansatz ist Hybrid: lokal für Volumen-Tasks
+          (Extraktion, Klassifikation, Q&amp;A), Cloud-API für komplexes Reasoning.
           So bekommst du das Beste aus beiden Welten — ohne dir etwas vorzumachen.
         </p>
 
         <Callout type="tip" title="Der ehrliche Hybrid-Ansatz">
           <p>
-            Lokal fuer 80% der alltaeglichen Tasks. Cloud-API fuer die 20% wo
-            Qualitaet kritisch ist. Investition: EUR 750-1.123 Hardware + EUR 70-90/Monat
+            Lokal für 80% der alltaeglichen Tasks. Cloud-API für die 20% wo
+            Qualität kritisch ist. Investition: EUR 750-1.123 Hardware + EUR 70-90/Monat
             laufend (Strom + Cloud). Das ist weniger als reine Cloud, aber auch nicht &quot;kostenlos&quot;.
           </p>
         </Callout>

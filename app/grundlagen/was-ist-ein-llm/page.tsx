@@ -6,7 +6,7 @@ import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 import { RelatedArticles } from "../../../components/RelatedArticles"
 
 export const metadata: Metadata = {
-  title: "Was ist ein LLM? Large Language Models erklaert | AI Engineering Wiki",
+  title: "Was ist ein LLM? Large Language Models erklärt | AI Engineering Wiki",
   description:
     "Was ist ein Large Language Model (LLM)? Wie funktionieren Transformer, Tokens und Inferenz? Modellgroessen, VRAM-Anforderungen und praktische Tipps.",
 }
@@ -36,8 +36,8 @@ export default function WasIstEinLLMPage() {
         <Callout type="summary" title="Auf einen Blick">
           <p>
             Ein Large Language Model (LLM) ist ein neuronales Netz, das auf riesigen
-            Textmengen trainiert wurde und Sprache versteht, generiert und uebersetzt.
-            LLMs sagen Wort fuer Wort vorher, welches Token als naechstes kommen
+            Textmengen trainiert wurde und Sprache versteht, generiert und übersetzt.
+            LLMs sagen Wort für Wort vorher, welches Token als naechstes kommen
             sollte. Sie koennen lokal auf eigener Hardware laufen — ohne Cloud, ohne
             Abhaengigkeit.
           </p>
@@ -56,7 +56,7 @@ export default function WasIstEinLLMPage() {
             gelernt.
           </p>
           <p className="text-white/70 leading-relaxed mt-4">
-            Der Kern: Ein LLM berechnet fuer jedes moegliche naechste Wort eine
+            Der Kern: Ein LLM berechnet für jedes moegliche naechste Wort eine
             Wahrscheinlichkeit und waehlt dann das wahrscheinlichste. Das klingt
             simpel, aber bei 70 Milliarden Parametern und 128.000 Tokens Kontext
             entstehen erstaunlich gute Ergebnisse.
@@ -147,12 +147,12 @@ llm --> out1
 llm --> out2
 llm --> out3
 @enduml`}
-            caption="Token-Prediction: Das Modell erzeugt Text Token fuer Token"
+            caption="Token-Prediction: Das Modell erzeugt Text Token für Token"
           />
 
-          <Callout type="tip" title="Faustregel fuer Tokens">
+          <Callout type="tip" title="Faustregel für Tokens">
             <p>
-              1 Token ist ungefaehr 3/4 eines englischen Wortes. Fuer Deutsch rechne
+              1 Token ist ungefaehr 3/4 eines englischen Wortes. Für Deutsch rechne
               mit 1 Token pro halbes Wort. Ein typischer Absatz (100 Woerter) sind ca.
               130-150 Tokens. Context Window von 128K = ca. 200 Seiten Text.
             </p>
@@ -213,7 +213,7 @@ llm --> out3
             Halluzinationen: Wenn LLMs luegen
           </h2>
           <p className="text-white/70 leading-relaxed">
-            LLMs koennen Fakten erfinden, die ueberzeugend klingen aber falsch sind.
+            LLMs koennen Fakten erfinden, die überzeugend klingen aber falsch sind.
             Das passiert, weil sie nicht &quot;wissen&quot; — sie berechnen statistische
             Wahrscheinlichkeiten. Wenn keine gute Antwort in den Trainingsdaten war,
             generieren sie trotzdem etwas Plausibles.
@@ -251,8 +251,8 @@ llm --> out3
             Modellgroessen: Von 7B bis 70B
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
-            &quot;B&quot; steht fuer Milliarden Parameter. Mehr Parameter bedeutet mehr
-            &quot;Wissen&quot; und bessere Qualitaet — aber auch mehr VRAM und langsamere
+            &quot;B&quot; steht für Milliarden Parameter. Mehr Parameter bedeutet mehr
+            &quot;Wissen&quot; und bessere Qualität — aber auch mehr VRAM und langsamere
             Antworten. Die Kunst liegt im richtigen Trade-off.
           </p>
 
@@ -261,7 +261,7 @@ llm --> out3
               "Groesse",
               "VRAM (Q4)",
               "Speed (RTX 3090)",
-              "Qualitaet",
+              "Qualität",
               "Beispiel-Modelle",
             ]}
             rows={[
@@ -269,7 +269,7 @@ llm --> out3
                 "7-8B",
                 "~5 GB",
                 "~112 tok/s",
-                "Gut fuer einfache Tasks",
+                "Gut für einfache Tasks",
                 "Llama 3.3 8B, Mistral 7B, Qwen 2.5 7B",
               ],
               [
@@ -283,14 +283,14 @@ llm --> out3
                 "24-32B",
                 "~16-20 GB",
                 "~20-30 tok/s",
-                "Nahe Cloud-Qualitaet",
+                "Nahe Cloud-Qualität",
                 "Mistral Small 3.1 24B, Qwen 2.5 32B",
               ],
               [
                 "70B",
                 "~40 GB",
                 "Passt NICHT auf 24 GB GPU",
-                "Beste lokale Qualitaet",
+                "Beste lokale Qualität",
                 "Llama 3.3 70B, Qwen 2.5 72B",
               ],
             ]}
@@ -300,7 +300,7 @@ llm --> out3
             <p>
               Ein 70B Modell in Q4_K_M Quantisierung braucht ca. 40 GB VRAM.
               Das passt NICHT auf eine einzelne RTX 3090 oder RTX 4090 (jeweils 24 GB).
-              Fuer 70B brauchst du 48 GB+ (z.B. 2x RTX 3090 oder eine RTX 6000 Ada).
+              Für 70B brauchst du 48 GB+ (z.B. 2x RTX 3090 oder eine RTX 6000 Ada).
               Mit 24 GB VRAM ist bei ca. 34B Modellen Schluss.
             </p>
           </Callout>
@@ -310,7 +310,7 @@ llm --> out3
               <strong>RTX 4060 (8 GB VRAM):</strong> 7B Modelle problemlos.{" "}
               <strong>RTX 4070 Ti Super (16 GB):</strong> Bis 14B komfortabel.{" "}
               <strong>RTX 3090/4090 (24 GB):</strong> Bis 32-34B quantisiert.{" "}
-              Die RTX 3090 gebraucht (EUR 750-1.123) bleibt der Value King fuer lokale AI.
+              Die RTX 3090 gebraucht (EUR 750-1.123) bleibt der Value King für lokale AI.
             </p>
           </Callout>
         </section>
@@ -323,14 +323,14 @@ llm --> out3
           <p className="text-white/70 leading-relaxed mb-4">
             Quantisierung reduziert die Praezision der Modell-Gewichte von 32-Bit
             Gleitkommazahlen auf 4 oder 8 Bit. Das halbiert den VRAM-Bedarf bei
-            minimalen Qualitaetsverlusten.
+            minimalen Qualitätsverlusten.
           </p>
 
           <ComparisonTable
-            headers={["Format", "Groesse vs. Original", "Qualitaet", "Empfehlung"]}
+            headers={["Format", "Groesse vs. Original", "Qualität", "Empfehlung"]}
             rows={[
               ["FP16 / BF16", "50%", "100% (verlustfrei)", "Wenn VRAM kein Problem"],
-              ["Q5_K_M", "~35%", "~99%", "Hoechste Qualitaet bei Kompression"],
+              ["Q5_K_M", "~35%", "~99%", "Hoechste Qualität bei Kompression"],
               [
                 "Q4_K_M",
                 "~25%",
@@ -364,14 +364,14 @@ llm --> out3
             Lokal vs. Cloud: Wo soll das LLM laufen?
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
-            Die Kernfrage fuer jedes Unternehmen: Eigene Hardware oder Cloud-API?
+            Die Kernfrage für jedes Unternehmen: Eigene Hardware oder Cloud-API?
             Beides hat seinen Platz.
           </p>
 
           <ComparisonTable
             headers={["Kriterium", "Cloud-API", "Lokal (Self-hosted)"]}
             rows={[
-              ["Qualitaet", "Beste verfuegbare Modelle", "Fuer einfache Tasks ~95% gleichwertig, bei Reasoning 20-25% schlechter"],
+              ["Qualität", "Beste verfügbare Modelle", "Für einfache Tasks ~95% gleichwertig, bei Reasoning 20-25% schlechter"],
               ["Datenschutz", "Daten gehen an Dritte (USA)", "Daten bleiben bei dir (DSGVO)"],
               ["Kosten pro Monat", "EUR 50-500+ (nutzungsabhaengig)", "~EUR 49 Strom (AT, 50% Last) + EUR 750-2.000 Hardware einmalig"],
               ["Hardware noetig", "Nein", "GPU ab EUR 350, RTX 3090 gebraucht ab EUR 750"],
@@ -384,7 +384,7 @@ llm --> out3
             Ehrlicher Benchmark: Cloud vs. Lokal
           </h3>
           <p className="text-white/70 leading-relaxed mb-4">
-            Die Qualitaetsluecke zwischen Cloud-Modellen und lokalen Modellen ist real.
+            Die Qualitätsluecke zwischen Cloud-Modellen und lokalen Modellen ist real.
             Hier sind ehrliche Vergleichswerte (Stand Maerz 2026):
           </p>
 
@@ -400,14 +400,14 @@ llm --> out3
 
           <Callout type="info" title="Benchmarks richtig lesen">
             <p>
-              Llama 3.3 70B uebertrifft GPT-4o in einigen Benchmarks (MMLU, HumanEval, IFEval).
-              Aber: 70B passt NICHT auf eine einzelne 24 GB GPU. Fuer lokale Nutzung sind
+              Llama 3.3 70B übertrifft GPT-4o in einigen Benchmarks (MMLU, HumanEval, IFEval).
+              Aber: 70B passt NICHT auf eine einzelne 24 GB GPU. Für lokale Nutzung sind
               8B-34B Modelle realistisch — und dort ist die Luecke zu Cloud-Modellen groesser,
               besonders bei komplexem Reasoning.
             </p>
           </Callout>
 
-          <Callout type="warning" title="Die Qualitaetsluecke ist REAL">
+          <Callout type="warning" title="Die Qualitätsluecke ist REAL">
             <p>
               Vor allem bei komplexem Reasoning (logische Schluesse, mehrstufige Analyse,
               juristische Argumentation) liegt Cloud deutlich vorne. Lokale Modelle sind
@@ -418,17 +418,17 @@ llm --> out3
 
           <Callout type="tip" title="Wo lokal trotzdem reicht">
             <p>
-              Fuer 80% der alltaeglichen Tasks (Daten-Extraktion, Klassifikation,
+              Für 80% der alltaeglichen Tasks (Daten-Extraktion, Klassifikation,
               einfache Q&amp;A, Zusammenfassungen) sind lokale Modelle ausreichend.
-              Fuer komplexes Reasoning: Cloud-API als Backup nutzen. Der ehrlichste
+              Für komplexes Reasoning: Cloud-API als Backup nutzen. Der ehrlichste
               Ansatz ist Hybrid — lokal wo es reicht, Cloud wo es zaehlt.
             </p>
           </Callout>
 
           <Callout type="tip" title="Unsere Empfehlung">
             <p>
-              Starte lokal mit Ollama + einem 7B oder 14B Modell. Fuer Aufgaben
-              wo die Qualitaet kritisch ist (z.B. Vertraege, komplexe Analysen),
+              Starte lokal mit Ollama + einem 7B oder 14B Modell. Für Aufgaben
+              wo die Qualität kritisch ist (z.B. Vertraege, komplexe Analysen),
               nutze eine Cloud-API als Backup. Das spart Geld und haelt deine
               Daten unter Kontrolle. Mehr dazu:{" "}
               <a
@@ -468,7 +468,7 @@ llm --> out3
                   >
                     ollama.com
                   </a>{" "}
-                  — gibt es fuer Windows, Mac und Linux.
+                  — gibt es für Windows, Mac und Linux.
                 </p>
               </div>
             </div>
@@ -508,10 +508,10 @@ llm --> out3
         <KeyTakeaway
           points={[
             "LLMs sagen das naechste Token vorher — sie 'wissen' nichts, sie berechnen Wahrscheinlichkeiten.",
-            "Mehr Parameter = bessere Qualitaet, aber mehr VRAM und langsamer. Q4_K_M Quantisierung ist der beste Trade-off.",
+            "Mehr Parameter = bessere Qualität, aber mehr VRAM und langsamer. Q4_K_M Quantisierung ist der beste Trade-off.",
             "LLMs halluzinieren. Kritische Ausgaben immer verifizieren, RAG reduziert das Risiko deutlich.",
             "Lokale LLMs auf eigener Hardware (Ollama) sind DSGVO-konform. RTX 3090 bei 50% Last: ca. EUR 49/Monat Strom (AT: EUR 0,34/kWh).",
-            "Fuer den Einstieg: Ollama installieren, llama3.3 starten, laeuft in 5 Minuten.",
+            "Für den Einstieg: Ollama installieren, llama3.3 starten, laeuft in 5 Minuten.",
           ]}
         />
 

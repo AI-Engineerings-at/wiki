@@ -19,7 +19,7 @@ export default function WasIstAgentOrchestration() {
           <p>
             Agent Orchestration koordiniert mehrere spezialisierte AI-Agenten.
             Ein Manager-Agent delegiert Aufgaben an Worker. Kommunikation laeuft
-            ueber einen Nachrichtenbus (z.B. Mattermost). Vorteile: Parallelisierung,
+            über einen Nachrichtenbus (z.B. Mattermost). Vorteile: Parallelisierung,
             Spezialisierung, Auditierbarkeit — alles lokal und DSGVO-konform.
           </p>
         </Callout>
@@ -128,9 +128,9 @@ export default function WasIstAgentOrchestration() {
 
         <Callout type="tip" title="Einstieg">
           <p>
-            Du brauchst kein komplexes Framework fuer den Start. Ein LLM mit
+            Du brauchst kein komplexes Framework für den Start. Ein LLM mit
             Tool-Zugriff (z.B. Claude Code CLI) plus Mattermost als Nachrichtenbus
-            reicht fuer die ersten Agent-Workflows.
+            reicht für die ersten Agent-Workflows.
           </p>
         </Callout>
 

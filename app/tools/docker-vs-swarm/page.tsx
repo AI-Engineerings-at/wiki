@@ -20,7 +20,7 @@ export default function DockerVsSwarm() {
           <p>
             Docker Compose = ein Rechner, schnelles Setup, ideal zum Lernen.
             Docker Swarm = mehrere Rechner, Rolling Updates, High Availability.
-            Fuer Homelab mit einer GPU: Compose. Fuer Production mit 3+ Nodes: Swarm.
+            Für Homelab mit einer GPU: Compose. Für Production mit 3+ Nodes: Swarm.
           </p>
         </Callout>
 

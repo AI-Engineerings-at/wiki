@@ -23,46 +23,46 @@ export type Category = {
 }
 
 const grundlagenArticles: Article[] = [
-  { title: 'Was ist Agent Orchestration?', description: 'Einfuehrung in Agent Orchestration und Multi-Agent Systeme.', href: '/grundlagen/was-ist-agent-orchestration', category: 'grundlagen', categoryLabel: 'Grundlagen', date: '2026-03-01', popular: true },
-  { title: 'Multi-Agent Systeme erklaert', description: 'Wie mehrere AI-Agenten zusammenarbeiten und warum das besser ist als ein einzelnes LLM.', href: '/grundlagen/multi-agent-systeme', category: 'grundlagen', categoryLabel: 'Grundlagen', date: '2026-03-01' },
+  { title: 'Was ist Agent Orchestration?', description: 'Einführung in Agent Orchestration und Multi-Agent Systeme.', href: '/grundlagen/was-ist-agent-orchestration', category: 'grundlagen', categoryLabel: 'Grundlagen', date: '2026-03-01', popular: true },
+  { title: 'Multi-Agent Systeme erklärt', description: 'Wie mehrere AI-Agenten zusammenarbeiten und warum das besser ist als ein einzelnes LLM.', href: '/grundlagen/multi-agent-systeme', category: 'grundlagen', categoryLabel: 'Grundlagen', date: '2026-03-01' },
   { title: 'Agent Rollen & Verantwortung', description: 'Developer, QA, Infra, Browser — welche Rollen braucht ein Agent-Team?', href: '/grundlagen/agent-rollen', category: 'grundlagen', categoryLabel: 'Grundlagen', date: '2026-03-01' },
   { title: 'Lokale AI vs. Cloud: Der TCO-Vergleich', description: 'Was kostet Self-Hosted AI wirklich? Hardware, Strom, Wartung vs. API-Kosten.', href: '/grundlagen/lokal-vs-cloud', category: 'grundlagen', categoryLabel: 'Grundlagen', date: '2026-03-01', popular: true },
-  { title: 'Ollama vs Cloud LLM: Vergleich', description: 'Wann lokal, wann Cloud? Qualitaet, Kosten, Datenschutz.', href: '/grundlagen/ollama-vs-cloud', category: 'grundlagen', categoryLabel: 'Grundlagen', date: '2026-03-01' },
+  { title: 'Ollama vs Cloud LLM: Vergleich', description: 'Wann lokal, wann Cloud? Qualität, Kosten, Datenschutz.', href: '/grundlagen/ollama-vs-cloud', category: 'grundlagen', categoryLabel: 'Grundlagen', date: '2026-03-01' },
   { title: 'AI Agent Team aufbauen', description: 'Arten von Agenten, Team-Struktur, Tools-Integration.', href: '/grundlagen/ai-agent-team', category: 'grundlagen', categoryLabel: 'Grundlagen', date: '2026-03-01' },
   { title: 'Self-hosted vs Cloud Services', description: 'Welche Services selbst hosten, welche in die Cloud?', href: '/grundlagen/selfhosted-vs-cloud', category: 'grundlagen', categoryLabel: 'Grundlagen', date: '2026-03-01' },
-  { title: '30-Tage Quickstart Guide', description: 'In 30 Tagen zum eigenen AI-Stack. Tag-fuer-Tag Anleitung.', href: '/grundlagen/30-tage-quickstart', category: 'grundlagen', categoryLabel: 'Grundlagen', date: '2026-03-01' },
+  { title: '30-Tage Quickstart Guide', description: 'In 30 Tagen zum eigenen AI-Stack. Tag-für-Tag Anleitung.', href: '/grundlagen/30-tage-quickstart', category: 'grundlagen', categoryLabel: 'Grundlagen', date: '2026-03-01' },
   { title: 'AI im Unternehmen', description: 'Warum Unternehmen lokale AI einsetzen: Datenschutz, Kostenkontrolle, Souveraenitaet.', href: '/grundlagen/ki-unternehmen', category: 'grundlagen', categoryLabel: 'Grundlagen', date: '2026-03-01' },
-  { title: 'Was ist ein LLM?', description: 'Was ist ein Large Language Model? Transformer, Tokens, Modellgroessen, VRAM und Halluzinationen erklaert.', href: '/grundlagen/was-ist-ein-llm', category: 'grundlagen', categoryLabel: 'Grundlagen', date: '2026-03-21', popular: true },
+  { title: 'Was ist ein LLM?', description: 'Was ist ein Large Language Model? Transformer, Tokens, Modellgroessen, VRAM und Halluzinationen erklärt.', href: '/grundlagen/was-ist-ein-llm', category: 'grundlagen', categoryLabel: 'Grundlagen', date: '2026-03-21', popular: true },
 ]
 
 const complianceArticles: Article[] = [
-  { title: 'DSGVO Grundlagen', description: 'Was bedeutet DSGVO fuer AI-Anwendungen — Datenschutz, Einwilligung, Loeschfristen.', href: '/compliance/dsgvo-grundlagen', category: 'compliance', categoryLabel: 'Compliance', date: '2026-02-28', popular: true },
-  { title: 'EU AI Act', description: 'Risikoklassen, Verbote, Transparenzpflichten fuer AI-Systeme in der EU.', href: '/compliance/eu-ai-act', category: 'compliance', categoryLabel: 'Compliance', date: '2026-02-28', popular: true },
+  { title: 'DSGVO Grundlagen', description: 'Was bedeutet DSGVO für AI-Anwendungen — Datenschutz, Einwilligung, Loeschfristen.', href: '/compliance/dsgvo-grundlagen', category: 'compliance', categoryLabel: 'Compliance', date: '2026-02-28', popular: true },
+  { title: 'EU AI Act', description: 'Risikoklassen, Verbote, Transparenzpflichten für AI-Systeme in der EU.', href: '/compliance/eu-ai-act', category: 'compliance', categoryLabel: 'Compliance', date: '2026-02-28', popular: true },
   { title: 'KI-Kompetenz nach Art. 4', description: 'KI-Kompetenz Pflicht: Wer ist betroffen, was muss geschult werden, Deadline 02.08.2026.', href: '/compliance/ki-kompetenz-art4', category: 'compliance', categoryLabel: 'Compliance', date: '2026-03-21' },
   { title: 'EU AI Act Checkliste', description: '7-Schritte Leitfaden zur EU AI Act Bereitschaft. Risikoklassen, Termine, Pflichten.', href: '/compliance/eu-ai-act-checkliste', category: 'compliance', categoryLabel: 'Compliance', date: '2026-03-01' },
   { title: 'Verbotene AI-Praktiken', description: 'Article 5 - Was seit Feb 2025 verboten ist. Social Scoring, Emotion Recognition.', href: '/compliance/verbotene-ai-praktiken', category: 'compliance', categoryLabel: 'Compliance', date: '2026-03-01' },
-  { title: 'Chatbot Transparenzpflichten', description: 'Kennzeichnungspflichten fuer Chatbots und KI-generierte Inhalte.', href: '/compliance/chatbot-transparenzpflichten', category: 'compliance', categoryLabel: 'Compliance', date: '2026-03-01' },
+  { title: 'Chatbot Transparenzpflichten', description: 'Kennzeichnungspflichten für Chatbots und KI-generierte Inhalte.', href: '/compliance/chatbot-transparenzpflichten', category: 'compliance', categoryLabel: 'Compliance', date: '2026-03-01' },
   { title: 'Datenschutz-Folgenabschaetzung (DPIA)', description: 'Wann ist eine DPIA Pflicht, wie fuehrt man sie durch, DPIA und EU AI Act.', href: '/compliance/dpia', category: 'compliance', categoryLabel: 'Compliance', date: '2026-03-21' },
   { title: 'Datenschutz Praxis', description: 'Praktische Umsetzung — TOM, AVV, Dokumentation, Betroffenenrechte.', href: '/compliance/datenschutz-praxis', category: 'compliance', categoryLabel: 'Compliance', date: '2026-02-28' },
-  { title: 'AI Agent Legal Framework', description: 'Von der Risikobewertung bis zum Compliance-Paket: EU AI Act + DSGVO fuer AI-Agenten in KMUs.', href: '/compliance/ai-agent-legal-framework', category: 'compliance', categoryLabel: 'Compliance', date: '2026-03-21', popular: true },
+  { title: 'AI Agent Legal Framework', description: 'Von der Risikobewertung bis zum Compliance-Paket: EU AI Act + DSGVO für AI-Agenten in KMUs.', href: '/compliance/ai-agent-legal-framework', category: 'compliance', categoryLabel: 'Compliance', date: '2026-03-21', popular: true },
 ]
 
 const toolsArticles: Article[] = [
-  { title: 'Docker Compose vs Docker Swarm', description: 'Welches fuer AI-Workloads? Vergleich, Use Cases, Entscheidungshilfe.', href: '/tools/docker-vs-swarm', category: 'tools', categoryLabel: 'Tools', date: '2026-03-01' },
-  { title: 'Docker Grundlagen', description: 'Container vs VMs, Docker Compose, Docker Swarm, GPU-Zugriff — alles was du fuer AI-Workloads brauchst.', href: '/tools/docker-grundlagen', category: 'tools', categoryLabel: 'Tools', date: '2026-03-21', popular: true },
+  { title: 'Docker Compose vs Docker Swarm', description: 'Welches für AI-Workloads? Vergleich, Use Cases, Entscheidungshilfe.', href: '/tools/docker-vs-swarm', category: 'tools', categoryLabel: 'Tools', date: '2026-03-01' },
+  { title: 'Docker Grundlagen', description: 'Container vs VMs, Docker Compose, Docker Swarm, GPU-Zugriff — alles was du für AI-Workloads brauchst.', href: '/tools/docker-grundlagen', category: 'tools', categoryLabel: 'Tools', date: '2026-03-21', popular: true },
   { title: 'AI Stack Setup in 30 Minuten', description: 'Ollama + Open WebUI + Docker: Dein eigener ChatGPT-Klon in 30 Minuten, lokal auf deiner Hardware.', href: '/tools/ai-stack-setup', category: 'tools', categoryLabel: 'Tools', date: '2026-03-21', popular: true },
   { title: 'Ollama: Lokale LLMs einfach gemacht', description: 'Installation, Modelle, GPU-Setup, REST API, Open WebUI Integration.', href: '/tools/ollama-tutorial', category: 'tools', categoryLabel: 'Tools', date: '2026-03-01', popular: true },
   { title: 'RAG Complete Guide', description: 'Retrieval Augmented Generation: Vector Databases, Embeddings, Hybrid Search.', href: '/tools/rag-guide', category: 'tools', categoryLabel: 'Tools', date: '2026-03-01' },
-  { title: 'n8n: Workflow-Automatisierung', description: 'Grundlagen, Nodes, Workflow-Beispiele, AI-Integration.', href: '/tools/n8n-fuer-anfaenger', category: 'tools', categoryLabel: 'Tools', date: '2026-03-01' },
+  { title: 'n8n: Workflow-Automatisierung', description: 'Grundlagen, Nodes, Workflow-Beispiele, AI-Integration.', href: '/tools/n8n-für-anfaenger', category: 'tools', categoryLabel: 'Tools', date: '2026-03-01' },
   { title: 'Mattermost: Agent-Kommunikation', description: 'Polling, Webhooks, Nachrichten-Format, Team-Kommunikation.', href: '/tools/mattermost-agent', category: 'tools', categoryLabel: 'Tools', date: '2026-03-01' },
-  { title: 'Grafana: Monitoring fuer Homelab', description: 'Prometheus, Dashboards, Alerting, Container-Metriken.', href: '/tools/grafana-monitoring', category: 'tools', categoryLabel: 'Tools', date: '2026-03-01' },
+  { title: 'Grafana: Monitoring für Homelab', description: 'Prometheus, Dashboards, Alerting, Container-Metriken.', href: '/tools/grafana-monitoring', category: 'tools', categoryLabel: 'Tools', date: '2026-03-01' },
   { title: 'Proxmox: Homelab Virtualisierung', description: 'Installation, VMs, LXC, GPU-Passthrough, Backup-Strategie.', href: '/tools/proxmox-setup', category: 'tools', categoryLabel: 'Tools', date: '2026-03-01' },
-  { title: 'Model Selection Guide', description: 'Waehle das richtige AI-Modell fuer deinen Anwendungsfall — von Llama bis Mistral.', href: '/tools/model-selection', category: 'tools', categoryLabel: 'Tools', date: '2026-03-01' },
-  { title: 'MCP Server Setup', description: 'Model Context Protocol Server fuer AI-Integrationen aufsetzen.', href: '/tools/mcp-server', category: 'tools', categoryLabel: 'Tools', date: '2026-03-01' },
+  { title: 'Model Selection Guide', description: 'Waehle das richtige AI-Modell für deinen Anwendungsfall — von Llama bis Mistral.', href: '/tools/model-selection', category: 'tools', categoryLabel: 'Tools', date: '2026-03-01' },
+  { title: 'MCP Server Setup', description: 'Model Context Protocol Server für AI-Integrationen aufsetzen.', href: '/tools/mcp-server', category: 'tools', categoryLabel: 'Tools', date: '2026-03-01' },
 ]
 
 const patternsArticles: Article[] = [
-  { title: 'Agent Orchestration Patterns', description: 'Uebersicht ueber bewaehrte Orchestration-Patterns fuer Multi-Agent Systeme.', href: '/patterns/agent-orchestration-patterns', category: 'patterns', categoryLabel: 'Patterns', date: '2026-02-28' },
+  { title: 'Agent Orchestration Patterns', description: 'Übersicht über bewaehrte Orchestration-Patterns für Multi-Agent Systeme.', href: '/patterns/agent-orchestration-patterns', category: 'patterns', categoryLabel: 'Patterns', date: '2026-02-28' },
   { title: 'Memory Management Pattern', description: 'Wie AI-Agenten persistentes Wissen speichern und abrufen — CLAUDE.md, Topic Files, Knowledge Graphs.', href: '/patterns/memory-management', category: 'patterns', categoryLabel: 'Patterns', date: '2026-03-01' },
   { title: 'Task Delegation Pattern', description: 'Orchestrator verteilt Tasks an spezialisierte Agenten — Routing, Prioritaeten, Deadlines.', href: '/patterns/task-delegation', category: 'patterns', categoryLabel: 'Patterns', date: '2026-03-01' },
   { title: 'Safety Hooks Pattern', description: 'Guardrails, Output-Validierung und Memory-Capture als automatische Sicherheitsschicht.', href: '/patterns/safety-hooks', category: 'patterns', categoryLabel: 'Patterns', date: '2026-03-01' },
@@ -72,11 +72,11 @@ const patternsArticles: Article[] = [
 ]
 
 const securityArticles: Article[] = [
-  { title: 'Self-Hosted Sicherheit', description: '6-Layer Security Modell: Netzwerk, SSH, Firewall, Container, Anwendung, Monitoring fuer lokale AI.', href: '/security/self-hosted-sicherheit', category: 'security', categoryLabel: 'Security', date: '2026-03-21', popular: true },
-  { title: 'Verschluesselung', description: 'Encryption At Rest, In Transit, In Use — LUKS, TLS, Confidential Computing fuer Self-Hosted AI.', href: '/security/verschluesselung', category: 'security', categoryLabel: 'Security', date: '2026-03-21' },
-  { title: 'API Keys sicher speichern', description: 'Vault, Environment Variables, Secrets Management fuer AI-Stack.', href: '/security/api-keys-sicher', category: 'security', categoryLabel: 'Security', date: '2026-02-28' },
-  { title: 'Firewall Setup', description: 'UFW, fail2ban, Netzwerk-Segmentation fuer lokale AI-Infrastruktur.', href: '/security/firewall-setup', category: 'security', categoryLabel: 'Security', date: '2026-02-28' },
-  { title: 'Backup Strategie', description: '3-2-1 Regel, automatisierte Backups fuer Ollama, n8n, PostgreSQL.', href: '/security/backup-strategie', category: 'security', categoryLabel: 'Security', date: '2026-02-28' },
+  { title: 'Self-Hosted Sicherheit', description: '6-Layer Security Modell: Netzwerk, SSH, Firewall, Container, Anwendung, Monitoring für lokale AI.', href: '/security/self-hosted-sicherheit', category: 'security', categoryLabel: 'Security', date: '2026-03-21', popular: true },
+  { title: 'Verschluesselung', description: 'Encryption At Rest, In Transit, In Use — LUKS, TLS, Confidential Computing für Self-Hosted AI.', href: '/security/verschluesselung', category: 'security', categoryLabel: 'Security', date: '2026-03-21' },
+  { title: 'API Keys sicher speichern', description: 'Vault, Environment Variables, Secrets Management für AI-Stack.', href: '/security/api-keys-sicher', category: 'security', categoryLabel: 'Security', date: '2026-02-28' },
+  { title: 'Firewall Setup', description: 'UFW, fail2ban, Netzwerk-Segmentation für lokale AI-Infrastruktur.', href: '/security/firewall-setup', category: 'security', categoryLabel: 'Security', date: '2026-02-28' },
+  { title: 'Backup Strategie', description: '3-2-1 Regel, automatisierte Backups für Ollama, n8n, PostgreSQL.', href: '/security/backup-strategie', category: 'security', categoryLabel: 'Security', date: '2026-02-28' },
 ]
 
 export const categories: Category[] = [
@@ -159,7 +159,7 @@ export const relatedArticlesMap: Record<string, string[]> = {
   '/grundlagen/ollama-vs-cloud': ['/grundlagen/lokal-vs-cloud', '/tools/ollama-tutorial', '/tools/model-selection'],
   '/grundlagen/ai-agent-team': ['/grundlagen/agent-rollen', '/grundlagen/was-ist-agent-orchestration', '/patterns/task-delegation'],
   '/grundlagen/selfhosted-vs-cloud': ['/grundlagen/lokal-vs-cloud', '/tools/docker-vs-swarm', '/security/backup-strategie'],
-  '/grundlagen/30-tage-quickstart': ['/tools/ollama-tutorial', '/tools/docker-vs-swarm', '/tools/n8n-fuer-anfaenger'],
+  '/grundlagen/30-tage-quickstart': ['/tools/ollama-tutorial', '/tools/docker-vs-swarm', '/tools/n8n-für-anfaenger'],
   '/grundlagen/ki-unternehmen': ['/compliance/dsgvo-grundlagen', '/grundlagen/lokal-vs-cloud', '/compliance/eu-ai-act'],
   '/grundlagen/was-ist-ein-llm': ['/grundlagen/lokal-vs-cloud', '/tools/ollama-tutorial', '/tools/rag-guide'],
   // Compliance
@@ -175,12 +175,12 @@ export const relatedArticlesMap: Record<string, string[]> = {
   '/tools/docker-vs-swarm': ['/tools/proxmox-setup', '/tools/grafana-monitoring', '/grundlagen/selfhosted-vs-cloud'],
   '/tools/ollama-tutorial': ['/tools/model-selection', '/tools/rag-guide', '/grundlagen/ollama-vs-cloud'],
   '/tools/rag-guide': ['/tools/ollama-tutorial', '/tools/model-selection', '/patterns/memory-management'],
-  '/tools/n8n-fuer-anfaenger': ['/tools/mattermost-agent', '/tools/grafana-monitoring', '/grundlagen/30-tage-quickstart'],
-  '/tools/mattermost-agent': ['/tools/n8n-fuer-anfaenger', '/patterns/heartbeat-monitoring', '/patterns/task-delegation'],
+  '/tools/n8n-für-anfaenger': ['/tools/mattermost-agent', '/tools/grafana-monitoring', '/grundlagen/30-tage-quickstart'],
+  '/tools/mattermost-agent': ['/tools/n8n-für-anfaenger', '/patterns/heartbeat-monitoring', '/patterns/task-delegation'],
   '/tools/grafana-monitoring': ['/tools/docker-vs-swarm', '/patterns/heartbeat-monitoring', '/tools/proxmox-setup'],
   '/tools/proxmox-setup': ['/tools/docker-vs-swarm', '/security/backup-strategie', '/tools/grafana-monitoring'],
   '/tools/model-selection': ['/tools/ollama-tutorial', '/tools/rag-guide', '/grundlagen/ollama-vs-cloud'],
-  '/tools/mcp-server': ['/tools/n8n-fuer-anfaenger', '/tools/ollama-tutorial', '/patterns/agent-orchestration-patterns'],
+  '/tools/mcp-server': ['/tools/n8n-für-anfaenger', '/tools/ollama-tutorial', '/patterns/agent-orchestration-patterns'],
   // Patterns
   '/patterns/agent-orchestration-patterns': ['/grundlagen/was-ist-agent-orchestration', '/patterns/task-delegation', '/patterns/safety-hooks'],
   '/patterns/memory-management': ['/tools/rag-guide', '/patterns/agent-orchestration-patterns', '/patterns/safety-hooks'],

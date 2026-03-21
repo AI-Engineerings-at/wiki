@@ -53,7 +53,7 @@ export function SiteFooter() {
 
   const description = isEn
     ? 'Local AI systems for DACH SMBs. GDPR-compliant, documented, auditable, and grounded in real operations.'
-    : 'Lokale AI-Systeme fuer DACH-KMUs. DSGVO-konform, dokumentiert, auditierbar und aus dem echten Betrieb.'
+    : 'Lokale AI-Systeme für DACH-KMUs. DSGVO-konform, dokumentiert, auditierbar und aus dem echten Betrieb.'
 
   const copyright = isEn
     ? '© 2026 AI Engineering - All rights reserved | Made in Austria'

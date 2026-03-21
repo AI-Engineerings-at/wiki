@@ -17,9 +17,9 @@ export default function ProxmoxSetup() {
       <div className="prose prose-invert max-w-none">
         <Callout type="summary" title="Auf einen Blick">
           <p>
-            Proxmox VE ist eine Open-Source Virtualisierungsplattform fuer dein
+            Proxmox VE ist eine Open-Source Virtualisierungsplattform für dein
             Homelab. KVM-VMs und LXC-Container auf eigener Hardware, Web-Interface,
-            Cluster-faehig. GPU-Passthrough fuer Ollama moeglich. Keine Lizenzkosten.
+            Cluster-faehig. GPU-Passthrough für Ollama moeglich. Keine Lizenzkosten.
           </p>
         </Callout>
 
@@ -222,7 +222,7 @@ lvconvert --type thin-pool vg00/data-thinpool
 
         <Callout type="warning" title="GPU-Passthrough">
           <p>
-            Fuer GPU-Passthrough muss IOMMU im BIOS aktiviert sein und die
+            Für GPU-Passthrough muss IOMMU im BIOS aktiviert sein und die
             GPU-Treiber auf dem Host geblockt werden. Ohne vfio-pci Konfiguration
             kann die GPU nicht an eine VM durchgereicht werden. Teste immer mit
             lspci | grep -i nvidia in der VM.

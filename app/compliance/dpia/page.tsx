@@ -1,7 +1,7 @@
 export const metadata = {
   title: 'Datenschutz-Folgenabschaetzung (DPIA) | AI Engineering Wiki',
   description:
-    'DPIA fuer KI-Systeme: Wann ist eine Datenschutz-Folgenabschaetzung Pflicht, wie fuehrt man sie durch, und was muss dokumentiert werden.',
+    'DPIA für KI-Systeme: Wann ist eine Datenschutz-Folgenabschaetzung Pflicht, wie fuehrt man sie durch, und was muss dokumentiert werden.',
 }
 
 export default function DPIAPage() {
@@ -16,7 +16,7 @@ export default function DPIAPage() {
         <p className="text-lg text-gray-300">
           Eine Datenschutz-Folgenabschaetzung (Data Protection Impact Assessment, DPIA)
           ist nach Art. 35 DSGVO Pflicht, wenn eine Datenverarbeitung voraussichtlich ein
-          hohes Risiko fuer die Rechte und Freiheiten natuerlicher Personen zur Folge hat.
+          hohes Risiko für die Rechte und Freiheiten natuerlicher Personen zur Folge hat.
           Bei KI-Systemen ist das haeufig der Fall.
         </p>
 
@@ -29,7 +29,7 @@ export default function DPIAPage() {
         <ul className="list-disc list-inside text-gray-300 space-y-2 mt-4">
           <li><strong>Automatisierten Einzelentscheidungen</strong> mit rechtlicher Wirkung (Art. 22 DSGVO)</li>
           <li><strong>Umfangreicher Verarbeitung besonderer Kategorien</strong> personenbezogener Daten</li>
-          <li><strong>Systematischer Ueberwachung</strong> oeffentlich zugaenglicher Bereiche</li>
+          <li><strong>Systematischer Überwachung</strong> oeffentlich zugaenglicher Bereiche</li>
           <li><strong>Profiling</strong> mit erheblichen Auswirkungen auf Betroffene</li>
           <li><strong>Neuen Technologien</strong> (KI-Systeme gelten als neue Technologie)</li>
         </ul>
@@ -43,8 +43,8 @@ export default function DPIAPage() {
         </div>
 
         <figure className="my-8">
-          <img src="/images/diagrams/dpia-6-schritte-flow.png" alt="DPIA 6-Schritte Flow — Von der Beschreibung bis zur Ueberpruefung" className="rounded-xl border border-white/10 w-full" />
-          <figcaption className="text-center text-white/40 text-sm mt-2">DPIA in 6 Schritten: Der komplette Prozess fuer KI-Systeme</figcaption>
+          <img src="/images/diagrams/dpia-6-schritte-flow.png" alt="DPIA 6-Schritte Flow — Von der Beschreibung bis zur Überpruefung" className="rounded-xl border border-white/10 w-full" />
+          <figcaption className="text-center text-white/40 text-sm mt-2">DPIA in 6 Schritten: Der komplette Prozess für KI-Systeme</figcaption>
         </figure>
 
         <h2 className="text-xl font-semibold text-white mt-8">DPIA-Prozess in 6 Schritten</h2>
@@ -57,10 +57,10 @@ export default function DPIAPage() {
             </li>
             <li>
               <strong>2. Notwendigkeit und Verhaeltnismaessigkeit pruefen</strong>
-              <p className="text-sm text-gray-400 mt-1">Ist die Verarbeitung fuer den Zweck erforderlich? Gibt es mildere Mittel?</p>
+              <p className="text-sm text-gray-400 mt-1">Ist die Verarbeitung für den Zweck erforderlich? Gibt es mildere Mittel?</p>
             </li>
             <li>
-              <strong>3. Risiken fuer Betroffene bewerten</strong>
+              <strong>3. Risiken für Betroffene bewerten</strong>
               <p className="text-sm text-gray-400 mt-1">Eintrittswahrscheinlichkeit und Schwere moeglicher Schaeden.</p>
             </li>
             <li>
@@ -72,7 +72,7 @@ export default function DPIAPage() {
               <p className="text-sm text-gray-400 mt-1">Ergebnisse schriftlich festhalten, Massnahmen und Restrisiken dokumentieren.</p>
             </li>
             <li>
-              <strong>6. Regelmaessig ueberpruefen</strong>
+              <strong>6. Regelmaessig überpruefen</strong>
               <p className="text-sm text-gray-400 mt-1">DPIA ist kein einmaliges Dokument — bei Aenderungen am System aktualisieren.</p>
             </li>
           </ol>
@@ -91,7 +91,7 @@ export default function DPIAPage() {
 
         <ul className="list-disc list-inside text-gray-300 space-y-1 mt-2">
           <li>High-Risk KI-Systeme brauchen eine DPIA und zusaetzlich eine KI-spezifische Risikobewertung</li>
-          <li>Art. 27 EU AI Act verlangt eine Grundrechte-Folgenabschaetzung fuer bestimmte Deployer</li>
+          <li>Art. 27 EU AI Act verlangt eine Grundrechte-Folgenabschaetzung für bestimmte Deployer</li>
           <li>Die DPIA kann mit der KI-Risikobewertung kombiniert werden</li>
         </ul>
 
@@ -100,7 +100,7 @@ export default function DPIAPage() {
         <div className="bg-green-900/30 border border-green-700 rounded-lg p-4 mt-4">
           <p className="text-gray-300">
             Bei Self-Hosted KI (z.B. Ollama lokal) faellt die DPIA deutlich einfacher aus:
-            Keine Drittlandtransfers, keine Auftragsverarbeitung, volle Kontrolle ueber die Daten.
+            Keine Drittlandtransfers, keine Auftragsverarbeitung, volle Kontrolle über die Daten.
             Das Restrisiko ist geringer als bei Cloud-KI.
           </p>
         </div>
@@ -118,7 +118,7 @@ export default function DPIAPage() {
         <h2 className="text-xl font-semibold text-white mt-8">Quellen</h2>
         <ul className="list-disc list-inside text-gray-300 space-y-1">
           <li><a href="https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX:32016R0679" target="_blank" className="text-blue-400 hover:underline">DSGVO Art. 35 — Datenschutz-Folgenabschaetzung (EUR-Lex)</a></li>
-          <li><a href="https://www.dsb.gv.at/download-links/dokumente-zum-datenschutz.html" target="_blank" className="text-blue-400 hover:underline">Oesterreichische Datenschutzbehoerde — DPIA Ressourcen</a></li>
+          <li><a href="https://www.dsb.gv.at/download-links/dokumente-zum-datenschutz.html" target="_blank" className="text-blue-400 hover:underline">Österreichische Datenschutzbehoerde — DPIA Ressourcen</a></li>
         </ul>
       </div>
     </div>

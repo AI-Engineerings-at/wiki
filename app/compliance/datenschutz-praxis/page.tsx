@@ -18,8 +18,8 @@ export default function DatenschutzPraxis() {
         </p>
 
         <figure className="my-8">
-          <img src="/images/infographics/datenschutz-tom-uebersicht.png" alt="Datenschutz TOM Uebersicht — Technische und organisatorische Massnahmen" className="rounded-xl border border-white/10 w-full" />
-          <figcaption className="text-center text-white/40 text-sm mt-2">TOM Uebersicht: Technische und organisatorische Massnahmen nach Art. 32 DSGVO</figcaption>
+          <img src="/images/infographics/datenschutz-tom-uebersicht.png" alt="Datenschutz TOM Übersicht — Technische und organisatorische Massnahmen" className="rounded-xl border border-white/10 w-full" />
+          <figcaption className="text-center text-white/40 text-sm mt-2">TOM Übersicht: Technische und organisatorische Massnahmen nach Art. 32 DSGVO</figcaption>
         </figure>
 
         <h2 className="text-xl font-semibold text-white mt-8">Technische Maßnahmen</h2>

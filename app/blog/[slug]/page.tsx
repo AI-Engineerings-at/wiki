@@ -73,7 +73,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               Lokaler AI-Stack aufbauen?
             </h3>
             <p className="text-slate-300">
-              Unser Playbook zeigt Schritt fuer Schritt, wie du LLMs, Automation
+              Unser Playbook zeigt Schritt für Schritt, wie du LLMs, Automation
               und Monitoring auf eigener Hardware betreibst — DSGVO-konform.
             </p>
           </div>

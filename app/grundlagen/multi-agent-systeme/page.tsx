@@ -1,9 +1,9 @@
 import Callout from "../../../components/Callout"
 
 export const metadata = {
-  title: 'Multi-Agent Systeme erklaert | AI Engineering Wiki',
+  title: 'Multi-Agent Systeme erklärt | AI Engineering Wiki',
   description:
-    'Was ist ein Multi-Agent System (MAS)? Vorteile gegenueber einem einzelnen LLM, Rollen, Kommunikation und typische Architektur-Patterns aus der Praxis.',
+    'Was ist ein Multi-Agent System (MAS)? Vorteile gegenüber einem einzelnen LLM, Rollen, Kommunikation und typische Architektur-Patterns aus der Praxis.',
 }
 
 export default function MultiAgentSysteme() {
@@ -18,8 +18,8 @@ export default function MultiAgentSysteme() {
         <Callout type="summary" title="Auf einen Blick">
           <p>
             Ein Multi-Agent System (MAS) nutzt spezialisierte AI-Agenten, die
-            parallel arbeiten und sich ueber ein Kommunikationsprotokoll
-            koordinieren. Vorteile gegenueber einem einzelnen LLM: echte
+            parallel arbeiten und sich über ein Kommunikationsprotokoll
+            koordinieren. Vorteile gegenüber einem einzelnen LLM: echte
             Arbeitsteilung, Memory pro Agent, klare Rollen und Verantwortung.
           </p>
         </Callout>

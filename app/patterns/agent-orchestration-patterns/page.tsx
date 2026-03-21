@@ -28,8 +28,8 @@ export default function AgentOrchestrationPatterns() {
         />
 
         <figure className="my-8">
-          <img src="/images/diagrams/patterns-orchestration-overview.png" alt="Agent Orchestration Patterns Uebersicht — Sequential, Parallel, Hierarchical, Router, Supervisor" className="rounded-xl border border-white/10 w-full" />
-          <figcaption className="text-center text-white/40 text-sm mt-2">Orchestration Patterns: Die 5 wichtigsten Muster fuer Multi-Agent Systeme</figcaption>
+          <img src="/images/diagrams/patterns-orchestration-overview.png" alt="Agent Orchestration Patterns Übersicht — Sequential, Parallel, Hierarchical, Router, Supervisor" className="rounded-xl border border-white/10 w-full" />
+          <figcaption className="text-center text-white/40 text-sm mt-2">Orchestration Patterns: Die 5 wichtigsten Muster für Multi-Agent Systeme</figcaption>
         </figure>
 
         <h2 className="text-xl font-semibold text-white mt-8">1. Sequential Pattern</h2>

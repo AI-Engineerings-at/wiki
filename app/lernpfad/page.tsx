@@ -30,7 +30,7 @@ const steps = [
     title: 'Terminal-Grundlagen für AI',
     description:
       '10 Befehle — das ist alles was zwischen dir und deinem ersten lokalen LLM steht. cd, curl, docker ps, ssh, grep und mehr.',
-    href: '/blog/2026-03-12-terminal-grundlagen-fuer-ai',
+    href: '/blog/2026-03-12-terminal-grundlagen-für-ai',
     readTime: '~6 Min',
     available: true,
   },
@@ -39,7 +39,7 @@ const steps = [
     title: 'Ollama installieren',
     description:
       'In 5 Minuten läuft dein erstes lokales Modell. Eine Installation, ein Befehl — und du chattest mit Qwen oder Llama komplett offline.',
-    href: '/blog/2026-03-12-ollama-installieren-schritt-fuer-schritt',
+    href: '/blog/2026-03-12-ollama-installieren-schritt-für-schritt',
     readTime: '~8 Min',
     available: true,
   },
@@ -57,7 +57,7 @@ const steps = [
     title: 'Docker Basics für AI',
     description:
       'Ohne Docker läuft kein moderner AI-Stack. Container, Volumes, Compose — die Konzepte die du wirklich brauchst, ohne dich in Details zu verlieren.',
-    href: '/blog/2026-03-12-docker-grundlagen-fuer-ai',
+    href: '/blog/2026-03-12-docker-grundlagen-für-ai',
     readTime: '~12 Min',
     available: true,
   },
@@ -75,7 +75,7 @@ const steps = [
     title: 'n8n Automatisierung',
     description:
       'AI ohne Automatisierung ist nur ein Chatbot. n8n verbindet deinen Stack mit E-Mails, Webhooks und APIs — damit laufen echte Workflows ohne manuelle Eingriffe.',
-    href: '/tools/n8n-fuer-anfaenger',
+    href: '/tools/n8n-für-anfaenger',
     readTime: '~20 Min',
     available: true,
   },

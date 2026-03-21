@@ -4,7 +4,7 @@ import Callout from "../../../components/Callout"
 export const metadata = {
   title: 'EU AI Act | AI Engineering Wiki',
   description:
-    'EU AI Act ab 2. August 2026: Risikoklassen, Pflichten, Transparenz und Strafen. Praxis-Guide fuer Unternehmen mit AI-Systemen.',
+    'EU AI Act ab 2. August 2026: Risikoklassen, Pflichten, Transparenz und Strafen. Praxis-Guide für Unternehmen mit AI-Systemen.',
 }
 
 export default function EuAiActLeitfaden() {
@@ -19,8 +19,8 @@ export default function EuAiActLeitfaden() {
         <Callout type="summary" title="Auf einen Blick">
           <p>
             Der EU AI Act (Verordnung 2024/1689) ist der weltweit erste umfassende
-            Rechtsrahmen fuer Kuenstliche Intelligenz. Er klassifiziert AI-Systeme
-            nach Risiko und definiert Pflichten fuer Anbieter und Betreiber. Fuer
+            Rechtsrahmen für Kuenstliche Intelligenz. Er klassifiziert AI-Systeme
+            nach Risiko und definiert Pflichten für Anbieter und Betreiber. Für
             die meisten Self-Hosted AI-Setups gilt: Minimal Risk, keine besonderen
             Pflichten — aber Transparenz und Dokumentation sind trotzdem empfohlen.
           </p>
@@ -36,7 +36,7 @@ export default function EuAiActLeitfaden() {
         <Callout type="warning" title="Strafen">
           <p>
             Bis zu 35 Millionen Euro oder 6% des globalen Jahresumsatzes sind moeglich.
-            Fuer KMU gelten etwas mildere Regeln, aber die Pflichten bleiben.
+            Für KMU gelten etwas mildere Regeln, aber die Pflichten bleiben.
           </p>
         </Callout>
 
@@ -306,8 +306,8 @@ Verarbeitet das System biometrische Daten?
           <ul className="space-y-2 text-sm text-white/50">
             <li><a href="https://eur-lex.europa.eu/eli/reg/2024/1689/oj" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">EUR-Lex: Verordnung (EU) 2024/1689 — EU AI Act Volltext</a></li>
             <li><a href="https://artificialintelligenceact.eu/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">AI Act Explorer</a> — Interaktive Aufbereitung aller Artikel</li>
-            <li><a href="https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">EU-Kommission: Regulatory Framework for AI</a> — Offizielle Uebersicht</li>
-            <li><a href="https://www.ris.bka.gv.at/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">RIS — Rechtsinformationssystem des Bundes</a> — Oesterreichische Umsetzung</li>
+            <li><a href="https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">EU-Kommission: Regulatory Framework for AI</a> — Offizielle Übersicht</li>
+            <li><a href="https://www.ris.bka.gv.at/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">RIS — Rechtsinformationssystem des Bundes</a> — Österreichische Umsetzung</li>
           </ul>
         </section>
       </div>

@@ -9,7 +9,7 @@ import { RelatedArticles } from "../../../components/RelatedArticles"
 export const metadata: Metadata = {
   title: "Docker Grundlagen: Container, Compose & Swarm | AI Engineering Wiki",
   description:
-    "Docker fuer AI-Workloads verstehen: Container vs VMs, Docker Compose fuer lokale Stacks, Docker Swarm fuer Multi-Node Deployments. Praxisnah erklaert.",
+    "Docker für AI-Workloads verstehen: Container vs VMs, Docker Compose für lokale Stacks, Docker Swarm für Multi-Node Deployments. Praxisnah erklärt.",
 }
 
 export default function DockerGrundlagenPage() {
@@ -36,7 +36,7 @@ export default function DockerGrundlagenPage() {
         <Callout type="summary" title="Auf einen Blick">
           <p>
             Docker packt Software in Container — isolierte Einheiten, die
-            ueberall gleich laufen. Fuer einen lokalen AI-Stack ist Docker die
+            überall gleich laufen. Für einen lokalen AI-Stack ist Docker die
             Grundlage: Ollama, Open WebUI, n8n, Grafana — alles laeuft in
             Containern. Docker Compose orchestriert mehrere Container auf einem
             Rechner, Docker Swarm verteilt sie auf mehrere.
@@ -124,12 +124,12 @@ export default function DockerGrundlagenPage() {
 
           <Callout type="tip" title="Wann was?">
             <p>
-              Fuer AI-Workloads: <strong>Docker Container</strong> fuer alles
+              Für AI-Workloads: <strong>Docker Container</strong> für alles
               was schnell starten und leichtgewichtig sein soll (Ollama, n8n,
-              Grafana). <strong>VMs</strong> fuer Hardware-Isolation (GPU
+              Grafana). <strong>VMs</strong> für Hardware-Isolation (GPU
               Passthrough an eine dedizierte AI-VM) oder wenn du mehrere
               Betriebssysteme brauchst. In der Praxis: beides kombinieren — VMs
-              fuer die Hosts, Container fuer die Services.
+              für die Hosts, Container für die Services.
             </p>
           </Callout>
         </section>
@@ -225,7 +225,7 @@ docker compose down -v`}</code>
         {/* Section 4: Docker Swarm */}
         <section className="mt-10">
           <h2 className="text-2xl font-bold text-white mb-4">
-            Docker Swarm: Container ueber mehrere Rechner
+            Docker Swarm: Container über mehrere Rechner
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
             Docker Swarm macht aus mehreren Rechnern einen Cluster. Services
@@ -263,8 +263,8 @@ docker compose down -v`}</code>
             GPU-Zugriff in Docker
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
-            Fuer AI-Workloads brauchen Container GPU-Zugriff. Das NVIDIA
-            Container Toolkit macht GPUs in Docker verfuegbar.
+            Für AI-Workloads brauchen Container GPU-Zugriff. Das NVIDIA
+            Container Toolkit macht GPUs in Docker verfügbar.
           </p>
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6 space-y-4">
@@ -314,7 +314,7 @@ sudo systemctl restart docker`}</code>
 
           <Callout type="warning" title="GPU in Swarm">
             <p>
-              Docker Swarm hat KEINE native GPU-Unterstuetzung fuer{" "}
+              Docker Swarm hat KEINE native GPU-Unterstuetzung für{" "}
               <code className="bg-white/10 px-1.5 py-0.5 rounded text-white/90">
                 --gpus
               </code>
@@ -339,7 +339,7 @@ sudo systemctl restart docker`}</code>
         {/* Section 6: Praxis-Tipps */}
         <section className="mt-10">
           <h2 className="text-2xl font-bold text-white mb-4">
-            Praxis-Tipps fuer den Alltag
+            Praxis-Tipps für den Alltag
           </h2>
 
           <ComparisonTable
@@ -409,13 +409,13 @@ sudo systemctl restart docker`}</code>
               <a href="https://docs.docker.com/get-started/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
                 Docker Documentation: Get Started
               </a>{" "}
-              — Offizielle Einfuehrung in Docker
+              — Offizielle Einführung in Docker
             </li>
             <li>
               <a href="https://docs.docker.com/compose/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
                 Docker Compose Documentation
               </a>{" "}
-              — Referenz fuer docker-compose.yml
+              — Referenz für docker-compose.yml
             </li>
             <li>
               <a href="https://docs.docker.com/engine/swarm/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">

@@ -7,7 +7,7 @@ export const metadata = {
     'n8n Workflow-Automatisierung im lokalen AI-Stack: Installation, Nodes, Beispiele und Integration mit Ollama, Slack/Mattermost und Stripe.',
 }
 
-export default function N8nAnfaenger() {
+export default function N8nAnfänger() {
   return (
     <div className="space-y-6">
       <div>
@@ -33,7 +33,7 @@ export default function N8nAnfaenger() {
         <CaseStudyBox
           tool="n8n"
           stat="36 aktiven Workflows"
-          description="fuer Revenue-Pipeline, Content-Automation und Infrastruktur-Monitoring"
+          description="für Revenue-Pipeline, Content-Automation und Infrastruktur-Monitoring"
           blogLink="/blog/2026-03-08-36-n8n-workflows"
           productLink="https://buy.stripe.com/8x2fZh7VB2DT2Hk1xafQI01"
           productName="n8n AI Workflow Bundle (EUR 29)"

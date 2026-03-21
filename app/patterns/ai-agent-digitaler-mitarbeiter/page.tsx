@@ -54,7 +54,7 @@ export default function AIAgentDigitalerMitarbeiterPage() {
           </p>
           <p className="text-white/70 leading-relaxed mt-4">
             Konkret heisst das: eigene Zugangsdaten, begrenzte Berechtigungen, eine
-            Probezeit mit schrittweiser Freigabe und klare Regeln fuer den Umgang
+            Probezeit mit schrittweiser Freigabe und klare Regeln für den Umgang
             mit externen Kontakten.
           </p>
         </section>
@@ -65,7 +65,7 @@ export default function AIAgentDigitalerMitarbeiterPage() {
             Principle of Least Privilege
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
-            Jeder Agent bekommt NUR die Berechtigungen, die er fuer seinen Job braucht.
+            Jeder Agent bekommt NUR die Berechtigungen, die er für seinen Job braucht.
             Nicht mehr. Das ist dasselbe Prinzip wie bei menschlichen Mitarbeitern:
             Ein Buchhalter braucht keinen SSH-Zugang zum Server.
           </p>
@@ -80,8 +80,8 @@ export default function AIAgentDigitalerMitarbeiterPage() {
               ],
               [
                 "Berechtigungen",
-                "Nur fuer seine Abteilung",
-                "Nur fuer definierte Doctypes/Endpoints",
+                "Nur für seine Abteilung",
+                "Nur für definierte Doctypes/Endpoints",
               ],
               [
                 "Credentials",
@@ -90,7 +90,7 @@ export default function AIAgentDigitalerMitarbeiterPage() {
               ],
               [
                 "Netzwerk",
-                "VPN-Zugang nur fuer seine Systeme",
+                "VPN-Zugang nur für seine Systeme",
                 "Network Policy: Deny-by-default, nur Allowlisted Endpoints",
               ],
               [
@@ -139,7 +139,7 @@ export default function AIAgentDigitalerMitarbeiterPage() {
             Network Policy: Deny-by-Default
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
-            Ein Agent sollte nur die Endpoints erreichen koennen, die er fuer seine
+            Ein Agent sollte nur die Endpoints erreichen koennen, die er für seine
             Arbeit braucht. Alles andere ist blockiert. Das verhindert, dass ein
             kompromittierter Agent auf interne Systeme zugreift.
           </p>
@@ -162,7 +162,7 @@ blocked:
           <Callout type="tip" title="Gateway auf localhost binden">
             <p>
               Der Agent-Gateway sollte auf 127.0.0.1 lauschen, nicht auf 0.0.0.0.
-              Remote-Zugriff laeuft ueber ein VPN (z.B. Netbird, WireGuard).
+              Remote-Zugriff laeuft über ein VPN (z.B. Netbird, WireGuard).
               Das verhindert, dass der Agent-Endpoint aus dem offenen Netzwerk
               erreichbar ist.
             </p>
@@ -185,7 +185,7 @@ blocked:
             headers={["Eigenschaft", "Plugin (Code)", "Skill (Markdown)"]}
             rows={[
               ["Ausfuehrung", "Direkter Code-Zugriff", "Beschreibung, Agent interpretiert"],
-              ["Sicherheit", "Kann alles ausfuehren", "Sandbox-Ausfuehrung"],
+              ["Sicherheit", "Kann alles ausführen", "Sandbox-Ausfuehrung"],
               ["Review", "Code Review noetig", "Text lesen reicht"],
               ["Wartung", "API-Aenderungen brechen Code", "Beschreibung bleibt stabil"],
               ["Supply Chain", "Abhaengigkeiten koennen malicious sein", "Keine externen Abhaengigkeiten"],
@@ -195,8 +195,8 @@ blocked:
           <Callout type="warning" title="Vorsicht bei Community-Plugins">
             <p>
               Recherchen zeigen, dass ein signifikanter Anteil von Community-Plugins
-              fuer Agent-Frameworks Sicherheitsprobleme haben kann — von Credential-Leaks
-              bis zu Remote Code Execution. Schreibe deine Skills selbst. Uebernimm
+              für Agent-Frameworks Sicherheitsprobleme haben kann — von Credential-Leaks
+              bis zu Remote Code Execution. Schreibe deine Skills selbst. Übernimm
               Logik und Patterns aus der Community, aber schreibe den Code selbst.
             </p>
           </Callout>
@@ -257,7 +257,7 @@ Trigger: Heartbeat erkennt neue E-Mails.
           <p className="text-white/70 leading-relaxed mt-4">
             Tier 2 wird NUR ausgeloest, wenn Tier 1 eine Anomalie erkennt.
             Beispiel: Tier 1 prueft &quot;Gibt es neue E-Mails?&quot; (HTTP-Call, 0 Tokens).
-            Nur wenn ja, ruft Tier 2 das LLM fuer Klassifizierung und Zusammenfassung.
+            Nur wenn ja, ruft Tier 2 das LLM für Klassifizierung und Zusammenfassung.
           </p>
 
           <Callout type="tip" title="Praxis-Rechnung">
@@ -277,7 +277,7 @@ Trigger: Heartbeat erkennt neue E-Mails.
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
             Ab 2. August 2026 muessen AI-Systeme mit Kundenkontakt transparent
-            gekennzeichnet sein (Art. 50). Das gilt auch fuer AI-Agenten, die
+            gekennzeichnet sein (Art. 50). Das gilt auch für AI-Agenten, die
             als digitale Mitarbeiter eingesetzt werden.
           </p>
 
@@ -322,7 +322,7 @@ Trigger: Heartbeat erkennt neue E-Mails.
             <p>
               Die Transparenzpflichten nach Art. 50 EU AI Act gelten ab August 2026.
               Verstoss: bis zu 15 Mio. EUR oder 3% des weltweiten Jahresumsatzes.
-              Fuer KMU gilt ein niedrigerer Betrag (Art. 99), aber die Pflicht
+              Für KMU gilt ein niedrigerer Betrag (Art. 99), aber die Pflicht
               selbst ist dieselbe.
             </p>
           </Callout>
@@ -331,7 +331,7 @@ Trigger: Heartbeat erkennt neue E-Mails.
         {/* Section 8: Onboarding-Checkliste */}
         <section className="mt-10">
           <h2 className="text-2xl font-bold text-white mb-4">
-            Onboarding-Checkliste fuer einen neuen AI-Agenten
+            Onboarding-Checkliste für einen neuen AI-Agenten
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
             Diese Checkliste fasst die Patterns zusammen. Jeder Punkt sollte
@@ -382,7 +382,7 @@ Trigger: Heartbeat erkennt neue E-Mails.
             </li>
             <li>
               <a href="/compliance/eu-ai-act" className="text-blue-400 hover:underline">
-                EU AI Act Ueberblick
+                EU AI Act Überblick
               </a>{" "}
               — Art. 50 Transparenzpflichten
             </li>

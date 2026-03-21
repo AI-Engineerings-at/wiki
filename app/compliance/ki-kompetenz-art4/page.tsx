@@ -3,7 +3,7 @@
 export const metadata = {
   title: 'KI-Kompetenz nach Art. 4 EU AI Act | AI Engineering Wiki',
   description:
-    'Art. 4 EU AI Act: KI-Kompetenz Pflicht fuer alle Unternehmen. Deadline 02.08.2026, Schulungspflichten, Strafen bis EUR 35 Mio. Praxis-Guide fuer DACH-KMUs.',
+    'Art. 4 EU AI Act: KI-Kompetenz Pflicht für alle Unternehmen. Deadline 02.08.2026, Schulungspflichten, Strafen bis EUR 35 Mio. Praxis-Guide für DACH-KMUs.',
 }
 
 export default function KIKompetenzArt4Page() {
@@ -18,7 +18,7 @@ export default function KIKompetenzArt4Page() {
         <div className="bg-red-900/30 border border-red-700 rounded-lg p-4 mt-4">
           <p className="text-red-300 text-sm">
             <strong>Deadline: 2. August 2026</strong> — Ab diesem Datum muessen alle Unternehmen,
-            die KI-Systeme einsetzen, nachweisen, dass ihre Mitarbeitenden ueber ausreichende
+            die KI-Systeme einsetzen, nachweisen, dass ihre Mitarbeitenden über ausreichende
             KI-Kompetenz verfuegen. Strafen bis zu <strong>EUR 35 Millionen</strong> oder
             7% des weltweiten Jahresumsatzes.
           </p>
@@ -28,8 +28,8 @@ export default function KIKompetenzArt4Page() {
         <p className="text-gray-300">
           Artikel 4 des EU AI Act (Verordnung (EU) 2024/1689) verpflichtet <strong>alle
           Anbieter und Betreiber</strong> von KI-Systemen, sicherzustellen, dass ihr Personal
-          ueber ein ausreichendes Mass an KI-Kompetenz verfuegt. Das gilt unabhaengig von der
-          Risikoklasse des KI-Systems — also auch fuer Minimal-Risk-Anwendungen wie Chatbots
+          über ein ausreichendes Mass an KI-Kompetenz verfuegt. Das gilt unabhaengig von der
+          Risikoklasse des KI-Systems — also auch für Minimal-Risk-Anwendungen wie Chatbots
           oder Empfehlungssysteme.
         </p>
 
@@ -38,7 +38,7 @@ export default function KIKompetenzArt4Page() {
           <blockquote className="text-gray-300 text-sm italic border-l-4 border-blue-500 pl-4">
             &ldquo;Anbieter und Betreiber von KI-Systemen ergreifen Massnahmen, um nach besten
             Kraeften sicherzustellen, dass ihr Personal und andere Personen, die in ihrem
-            Auftrag mit dem Betrieb und der Nutzung von KI-Systemen befasst sind, ueber ein
+            Auftrag mit dem Betrieb und der Nutzung von KI-Systemen befasst sind, über ein
             ausreichendes Mass an KI-Kompetenz verfuegen, wobei ihre technischen Kenntnisse,
             ihre Erfahrung, ihre Ausbildung und Schulung sowie der Kontext, in dem die
             KI-Systeme eingesetzt werden sollen, [...] zu beruecksichtigen sind.&rdquo;
@@ -87,9 +87,9 @@ export default function KIKompetenzArt4Page() {
         </div>
 
         <p className="text-gray-300 mt-4">
-          In Oesterreich sind schaetzungsweise <strong>400.000 Unternehmen</strong> betroffen —
+          In Österreich sind schaetzungsweise <strong>400.000 Unternehmen</strong> betroffen —
           jedes KMU, das ChatGPT, Copilot, KI-gestuetzte Buchhaltung oder andere KI-Tools
-          einsetzt. In Deutschland und der Schweiz gilt das entsprechend fuer alle Firmen
+          einsetzt. In Deutschland und der Schweiz gilt das entsprechend für alle Firmen
           im EU/EWR-Raum.
         </p>
 
@@ -100,7 +100,7 @@ export default function KIKompetenzArt4Page() {
 
         <figure className="my-8">
           <img src="/images/infographics/ki-kompetenz-schulungsplan.png" alt="KI-Kompetenz Schulungsplan — 4 Kompetenzbereiche" className="rounded-xl border border-white/10 w-full" />
-          <figcaption className="text-center text-white/40 text-sm mt-2">KI-Kompetenz Schulungsplan: Die 4 Kompetenzbereiche fuer Art. 4 Compliance</figcaption>
+          <figcaption className="text-center text-white/40 text-sm mt-2">KI-Kompetenz Schulungsplan: Die 4 Kompetenzbereiche für Art. 4 Compliance</figcaption>
         </figure>
 
         <h2 className="text-xl font-semibold text-white mt-8">Was muss geschult werden?</h2>
@@ -177,7 +177,7 @@ export default function KIKompetenzArt4Page() {
             </tbody>
           </table>
           <p className="text-gray-500 text-xs mt-2">
-            Fuer KMUs und Start-ups gelten proportionale Hoechstbetraege — der jeweils niedrigere Betrag.
+            Für KMUs und Start-ups gelten proportionale Hoechstbetraege — der jeweils niedrigere Betrag.
           </p>
         </div>
 
@@ -239,20 +239,20 @@ export default function KIKompetenzArt4Page() {
           <li>Nachweisbare Materialien (Unterlagen, Tests, Teilnahmebestaetigung)</li>
         </ul>
 
-        <h2 className="text-xl font-semibold text-white mt-8">Oesterreich-spezifisch</h2>
+        <h2 className="text-xl font-semibold text-white mt-8">Österreich-spezifisch</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
           <ul className="text-gray-300 space-y-2">
-            <li><strong>Zustaendige Behoerde:</strong> Noch nicht final festgelegt (Stand Maerz 2026). Die RTR (Rundfunk und Telekom Regulierungs-GmbH) ist als Marktaufsichtsbehoerde im Gespraech.</li>
-            <li><strong>Gewerberecht:</strong> KI-Schulungen fallen unter freies Gewerbe (Lebens- und Sozialberatung, Unternehmensberatung) — keine Gewerbeberechtigung noetig fuer allgemeine KI-Schulungen.</li>
-            <li><strong>WKO Foerderungen:</strong> Digitalisierungsfoerderungen des BMAW koennen fuer KI-Schulungen genutzt werden.</li>
+            <li><strong>Zuständige Behoerde:</strong> Noch nicht final festgelegt (Stand Maerz 2026). Die RTR (Rundfunk und Telekom Regulierungs-GmbH) ist als Marktaufsichtsbehoerde im Gespraech.</li>
+            <li><strong>Gewerberecht:</strong> KI-Schulungen fallen unter freies Gewerbe (Lebens- und Sozialberatung, Unternehmensberatung) — keine Gewerbeberechtigung noetig für allgemeine KI-Schulungen.</li>
+            <li><strong>WKO Foerderungen:</strong> Digitalisierungsfoerderungen des BMAW koennen für KI-Schulungen genutzt werden.</li>
           </ul>
         </div>
 
         <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mt-8">
           <h3 className="font-semibold text-white mb-2">Weiterfuehrend</h3>
           <ul className="text-gray-300 space-y-1">
-            <li>&#8226; <strong>EU AI Act Ueberblick:</strong>{" "}
+            <li>&#8226; <strong>EU AI Act Überblick:</strong>{" "}
               <a href="/compliance/eu-ai-act" className="text-blue-400 hover:underline">EU AI Act: Was du wissen musst</a>
             </li>
             <li>&#8226; <strong>Checkliste:</strong>{" "}

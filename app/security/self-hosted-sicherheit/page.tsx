@@ -9,7 +9,7 @@ import { RelatedArticles } from "../../../components/RelatedArticles"
 export const metadata: Metadata = {
   title: "Self-Hosted Sicherheit: Das 6-Layer Modell | AI Engineering Wiki",
   description:
-    "6 Sicherheitsebenen fuer selbst gehostete AI-Infrastruktur: Netzwerk, SSH, Firewall, Container, Anwendung, Monitoring. Praxisnahe Anleitung.",
+    "6 Sicherheitsebenen für selbst gehostete AI-Infrastruktur: Netzwerk, SSH, Firewall, Container, Anwendung, Monitoring. Praxisnahe Anleitung.",
 }
 
 export default function SelfHostedSicherheitPage() {
@@ -22,8 +22,8 @@ export default function SelfHostedSicherheitPage() {
           Self-Hosted Sicherheit: Das 6-Layer Modell
         </h1>
         <p className="text-lg text-white/60 mt-3 max-w-2xl">
-          Wenn du AI-Services selbst hostest, bist du fuer die Sicherheit
-          verantwortlich. Kein Cloud-Anbieter faengt Fehler fuer dich ab. Hier
+          Wenn du AI-Services selbst hostest, bist du für die Sicherheit
+          verantwortlich. Kein Cloud-Anbieter faengt Fehler für dich ab. Hier
           sind die 6 Schichten, die deine Infrastruktur schuetzen.
         </p>
         <div className="flex items-center gap-4 mt-4 text-sm text-white/40">
@@ -120,9 +120,9 @@ sudo ufw status verbose`}</code>
             </p>
           </Callout>
 
-          <Callout type="tip" title="VLAN fuer Isolation">
+          <Callout type="tip" title="VLAN für Isolation">
             <p>
-              Wenn dein Router VLANs unterstuetzt, trenne dein AI-Lab vom
+              Wenn dein Router VLANs unterstützt, trenne dein AI-Lab vom
               restlichen Netzwerk. AI-Server in VLAN 10, IoT in VLAN 20,
               regulaere Geraete in VLAN 1. So kann ein kompromittiertes
               IoT-Geraet nicht auf deine AI-Infrastruktur zugreifen.
@@ -226,7 +226,7 @@ sudo fail2ban-client status sshd`}</code>
               ["Read-Only Root", "read_only: true in compose", "Verhindert Dateisystem-Manipulation"],
               ["Kein Root im Container", "user: '1000:1000' in compose", "Container laeuft als normaler User"],
               ["Secrets Management", "Docker Secrets oder Vault", "Keine Credentials in Umgebungsvariablen"],
-              ["Resource Limits", "mem_limit: 4g, cpus: '2.0'", "Container kann nicht den Host ueberlasten"],
+              ["Resource Limits", "mem_limit: 4g, cpus: '2.0'", "Container kann nicht den Host überlasten"],
               ["Network Isolation", "Eigene Docker-Netzwerke pro Stack", "Services sehen nur was sie muessen"],
             ]}
           />
@@ -248,7 +248,7 @@ sudo fail2ban-client status sshd`}</code>
         {/* Section 5: Layer 5 - Anwendung */}
         <section className="mt-10">
           <h2 className="text-2xl font-bold text-white mb-4">
-            Layer 5: Anwendungssicherheit fuer AI
+            Layer 5: Anwendungssicherheit für AI
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
             AI-Anwendungen haben eigene Sicherheitsrisiken. LLMs koennen
@@ -263,7 +263,7 @@ sudo fail2ban-client status sshd`}</code>
               ["Data Leakage", "LLM gibt Environment Variables oder Secrets aus", "Output Sanitizer (PFLICHT)"],
               ["Token Theft", "API Keys werden abgefangen", "Vault, Token Rotation, Rate Limiting"],
               ["Model Poisoning", "Manipulierte Modelle von unsicheren Quellen", "Nur offizielle Quellen (ollama.com, HuggingFace verified)"],
-              ["Resource Exhaustion", "Ueberlange Prompts/Kontexte", "Max Token Limits, Request Timeouts"],
+              ["Resource Exhaustion", "Überlange Prompts/Kontexte", "Max Token Limits, Request Timeouts"],
             ]}
           />
 
@@ -273,7 +273,7 @@ sudo fail2ban-client status sshd`}</code>
               oder System-Informationen auszugeben. JEDE Antwort muss durch
               einen Sanitizer laufen, der Patterns wie API Keys, IP-Adressen,
               und Dateipfade erkennt und entfernt. Das ist keine
-              Nice-to-have-Funktion, sondern absolute Pflicht fuer
+              Nice-to-have-Funktion, sondern absolute Pflicht für
               Produktion.
             </p>
           </Callout>
@@ -290,7 +290,7 @@ sudo fail2ban-client status sshd`}</code>
           </p>
 
           <ComparisonTable
-            headers={["Was ueberwachen", "Tool", "Alert-Bedingung"]}
+            headers={["Was überwachen", "Tool", "Alert-Bedingung"]}
             rows={[
               ["SSH Login-Versuche", "fail2ban + Grafana", "Mehr als 5 fehlgeschlagene Logins/Stunde"],
               ["Container Health", "Docker Health Checks + Uptime Kuma", "Container unhealthy oder gestoppt"],
@@ -324,7 +324,7 @@ sudo fail2ban-client status sshd`}</code>
             "Sicherheit ist ein Schichtenmodell. 6 Layer, jede haelt etwas anderes auf. Keine alleine reicht.",
             "Default Deny bei der Firewall. Nur oeffnen was gebraucht wird. AI-Ports NICHT ins Internet.",
             "SSH Key-Only + fail2ban. Kein Passwort-Login, automatische Sperre nach 3 Fehlversuchen.",
-            "Output Sanitizer ist Pflicht fuer AI-Anwendungen. LLMs leaken sonst Secrets und System-Infos.",
+            "Output Sanitizer ist Pflicht für AI-Anwendungen. LLMs leaken sonst Secrets und System-Infos.",
             "Monitoring mit Alerting. Ohne Monitoring weisst du nicht, ob jemand schon drin ist.",
           ]}
         />
@@ -337,7 +337,7 @@ sudo fail2ban-client status sshd`}</code>
               <a href="https://www.cisecurity.org/cis-benchmarks" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
                 CIS Benchmarks
               </a>{" "}
-              — Industriestandard fuer Betriebssystem-Haertung
+              — Industriestandard für Betriebssystem-Haertung
             </li>
             <li>
               <a href="https://docs.docker.com/engine/security/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
@@ -355,7 +355,7 @@ sudo fail2ban-client status sshd`}</code>
               <a href="https://www.fail2ban.org/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
                 fail2ban
               </a>{" "}
-              — Brute-Force-Schutz fuer SSH und andere Services
+              — Brute-Force-Schutz für SSH und andere Services
             </li>
           </ul>
         </section>

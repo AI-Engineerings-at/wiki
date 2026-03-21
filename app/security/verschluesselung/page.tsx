@@ -9,7 +9,7 @@ import { RelatedArticles } from "../../../components/RelatedArticles"
 export const metadata: Metadata = {
   title: "Verschluesselung: At Rest, In Transit, In Use | AI Engineering Wiki",
   description:
-    "Verschluesselung fuer Self-Hosted AI: Daten auf der Festplatte, im Netzwerk und waehrend der Verarbeitung schuetzen. LUKS, TLS, Confidential Computing erklaert.",
+    "Verschluesselung für Self-Hosted AI: Daten auf der Festplatte, im Netzwerk und waehrend der Verarbeitung schuetzen. LUKS, TLS, Confidential Computing erklärt.",
 }
 
 export default function VerschluesselungPage() {
@@ -23,7 +23,7 @@ export default function VerschluesselungPage() {
         </h1>
         <p className="text-lg text-white/60 mt-3 max-w-2xl">
           Daten muessen in drei Zustaenden geschuetzt werden: gespeichert,
-          uebertragen und waehrend der Verarbeitung. Hier ist was das
+          übertragen und waehrend der Verarbeitung. Hier ist was das
           praktisch bedeutet.
         </p>
         <div className="flex items-center gap-4 mt-4 text-sm text-white/40">
@@ -38,20 +38,20 @@ export default function VerschluesselungPage() {
           <p>
             Verschluesselung schuetzt Daten in drei Phasen: <strong>At Rest</strong>{" "}
             (auf Festplatte/SSD), <strong>In Transit</strong> (im Netzwerk),{" "}
-            <strong>In Use</strong> (waehrend der Verarbeitung im RAM). Fuer einen
+            <strong>In Use</strong> (waehrend der Verarbeitung im RAM). Für einen
             self-hosted AI-Stack sind die ersten beiden Pflicht, die dritte ist
-            ein Bonus fuer Hochsicherheits-Szenarien.
+            ein Bonus für Hochsicherheits-Szenarien.
           </p>
         </Callout>
 
-        {/* Section 1: Ueberblick */}
+        {/* Section 1: Überblick */}
         <section className="mt-10">
           <h2 className="text-2xl font-bold text-white mb-4">
             Die drei Verschluesselungs-Schichten
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
             Wenn du Daten nur auf der Festplatte verschluesselst aber
-            unverschluesselt uebers Netzwerk schickst, hast du eine Luecke.
+            unverschluesselt übers Netzwerk schickst, hast du eine Luecke.
             Verschluesselung muss alle drei Zustaende abdecken.
           </p>
 
@@ -94,7 +94,7 @@ export default function VerschluesselungPage() {
             LUKS (Linux Unified Key Setup)
           </h3>
           <p className="text-white/70 leading-relaxed mb-4">
-            LUKS ist der Standard fuer Festplatten-Verschluesselung unter Linux.
+            LUKS ist der Standard für Festplatten-Verschluesselung unter Linux.
             Die meisten Linux-Distributionen bieten LUKS-Verschluesselung
             waehrend der Installation an.
           </p>
@@ -123,7 +123,7 @@ sudo mount /dev/mapper/encrypted-data /mnt/secure-data`}</code>
               LUKS-Verschluesselung hat auf modernen CPUs mit AES-NI
               Unterstuetzung nur ca. 1-3% Performance-Overhead bei
               sequentiellem Lesen/Schreiben. Bei zufaelligem I/O (Datenbanken)
-              kann der Overhead 5-10% betragen. Fuer AI-Workloads wo die GPU
+              kann der Overhead 5-10% betragen. Für AI-Workloads wo die GPU
               der Bottleneck ist, spuerst du den Unterschied nicht.
             </p>
           </Callout>
@@ -182,7 +182,7 @@ sudo mount /dev/mapper/encrypted-data /mnt/secure-data`}</code>
                 sudo apt install wireguard
               </code>
               . Netbird (netbird.io) bietet eine verwaltete WireGuard-Loesung
-              fuer Zero-Trust Netzwerke.
+              für Zero-Trust Netzwerke.
             </p>
           </Callout>
         </section>
@@ -204,13 +204,13 @@ sudo mount /dev/mapper/encrypted-data /mnt/secure-data`}</code>
               ["Intel SGX", "Xeon (Server-CPUs)", "Enclaves im RAM", "5-30%"],
               ["AMD SEV-SNP", "EPYC (Server-CPUs)", "Verschluesselter VM-Speicher", "~2%"],
               ["ARM CCA", "ARMv9+", "Realms (isolierte Bereiche)", "Gering"],
-              ["Software-Loesungen", "Ueberall", "Memory Scrubbing, ASLR", "Minimal"],
+              ["Software-Lösungen", "Überall", "Memory Scrubbing, ASLR", "Minimal"],
             ]}
           />
 
-          <Callout type="info" title="Fuer die meisten Homelabs irrelevant">
+          <Callout type="info" title="Für die meisten Homelabs irrelevant">
             <p>
-              Confidential Computing (Intel SGX, AMD SEV) ist primaer fuer
+              Confidential Computing (Intel SGX, AMD SEV) ist primaer für
               Cloud-Szenarien relevant, wo du dem Hoster nicht vertraust. In
               deinem eigenen Homelab kontrollierst du die Hardware selbst. Die
               praktischeren Massnahmen: Swap verschluesseln (verhindert RAM-
@@ -224,7 +224,7 @@ sudo mount /dev/mapper/encrypted-data /mnt/secure-data`}</code>
         {/* Section 5: Checkliste */}
         <section className="mt-10">
           <h2 className="text-2xl font-bold text-white mb-4">
-            Verschluesselungs-Checkliste fuer Self-Hosted AI
+            Verschluesselungs-Checkliste für Self-Hosted AI
           </h2>
 
           <ComparisonTable
@@ -232,9 +232,9 @@ sudo mount /dev/mapper/encrypted-data /mnt/secure-data`}</code>
             rows={[
               ["LUKS auf Backup-Volumes", "PFLICHT", "lsblk -o NAME,TYPE,FSTYPE | grep crypt"],
               ["Swap verschluesselt", "PFLICHT", "swapon --show + /etc/crypttab"],
-              ["TLS fuer alle Web-Services", "PFLICHT", "curl -vI https://dein-service.local"],
+              ["TLS für alle Web-Services", "PFLICHT", "curl -vI https://dein-service.local"],
               ["SSH Key-Only (kein Passwort)", "PFLICHT", "grep PasswordAuth /etc/ssh/sshd_config"],
-              ["WireGuard fuer Remote-Zugriff", "HOCH", "wg show"],
+              ["WireGuard für Remote-Zugriff", "HOCH", "wg show"],
               ["Docker Overlay verschluesselt", "HOCH", "docker network inspect --format '{{.Options}}'"],
               ["Ollama hinter Reverse Proxy", "HOCH", "curl -I https://ollama.local"],
               ["Datenbank-Verbindungen TLS", "MITTEL", "psql 'sslmode=require'"],
@@ -259,13 +259,13 @@ sudo mount /dev/mapper/encrypted-data /mnt/secure-data`}</code>
               Art. 34 DSGVO: Wenn personenbezogene Daten verschluesselt waren
               und der Key nicht kompromittiert wurde, entfaellt die Pflicht zur
               Benachrichtigung der Betroffenen bei einem Data Breach. Das ist ein
-              starker Anreiz, Verschluesselung ueberall einzusetzen.
+              starker Anreiz, Verschluesselung überall einzusetzen.
             </p>
           </Callout>
 
           <Callout type="tip" title="Weiter vertiefen">
             <p>
-              Mehr zum Thema Datenschutz fuer AI-Anwendungen findest du in
+              Mehr zum Thema Datenschutz für AI-Anwendungen findest du in
               unserem{" "}
               <a
                 href="/compliance/dsgvo-grundlagen"
@@ -291,7 +291,7 @@ sudo mount /dev/mapper/encrypted-data /mnt/secure-data`}</code>
         <KeyTakeaway
           points={[
             "Drei Verschluesselungs-Phasen: At Rest (Festplatte), In Transit (Netzwerk), In Use (RAM). Die ersten zwei sind Pflicht.",
-            "LUKS fuer Festplatten, TLS 1.3 fuer Web-Traffic, WireGuard fuer Remote-Zugriff. Alles Standard-Tools, kein Spezialwissen noetig.",
+            "LUKS für Festplatten, TLS 1.3 für Web-Traffic, WireGuard für Remote-Zugriff. Alles Standard-Tools, kein Spezialwissen noetig.",
             "Swap-Partition verschluesseln! Sonst landen RAM-Inhalte (Prompts, API Keys) im Klartext auf der Platte.",
             "DSGVO Art. 32 nennt Verschluesselung explizit. Verschluesselte Daten reduzieren Meldepflicht bei Breaches (Art. 34).",
             "Ollama-API laeuft unverschluesselt — Reverse Proxy mit TLS oder SSH Tunnel davorsetzen.",

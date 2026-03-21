@@ -18,8 +18,8 @@ export default function BackupStrategie() {
         <Callout type="summary" title="Auf einen Blick">
           <p>
             3-2-1 Regel: 3 Kopien, 2 verschiedene Medien, 1 Offsite. Docker Volumes
-            taeglich sichern, Configs bei Aenderung. Restic fuer verschluesselte
-            Backups, Rclone fuer Cloud-Sync. Restore testen — ein Backup das du
+            taeglich sichern, Configs bei Aenderung. Restic für verschluesselte
+            Backups, Rclone für Cloud-Sync. Restore testen — ein Backup das du
             nicht wiederherstellen kannst ist keins.
           </p>
         </Callout>
@@ -218,9 +218,9 @@ rclone sync $BACKUP_DIR remote:homelab-backup --transfers 2`}</code>
           <h2 className="text-xl font-bold text-white mb-4">Quellen</h2>
           <ul className="space-y-2 text-sm text-white/50">
             <li><a href="https://restic.net/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Restic — Backup-Tool</a> — Schnell, sicher, dedupliziert</li>
-            <li><a href="https://rclone.org/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Rclone</a> — Cloud-Sync fuer 70+ Storage-Provider</li>
-            <li><a href="https://www.backblaze.com/cloud-storage" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Backblaze B2</a> — Guenstiger Cloud-Storage fuer Offsite-Backups</li>
-            <li><a href="https://www.proxmox.com/en/proxmox-backup-server" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Proxmox Backup Server</a> — Spezialisierte Backup-Loesung fuer PVE</li>
+            <li><a href="https://rclone.org/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Rclone</a> — Cloud-Sync für 70+ Storage-Provider</li>
+            <li><a href="https://www.backblaze.com/cloud-storage" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Backblaze B2</a> — Guenstiger Cloud-Storage für Offsite-Backups</li>
+            <li><a href="https://www.proxmox.com/en/proxmox-backup-server" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Proxmox Backup Server</a> — Spezialisierte Backup-Loesung für PVE</li>
           </ul>
         </section>
       </div>

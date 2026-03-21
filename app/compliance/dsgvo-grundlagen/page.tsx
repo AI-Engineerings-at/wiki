@@ -4,7 +4,7 @@ import Callout from "../../../components/Callout"
 export const metadata = {
   title: 'DSGVO Grundlagen | AI Engineering Wiki',
   description:
-    'DSGVO-Grundlagen fuer AI-Systeme: Pflichten, Rechtsgrundlagen, Dokumentation und Praxis-Hinweise. Kein Ersatz fuer Rechtsberatung.',
+    'DSGVO-Grundlagen für AI-Systeme: Pflichten, Rechtsgrundlagen, Dokumentation und Praxis-Hinweise. Kein Ersatz für Rechtsberatung.',
 }
 
 export default function DsgvoGrundlagen() {
@@ -18,7 +18,7 @@ export default function DsgvoGrundlagen() {
       <div className="prose prose-invert max-w-none">
         <Callout type="summary" title="Auf einen Blick">
           <p>
-            Die DSGVO regelt den Schutz personenbezogener Daten in der EU. Fuer AI-Systeme
+            Die DSGVO regelt den Schutz personenbezogener Daten in der EU. Für AI-Systeme
             bedeutet das: Rechtsgrundlage pruefen, Verarbeitungsverzeichnis fuehren,
             Betroffenenrechte sicherstellen und bei Hochrisiko-Verarbeitungen eine
             Datenschutz-Folgenabschaetzung durchfuehren. Self-Hosted AI hat dabei
@@ -52,7 +52,7 @@ export default function DsgvoGrundlagen() {
 
         <figure className="my-8">
           <img src="/images/infographics/dsgvo-6-grundsaetze.png" alt="DSGVO 6 Grundsaetze — Rechtmaessigkeit, Zweckbindung, Datenminimierung, Richtigkeit, Speicherbegrenzung, Integritaet" className="rounded-xl border border-white/10 w-full" />
-          <figcaption className="text-center text-white/40 text-sm mt-2">Die 6 DSGVO-Grundsaetze nach Art. 5: Basis fuer jeden Datenschutz</figcaption>
+          <figcaption className="text-center text-white/40 text-sm mt-2">Die 6 DSGVO-Grundsaetze nach Art. 5: Basis für jeden Datenschutz</figcaption>
         </figure>
 
         <h2 className="text-xl font-semibold text-white mt-8">Die 6 Grundsätze (Art. 5)</h2>
@@ -97,8 +97,8 @@ export default function DsgvoGrundlagen() {
         </div>
 
         <figure className="my-8">
-          <img src="/images/infographics/dsgvo-checkliste.png" alt="DSGVO Checkliste fuer AI-Systeme" className="rounded-xl border border-white/10 w-full" />
-          <figcaption className="text-center text-white/40 text-sm mt-2">DSGVO Checkliste: Die wichtigsten Pflichten fuer AI-Systeme auf einen Blick</figcaption>
+          <img src="/images/infographics/dsgvo-checkliste.png" alt="DSGVO Checkliste für AI-Systeme" className="rounded-xl border border-white/10 w-full" />
+          <figcaption className="text-center text-white/40 text-sm mt-2">DSGVO Checkliste: Die wichtigsten Pflichten für AI-Systeme auf einen Blick</figcaption>
         </figure>
 
         <figure className="my-8">
@@ -305,9 +305,9 @@ Email: max@musterfirma.at
           <h2 className="text-xl font-bold text-white mb-4">Quellen</h2>
           <ul className="space-y-2 text-sm text-white/50">
             <li><a href="https://eur-lex.europa.eu/eli/reg/2016/679/oj" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">EUR-Lex: Verordnung (EU) 2016/679 — DSGVO Volltext</a></li>
-            <li><a href="https://www.dsb.gv.at/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Oesterreichische Datenschutzbehoerde (DSB)</a> — Nationale Aufsichtsbehoerde</li>
+            <li><a href="https://www.dsb.gv.at/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Österreichische Datenschutzbehoerde (DSB)</a> — Nationale Aufsichtsbehoerde</li>
             <li><a href="https://www.edpb.europa.eu/edpb_en" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">European Data Protection Board (EDPB)</a> — Leitlinien und Empfehlungen</li>
-            <li><a href="https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10001597" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">RIS: Datenschutzgesetz (DSG)</a> — Oesterreichisches Datenschutzgesetz</li>
+            <li><a href="https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10001597" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">RIS: Datenschutzgesetz (DSG)</a> — Österreichisches Datenschutzgesetz</li>
           </ul>
         </section>
       </div>

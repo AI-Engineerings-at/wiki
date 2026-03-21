@@ -17,7 +17,7 @@ export default function ModelSelectionPage() {
 
       <div className="prose prose-invert max-w-none">
         <figure className="my-8">
-          <img src="/images/diagrams/tools-model-entscheidungsbaum.png" alt="Modell-Entscheidungsbaum — Welches AI-Modell fuer welchen Use Case" className="rounded-xl border border-white/10 w-full" />
+          <img src="/images/diagrams/tools-model-entscheidungsbaum.png" alt="Modell-Entscheidungsbaum — Welches AI-Modell für welchen Use Case" className="rounded-xl border border-white/10 w-full" />
           <figcaption className="text-center text-white/40 text-sm mt-2">Modell-Entscheidungsbaum: So findest du das richtige AI-Modell</figcaption>
         </figure>
 
@@ -50,7 +50,7 @@ export default function ModelSelectionPage() {
           <li><strong>Beispiele:</strong> Mistral Small 3.1 (24B), Qwen 2.5 32B</li>
           <li><strong>Hardware:</strong> 24GB VRAM (RTX 3090/4090)</li>
           <li><strong>Speed:</strong> ~20-30 tok/s auf RTX 3090</li>
-          <li><strong>Use Cases:</strong> Komplexe Reasoning, lange Dokumente, hoechste lokale Qualitaet</li>
+          <li><strong>Use Cases:</strong> Komplexe Reasoning, lange Dokumente, hoechste lokale Qualität</li>
           <li><strong>Hinweis:</strong> 70B Modelle passen NICHT auf 24 GB VRAM — brauchen 48 GB+ oder Multi-GPU</li>
         </ul>
 
@@ -63,8 +63,8 @@ export default function ModelSelectionPage() {
         </ul>
 
         <figure className="my-8">
-          <img src="/images/infographics/tools-model-selection-vergleich.png" alt="Model Selection Vergleich — Parameter, Context, RAM, Qualitaet" className="rounded-xl border border-white/10 w-full" />
-          <figcaption className="text-center text-white/40 text-sm mt-2">Modell-Vergleich: Parameter, Context-Window, RAM-Bedarf und Qualitaet</figcaption>
+          <img src="/images/infographics/tools-model-selection-vergleich.png" alt="Model Selection Vergleich — Parameter, Context, RAM, Qualität" className="rounded-xl border border-white/10 w-full" />
+          <figcaption className="text-center text-white/40 text-sm mt-2">Modell-Vergleich: Parameter, Context-Window, RAM-Bedarf und Qualität</figcaption>
         </figure>
 
         <h2 className="text-xl font-semibold text-white mt-8">Vergleichstabelle (Stand Maerz 2026)</h2>
@@ -105,7 +105,7 @@ export default function ModelSelectionPage() {
               <td className="py-2">24B</td>
               <td className="py-2">~16 GB</td>
               <td className="py-2">~30</td>
-              <td className="py-2">Deutsch (uebertrifft GPT-4o Mini)</td>
+              <td className="py-2">Deutsch (übertrifft GPT-4o Mini)</td>
             </tr>
             <tr className="border-b border-gray-800">
               <td className="py-2">Qwen 2.5 32B</td>
@@ -126,14 +126,14 @@ export default function ModelSelectionPage() {
 
         <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mt-4">
           <p className="text-blue-300 text-sm">
-            <strong>Deutsch-Tipp:</strong> Mistral Small 3.1 (24B) uebertrifft GPT-4o Mini
-            und Gemma 3 bei europaeischen Sprachen — ideal fuer deutschsprachige
+            <strong>Deutsch-Tipp:</strong> Mistral Small 3.1 (24B) übertrifft GPT-4o Mini
+            und Gemma 3 bei europaeischen Sprachen — ideal für deutschsprachige
             Chat- und Content-Tasks auf lokaler Hardware.
           </p>
         </div>
 
         <figure className="my-8">
-          <img src="/images/infographics/tools-model-vram.png" alt="VRAM-Anforderungen pro Modell — GPU-Speicher Uebersicht" className="rounded-xl border border-white/10 w-full" />
+          <img src="/images/infographics/tools-model-vram.png" alt="VRAM-Anforderungen pro Modell — GPU-Speicher Übersicht" className="rounded-xl border border-white/10 w-full" />
           <figcaption className="text-center text-white/40 text-sm mt-2">VRAM-Anforderungen: Wie viel GPU-Speicher jedes Modell braucht</figcaption>
         </figure>
 
@@ -180,10 +180,10 @@ ollama pull qwen3:14b         # 4-bit default, ~10GB`}</code>
         <h2 className="text-xl font-semibold text-white mt-8">Entscheidungshilfe</h2>
         <ul className="list-disc list-inside text-gray-300 space-y-1">
           <li><strong>Budget gespart?</strong> → Llama 3.3 8B oder Qwen 2.5 7B (~112 tok/s auf RTX 3090)</li>
-          <li><strong>Maximale lokale Qualitaet?</strong> → Mistral Small 3.1 24B oder Qwen 2.5 32B (passt auf 24 GB)</li>
+          <li><strong>Maximale lokale Qualität?</strong> → Mistral Small 3.1 24B oder Qwen 2.5 32B (passt auf 24 GB)</li>
           <li><strong>Schnelle Embeddings?</strong> → mxbai-embed-large (1024 dim)</li>
-          <li><strong>Deutsch?</strong> → Mistral Small 3.1 (uebertrifft GPT-4o Mini) oder Qwen3 14B</li>
-          <li><strong>Absolut beste Qualitaet?</strong> → Cloud API: Claude Sonnet 4.5, GPT-4o oder Gemini 2.5 Pro</li>
+          <li><strong>Deutsch?</strong> → Mistral Small 3.1 (übertrifft GPT-4o Mini) oder Qwen3 14B</li>
+          <li><strong>Absolut beste Qualität?</strong> → Cloud API: Claude Sonnet 4.5, GPT-4o oder Gemini 2.5 Pro</li>
           <li><strong>Open Source S-Tier?</strong> → GLM-5, Kimi K2.5, MiniMax M2.5 (brauchen grosse GPU oder Cloud-Hosting)</li>
         </ul>
 
@@ -191,9 +191,9 @@ ollama pull qwen3:14b         # 4-bit default, ~10GB`}</code>
 
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Wir nutzen (Stand Maerz 2026):
-# - mistral-small3.2:24b auf RTX 3090 (.90) fuer Chat/Code (stark bei Deutsch)
-# - mxbai-embed-large auf RTX 2060 (.99) fuer Embeddings (1024 dim)
-# - Cloud API (Claude Sonnet 4.5) fuer komplexes Reasoning
+# - mistral-small3.2:24b auf RTX 3090 (.90) für Chat/Code (stark bei Deutsch)
+# - mxbai-embed-large auf RTX 2060 (.99) für Embeddings (1024 dim)
+# - Cloud API (Claude Sonnet 4.5) für komplexes Reasoning
 
 # docker-compose.yml Auszug
 services:
@@ -220,7 +220,7 @@ OLLAMA_MODELS=/root/.ollama/models`}</code>
             <li><a href="https://artificialanalysis.ai/leaderboards/models" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Artificial Analysis LLM Leaderboard, Maerz 2026</a> — Intelligence Index, 312 Modelle, Updates alle 72h</li>
             <li><a href="https://onyx.app/open-llm-leaderboard" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Onyx Open LLM Leaderboard</a> — Kimi K2.5 HumanEval 99%, AIME 96.1%</li>
             <li><a href="https://vellum.ai/blog/llama-3-3-70b-vs-gpt-4o" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Vellum: Llama 3.3 70B vs GPT-4o</a> — MMLU, HumanEval, IFEval Benchmarks</li>
-            <li><a href="https://mistral.ai/news/mistral-small-3-1" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Mistral AI: Mistral Small 3.1</a> — Uebertrifft GPT-4o Mini bei europaeischen Sprachen</li>
+            <li><a href="https://mistral.ai/news/mistral-small-3-1" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Mistral AI: Mistral Small 3.1</a> — Übertrifft GPT-4o Mini bei europaeischen Sprachen</li>
             <li><a href="https://localaimaster.com/blog/best-gpus-for-ai-2025" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">LocalAIMaster: Best GPUs for AI</a> — RTX 3090 tok/s Messwerte</li>
             <li><a href="https://corelab.tech/llmgpu/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">CoreLab: LLM GPU Benchmarks</a> — 8B ~112 tok/s auf RTX 3090</li>
             <li><a href="https://intuitionlabs.ai/articles/local-llm-deployment-24gb-gpu-optimization" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">IntuitionLabs: 24GB GPU Optimization</a> — Max ~34B auf 24 GB VRAM</li>
