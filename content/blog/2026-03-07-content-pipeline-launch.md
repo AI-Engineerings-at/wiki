@@ -28,7 +28,7 @@ Alles orchestriert durch n8n, alles lokal, alles DSGVO-konform.
 
 ## Warum lokal?
 
-Die EU AI Act Deadline rückt naeher (2. August 2026). Unternehmen müssen nachweisen, wo ihre Daten verarbeitet werden. Mit unserem Setup ist die Antwort einfach: auf unseren eigenen Servern.
+Die EU AI Act Deadline rückt näher (2. August 2026). Unternehmen müssen nachweisen, wo ihre Daten verarbeitet werden. Mit unserem Setup ist die Antwort einfach: auf unseren eigenen Servern.
 
 ## Tech Stack
 

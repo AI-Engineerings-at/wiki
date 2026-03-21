@@ -92,6 +92,52 @@ Andrej Karpathy described this kind of effectiveness early on — first for RNNs
 
 For those who want to go deeper: Karpathy's `llm.c` project implements a GPT-2-style Transformer in 1,000 lines of C. No abstractions, no framework. [Source: github.com/karpathy/llm.c](https://github.com/karpathy/llm.c)
 
+## What an LLM CANNOT Do
+
+As impressive as the capabilities are, LLMs have fundamental limitations that no amount of training or scaling will fully resolve:
+
+**Hallucinations are systemic.** An LLM cannot distinguish between "true" and "sounds plausible". It generates the most probable token sequence, not the most correct one. This means it invents sources, statistics, people, and events — with the same confidence as correct statements. In medical, legal, or financial contexts, this is a dealbreaker without human oversight.
+
+**No real understanding.** An LLM does not understand language in the human sense. It recognizes statistical patterns in text. It can explain a joke because it has seen millions of joke explanations — not because it understands humour. This is an important distinction because it determines where you can rely on the output and where you cannot.
+
+**Context limits.** Every model has a context window — the maximum number of tokens it can process at once. Llama 3.2 supports 128,000 tokens; smaller models often max out at 4,096 or 8,192. If your document exceeds the context window, the beginning is simply truncated. The model does not "forget" — it never saw the information in the first place.
+
+**No access to reality.** An LLM has no internet access, no database connection, and no knowledge of events after the training cutoff. If you ask "What happened yesterday?", it guesses — or admits it does not know (if it was well-trained).
+
+**Mathematics and logical reasoning.** LLMs are weak at arithmetic, formal logic, and multi-step reasoning. They can miscalculate 17 x 24 while eloquently writing about number theory. This is because calculation is not pattern matching.
+
+## Which Model for Which Purpose?
+
+| Task | Recommended Model | Parameters | VRAM Required | Notes |
+|------|------------------|------------|---------------|-------|
+| Quick drafts, brainstorming | Llama 3.2 3B | 3B | ~3 GB | Fast, good for simple tasks |
+| Email summaries, classification | Qwen 2.5 7B | 7B | ~5 GB | Good VRAM-to-performance ratio |
+| Code generation | Qwen 2.5 Coder 14B | 14B | ~10 GB | Specialised for coding tasks |
+| Technical documentation | Qwen 2.5 14B | 14B | ~10 GB | Solid for longer, structured text |
+| Complex analysis, longer texts | Qwen 2.5 27B | 27B | ~18 GB | Needs RTX 3090 or better |
+| Multilingual tasks | Mistral Small 24B | 24B | ~16 GB | Strong across European languages |
+| Simple chat, low hardware | Phi-3.5 Mini 3.8B | 3.8B | ~3 GB | Microsoft's compact model |
+
+These values are approximations for quantised versions (Q4_K_M). Non-quantised models require roughly double the VRAM.
+
+## Running LLMs Locally
+
+The simplest way to run an LLM locally is [Ollama](https://ollama.com). A single command is enough:
+
+```bash
+ollama run qwen2.5:7b
+```
+
+Ollama handles the download, quantisation, and GPU management. You need:
+
+- **Minimum:** 8 GB RAM, a reasonably modern CPU — this runs 3B models on CPU (slow but functional)
+- **Recommended:** 16 GB RAM, a GPU with 6+ GB VRAM (e.g., RTX 2060, RTX 3060) — this runs 7B models smoothly
+- **Optimal:** 24+ GB VRAM (RTX 3090, RTX 4090) — this runs 27B models at good speed
+
+If you don't have a dedicated GPU: Ollama can also run models on CPU. A 3B model on a modern laptop (M1/M2 Mac or current Intel/AMD) responds in roughly 2-5 seconds per paragraph. Not fast, but sufficient for many tasks.
+
+More details in [Step 3: Install Ollama](/blog/2026-03-12-install-ollama-step-by-step) of this series.
+
 ## What This Means for You
 
 LLMs are powerful tools for text summarization, classification, code generation, translation, and extraction. They are not all-knowing assistants and no substitute for domain expertise.

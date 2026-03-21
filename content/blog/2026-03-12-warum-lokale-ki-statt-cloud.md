@@ -78,6 +78,69 @@ Keine Registrierung. Kein API-Key. Kein Cloud-Vertrag. Das Modell läuft lokal, 
 
 Wir betreiben unseren kompletten AI-Stack so — für Zusammenfassungen, Content-Erstellung, Meeting-Transkription und Automatisierungen. Alles lokal, alles DSGVO-konform out of the box.
 
+## Konkretes Kostenbeispiel: Cloud vs. Lokal
+
+Nehmen wir ein mittelständisches Unternehmen, das AI für Kundensupport-Zusammenfassungen, interne Dokumentanalyse und E-Mail-Entwürfe nutzt. Angenommen: 1.000 Anfragen pro Tag, durchschnittlich 500 Input-Tokens und 300 Output-Tokens pro Anfrage.
+
+**Cloud-Kosten (OpenAI GPT-4o):**
+- Input: 1.000 × 500 Tokens × $2,50 / 1M Tokens = $1,25 pro Tag
+- Output: 1.000 × 300 Tokens × $10,00 / 1M Tokens = $3,00 pro Tag
+- Tageskosten: ca. $4,25
+- Monatskosten: ca. $127,50
+- Jahreskosten: ca. $1.530
+
+Bei GPT-4 (nicht GPT-4o) liegen die Kosten bei ca. $30/Tag — also $10.950/Jahr. Und das skaliert linear: doppeltes Volumen, doppelte Kosten.
+
+**Lokale Kosten (Ollama + RTX 3090):**
+- Einmalig: gebrauchte RTX 3090 ca. EUR 700, oder eine RTX 4060 Ti 16GB ca. EUR 450
+- Strom: ca. 300W unter Last, bei 8h/Tag = 2,4 kWh × EUR 0,30 = EUR 0,72/Tag
+- Monatskosten Strom: ca. EUR 22
+- Jahreskosten Strom: ca. EUR 264
+
+Die Hardware amortisiert sich bei Cloud-Vergleich mit GPT-4o nach ca. 6 Monaten. Bei GPT-4 nach weniger als einem Monat. Danach fallen nur noch Stromkosten an.
+
+Der Haken: Die lokalen Modelle (7B-27B Parameter) liefern nicht die gleiche Spitzenqualität wie GPT-4. Für die genannten Aufgaben — Zusammenfassungen, Klassifikation, Entwürfe — ist der Unterschied in der Praxis aber selten geschäftsrelevant.
+
+## DSGVO: Die echten Risiken
+
+Die DSGVO-Problematik geht tiefer als "Daten gehen in die USA". Hier die konkreten Risiken:
+
+**Schrems II und der unsichere Drittlandtransfer.** Der EuGH hat 2020 im Schrems-II-Urteil den EU-US Privacy Shield für ungültig erklärt. Der Nachfolger, das EU-US Data Privacy Framework (DPF), steht seit 2023. Aber: Die zugrundeliegende US-Gesetzgebung (FISA Section 702, Executive Order 12333) hat sich nicht substantiell geändert. NOYB hat bereits angekündigt, auch das DPF anzufechten. Das Risiko eines "Schrems III" ist real. [Quelle: noyb.eu](https://noyb.eu/en/us-surveillance-law-incompatible-eu-law-noyb-files-new-complaints-after-dpf)
+
+**Bußgelder.** Die DSGVO sieht Bußgelder von bis zu 20 Millionen Euro oder 4% des weltweiten Jahresumsatzes vor — je nachdem, was höher ist. Die italienische Datenschutzbehörde (Garante) hat ChatGPT 2023 vorübergehend gesperrt. Die polnische Behörde hat 2024 ein Bußgeld gegen einen Datenbroker wegen mangelnder Transparenz bei AI-Verarbeitung verhängt.
+
+**Beweislastumkehr.** Unter der DSGVO muss der Verantwortliche (also dein Unternehmen) nachweisen, dass die Verarbeitung rechtmäßig ist — nicht die Behörde muss nachweisen, dass sie es nicht ist. Wenn du nicht dokumentieren kannst, wo Daten verarbeitet werden, hast du ein Problem.
+
+**Mitarbeiter-Nutzung ohne Rechtsgrundlage.** Das unterschätzte Risiko: Mitarbeiter nutzen ChatGPT auf eigene Faust, ohne dass die IT-Abteilung davon weiß. Kundennamen, Vertragsinhalte, Personaldaten — alles landet in einem System ohne AVV, ohne DSFA, ohne dokumentierte Rechtsgrundlage. Das ist keine theoretische Gefahr, das passiert täglich in deutschen Unternehmen.
+
+## Wann Cloud BESSER ist
+
+Ehrliche Antwort: Es gibt Szenarien, in denen Cloud-AI die bessere Wahl ist.
+
+**Spitzenqualität bei komplexem Reasoning.** Wenn du ein Modell brauchst, das 100-seitige juristische Dokumente analysiert und dabei subtile Widersprüche findet, ist GPT-4 oder Claude aktuell besser als jedes lokal betreibbare Modell. Die Lücke schließt sich, aber sie existiert noch.
+
+**Kein eigenes AI-Team.** Wenn du weder die Kapazität noch das Know-how hast, eine lokale Infrastruktur aufzusetzen und zu warten, ist eine verwaltete Cloud-Lösung pragmatisch sinnvoller als eine schlecht betriebene lokale Installation.
+
+**Seltene, hochwertige Anfragen.** Wenn du nur 10-20 Anfragen pro Tag hast und keine sensiblen Daten verarbeitest, lohnt sich die Hardware-Investition wirtschaftlich nicht.
+
+**Multimodale Aufgaben.** Bildanalyse, Video-Verständnis, Audio-Transkription auf Spitzenniveau — hier ist die Cloud-Infrastruktur (noch) deutlich überlegen, insbesondere bei Echtzeit-Anforderungen.
+
+## Der Hybrid-Ansatz: Das Beste aus beiden Welten
+
+In der Praxis fahren viele Unternehmen am besten mit einem hybriden Setup:
+
+**Lokal für sensible Daten:** Alle Aufgaben, die personenbezogene Daten, Vertragsinhalte, Finanzdaten oder interne Strategiedokumente berühren, laufen über den lokalen Stack. Ollama + Open WebUI + ein 14B oder 27B Modell deckt das ab.
+
+**Cloud für nicht-sensible Spezialaufgaben:** Marketing-Texte ohne Kundenbezug, allgemeine Recherche, Kreativ-Brainstorming — das kann über eine Cloud-API laufen, sofern ein gültiger AVV existiert und keine personenbezogenen Daten im Prompt stehen.
+
+**Konkretes Setup:**
+1. Lokaler Ollama-Server mit `qwen2.5:14b` für den täglichen Betrieb
+2. Open WebUI als Interface für alle Mitarbeiter
+3. n8n-Workflow, der bei Bedarf an eine Cloud-API weiterleitet — aber nur für explizit freigegebene, nicht-sensible Aufgaben
+4. Klare Richtlinie: Personenbezogene Daten verlassen das Netzwerk nie
+
+Das ist kein Kompromiss — das ist die architektonisch saubere Lösung. Sensible Daten bleiben lokal, rechenintensive Spezialaufgaben gehen in die Cloud, und die Entscheidung wird nicht dem einzelnen Mitarbeiter überlassen, sondern technisch durchgesetzt.
+
 ## Die ehrliche Abwägung
 
 Lokale Modelle sind kleiner als GPT-4. Für die meisten Business-Aufgaben — Zusammenfassungen, Klassifikation, Entwürfe, Übersetzungen — reichen 7B bis 27B Modelle aber vollständig aus.
