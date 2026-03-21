@@ -62,22 +62,22 @@ export default function AiKostenVergleich() {
 
         <figure className="my-8">
           <img src="/images/infographics/ai-kosten-break-even.png" alt="AI Kosten Break-Even — Ab wann sich lokale AI rechnet" className="rounded-xl border border-white/10 w-full" />
-          <figcaption className="text-center text-white/40 text-sm mt-2">Break-Even Analyse: Ab wann lokale AI guenstiger ist als Cloud</figcaption>
+          <figcaption className="text-center text-white/40 text-sm mt-2">Break-Even Analyse: Ab wann lokale AI günstiger ist als Cloud</figcaption>
         </figure>
 
         <h2 className="text-xl font-semibold text-white mt-8">Break-Even (ehrlich)</h2>
         <p className="text-gray-300 mt-2">
           Der echte Break-Even für Self-Hosting liegt laut DevTk.AI bei 50-200 Millionen
-          Tokens pro Monat. Unter 2M Tokens/Tag ist die Cloud API guenstiger (Prem AI).
+          Tokens pro Monat. Unter 2M Tokens/Tag ist die Cloud API günstiger (Prem AI).
           Die versteckten Kosten (Engineering, Wartung, Updates) werden laut AISuperior
-          3-5x unterschaetzt, der Engineering-Anteil macht 45-55% des TCO aus.
+          3-5x unterschätzt, der Engineering-Anteil macht 45-55% des TCO aus.
         </p>
 
-        <Callout type="info" title="Qualitätsluecke beachten">
+        <Callout type="info" title="Qualitätslücke beachten">
           <p>
-            Selbst wenn lokal guenstiger ist: Für komplexes Reasoning (Logik, juristische
+            Selbst wenn lokal günstiger ist: Für komplexes Reasoning (Logik, juristische
             Analyse, mehrstufige Aufgaben) liegt Cloud ~25% vorne. Der Break-Even gilt nur
-            für Tasks, die lokale Modelle auch wirklich gut koennen.
+            für Tasks, die lokale Modelle auch wirklich gut können.
           </p>
         </Callout>
 
@@ -94,13 +94,13 @@ export default function AiKostenVergleich() {
         <section className="mt-16 pt-8 border-t border-white/10">
           <h2 className="text-xl font-bold text-white mb-4">Quellen</h2>
           <ul className="space-y-2 text-sm text-white/50">
-            <li><a href="https://openai.com/api/pricing/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">OpenAI Pricing, Maerz 2026</a> — GPT-4o $2.50/$10, GPT-4o-mini $0.15/$0.60 pro 1M Tokens</li>
-            <li><a href="https://platform.claude.com/docs/en/about-claude/pricing" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Anthropic Pricing, Maerz 2026</a> — Claude Sonnet $3/$15, Opus $5/$25 pro 1M Tokens</li>
-            <li><a href="https://ai.google.dev/gemini-api/docs/pricing" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Google Gemini Pricing, Maerz 2026</a> — Gemini 2.5 Pro $1.25/$10 pro 1M Tokens</li>
+            <li><a href="https://openai.com/api/pricing/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">OpenAI Pricing, März 2026</a> — GPT-4o $2.50/$10, GPT-4o-mini $0.15/$0.60 pro 1M Tokens</li>
+            <li><a href="https://platform.claude.com/docs/en/about-claude/pricing" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Anthropic Pricing, März 2026</a> — Claude Sonnet $3/$15, Opus $5/$25 pro 1M Tokens</li>
+            <li><a href="https://ai.google.dev/gemini-api/docs/pricing" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Google Gemini Pricing, März 2026</a> — Gemini 2.5 Pro $1.25/$10 pro 1M Tokens</li>
             <li><a href="https://www.globalpetrolprices.com/Austria/electricity_prices/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">GlobalPetrolPrices: Austria 2026</a> — Strompreis AT Privat EUR 0,34/kWh</li>
             <li><a href="https://bestvaluegpu.com/en-eu/history/new-and-used-rtx-3090-price-history-and-specs/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">BestValueGPU: RTX 3090</a> — Gebrauchtpreise EUR 750-1.123</li>
             <li><a href="https://devtk.ai/en/blog/self-hosting-llm-vs-api-cost-2026/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">DevTk.AI: Self-Hosting vs API 2026</a> — Break-Even bei 50M-200M Tokens/Monat</li>
-            <li><a href="https://blog.premai.io/self-hosted-llm-guide-setup-tools-cost-comparison-2026/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Prem AI: Self-Hosted LLM Guide 2026</a> — Unter 2M Tokens/Tag ist API guenstiger</li>
+            <li><a href="https://blog.premai.io/self-hosted-llm-guide-setup-tools-cost-comparison-2026/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Prem AI: Self-Hosted LLM Guide 2026</a> — Unter 2M Tokens/Tag ist API günstiger</li>
             <li><a href="https://aisuperior.com/open-source-llm-deployment-cost/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">AISuperior: LLM Deployment Cost</a> — Hidden Cost Faktor 3-5x, Engineering 45-55%</li>
             <li><a href="https://localaimaster.com/blog/best-gpus-for-ai-2025" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">LocalAIMaster: Best GPUs for AI</a> — Inference Speed RTX 3090</li>
             <li><a href="https://vellum.ai/blog/llama-3-3-70b-vs-gpt-4o" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Vellum: Llama 3.3 70B vs GPT-4o</a> — Benchmark-Vergleich MMLU, HumanEval, IFEval</li>
@@ -118,7 +118,7 @@ export default function AiKostenVergleich() {
 
         <Callout type="tip" title="Der ehrliche Hybrid-Ansatz">
           <p>
-            Lokal für 80% der alltaeglichen Tasks. Cloud-API für die 20% wo
+            Lokal für 80% der alltäglichen Tasks. Cloud-API für die 20% wo
             Qualität kritisch ist. Investition: EUR 750-1.123 Hardware + EUR 70-90/Monat
             laufend (Strom + Cloud). Das ist weniger als reine Cloud, aber auch nicht &quot;kostenlos&quot;.
           </p>

@@ -19,7 +19,7 @@ export default function EuAiActLeitfaden() {
         <Callout type="summary" title="Auf einen Blick">
           <p>
             Der EU AI Act (Verordnung 2024/1689) ist der weltweit erste umfassende
-            Rechtsrahmen für Kuenstliche Intelligenz. Er klassifiziert AI-Systeme
+            Rechtsrahmen für Künstliche Intelligenz. Er klassifiziert AI-Systeme
             nach Risiko und definiert Pflichten für Anbieter und Betreiber. Für
             die meisten Self-Hosted AI-Setups gilt: Minimal Risk, keine besonderen
             Pflichten — aber Transparenz und Dokumentation sind trotzdem empfohlen.
@@ -35,7 +35,7 @@ export default function EuAiActLeitfaden() {
 
         <Callout type="warning" title="Strafen">
           <p>
-            Bis zu 35 Millionen Euro oder 6% des globalen Jahresumsatzes sind moeglich.
+            Bis zu 35 Millionen Euro oder 6% des globalen Jahresumsatzes sind möglich.
             Für KMU gelten etwas mildere Regeln, aber die Pflichten bleiben.
           </p>
         </Callout>
@@ -189,7 +189,7 @@ export default function EuAiActLeitfaden() {
               </tr>
               <tr className="border-b border-gray-800">
                 <td className="py-2 font-semibold text-red-400">02. Aug 2026</td>
-                <td className="py-2 font-semibold">Vollstaendig anwendbar. Strafen moeglich.</td>
+                <td className="py-2 font-semibold">Vollständig anwendbar. Strafen möglich.</td>
               </tr>
               <tr>
                 <td className="py-2">02. Aug 2027</td>
@@ -296,7 +296,7 @@ Verarbeitet das System biometrische Daten?
               <a href="/compliance/dsgvo-grundlagen" className="text-blue-400 hover:underline">DSGVO Grundlagen →</a>
             </li>
             <li>• <strong>DPIA:</strong>{" "}
-              <a href="/compliance/dpia" className="text-blue-400 hover:underline">Datenschutz-Folgenabschaetzung →</a>
+              <a href="/compliance/dpia" className="text-blue-400 hover:underline">Datenschutz-Folgenabschätzung →</a>
             </li>
           </ul>
         </div>

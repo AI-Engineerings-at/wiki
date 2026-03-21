@@ -8,7 +8,7 @@ import { RelatedArticles } from "../../../components/RelatedArticles"
 export const metadata: Metadata = {
   title: "AI Stack Setup in 30 Minuten: Ollama + Open WebUI + Docker | AI Engineering Wiki",
   description:
-    "Schritt-für-Schritt: Ollama installieren, LLM herunterladen, Open WebUI starten. In 30 Minuten laeuft dein eigener AI-Stack lokal.",
+    "Schritt-für-Schritt: Ollama installieren, LLM herunterladen, Open WebUI starten. In 30 Minuten läuft dein eigener AI-Stack lokal.",
 }
 
 export default function AiStackSetupPage() {
@@ -28,7 +28,7 @@ export default function AiStackSetupPage() {
         <div className="flex items-center gap-4 mt-4 text-sm text-white/40">
           <span>Lesezeit: 10 min</span>
           <span className="w-1 h-1 rounded-full bg-white/20" />
-          <span>Zuletzt aktualisiert: Maerz 2026</span>
+          <span>Zuletzt aktualisiert: März 2026</span>
         </div>
       </div>
 
@@ -37,8 +37,8 @@ export default function AiStackSetupPage() {
           <p>
             In diesem Tutorial setzt du in 30 Minuten einen lokalen AI-Stack auf:
             Ollama als LLM-Backend, Open WebUI als Chat-Interface, Docker als
-            Container-Runtime. Am Ende hast du einen voll funktionsfaehigen
-            ChatGPT-Klon der auf deiner eigenen Hardware laeuft.
+            Container-Runtime. Am Ende hast du einen voll funktionsfähigen
+            ChatGPT-Klon der auf deiner eigenen Hardware läuft.
           </p>
         </Callout>
 
@@ -61,7 +61,7 @@ export default function AiStackSetupPage() {
 
           <Callout type="info" title="Keine GPU? Geht auch">
             <p>
-              Ollama laeuft auch auf der CPU — nur deutlich langsamer. Ein 7B
+              Ollama läuft auch auf der CPU — nur deutlich langsamer. Ein 7B
               Modell auf einer modernen CPU (i7/Ryzen 7) liefert ca. 5-10 tok/s.
               Zum Testen reicht das, für produktive Nutzung brauchst du eine
               GPU.
@@ -94,7 +94,7 @@ export default function AiStackSetupPage() {
               <code className="text-sm text-green-400">{`# Ein-Befehl Installation
 curl -fsSL https://ollama.com/install.sh | sh
 
-# Pruefen ob es laeuft
+# Prüfen ob es läuft
 ollama --version`}</code>
             </pre>
           </div>
@@ -104,7 +104,7 @@ ollama --version`}</code>
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`# Download von https://ollama.com/download
 # Installer ausführen
-# Ollama laeuft als Hintergrund-Service`}</code>
+# Ollama läuft als Hintergrund-Service`}</code>
             </pre>
           </div>
         </section>
@@ -124,7 +124,7 @@ ollama --version`}</code>
               className="rounded-xl border border-white/10"
             />
             <p className="text-sm text-white/40 mt-2 text-center">
-              ollama pull laedt das Modell herunter und speichert es lokal.
+              ollama pull lädt das Modell herunter und speichert es lokal.
             </p>
           </div>
 
@@ -143,7 +143,7 @@ ollama list`}</code>
           </div>
 
           <ComparisonTable
-            headers={["Modell", "Groesse", "VRAM", "Staerke", "Befehl"]}
+            headers={["Modell", "Größe", "VRAM", "Stärke", "Befehl"]}
             rows={[
               ["Llama 3.3 (8B)", "4.7 GB", "~5 GB", "Schneller Allrounder", "ollama pull llama3.3"],
               ["Mistral Small 3.1 (24B)", "14 GB", "~16 GB", "Starkes Deutsch, übertrifft GPT-4o Mini", "ollama pull mistral-small3.1"],
@@ -152,10 +152,10 @@ ollama list`}</code>
             ]}
           />
 
-          <Callout type="warning" title="VRAM pruefen">
+          <Callout type="warning" title="VRAM prüfen">
             <p>
               Wenn das Modell nicht in den VRAM passt, lagert Ollama auf die CPU
-              aus — das ist 5-10x langsamer. Pruefen:{" "}
+              aus — das ist 5-10x langsamer. Prüfen:{" "}
               <code className="bg-white/10 px-1.5 py-0.5 rounded text-white/90">
                 nvidia-smi
               </code>{" "}
@@ -185,7 +185,7 @@ ollama list`}</code>
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
             Terminal-Chat ist OK zum Testen, aber für den Alltag willst du ein
-            Web-Interface. Open WebUI sieht aus wie ChatGPT, laeuft aber lokal
+            Web-Interface. Open WebUI sieht aus wie ChatGPT, läuft aber lokal
             und verbindet sich mit deinem Ollama.
           </p>
 
@@ -214,7 +214,7 @@ EOF
 # Starten
 docker compose up -d
 
-# Browser oeffnen: http://localhost:3000`}</code>
+# Browser öffnen: http://localhost:3000`}</code>
             </pre>
           </div>
 
@@ -239,7 +239,7 @@ docker compose up -d
                 1
               </span>
               <div>
-                <p className="text-white font-medium">Browser oeffnen</p>
+                <p className="text-white font-medium">Browser öffnen</p>
                 <p className="text-white/50 text-sm mt-1">
                   Navigiere zu{" "}
                   <code className="bg-white/10 px-1.5 py-0.5 rounded text-white/90">
@@ -256,7 +256,7 @@ docker compose up -d
                 <p className="text-white font-medium">Account erstellen</p>
                 <p className="text-white/50 text-sm mt-1">
                   Der erste User wird automatisch Admin. E-Mail und Passwort
-                  frei waehlbar — alles bleibt lokal.
+                  frei wählbar — alles bleibt lokal.
                 </p>
               </div>
             </div>
@@ -265,10 +265,10 @@ docker compose up -d
                 3
               </span>
               <div>
-                <p className="text-white font-medium">Modell auswaehlen und chatten</p>
+                <p className="text-white font-medium">Modell auswählen und chatten</p>
                 <p className="text-white/50 text-sm mt-1">
                   Open WebUI erkennt automatisch alle Modelle die in Ollama
-                  installiert sind. Oben das Modell waehlen und loschatten.
+                  installiert sind. Oben das Modell wählen und loschatten.
                 </p>
               </div>
             </div>
@@ -281,7 +281,7 @@ docker compose up -d
             Schritt 4: Verifikation (5 Minuten)
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
-            Pruefe ob alles korrekt laeuft:
+            Prüfe ob alles korrekt läuft:
           </p>
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
@@ -290,7 +290,7 @@ docker compose up -d
 curl http://localhost:11434/api/tags
 # Erwartete Antwort: JSON mit deinen Modellen
 
-# Open WebUI laeuft?
+# Open WebUI läuft?
 curl -I http://localhost:3000
 # Erwartete Antwort: HTTP 200
 
@@ -306,7 +306,7 @@ docker compose ps
 
           <Callout type="tip" title="Ollama REST API">
             <p>
-              Ollama bietet eine vollstaendige REST API unter Port 11434. Du
+              Ollama bietet eine vollständige REST API unter Port 11434. Du
               kannst sie aus jedem Programm, Script oder Workflow ansprechen:{" "}
               <code className="bg-white/10 px-1.5 py-0.5 rounded text-white/90">
                 curl http://localhost:11434/api/chat -d
@@ -318,20 +318,20 @@ docker compose ps
           </Callout>
         </section>
 
-        {/* Naechste Schritte */}
+        {/* Nächste Schritte */}
         <section className="mt-10">
           <h2 className="text-2xl font-bold text-white mb-4">
-            Naechste Schritte
+            Nächste Schritte
           </h2>
 
           <ComparisonTable
             headers={["Was", "Warum", "Wiki-Artikel"]}
             rows={[
               ["Docker Grundlagen lernen", "Verstehen was unter der Haube passiert", "/tools/docker-grundlagen"],
-              ["Mehrere Modelle testen", "Verschiedene Staerken für verschiedene Aufgaben", "/tools/model-selection"],
-              ["n8n Workflows bauen", "LLM in automatisierte Prozesse einbinden", "/tools/n8n-für-anfaenger"],
+              ["Mehrere Modelle testen", "Verschiedene Stärken für verschiedene Aufgaben", "/tools/model-selection"],
+              ["n8n Workflows bauen", "LLM in automatisierte Prozesse einbinden", "/tools/n8n-für-anfänger"],
               ["Monitoring einrichten", "GPU-Auslastung und Container-Health überwachen", "/tools/grafana-monitoring"],
-              ["Security pruefen", "Lokal heisst nicht automatisch sicher", "/security/self-hosted-sicherheit"],
+              ["Security prüfen", "Lokal heisst nicht automatisch sicher", "/security/self-hosted-sicherheit"],
             ]}
           />
 
@@ -348,7 +348,7 @@ docker compose ps
               >
                 Der Lokale AI-Stack Playbook (EUR 49)
               </a>{" "}
-              fuehrt dich durch den gesamten Prozess.
+              führt dich durch den gesamten Prozess.
             </p>
           </Callout>
         </section>

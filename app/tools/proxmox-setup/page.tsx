@@ -19,7 +19,7 @@ export default function ProxmoxSetup() {
           <p>
             Proxmox VE ist eine Open-Source Virtualisierungsplattform für dein
             Homelab. KVM-VMs und LXC-Container auf eigener Hardware, Web-Interface,
-            Cluster-faehig. GPU-Passthrough für Ollama moeglich. Keine Lizenzkosten.
+            Cluster-fähig. GPU-Passthrough für Ollama möglich. Keine Lizenzkosten.
           </p>
         </Callout>
 
@@ -244,7 +244,7 @@ lvconvert --type thin-pool vg00/data-thinpool
             <li><a href="https://www.proxmox.com/en/proxmox-virtual-environment/overview" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Proxmox VE — Offizielle Website</a></li>
             <li><a href="https://pve.proxmox.com/wiki/Main_Page" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Proxmox VE Wiki</a> — Dokumentation und Anleitungen</li>
             <li><a href="https://pve.proxmox.com/wiki/PCI_Passthrough" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Proxmox Wiki: PCI Passthrough</a> — GPU-Passthrough Anleitung</li>
-            <li><a href="https://www.proxmox.com/en/proxmox-backup-server/overview" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Proxmox Backup Server</a> — Dedizierte Backup-Loesung</li>
+            <li><a href="https://www.proxmox.com/en/proxmox-backup-server/overview" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Proxmox Backup Server</a> — Dedizierte Backup-Lösung</li>
           </ul>
         </section>
       </div>

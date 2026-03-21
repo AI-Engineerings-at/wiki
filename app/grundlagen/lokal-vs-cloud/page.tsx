@@ -182,7 +182,7 @@ export default function LokalVsCloud() {
         <h2 className="text-xl font-semibold text-white mt-8">Break-Even Analyse (ehrlich)</h2>
 
         <p className="text-gray-300">
-          Wann lohnt sich der Umstieg auf lokal? Das haengt stark von deiner Nutzung ab.
+          Wann lohnt sich der Umstieg auf lokal? Das hängt stark von deiner Nutzung ab.
         </p>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
@@ -201,11 +201,11 @@ Gesamt ab Jahr 2:         ~EUR 588/Jahr
 
 Break-Even vs. Cloud API:
   Laut DevTk.AI/Prem AI: erst ab 50M-200M Tokens/Monat
-  Unter 2M Tokens/Tag: API ist guenstiger
-  Hidden Cost Faktor: TCO wird 3-5x unterschaetzt (AISuperior)
+  Unter 2M Tokens/Tag: API ist günstiger
+  Hidden Cost Faktor: TCO wird 3-5x unterschätzt (AISuperior)
   Engineering-Anteil: 45-55% des TCO (AISuperior)
 
-Cloud API Preise (Maerz 2026, pro 1M Tokens):
+Cloud API Preise (März 2026, pro 1M Tokens):
   GPT-4o:           $2.50 Input / $10.00 Output
   Claude Sonnet 4.5: $3.00 Input / $15.00 Output
   Gemini 2.5 Pro:   $1.25 Input / $10.00 Output
@@ -213,22 +213,22 @@ Cloud API Preise (Maerz 2026, pro 1M Tokens):
           </pre>
         </div>
 
-        <Callout type="info" title="Break-Even ist nutzungsabhaengig">
+        <Callout type="info" title="Break-Even ist nutzungsabhängig">
           <p>
             Der Break-Even für Self-Hosting liegt bei 50-200 Millionen Tokens pro Monat.
-            Unter 2M Tokens/Tag ist die Cloud API guenstiger. Der finanzielle Vorteil von
-            lokal wird oft überschaetzt — der echte Vorteil liegt bei Datenschutz (DSGVO),
-            Verfuegbarkeit (offline) und Unabhaengigkeit von Anbietern.
+            Unter 2M Tokens/Tag ist die Cloud API günstiger. Der finanzielle Vorteil von
+            lokal wird oft überschätzt — der echte Vorteil liegt bei Datenschutz (DSGVO),
+            Verfügbarkeit (offline) und Unabhängigkeit von Anbietern.
           </p>
         </Callout>
 
         <h2 className="text-xl font-semibold text-white mt-8">Hardware-Kosten (ehrlich)</h2>
 
         <ComparisonTable
-          headers={["GPU", "VRAM", "Preis (EUR)", "Was laeuft darauf", "Einschraenkung"]}
+          headers={["GPU", "VRAM", "Preis (EUR)", "Was läuft darauf", "Einschränkung"]}
           rows={[
             ["RTX 3060 12GB", "12 GB", "~350", "7B Modelle (Mistral 7B, Llama 3.2 8B)", "NUR kleine Modelle, für 14B+ zu wenig VRAM"],
-            ["RTX 4070 Ti Super", "16 GB", "~800", "Bis 14B komfortabel (Qwen 2.5 14B)", "32B nur stark quantisiert, 70B unmoeglich"],
+            ["RTX 4070 Ti Super", "16 GB", "~800", "Bis 14B komfortabel (Qwen 2.5 14B)", "32B nur stark quantisiert, 70B unmöglich"],
             ["RTX 3090 (gebraucht)", "24 GB", "750-1.123", "Bis 34B quantisiert (Q4_K_M)", "70B passt NICHT (braucht ~40 GB VRAM)"],
             ["RTX 4090", "24 GB", "1.800-2.000", "Bis 34B komfortabel", "Gleiche 24 GB VRAM-Grenze wie RTX 3090"],
           ]}
@@ -272,7 +272,7 @@ Cloud API Preise (Maerz 2026, pro 1M Tokens):
           </p>
         </Callout>
 
-        <h2 className="text-xl font-semibold text-white mt-8">Die Qualitätsluecke (ehrlich)</h2>
+        <h2 className="text-xl font-semibold text-white mt-8">Die Qualitätslücke (ehrlich)</h2>
 
         <p className="text-gray-300 mt-2 mb-4">
           Lokale Modelle sind gut — aber nicht so gut wie die besten Cloud-Modelle.
@@ -289,9 +289,9 @@ Cloud API Preise (Maerz 2026, pro 1M Tokens):
           ]}
         />
 
-        <Callout type="warning" title="Die Qualitätsluecke ist REAL">
+        <Callout type="warning" title="Die Qualitätslücke ist REAL">
           <p>
-            Vor allem bei komplexem Reasoning (logische Schluesse, mehrstufige Analyse,
+            Vor allem bei komplexem Reasoning (logische Schlüsse, mehrstufige Analyse,
             juristische Argumentation) liegt Cloud deutlich vorne. Wer behauptet lokale
             Modelle seien &quot;fast gleichwertig&quot; verschweigt diesen Unterschied.
           </p>
@@ -299,7 +299,7 @@ Cloud API Preise (Maerz 2026, pro 1M Tokens):
 
         <Callout type="tip" title="Wo lokal trotzdem reicht">
           <p>
-            Für 80% der alltaeglichen Tasks (Daten-Extraktion, Klassifikation,
+            Für 80% der alltäglichen Tasks (Daten-Extraktion, Klassifikation,
             einfache Q&amp;A, Zusammenfassungen) sind lokale Modelle ausreichend.
             Für komplexes Reasoning: Cloud-API als Backup.
           </p>
@@ -310,7 +310,7 @@ Cloud API Preise (Maerz 2026, pro 1M Tokens):
         <div className="bg-green-900/30 border border-green-700 rounded-lg p-4 mt-4">
           <h3 className="font-semibold text-white mb-2">Hybrid-Ansatz (unser Setup)</h3>
           <ul className="text-gray-300 space-y-2">
-            <li><strong>Lokal:</strong> Ollama für regelmaessige Tasks (Extraktion, Klassifikation, einfache Q&amp;A)</li>
+            <li><strong>Lokal:</strong> Ollama für regelmäßige Tasks (Extraktion, Klassifikation, einfache Q&amp;A)</li>
             <li><strong>Cloud:</strong> GPT-4o / Claude für komplexe Reasoning-Tasks (wenige Calls/Monat)</li>
             <li><strong>Kosten:</strong> ~EUR 49/Monat Strom (AT, 50% Last) + EUR 20-40/Monat Cloud-API</li>
             <li><strong>Ergebnis:</strong> Guter Kompromiss aus Kosten, Qualität und Datenschutz</li>
@@ -320,12 +320,12 @@ Cloud API Preise (Maerz 2026, pro 1M Tokens):
         <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mt-8">
           <h3 className="font-semibold text-white mb-2">Fazit</h3>
           <p className="text-gray-300">
-            Lokal ist nach 6-12 Monaten guenstiger — BEI regelmaessiger Nutzung. Bei
+            Lokal ist nach 6-12 Monaten günstiger — BEI regelmäßiger Nutzung. Bei
             geringer Nutzung ist Cloud finanziell besser. Die Qualität ist für 80% der
             Tasks ausreichend, für komplexes Reasoning braucht man Cloud-APIs als
-            Ergaenzung. Der EHRLICHSTE Ansatz ist Hybrid: lokal wo es reicht, Cloud wo
-            es zaehlt. Dazu kommen die DSGVO-Vorteile (kein Drittlandtransfer) und die
-            Unabhaengigkeit von Cloud-Anbietern.
+            Ergänzung. Der EHRLICHSTE Ansatz ist Hybrid: lokal wo es reicht, Cloud wo
+            es zählt. Dazu kommen die DSGVO-Vorteile (kein Drittlandtransfer) und die
+            Unabhängigkeit von Cloud-Anbietern.
           </p>
         </div>
 
@@ -334,9 +334,9 @@ Cloud API Preise (Maerz 2026, pro 1M Tokens):
           <ul className="space-y-2 text-sm text-white/50">
             <li><a href="https://www.globalpetrolprices.com/Austria/electricity_prices/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">GlobalPetrolPrices: Austria Electricity 2026</a> — Strompreis AT Privat EUR 0,34/kWh</li>
             <li><a href="https://bestvaluegpu.com/en-eu/history/new-and-used-rtx-3090-price-history-and-specs/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">BestValueGPU: RTX 3090 Preisentwicklung</a> — Gebrauchtpreise EUR 750-1.123</li>
-            <li><a href="https://www.xda-developers.com/used-rtx-3090-still-best-for-local-ai-in-value/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">XDA Developers: RTX 3090 Value King 2026</a> — RTX 3090 als bestes Preis-Leistungs-Verhaeltnis</li>
+            <li><a href="https://www.xda-developers.com/used-rtx-3090-still-best-for-local-ai-in-value/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">XDA Developers: RTX 3090 Value King 2026</a> — RTX 3090 als bestes Preis-Leistungs-Verhältnis</li>
             <li><a href="https://devtk.ai/en/blog/self-hosting-llm-vs-api-cost-2026/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">DevTk.AI: Self-Hosting vs API Cost 2026</a> — Break-Even bei 50M-200M Tokens/Monat</li>
-            <li><a href="https://blog.premai.io/self-hosted-llm-guide-setup-tools-cost-comparison-2026/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Prem AI: Self-Hosted LLM Guide 2026</a> — Unter 2M Tokens/Tag ist API guenstiger</li>
+            <li><a href="https://blog.premai.io/self-hosted-llm-guide-setup-tools-cost-comparison-2026/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Prem AI: Self-Hosted LLM Guide 2026</a> — Unter 2M Tokens/Tag ist API günstiger</li>
             <li><a href="https://aisuperior.com/open-source-llm-deployment-cost/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">AISuperior: LLM Deployment Cost</a> — Hidden Cost Faktor 3-5x, Engineering 45-55%</li>
             <li><a href="https://openai.com/api/pricing/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">OpenAI Pricing</a> — GPT-4o $2.50/$10 pro 1M Tokens</li>
             <li><a href="https://platform.claude.com/docs/en/about-claude/pricing" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Anthropic Pricing</a> — Claude Sonnet $3/$15 pro 1M Tokens</li>

@@ -50,11 +50,11 @@ export default function ModelSelectionPage() {
           <li><strong>Beispiele:</strong> Mistral Small 3.1 (24B), Qwen 2.5 32B</li>
           <li><strong>Hardware:</strong> 24GB VRAM (RTX 3090/4090)</li>
           <li><strong>Speed:</strong> ~20-30 tok/s auf RTX 3090</li>
-          <li><strong>Use Cases:</strong> Komplexe Reasoning, lange Dokumente, hoechste lokale Qualität</li>
+          <li><strong>Use Cases:</strong> Komplexe Reasoning, lange Dokumente, höchste lokale Qualität</li>
           <li><strong>Hinweis:</strong> 70B Modelle passen NICHT auf 24 GB VRAM — brauchen 48 GB+ oder Multi-GPU</li>
         </ul>
 
-        <h3 className="text-lg font-semibold text-white mt-6">4. Top Open Source (S-Tier, Maerz 2026)</h3>
+        <h3 className="text-lg font-semibold text-white mt-6">4. Top Open Source (S-Tier, März 2026)</h3>
         <ul className="list-disc list-inside text-gray-300 space-y-1">
           <li><strong>GLM-5 (Z AI):</strong> Reasoning-Spezialist, GPQA Diamond 86%, HumanEval 90%, SWE-bench 77.8%</li>
           <li><strong>Kimi K2.5 (Moonshot AI):</strong> HumanEval 99%, AIME 96.1%, SWE-bench 76.8% — S-Tier</li>
@@ -67,7 +67,7 @@ export default function ModelSelectionPage() {
           <figcaption className="text-center text-white/40 text-sm mt-2">Modell-Vergleich: Parameter, Context-Window, RAM-Bedarf und Qualität</figcaption>
         </figure>
 
-        <h2 className="text-xl font-semibold text-white mt-8">Vergleichstabelle (Stand Maerz 2026)</h2>
+        <h2 className="text-xl font-semibold text-white mt-8">Vergleichstabelle (Stand März 2026)</h2>
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-gray-700">
@@ -75,7 +75,7 @@ export default function ModelSelectionPage() {
               <th className="py-2 text-gray-400">Parameter</th>
               <th className="py-2 text-gray-400">VRAM (Q4)</th>
               <th className="py-2 text-gray-400">tok/s (RTX 3090)</th>
-              <th className="py-2 text-gray-400">Staerke</th>
+              <th className="py-2 text-gray-400">Stärke</th>
             </tr>
           </thead>
           <tbody className="text-gray-300">
@@ -127,7 +127,7 @@ export default function ModelSelectionPage() {
         <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mt-4">
           <p className="text-blue-300 text-sm">
             <strong>Deutsch-Tipp:</strong> Mistral Small 3.1 (24B) übertrifft GPT-4o Mini
-            und Gemma 3 bei europaeischen Sprachen — ideal für deutschsprachige
+            und Gemma 3 bei europäischen Sprachen — ideal für deutschsprachige
             Chat- und Content-Tasks auf lokaler Hardware.
           </p>
         </div>
@@ -190,7 +190,7 @@ ollama pull qwen3:14b         # 4-bit default, ~10GB`}</code>
         <h2 className="text-xl font-semibold text-white mt-8">Unser Stack</h2>
 
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
-          <code className="text-sm text-gray-300">{`# Wir nutzen (Stand Maerz 2026):
+          <code className="text-sm text-gray-300">{`# Wir nutzen (Stand März 2026):
 # - mistral-small3.2:24b auf RTX 3090 (.90) für Chat/Code (stark bei Deutsch)
 # - mxbai-embed-large auf RTX 2060 (.99) für Embeddings (1024 dim)
 # - Cloud API (Claude Sonnet 4.5) für komplexes Reasoning
@@ -217,14 +217,14 @@ OLLAMA_MODELS=/root/.ollama/models`}</code>
         <section className="mt-16 pt-8 border-t border-white/10">
           <h2 className="text-xl font-bold text-white mb-4">Quellen</h2>
           <ul className="space-y-2 text-sm text-white/50">
-            <li><a href="https://artificialanalysis.ai/leaderboards/models" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Artificial Analysis LLM Leaderboard, Maerz 2026</a> — Intelligence Index, 312 Modelle, Updates alle 72h</li>
+            <li><a href="https://artificialanalysis.ai/leaderboards/models" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Artificial Analysis LLM Leaderboard, März 2026</a> — Intelligence Index, 312 Modelle, Updates alle 72h</li>
             <li><a href="https://onyx.app/open-llm-leaderboard" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Onyx Open LLM Leaderboard</a> — Kimi K2.5 HumanEval 99%, AIME 96.1%</li>
             <li><a href="https://vellum.ai/blog/llama-3-3-70b-vs-gpt-4o" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Vellum: Llama 3.3 70B vs GPT-4o</a> — MMLU, HumanEval, IFEval Benchmarks</li>
-            <li><a href="https://mistral.ai/news/mistral-small-3-1" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Mistral AI: Mistral Small 3.1</a> — Übertrifft GPT-4o Mini bei europaeischen Sprachen</li>
+            <li><a href="https://mistral.ai/news/mistral-small-3-1" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Mistral AI: Mistral Small 3.1</a> — Übertrifft GPT-4o Mini bei europäischen Sprachen</li>
             <li><a href="https://localaimaster.com/blog/best-gpus-for-ai-2025" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">LocalAIMaster: Best GPUs for AI</a> — RTX 3090 tok/s Messwerte</li>
             <li><a href="https://corelab.tech/llmgpu/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">CoreLab: LLM GPU Benchmarks</a> — 8B ~112 tok/s auf RTX 3090</li>
             <li><a href="https://intuitionlabs.ai/articles/local-llm-deployment-24gb-gpu-optimization" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">IntuitionLabs: 24GB GPU Optimization</a> — Max ~34B auf 24 GB VRAM</li>
-            <li><a href="https://ollama.com/library" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Ollama Model Library</a> — Verfuegbare Modelle und Quantisierungen</li>
+            <li><a href="https://ollama.com/library" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Ollama Model Library</a> — Verfügbare Modelle und Quantisierungen</li>
             <li><a href="https://lmarena.ai" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">LMSYS Chatbot Arena</a> — Community-basiertes Modell-Ranking</li>
           </ul>
         </section>

@@ -26,7 +26,7 @@ export default function AIAgentDigitalerMitarbeiterPage() {
         <div className="flex items-center gap-4 mt-4 text-sm text-white/40">
           <span>Lesezeit: 14 min</span>
           <span className="w-1 h-1 rounded-full bg-white/20" />
-          <span>Zuletzt aktualisiert: Maerz 2026</span>
+          <span>Zuletzt aktualisiert: März 2026</span>
         </div>
       </div>
 
@@ -34,9 +34,9 @@ export default function AIAgentDigitalerMitarbeiterPage() {
         <Callout type="summary" title="Auf einen Blick">
           <p>
             Ein AI Agent ist kein Tool, das man installiert — er ist ein digitaler Mitarbeiter,
-            den man onboarded. Das bedeutet: eigene Identitaet, eigene Credentials, begrenzte
+            den man onboarded. Das bedeutet: eigene Identität, eigene Credentials, begrenzte
             Berechtigungen, Probezeit und EU AI Act Compliance. Dieser Artikel zeigt die
-            Architektur-Patterns, die das ermoeglichen.
+            Architektur-Patterns, die das ermöglichen.
           </p>
         </Callout>
 
@@ -46,9 +46,9 @@ export default function AIAgentDigitalerMitarbeiterPage() {
             Das Denkmodell: Agent = Mitarbeiter
           </h2>
           <p className="text-white/70 leading-relaxed">
-            Der haeufigste Fehler beim Einsatz von AI-Agenten: Man behandelt sie wie
-            Software-Tools. Installieren, API-Key rein, laeuft. Das funktioniert bei
-            einem einzelnen Chatbot. Aber sobald ein Agent eigenstaendig E-Mails liest,
+            Der häufigste Fehler beim Einsatz von AI-Agenten: Man behandelt sie wie
+            Software-Tools. Installieren, API-Key rein, läuft. Das funktioniert bei
+            einem einzelnen Chatbot. Aber sobald ein Agent eigenständig E-Mails liest,
             Kunden kontaktiert oder in Unternehmenssysteme schreibt, braucht er die
             gleiche Sorgfalt wie ein neuer Mitarbeiter.
           </p>
@@ -74,7 +74,7 @@ export default function AIAgentDigitalerMitarbeiterPage() {
             headers={["Bereich", "Menschlicher Mitarbeiter", "AI Agent"]}
             rows={[
               [
-                "Identitaet",
+                "Identität",
                 "Eigener Firmen-Account, eigene E-Mail",
                 "Eigener System-User, eigene API-Keys",
               ],
@@ -108,7 +108,7 @@ export default function AIAgentDigitalerMitarbeiterPage() {
             Credential-Isolation: Jeder Agent hat seinen eigenen Vault
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
-            Einer der kritischsten Punkte: Agenten duerfen KEINE Credentials teilen.
+            Einer der kritischsten Punkte: Agenten dürfen KEINE Credentials teilen.
             Wenn Agent A kompromittiert wird, darf Agent B davon nicht betroffen sein.
           </p>
 
@@ -139,7 +139,7 @@ export default function AIAgentDigitalerMitarbeiterPage() {
             Network Policy: Deny-by-Default
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
-            Ein Agent sollte nur die Endpoints erreichen koennen, die er für seine
+            Ein Agent sollte nur die Endpoints erreichen können, die er für seine
             Arbeit braucht. Alles andere ist blockiert. Das verhindert, dass ein
             kompromittierter Agent auf interne Systeme zugreift.
           </p>
@@ -162,7 +162,7 @@ blocked:
           <Callout type="tip" title="Gateway auf localhost binden">
             <p>
               Der Agent-Gateway sollte auf 127.0.0.1 lauschen, nicht auf 0.0.0.0.
-              Remote-Zugriff laeuft über ein VPN (z.B. Netbird, WireGuard).
+              Remote-Zugriff läuft über ein VPN (z.B. Netbird, WireGuard).
               Das verhindert, dass der Agent-Endpoint aus dem offenen Netzwerk
               erreichbar ist.
             </p>
@@ -175,20 +175,20 @@ blocked:
             Skills statt Plugins: Kontrolle behalten
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
-            Agent-Faehigkeiten werden als Markdown-Skills definiert, nicht als
-            ausfuehrbarer Code. Das ist ein bewusster Sicherheitsentscheid:
+            Agent-Fähigkeiten werden als Markdown-Skills definiert, nicht als
+            ausführbarer Code. Das ist ein bewusster Sicherheitsentscheid:
             Ein Markdown-Skill beschreibt WAS der Agent tun soll, aber der Agent
-            fuehrt den Code in einer Sandbox aus.
+            führt den Code in einer Sandbox aus.
           </p>
 
           <ComparisonTable
             headers={["Eigenschaft", "Plugin (Code)", "Skill (Markdown)"]}
             rows={[
-              ["Ausfuehrung", "Direkter Code-Zugriff", "Beschreibung, Agent interpretiert"],
-              ["Sicherheit", "Kann alles ausführen", "Sandbox-Ausfuehrung"],
-              ["Review", "Code Review noetig", "Text lesen reicht"],
-              ["Wartung", "API-Aenderungen brechen Code", "Beschreibung bleibt stabil"],
-              ["Supply Chain", "Abhaengigkeiten koennen malicious sein", "Keine externen Abhaengigkeiten"],
+              ["Ausführung", "Direkter Code-Zugriff", "Beschreibung, Agent interpretiert"],
+              ["Sicherheit", "Kann alles ausführen", "Sandbox-Ausführung"],
+              ["Review", "Code Review nötig", "Text lesen reicht"],
+              ["Wartung", "API-Änderungen brechen Code", "Beschreibung bleibt stabil"],
+              ["Supply Chain", "Abhängigkeiten können malicious sein", "Keine externen Abhängigkeiten"],
             ]}
           />
 
@@ -214,7 +214,7 @@ Trigger: Heartbeat erkennt neue E-Mails.
 
 ## Steps
 1. IMAP Inbox abrufen (INBOX, letzte 24h)
-2. Absender gegen Allowlist pruefen
+2. Absender gegen Allowlist prüfen
 3. Klassifizieren: URGENT / IMPORTANT / NORMAL
 4. Zusammenfassung an Owner posten
 
@@ -232,8 +232,8 @@ Trigger: Heartbeat erkennt neue E-Mails.
             Two-Tier Heartbeat: 90% Token-Einsparung
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
-            Ein Agent muss regelmaessig pruefen, ob es etwas zu tun gibt. Aber
-            jeder LLM-Call kostet Tokens. Die Loesung: Ein zweistufiges Heartbeat-System.
+            Ein Agent muss regelmäßig prüfen, ob es etwas zu tun gibt. Aber
+            jeder LLM-Call kostet Tokens. Die Lösung: Ein zweistufiges Heartbeat-System.
           </p>
 
           <ComparisonTable
@@ -255,8 +255,8 @@ Trigger: Heartbeat erkennt neue E-Mails.
           />
 
           <p className="text-white/70 leading-relaxed mt-4">
-            Tier 2 wird NUR ausgeloest, wenn Tier 1 eine Anomalie erkennt.
-            Beispiel: Tier 1 prueft &quot;Gibt es neue E-Mails?&quot; (HTTP-Call, 0 Tokens).
+            Tier 2 wird NUR ausgelöst, wenn Tier 1 eine Anomalie erkennt.
+            Beispiel: Tier 1 prüft &quot;Gibt es neue E-Mails?&quot; (HTTP-Call, 0 Tokens).
             Nur wenn ja, ruft Tier 2 das LLM für Klassifizierung und Zusammenfassung.
           </p>
 
@@ -276,7 +276,7 @@ Trigger: Heartbeat erkennt neue E-Mails.
             EU AI Act: Kennzeichnungspflicht
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
-            Ab 2. August 2026 muessen AI-Systeme mit Kundenkontakt transparent
+            Ab 2. August 2026 müssen AI-Systeme mit Kundenkontakt transparent
             gekennzeichnet sein (Art. 50). Das gilt auch für AI-Agenten, die
             als digitale Mitarbeiter eingesetzt werden.
           </p>
@@ -289,7 +289,7 @@ Trigger: Heartbeat erkennt neue E-Mails.
               <div>
                 <p className="text-white font-medium">E-Mail-Signatur</p>
                 <p className="text-white/50 text-sm mt-1">
-                  &quot;Max Mustermann | KI-gestuetzter Assistent | Firma GmbH&quot;
+                  &quot;Max Mustermann | KI-gestützter Assistent | Firma GmbH&quot;
                 </p>
               </div>
             </div>
@@ -311,8 +311,8 @@ Trigger: Heartbeat erkennt neue E-Mails.
               <div>
                 <p className="text-white font-medium">Voice/Telefon</p>
                 <p className="text-white/50 text-sm mt-1">
-                  Automatische Ansage am Gespraechsanfang:
-                  &quot;Ich bin ein KI-gestuetzter Assistent.&quot;
+                  Automatische Ansage am Gesprächsanfang:
+                  &quot;Ich bin ein KI-gestützter Assistent.&quot;
                 </p>
               </div>
             </div>
@@ -346,7 +346,7 @@ Trigger: Heartbeat erkennt neue E-Mails.
               "Berechtigungs-Matrix: Read/Write/Create pro Doctype definiert",
               "30 Tage Probezeit: Erst Read-only, dann schrittweise Write",
               "Human Sponsor genehmigt jede Berechtigungserweiterung",
-              "EU AI Act Kennzeichnung in allen Kommunikationskanaelen",
+              "EU AI Act Kennzeichnung in allen Kommunikationskanälen",
               "Logging: Alle Aktionen protokolliert, 12 Monate Aufbewahrung",
               "Skills selbst geschrieben, keine Community-Plugins ohne Review",
               "Credential-Rotation alle 90 Tage (Reminder im ERP-System)",
@@ -362,12 +362,12 @@ Trigger: Heartbeat erkennt neue E-Mails.
         {/* Key Takeaway */}
         <KeyTakeaway
           points={[
-            "Behandle AI-Agenten wie neue Mitarbeiter: eigene Identitaet, eigene Credentials, begrenzte Berechtigungen.",
+            "Behandle AI-Agenten wie neue Mitarbeiter: eigene Identität, eigene Credentials, begrenzte Berechtigungen.",
             "Credential-Isolation ist nicht optional. Jeder Agent bekommt seinen eigenen Vault.",
             "Network Policy: Deny-by-default. Der Agent erreicht nur die Endpoints, die er braucht.",
-            "Skills statt Plugins: Markdown-Beschreibungen statt ausfuehrbarem Code. Sicherer und wartbarer.",
+            "Skills statt Plugins: Markdown-Beschreibungen statt ausführbarem Code. Sicherer und wartbarer.",
             "Two-Tier Heartbeat spart 90% Tokens: Cheap Checks zuerst, LLM nur bei Anomalie.",
-            "EU AI Act Kennzeichnung ab August 2026 Pflicht. Jetzt vorbereiten, nicht spaeter.",
+            "EU AI Act Kennzeichnung ab August 2026 Pflicht. Jetzt vorbereiten, nicht später.",
           ]}
         />
 

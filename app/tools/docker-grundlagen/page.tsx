@@ -28,7 +28,7 @@ export default function DockerGrundlagenPage() {
         <div className="flex items-center gap-4 mt-4 text-sm text-white/40">
           <span>Lesezeit: 14 min</span>
           <span className="w-1 h-1 rounded-full bg-white/20" />
-          <span>Zuletzt aktualisiert: Maerz 2026</span>
+          <span>Zuletzt aktualisiert: März 2026</span>
         </div>
       </div>
 
@@ -37,7 +37,7 @@ export default function DockerGrundlagenPage() {
           <p>
             Docker packt Software in Container — isolierte Einheiten, die
             überall gleich laufen. Für einen lokalen AI-Stack ist Docker die
-            Grundlage: Ollama, Open WebUI, n8n, Grafana — alles laeuft in
+            Grundlage: Ollama, Open WebUI, n8n, Grafana — alles läuft in
             Containern. Docker Compose orchestriert mehrere Container auf einem
             Rechner, Docker Swarm verteilt sie auf mehrere.
           </p>
@@ -50,13 +50,13 @@ export default function DockerGrundlagenPage() {
           </h2>
           <p className="text-white/70 leading-relaxed">
             Docker ist eine Plattform, die Software in Container verpackt. Ein
-            Container enthaelt alles was die Software braucht — Code,
+            Container enthält alles was die Software braucht — Code,
             Laufzeit-Umgebung, System-Bibliotheken, Konfiguration. Du
             installierst nicht mehr &quot;Programm X auf Betriebssystem Y&quot;
             sondern startest einen Container, der alles mitbringt.
           </p>
           <p className="text-white/70 leading-relaxed mt-4">
-            Das loest das klassische Problem &quot;bei mir funktioniert es
+            Das löst das klassische Problem &quot;bei mir funktioniert es
             aber&quot;: Container laufen auf deinem Laptop genauso wie auf
             einem Server.
           </p>
@@ -68,8 +68,8 @@ export default function DockerGrundlagenPage() {
             Container vs. Virtuelle Maschinen
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
-            Container und VMs loesen aehnliche Probleme, aber auf verschiedenen
-            Ebenen. Container sind leichtgewichtiger, VMs sind staerker isoliert.
+            Container und VMs lösen ähnliche Probleme, aber auf verschiedenen
+            Ebenen. Container sind leichtgewichtiger, VMs sind stärker isoliert.
           </p>
 
           <div className="my-6">
@@ -95,7 +95,7 @@ export default function DockerGrundlagenPage() {
                 "Minuten",
               ],
               [
-                "Groesse",
+                "Größe",
                 "MBs (Image)",
                 "GBs (volles OS)",
               ],
@@ -189,7 +189,7 @@ volumes:
               <code className="text-sm text-green-400">{`# Stack starten (im Hintergrund)
 docker compose up -d
 
-# Status pruefen
+# Status prüfen
 docker compose ps
 
 # Logs ansehen
@@ -198,7 +198,7 @@ docker compose logs -f ollama
 # Stack stoppen
 docker compose down
 
-# Stack stoppen UND Volumes loeschen (ACHTUNG: Daten weg!)
+# Stack stoppen UND Volumes löschen (ACHTUNG: Daten weg!)
 docker compose down -v`}</code>
             </pre>
           </div>
@@ -208,12 +208,12 @@ docker compose down -v`}</code>
               <code className="bg-white/10 px-1.5 py-0.5 rounded text-white/90">
                 docker compose down -v
               </code>{" "}
-              loescht ALLE Volumes — also alle gespeicherten Modelle, Datenbanken,
+              löscht ALLE Volumes — also alle gespeicherten Modelle, Datenbanken,
               Konfigurationen. Ohne{" "}
               <code className="bg-white/10 px-1.5 py-0.5 rounded text-white/90">
                 -v
               </code>{" "}
-              bleiben die Daten erhalten und der naechste{" "}
+              bleiben die Daten erhalten und der nächste{" "}
               <code className="bg-white/10 px-1.5 py-0.5 rounded text-white/90">
                 docker compose up
               </code>{" "}
@@ -229,7 +229,7 @@ docker compose down -v`}</code>
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
             Docker Swarm macht aus mehreren Rechnern einen Cluster. Services
-            laufen auf dem Node, der gerade Kapazitaet hat. Faellt ein Node aus,
+            laufen auf dem Node, der gerade Kapazität hat. Fällt ein Node aus,
             werden die Container automatisch auf andere Nodes verschoben.
           </p>
 
@@ -240,8 +240,8 @@ docker compose down -v`}</code>
               ["High Availability", "Nein", "Ja (Auto-Failover)"],
               ["Rolling Updates", "Nein", "Ja (Zero-Downtime)"],
               ["Load Balancing", "Nein (manuell)", "Ja (Ingress Mesh)"],
-              ["Secrets Management", "Umgebungsvariablen", "Docker Secrets (verschluesselt)"],
-              ["Komplexitaet", "Niedrig", "Mittel"],
+              ["Secrets Management", "Umgebungsvariablen", "Docker Secrets (verschlüsselt)"],
+              ["Komplexität", "Niedrig", "Mittel"],
               ["Empfehlung", "Entwicklung, kleine Setups", "Produktion, mehrere Rechner"],
             ]}
           />
@@ -249,7 +249,7 @@ docker compose down -v`}</code>
           <Callout type="info" title="Compose oder Swarm?">
             <p>
               Starte mit Docker Compose. Wenn du nur einen Rechner hast, reicht
-              das voellig. Docker Swarm brauchst du erst wenn du mehrere Rechner
+              das völlig. Docker Swarm brauchst du erst wenn du mehrere Rechner
               hast und Services ausfallsicher betreiben willst. Die
               Compose-Dateien lassen sich mit kleinen Anpassungen als Swarm
               Stacks deployen.
@@ -275,7 +275,7 @@ docker compose down -v`}</code>
               <div>
                 <p className="text-white font-medium">NVIDIA Treiber installieren</p>
                 <p className="text-white/50 text-sm mt-1">
-                  Auf dem Host-System muessen die NVIDIA-Treiber installiert sein.
+                  Auf dem Host-System müssen die NVIDIA-Treiber installiert sein.
                   In Ubuntu:{" "}
                   <code className="bg-white/10 px-1.5 py-0.5 rounded text-white/90">
                     sudo apt install nvidia-driver-550
@@ -314,7 +314,7 @@ sudo systemctl restart docker`}</code>
 
           <Callout type="warning" title="GPU in Swarm">
             <p>
-              Docker Swarm hat KEINE native GPU-Unterstuetzung für{" "}
+              Docker Swarm hat KEINE native GPU-Unterstützung für{" "}
               <code className="bg-white/10 px-1.5 py-0.5 rounded text-white/90">
                 --gpus
               </code>
@@ -326,7 +326,7 @@ sudo systemctl restart docker`}</code>
               <code className="bg-white/10 px-1.5 py-0.5 rounded text-white/90">
                 placement constraints
               </code>{" "}
-              auf GPU-Nodes pinnen. Zusaetzlich das NVIDIA Runtime als Default
+              auf GPU-Nodes pinnen. Zusätzlich das NVIDIA Runtime als Default
               in{" "}
               <code className="bg-white/10 px-1.5 py-0.5 rounded text-white/90">
                 /etc/docker/daemon.json
@@ -346,14 +346,14 @@ sudo systemctl restart docker`}</code>
             headers={["Situation", "Befehl", "Was es tut"]}
             rows={[
               [
-                "Container laeuft nicht",
+                "Container läuft nicht",
                 "docker compose logs service-name",
                 "Zeigt Fehlermeldungen des Containers",
               ],
               [
                 "Disk voll",
                 "docker system prune -a",
-                "Loescht ungenutzte Images, Container, Netzwerke",
+                "Löscht ungenutzte Images, Container, Netzwerke",
               ],
               [
                 "Neustart nach Update",
@@ -363,10 +363,10 @@ sudo systemctl restart docker`}</code>
               [
                 "In Container schauen",
                 "docker exec -it container-name bash",
-                "Oeffnet Shell im laufenden Container",
+                "Öffnet Shell im laufenden Container",
               ],
               [
-                "Ressourcen pruefen",
+                "Ressourcen prüfen",
                 "docker stats",
                 "Zeigt CPU, RAM, Netzwerk pro Container",
               ],
@@ -375,7 +375,7 @@ sudo systemctl restart docker`}</code>
 
           <Callout type="tip" title="Logging begrenzen">
             <p>
-              Docker-Container koennen extrem grosse Logfiles erzeugen. Setze in
+              Docker-Container können extrem grosse Logfiles erzeugen. Setze in
               der{" "}
               <code className="bg-white/10 px-1.5 py-0.5 rounded text-white/90">
                 docker-compose.yml
@@ -397,7 +397,7 @@ sudo systemctl restart docker`}</code>
             "Docker Compose definiert Multi-Container-Stacks in einer YAML-Datei. Ein Befehl startet alles.",
             "Docker Swarm verteilt Container auf mehrere Rechner mit Auto-Failover. Brauchst du erst ab 2+ Nodes.",
             "GPU in Docker braucht das NVIDIA Container Toolkit. In Swarm: Node Labels + Placement Constraints.",
-            "Volumes sind deine Daten. docker compose down -v loescht ALLES. Ohne -v bleiben Daten erhalten.",
+            "Volumes sind deine Daten. docker compose down -v löscht ALLES. Ohne -v bleiben Daten erhalten.",
           ]}
         />
 

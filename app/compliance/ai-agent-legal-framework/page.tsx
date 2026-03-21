@@ -26,17 +26,17 @@ export default function AIAgentLegalFrameworkPage() {
         <div className="flex items-center gap-4 mt-4 text-sm text-white/40">
           <span>Lesezeit: 16 min</span>
           <span className="w-1 h-1 rounded-full bg-white/20" />
-          <span>Zuletzt aktualisiert: Maerz 2026</span>
+          <span>Zuletzt aktualisiert: März 2026</span>
         </div>
       </div>
 
       <div className="prose prose-invert max-w-none">
         <Callout type="summary" title="Auf einen Blick">
           <p>
-            Ab August 2026 muessen Unternehmen, die AI-Agenten mit Kundenkontakt einsetzen,
-            umfangreiche Compliance-Anforderungen erfuellen. Dieses Framework verbindet
+            Ab August 2026 müssen Unternehmen, die AI-Agenten mit Kundenkontakt einsetzen,
+            umfangreiche Compliance-Anforderungen erfüllen. Dieses Framework verbindet
             EU AI Act und DSGVO zu einem praktischen Prozess: Risikobewertung, Dokumentengenerierung,
-            Killswitch-Konfiguration und manipulationssichere Hash Chain. Ein Wizard fuehrt
+            Killswitch-Konfiguration und manipulationssichere Hash Chain. Ein Wizard führt
             durch den gesamten Prozess.
           </p>
         </Callout>
@@ -48,15 +48,15 @@ export default function AIAgentLegalFrameworkPage() {
           </h2>
           <p className="text-white/70 leading-relaxed">
             Wer einen AI-Agenten produktiv einsetzt, muss zwei Regelwerke gleichzeitig
-            erfuellen: den EU AI Act (Transparenz, Risikobewertung, Logging) und die
+            erfüllen: den EU AI Act (Transparenz, Risikobewertung, Logging) und die
             DSGVO (Datenschutz, Verarbeitungsverzeichnis, Betroffenenrechte). Für
             Grossunternehmen gibt es teure Compliance-Plattformen (50.000+ EUR/Jahr).
-            Für KMUs existiert Stand Maerz 2026 kein vergleichbares Produkt.
+            Für KMUs existiert Stand März 2026 kein vergleichbares Produkt.
           </p>
           <p className="text-white/70 leading-relaxed mt-4">
             Das Ergebnis: Die meisten KMUs ignorieren das Thema oder erstellen
             Dokumente manuell in Word — ohne Zusammenhang zwischen den Dokumenten
-            und ohne Verbindung zur tatsaechlichen Agent-Konfiguration.
+            und ohne Verbindung zur tatsächlichen Agent-Konfiguration.
           </p>
 
           <Callout type="warning" title="Deadline: 2. August 2026">
@@ -84,16 +84,16 @@ export default function AIAgentLegalFrameworkPage() {
               ["Automatisches Log Retention (min. 6 Monate)", "EU AI Act Art. 12", "02.08.2026", "15 Mio. EUR / 3%"],
               ["Verarbeitungsverzeichnis", "DSGVO Art. 30", "JETZT", "20 Mio. EUR / 4%"],
               ["DPIA vor Inbetriebnahme", "DSGVO Art. 35", "JETZT", "20 Mio. EUR / 4%"],
-              ["Recht auf menschliche Überpruefung", "DSGVO Art. 22", "JETZT", "20 Mio. EUR / 4%"],
+              ["Recht auf menschliche Überprüfung", "DSGVO Art. 22", "JETZT", "20 Mio. EUR / 4%"],
             ]}
           />
 
           <Callout type="info" title="Österreich-spezifisch">
             <p>
-              In Österreich ist die KI-Servicestelle bei der RTR die nationale AI-Behoerde.
-              Die DSB (Datenschutzbehoerde) ist für DSGVO-Enforcement zustaendig.
-              Compliance-Dokumente muessen auf Deutsch verfügbar sein und innerhalb
-              von 72 Stunden vorgelegt werden koennen.
+              In Österreich ist die KI-Servicestelle bei der RTR die nationale AI-Behörde.
+              Die DSB (Datenschutzbehörde) ist für DSGVO-Enforcement zuständig.
+              Compliance-Dokumente müssen auf Deutsch verfügbar sein und innerhalb
+              von 72 Stunden vorgelegt werden können.
             </p>
           </Callout>
         </section>
@@ -107,7 +107,7 @@ export default function AIAgentLegalFrameworkPage() {
             Das Kernprinzip: Compliance-Dokumente und Agent-Konfiguration werden
             im selben Prozess erzeugt. Nicht zuerst den Agent aufsetzen und dann
             die Dokumentation nachziehen — sondern beides gleichzeitig. Nur so
-            stimmen Realitaet und Dokumentation überein.
+            stimmen Realität und Dokumentation überein.
           </p>
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6 space-y-4">
@@ -116,7 +116,7 @@ export default function AIAgentLegalFrameworkPage() {
               { step: "1", title: "Agent Identity", desc: "Name, E-Mail, Firma, Rolle und Aufgaben definieren" },
               { step: "2", title: "Risk Assessment", desc: "Fragebogen: Limited Risk oder High Risk? 10-15 Fragen" },
               { step: "3", title: "Scope & Berechtigungen", desc: "Welche Systeme? Read/Write/Create pro System" },
-              { step: "4", title: "DSGVO Compliance", desc: "DPIA, Verarbeitungsverzeichnis, Privacy Notice (auto-befuellt)" },
+              { step: "4", title: "DSGVO Compliance", desc: "DPIA, Verarbeitungsverzeichnis, Privacy Notice (auto-befüllt)" },
               { step: "5", title: "EU AI Act Compliance", desc: "Art. 50 Transparency Kit: E-Mail-Signatur, Social Bio, Voice-Ansage" },
               { step: "6", title: "Killswitch & Human Oversight", desc: "3-Level Killswitch: PAUSE, STOP, DECOMMISSION" },
               { step: "7", title: "Agent-Konfiguration generieren", desc: "SOUL.md, Network Policy, Vault, Start-Script" },
@@ -163,8 +163,8 @@ export default function AIAgentLegalFrameworkPage() {
               Ein Agent, der E-Mails beantwortet, Social Media postet oder
               Kundenanfragen weiterleitet, ist typischerweise Limited Risk.
               Das bedeutet: Transparenzpflichten (Kennzeichnung), aber keine
-              DPIA nach EU AI Act Art. 9 und keine Konformitaetsbewertung.
-              Die DSGVO-DPIA kann trotzdem noetig sein.
+              DPIA nach EU AI Act Art. 9 und keine Konformitätsbewertung.
+              Die DSGVO-DPIA kann trotzdem nötig sein.
             </p>
           </Callout>
         </section>
@@ -175,21 +175,21 @@ export default function AIAgentLegalFrameworkPage() {
             Die Compliance-Dokumente
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
-            Ein vollstaendiges Compliance-Paket besteht aus mindestens 7 Dokumenten.
+            Ein vollständiges Compliance-Paket besteht aus mindestens 7 Dokumenten.
             Jedes Dokument hat eine klare Rechtsgrundlage und einen definierten Zweck.
           </p>
 
           <ComparisonTable
             headers={["Dokument", "Rechtsquelle", "Zweck"]}
             rows={[
-              ["Risk Assessment", "AI Act Art. 6", "Limited vs. High Risk Einstufung mit Begruendung"],
-              ["DPIA", "DSGVO Art. 35", "Datenschutz-Folgenabschaetzung, vorbefuellt mit Agent-Scope"],
+              ["Risk Assessment", "AI Act Art. 6", "Limited vs. High Risk Einstufung mit Begründung"],
+              ["DPIA", "DSGVO Art. 35", "Datenschutz-Folgenabschätzung, vorbefüllt mit Agent-Scope"],
               ["Verarbeitungsverzeichnis", "DSGVO Art. 30", "Alle Datenverarbeitungen des Agents"],
               ["Privacy Notice", "DSGVO Art. 13/14", "Information für betroffene Personen"],
               ["Art. 50 Transparency Kit", "AI Act Art. 50", "E-Mail-Signatur, Social Bio, Voice-Ansage, Meta-Tags"],
               ["Killswitch & Oversight", "AI Act Art. 14", "3-Level Killswitch, Verantwortliche, Eskalation"],
               ["Log Policy", "AI Act Art. 12", "Was wird geloggt, Aufbewahrung, Zugriff"],
-              ["Escalation Policy", "DSGVO Art. 22", "Recht auf menschliche Überpruefung"],
+              ["Escalation Policy", "DSGVO Art. 22", "Recht auf menschliche Überprüfung"],
               ["Onboarding-Protokoll", "Gesamt", "Wer, was, wann, Killswitch-Verantwortliche, Freigabe"],
             ]}
           />
@@ -201,24 +201,24 @@ export default function AIAgentLegalFrameworkPage() {
             3-Level Killswitch: Human Oversight nach Art. 14
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
-            Der EU AI Act verlangt, dass Menschen AI-Systeme jederzeit stoppen koennen.
+            Der EU AI Act verlangt, dass Menschen AI-Systeme jederzeit stoppen können.
             Ein gestuftes Killswitch-System macht das praktikabel.
           </p>
 
           <ComparisonTable
             headers={["Level", "Aktion", "Wann einsetzen"]}
             rows={[
-              ["Level 1: PAUSE", "Agent stoppt, sichert State, wartet auf Resume", "Agent verhaelt sich unerwartet, Situation unklar"],
-              ["Level 2: STOP", "Sofort beenden, alle laufenden Aktionen abbrechen", "Agent macht Fehler, die Schaden anrichten koennten"],
+              ["Level 1: PAUSE", "Agent stoppt, sichert State, wartet auf Resume", "Agent verhält sich unerwartet, Situation unklar"],
+              ["Level 2: STOP", "Sofort beenden, alle laufenden Aktionen abbrechen", "Agent macht Fehler, die Schaden anrichten könnten"],
               ["Level 3: DECOMMISSION", "Permanent deaktivieren, Keys revoken, Logs archivieren", "Agent wird nicht mehr gebraucht oder ist kompromittiert"],
             ]}
           />
 
-          <Callout type="info" title="Wer darf den Killswitch betaetigen?">
+          <Callout type="info" title="Wer darf den Killswitch betätigen?">
             <p>
-              Das wird im Wizard definiert. Typisch: Der Owner (Geschaeftsfuehrer)
-              kann alle 3 Level. Team-Mitglieder koennen Level 1 (PAUSE).
-              Automatische Systeme koennen Level 1 bei Anomalie-Erkennung ausloesen.
+              Das wird im Wizard definiert. Typisch: Der Owner (Geschäftsführer)
+              kann alle 3 Level. Team-Mitglieder können Level 1 (PAUSE).
+              Automatische Systeme können Level 1 bei Anomalie-Erkennung auslösen.
               Level 3 (DECOMMISSION) sollte immer manuell sein.
             </p>
           </Callout>
@@ -230,8 +230,8 @@ export default function AIAgentLegalFrameworkPage() {
             Hash Chain: Manipulationssichere Dokumentation
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
-            Compliance-Dokumente muessen nachweisbar unveraendert sein. Eine SHA-256
-            Hash Chain stellt sicher, dass jede Aenderung nachvollziehbar ist.
+            Compliance-Dokumente müssen nachweisbar unverändert sein. Eine SHA-256
+            Hash Chain stellt sicher, dass jede Änderung nachvollziehbar ist.
             Wird ein altes Dokument manipuliert, brechen alle nachfolgenden Hashes.
           </p>
 
@@ -243,7 +243,7 @@ Dokument v2  →  SHA-256: d4e5f6...  (previous: a1b2c3...)
 Dokument v3  →  SHA-256: g7h8i9...  (previous: d4e5f6...)
 
 Manipulation von v1?
-→ Hash von v1 aendert sich
+→ Hash von v1 ändert sich
 → previous_hash von v2 stimmt nicht mehr
 → Kette ist gebrochen = Manipulation erkannt`}</code>
             </pre>
@@ -251,9 +251,9 @@ Manipulation von v1?
 
           <Callout type="info" title="Kein Blockchain, kein ID Austria">
             <p>
-              Eine Hash Chain ist KEINE Blockchain. Sie laeuft lokal, braucht kein
+              Eine Hash Chain ist KEINE Blockchain. Sie läuft lokal, braucht kein
               Netzwerk und keine Kryptographie-Infrastruktur. Sie beweist nur, dass
-              Dokumente nicht nachtraeglich veraendert wurden. Für rechtsverbindliche
+              Dokumente nicht nachträglich verändert wurden. Für rechtsverbindliche
               elektronische Signaturen braucht man ID Austria / eIDAS — das ist ein
               separates Thema.
             </p>
@@ -266,7 +266,7 @@ Manipulation von v1?
             Marktlage: Kein KMU-Produkt vorhanden
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
-            Stand Maerz 2026 gibt es für KMUs kein Compliance-Tool, das speziell
+            Stand März 2026 gibt es für KMUs kein Compliance-Tool, das speziell
             auf AI-Agenten zugeschnitten ist.
           </p>
 
@@ -284,7 +284,7 @@ Manipulation von v1?
             <p>
               Studien zeigen: Nur 56 von 100 DACH-KMUs kennen den EU AI Act
               (verglichen mit 82 von 100 bei der DSGVO). Das Bewusstsein ist niedrig,
-              die Deadline nahe. Wer jetzt anfaengt, hat einen Vorsprung.
+              die Deadline nahe. Wer jetzt anfängt, hat einen Vorsprung.
             </p>
           </Callout>
         </section>
@@ -294,9 +294,9 @@ Manipulation von v1?
           points={[
             "EU AI Act Art. 50 Deadline: 2. August 2026. Transparenzpflichten für ALLE AI-Systeme mit Kundenkontakt.",
             "DSGVO-Pflichten (Art. 30, 35) gelten bereits JETZT. Eine DPIA ist vor der Inbetriebnahme eines AI-Agenten Pflicht.",
-            "Compliance-Dokumente und Agent-Konfiguration muessen im selben Prozess entstehen — sonst stimmt die Doku nicht mit der Realitaet überein.",
+            "Compliance-Dokumente und Agent-Konfiguration müssen im selben Prozess entstehen — sonst stimmt die Doku nicht mit der Realität überein.",
             "3-Level Killswitch (PAUSE, STOP, DECOMMISSION) ist der praktische Weg zur Human Oversight nach Art. 14.",
-            "Hash Chain (SHA-256) macht Compliance-Dokumente manipulationssicher — ohne Blockchain, lokal ausfuehrbar.",
+            "Hash Chain (SHA-256) macht Compliance-Dokumente manipulationssicher — ohne Blockchain, lokal ausführbar.",
             "Für KMUs existiert aktuell kein Compliance-Tool. Wer jetzt handelt, hat Vorsprung vor der Deadline.",
           ]}
         />
@@ -320,7 +320,7 @@ Manipulation von v1?
               <a href="/compliance/eu-ai-act" className="text-blue-400 hover:underline">EU AI Act Überblick</a> — Risikoklassen und Pflichten
             </li>
             <li>
-              <a href="/compliance/dpia" className="text-blue-400 hover:underline">Datenschutz-Folgenabschaetzung (DPIA)</a> — Wann Pflicht, wie durchfuehren
+              <a href="/compliance/dpia" className="text-blue-400 hover:underline">Datenschutz-Folgenabschätzung (DPIA)</a> — Wann Pflicht, wie durchführen
             </li>
             <li>
               <a href="/compliance/dsgvo-grundlagen" className="text-blue-400 hover:underline">DSGVO Grundlagen</a> — Art. 30, Art. 35

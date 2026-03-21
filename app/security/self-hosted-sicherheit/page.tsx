@@ -23,13 +23,13 @@ export default function SelfHostedSicherheitPage() {
         </h1>
         <p className="text-lg text-white/60 mt-3 max-w-2xl">
           Wenn du AI-Services selbst hostest, bist du für die Sicherheit
-          verantwortlich. Kein Cloud-Anbieter faengt Fehler für dich ab. Hier
+          verantwortlich. Kein Cloud-Anbieter fängt Fehler für dich ab. Hier
           sind die 6 Schichten, die deine Infrastruktur schuetzen.
         </p>
         <div className="flex items-center gap-4 mt-4 text-sm text-white/40">
           <span>Lesezeit: 15 min</span>
           <span className="w-1 h-1 rounded-full bg-white/20" />
-          <span>Zuletzt aktualisiert: Maerz 2026</span>
+          <span>Zuletzt aktualisiert: März 2026</span>
         </div>
       </div>
 
@@ -39,7 +39,7 @@ export default function SelfHostedSicherheitPage() {
             Self-Hosting bedeutet volle Kontrolle — aber auch volle
             Verantwortung. Sicherheit ist kein einzelnes Feature sondern ein
             Schichtenmodell: 6 Layer von der physischen Infrastruktur bis zum
-            Monitoring. Jede Schicht haelt etwas anderes auf. Keine alleine
+            Monitoring. Jede Schicht hält etwas anderes auf. Keine alleine
             reicht.
           </p>
         </Callout>
@@ -50,7 +50,7 @@ export default function SelfHostedSicherheitPage() {
             Die 6 Sicherheitsschichten
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
-            Jede Schicht adressiert eine andere Angriffsflaeche. Wenn Layer 1
+            Jede Schicht adressiert eine andere Angriffsfläche. Wenn Layer 1
             versagt, muss Layer 2 greifen. Das ist Defense in Depth.
           </p>
 
@@ -72,11 +72,11 @@ export default function SelfHostedSicherheitPage() {
             headers={["Layer", "Schuetzt gegen", "Werkzeuge"]}
             rows={[
               ["1. Netzwerk", "Unbefugter Zugriff von aussen", "Firewall (UFW/iptables), VLAN, VPN"],
-              ["2. SSH & Authentifizierung", "Brute Force, schwache Passwoerter", "SSH Key-Only, fail2ban, 2FA"],
+              ["2. SSH & Authentifizierung", "Brute Force, schwache Passwörter", "SSH Key-Only, fail2ban, 2FA"],
               ["3. Host-Betriebssystem", "Veraltete Software, Kernel-Exploits", "Unattended Upgrades, CIS Benchmark"],
               ["4. Container & Services", "Privilege Escalation, ungesicherte APIs", "Rootless Container, Read-Only FS, Secrets"],
               ["5. Anwendung", "Prompt Injection, Data Leakage", "Input Validation, Output Sanitizer, Rate Limits"],
-              ["6. Monitoring & Response", "Unbemerkte Einbrueche", "Loki, Grafana Alerts, Audit Logs"],
+              ["6. Monitoring & Response", "Unbemerkte Einbrüche", "Loki, Grafana Alerts, Audit Logs"],
             ]}
           />
         </section>
@@ -89,7 +89,7 @@ export default function SelfHostedSicherheitPage() {
           <p className="text-white/70 leading-relaxed mb-4">
             Dein lokaler AI-Stack sollte NICHT direkt aus dem Internet
             erreichbar sein. Die wichtigste Regel: Default Deny — alles ist
-            gesperrt, du oeffnest gezielt was noetig ist.
+            gesperrt, du öffnest gezielt was nötig ist.
           </p>
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
@@ -111,10 +111,10 @@ sudo ufw status verbose`}</code>
             </pre>
           </div>
 
-          <Callout type="warning" title="Ports NICHT oeffentlich freigeben">
+          <Callout type="warning" title="Ports NICHT öffentlich freigeben">
             <p>
               Services wie Ollama (11434), n8n (5678), Grafana (3000),
-              PostgreSQL (5432) gehoeren NICHT ins Internet. Wenn du externen
+              PostgreSQL (5432) gehören NICHT ins Internet. Wenn du externen
               Zugriff brauchst: VPN oder Reverse Proxy mit Authentifizierung
               (z.B. Cloudflare Tunnel oder Traefik mit BasicAuth).
             </p>
@@ -124,8 +124,8 @@ sudo ufw status verbose`}</code>
             <p>
               Wenn dein Router VLANs unterstützt, trenne dein AI-Lab vom
               restlichen Netzwerk. AI-Server in VLAN 10, IoT in VLAN 20,
-              regulaere Geraete in VLAN 1. So kann ein kompromittiertes
-              IoT-Geraet nicht auf deine AI-Infrastruktur zugreifen.
+              reguläre Geräte in VLAN 1. So kann ein kompromittiertes
+              IoT-Gerät nicht auf deine AI-Infrastruktur zugreifen.
             </p>
           </Callout>
         </section>
@@ -137,11 +137,11 @@ sudo ufw status verbose`}</code>
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
             SSH ist der Hauptzugang zu deinen Servern. Falsch konfiguriert
-            ist es das groesste Einfallstor.
+            ist es das größte Einfallstor.
           </p>
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
-            <p className="text-white font-medium mb-3">SSH haerten (/etc/ssh/sshd_config)</p>
+            <p className="text-white font-medium mb-3">SSH härten (/etc/ssh/sshd_config)</p>
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`# Passwort-Login deaktivieren
 PasswordAuthentication no
@@ -178,7 +178,7 @@ sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
 sudo systemctl enable fail2ban
 sudo systemctl start fail2ban
 
-# Status pruefen
+# Status prüfen
 sudo fail2ban-client status sshd`}</code>
             </pre>
           </div>
@@ -213,7 +213,7 @@ sudo fail2ban-client status sshd`}</code>
               ["Auto-Updates", "sudo apt install unattended-upgrades", "Sicherheits-Patches automatisch einspielen"],
               ["Nicht-root User", "sudo adduser deploy && sudo usermod -aG docker deploy", "Minimale Rechte, kein permanenter root"],
               ["Kernel-Updates", "sudo apt upgrade linux-generic", "Kernel-Exploits schliessen"],
-              ["Unnoetige Services", "sudo systemctl disable bluetooth cups", "Angriffsflaeche reduzieren"],
+              ["Unnötige Services", "sudo systemctl disable bluetooth cups", "Angriffsfläche reduzieren"],
             ]}
           />
 
@@ -224,10 +224,10 @@ sudo fail2ban-client status sshd`}</code>
             headers={["Prinzip", "Umsetzung", "Beispiel"]}
             rows={[
               ["Read-Only Root", "read_only: true in compose", "Verhindert Dateisystem-Manipulation"],
-              ["Kein Root im Container", "user: '1000:1000' in compose", "Container laeuft als normaler User"],
+              ["Kein Root im Container", "user: '1000:1000' in compose", "Container läuft als normaler User"],
               ["Secrets Management", "Docker Secrets oder Vault", "Keine Credentials in Umgebungsvariablen"],
               ["Resource Limits", "mem_limit: 4g, cpus: '2.0'", "Container kann nicht den Host überlasten"],
-              ["Network Isolation", "Eigene Docker-Netzwerke pro Stack", "Services sehen nur was sie muessen"],
+              ["Network Isolation", "Eigene Docker-Netzwerke pro Stack", "Services sehen nur was sie müssen"],
             ]}
           />
 
@@ -251,7 +251,7 @@ sudo fail2ban-client status sshd`}</code>
             Layer 5: Anwendungssicherheit für AI
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
-            AI-Anwendungen haben eigene Sicherheitsrisiken. LLMs koennen
+            AI-Anwendungen haben eigene Sicherheitsrisiken. LLMs können
             manipuliert werden (Prompt Injection) und sensible Daten in ihren
             Antworten leaken.
           </p>
@@ -269,7 +269,7 @@ sudo fail2ban-client status sshd`}</code>
 
           <Callout type="warning" title="Output Sanitizer ist Pflicht">
             <p>
-              LLMs koennen dazu gebracht werden, Umgebungsvariablen, API Keys
+              LLMs können dazu gebracht werden, Umgebungsvariablen, API Keys
               oder System-Informationen auszugeben. JEDE Antwort muss durch
               einen Sanitizer laufen, der Patterns wie API Keys, IP-Adressen,
               und Dateipfade erkennt und entfernt. Das ist keine
@@ -313,7 +313,7 @@ sudo fail2ban-client status sshd`}</code>
               >
                 Grafana Homelab Dashboard Pack
               </a>{" "}
-              enthaelt vorgefertigte Security-Panels.
+              enthält vorgefertigte Security-Panels.
             </p>
           </Callout>
         </section>
@@ -321,8 +321,8 @@ sudo fail2ban-client status sshd`}</code>
         {/* Key Takeaway */}
         <KeyTakeaway
           points={[
-            "Sicherheit ist ein Schichtenmodell. 6 Layer, jede haelt etwas anderes auf. Keine alleine reicht.",
-            "Default Deny bei der Firewall. Nur oeffnen was gebraucht wird. AI-Ports NICHT ins Internet.",
+            "Sicherheit ist ein Schichtenmodell. 6 Layer, jede hält etwas anderes auf. Keine alleine reicht.",
+            "Default Deny bei der Firewall. Nur öffnen was gebraucht wird. AI-Ports NICHT ins Internet.",
             "SSH Key-Only + fail2ban. Kein Passwort-Login, automatische Sperre nach 3 Fehlversuchen.",
             "Output Sanitizer ist Pflicht für AI-Anwendungen. LLMs leaken sonst Secrets und System-Infos.",
             "Monitoring mit Alerting. Ohne Monitoring weisst du nicht, ob jemand schon drin ist.",
@@ -337,7 +337,7 @@ sudo fail2ban-client status sshd`}</code>
               <a href="https://www.cisecurity.org/cis-benchmarks" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
                 CIS Benchmarks
               </a>{" "}
-              — Industriestandard für Betriebssystem-Haertung
+              — Industriestandard für Betriebssystem-Härtung
             </li>
             <li>
               <a href="https://docs.docker.com/engine/security/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
@@ -349,7 +349,7 @@ sudo fail2ban-client status sshd`}</code>
               <a href="https://owasp.org/www-project-top-ten/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
                 OWASP Top 10
               </a>{" "}
-              — Die haeufigsten Sicherheitsrisiken in Webanwendungen
+              — Die häufigsten Sicherheitsrisiken in Webanwendungen
             </li>
             <li>
               <a href="https://www.fail2ban.org/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">

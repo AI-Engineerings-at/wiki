@@ -8,7 +8,7 @@ import { RelatedArticles } from "../../../components/RelatedArticles"
 export const metadata: Metadata = {
   title: "Was ist ein LLM? Large Language Models erklärt | AI Engineering Wiki",
   description:
-    "Was ist ein Large Language Model (LLM)? Wie funktionieren Transformer, Tokens und Inferenz? Modellgroessen, VRAM-Anforderungen und praktische Tipps.",
+    "Was ist ein Large Language Model (LLM)? Wie funktionieren Transformer, Tokens und Inferenz? Modellgrößen, VRAM-Anforderungen und praktische Tipps.",
 }
 
 export default function WasIstEinLLMPage() {
@@ -27,7 +27,7 @@ export default function WasIstEinLLMPage() {
         <div className="flex items-center gap-4 mt-4 text-sm text-white/40">
           <span>Lesezeit: 12 min</span>
           <span className="w-1 h-1 rounded-full bg-white/20" />
-          <span>Zuletzt aktualisiert: Maerz 2026</span>
+          <span>Zuletzt aktualisiert: März 2026</span>
         </div>
       </div>
 
@@ -37,9 +37,9 @@ export default function WasIstEinLLMPage() {
           <p>
             Ein Large Language Model (LLM) ist ein neuronales Netz, das auf riesigen
             Textmengen trainiert wurde und Sprache versteht, generiert und übersetzt.
-            LLMs sagen Wort für Wort vorher, welches Token als naechstes kommen
-            sollte. Sie koennen lokal auf eigener Hardware laufen — ohne Cloud, ohne
-            Abhaengigkeit.
+            LLMs sagen Wort für Wort vorher, welches Token als nächstes kommen
+            sollte. Sie können lokal auf eigener Hardware laufen — ohne Cloud, ohne
+            Abhängigkeit.
           </p>
         </Callout>
 
@@ -49,15 +49,15 @@ export default function WasIstEinLLMPage() {
             Was genau ist ein LLM?
           </h2>
           <p className="text-white/70 leading-relaxed">
-            Ein Large Language Model ist eine Form von kuenstlicher Intelligenz, die
+            Ein Large Language Model ist eine Form von künstlicher Intelligenz, die
             auf der Transformer-Architektur basiert. Das Modell wurde mit Milliarden
-            von Texten aus dem Internet trainiert — Buecher, Wikipedia, Foren,
+            von Texten aus dem Internet trainiert — Bücher, Wikipedia, Foren,
             wissenschaftliche Arbeiten — und hat dabei statistische Muster in Sprache
             gelernt.
           </p>
           <p className="text-white/70 leading-relaxed mt-4">
-            Der Kern: Ein LLM berechnet für jedes moegliche naechste Wort eine
-            Wahrscheinlichkeit und waehlt dann das wahrscheinlichste. Das klingt
+            Der Kern: Ein LLM berechnet für jedes mögliche nächste Wort eine
+            Wahrscheinlichkeit und wählt dann das wahrscheinlichste. Das klingt
             simpel, aber bei 70 Milliarden Parametern und 128.000 Tokens Kontext
             entstehen erstaunlich gute Ergebnisse.
           </p>
@@ -71,7 +71,7 @@ export default function WasIstEinLLMPage() {
           <p className="text-white/70 leading-relaxed mb-4">
             Seit dem Paper &quot;Attention is All You Need&quot; (2017) basieren alle
             modernen LLMs auf Transformern. Die Kernidee: Jedes Wort im Text &quot;schaut&quot;
-            auf alle anderen Woerter gleichzeitig und lernt, welche Zusammenhaenge
+            auf alle anderen Wörter gleichzeitig und lernt, welche Zusammenhänge
             wichtig sind.
           </p>
 
@@ -105,7 +105,7 @@ ff --> out
           <Callout type="info" title="Was ist Self-Attention?">
             <p>
               Self-Attention ist der Mechanismus, mit dem das Modell versteht, welche
-              Woerter in einem Satz zusammengehoeren. Wenn du schreibst &quot;Der Hund
+              Wörter in einem Satz zusammengehören. Wenn du schreibst &quot;Der Hund
               jagte die Katze, weil er hungrig war&quot; — Attention hilft dem Modell zu
               verstehen, dass &quot;er&quot; sich auf &quot;Hund&quot; bezieht, nicht auf &quot;Katze&quot;.
             </p>
@@ -118,7 +118,7 @@ ff --> out
             Tokens: Wie LLMs Text verarbeiten
           </h2>
           <p className="text-white/70 leading-relaxed">
-            LLMs lesen keine Woerter — sie lesen Tokens. Ein Token ist ein
+            LLMs lesen keine Wörter — sie lesen Tokens. Ein Token ist ein
             Textfragment, oft ein Wort oder Wort-Teil. &quot;Datenschutzgrundverordnung&quot;
             wird zum Beispiel in 3-4 Tokens zerlegt. Englische Texte brauchen weniger
             Tokens als deutsche, weil die meisten Modelle auf englischen Daten
@@ -152,8 +152,8 @@ llm --> out3
 
           <Callout type="tip" title="Faustregel für Tokens">
             <p>
-              1 Token ist ungefaehr 3/4 eines englischen Wortes. Für Deutsch rechne
-              mit 1 Token pro halbes Wort. Ein typischer Absatz (100 Woerter) sind ca.
+              1 Token ist ungefähr 3/4 eines englischen Wortes. Für Deutsch rechne
+              mit 1 Token pro halbes Wort. Ein typischer Absatz (100 Wörter) sind ca.
               130-150 Tokens. Context Window von 128K = ca. 200 Seiten Text.
             </p>
           </Callout>
@@ -165,7 +165,7 @@ llm --> out3
             LLM vs. Suchmaschine
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
-            Ein haeufiges Missverstaendnis: LLMs sind keine Suchmaschinen. Sie
+            Ein häufiges Missverständnis: LLMs sind keine Suchmaschinen. Sie
             &quot;wissen&quot; nichts — sie berechnen, welche Antwort statistisch am
             wahrscheinlichsten ist.
           </p>
@@ -179,18 +179,18 @@ llm --> out3
                 "Trainings-Daten (Stichtag)",
               ],
               [
-                "Aktualitaet",
+                "Aktualität",
                 "Echtzeit",
                 "Wissen endet am Trainings-Cutoff",
               ],
               [
                 "Antwortformat",
                 "Links zu Webseiten",
-                "Fliesstext, Code, Tabellen",
+                "Fließtext, Code, Tabellen",
               ],
               [
                 "Genauigkeit",
-                "Quelle pruefbar",
+                "Quelle prüfbar",
                 "Kann halluzinieren (erfundene Fakten)",
               ],
               [
@@ -210,10 +210,10 @@ llm --> out3
         {/* Section 5: Halluzinationen */}
         <section className="mt-10">
           <h2 className="text-2xl font-bold text-white mb-4">
-            Halluzinationen: Wenn LLMs luegen
+            Halluzinationen: Wenn LLMs lügen
           </h2>
           <p className="text-white/70 leading-relaxed">
-            LLMs koennen Fakten erfinden, die überzeugend klingen aber falsch sind.
+            LLMs können Fakten erfinden, die überzeugend klingen aber falsch sind.
             Das passiert, weil sie nicht &quot;wissen&quot; — sie berechnen statistische
             Wahrscheinlichkeiten. Wenn keine gute Antwort in den Trainingsdaten war,
             generieren sie trotzdem etwas Plausibles.
@@ -222,7 +222,7 @@ llm --> out3
           <Callout type="warning" title="Halluzinations-Risiko">
             <p>
               LLMs erfinden Zitate, Gesetze, URLs und Statistiken. Besonders
-              gefaehrlich bei: juristischen Texten, medizinischen Ratschlaegen,
+              gefährlich bei: juristischen Texten, medizinischen Ratschlägen,
               historischen Fakten und technischen Spezifikationen. IMMER die Ausgabe
               verifizieren, bevor du sie weiterverwendest.
             </p>
@@ -231,7 +231,7 @@ llm --> out3
           <Callout type="tip" title="Halluzinationen reduzieren">
             <p>
               <strong>RAG (Retrieval Augmented Generation)</strong> ist die beste
-              Methode: Statt das Modell &quot;raten&quot; zu lassen, fuetterst du es mit echten
+              Methode: Statt das Modell &quot;raten&quot; zu lassen, fütterst du es mit echten
               Dokumenten als Kontext. Das Modell antwortet dann basierend auf deinen
               Daten statt auf seinen Trainingsdaten. Mehr dazu im{" "}
               <a
@@ -245,10 +245,10 @@ llm --> out3
           </Callout>
         </section>
 
-        {/* Section 6: Modellgroessen */}
+        {/* Section 6: Modellgrößen */}
         <section className="mt-10">
           <h2 className="text-2xl font-bold text-white mb-4">
-            Modellgroessen: Von 7B bis 70B
+            Modellgrößen: Von 7B bis 70B
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
             &quot;B&quot; steht für Milliarden Parameter. Mehr Parameter bedeutet mehr
@@ -258,7 +258,7 @@ llm --> out3
 
           <ComparisonTable
             headers={[
-              "Groesse",
+              "Größe",
               "VRAM (Q4)",
               "Speed (RTX 3090)",
               "Qualität",
@@ -321,16 +321,16 @@ llm --> out3
             Quantisierung: Grosse Modelle auf kleiner Hardware
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
-            Quantisierung reduziert die Praezision der Modell-Gewichte von 32-Bit
+            Quantisierung reduziert die Präzision der Modell-Gewichte von 32-Bit
             Gleitkommazahlen auf 4 oder 8 Bit. Das halbiert den VRAM-Bedarf bei
             minimalen Qualitätsverlusten.
           </p>
 
           <ComparisonTable
-            headers={["Format", "Groesse vs. Original", "Qualität", "Empfehlung"]}
+            headers={["Format", "Größe vs. Original", "Qualität", "Empfehlung"]}
             rows={[
               ["FP16 / BF16", "50%", "100% (verlustfrei)", "Wenn VRAM kein Problem"],
-              ["Q5_K_M", "~35%", "~99%", "Hoechste Qualität bei Kompression"],
+              ["Q5_K_M", "~35%", "~99%", "Höchste Qualität bei Kompression"],
               [
                 "Q4_K_M",
                 "~25%",
@@ -348,7 +348,7 @@ llm --> out3
 
           <Callout type="info">
             <p>
-              Bei Ollama sind die meisten Modelle standardmaessig in Q4_K_M
+              Bei Ollama sind die meisten Modelle standardmäßig in Q4_K_M
               quantisiert. Du musst nichts extra konfigurieren — einfach{" "}
               <code className="bg-white/10 px-1.5 py-0.5 rounded text-white/90">
                 ollama run llama3.3
@@ -373,9 +373,9 @@ llm --> out3
             rows={[
               ["Qualität", "Beste verfügbare Modelle", "Für einfache Tasks ~95% gleichwertig, bei Reasoning 20-25% schlechter"],
               ["Datenschutz", "Daten gehen an Dritte (USA)", "Daten bleiben bei dir (DSGVO)"],
-              ["Kosten pro Monat", "EUR 50-500+ (nutzungsabhaengig)", "~EUR 49 Strom (AT, 50% Last) + EUR 750-2.000 Hardware einmalig"],
-              ["Hardware noetig", "Nein", "GPU ab EUR 350, RTX 3090 gebraucht ab EUR 750"],
-              ["Verfuegbarkeit", "Internet noetig", "Laeuft offline"],
+              ["Kosten pro Monat", "EUR 50-500+ (nutzungsabhängig)", "~EUR 49 Strom (AT, 50% Last) + EUR 750-2.000 Hardware einmalig"],
+              ["Hardware nötig", "Nein", "GPU ab EUR 350, RTX 3090 gebraucht ab EUR 750"],
+              ["Verfügbarkeit", "Internet nötig", "Läuft offline"],
               ["Wartung", "Keine", "Updates, Monitoring (~1h/Monat)"],
             ]}
           />
@@ -384,8 +384,8 @@ llm --> out3
             Ehrlicher Benchmark: Cloud vs. Lokal
           </h3>
           <p className="text-white/70 leading-relaxed mb-4">
-            Die Qualitätsluecke zwischen Cloud-Modellen und lokalen Modellen ist real.
-            Hier sind ehrliche Vergleichswerte (Stand Maerz 2026):
+            Die Qualitätslücke zwischen Cloud-Modellen und lokalen Modellen ist real.
+            Hier sind ehrliche Vergleichswerte (Stand März 2026):
           </p>
 
           <ComparisonTable
@@ -402,34 +402,34 @@ llm --> out3
             <p>
               Llama 3.3 70B übertrifft GPT-4o in einigen Benchmarks (MMLU, HumanEval, IFEval).
               Aber: 70B passt NICHT auf eine einzelne 24 GB GPU. Für lokale Nutzung sind
-              8B-34B Modelle realistisch — und dort ist die Luecke zu Cloud-Modellen groesser,
+              8B-34B Modelle realistisch — und dort ist die Lücke zu Cloud-Modellen größer,
               besonders bei komplexem Reasoning.
             </p>
           </Callout>
 
-          <Callout type="warning" title="Die Qualitätsluecke ist REAL">
+          <Callout type="warning" title="Die Qualitätslücke ist REAL">
             <p>
-              Vor allem bei komplexem Reasoning (logische Schluesse, mehrstufige Analyse,
+              Vor allem bei komplexem Reasoning (logische Schlüsse, mehrstufige Analyse,
               juristische Argumentation) liegt Cloud deutlich vorne. Lokale Modelle sind
               dort nicht &quot;fast so gut&quot; — sie sind messbar schlechter. Das zu
-              verschweigen waere unehrlich.
+              verschweigen wäre unehrlich.
             </p>
           </Callout>
 
           <Callout type="tip" title="Wo lokal trotzdem reicht">
             <p>
-              Für 80% der alltaeglichen Tasks (Daten-Extraktion, Klassifikation,
+              Für 80% der alltäglichen Tasks (Daten-Extraktion, Klassifikation,
               einfache Q&amp;A, Zusammenfassungen) sind lokale Modelle ausreichend.
               Für komplexes Reasoning: Cloud-API als Backup nutzen. Der ehrlichste
-              Ansatz ist Hybrid — lokal wo es reicht, Cloud wo es zaehlt.
+              Ansatz ist Hybrid — lokal wo es reicht, Cloud wo es zählt.
             </p>
           </Callout>
 
           <Callout type="tip" title="Unsere Empfehlung">
             <p>
               Starte lokal mit Ollama + einem 7B oder 14B Modell. Für Aufgaben
-              wo die Qualität kritisch ist (z.B. Vertraege, komplexe Analysen),
-              nutze eine Cloud-API als Backup. Das spart Geld und haelt deine
+              wo die Qualität kritisch ist (z.B. Verträge, komplexe Analysen),
+              nutze eine Cloud-API als Backup. Das spart Geld und hält deine
               Daten unter Kontrolle. Mehr dazu:{" "}
               <a
                 href="/grundlagen/lokal-vs-cloud"
@@ -492,7 +492,7 @@ llm --> out3
               <div>
                 <p className="text-white font-medium">Fragen stellen</p>
                 <p className="text-white/50 text-sm mt-1">
-                  Das Modell laeuft auf deiner GPU. Keine Cloud, keine API-Keys,
+                  Das Modell läuft auf deiner GPU. Keine Cloud, keine API-Keys,
                   keine Kosten. Die REST-API ist unter{" "}
                   <code className="bg-white/10 px-1.5 py-0.5 rounded text-white/90">
                     http://localhost:11434
@@ -507,11 +507,11 @@ llm --> out3
         {/* Key Takeaway */}
         <KeyTakeaway
           points={[
-            "LLMs sagen das naechste Token vorher — sie 'wissen' nichts, sie berechnen Wahrscheinlichkeiten.",
+            "LLMs sagen das nächste Token vorher — sie 'wissen' nichts, sie berechnen Wahrscheinlichkeiten.",
             "Mehr Parameter = bessere Qualität, aber mehr VRAM und langsamer. Q4_K_M Quantisierung ist der beste Trade-off.",
             "LLMs halluzinieren. Kritische Ausgaben immer verifizieren, RAG reduziert das Risiko deutlich.",
             "Lokale LLMs auf eigener Hardware (Ollama) sind DSGVO-konform. RTX 3090 bei 50% Last: ca. EUR 49/Monat Strom (AT: EUR 0,34/kWh).",
-            "Für den Einstieg: Ollama installieren, llama3.3 starten, laeuft in 5 Minuten.",
+            "Für den Einstieg: Ollama installieren, llama3.3 starten, läuft in 5 Minuten.",
           ]}
         />
 
