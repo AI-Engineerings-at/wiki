@@ -30,8 +30,8 @@ export default function AiKostenVergleich() {
         <ComparisonTable
           headers={["Option", "Hardware (einmalig)", "Laufend/Monat", "Was du bekommst"]}
           rows={[
-            ["Cloud API (GPT-4o)", "EUR 0", "EUR 100-500", "Beste Qualitaet — $2.50/$10 pro 1M Tokens"],
-            ["Cloud API (Claude Sonnet)", "EUR 0", "EUR 50-200", "Sehr gute Qualitaet — $3/$15 pro 1M Tokens"],
+            ["Cloud API (GPT-4o)", "EUR 0", "EUR 100-500", "Beste Qualität — $5/$15 pro 1M Tokens (Stand März 2026)"],
+            ["Cloud API (Claude Sonnet 4)", "EUR 0", "EUR 50-200", "Sehr gute Qualität — $3/$15 pro 1M Tokens"],
             ["Cloud API (Gemini 2.5 Pro)", "EUR 0", "EUR 30-150", "Stark bei Reasoning — $1.25/$10 pro 1M Tokens"],
             ["Lokal (RTX 3090, gebr.)", "EUR 750-1.123", "~EUR 49 (Strom, AT)", "Bis 34B Modelle, 80% der Tasks gut"],
             ["Lokal (RTX 4090)", "EUR 1.800-2.000", "~EUR 49 (Strom, AT)", "Wie 3090, etwas schneller, gleiche VRAM-Grenze"],

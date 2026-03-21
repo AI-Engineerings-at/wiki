@@ -3,9 +3,9 @@ import { categories, getRecentArticles, getPopularArticles } from '../lib/articl
 import { SearchBar } from '../components/SearchBar'
 
 export const metadata = {
-  title: 'AI Engineering Wiki — Kostenloses Wissen ueber lokale KI, DSGVO und Automatisierung',
+  title: 'AI Engineering Wiki — Kostenloses Wissen über lokale KI, DSGVO und Automatisierung',
   description:
-    'Kostenloses Wissen ueber lokale KI, DSGVO-Compliance und Automatisierung. Fuer DACH-KMUs, die lokale AI-Systeme sauber einfuehren wollen.',
+    'Kostenloses Wissen über lokale KI, DSGVO-Compliance und Automatisierung. Für DACH-KMUs, die lokale AI-Systeme sauber einführen wollen.',
 }
 
 export default function Home() {
@@ -14,29 +14,91 @@ export default function Home() {
 
   return (
     <div className="space-y-16">
-      {/* Hero Section */}
-      <section className="text-center py-12 md:py-20">
-        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
-          AI Engineering
-          <span className="text-[#4262FF]"> Wiki</span>
-        </h1>
-        <p className="text-xl text-slate-300 max-w-3xl mx-auto mb-2">
-          Kostenloses Wissen ueber lokale KI, DSGVO und Automatisierung
-        </p>
-        <p className="text-slate-500 max-w-2xl mx-auto mb-8">
-          Fuer DACH-KMUs, die lokale AI-Systeme DSGVO-konform einfuehren, dokumentieren
-          und auditierbar betreiben wollen. Aus echtem Betrieb in Oesterreich.
-        </p>
+      {/* Hero Section — Eagle Background */}
+      <section className="relative -mx-4 md:-mx-8 -mt-4 overflow-hidden rounded-b-3xl">
+        <div className="absolute inset-0">
+          <img
+            src="/images/hero-eagle.png"
+            alt=""
+            className="w-full h-full object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-slate-950/80 to-slate-950" />
+        </div>
+        <div className="relative text-center py-20 md:py-32 px-4">
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 leading-tight">
+            AI Engineering
+            <span className="text-[#4262FF]"> Wiki</span>
+          </h1>
+          <p className="text-xl md:text-2xl text-slate-200 max-w-3xl mx-auto mb-2">
+            Kostenloses Wissen über lokale KI, DSGVO und Automatisierung
+          </p>
+          <p className="text-slate-400 max-w-2xl mx-auto mb-10">
+            Für DACH-KMUs, die lokale AI-Systeme DSGVO-konform einführen, dokumentieren
+            und auditierbar betreiben wollen. Aus echtem Betrieb in Österreich.
+          </p>
 
-        {/* Search */}
-        <div className="max-w-xl mx-auto">
-          <SearchBar />
+          {/* Search */}
+          <div className="max-w-xl mx-auto">
+            <SearchBar />
+          </div>
+
+          {/* Quick Stats */}
+          <div className="flex flex-wrap justify-center gap-6 md:gap-10 mt-10 text-sm">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-white">106+</div>
+              <div className="text-slate-400">Artikel</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-white">DE + EN</div>
+              <div className="text-slate-400">Bilingual</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-white">100%</div>
+              <div className="text-slate-400">Kostenlos</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-white">S9</div>
+              <div className="text-slate-400">Keine Fake-Daten</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Quick Access — Wichtigste Themen */}
+      <section>
+        <h2 className="text-2xl font-bold text-white mb-2">Direkt einsteigen</h2>
+        <p className="text-slate-400 text-sm mb-6">Die wichtigsten Themen auf einen Blick</p>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <QuickLink
+            href="/compliance/eu-ai-act"
+            icon="⚖️"
+            title="EU AI Act"
+            subtitle="Deadline 02.08.2026 — Was du jetzt tun musst"
+          />
+          <QuickLink
+            href="/compliance/dsgvo-grundlagen"
+            icon="🛡️"
+            title="DSGVO für AI"
+            subtitle="Rechtsgrundlagen, Art. 30, DPIA"
+          />
+          <QuickLink
+            href="/tools/ollama-tutorial"
+            icon="🦙"
+            title="Ollama Setup"
+            subtitle="Lokale LLMs in 5 Minuten"
+          />
+          <QuickLink
+            href="/grundlagen/was-ist-ein-llm"
+            icon="🧠"
+            title="Was ist ein LLM?"
+            subtitle="Transformer, Tokens, Halluzinationen"
+          />
         </div>
       </section>
 
       {/* Category Cards */}
       <section>
-        <h2 className="text-2xl font-bold text-white mb-6">Kategorien</h2>
+        <h2 className="text-2xl font-bold text-white mb-6">Alle Kategorien</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {categories.map((cat) => (
             <CategoryCard
@@ -48,19 +110,65 @@ export default function Home() {
               count={cat.articles.length}
             />
           ))}
-          <CategoryCard
-            icon={'\u{1F4DD}'}
-            title="Tutorials"
-            description="Step-by-Step Anleitungen fuer lokale KI-Setups"
-            href="/lernpfad"
-            count={0}
-          />
+        </div>
+      </section>
+
+      {/* Tools & Frameworks Library */}
+      <section>
+        <h2 className="text-2xl font-bold text-white mb-2">Tools & Frameworks</h2>
+        <p className="text-slate-400 text-sm mb-6">Anleitungen und Vergleiche für den lokalen AI-Stack</p>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <ToolLink href="/tools/ollama-tutorial" label="Ollama" tag="LLM Runtime" />
+          <ToolLink href="/tools/n8n-fuer-anfaenger" label="n8n" tag="Workflow Automation" />
+          <ToolLink href="/tools/grafana-monitoring" label="Grafana" tag="Monitoring" />
+          <ToolLink href="/tools/docker-vs-swarm" label="Docker & Swarm" tag="Container" />
+          <ToolLink href="/tools/proxmox-setup" label="Proxmox" tag="Virtualisierung" />
+          <ToolLink href="/tools/mattermost-agent" label="Mattermost" tag="Agent Bridge" />
+          <ToolLink href="/tools/mcp-server" label="MCP Server" tag="Tool Integration" />
+          <ToolLink href="/tools/model-selection" label="Modell-Auswahl" tag="LLM Guide" />
+          <ToolLink href="/tools/rag-guide" label="RAG Pipeline" tag="Retrieval" />
+        </div>
+      </section>
+
+      {/* Compliance & Legal */}
+      <section className="bg-slate-900/50 border border-slate-800 rounded-2xl p-8">
+        <div className="flex items-center gap-3 mb-6">
+          <span className="text-3xl">⚖️</span>
+          <div>
+            <h2 className="text-2xl font-bold text-white">Compliance & Recht</h2>
+            <p className="text-slate-400 text-sm">EU AI Act, DSGVO, Risikoklassen — alles was du wissen musst</p>
+          </div>
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <ComplianceLink href="/compliance/eu-ai-act" label="EU AI Act Leitfaden" hot />
+          <ComplianceLink href="/compliance/eu-ai-act-checkliste" label="Compliance Checkliste" />
+          <ComplianceLink href="/compliance/dsgvo-grundlagen" label="DSGVO Grundlagen" />
+          <ComplianceLink href="/compliance/dpia" label="DPIA für KI-Systeme" />
+          <ComplianceLink href="/compliance/verbotene-ai-praktiken" label="Verbotene AI-Praktiken" />
+          <ComplianceLink href="/compliance/ki-kompetenz-art4" label="Art. 4 KI-Kompetenz" hot />
+          <ComplianceLink href="/compliance/chatbot-transparenzpflichten" label="Chatbot Transparenz" />
+          <ComplianceLink href="/compliance/ai-agent-legal-framework" label="Agent Legal Framework" />
+          <ComplianceLink href="/compliance/datenschutz-praxis" label="Datenschutz Praxis" />
+        </div>
+      </section>
+
+      {/* Patterns & Architecture */}
+      <section>
+        <h2 className="text-2xl font-bold text-white mb-2">Patterns & Architektur</h2>
+        <p className="text-slate-400 text-sm mb-6">Bewährte Muster für AI-Agent-Systeme im Produktivbetrieb</p>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <ToolLink href="/patterns/agent-orchestration-patterns" label="Agent Orchestration" tag="Pattern" />
+          <ToolLink href="/patterns/safety-hooks" label="Safety Hooks" tag="Security" />
+          <ToolLink href="/patterns/heartbeat-monitoring" label="Heartbeat Monitoring" tag="Ops" />
+          <ToolLink href="/patterns/memory-management" label="Memory Management" tag="Context" />
+          <ToolLink href="/patterns/task-delegation" label="Task Delegation" tag="Workflow" />
+          <ToolLink href="/patterns/self-improving-agents" label="Self-Improving Agents" tag="NemoClaw" />
+          <ToolLink href="/patterns/ai-agent-digitaler-mitarbeiter" label="Agent als Mitarbeiter" tag="Konzept" />
         </div>
       </section>
 
       {/* Recent + Popular side by side */}
       <div className="grid lg:grid-cols-2 gap-8">
-        {/* Recent Articles */}
         <section>
           <h2 className="text-xl font-bold text-white mb-4">Neueste Artikel</h2>
           <div className="space-y-3">
@@ -84,7 +192,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Popular Articles */}
         <section>
           <h2 className="text-xl font-bold text-white mb-4">Beliebteste Artikel</h2>
           <div className="space-y-3">
@@ -101,7 +208,6 @@ export default function Home() {
                       {article.title}
                     </h3>
                   </div>
-                  <span className="text-xs text-slate-600 whitespace-nowrap ml-3">{article.categoryLabel}</span>
                 </div>
               </Link>
             ))}
@@ -109,50 +215,104 @@ export default function Home() {
         </section>
       </div>
 
-      {/* EU AI Act Banner */}
-      <section className="bg-slate-900 border border-blue-500/20 rounded-2xl p-8 text-center">
-        <h2 className="text-2xl font-bold text-white mb-3">
-          EU AI Act Deadline: 2. August 2026
-        </h2>
-        <p className="text-slate-400 mb-6 max-w-2xl mx-auto">
-          Wenn du lokale AI-Systeme sauber einfuehren willst:
-          Compliance-Templates, Audit-Trail-Loesungen und dokumentierte
-          Praxis-Setups fuer den echten Betrieb.
-        </p>
-        <a
-          href="https://buy.stripe.com/bJe7sLb7N92ha9MejWfQI02"
-          className="btn-primary"
-        >
-          Zum Compliance-Kit (EUR 79)
-        </a>
+      {/* Nützliche Links */}
+      <section>
+        <h2 className="text-2xl font-bold text-white mb-6">Nützliche Links</h2>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <ExternalLink
+            href="https://ollama.com/library"
+            title="Ollama Model Library"
+            description="Alle verfügbaren lokalen Modelle"
+          />
+          <ExternalLink
+            href="https://artificialanalysis.ai/"
+            title="Artificial Analysis"
+            description="LLM Benchmarks & Preisvergleich"
+          />
+          <ExternalLink
+            href="https://eur-lex.europa.eu/eli/reg/2024/1689/oj"
+            title="EU AI Act Volltext"
+            description="Offizielle Verordnung (EU) 2024/1689"
+          />
+          <ExternalLink
+            href="https://www.dsb.gv.at/"
+            title="Datenschutzbehörde AT"
+            description="Österreichische Aufsichtsbehörde"
+          />
+          <ExternalLink
+            href="https://docs.n8n.io/"
+            title="n8n Dokumentation"
+            description="Workflow Automation Docs"
+          />
+          <ExternalLink
+            href="https://huggingface.co/models"
+            title="Hugging Face Models"
+            description="Open-Source Model Hub"
+          />
+          <ExternalLink
+            href="https://arxiv.org/list/cs.AI/recent"
+            title="arXiv AI Papers"
+            description="Aktuelle Forschung"
+          />
+          <ExternalLink
+            href="https://www.ai-engineering.at"
+            title="AI Engineering Shop"
+            description="Produkte & Bundles"
+          />
+        </div>
       </section>
 
-      {/* Kurse Coming Soon Banner */}
-      <section className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 text-center">
-        <div className="inline-flex items-center gap-2 bg-blue-500/10 text-blue-400 text-xs font-bold px-3 py-1 rounded-full mb-3">
-          Coming Soon
+      {/* EU AI Act Deadline Banner — dezent, nicht als erstes */}
+      <section className="bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/20 rounded-2xl p-8">
+        <div className="flex flex-col md:flex-row items-center gap-6">
+          <div className="flex-1">
+            <div className="text-xs font-bold text-red-400 mb-2">DEADLINE</div>
+            <h2 className="text-2xl font-bold text-white mb-2">
+              EU AI Act — 2. August 2026
+            </h2>
+            <p className="text-slate-400 text-sm">
+              Art. 4 KI-Kompetenz ist Pflicht für jedes Unternehmen das AI einsetzt.
+              Unsere Compliance-Templates helfen dir bei der Dokumentation.
+            </p>
+          </div>
+          <div className="flex flex-col gap-3">
+            <Link
+              href="/compliance/eu-ai-act"
+              className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              Leitfaden lesen &rarr;
+            </Link>
+            <Link
+              href="/compliance/eu-ai-act-checkliste"
+              className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              Checkliste ansehen &rarr;
+            </Link>
+          </div>
         </div>
-        <h3 className="text-lg font-bold text-white mb-2">
-          Online-Kurse fuer lokale KI
-        </h3>
-        <p className="text-slate-400 text-sm max-w-lg mx-auto mb-4">
-          Strukturierte Lernpfade zu DSGVO, EU AI Act, Ollama und lokaler Automatisierung.
-          Von Grundlagen bis Zertifizierung.
+      </section>
+
+      {/* Lernpfad CTA */}
+      <section className="text-center py-8">
+        <h2 className="text-2xl font-bold text-white mb-3">
+          Strukturiert lernen?
+        </h2>
+        <p className="text-slate-400 max-w-lg mx-auto mb-6">
+          Der 30-Tage Lernpfad führt dich Schritt für Schritt vom ersten lokalen LLM
+          bis zum vollständigen AI-Stack mit Monitoring und Compliance.
         </p>
-        <a
-          href="https://kurse.ai-engineering.at"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+        <Link
+          href="/lernpfad"
+          className="inline-block bg-[#4262FF] hover:bg-[#3550DD] text-white font-bold py-3 px-8 rounded-full transition-all hover:scale-105 text-sm"
         >
-          kurse.ai-engineering.at &rarr;
-        </a>
+          Lernpfad starten
+        </Link>
       </section>
 
       {/* Bottom note */}
       <div className="text-center text-xs text-slate-600 py-4">
         <p>
-          Open Knowledge von AI Engineering — aus dem echten Betrieb, fuer Teams
+          Open Knowledge von AI Engineering — aus echtem Betrieb, für Teams
           die lokale AI unter eigener Kontrolle betreiben wollen.
         </p>
       </div>
@@ -185,9 +345,106 @@ function CategoryCard({
         </h3>
       </div>
       <p className="text-slate-400 text-sm">{description}</p>
-      <p className="text-xs text-slate-600 mt-3">
-        {count > 0 ? `${count} Artikel` : 'Coming soon'}
-      </p>
+      <p className="text-xs text-slate-600 mt-3">{count} Artikel</p>
     </Link>
+  )
+}
+
+function QuickLink({
+  href,
+  icon,
+  title,
+  subtitle,
+}: {
+  href: string
+  icon: string
+  title: string
+  subtitle: string
+}) {
+  return (
+    <Link
+      href={href}
+      className="flex items-start gap-3 p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-blue-500/50 transition-all group"
+    >
+      <span className="text-2xl mt-0.5">{icon}</span>
+      <div>
+        <h3 className="text-sm font-bold text-white group-hover:text-blue-400 transition-colors">
+          {title}
+        </h3>
+        <p className="text-xs text-slate-500 mt-1">{subtitle}</p>
+      </div>
+    </Link>
+  )
+}
+
+function ToolLink({
+  href,
+  label,
+  tag,
+}: {
+  href: string
+  label: string
+  tag: string
+}) {
+  return (
+    <Link
+      href={href}
+      className="flex items-center justify-between p-3 bg-slate-900/50 border border-slate-800 rounded-lg hover:border-blue-500/50 transition-all group"
+    >
+      <span className="text-sm font-medium text-white group-hover:text-blue-400 transition-colors">
+        {label}
+      </span>
+      <span className="text-xs text-slate-600 bg-slate-800 px-2 py-0.5 rounded">{tag}</span>
+    </Link>
+  )
+}
+
+function ComplianceLink({
+  href,
+  label,
+  hot,
+}: {
+  href: string
+  label: string
+  hot?: boolean
+}) {
+  return (
+    <Link
+      href={href}
+      className="flex items-center justify-between p-3 bg-slate-950/50 border border-slate-700 rounded-lg hover:border-blue-500/50 transition-all group"
+    >
+      <span className="text-sm font-medium text-white group-hover:text-blue-400 transition-colors">
+        {label}
+      </span>
+      {hot && (
+        <span className="text-xs text-red-400 bg-red-500/10 px-2 py-0.5 rounded font-bold">
+          AKTUELL
+        </span>
+      )}
+    </Link>
+  )
+}
+
+function ExternalLink({
+  href,
+  title,
+  description,
+}: {
+  href: string
+  title: string
+  description: string
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block p-4 bg-slate-900/30 border border-slate-800 rounded-xl hover:border-slate-600 transition-all group"
+    >
+      <h3 className="text-sm font-semibold text-white group-hover:text-blue-400 transition-colors mb-1">
+        {title} ↗
+      </h3>
+      <p className="text-xs text-slate-500">{description}</p>
+    </a>
   )
 }

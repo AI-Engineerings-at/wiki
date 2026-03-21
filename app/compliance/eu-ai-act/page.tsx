@@ -176,8 +176,8 @@ export default function EuAiActLeitfaden() {
             </thead>
             <tbody className="text-gray-300">
               <tr className="border-b border-gray-800">
-                <td className="py-2">01. Aug 2024</td>
-                <td className="py-2">AI Act in Kraft getreten</td>
+                <td className="py-2">12. Juli 2024</td>
+                <td className="py-2">AI Act im EU-Amtsblatt veröffentlicht, 01. Aug 2024 in Kraft getreten</td>
               </tr>
               <tr className="border-b border-gray-800">
                 <td className="py-2">02. Feb 2025</td>

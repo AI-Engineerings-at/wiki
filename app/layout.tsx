@@ -6,11 +6,11 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: {
-    default: 'AI Engineering Wiki — Kostenloses Wissen ueber lokale KI, DSGVO und Automatisierung',
+    default: 'AI Engineering Wiki — Kostenloses Wissen über lokale KI, DSGVO und Automatisierung',
     template: '%s | AI Engineering Wiki',
   },
   description:
-    'Kostenloses Wissen ueber lokale KI, DSGVO-Compliance und Automatisierung. Fuer DACH-KMUs, die lokale AI-Systeme sauber einfuehren wollen.',
+    'Kostenloses Wissen über lokale KI, DSGVO-Compliance und Automatisierung. Für DACH-KMUs, die lokale AI-Systeme sauber einführen wollen.',
   metadataBase: new URL('https://wiki.ai-engineering.at'),
   openGraph: {
     siteName: 'AI Engineering Wiki',
