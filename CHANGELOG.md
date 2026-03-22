@@ -2,6 +2,47 @@
 
 Alle wesentlichen Änderungen an der AI Engineering Wiki.
 
+## [1.3.0] — 2026-03-22
+
+### Hinzugefügt
+- 19 gebrandete Hero-Bilder (ComfyUI FLUX Dev + Realism LoRA auf RTX 3090)
+  - EU AI Act, DSGVO, Ollama, n8n, Docker, Grafana, Agent Orchestration
+  - Security, RAG Pipeline, Lernpfad, Österreich, Papers, LLM, Backup
+  - Self-Improving Agents, Human-in-the-Loop
+- AI Tools Datenbank: 68 Tools in 12 Kategorien mit Suche + Filter (DE+EN)
+- Spiral-Lernpfad: 3-Fragen-Quiz → 5 Pfade, 36 Quiz-Fragen, Stages, Feedback, Kommentare, WIKI20 Rabattcode
+- EU AI Act Self-Assessment: 10 Fragen, farbcodierte Ergebnisse (DE+EN)
+- 4 echte Download-Templates (KI-Richtlinie, Tool-Inventar, Schulungsnachweis, AI Act Checkliste)
+- Vergleichsseite "Wo andere besser sind" (ehrliche Konkurrenz-Referenzen)
+- 2 neue Patterns: Evals & Guardrails, Human-in-the-Loop (DE+EN)
+- Österreich-Portal mit RTR, WKO, FFG, aws, Digital Austria, AI Tinkerers
+- Open-Source-Tools: 58 kuratierte Projekte (DE+EN)
+- Kategorie-Header mit Flux2-Bildern
+- 14 Blog-Posts mit Hero-Bildern
+- 2 Animations-GIFs aus ComfyUI Frames
+
+### Verbessert
+- Neutralität 4/10 → 7/10: Marketing-Sprache entfernt, Konkurrenz ehrlich benannt
+- GitHub Edit Link gefixt (war 404)
+- 30 kaputte URLs repariert (9 tot + 21 Redirects)
+- Disclaimer prominenter im Footer
+- NIST AI RMF, OECD.AI, EU AI Office als Quellen
+- n8n Starter Kit + DataCamp als Referenzen
+- Menschlichere Sprache auf Homepage, Lernpfad, Kategorieseiten
+- 10 schwächste Seiten auf 7/8 Score gebracht
+- Support-Seite CSS angeglichen (gray→slate)
+- Hamburger-Menü für Mobile Navigation
+- Dark Scrollbar passend zum Theme
+- Version-Badges in 10 Tool-Artikeln
+- Konsistenz-Audit: alle Seiten geprüft
+
+### Infrastruktur
+- 19 Bilder auf .90 RTX 3090 generiert (ComfyUI FLUX Dev)
+- ComfyUI output braucht Volume-Mount (TODO)
+- Bilder von .90 + Mattermost gesichert
+- Lighthouse: 87/94/96/100 (Perf/A11y/BP/SEO)
+- CI/CD: 5/5 Runs erfolgreich, ~1:20 pro Deploy
+
 ## [1.2.0] — 2026-03-22
 
 ### Hinzugefügt
