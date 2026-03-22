@@ -50,6 +50,10 @@ export default function PapersPage() {
         </p>
       </div>
 
+      <figure className="my-6 -mx-4 md:-mx-0">
+        <img src="/images/generated/hero-papers-research-v2.png" alt="AI Research Papers" className="rounded-xl border border-white/10 w-full" />
+      </figure>
+
       <div className="space-y-4">
         {articles.map((article) => (
           <a

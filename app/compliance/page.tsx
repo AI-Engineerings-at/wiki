@@ -58,16 +58,16 @@ export default function CompliancePage() {
 
   return (
     <div className="space-y-8">
-      <div className="relative -mx-4 md:-mx-8 -mt-4 mb-8 overflow-hidden rounded-b-2xl">
-        <img src="/images/generated/social-ai-tech-5.png" alt="" className="w-full h-48 object-cover opacity-30" />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-slate-950" />
-      </div>
       <div>
         <h1 className="text-3xl font-bold text-white">Compliance</h1>
         <p className="text-slate-400 mt-2">
           Was du rechtlich beachten musst wenn du KI im Unternehmen einsetzt — ohne Juristendeutsch.
         </p>
       </div>
+
+      <figure className="my-6 -mx-4 md:-mx-0">
+        <img src="/images/generated/hero-eu-ai-act.png" alt="EU AI Act und DSGVO Compliance" className="rounded-xl border border-white/10 w-full" />
+      </figure>
 
       <div className="space-y-4">
         {articles.map((article) => (

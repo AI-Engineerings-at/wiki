@@ -18,9 +18,8 @@ export default function OesterreichPage() {
         </p>
       </div>
 
-      <figure className="my-8">
+      <figure className="my-6 -mx-4 md:-mx-0">
         <img src="/images/generated/hero-oesterreich-ki.png" alt="KI in Österreich" className="rounded-xl border border-white/10 w-full" />
-        <figcaption className="text-center text-white/40 text-sm mt-2">KI in Österreich</figcaption>
       </figure>
 
       <Callout type="summary" title="Überblick">

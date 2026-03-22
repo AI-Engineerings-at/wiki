@@ -89,6 +89,10 @@ export default function DownloadsPage() {
         </p>
       </div>
 
+      <figure className="my-6 -mx-4 md:-mx-0">
+        <img src="/images/generated/hero-flux-ai-engineering-1.png" alt="Praxis-Downloads und Templates" className="rounded-xl border border-white/10 w-full" />
+      </figure>
+
       <Callout type="summary" title="Überblick">
         Kostenlose Templates und Checklisten für KI im Unternehmen: KI-Richtlinie, DPIA-Vorlage,
         EU AI Act Checkliste, Verarbeitungsverzeichnis, Schulungsnachweis, Agent Onboarding und mehr.

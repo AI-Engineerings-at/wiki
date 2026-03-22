@@ -74,6 +74,10 @@ export default function BasicsPage() {
         </p>
       </div>
 
+      <figure className="my-6 -mx-4 md:-mx-0">
+        <img src="/images/generated/hero-was-ist-llm.png" alt="AI Basics — LLMs, Agents, local systems" className="rounded-xl border border-white/10 w-full" />
+      </figure>
+
       <div className="space-y-4">
         {articles.map((article) => (
           <a

@@ -40,16 +40,16 @@ export default function PapersPage() {
 
   return (
     <div className="space-y-8">
-      <figure className="my-8">
-        <img src="/images/generated/hero-papers-research-v2.png" alt="AI Research Papers" className="rounded-xl border border-white/10 w-full" />
-        <figcaption className="text-center text-white/40 text-sm mt-2">AI Research Papers</figcaption>
-      </figure>
       <div>
         <h1 className="text-3xl font-bold text-white">AI Papers — Wichtige Forschung verständlich erklärt</h1>
         <p className="text-slate-400 mt-2">
           Die wichtigsten Papers zu LLMs, RAG, Agents und AI Safety — auf Deutsch zusammengefasst.
         </p>
       </div>
+
+      <figure className="my-6 -mx-4 md:-mx-0">
+        <img src="/images/generated/hero-papers-research-v2.png" alt="AI Research Papers" className="rounded-xl border border-white/10 w-full" />
+      </figure>
 
       <div className="space-y-4">
         {articles.map((article) => (

@@ -73,6 +73,11 @@ export default function ToolsPage() {
           Tools and technologies for your local AI stack.
         </p>
       </div>
+
+      <figure className="my-6 -mx-4 md:-mx-0">
+        <img src="/images/generated/hero-n8n-automation-v2.png" alt="Tools and frameworks for the local AI stack" className="rounded-xl border border-white/10 w-full" />
+      </figure>
+
       <div className="space-y-4">
         {articles.map((article) => (
           <a

@@ -68,6 +68,10 @@ export default function CompliancePage() {
         </p>
       </div>
 
+      <figure className="my-6 -mx-4 md:-mx-0">
+        <img src="/images/generated/hero-eu-ai-act.png" alt="EU AI Act and GDPR Compliance" className="rounded-xl border border-white/10 w-full" />
+      </figure>
+
       <div className="space-y-4">
         {articles.map((article) => (
           <a
