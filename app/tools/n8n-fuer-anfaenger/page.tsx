@@ -188,7 +188,7 @@ Webhook -> Ollama -> Notion -> Slack`}</code>
 
         <Callout type="tip" title="n8n 2.x Expressions">
           <p>
-            In n8n 2.x muessen Expressions mit einem = Zeichen beginnen.
+            In n8n 2.x müssen Expressions mit einem = Zeichen beginnen.
             Beispiel: ={`{{ $json.name }}`} statt nur {`{{ $json.name }}`}.
             Datums-Formatierung nutzt Luxon (yyyy-MM-dd), nicht Moment.js.
           </p>

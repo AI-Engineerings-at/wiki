@@ -86,8 +86,8 @@ registry --> storage : ollama pull
 
         <h2 className="text-xl font-semibold text-white mt-8">Was ist Ollama?</h2>
         <p className="text-gray-300">
-          Ollama ist ein CLI-Tool, um LLMs lokal zu betreiben. Unterstuetzt 200+ Modelle
-          (Llama, Mistral, Qwen, Gemma, etc.) und laeuft auf macOS (mit Metal GPU-Beschleunigung),
+          Ollama ist ein CLI-Tool, um LLMs lokal zu betreiben. Unterstützt 200+ Modelle
+          (Llama, Mistral, Qwen, Gemma, etc.) und läuft auf macOS (mit Metal GPU-Beschleunigung),
           Linux und Windows (nativ oder via WSL2).
         </p>
 

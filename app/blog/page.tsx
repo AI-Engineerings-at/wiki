@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { getAllBlogPosts } from '../../lib/blog'
 
 export const metadata = {
@@ -67,10 +68,12 @@ export default function BlogIndex() {
         >
           <div className="relative overflow-hidden rounded-2xl border border-slate-800 hover:border-blue-500/50 transition-all">
             {blogImages[featured.slug] && (
-              <div className="aspect-[21/9] overflow-hidden">
-                <img
+              <div className="relative aspect-[21/9] overflow-hidden">
+                <Image
                   src={blogImages[featured.slug]}
                   alt={featured.title}
+                  fill
+                  sizes="100vw"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent" />
@@ -117,9 +120,11 @@ export default function BlogIndex() {
               {/* Image */}
               {blogImages[post.slug] ? (
                 <div className="aspect-video overflow-hidden">
-                  <img
+                  <Image
                     src={blogImages[post.slug]}
                     alt={post.title}
+                    width={800}
+                    height={450}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>

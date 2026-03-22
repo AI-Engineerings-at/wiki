@@ -243,8 +243,8 @@ rectangle "Pipeline" {
         <Callout type="tip" title="Praxis-Tipp">
           <p>
             Starte mit 2-3 Agenten (Manager + 1-2 Worker). Erst wenn die
-            Koordination stabil laeuft, weitere hinzufuegen. Zu viele Agenten
-            ohne klare Rollen fuehren zu Chaos, nicht zu Produktivitaet.
+            Koordination stabil läuft, weitere hinzufügen. Zu viele Agenten
+            ohne klare Rollen führen zu Chaos, nicht zu Produktivität.
           </p>
         </Callout>
 

@@ -18,7 +18,7 @@ export default function WasIstAgentOrchestration() {
         <Callout type="summary" title="Auf einen Blick">
           <p>
             Agent Orchestration koordiniert mehrere spezialisierte AI-Agenten.
-            Ein Manager-Agent delegiert Aufgaben an Worker. Kommunikation laeuft
+            Ein Manager-Agent delegiert Aufgaben an Worker. Kommunikation läuft
             über einen Nachrichtenbus (z.B. Mattermost). Vorteile: Parallelisierung,
             Spezialisierung, Auditierbarkeit — alles lokal und DSGVO-konform.
           </p>

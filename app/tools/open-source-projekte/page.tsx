@@ -1,7 +1,7 @@
 export const metadata = {
   title: 'Open Source Tools & Projekte | AI Engineering Wiki',
   description:
-    'Kuratierte Liste der besten Open-Source-Tools fuer lokale AI: LLM Runtimes, Agent Frameworks, RAG, Monitoring, Automation und Security.',
+    'Kuratierte Liste der besten Open-Source-Tools für lokale AI: LLM Runtimes, Agent Frameworks, RAG, Monitoring, Automation und Security.',
 }
 
 type Tool = {
@@ -21,7 +21,7 @@ const categories: Category[] = [
   {
     title: 'LLM Runtimes & Interfaces',
     description:
-      'Lokale LLM-Ausfuehrung, Inference-Engines und Chat-Interfaces fuer Self-Hosted AI.',
+      'Lokale LLM-Ausführung, Inference-Engines und Chat-Interfaces für Self-Hosted AI.',
     tools: [
       {
         name: 'Ollama',
@@ -33,28 +33,28 @@ const categories: Category[] = [
       {
         name: 'Ollama Python',
         url: 'https://github.com/ollama/ollama-python',
-        description: 'Python-Library fuer die Ollama API.',
+        description: 'Python-Library für die Ollama API.',
         tags: ['Python', 'SDK', 'Im Einsatz'],
       },
       {
         name: 'Open WebUI',
         url: 'https://github.com/open-webui/open-webui',
         description:
-          'User-friendly WebUI fuer LLMs — unterstuetzt Ollama und OpenAI-kompatible APIs.',
+          'User-friendly WebUI für LLMs — unterstützt Ollama und OpenAI-kompatible APIs.',
         tags: ['WebUI', 'Chat', 'Self-Hosted', 'Im Einsatz'],
       },
       {
         name: 'LocalAI',
         url: 'https://github.com/mudler/LocalAI',
         description:
-          'Open Source Alternative zu OpenAI — self-hosted, laeuft auch ohne GPU.',
+          'Open Source Alternative zu OpenAI — self-hosted, läuft auch ohne GPU.',
         tags: ['LLM', 'OpenAI-kompatibel', 'CPU'],
       },
       {
         name: 'exo',
         url: 'https://github.com/exo-explore/exo',
         description:
-          'Run AI models on your own hardware — Cluster ueber mehrere Geraete.',
+          'Run AI models on your own hardware — Cluster über mehrere Geräte.',
         tags: ['LLM', 'Cluster', 'Multi-Device'],
       },
       {
@@ -83,7 +83,7 @@ const categories: Category[] = [
   {
     title: 'Agent Frameworks',
     description:
-      'Frameworks und Plattformen fuer autonome AI-Agenten, Multi-Agent Systeme und Orchestrierung.',
+      'Frameworks und Plattformen für autonome AI-Agenten, Multi-Agent Systeme und Orchestrierung.',
     tools: [
       {
         name: 'CrewAI',
@@ -116,19 +116,19 @@ const categories: Category[] = [
         name: 'mem0',
         url: 'https://github.com/mem0ai/mem0',
         description:
-          'The Memory layer for AI apps — persistentes Gedaechtnis fuer AI Agents.',
+          'The Memory layer for AI apps — persistentes Gedächtnis für AI Agents.',
         tags: ['Memory', 'Agents', 'Persistenz'],
       },
       {
         name: 'Hindsight',
         url: 'https://github.com/vectorize-io/hindsight',
-        description: 'Agent memory that learns — lernfaehiges Agent-Gedaechtnis.',
+        description: 'Agent memory that learns — lernfähiges Agent-Gedächtnis.',
         tags: ['Memory', 'Agents', 'Learning'],
       },
       {
         name: 'Eliza',
         url: 'https://github.com/elizaOS/eliza',
-        description: 'Autonomous agents for everyone — Agent-Framework fuer alle.',
+        description: 'Autonomous agents for everyone — Agent-Framework für alle.',
         tags: ['Agents', 'Autonomie'],
       },
       {
@@ -167,7 +167,7 @@ const categories: Category[] = [
       {
         name: 'ruflo',
         url: 'https://github.com/ruvnet/ruflo',
-        description: 'Multi-Agent Swarm Orchestration fuer Claude.',
+        description: 'Multi-Agent Swarm Orchestration für Claude.',
         tags: ['Agents', 'Claude', 'Swarm'],
       },
       {
@@ -181,7 +181,7 @@ const categories: Category[] = [
         name: '12-Factor Agents',
         url: 'https://github.com/humanlayer/12-factor-agents',
         description:
-          'Prinzipien fuer den Bau von produktionstauglicher LLM-Software.',
+          'Prinzipien für den Bau von produktionstauglicher LLM-Software.',
         tags: ['Best Practices', 'Architektur', 'Lernressource'],
       },
       {
@@ -223,7 +223,7 @@ const categories: Category[] = [
   {
     title: 'RAG & Knowledge',
     description:
-      'Vector-Datenbanken, RAG-Frameworks und Knowledge-Management fuer AI-Anwendungen.',
+      'Vector-Datenbanken, RAG-Frameworks und Knowledge-Management für AI-Anwendungen.',
     tools: [
       {
         name: 'open-notebook',
@@ -243,7 +243,7 @@ const categories: Category[] = [
         name: 'Quivr',
         url: 'https://github.com/QuivrHQ/quivr',
         description:
-          'Opinionated RAG fuer generative AI Anwendungen.',
+          'Opinionated RAG für generative AI Anwendungen.',
         tags: ['RAG', 'GenAI'],
       },
       {
@@ -270,7 +270,7 @@ const categories: Category[] = [
       {
         name: 'OpenDataLoader PDF',
         url: 'https://github.com/opendataloader-project/opendataloader-pdf',
-        description: 'PDF Parser fuer AI-ready Daten.',
+        description: 'PDF Parser für AI-ready Daten.',
         tags: ['PDF', 'Data Ingestion', 'Parser'],
       },
     ],
@@ -278,7 +278,7 @@ const categories: Category[] = [
   {
     title: 'Claude Code & OpenClaw Ecosystem',
     description:
-      'Skills, Plugins, Hooks und Ressourcen rund um Claude Code und das OpenClaw-Oekosystem.',
+      'Skills, Plugins, Hooks und Ressourcen rund um Claude Code und das OpenClaw-Ökosystem.',
     tools: [
       {
         name: 'Anthropic Skills',
@@ -302,20 +302,20 @@ const categories: Category[] = [
       {
         name: 'Knowledge Work Plugins',
         url: 'https://github.com/anthropics/knowledge-work-plugins',
-        description: 'Knowledge Worker Plugins fuer Claude.',
+        description: 'Knowledge Worker Plugins für Claude.',
         tags: ['Claude', 'Plugins', 'Knowledge'],
       },
       {
         name: 'Superpowers',
         url: 'https://github.com/obra/superpowers',
         description:
-          'Agentic Skills Framework und Methodik fuer Claude Code.',
+          'Agentic Skills Framework und Methodik für Claude Code.',
         tags: ['Claude', 'Skills', 'Methodik'],
       },
       {
         name: 'Claude Code Hooks Mastery',
         url: 'https://github.com/disler/claude-code-hooks-mastery',
-        description: 'Umfassender Guide fuer Claude Code Hooks.',
+        description: 'Umfassender Guide für Claude Code Hooks.',
         tags: ['Claude', 'Hooks', 'Lernressource'],
       },
       {
@@ -340,7 +340,7 @@ const categories: Category[] = [
       {
         name: 'Context Hub',
         url: 'https://github.com/andrewyng/context-hub',
-        description: 'Andrew Ngs Context Hub fuer AI Agents.',
+        description: 'Andrew Ngs Context Hub für AI Agents.',
         tags: ['Context', 'Agents'],
       },
     ],
@@ -397,7 +397,7 @@ const categories: Category[] = [
   {
     title: 'Security & Compliance',
     description:
-      'AI Security Testing, Red Teaming und Vulnerability Scanning fuer AI-Systeme.',
+      'AI Security Testing, Red Teaming und Vulnerability Scanning für AI-Systeme.',
     tools: [
       {
         name: 'promptfoo',
@@ -410,7 +410,7 @@ const categories: Category[] = [
         name: 'Strix',
         url: 'https://github.com/usestrix/strix',
         description:
-          'Open source AI hackers fuer automatisiertes Vulnerability Scanning.',
+          'Open source AI hackers für automatisiertes Vulnerability Scanning.',
         tags: ['Security', 'Scanning', 'AI'],
       },
     ],
@@ -418,7 +418,7 @@ const categories: Category[] = [
   {
     title: 'Sonstige Tools',
     description:
-      'Web Scraping, Voice AI, API-Entwicklung und weitere nuetzliche Open-Source-Tools.',
+      'Web Scraping, Voice AI, API-Entwicklung und weitere nützliche Open-Source-Tools.',
     tools: [
       {
         name: 'Firecrawl',
@@ -431,14 +431,14 @@ const categories: Category[] = [
         name: 'Handy',
         url: 'https://github.com/cjpais/Handy',
         description:
-          'Open source offline-faehiges Speech-to-Text.',
+          'Open source offline-fähiges Speech-to-Text.',
         tags: ['STT', 'Offline', 'Voice'],
       },
       {
         name: 'LiveKit Agents',
         url: 'https://github.com/livekit/agents',
         description:
-          'Build real-time multimodal AI applications — Framework fuer Voice AI Agents.',
+          'Build real-time multimodal AI applications — Framework für Voice AI Agents.',
         tags: ['Voice', 'Realtime', 'Agents'],
       },
       {
@@ -452,14 +452,14 @@ const categories: Category[] = [
         name: 'Lightpanda Browser',
         url: 'https://github.com/lightpanda-io/browser',
         description:
-          'Headless Browser fuer AI und Automation.',
+          'Headless Browser für AI und Automation.',
         tags: ['Browser', 'Headless', 'Automation'],
       },
       {
         name: 'LLM Server Docs',
         url: 'https://github.com/varunvasudeva1/llm-server-docs',
         description:
-          'Komplette Dokumentation fuer den Aufbau eines eigenen LLM-Servers auf Debian.',
+          'Komplette Dokumentation für den Aufbau eines eigenen LLM-Servers auf Debian.',
         tags: ['LLM', 'Server', 'Lernressource'],
       },
       {
@@ -479,14 +479,14 @@ const categories: Category[] = [
         name: 'HA LLM Vision',
         url: 'https://github.com/valentinfrlch/ha-llmvision',
         description:
-          'Home Assistant Integration fuer LLM Vision — Bildanalyse mit lokalen Modellen.',
+          'Home Assistant Integration für LLM Vision — Bildanalyse mit lokalen Modellen.',
         tags: ['Home Assistant', 'Vision', 'Smart Home'],
       },
       {
         name: 'HA Ollama Addon',
         url: 'https://github.com/SirUli/homeassistant-ollama-addon',
         description:
-          'Home Assistant Addon fuer Ollama — lokale LLMs im Smart Home.',
+          'Home Assistant Addon für Ollama — lokale LLMs im Smart Home.',
         tags: ['Home Assistant', 'Ollama', 'Smart Home'],
       },
     ],
@@ -494,7 +494,7 @@ const categories: Category[] = [
   {
     title: 'Lernressourcen',
     description:
-      'Buecher, Kurse und Sammlungen zum Lernen von AI Engineering, ML und LLMs.',
+      'Bücher, Kurse und Sammlungen zum Lernen von AI Engineering, ML und LLMs.',
     tools: [
       {
         name: 'LLMs from Scratch',
@@ -558,13 +558,13 @@ export default function OpenSourceProjektePage() {
           Open Source Tools &amp; Projekte
         </h1>
         <p className="text-slate-400 mt-2 max-w-2xl">
-          Kuratierte Sammlung der besten Open-Source-Tools fuer lokale AI,
+          Kuratierte Sammlung der besten Open-Source-Tools für lokale AI,
           Agent-Frameworks, RAG, Monitoring und Automation. Alle Tools sind
-          Self-Hosted-faehig und auf GitHub verfuegbar.
+          Self-Hosted-fähig und auf GitHub verfügbar.
         </p>
         <p className="text-slate-500 text-sm mt-2">
           {categories.reduce((sum, cat) => sum + cat.tools.length, 0)} Tools in{' '}
-          {categories.length} Kategorien | Zuletzt aktualisiert: Maerz 2026
+          {categories.length} Kategorien | Zuletzt aktualisiert: März 2026
         </p>
       </div>
 
@@ -634,7 +634,7 @@ export default function OpenSourceProjektePage() {
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 text-sm text-slate-400">
         <p>
           Diese Liste basiert auf einer systematischen Analyse von 239 GitHub-Starred-Repos.
-          Aufgenommen wurden nur Projekte mit einer Relevanz von mindestens 7/10 fuer
+          Aufgenommen wurden nur Projekte mit einer Relevanz von mindestens 7/10 für
           lokale AI-Infrastruktur und Self-Hosted-Setups. Die Beschreibungen stammen
           aus den offiziellen GitHub-Repositories.
         </p>

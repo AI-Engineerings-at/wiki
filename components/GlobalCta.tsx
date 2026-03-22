@@ -60,10 +60,10 @@ function getConfig(pathname: string): CtaConfig {
       ...base,
       headline: isEn
         ? 'Next step: ship workflows that stay operable'
-        : 'Naechster Schritt: Workflows sauber in Betrieb bringen',
+        : 'Nächster Schritt: Workflows sauber in Betrieb bringen',
       body: isEn
         ? 'Use proven n8n patterns, templates and integrations for workflows that stay local, documented, and auditable.'
-        : 'Nutze bewaehrte n8n-Patterns, Templates und Integrationen für Workflows, die lokal, dokumentiert und auditierbar bleiben.',
+        : 'Nutze bewährte n8n-Patterns, Templates und Integrationen für Workflows, die lokal, dokumentiert und auditierbar bleiben.',
       primaryHref: n8nHref,
       primaryLabel: isEn ? 'View n8n Bundle' : 'n8n Bundle ansehen',
     }
@@ -74,10 +74,10 @@ function getConfig(pathname: string): CtaConfig {
       ...base,
       headline: isEn
         ? 'Next step: operationalize compliance'
-        : 'Naechster Schritt: Compliance in den Betrieb bringen',
+        : 'Nächster Schritt: Compliance in den Betrieb bringen',
       body: isEn
         ? 'Use ready-to-run GDPR templates, checklists and practical guidance for AI systems that need documentation and auditability.'
-        : 'Nutze fertige DSGVO-Templates, Checklisten und Praxis-Guides für AI-Systeme, die dokumentiert und auditierbar sein muessen.',
+        : 'Nutze fertige DSGVO-Templates, Checklisten und Praxis-Guides für AI-Systeme, die dokumentiert und auditierbar sein müssen.',
       primaryHref: dsgvoHref,
       primaryLabel: isEn ? 'View GDPR Bundle' : 'DSGVO Bundle ansehen',
     }
@@ -87,7 +87,7 @@ function getConfig(pathname: string): CtaConfig {
     ...base,
     headline: isEn
       ? 'Next step: move from knowledge to implementation'
-      : 'Naechster Schritt: vom Wissen in die Umsetzung',
+      : 'Nächster Schritt: vom Wissen in die Umsetzung',
     body: isEn
       ? 'If you want more than theory: setups, workflows and templates from real operations for teams that want local, documented AI systems.'
       : 'Wenn du mehr willst als Theorie: Setups, Workflows und Vorlagen aus dem echten Betrieb für Teams, die lokale und dokumentierte AI-Systeme wollen.',

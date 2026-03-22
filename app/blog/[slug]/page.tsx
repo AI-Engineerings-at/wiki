@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Metadata } from 'next'
 import {
   getAllBlogSlugs,
@@ -94,9 +95,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       {/* Hero Image */}
       {heroImage && (
         <div className="relative aspect-[21/9] overflow-hidden rounded-2xl mb-8 border border-slate-800">
-          <img
+          <Image
             src={heroImage}
             alt={post.title}
+            fill
+            sizes="100vw"
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
@@ -231,9 +234,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 <article className="h-full flex flex-col bg-slate-900 border border-slate-800 rounded-xl overflow-hidden hover:border-blue-500/50 transition-all">
                   {blogImages[related.slug] ? (
                     <div className="aspect-video overflow-hidden">
-                      <img
+                      <Image
                         src={blogImages[related.slug]}
                         alt={related.title}
+                        width={800}
+                        height={450}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     </div>
