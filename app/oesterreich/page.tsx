@@ -1,3 +1,5 @@
+import Callout from "../../components/Callout"
+
 export const metadata = {
   title: 'KI in Österreich | AI Engineering Wiki',
   description:
@@ -15,6 +17,12 @@ export default function OesterreichPage() {
           Übersicht aller relevanten österreichischen KI-Ressourcen: Regulierung, Förderprogramme, Leitfäden und Community.
         </p>
       </div>
+
+      <Callout type="summary" title="Überblick">
+        Alle österreichischen KI-Ressourcen auf einen Blick: Behörden (RTR, DSB, Digital Austria),
+        Förderprogramme (FFG, aws), WKO-Leitfäden für KMU, Community-Events und die aktuelle Rechtslage
+        zum EU AI Act aus österreichischer Perspektive.
+      </Callout>
 
       {/* Behörden & Regulierung */}
       <section className="space-y-4">
@@ -288,6 +296,28 @@ export default function OesterreichPage() {
           </div>
         </div>
       </section>
+
+      {/* Quellen */}
+      <section className="mt-16 pt-8 border-t border-white/10">
+        <h2 className="text-xl font-bold text-white mb-4">Quellen</h2>
+        <ul className="space-y-2 text-sm text-white/50">
+          <li><a href="https://www.rtr.at/rtr/service/ki-servicestelle/ki-servicestelle.de.html" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">RTR KI-Servicestelle</a> — Zentrale Anlaufstelle für KI-Regulierung in Österreich</li>
+          <li><a href="https://dsb.gv.at/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Datenschutzbehörde (DSB)</a> — DSGVO-Durchsetzung in Österreich</li>
+          <li><a href="https://www.digitalaustria.gv.at/themen/kuenstliche-intelligenz.html" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Digital Austria</a> — KI-Strategie der Bundesregierung</li>
+          <li><a href="https://www.ffg.at/ai-tech-green-2025" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">FFG AI Ökosysteme</a> — Förderprogramm für AI-Technologie</li>
+          <li><a href="https://www.wko.at/digitalisierung/ai-act-eu" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">WKO AI Act Übersicht</a> — Praxisnahe KMU-Perspektive zum EU AI Act</li>
+          <li><a href="https://digital-strategy.ec.europa.eu/en/policies/ai-office" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">EU AI Office</a> — Zentrale EU-Stelle für KI-Governance</li>
+        </ul>
+      </section>
+
+      <div className="mt-12 pt-8 border-t border-white/10 text-center">
+        <p className="text-sm text-slate-500">
+          Alle Wiki-Artikel sind kostenlos. Wenn du fertige Templates und Bundles suchst:
+        </p>
+        <a href="https://www.ai-engineering.at" className="text-sm text-blue-400 hover:text-blue-300 transition-colors mt-2 inline-block">
+          Produkte &amp; Bundles ansehen →
+        </a>
+      </div>
     </div>
   )
 }

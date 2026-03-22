@@ -19,11 +19,16 @@ export default function BackupStrategie() {
         <Callout type="summary" title="Auf einen Blick">
           <p>
             3-2-1 Regel: 3 Kopien, 2 verschiedene Medien, 1 Offsite. Docker Volumes
-            taeglich sichern, Configs bei Aenderung. Restic für verschluesselte
+            täglich sichern, Configs bei Änderung. Restic für verschlüsselte
             Backups, Rclone für Cloud-Sync. Restore testen — ein Backup das du
             nicht wiederherstellen kannst ist keins.
           </p>
         </Callout>
+
+        <figure className="my-8">
+          <img src="/images/infographics/security-backup-321.png" alt="3-2-1 Backup Regel" className="rounded-xl border border-white/10 w-full" />
+          <figcaption className="text-center text-white/40 text-sm mt-2">Die 3-2-1 Backup-Regel: 3 Kopien, 2 Medien, 1 Offsite</figcaption>
+        </figure>
 
         <p className="text-lg text-gray-300">
           Backups sind langweilig bis du sie brauchst. Dann sind sie lebensrettend.
@@ -237,7 +242,7 @@ rclone sync $BACKUP_DIR remote:homelab-backup --transfers 2`}</code>
 
         <Callout type="warning" title="Restore testen">
           <p>
-            Ein Backup ohne regelmaessigen Restore-Test ist wertlos. Teste
+            Ein Backup ohne regelmäßigen Restore-Test ist wertlos. Teste
             mindestens monatlich, ob du aus deinen Backups wiederherstellen kannst.
             Am besten automatisiert per Cron.
           </p>
@@ -259,8 +264,8 @@ rclone sync $BACKUP_DIR remote:homelab-backup --transfers 2`}</code>
           <ul className="space-y-2 text-sm text-white/50">
             <li><a href="https://restic.net/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Restic — Backup-Tool</a> — Schnell, sicher, dedupliziert</li>
             <li><a href="https://rclone.org/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Rclone</a> — Cloud-Sync für 70+ Storage-Provider</li>
-            <li><a href="https://www.backblaze.com/cloud-storage" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Backblaze B2</a> — Guenstiger Cloud-Storage für Offsite-Backups</li>
-            <li><a href="https://www.proxmox.com/en/products/proxmox-backup-server/overview" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Proxmox Backup Server</a> — Spezialisierte Backup-Loesung für PVE</li>
+            <li><a href="https://www.backblaze.com/cloud-storage" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Backblaze B2</a> — Günstiger Cloud-Storage für Offsite-Backups</li>
+            <li><a href="https://www.proxmox.com/en/products/proxmox-backup-server/overview" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Proxmox Backup Server</a> — Spezialisierte Backup-Lösung für PVE</li>
           </ul>
         </section>
       </div>

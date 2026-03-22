@@ -1,8 +1,34 @@
+import Callout from "../../../components/Callout"
+import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
+
 export const metadata = {
   title: 'Datenschutz Praxis | AI Engineering Wiki',
   description:
     'DSGVO in der Praxis umsetzen: technische und organisatorische Massnahmen (TOM), Zugriffskontrollen, Logging, Monitoring und Checklisten.',
 }
+
+const dsgvoProzessDiagram = `@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam rectangleBorderColor #334155
+skinparam rectangleBackgroundColor #0F172A
+
+rectangle "Datenerhebung\\n(Art. 5, 6 DSGVO)" as erhebung
+rectangle "Verarbeitung\\n(Art. 30 VVT)" as verarbeitung
+rectangle "Technische Maßnahmen\\n(Art. 32 TOM)" as tom
+rectangle "Betroffenenrechte\\n(Art. 15-22)" as rechte
+rectangle "Löschung\\n(Löschkonzept)" as loeschung
+rectangle "Audit & Überprüfung\\n(Regelmäßig)" as audit
+
+erhebung -down-> verarbeitung : Rechtsgrundlage prüfen
+verarbeitung -down-> tom : Schutzmaßnahmen
+tom -down-> rechte : Auskunft, Berichtigung
+rechte -down-> loeschung : Aufbewahrungsfrist
+loeschung -down-> audit : Dokumentation
+audit -up-> erhebung : Kontinuierliche\\nVerbesserung
+
+@enduml`
 
 export default function DatenschutzPraxis() {
   return (
@@ -12,10 +38,18 @@ export default function DatenschutzPraxis() {
         <p className="text-gray-400 mt-2">Compliance · 6 min</p>
       </div>
 
+      <Callout type="summary" title="Überblick">
+        DSGVO in der Praxis umsetzen: Technische Maßnahmen (TLS, Verschlüsselung, Zugriffskontrollen),
+        organisatorische Maßnahmen (DSB, Schulungen, AVV) und konkrete Checklisten.
+        Mit Code-Beispielen für TLS-Konfiguration und einer vollständigen AVV-Prüfliste.
+      </Callout>
+
       <div className="prose prose-invert max-w-none">
         <p className="text-lg text-gray-300">
           Wie setzt man DSGVO in der Praxis um? Konkrete Maßnahmen und Checklisten.
         </p>
+
+        <PlantUMLDiagram diagram={dsgvoProzessDiagram} caption="DSGVO-Prozess: Von der Erhebung über Verarbeitung und TOM bis zur Löschung und Audit" />
 
         <figure className="my-8">
           <img src="/images/infographics/datenschutz-tom-uebersicht.png" alt="Datenschutz TOM Übersicht — Technische und organisatorische Massnahmen" className="rounded-xl border border-white/10 w-full" />
@@ -104,6 +138,11 @@ data UUID=xxx none luks`}</code>
           </ul>
         </div>
 
+        <figure className="my-8">
+          <img src="/images/infographics/tools-dsgvo-ampel.png" alt="DSGVO-Ampel: Welche Tools sind konform?" className="rounded-xl border border-white/10 w-full" />
+          <figcaption className="text-center text-white/40 text-sm mt-2">DSGVO-Ampel: Welche Tools sind konform?</figcaption>
+        </figure>
+
         <h2 className="text-xl font-semibold text-white mt-8">DSGVO-spezifisch</h2>
 
         <ul className="list-disc list-inside text-gray-300 space-y-2 mt-4">
@@ -166,6 +205,26 @@ data UUID=xxx none luks`}</code>
             <li>[] Technische Maßnahmen implementiert?</li>
             <li>[] Mitarbeiter geschult?</li>
           </ul>
+        </div>
+
+        {/* Quellen */}
+        <section className="mt-16 pt-8 border-t border-white/10">
+          <h2 className="text-xl font-bold text-white mb-4">Quellen</h2>
+          <ul className="space-y-2 text-sm text-white/50">
+            <li><a href="https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX:32016R0679" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">DSGVO Volltext (EUR-Lex)</a> — Datenschutz-Grundverordnung</li>
+            <li><a href="https://www.glacis.io/guide-eu-ai-act" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">GLACIS: EU AI Act Compliance Guide 2026</a> — Umfassender Compliance-Leitfaden</li>
+            <li><a href="https://www.littledata.com/eu-ai-act-compliance-checklist/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">LittleData: EU AI Act Compliance Checklist</a> — 7-Schritte-Checkliste</li>
+            <li><a href="https://dsb.gv.at/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Österreichische Datenschutzbehörde</a> — DSGVO-Durchsetzung in Österreich</li>
+          </ul>
+        </section>
+
+        <div className="mt-12 pt-8 border-t border-white/10 text-center">
+          <p className="text-sm text-slate-500">
+            Alle Wiki-Artikel sind kostenlos. Wenn du fertige Templates und Bundles suchst:
+          </p>
+          <a href="https://www.ai-engineering.at" className="text-sm text-blue-400 hover:text-blue-300 transition-colors mt-2 inline-block">
+            Produkte &amp; Bundles ansehen →
+          </a>
         </div>
       </div>
     </div>

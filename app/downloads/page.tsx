@@ -1,3 +1,5 @@
+import Callout from "../../components/Callout"
+
 export const metadata = {
   title: 'Praxis-Downloads | AI Engineering Wiki',
   description:
@@ -76,6 +78,12 @@ export default function DownloadsPage() {
         </p>
       </div>
 
+      <Callout type="summary" title="Überblick">
+        Kostenlose Templates und Checklisten für KI im Unternehmen: KI-Richtlinie, DPIA-Vorlage,
+        EU AI Act Checkliste, Verarbeitungsverzeichnis, Agent Onboarding und mehr.
+        Jeder Download verweist auf den Wiki-Artikel mit dem vollständigen Template.
+      </Callout>
+
       <div className="space-y-4">
         {downloads.map((item) => (
           <a
@@ -96,6 +104,27 @@ export default function DownloadsPage() {
             </div>
           </a>
         ))}
+      </div>
+
+      {/* Quellen */}
+      <section className="mt-16 pt-8 border-t border-white/10">
+        <h2 className="text-xl font-bold text-white mb-4">Quellen</h2>
+        <ul className="space-y-2 text-sm text-white/50">
+          <li><a href="/compliance/ki-kompetenz-art4" className="text-blue-400 hover:underline">KI-Kompetenz nach Art. 4</a> — Grundlage für die KI-Richtlinie Vorlage</li>
+          <li><a href="/compliance/dpia" className="text-blue-400 hover:underline">DPIA für KI-Systeme</a> — Datenschutz-Folgenabschätzung Schritt für Schritt</li>
+          <li><a href="/compliance/eu-ai-act-checkliste" className="text-blue-400 hover:underline">EU AI Act Checkliste</a> — 7-Schritte Leitfaden zur Bereitschaft</li>
+          <li><a href="/compliance/dsgvo-grundlagen" className="text-blue-400 hover:underline">DSGVO Grundlagen</a> — Basis für das Verarbeitungsverzeichnis</li>
+          <li><a href="/grundlagen/30-tage-quickstart" className="text-blue-400 hover:underline">30-Tage Quickstart</a> — Von der Hardware bis zum ersten Agenten</li>
+        </ul>
+      </section>
+
+      <div className="mt-12 pt-8 border-t border-white/10 text-center">
+        <p className="text-sm text-slate-500">
+          Alle Wiki-Artikel sind kostenlos. Wenn du fertige Templates und Bundles suchst:
+        </p>
+        <a href="https://www.ai-engineering.at" className="text-sm text-blue-400 hover:text-blue-300 transition-colors mt-2 inline-block">
+          Produkte &amp; Bundles ansehen →
+        </a>
       </div>
     </div>
   )

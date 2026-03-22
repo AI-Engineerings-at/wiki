@@ -24,7 +24,7 @@ export default function SelfHostedSicherheitPage() {
         <p className="text-lg text-white/60 mt-3 max-w-2xl">
           Wenn du AI-Services selbst hostest, bist du für die Sicherheit
           verantwortlich. Kein Cloud-Anbieter fängt Fehler für dich ab. Hier
-          sind die 6 Schichten, die deine Infrastruktur schuetzen.
+          sind die 6 Schichten, die deine Infrastruktur schützen.
         </p>
         <div className="flex items-center gap-4 mt-4 text-sm text-white/40">
           <span>Lesezeit: 15 min</span>
@@ -63,15 +63,15 @@ export default function SelfHostedSicherheitPage() {
               className="rounded-xl border border-white/10"
             />
             <p className="text-sm text-white/40 mt-2 text-center">
-              Sicherheit in Schichten: Jede Ebene schuetzt gegen andere
+              Sicherheit in Schichten: Jede Ebene schützt gegen andere
               Angriffsvektoren.
             </p>
           </div>
 
           <ComparisonTable
-            headers={["Layer", "Schuetzt gegen", "Werkzeuge"]}
+            headers={["Layer", "Schützt gegen", "Werkzeuge"]}
             rows={[
-              ["1. Netzwerk", "Unbefugter Zugriff von aussen", "Firewall (UFW/iptables), VLAN, VPN"],
+              ["1. Netzwerk", "Unbefugter Zugriff von außen", "Firewall (UFW/iptables), VLAN, VPN"],
               ["2. SSH & Authentifizierung", "Brute Force, schwache Passwörter", "SSH Key-Only, fail2ban, 2FA"],
               ["3. Host-Betriebssystem", "Veraltete Software, Kernel-Exploits", "Unattended Upgrades, CIS Benchmark"],
               ["4. Container & Services", "Privilege Escalation, ungesicherte APIs", "Rootless Container, Read-Only FS, Secrets"],
@@ -208,11 +208,11 @@ sudo fail2ban-client status sshd`}</code>
             Host-System
           </h3>
           <ComparisonTable
-            headers={["Massnahme", "Befehl / Konfiguration", "Warum"]}
+            headers={["Maßnahme", "Befehl / Konfiguration", "Warum"]}
             rows={[
               ["Auto-Updates", "sudo apt install unattended-upgrades", "Sicherheits-Patches automatisch einspielen"],
               ["Nicht-root User", "sudo adduser deploy && sudo usermod -aG docker deploy", "Minimale Rechte, kein permanenter root"],
-              ["Kernel-Updates", "sudo apt upgrade linux-generic", "Kernel-Exploits schliessen"],
+              ["Kernel-Updates", "sudo apt upgrade linux-generic", "Kernel-Exploits schließen"],
               ["Unnötige Services", "sudo systemctl disable bluetooth cups", "Angriffsfläche reduzieren"],
             ]}
           />
@@ -257,7 +257,7 @@ sudo fail2ban-client status sshd`}</code>
           </p>
 
           <ComparisonTable
-            headers={["Risiko", "Beschreibung", "Gegenmassnahme"]}
+            headers={["Risiko", "Beschreibung", "Gegenmaßnahme"]}
             rows={[
               ["Prompt Injection", "Nutzer manipuliert LLM-Anweisungen", "System Prompt Isolation, Input Validation"],
               ["Data Leakage", "LLM gibt Environment Variables oder Secrets aus", "Output Sanitizer (PFLICHT)"],

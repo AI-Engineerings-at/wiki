@@ -18,12 +18,17 @@ export default function FirewallSetup() {
       <div className="prose prose-invert max-w-none">
         <Callout type="summary" title="Auf einen Blick">
           <p>
-            Nur noetige Ports oeffnen, Services segmentieren, SSH nur mit Key-Auth.
+            Nur nötige Ports öffnen, Services segmentieren, SSH nur mit Key-Auth.
             UFW als Firewall, Fail2ban gegen Brute-Force, Traefik als Reverse Proxy.
-            Interne Services (Prometheus, Docker API) niemals direkt von aussen
+            Interne Services (Prometheus, Docker API) niemals direkt von außen
             erreichbar machen.
           </p>
         </Callout>
+
+        <figure className="my-8">
+          <img src="/images/diagrams/security-netzwerk.png" alt="Netzwerk-Segmentation für lokale AI-Infrastruktur" className="rounded-xl border border-white/10 w-full" />
+          <figcaption className="text-center text-white/40 text-sm mt-2">Netzwerk-Segmentation: DMZ, internes Netz, AI-Stack isoliert</figcaption>
+        </figure>
 
         <p className="text-lg text-gray-300">
           Netzwerksicherheit ist die erste Verteidigungslinie. Ohne Firewall und
@@ -272,10 +277,15 @@ nmap -sT -p 22,80,443,3000,8080,9090 192.168.1.100
           <p>
             Docker manipuliert iptables direkt und umgeht UFW-Regeln. Ports die
             in docker-compose.yml mit ports: exponiert werden, sind trotz UFW
-            von aussen erreichbar. Loesung: Ports nur auf 127.0.0.1 binden
+            von außen erreichbar. Lösung: Ports nur auf 127.0.0.1 binden
             (z.B. 127.0.0.1:9090:9090) oder Docker-interne Netzwerke nutzen.
           </p>
         </Callout>
+
+        <figure className="my-8">
+          <img src="/images/diagrams/security-layers.png" alt="Security Layers — Mehrschichtige Absicherung" className="rounded-xl border border-white/10 w-full" />
+          <figcaption className="text-center text-white/40 text-sm mt-2">Defense in Depth: Firewall, Fail2ban, Docker Network, Application Security</figcaption>
+        </figure>
 
         <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mt-8">
           <h3 className="font-semibold text-white mb-2">Zusammenfassung</h3>

@@ -9,7 +9,7 @@ import { RelatedArticles } from "../../../components/RelatedArticles"
 export const metadata: Metadata = {
   title: "Verschlüsselung: At Rest, In Transit, In Use | AI Engineering Wiki",
   description:
-    "Verschlüsselung für Self-Hosted AI: Daten auf der Festplatte, im Netzwerk und während der Verarbeitung schuetzen. LUKS, TLS, Confidential Computing erklärt.",
+    "Verschlüsselung für Self-Hosted AI: Daten auf der Festplatte, im Netzwerk und während der Verarbeitung schützen. LUKS, TLS, Confidential Computing erklärt.",
 }
 
 export default function VerschlüsselungPage() {
@@ -22,7 +22,7 @@ export default function VerschlüsselungPage() {
           Verschlüsselung: At Rest, In Transit, In Use
         </h1>
         <p className="text-lg text-white/60 mt-3 max-w-2xl">
-          Daten müssen in drei Zuständen geschuetzt werden: gespeichert,
+          Daten müssen in drei Zuständen geschützt werden: gespeichert,
           übertragen und während der Verarbeitung. Hier ist was das
           praktisch bedeutet.
         </p>
@@ -36,13 +36,18 @@ export default function VerschlüsselungPage() {
       <div className="prose prose-invert max-w-none">
         <Callout type="summary" title="Auf einen Blick">
           <p>
-            Verschlüsselung schuetzt Daten in drei Phasen: <strong>At Rest</strong>{" "}
+            Verschlüsselung schützt Daten in drei Phasen: <strong>At Rest</strong>{" "}
             (auf Festplatte/SSD), <strong>In Transit</strong> (im Netzwerk),{" "}
             <strong>In Use</strong> (während der Verarbeitung im RAM). Für einen
             self-hosted AI-Stack sind die ersten beiden Pflicht, die dritte ist
             ein Bonus für Hochsicherheits-Szenarien.
           </p>
         </Callout>
+
+        <figure className="my-8">
+          <img src="/images/infographics/security-encryption.png" alt="Verschlüsselung — At Rest, In Transit, End-to-End" className="rounded-xl border border-white/10 w-full" />
+          <figcaption className="text-center text-white/40 text-sm mt-2">Verschlüsselung: Data at Rest, Data in Transit, End-to-End</figcaption>
+        </figure>
 
         {/* Section 1: Überblick */}
         <section className="mt-10">
@@ -84,7 +89,7 @@ export default function VerschlüsselungPage() {
             Encryption At Rest: Festplatten-Verschlüsselung
           </h2>
           <p className="text-white/70 leading-relaxed mb-4">
-            At-Rest-Verschlüsselung schuetzt deine Daten wenn jemand physisch
+            At-Rest-Verschlüsselung schützt deine Daten wenn jemand physisch
             an die Festplatte kommt — Einbruch, Entsorgung, Reparatur. Ohne
             Verschlüsselung kann jeder die Platte in einen anderen Rechner
             stecken und alles lesen.
@@ -133,7 +138,7 @@ sudo mount /dev/mapper/encrypted-data /mnt/secure-data`}</code>
             rows={[
               ["Backup-Volumes", "PFLICHT", "Backups enthalten alles — Datenbanken, Configs, Secrets"],
               ["Datenbank-Volumes", "HOCH", "Kundendaten, Credentials, AI-Trainingsdaten"],
-              ["System-Partition", "MITTEL", "Schuetzt Configs und Logs bei Diebstahl"],
+              ["System-Partition", "MITTEL", "Schützt Configs und Logs bei Diebstahl"],
               ["Swap-Partition", "HOCH", "RAM-Inhalte werden auf Disk geschrieben (Secrets!)"],
               ["Modell-Storage", "NIEDRIG", "Modelle sind öffentlich, aber deine Fine-Tunes nicht"],
             ]}
@@ -228,7 +233,7 @@ sudo mount /dev/mapper/encrypted-data /mnt/secure-data`}</code>
           </h2>
 
           <ComparisonTable
-            headers={["Massnahme", "Priorität", "Status-Check"]}
+            headers={["Maßnahme", "Priorität", "Status-Check"]}
             rows={[
               ["LUKS auf Backup-Volumes", "PFLICHT", "lsblk -o NAME,TYPE,FSTYPE | grep crypt"],
               ["Swap verschlüsselt", "PFLICHT", "swapon --show + /etc/crypttab"],
@@ -286,6 +291,11 @@ sudo mount /dev/mapper/encrypted-data /mnt/secure-data`}</code>
             </p>
           </Callout>
         </section>
+
+        <figure className="my-8">
+          <img src="/images/diagrams/datenschutz-verschluesselung.png" alt="Verschlüsselung im Überblick" className="rounded-xl border border-white/10 w-full" />
+          <figcaption className="text-center text-white/40 text-sm mt-2">Verschlüsselung im Überblick</figcaption>
+        </figure>
 
         {/* Key Takeaway */}
         <KeyTakeaway

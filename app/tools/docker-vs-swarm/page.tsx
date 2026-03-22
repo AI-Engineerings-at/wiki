@@ -67,6 +67,11 @@ export default function DockerVsSwarm() {
           geht nicht.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/tools-docker-architektur.png" alt="Docker Architektur" className="rounded-xl border border-white/10 w-full" />
+          <figcaption className="text-center text-white/40 text-sm mt-2">Docker Architektur</figcaption>
+        </figure>
+
         <h2 className="text-xl font-semibold text-white mt-8">Docker Swarm in 60 Sekunden</h2>
         <p className="text-gray-300">
           Docker Swarm ist die eingebaute Orchestrierungsplattform von Docker. Du 

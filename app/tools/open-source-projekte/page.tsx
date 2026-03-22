@@ -1,3 +1,5 @@
+import Callout from "../../../components/Callout"
+
 export const metadata = {
   title: 'Open Source Tools & Projekte | AI Engineering Wiki',
   description:
@@ -582,6 +584,13 @@ export default function OpenSourceProjektePage() {
         </p>
       </div>
 
+      <Callout type="summary" title="Überblick">
+        {categories.reduce((sum, cat) => sum + cat.tools.length, 0)} kuratierte Open-Source-Tools
+        in {categories.length} Kategorien — von LLM Runtimes über Agent Frameworks bis Security.
+        Alle Tools sind Self-Hosted-fähig und auf GitHub verfügbar. Tools mit dem Tag
+        &quot;Im Einsatz&quot; nutzen wir selbst in Produktion.
+      </Callout>
+
       {/* Inhaltsverzeichnis */}
       <nav className="bg-slate-900 border border-slate-800 rounded-xl p-5">
         <h2 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-3">
@@ -652,6 +661,28 @@ export default function OpenSourceProjektePage() {
           lokale AI-Infrastruktur und Self-Hosted-Setups. Die Beschreibungen stammen
           aus den offiziellen GitHub-Repositories.
         </p>
+      </div>
+
+      {/* Quellen */}
+      <section className="mt-16 pt-8 border-t border-white/10">
+        <h2 className="text-xl font-bold text-white mb-4">Quellen</h2>
+        <ul className="space-y-2 text-sm text-white/50">
+          <li><a href="https://github.com/ollama/ollama" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Ollama</a> — Lokale LLM Runtime</li>
+          <li><a href="https://github.com/crewAIInc/crewAI" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">CrewAI</a> — Multi-Agent Orchestrierung</li>
+          <li><a href="https://github.com/n8n-io/n8n" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">n8n</a> — Workflow Automation</li>
+          <li><a href="https://github.com/qdrant/qdrant" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Qdrant</a> — Vector Search Engine</li>
+          <li><a href="https://github.com/langfuse/langfuse" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Langfuse</a> — LLM Observability</li>
+          <li><a href="https://github.com/promptfoo/promptfoo" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">promptfoo</a> — AI Red Teaming und Prompt Testing</li>
+        </ul>
+      </section>
+
+      <div className="mt-12 pt-8 border-t border-white/10 text-center">
+        <p className="text-sm text-slate-500">
+          Alle Wiki-Artikel sind kostenlos. Wenn du fertige Templates und Bundles suchst:
+        </p>
+        <a href="https://www.ai-engineering.at" className="text-sm text-blue-400 hover:text-blue-300 transition-colors mt-2 inline-block">
+          Produkte &amp; Bundles ansehen →
+        </a>
       </div>
     </div>
   )

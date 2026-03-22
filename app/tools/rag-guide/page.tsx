@@ -1,8 +1,33 @@
+import Callout from "../../../components/Callout"
+import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
+
 export const metadata = {
   title: 'RAG Guide | AI Engineering Wiki',
   description:
     'RAG (Retrieval Augmented Generation) in der Praxis: Embeddings, Vector DBs (ChromaDB/Qdrant), Hybrid Search und wie du dein eigenes Wissen ins LLM bringst.',
 }
+
+const ragPipelineDiagram = `@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam rectangleBorderColor #334155
+skinparam rectangleBackgroundColor #0F172A
+
+rectangle "User Query" as query
+rectangle "Query Embedding" as embed
+rectangle "Retriever\\n(Vector DB + BM25)" as retriever
+rectangle "Relevante Chunks\\n(Context)" as context
+rectangle "LLM\\n(Ollama / OpenAI)" as llm
+rectangle "Generierte Antwort" as answer
+
+query -down-> embed : Text → Vektor
+embed -down-> retriever : Ähnlichkeitssuche
+retriever -down-> context : Top-K Ergebnisse
+context -down-> llm : Query + Context
+llm -down-> answer : Augmented Generation
+
+@enduml`
 
 export default function RagGuide() {
   return (
@@ -15,6 +40,13 @@ export default function RagGuide() {
           <span className="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded">LangChain 0.3.x</span>
         </div>
       </div>
+
+      <Callout type="summary" title="Überblick">
+        RAG (Retrieval Augmented Generation) kombiniert Information Retrieval mit Textgenerierung:
+        Dein LLM greift auf eigene Dokumente zu statt nur auf Trainingsdaten. Dieser Guide deckt
+        die komplette Pipeline ab — von Embeddings über Vector DBs (ChromaDB, Qdrant) bis Hybrid Search
+        und Query Transformations. Mit Code-Beispielen für Ollama + LangChain.
+      </Callout>
 
       <div className="prose prose-invert max-w-none">
         <p className="text-lg text-gray-300">
@@ -37,6 +69,8 @@ export default function RagGuide() {
           <img src="/images/diagrams/tools-rag-pipeline.png" alt="RAG Pipeline — Document Chunking, Embedding, Retrieval, Generation" className="rounded-xl border border-white/10 w-full" />
           <figcaption className="text-center text-white/40 text-sm mt-2">RAG Pipeline: Von der Dokumentenverarbeitung bis zur Antwortgenerierung</figcaption>
         </figure>
+
+        <PlantUMLDiagram diagram={ragPipelineDiagram} caption="RAG Pipeline: Query → Embedding → Retriever → Context → LLM → Antwort" />
 
         <h2 className="text-xl font-semibold text-white mt-8">RAG Workflow</h2>
 
@@ -289,10 +323,31 @@ Frage allgemeiner formuliert: {question}
         <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mt-8">
           <h3 className="font-semibold text-white mb-2">Zusammenfassung</h3>
           <p className="text-gray-300">
-            RAG ist der Schlüssel zu lokalen AI-Systemen, die auf dein Wissen zugreifen können. 
-            Mit ChromaDB + Ollama hast du ein einfaches Setup. Für Produktion empfehlen wir 
+            RAG ist der Schlüssel zu lokalen AI-Systemen, die auf dein Wissen zugreifen können.
+            Mit ChromaDB + Ollama hast du ein einfaches Setup. Für Produktion empfehlen wir
             Hybrid Search (BM25 + Vektor) + Reranking für beste Ergebnisse.
           </p>
+        </div>
+
+        {/* Quellen */}
+        <section className="mt-16 pt-8 border-t border-white/10">
+          <h2 className="text-xl font-bold text-white mb-4">Quellen</h2>
+          <ul className="space-y-2 text-sm text-white/50">
+            <li><a href="https://python.langchain.com/docs/tutorials/rag/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">LangChain RAG Tutorial</a> — Offizielle LangChain-Dokumentation zu RAG</li>
+            <li><a href="https://docs.llamaindex.ai/en/stable/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">LlamaIndex Docs</a> — RAG Framework Dokumentation</li>
+            <li><a href="https://docs.trychroma.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">ChromaDB Docs</a> — AI-native Embedding-Datenbank</li>
+            <li><a href="https://qdrant.tech/documentation/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Qdrant Documentation</a> — High-Performance Vector Search</li>
+            <li><a href="https://github.com/ollama/ollama" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Ollama</a> — Lokale LLM Runtime</li>
+          </ul>
+        </section>
+
+        <div className="mt-12 pt-8 border-t border-white/10 text-center">
+          <p className="text-sm text-slate-500">
+            Alle Wiki-Artikel sind kostenlos. Wenn du fertige Templates und Bundles suchst:
+          </p>
+          <a href="https://www.ai-engineering.at" className="text-sm text-blue-400 hover:text-blue-300 transition-colors mt-2 inline-block">
+            Produkte &amp; Bundles ansehen →
+          </a>
         </div>
       </div>
     </div>

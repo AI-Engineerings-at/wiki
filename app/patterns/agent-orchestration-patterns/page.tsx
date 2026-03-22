@@ -27,6 +27,11 @@ export default function AgentOrchestrationPatterns() {
         />
 
         <figure className="my-8">
+          <img src="/images/diagrams/agent-orchestration-diagram.png" alt="Agent Orchestration Architektur" className="rounded-xl border border-white/10 w-full" />
+          <figcaption className="text-center text-white/40 text-sm mt-2">Agent Orchestration Architektur</figcaption>
+        </figure>
+
+        <figure className="my-8">
           <img src="/images/diagrams/patterns-orchestration-overview.png" alt="Agent Orchestration Patterns Übersicht — Sequential, Parallel, Hierarchical, Router, Supervisor" className="rounded-xl border border-white/10 w-full" />
           <figcaption className="text-center text-white/40 text-sm mt-2">Orchestration Patterns: Die 5 wichtigsten Muster für Multi-Agent Systeme</figcaption>
         </figure>
@@ -164,6 +169,11 @@ while not task.complete:
     else:
         task.complete = True`}</code>
         </pre>
+
+        <figure className="my-8">
+          <img src="/images/diagrams/tools-dispatch-routing.png" alt="Dispatch Routing" className="rounded-xl border border-white/10 w-full" />
+          <figcaption className="text-center text-white/40 text-sm mt-2">Dispatch Routing</figcaption>
+        </figure>
 
         <h2 className="text-xl font-semibold text-white mt-8">Wichtige Quellen</h2>
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import Callout from "../../../components/Callout"
 
 type Tool = {
   name: string
@@ -288,6 +289,12 @@ export default function AIToolsDatenbankPage() {
         </p>
       </div>
 
+      <Callout type="summary" title="Überblick">
+        {totalTools} kuratierte AI-Tools in {toolCategories.length} Kategorien — von LLM Runtimes über Agent Frameworks
+        bis Monitoring. Jedes Tool mit GitHub-Link, Lizenz, Star-Count und Self-Hosted-Status.
+        Filterbar nach Kategorie, Suchbegriff und Einsatzstatus.
+      </Callout>
+
       {/* Search & Filters */}
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
         <div className="relative">
@@ -403,6 +410,28 @@ export default function AIToolsDatenbankPage() {
           Tools mit dem Badge &quot;Im Einsatz&quot; werden von uns produktiv in unserer
           AI-Infrastruktur genutzt. Alle Angaben ohne Gewähr.
         </p>
+      </div>
+
+      {/* Quellen */}
+      <section className="mt-16 pt-8 border-t border-white/10">
+        <h2 className="text-xl font-bold text-white mb-4">Quellen</h2>
+        <ul className="space-y-2 text-sm text-white/50">
+          <li><a href="https://github.com/ollama/ollama" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Ollama</a> — Lokale LLM Runtime (MIT)</li>
+          <li><a href="https://github.com/open-webui/open-webui" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Open WebUI</a> — Feature-reiche Chat-Oberfläche für LLMs</li>
+          <li><a href="https://github.com/n8n-io/n8n" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">n8n</a> — Fair-Code Workflow Automation</li>
+          <li><a href="https://github.com/langchain-ai/langchain" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">LangChain</a> — Framework für LLM-Anwendungen</li>
+          <li><a href="https://github.com/grafana/grafana" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Grafana</a> — Dashboards und Observability</li>
+          <li><a href="https://github.com/modelcontextprotocol/servers" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">MCP Servers</a> — Model Context Protocol Server (Anthropic)</li>
+        </ul>
+      </section>
+
+      <div className="mt-12 pt-8 border-t border-white/10 text-center">
+        <p className="text-sm text-slate-500">
+          Alle Wiki-Artikel sind kostenlos. Wenn du fertige Templates und Bundles suchst:
+        </p>
+        <a href="https://www.ai-engineering.at" className="text-sm text-blue-400 hover:text-blue-300 transition-colors mt-2 inline-block">
+          Produkte &amp; Bundles ansehen →
+        </a>
       </div>
     </div>
   )

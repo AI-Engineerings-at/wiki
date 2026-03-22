@@ -1,8 +1,36 @@
+import Callout from "../../../components/Callout"
+import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
+
 export const metadata = {
   title: 'Datenschutz-Folgenabschätzung (DPIA) | AI Engineering Wiki',
   description:
     'DPIA für KI-Systeme: Wann ist eine Datenschutz-Folgenabschätzung Pflicht, wie führt man sie durch, und was muss dokumentiert werden.',
 }
+
+const dpiaAblaufDiagram = `@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam rectangleBorderColor #334155
+skinparam rectangleBackgroundColor #0F172A
+
+rectangle "1. Screening\\nDPIA erforderlich?" as screening
+rectangle "2. Beschreibung\\nDaten, Zweck, Rechtsgrundlage" as beschreibung
+rectangle "3. Analyse\\nNotwendigkeit & Verhältnismäßigkeit" as analyse
+rectangle "4. Bewertung\\nRisiken für Betroffene" as bewertung
+rectangle "5. Maßnahmen\\nTOM, Pseudonymisierung" as massnahmen
+rectangle "6. Dokumentation\\nErgebnisse festhalten" as doku
+rectangle "Regelmäßige\\nÜberprüfung" as review
+
+screening -down-> beschreibung : Ja, DPIA nötig
+beschreibung -down-> analyse
+analyse -down-> bewertung
+bewertung -down-> massnahmen
+massnahmen -down-> doku
+doku -down-> review
+review -up-> beschreibung : Bei Änderungen\\naktualisieren
+
+@enduml`
 
 export default function DPIAPage() {
   return (
@@ -12,6 +40,12 @@ export default function DPIAPage() {
         <p className="text-gray-400 mt-2">Compliance · 8 min · Stand: März 2026</p>
       </div>
 
+      <Callout type="summary" title="Überblick">
+        DPIA (Data Protection Impact Assessment) nach Art. 35 DSGVO: Wann ist sie Pflicht,
+        wie führt man sie in 6 Schritten durch, und was bedeutet der EU AI Act für die
+        Folgenabschätzung bei KI-Systemen. Inklusive Risikomatrix und Vorteil Self-Hosted KI.
+      </Callout>
+
       <div className="prose prose-invert max-w-none">
         <p className="text-lg text-gray-300">
           Eine Datenschutz-Folgenabschätzung (Data Protection Impact Assessment, DPIA)
@@ -19,6 +53,8 @@ export default function DPIAPage() {
           hohes Risiko für die Rechte und Freiheiten natürlicher Personen zur Folge hat.
           Bei KI-Systemen ist das häufig der Fall.
         </p>
+
+        <PlantUMLDiagram diagram={dpiaAblaufDiagram} caption="DPIA-Ablauf: Screening → Beschreibung → Analyse → Bewertung → Maßnahmen → Dokumentation" />
 
         <h2 className="text-xl font-semibold text-white mt-8">Wann ist eine DPIA Pflicht?</h2>
 
@@ -120,6 +156,15 @@ export default function DPIAPage() {
           <li><a href="https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX:32016R0679" target="_blank" className="text-blue-400 hover:underline">DSGVO Art. 35 — Datenschutz-Folgenabschätzung (EUR-Lex)</a></li>
           <li><a href="https://dsb.gv.at/download-links/dokumente-zum-datenschutz.html" target="_blank" className="text-blue-400 hover:underline">Österreichische Datenschutzbehörde — DPIA Ressourcen</a></li>
         </ul>
+
+        <div className="mt-12 pt-8 border-t border-white/10 text-center">
+          <p className="text-sm text-slate-500">
+            Alle Wiki-Artikel sind kostenlos. Wenn du fertige Templates und Bundles suchst:
+          </p>
+          <a href="https://www.ai-engineering.at" className="text-sm text-blue-400 hover:text-blue-300 transition-colors mt-2 inline-block">
+            Produkte &amp; Bundles ansehen →
+          </a>
+        </div>
       </div>
     </div>
   )

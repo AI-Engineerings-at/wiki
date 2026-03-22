@@ -18,7 +18,7 @@ export default function SupportPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-white">Support</h1>
-        <p className="text-gray-400 mt-2">
+        <p className="text-slate-400 mt-2">
           Hilfe bei Problemen mit deinem lokalen AI-Stack.
         </p>
       </div>
@@ -28,16 +28,16 @@ export default function SupportPage() {
           <a
             key={article.href}
             href={article.href}
-            className="block p-6 bg-gray-900 border border-gray-700 rounded-lg hover:border-brand-blue transition-colors group"
+            className="block p-6 bg-slate-900 border border-slate-800 rounded-xl hover:border-brand-blue transition-colors group"
           >
             <div className="flex items-start justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-white group-hover:text-brand-blue transition-colors">
                   {article.title}
                 </h2>
-                <p className="text-gray-400 text-sm mt-1">{article.description}</p>
+                <p className="text-slate-400 text-sm mt-1">{article.description}</p>
               </div>
-              <span className="text-xs text-gray-600 whitespace-nowrap ml-4">{article.date}</span>
+              <span className="text-xs text-slate-500 whitespace-nowrap ml-4">{article.date}</span>
             </div>
           </a>
         ))}

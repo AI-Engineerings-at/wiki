@@ -1,8 +1,40 @@
+import Callout from "../../../components/Callout"
+import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
+
 export const metadata = {
   title: 'Agent Rollen & Verantwortung | AI Engineering Wiki',
   description:
     'Rollenmodell für Multi-Agent Systeme: Orchestrator, Worker, QA/Review und Infra. Klare Verantwortung, Boundaries und Eskalation in der Praxis.',
 }
+
+const agentRollenDiagram = `@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam rectangleBorderColor #334155
+skinparam rectangleBackgroundColor #0F172A
+
+rectangle "CEO / Auftraggeber" as ceo
+rectangle "Manager / Orchestrator" as manager
+rectangle "Worker: Frontend" as worker1
+rectangle "Worker: Backend" as worker2
+rectangle "Worker: QA/Content" as worker3
+rectangle "Guard / Quality Assurance" as guard
+rectangle "Researcher" as researcher
+rectangle "Browser Agent" as browser
+
+ceo -down-> manager : delegiert
+manager -down-> worker1 : koordiniert
+manager -down-> worker2 : koordiniert
+manager -down-> worker3 : koordiniert
+manager -down-> guard : prüft
+worker1 -right-> guard : Output
+worker2 -right-> guard : Output
+worker3 -right-> guard : Output
+manager -down-> researcher : Recherche
+manager -down-> browser : Web-Aktionen
+
+@enduml`
 
 export default function AgentRollen() {
   return (
@@ -11,6 +43,12 @@ export default function AgentRollen() {
         <h1 className="text-3xl font-bold text-white">Agent Rollen und Verantwortung</h1>
         <p className="text-gray-400 mt-2">Grundlagen · 6 min</p>
       </div>
+
+      <Callout type="summary" title="Überblick">
+        Rollenmodell für Multi-Agent Systeme: Manager/Orchestrator koordiniert, Worker führen aus,
+        Guards prüfen die Qualität. Mit RACI-Matrix, Eskalationspfaden und konkreten Beispielen
+        aus unserem eigenen Agent-Team.
+      </Callout>
 
       <div className="prose prose-invert max-w-none">
         <p className="text-lg text-gray-300">
@@ -22,6 +60,8 @@ export default function AgentRollen() {
           <img src="/images/diagrams/agent-rollen-pyramide.png" alt="Agent Rollen Pyramide — CEO, Manager, Worker, Guard" className="rounded-xl border border-white/10 w-full" />
           <figcaption className="text-center text-white/40 text-sm mt-2">Agent Rollen Pyramide: Von CEO über Manager zu spezialisierten Workern</figcaption>
         </figure>
+
+        <PlantUMLDiagram diagram={agentRollenDiagram} caption="Rollen-Übersicht: CEO, Manager, Worker, Guard, Researcher und Browser Agent" />
 
         <h2 className="text-xl font-semibold text-white mt-8">Das Minimum Viable Team</h2>
         <p className="text-gray-300">
@@ -277,6 +317,26 @@ export default function AgentRollen() {
             <li>[ ] Wie eskaliert man bei Problemen?</li>
             <li>[ ] Welche Tools nutzt jeder Agent?</li>
           </ul>
+        </div>
+
+        {/* Quellen */}
+        <section className="mt-16 pt-8 border-t border-white/10">
+          <h2 className="text-xl font-bold text-white mb-4">Quellen</h2>
+          <ul className="space-y-2 text-sm text-white/50">
+            <li><a href="https://github.com/crewAIInc/crewAI" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">CrewAI</a> — Framework für rollenbasierte AI-Agenten</li>
+            <li><a href="https://github.com/microsoft/autogen" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">AutoGen</a> — Multi-Agent Conversation Framework (Microsoft)</li>
+            <li><a href="https://github.com/humanlayer/12-factor-agents" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">12-Factor Agents</a> — Prinzipien für produktionstaugliche LLM-Software</li>
+            <li><a href="https://github.com/anthropics/skills" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Anthropic Skills</a> — Offizielle Agent Skills von Anthropic</li>
+          </ul>
+        </section>
+
+        <div className="mt-12 pt-8 border-t border-white/10 text-center">
+          <p className="text-sm text-slate-500">
+            Alle Wiki-Artikel sind kostenlos. Wenn du fertige Templates und Bundles suchst:
+          </p>
+          <a href="https://www.ai-engineering.at" className="text-sm text-blue-400 hover:text-blue-300 transition-colors mt-2 inline-block">
+            Produkte &amp; Bundles ansehen →
+          </a>
         </div>
       </div>
     </div>

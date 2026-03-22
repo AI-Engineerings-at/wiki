@@ -18,11 +18,16 @@ export default function ApiKeysSicher() {
       <div className="prose prose-invert max-w-none">
         <Callout type="summary" title="Auf einen Blick">
           <p>
-            API-Keys gehoeren in einen Vault oder Environment Variables — niemals
-            in Code oder Git. Regelmaessig rotieren (alle 3-6 Monate), minimale
+            API-Keys gehören in einen Vault oder Environment Variables — niemals
+            in Code oder Git. Regelmäßig rotieren (alle 3-6 Monate), minimale
             Rechte pro Key, bei Leak sofort revoken.
           </p>
         </Callout>
+
+        <figure className="my-8">
+          <img src="/images/diagrams/security-secret-management.png" alt="Secret Management — API Keys sicher verwalten" className="rounded-xl border border-white/10 w-full" />
+          <figcaption className="text-center text-white/40 text-sm mt-2">Secret Management: Vault, Environment Variables und Key Rotation</figcaption>
+        </figure>
 
         <p className="text-lg text-gray-300">
           API-Keys sind das Gold deiner Infrastruktur. Ein geleakter Key kann zu
@@ -31,8 +36,8 @@ export default function ApiKeysSicher() {
 
         <Callout type="warning" title="Niemals committen">
           <p>
-            API-Keys, Tokens und Passwoerter haben in Git nichts verloren. Ein
-            einziger Commit mit einem Key im Code reicht — selbst nach dem Loeschen
+            API-Keys, Tokens und Passwörter haben in Git nichts verloren. Ein
+            einziger Commit mit einem Key im Code reicht — selbst nach dem Löschen
             bleibt er in der Git-History.
           </p>
         </Callout>

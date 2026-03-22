@@ -1,3 +1,33 @@
+import Callout from "../../../components/Callout"
+import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
+
+const entscheidungsbaumDiagram = `@startuml
+skinparam backgroundColor transparent
+skinparam defaultFontColor #E2E8F0
+skinparam ArrowColor #4262FF
+skinparam rectangleBorderColor #334155
+skinparam rectangleBackgroundColor #0F172A
+
+rectangle "Was suchst du?" as start
+
+rectangle "Recht & Regulierung" as recht
+rectangle "Technik & Tools" as technik
+rectangle "Governance & Risiko" as governance
+
+rectangle "RTR KI-Servicestelle\\nWKO AI Act\\nEU-Kommission" as recht_quellen
+rectangle "n8n Starter Kit\\nHugging Face\\nDataCamp Tutorial" as technik_quellen
+rectangle "NIST AI RMF\\nOECD.AI\\nGLACIS Guide" as governance_quellen
+
+start -down-> recht
+start -down-> technik
+start -down-> governance
+
+recht -down-> recht_quellen
+technik -down-> technik_quellen
+governance -down-> governance_quellen
+
+@enduml`
+
 export const metadata = {
   title: 'Vergleichbare Ressourcen \u2014 Wo du sonst noch lernen kannst | AI Engineering Wiki',
   description:
@@ -24,6 +54,14 @@ export default function VergleichAlternativenPage() {
           <span>Zuletzt aktualisiert: M\u00e4rz 2026</span>
         </div>
       </div>
+
+      <Callout type="summary" title="Überblick">
+        Ehrlicher Vergleich: Wo andere Quellen besser sind als unsere Wiki — und wo wir punkten.
+        EU-Kommission für Recht, Hugging Face für Modelle, NIST für Governance. Wir liefern
+        DACH-Fokus, Praxis statt Theorie und alles an einem Ort.
+      </Callout>
+
+      <PlantUMLDiagram diagram={entscheidungsbaumDiagram} caption="Entscheidungsbaum: Je nach Thema die beste Quelle finden" />
 
       <div className="prose prose-invert max-w-none">
         <p className="text-white/70 leading-relaxed">
@@ -141,6 +179,15 @@ export default function VergleichAlternativenPage() {
             <li><a href="https://www.datacamp.com/de/tutorial/local-ai" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">DataCamp: Lokale KI Tutorial</a> \u2014 Lokale KI mit Docker, n8n, Qdrant und Ollama</li>
           </ul>
         </section>
+
+        <div className="mt-12 pt-8 border-t border-white/10 text-center">
+          <p className="text-sm text-slate-500">
+            Alle Wiki-Artikel sind kostenlos. Wenn du fertige Templates und Bundles suchst:
+          </p>
+          <a href="https://www.ai-engineering.at" className="text-sm text-blue-400 hover:text-blue-300 transition-colors mt-2 inline-block">
+            Produkte &amp; Bundles ansehen →
+          </a>
+        </div>
       </div>
     </div>
   )

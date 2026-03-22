@@ -74,6 +74,11 @@ proto --> claude : Antwort
           caption="MCP Architektur: Claude Desktop kommuniziert über MCP-Server mit der gesamten Infrastruktur"
         />
 
+        <figure className="my-8">
+          <img src="/images/diagrams/tools-mcp-architektur.png" alt="MCP Server Architektur" className="rounded-xl border border-white/10 w-full" />
+          <figcaption className="text-center text-white/40 text-sm mt-2">MCP Server Architektur</figcaption>
+        </figure>
+
         <h2 className="text-xl font-semibold text-white mt-8">Was ist MCP?</h2>
         <p className="text-gray-300 mt-2">
           MCP ist ein offener Standard von Anthropic. Er ermöglicht Claude, 
@@ -148,6 +153,11 @@ pip install mcp
         <p className="text-gray-300 mt-3">
           Nach dem Neustart von Claude Desktop siehst du die verfügbaren Tools im Menü.
         </p>
+
+        <figure className="my-8">
+          <img src="/images/diagrams/tools-skills-architektur.png" alt="Skills Architektur" className="rounded-xl border border-white/10 w-full" />
+          <figcaption className="text-center text-white/40 text-sm mt-2">Skills Architektur</figcaption>
+        </figure>
 
         <h2 className="text-xl font-semibold text-white mt-8">Eigener MCP Server mit FastMCP</h2>
 

@@ -140,6 +140,11 @@ end note
           </div>
         </div>
 
+        <figure className="my-8">
+          <img src="/images/infographics/eu-ai-act-risikoklassen-entscheidungsbaum.png" alt="Entscheidungsbaum: Welche Risikoklasse?" className="rounded-xl border border-white/10 w-full" />
+          <figcaption className="text-center text-white/40 text-sm mt-2">Entscheidungsbaum: Welche Risikoklasse?</figcaption>
+        </figure>
+
         <h2 className="text-xl font-semibold text-white mt-8">Was das für typische Business-KI-Nutzung bedeutet</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
