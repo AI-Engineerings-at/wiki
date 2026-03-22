@@ -76,8 +76,8 @@ export function SiteFooter() {
           <div>
             <h4 className="text-white font-bold mb-4">{products.title}</h4>
             <ul className="space-y-2 text-sm text-slate-400">
-              {products.items.map((item) => (
-                <li key={item.href}>
+              {products.items.map((item, index) => (
+                <li key={`${item.href}-${index}`}>
                   <Link href={item.href} className="hover:text-[#31F1A8]">
                     {item.label}
                   </Link>
