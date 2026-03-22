@@ -120,7 +120,7 @@ async def poll_channel():
         for post in posts['posts'].values():
             if not post.get('metadata'):
                 continue
-            if '@jim01' in post['message']:
+            if 'Developer-Agent' in post['message']:
                 task = parse_task(post['message'])
                 result = await execute(task)
                 post_response(post['root_id'], result)
@@ -134,17 +134,17 @@ asyncio.run(poll_channel())`}</code>
 
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Task-Request
-@jim01 Bitte deploye die neue Landing Page auf .99
+Developer-Agent Bitte deploye die neue Landing Page auf .99
 
 # Response (durch Agent)
-@joe Deployment abgeschlossen.
+CEO Deployment abgeschlossen.
 - Branch: feature/new-landing
 - URL: https://ai-engineering.at
 - Build: erfolgreich
 - Dauer: 3min 22s
 
 # Thread-Antwort (besser für Debugging)
-@joe Ich schaue mir das mal an...
+CEO Ich schaue mir das mal an...
 - Checking branch exists...
 - Running docker build...
 - Deploying to production...

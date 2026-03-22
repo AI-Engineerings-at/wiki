@@ -123,13 +123,13 @@ asyncio.gather(
           Manager-Agent delegiert an Worker-Agenten. Unser Praxismodell.
         </p>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
-          <code className="text-sm text-gray-300">{`# Jim (Manager) delegiert an:
+          <code className="text-sm text-gray-300">{`# Manager-Agent delegiert an:
 # - Researcher:Infos sammeln
 # - Coder: Code schreiben  
 # - Reviewer: Prüfen
 # - Deployer: Veröffentlichen
 
-# Jim's Entscheidungslogik
+# Manager-Agent Entscheidungslogik
 task = parse_user_request()
 if task.requires_code:
     coder_result = coder_agent.execute(task)

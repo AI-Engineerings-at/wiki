@@ -23,7 +23,7 @@ Unser Docker Swarm besteht aus 5 Nodes plus einem externen GPU-Rechner:
 |------|-------|----------|
 | Manager 1 | Monitoring, Ops Dashboard, Voice Gateway | VM auf Proxmox |
 | Manager 2 | ERPNext, Open WebUI, open-notebook | VM auf Proxmox |
-| Leader | n8n, Mattermost, Whisper STT, Ollama | VM auf Proxmox |
+| Leader | n8n, Team-Chat, Whisper STT, Ollama | VM auf Proxmox |
 | Worker 1 | Home Assistant, CasaOS | Mini-PC/NUC |
 | Worker 2 | Ollama GPU, CLI Bridges, Download-Issuer | Fedora, RTX 2060 |
 | GPU-Server (Extern) | Ollama Primary, ComfyUI | Windows, RTX 3090 |
@@ -36,7 +36,7 @@ Unser Stack besteht aus vier Kernkomponenten, die als Docker Services auf dem Ma
 
 - **Prometheus** sammelt Metriken von allen Nodes (Scrape-Intervall: 15s)
 - **Grafana** visualisiert alles auf 22 Dashboards
-- **Alertmanager** schickt Warnungen an unseren Mattermost-Channel
+- **Alertmanager** schickt Warnungen an unseren Team-Chat-Channel
 - **Loki + Promtail** aggregiert Container-Logs zentral
 
 Alle Services haben `restart_policy: on-failure` gesetzt. Wenn ein Collector ausfällt, startet er automatisch neu.
@@ -61,9 +61,9 @@ Neben Grafana haben wir ein eigenes Ops Dashboard (Next.js). Das zeigt den Healt
 
 Das Dashboard prüft die Services aktiv: HTTP-Health-Checks gegen jeden Endpunkt, alle 60 Sekunden. Wenn ERPNext nicht antwortet oder n8n down ist, sehen wir das sofort.
 
-## Alerting: Mattermost statt PagerDuty
+## Alerting: Team-Chat statt PagerDuty
 
-Alertmanager schickt Warnungen direkt an unseren Mattermost-Server. Kein externer Dienst, kein Slack, kein PagerDuty. Eine Webhook-URL, ein Channel, fertig.
+Alertmanager schickt Warnungen direkt an unseren Team-Chat-Server. Kein externer Dienst, kein Slack, kein PagerDuty. Eine Webhook-URL, ein Channel, fertig.
 
 Typische Alerts:
 - Node unreachable (länger als 2 Minuten)

@@ -76,7 +76,7 @@ export default function AgentRollen() {
             </div>
             <p className="text-gray-300 text-sm">
               Koordiniert alle anderen Agenten. Nimmt Anfragen entgegen, priorisiert sie 
-              und delegiert an die richtigen Worker. Bei uns: @jim
+              und delegiert an die richtigen Worker. Bei uns: Manager-Agent
             </p>
           </div>
 
@@ -87,7 +87,7 @@ export default function AgentRollen() {
             </div>
             <p className="text-gray-300 text-sm">
               Führt die eigentliche Arbeit aus. Code schreiben, Infrastruktur aufsetzen, 
-              Content erstellen. Bei uns: @jim01, @lisa01, @john01
+              Content erstellen. Bei uns: Developer-Agent, Infrastructure-Agent, QA-Agent
             </p>
           </div>
 
@@ -192,27 +192,27 @@ export default function AgentRollen() {
             </thead>
             <tbody className="text-gray-300">
               <tr className="border-b border-gray-800">
-                <td className="py-2 text-white">@joe</td>
+                <td className="py-2 text-white">CEO</td>
                 <td className="py-2">CEO / Auftraggeber</td>
                 <td className="py-2">Finale Entscheidungen, Business-Strategie</td>
               </tr>
               <tr className="border-b border-gray-800">
-                <td className="py-2 text-white">@jim</td>
+                <td className="py-2 text-white">Manager-Agent</td>
                 <td className="py-2">Manager</td>
                 <td className="py-2">Priorisierung, Koordination, Eskalationen</td>
               </tr>
               <tr className="border-b border-gray-800">
-                <td className="py-2 text-white">@jim01</td>
+                <td className="py-2 text-white">Developer-Agent</td>
                 <td className="py-2">Worker: Frontend/App/CI</td>
                 <td className="py-2">Next.js, E2E Tests, Git, Deploy</td>
               </tr>
               <tr className="border-b border-gray-800">
-                <td className="py-2 text-white">@lisa01</td>
+                <td className="py-2 text-white">Infrastructure-Agent</td>
                 <td className="py-2">Worker: Backend/Infra</td>
                 <td className="py-2">n8n, Docker, Monitoring, Delivery</td>
               </tr>
               <tr>
-                <td className="py-2 text-white">@john01</td>
+                <td className="py-2 text-white">QA-Agent</td>
                 <td className="py-2">Worker: QA/Content</td>
                 <td className="py-2">Testing, Research, Screenshots</td>
               </tr>
@@ -298,11 +298,11 @@ export default function AgentRollen() {
    ↓
 2. Fix funktioniert nicht → postet Error + Context in Channel
    ↓
-3. Manager (@jim) übernimmt → entweder:
+3. Manager (Manager-Agent) übernimmt → entweder:
    a) Selbst lösen
    b) An anderen Worker delegieren
    ↓
-4. Manager kann nicht lösen → eskaliert an CEO (@joe)
+4. Manager kann nicht lösen → eskaliert an CEO (CEO)
    ↓
 5. CEO entscheidet → weitermachen / verwerfen / extern holen`}
           </pre>

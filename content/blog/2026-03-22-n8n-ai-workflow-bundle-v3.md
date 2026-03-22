@@ -12,7 +12,7 @@ Das n8n AI Workflow Bundle ist eine Sammlung von 14 produktionsreifen n8n-Workfl
 
 ## Was ist das n8n AI Workflow Bundle?
 
-14 Workflows im JSON-Format. Jeder Workflow wurde in einer produktiven Umgebung entwickelt und getestet — auf Docker Swarm mit PostgreSQL-Backend, Ollama als LLM-Runtime und Mattermost als Kommunikationskanal. Die Workflows decken fünf Bereiche ab: E-Mail-Automatisierung, Social Media, Revenue-Pipeline, Infrastruktur-Monitoring und Lead-Generierung.
+14 Workflows im JSON-Format. Jeder Workflow wurde in einer produktiven Umgebung entwickelt und getestet — auf Docker Swarm mit PostgreSQL-Backend, Ollama als LLM-Runtime und Team-Chat als Kommunikationskanal. Die Workflows decken fünf Bereiche ab: E-Mail-Automatisierung, Social Media, Revenue-Pipeline, Infrastruktur-Monitoring und Lead-Generierung.
 
 Das Bundle ist kein Tutorial und kein Kurs. Es sind fertige Workflows, die du importierst, an deine Umgebung anpasst (API-Keys, Endpoints, Channel-Namen) und aktivierst. Jeder Workflow enthält Inline-Kommentare, die erklären, was jede Node macht und warum sie so konfiguriert ist.
 
@@ -20,7 +20,7 @@ Das Bundle ist kein Tutorial und kein Kurs. Es sind fertige Workflows, die du im
 
 ### Error Handler Pattern
 
-Jeder Workflow in v3 hat einen dedizierten Error Handler. In v2 liefen Fehler ins Leere — der Workflow stoppte, niemand wurde benachrichtigt. In v3 fängt ein Error Trigger Node jeden Fehler ab, loggt ihn strukturiert (Workflow-Name, Node-Name, Fehlermeldung, Zeitstempel) und sendet eine Notification an Mattermost oder Slack. Optional wird ein Retry ausgelöst — mit konfigurierbarem Delay und maximalem Retry-Count.
+Jeder Workflow in v3 hat einen dedizierten Error Handler. In v2 liefen Fehler ins Leere — der Workflow stoppte, niemand wurde benachrichtigt. In v3 fängt ein Error Trigger Node jeden Fehler ab, loggt ihn strukturiert (Workflow-Name, Node-Name, Fehlermeldung, Zeitstempel) und sendet eine Notification an Team-Chat oder Slack. Optional wird ein Retry ausgelöst — mit konfigurierbarem Delay und maximalem Retry-Count.
 
 Das Error Handler Pattern ist kein Zusatz-Workflow, sondern in jeden einzelnen der 14 Workflows integriert. Du musst es nicht separat einrichten.
 
@@ -48,7 +48,7 @@ v3 nutzt eine einheitliche Architektur für alle 14 Workflows:
 
 | Nr. | Name | Kategorie | Was es tut |
 |-----|------|-----------|------------|
-| 1 | Email Daily Digest | Email | Sammelt neue E-Mails, fasst sie per Ollama zusammen, postet Digest in Mattermost/Slack |
+| 1 | Email Daily Digest | Email | Sammelt neue E-Mails, fasst sie per Ollama zusammen, postet Digest in Team-Chat/Slack |
 | 2 | Email Auto-Responder | Email | Beantwortet häufige Anfragen automatisch mit AI-generierten Antworten |
 | 3 | Email Lead Capture | Email | Extrahiert Kontaktdaten aus eingehenden E-Mails, erstellt Leads in CRM |
 | 4 | Social Content Generator | Social | Generiert Social-Media-Posts aus RSS-Feeds mit Ollama und Humanizer-Regeln |
@@ -83,11 +83,11 @@ Der Import funktioniert in drei Schritten:
 
 **Schritt 2: Credentials anpassen**
 
-Jeder Workflow nutzt n8n Credentials für externe Services (Ollama, Stripe, Mattermost, SMTP). Erstelle die benötigten Credentials in n8n unter "Settings" → "Credentials" und weise sie den entsprechenden Nodes zu. Die Inline-Kommentare in jedem Workflow listen die benötigten Credentials auf.
+Jeder Workflow nutzt n8n Credentials für externe Services (Ollama, Stripe, Team-Chat, SMTP). Erstelle die benötigten Credentials in n8n unter "Settings" → "Credentials" und weise sie den entsprechenden Nodes zu. Die Inline-Kommentare in jedem Workflow listen die benötigten Credentials auf.
 
 **Schritt 3: Konfiguration prüfen und aktivieren**
 
-Passe Endpoints an (Ollama-URL, Mattermost-Channel, SMTP-Server), teste den Workflow im Test-Modus, und aktiviere ihn. Die Error Handler sind sofort funktionsfähig — sie nutzen dieselben Notification-Credentials.
+Passe Endpoints an (Ollama-URL, Team-Chat-Channel, SMTP-Server), teste den Workflow im Test-Modus, und aktiviere ihn. Die Error Handler sind sofort funktionsfähig — sie nutzen dieselben Notification-Credentials.
 
 ## Ehrliche Einschränkungen
 

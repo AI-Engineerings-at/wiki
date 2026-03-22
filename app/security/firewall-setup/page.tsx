@@ -4,7 +4,7 @@ import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 export const metadata = {
   title: 'Firewall Setup | AI Engineering Wiki',
   description:
-    'Firewall-Setup für lokale AI-Infrastruktur: UFW, fail2ban, Netzwerk-Segmentation und Ports für Ollama, n8n, Grafana und Mattermost.',
+    'Firewall-Setup für lokale AI-Infrastruktur: UFW, fail2ban, Netzwerk-Segmentation und Ports für Ollama, n8n, Grafana und Team-Chat.',
 }
 
 export default function FirewallSetup() {

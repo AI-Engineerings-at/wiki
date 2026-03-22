@@ -272,7 +272,7 @@ function shouldEscalate(task, confidence, context):
      → Direct escalation (continue to step 5)
 
 4. Approval Request
-   → Mattermost/Slack: Draft + context to support team
+   → Team-Chat/Slack: Draft + context to support team
    → Wait Node: max 4 hours
    → Approved? → Send
    → Rejected? → Handle manually
@@ -423,7 +423,7 @@ stop
           </h3>
           <p className="text-white/60 text-sm mb-4">
             We help with designing approval workflows and escalation patterns —
-            using n8n, Mattermost and EU AI Act compliance.
+            using n8n, Team-Chat and EU AI Act compliance.
           </p>
           <a
             href="https://ai-engineering.at/kontakt"

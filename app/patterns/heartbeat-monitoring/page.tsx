@@ -248,7 +248,7 @@ docker run -d \\
 # - Docker Container Check (Socket einbinden)
 
 # Notifications konfigurieren:
-# - Mattermost Webhook
+# - Team-Chat Webhook
 # - E-Mail
 # - Telegram Bot`}</code>
         </pre>

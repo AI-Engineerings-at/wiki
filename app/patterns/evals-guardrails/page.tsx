@@ -259,7 +259,7 @@ export default function EvalsGuardrailsPage() {
 
 5. Ergebnis loggen
    → Langfuse Trace: Scores + Metadata
-   → Bei Score < 0.7: Alert an Mattermost
+   → Bei Score < 0.7: Alert an den Team-Chat
    → Bei PII detected: Response blockieren`}</code>
             </pre>
           </div>

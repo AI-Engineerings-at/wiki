@@ -377,7 +377,7 @@ Trigger: Heartbeat erkennt neue E-Mails.
           <ul className="space-y-2 text-sm text-white/50">
             <li>
               <span className="text-white/70">Basis-Spec:</span>{" "}
-              <span className="text-blue-400">phantom-ai/docs/superpowers/specs/2026-03-19-mani-external-secretary-design.md</span>{" "}
+              <span className="text-blue-400">Interne Design-Spezifikation</span>{" "}
               — AI Agent Onboarding Design (intern)
             </li>
             <li>

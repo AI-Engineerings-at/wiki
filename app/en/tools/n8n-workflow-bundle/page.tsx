@@ -138,7 +138,7 @@ rectangle "LLM (Dual Fallback)" as llm #1E3A5F {
 }
 
 rectangle "Output" as output #1E3A5F {
-  rectangle "Mattermost / Slack" as chat #0F172A
+  rectangle "Team-Chat / Slack" as chat #0F172A
   rectangle "Send Email" as send #0F172A
   rectangle "HTTP / API" as http #0F172A
 }
@@ -177,7 +177,7 @@ errlog --> retry
             <h3 className="font-semibold text-white mb-2">What the Error Handler Does</h3>
             <ol className="text-gray-300 text-sm space-y-2">
               <li><strong>1. Structured logging</strong> — workflow name, node name, error message, timestamp as JSON</li>
-              <li><strong>2. Send notification</strong> — Mattermost, Slack or email (configurable)</li>
+              <li><strong>2. Send notification</strong> — Team-Chat, Slack or email (configurable)</li>
               <li><strong>3. Trigger retry (optional)</strong> — configurable delay (default: 30 seconds) and max retry count (default: 3)</li>
               <li><strong>4. Escalation</strong> — after reaching retry limit, an escalation message is sent</li>
             </ol>

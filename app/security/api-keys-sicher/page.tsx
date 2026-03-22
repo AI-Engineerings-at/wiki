@@ -206,7 +206,7 @@ vault.json.enc
                 <td className="py-2">n8n Credentials</td>
               </tr>
               <tr className="border-b border-gray-800">
-                <td className="py-2">Mattermost</td>
+                <td className="py-2">Team-Chat</td>
                 <td className="py-2">Vault</td>
               </tr>
               <tr>

@@ -126,7 +126,7 @@ export default function Home() {
           <ToolLink href="/tools/grafana-monitoring" label="Grafana" tag="Monitoring" />
           <ToolLink href="/tools/docker-vs-swarm" label="Docker & Swarm" tag="Container" />
           <ToolLink href="/tools/proxmox-setup" label="Proxmox" tag="Virtualisierung" />
-          <ToolLink href="/tools/mattermost-agent" label="Mattermost" tag="Agent Bridge" />
+          <ToolLink href="/tools/mattermost-agent" label="Team-Chat" tag="Agent Bridge" />
           <ToolLink href="/tools/mcp-server" label="MCP Server" tag="Tool Integration" />
           <ToolLink href="/tools/model-selection" label="Modell-Auswahl" tag="LLM Guide" />
           <ToolLink href="/tools/rag-guide" label="RAG Pipeline" tag="Retrieval" />

@@ -68,7 +68,7 @@ export default function N8nAnfänger() {
           <li>IF - Conditional branching</li>
           <li>Set - Transform data</li>
           <li>Function - Custom JavaScript code</li>
-          <li>Slack / Mattermost - Send messages</li>
+          <li>Slack / Team-Chat - Send messages</li>
           <li>Ollama - Local LLMs</li>
         </ul>
 

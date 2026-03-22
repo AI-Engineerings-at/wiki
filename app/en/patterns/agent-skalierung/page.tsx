@@ -45,7 +45,7 @@ export default function AgentScaling() {
               <h3 className="font-semibold text-white">Create Bot Account</h3>
             </div>
             <p className="text-gray-300 text-sm">
-              Create a new bot in the team chat (e.g., Mattermost) with a descriptive name.
+              Create a new bot in the team chat (e.g., Team-Chat) with a descriptive name.
               Generate the access token and store it securely.
             </p>
           </div>

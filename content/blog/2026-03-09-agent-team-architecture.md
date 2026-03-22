@@ -97,9 +97,9 @@ CEO gibt Richtung → Manager-Agent priorisiert
 
 ## Kommunikation
 
-### Mattermost als Single Backbone
+### Team-Chat als Single Backbone
 
-Alle Agent-Kommunikation läuft über ein self-hosted Mattermost. Warum nicht Slack oder Discord? Drei Gründe:
+Alle Agent-Kommunikation läuft über ein self-hosted Team-Chat. Warum nicht Slack oder Discord? Drei Gründe:
 
 1. **Self-hosted** — keine Daten verlassen das Netzwerk
 2. **Keine Rate Limits** — wir konfigurieren selbst
@@ -159,7 +159,7 @@ Früh haben Worker direkt beim CEO nachgefragt. Das skaliert nicht. Der Orchestr
 
 ### 3. Identität ist Pflicht
 
-Jeder Agent hat seinen eigenen Mattermost-Token. Nie teilen, nie tauschen. Sonst ist der Audit Trail wertlos — du weißt nicht mehr wer was getan hat.
+Jeder Agent hat seinen eigenen Team-Chat-Token. Nie teilen, nie tauschen. Sonst ist der Audit Trail wertlos — du weißt nicht mehr wer was getan hat.
 
 ### 4. Observer dürfen nicht eingreifen
 

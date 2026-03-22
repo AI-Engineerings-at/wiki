@@ -38,13 +38,13 @@ Single LLM tries:
 User: "Deploy v1.2.3, notify team, create release notes"
 
 Orchestrator (Manager):
-  ├→ Delegates to @jim01: "Deploy v1.2.3"
-  │  @jim01: Uses Claude Code, Git, Kubernetes API
-  │  @jim01: Returns "Deployment successful"
+  ├→ Delegates to Developer-Agent: "Deploy v1.2.3"
+  │  Developer-Agent: Uses Claude Code, Git, Kubernetes API
+  │  Developer-Agent: Returns "Deployment successful"
   │
-  ├→ Delegates to @echo_log: "Notify team"
-  │  @echo_log: Posts to #deployments (Mattermost)
-  │  @echo_log: Returns "Posted"
+  ├→ Delegates to Logger-Agent: "Notify team"
+  │  Logger-Agent: Posts to #deployments (Team-Chat)
+  │  Logger-Agent: Returns "Posted"
   │
   └→ Delegates to @content-writer: "Create release notes"
      @content-writer: Summarizes commit history
@@ -72,7 +72,7 @@ class Orchestrator:
         # Delegate
         results = []
         for task in tasks:
-            agent = self.select_agent(task)  # Select @jim01 for deploy
+            agent = self.select_agent(task)  # Select Developer-Agent for deploy
             result = agent.execute(task)
             results.append(result)
 
@@ -86,9 +86,9 @@ Each agent = one job, excellent at it.
 
 | Agent | Specialization | Tools | Model |
 |-------|----------------|-------|-------|
-| @jim01 | Code, deployments | Git, Bash, Kubernetes | Sonnet |
-| @lisa01 | Infrastructure | Docker, Terraform | Sonnet |
-| @jim02 | QA, browser tests | Playwright, screenshots | Haiku |
+| Developer-Agent | Code, deployments | Git, Bash, Kubernetes | Sonnet |
+| Infrastructure-Agent | Infrastructure | Docker, Terraform | Sonnet |
+| QA-Agent | QA, browser tests | Playwright, screenshots | Haiku |
 | @content-writer | Text, docs, social | Claude, write | Sonnet |
 
 ### 3. Communication Channel
@@ -96,7 +96,7 @@ Each agent = one job, excellent at it.
 Agents speak over structured channels:
 
 ```
-Option 1: Chat (Mattermost)
+Option 1: Chat (Team-Chat)
   - Slow (~1-5 sec, polling)
   - Human-readable
   - Good for interactive tasks
@@ -169,7 +169,7 @@ Each agent knows its neighbors and communicates directly.
 - Complex synchronization
 - No global control
 
-**Playbook01 uses**: Mostly orchestration (Jim = orchestrator)
+**Playbook01 uses**: Mostly orchestration (Manager-Agent = orchestrator)
 
 ## Orchestration Patterns
 
@@ -217,7 +217,7 @@ Aggregates results
 
 ```
 Request: Deploy v1.2.3
-Agent @jim01 is dead!
+Agent Developer-Agent is dead!
 → Deployment blocked
 ```
 
@@ -334,7 +334,7 @@ Step 1: Identify agents
   - Who does code? Who does content? Who does ops?
 
 Step 2: Choose communication
-  - Chat-based (interactive): Mattermost + polling
+  - Chat-based (interactive): Message Bus + Polling
   - Queue-based (batch): n8n
   - API-based (real-time): REST
 
@@ -357,7 +357,7 @@ Step 5: Monitor
 ## Further Reading
 
 - [Multi-Agent Systems Explained](/en/grundlagen/multi-agent-systems) — Architecture patterns
-- [Mattermost Integration](/en/tools/mattermost) — Communication backbone
+- [Team-Chat Integration](/en/tools/mattermost) — Communication backbone
 - [n8n Workflows](/en/tools/n8n) — Queue-based orchestration
 - [Sub-Agents in Claude Code](/en/tools/agents) — Agent primitives
 

@@ -51,9 +51,9 @@ Für jeden Post generiert ComfyUI (FLUX.1-Modell, RTX 3090) ein passendes Bild. 
 
 Ergebnis: einzigartige Bilder statt Stock-Fotos. Und da ComfyUI lokal läuft, gibt es keine Lizenzprobleme und keine Abhängigkeit von DALL-E oder Midjourney.
 
-### Schritt 4: Approval via Mattermost
+### Schritt 4: Approval via Team-Chat
 
-Automatisch posten ohne Review? Nicht bei uns. Jeder generierte Post landet zuerst im Mattermost-Channel. Joe sieht den Text, das Bild, und die Zielplattform. Ein `/approve` Slash-Command gibt den Post frei.
+Automatisch posten ohne Review? Nicht bei uns. Jeder generierte Post landet zuerst im Team-Chat-Channel. Joe sieht den Text, das Bild, und die Zielplattform. Ein `/approve` Slash-Command gibt den Post frei.
 
 Das klingt nach manuellem Aufwand, ist in der Praxis aber 10 Sekunden pro Post: Text lesen, passt oder Feedback geben. So bleibt die menschliche Kontrolle, ohne dass jemand Texte schreiben muss.
 
@@ -76,7 +76,7 @@ Ein paar Learnings aus der Praxis:
 
 ## Der Cron
 
-Montag und Donnerstag um 09:00 Uhr. n8n triggert den Workflow, der komplette Durchlauf (RSS → Humanizer → Bild → Mattermost) dauert etwa 2-3 Minuten. Nach Approval geht der Post in unter 30 Sekunden live.
+Montag und Donnerstag um 09:00 Uhr. n8n triggert den Workflow, der komplette Durchlauf (RSS → Humanizer → Bild → Team-Chat) dauert etwa 2-3 Minuten. Nach Approval geht der Post in unter 30 Sekunden live.
 
 ## Was das kostet
 

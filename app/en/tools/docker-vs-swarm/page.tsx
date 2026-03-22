@@ -15,7 +15,7 @@ export default function DockerVsSwarmPage() {
 
       <div className="prose prose-invert max-w-none">
         <p className="text-lg text-slate-300">
-          You want to set up Ollama, n8n, Grafana and Mattermost. Now the question: 
+          You want to set up Ollama, n8n, Grafana and Team-Chat. Now the question: 
           Docker Compose or Docker Swarm? The answer determines how your stack scales.
         </p>
 

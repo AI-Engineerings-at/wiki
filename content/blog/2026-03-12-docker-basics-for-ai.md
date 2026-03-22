@@ -118,7 +118,7 @@ Concrete advantages:
 
 **Updates:** New version of Open WebUI? `docker pull ghcr.io/open-webui/open-webui:main && docker compose up -d`. Rollback: set the old image tag back.
 
-Our stack currently runs 31 Docker services across 5 nodes — Ollama, Whisper STT, Mattermost, n8n, ERPNext, Grafana, and more. Without Docker, this would not be manageable.
+Our stack currently runs 31 Docker services across 5 nodes — Ollama, Whisper STT, Team-Chat, n8n, ERPNext, Grafana, and more. Without Docker, this would not be manageable.
 
 ## The Next Step
 

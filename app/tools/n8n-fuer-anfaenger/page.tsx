@@ -5,7 +5,7 @@ import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 export const metadata = {
   title: 'n8n für Anfänger | AI Engineering Wiki',
   description:
-    'n8n Workflow-Automatisierung im lokalen AI-Stack: Installation, Nodes, Beispiele und Integration mit Ollama, Slack/Mattermost und Stripe.',
+    'n8n Workflow-Automatisierung im lokalen AI-Stack: Installation, Nodes, Beispiele und Integration mit Ollama, Slack/Team-Chat und Stripe.',
 }
 
 export default function N8nAnfänger() {
@@ -30,7 +30,7 @@ export default function N8nAnfänger() {
           <p>
             n8n ist ein Open-Source Workflow-Automatisierungstool. Self-hosted,
             400+ Integrationen, visueller Editor. Verbindet Ollama, Stripe,
-            Mattermost und mehr — ohne Programmierung. In 5 Minuten per Docker
+            Team-Chat und mehr — ohne Programmierung. In 5 Minuten per Docker
             installiert.
           </p>
         </Callout>
@@ -78,7 +78,7 @@ rectangle "Verarbeitung" as processing #1E3A5F {
 }
 
 rectangle "Ausgabe" as output #1E3A5F {
-  rectangle "Mattermost / Slack" as chat #0F172A
+  rectangle "Team-Chat / Slack" as chat #0F172A
   rectangle "Datenbank" as db #0F172A
   rectangle "E-Mail senden" as send #0F172A
   rectangle "HTTP Request" as http #0F172A
@@ -106,7 +106,7 @@ if (Payment erfolgreich?) then (ja)
   :Bestelldaten extrahieren;
   :Ollama: Bestätigungsmail generieren;
   :E-Mail an Kunden senden;
-  :Mattermost Notification;
+  :Team-Chat Notification;
 else (nein)
   :Fehler loggen;
   :Alert an Admin;
@@ -165,7 +165,7 @@ stop
           <li>• <strong>IF</strong> — Conditional branching</li>
           <li>• <strong>Set</strong> — Transform data</li>
           <li>• <strong>Function</strong> — Custom JavaScript code</li>
-          <li>• <strong>Slack / Mattermost</strong> — Send messages</li>
+          <li>• <strong>Slack / Team-Chat</strong> — Send messages</li>
           <li>• <strong>Ollama</strong> — Local LLMs</li>
         </ul>
 

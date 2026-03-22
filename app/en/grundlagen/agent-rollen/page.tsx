@@ -31,7 +31,7 @@ export default function AgentRollen() {
             </div>
             <p className="text-gray-300 text-sm">
               Coordinates all other agents. Takes requests, prioritizes them, and delegates to the right workers. 
-              In our setup: @jim
+              In our setup: Manager-Agent
             </p>
           </div>
 
@@ -42,7 +42,7 @@ export default function AgentRollen() {
             </div>
             <p className="text-gray-300 text-sm">
               Does the actual work. Writing code, setting up infrastructure, creating content. 
-              In our setup: @jim01, @lisa01, @john01
+              In our setup: Developer-Agent, Infrastructure-Agent, QA-Agent
             </p>
           </div>
 
@@ -140,27 +140,27 @@ export default function AgentRollen() {
             </thead>
             <tbody className="text-gray-300">
               <tr className="border-b border-gray-800">
-                <td className="py-2 text-white">@joe</td>
+                <td className="py-2 text-white">CEO</td>
                 <td className="py-2">CEO / Requester</td>
                 <td className="py-2">Final decisions, business strategy</td>
               </tr>
               <tr className="border-b border-gray-800">
-                <td className="py-2 text-white">@jim</td>
+                <td className="py-2 text-white">Manager-Agent</td>
                 <td className="py-2">Manager</td>
                 <td className="py-2">Prioritization, coordination, escalations</td>
               </tr>
               <tr className="border-b border-gray-800">
-                <td className="py-2 text-white">@jim01</td>
+                <td className="py-2 text-white">Developer-Agent</td>
                 <td className="py-2">Worker: Frontend/App/CI</td>
                 <td className="py-2">Next.js, E2E tests, Git, deploy</td>
               </tr>
               <tr className="border-b border-gray-800">
-                <td className="py-2 text-white">@lisa01</td>
+                <td className="py-2 text-white">Infrastructure-Agent</td>
                 <td className="py-2">Worker: Backend/Infra</td>
                 <td className="py-2">n8n, Docker, monitoring, delivery</td>
               </tr>
               <tr>
-                <td className="py-2 text-white">@john01</td>
+                <td className="py-2 text-white">QA-Agent</td>
                 <td className="py-2">Worker: QA/Content</td>
                 <td className="py-2">Testing, research, screenshots</td>
               </tr>
@@ -245,11 +245,11 @@ export default function AgentRollen() {
    ↓
 2. Fix doesn't work → posts error + context in channel
    ↓
-3. Manager (@jim) takes over → either:
+3. Manager (Manager-Agent) takes over → either:
    a) Solve it themselves
    b) Delegate to another worker
    ↓
-4. Manager can't solve → escalates to CEO (@joe)
+4. Manager can't solve → escalates to CEO (CEO)
    ↓
 5. CEO decides → continue / discard / get external help`}
           </pre>

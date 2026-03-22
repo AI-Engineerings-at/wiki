@@ -45,11 +45,11 @@ Die Basis. Deploy-Automation, Swarm Recovery, VM Management, n8n Workflow-Operat
 
 ### Agent Management (7 Skills)
 
-Jeder der 11 Agents braucht Credential-Zugriff, Task-Tracking, und Mattermost-Polling. Drei `mm-wait` Skills allein — einer pro Agent-Typ. Der `agent-vault` Skill ist die zentrale Schnittstelle zur Credential-Datenbank.
+Jeder der 11 Agents braucht Credential-Zugriff, Task-Tracking, und Team-Chat-Polling. Drei `mm-wait` Skills allein — einer pro Agent-Typ. Der `agent-vault` Skill ist die zentrale Schnittstelle zur Credential-Datenbank.
 
 ### Documentation & Orchestration (4 Skills)
 
-`full-sync` ist der mächtigste hier: Eine 10-Schritt Pipeline die Docs aktualisiert, ERPNext Tasks synchronisiert, open-notebook beschickt, Git Commits macht, und das Ergebnis in Mattermost postet. Ein Befehl, alles synchron.
+`full-sync` ist der mächtigste hier: Eine 10-Schritt Pipeline die Docs aktualisiert, ERPNext Tasks synchronisiert, open-notebook beschickt, Git Commits macht, und das Ergebnis im Team-Chat postet. Ein Befehl, alles synchron.
 
 ### Content & Creative (5 Skills)
 

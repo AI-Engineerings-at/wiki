@@ -19,7 +19,7 @@ export default function WasIstAgentOrchestration() {
           <p>
             Agent Orchestration koordiniert mehrere spezialisierte AI-Agenten.
             Ein Manager-Agent delegiert Aufgaben an Worker. Kommunikation läuft
-            über einen Nachrichtenbus (z.B. Mattermost). Vorteile: Parallelisierung,
+            über einen Nachrichtenbus (z.B. Team-Chat). Vorteile: Parallelisierung,
             Spezialisierung, Auditierbarkeit — alles lokal und DSGVO-konform.
           </p>
         </Callout>
@@ -63,19 +63,19 @@ export default function WasIstAgentOrchestration() {
             </thead>
             <tbody className="text-gray-300">
               <tr className="border-b border-gray-800">
-                <td className="py-2">@jim</td>
+                <td className="py-2">Manager-Agent</td>
                 <td className="py-2">Manager — Priorisierung, Freigaben</td>
               </tr>
               <tr className="border-b border-gray-800">
-                <td className="py-2">@jim01</td>
+                <td className="py-2">Developer-Agent</td>
                 <td className="py-2">Frontend/App/CI — Next.js, Tests</td>
               </tr>
               <tr className="border-b border-gray-800">
-                <td className="py-2">@lisa01</td>
+                <td className="py-2">Infrastructure-Agent</td>
                 <td className="py-2">Backend/Infra — n8n, Docker, Monitoring</td>
               </tr>
               <tr>
-                <td className="py-2">@john01</td>
+                <td className="py-2">QA-Agent</td>
                 <td className="py-2">QA/Content — Testing, Research</td>
               </tr>
             </tbody>
@@ -84,7 +84,7 @@ export default function WasIstAgentOrchestration() {
 
         <h2 className="text-xl font-semibold text-white mt-8">Kommunikation</h2>
         <p className="text-gray-300">
-          Die Agenten kommunizieren über einen zentralen Bus. Bei uns ist das Mattermost. 
+          Die Agenten kommunizieren über einen zentralen Bus. Bei uns ist der Team-Chat. 
           Jeder Agent hat eigene Polling-Skripte, die auf für ihn relevante Nachrichten reagieren.
         </p>
 
@@ -93,15 +93,15 @@ export default function WasIstAgentOrchestration() {
           <pre className="text-sm text-gray-300 overflow-x-auto">
 {`1. Joe postet Task in #echo_log
     ↓
-2. @jim (Manager) priorisiert und delegiert
+2. Manager-Agent (Manager) priorisiert und delegiert
     ↓
-3. @jim01 → Code schreiben
-   @lisa01 → Infrastruktur vorbereiten
-   @john01 → Content prüfen
+3. Developer-Agent → Code schreiben
+   Infrastructure-Agent → Infrastruktur vorbereiten
+   QA-Agent → Content prüfen
     ↓
 4. Alle posten Ergebnisse zurück
     ↓
-5. @jim aggregiert und meldet Fertig`}
+5. Manager-Agent aggregiert und meldet Fertig`}
           </pre>
         </div>
 
@@ -110,7 +110,7 @@ export default function WasIstAgentOrchestration() {
           <li><strong>Parallelisierung:</strong> Mehrere Agenten gleichzeitig arbeiten lassen</li>
           <li><strong>Spezialisierung:</strong> Jeder Agent ist Experte für seinen Bereich</li>
           <li><strong>Skalierbarkeit:</strong> Neuen Agent hinzufügen ist einfach</li>
-          <li><strong>Auditierbarkeit:</strong> Jede Aktion wird in Mattermost geloggt</li>
+          <li><strong>Auditierbarkeit:</strong> Jede Aktion wird im Team-Chat geloggt</li>
           <li><strong>DSGVO:</strong> Alles bleibt lokal — kein Training auf deinen Prompts</li>
         </ul>
 
@@ -119,7 +119,7 @@ export default function WasIstAgentOrchestration() {
           Für unser Setup nutzen wir:
         </p>
         <ul className="list-disc list-inside text-gray-300 space-y-2 mt-2">
-          <li><strong>Mattermost</strong> — Team-Kommunikation als Nachrichtenbus</li>
+          <li><strong>Team-Chat</strong> — Team-Kommunikation als Nachrichtenbus</li>
           <li><strong>n8n</strong> — Workflow-Automatisierung</li>
           <li><strong>Docker Swarm</strong> — Container-Orchestrierung</li>
           <li><strong>Claude Code</strong> — CLI-Zugriff auf LLM-Fähigkeiten</li>
@@ -129,7 +129,7 @@ export default function WasIstAgentOrchestration() {
         <Callout type="tip" title="Einstieg">
           <p>
             Du brauchst kein komplexes Framework für den Start. Ein LLM mit
-            Tool-Zugriff (z.B. Claude Code CLI) plus Mattermost als Nachrichtenbus
+            Tool-Zugriff (z.B. Claude Code CLI) plus Team-Chat als Nachrichtenbus
             reicht für die ersten Agent-Workflows.
           </p>
         </Callout>
@@ -150,7 +150,7 @@ export default function WasIstAgentOrchestration() {
           <ul className="space-y-2 text-sm text-white/50">
             <li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Anthropic Engineering: Building Effective Agents</a></li>
             <li><a href="https://platform.claude.com/docs/en/docs/build-with-claude/agent-patterns" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Anthropic Docs: Agent Patterns</a></li>
-            <li><a href="https://mattermost.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Mattermost</a> — Self-hosted Messaging als Agent-Kommunikationsbus</li>
+            <li><a href="https://mattermost.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Team-Chat</a> — Self-hosted Messaging als Agent-Kommunikationsbus</li>
           </ul>
         </section>
       </div>

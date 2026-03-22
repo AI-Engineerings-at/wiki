@@ -102,7 +102,7 @@ Automation/
 
 **Permission model**:
 ```
-#ceo-dashboard:    Reader: @joe, @jim     | Poster: Bots only
+#ceo-dashboard:    Reader: CEO, Manager-Agent     | Poster: Bots only
 #infra-alerts:     Reader: Everyone       | Poster: Monitoring bots
 #echo-log:         Reader: Everyone       | Poster: Bots only
 #general:          Reader: Everyone       | Poster: Everyone
@@ -482,7 +482,7 @@ Input: MM Webhook (/analyze)
 
 ```markdown
 ### ✅ Task Complete
-**Agent:** @jim01
+**Agent:** Developer-Agent
 **Task:** Deploy v1.2.3 to Production
 **Duration:** 3m 42s
 **Status:** Success
@@ -494,7 +494,7 @@ Details: Everything deployed successfully
 
 ```markdown
 ### ❌ Task Failed
-**Agent:** @lisa01
+**Agent:** Infrastructure-Agent
 **Task:** Database migration
 **Error:** Connection timeout
 **Log:** [paste error details]
@@ -534,7 +534,7 @@ Posts per minute: Max 5 auto-posts per agent
 
 ```
 #ceo-dashboard:
-  - Readers: @joe, @jim (CEO/Manager only)
+  - Readers: CEO, Manager-Agent (CEO/Manager only)
   - Posters: Bots only (Prometheus, Uptime Kuma)
   - Purpose: KPI review, daily standup
 
@@ -562,7 +562,7 @@ Posts per minute: Max 5 auto-posts per agent
 
 ```
 Critical alerts: All members notified
-High alerts:     @jim + responsible agent
+High alerts:     Manager-Agent + responsible agent
 Medium alerts:   Channel only
 Low info:        No notification
 ```

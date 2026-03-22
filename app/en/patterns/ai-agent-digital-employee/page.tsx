@@ -272,7 +272,7 @@ blocked:
           <ul className="space-y-2 text-sm text-white/50">
             <li>
               <span className="text-white/70">Base spec:</span>{" "}
-              <span className="text-blue-400">phantom-ai/docs/superpowers/specs/2026-03-19-mani-external-secretary-design.md</span>{" "}
+              <span className="text-blue-400">Internal design specification</span>{" "}
               — AI Agent onboarding design (internal)
             </li>
             <li><a href="/en/compliance/eu-ai-act" className="text-blue-400 hover:underline">EU AI Act Overview</a> — Art. 50 transparency obligations</li>

@@ -120,7 +120,7 @@ Manager (Planner)
           <li>Docker commands</li>
           <li>Read/write files</li>
           <li>Web research</li>
-          <li>Post messages (Mattermost)</li>
+          <li>Post messages (Team-Chat)</li>
         </ul>
 
         <h2 className="text-xl font-semibold text-white mt-8">Safety Rules from Real Incidents</h2>
@@ -136,7 +136,7 @@ Manager (Planner)
 
         <h2 className="text-xl font-semibold text-white mt-8">How Agents Communicate</h2>
         <p className="text-gray-300">
-          In practice, agents communicate through team chat channels (e.g., Mattermost). Each agent
+          In practice, agents communicate through team chat channels (e.g., Team-Chat). Each agent
           has its own bot account. Tasks come in through the main channel, the manager delegates,
           and the assigned agent posts the result. This channel-based communication creates a
           transparent audit trail — you can trace exactly who did what and when.

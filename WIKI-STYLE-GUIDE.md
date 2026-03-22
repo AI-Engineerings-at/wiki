@@ -1,7 +1,7 @@
 # Wiki & Blog Style Guide - AI Engineering
 
 > Verbindliche Regeln fuer alle externen Inhalte. Stand: 2026-03-20.
-> Maschinenlesbare Version: `phantom-ai/services/social-poster/style_config.json`
+> Maschinenlesbare Version: siehe interne Dokumentation
 > SSOT-Hierarchie: `docs/BRAND-BIBLE-V2.md` -> `PRODUCT_STYLE_GUIDE.md` -> `docs/PUBLIC_MESSAGING_MATRIX.md` -> dieses Dokument
 
 ## 1. Sprache & Ton
@@ -141,7 +141,7 @@ Der Content Processor (`content_processor.py`) auf dem Social Poster erzwingt di
 2. **Humanizer**: Score-Check >= 85, automatischer Rewrite bei Bedarf
 3. **Sanitizer**: Anonymisierung aller internen Details
 4. **Platform-Adapter**: Laenge, Format, CTA-Anpassung, Messaging-Routing
-5. **Approval**: Alles landet in Mattermost zur Freigabe durch Joe
+5. **Approval**: Alles landet im Team-Chat zur Freigabe durch Joe
 
 Kein Content wird ohne Humanizer + Sanitizer veroeffentlicht.
 

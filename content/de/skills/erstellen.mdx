@@ -47,7 +47,7 @@ Der Body ist freier Markdown-Text. Hier beschreibst du, was Claude tun soll, wen
 3. Docker Build ausfuehren
 4. Service Update
 5. Health Check
-6. Ergebnis in Mattermost posten
+6. Ergebnis im Team-Chat posten
 
 ## Regeln
 
@@ -172,7 +172,7 @@ Bevor ein Skill als "fertig" gilt:
 - [ ] Body hat klare Schritt-fuer-Schritt Anweisungen
 - [ ] Fehler-Handling ist dokumentiert
 - [ ] Keine Credentials im Klartext
-- [ ] Im richtigen Repo (`phantom-ai` fuer Infra, `Playbook01` fuer Business)
+- [ ] Im richtigen Repo (`interne Repo` fuer Infra, `Playbook01` fuer Business)
 - [ ] Im Skill-Katalog eingetragen
 - [ ] Mindestens 1x manuell getestet
 
@@ -353,12 +353,12 @@ Alle neuen Skills müssen in den Katalog:
 
 Deployment auf Docker Swarm für Voice Gateway / Dashboard.
 
-- **Repo**: Playbook01 / phantom-ai (wer?)
+- **Repo**: Playbook01 / interne Repo (wer?)
 - **Trigger Keywords**: deploy, VG, dashboard
 - **Abhängigkeiten**: vault, ssh
 - **Fehlerbehandlung**: Mit Logs + #infra-alerts
 - **Getestet**: ✓ (20.03.2026)
-- **Kontakt**: @jim (bei Fragen)
+- **Kontakt**: Manager-Agent (bei Fragen)
 ```
 
 ## Häufige Fehler & Lösungen

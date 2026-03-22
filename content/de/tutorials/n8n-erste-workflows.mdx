@@ -216,12 +216,12 @@ Klick "Test" oben rechts. Der Workflow sollte 5 Emails verschicken (oder 0, wenn
 
 ## Workflow 3: Form → Classification → Notification
 
-**Was macht er**: Formular-Submission → Text kategorisieren (Bug/Feature/Feedback) → Alert in Mattermost schreiben.
+**Was macht er**: Formular-Submission → Text kategorisieren (Bug/Feature/Feedback) → Alert im Team-Chat schreiben.
 
 ### Aufbau
 
 ```
-Webhook (Form) → Ollama Classify → Mattermost Post
+Webhook (Form) → Ollama Classify → Team-Chat Post
 ```
 
 ### Schritt-für-Schritt
@@ -279,10 +279,10 @@ return {
 }
 ```
 
-**5. Mattermost Notification**
+**5. Team-Chat Notification**
 
 - Klick "+" neben HTTP Request
-- Suche "Mattermost"
+- Suche "Team-Chat"
 - Channel: #feedback
 - Message:
 
@@ -293,7 +293,7 @@ Email: {{ $prevNode.json.email }}
 Text: {{ $prevNode.json.original_text }}
 ```
 
-Falls du Mattermost nicht hast, nimm stattdessen "Send Email" oder "Slack".
+Falls du keinen Team-Chat nicht hast, nimm stattdessen "Send Email" oder "Slack".
 
 ### Testen
 
@@ -308,7 +308,7 @@ curl -X POST http://localhost:5678/webhook/feedback \
   }'
 ```
 
-Du solltest eine Mattermost-Nachricht mit "BUG" Kategorisierung bekommen.
+Du solltest eine Team-Chat-Nachricht mit "BUG" Kategorisierung bekommen.
 
 ---
 

@@ -35,7 +35,7 @@ export default function DockerVsSwarm() {
         </Callout>
 
         <p className="text-lg text-gray-300">
-          Du willst Ollama, n8n, Grafana und Mattermost aufsetzen. Jetzt die Frage:
+          Du willst Ollama, n8n, Grafana und Team-Chat aufsetzen. Jetzt die Frage:
           Docker Compose oder Docker Swarm? Die Antwort bestimmt, wie dein Stack
           skaliert — und ob er 2026 noch funktioniert.
         </p>

@@ -260,7 +260,7 @@ Tamper with v1?
           <ul className="space-y-2 text-sm text-white/50">
             <li>
               <span className="text-white/70">Base spec:</span>{" "}
-              <span className="text-blue-400">phantom-ai/docs/superpowers/specs/2026-03-20-ai-agent-legal-framework-design.md</span>{" "}
+              <span className="text-blue-400">Internal design specification</span>{" "}
               — AI Agent Legal Framework design (internal)
             </li>
             <li>

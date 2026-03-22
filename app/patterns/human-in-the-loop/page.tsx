@@ -280,7 +280,7 @@ function shouldEscalate(task, confidence, context):
      → Direkte Eskalation (weiter zu Schritt 5)
 
 4. Approval Request
-   → Mattermost/Slack: Entwurf + Kontext an Support-Team
+   → Team-Chat/Slack: Entwurf + Kontext an Support-Team
    → Wait Node: max 4 Stunden
    → Approved? → Senden
    → Rejected? → Manuell bearbeiten
@@ -431,7 +431,7 @@ stop
           </h3>
           <p className="text-white/60 text-sm mb-4">
             Wir helfen beim Design von Approval Workflows und Escalation Patterns —
-            mit n8n, Mattermost und EU AI Act Compliance.
+            mit n8n, Team-Chat und EU AI Act Compliance.
           </p>
           <a
             href="https://ai-engineering.at/kontakt"

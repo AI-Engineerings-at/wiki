@@ -78,7 +78,7 @@ Jedes Produkt = Enterprise Value.
 **Wie sie geladen werden**:
 - Alle `.md` Dateien aus `.claude/rules/` werden beim Session-Start eingelesen
 - Claude haelt sich an diese Regeln automatisch
-- Kann per Project ueberschrieben werden (vs global shared rules in phantom-ai)
+- Kann per Project ueberschrieben werden (vs global shared rules in interne Repo)
 
 **Best Practice**: Auf ~50-100 Zeilen pro Rule halten. Details in separate Dateien.
 
@@ -184,13 +184,13 @@ Alle Rules werden beim Start geladen. Keine Limits, aber gut organisieren.
 ```
 
 **Nummern-Schema** (Playbook01):
-- 01-06: Globale Safety/Hygiene (von phantom-ai SSOT)
+- 01-06: Globale Safety/Hygiene (von interne Repo SSOT)
 - 07: Project-Gotchas
 - 08: Guardrails (destruktive Aktionen)
 - 09: Memory Protocol
 - 10: Commerce Rules
 - 11: Backup & DR
-- 12-13: Dokumentation (von phantom-ai)
+- 12-13: Dokumentation (von interne Repo)
 - 14-16: Skill/Agent Standards
 - 18-21: n8n Layout + Pipelines
 
@@ -230,7 +230,7 @@ memory/logs/
 
 - [09:15] Task started: Wiki expansion (memory-management, 5 pages)
 - [10:45] Agents.mdx completed (1200 lines) + EN counterpart
-- [12:30] Mattermost.mdx completed
+- [12:30] team-chat.mdx completed
 - [14:00] Memory-management.mdx started
 - [Error] /en/tools/agents.mdx deployment failed (commit issue)
 - [15:30] Fixed + re-deployed
@@ -351,9 +351,9 @@ Jedes Projekt sollte eine `memory/MEMORY.md` Datei haben:
 
 | Person | Role | Repo | Contact |
 |--------|------|------|---------|
-| Joe | CEO | Playbook01 | @joe |
-| Jim | Orchestrator | Playbook01 | @jim |
-| Lisa | Infra | Both | @lisa01 |
+| Joe | CEO | Playbook01 | CEO |
+| Manager | Orchestrator | Playbook01 | Manager-Agent |
+| Infra | Infra | Both | Infrastructure-Agent |
 
 ## Critical Gotchas
 

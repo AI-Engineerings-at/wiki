@@ -31,7 +31,7 @@ export default function ToolsPage() {
       date: '2026-03-01',
     },
     {
-      title: 'Mattermost: Agent-Kommunikation',
+      title: 'Team-Chat: Agent-Kommunikation',
       description: 'Deine KI-Agenten über einen Team-Chat steuern — Aufträge geben und Ergebnisse bekommen.',
       href: '/tools/mattermost-agent',
       date: '2026-03-01',

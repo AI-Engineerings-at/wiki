@@ -257,7 +257,7 @@ export default function EvalsGuardrailsENPage() {
 
 5. Log results
    → Langfuse Trace: Scores + Metadata
-   → If score < 0.7: Alert to Mattermost
+   → If score < 0.7: Alert to Team-Chat
    → If PII detected: Block response`}</code>
             </pre>
           </div>

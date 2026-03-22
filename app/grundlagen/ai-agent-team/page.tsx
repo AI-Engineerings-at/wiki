@@ -141,7 +141,7 @@ Manager (Planner)
           <li>Docker Commands</li>
           <li>Dateien lesen/schreiben</li>
           <li>Web recherchieren</li>
-          <li>Nachrichten posten (Mattermost)</li>
+          <li>Nachrichten posten (Team-Chat)</li>
         </ul>
 
         <Callout type="warning" title="Guardrails sind Pflicht">
@@ -167,7 +167,7 @@ Manager (Planner)
 
         <h2 className="text-xl font-semibold text-white mt-8">Wie Agenten kommunizieren</h2>
         <p className="text-gray-300">
-          In der Praxis kommunizieren Agenten über Team-Chat-Kanäle (z.B. Mattermost). Jeder Agent
+          In der Praxis kommunizieren Agenten über Team-Chat-Kanäle (z.B. Team-Chat). Jeder Agent
           hat seinen eigenen Bot-Account. Aufgaben kommen über den Hauptkanal herein, der Manager
           delegiert, und der zugewiesene Agent postet das Ergebnis. Diese kanalbasierte Kommunikation
           erzeugt einen transparenten Audit Trail — du kannst genau nachvollziehen, wer was gemacht

@@ -42,13 +42,13 @@ Ein einzelnes LLM soll alle diese Tasks gleichzeitig loesen:
          ┌──────────────┐
          │  Orchestrator │
          │    (Manager)   │
-         │    @jim        │
+         │    Manager-Agent        │
          └──────┬────────┘
     ┌────────────┼────────────┐
     │            │            │
 ┌───┴───┐   ┌───┴───┐   ┌───┴───┐
 │Dev    │   │QA     │   │Infra  │
-│@jim01 │   │@jim02 │   │@lisa01│
+│Developer-Agent │   │QA-Agent │   │Infrastructure-Agent│
 └───────┘   └───────┘   └───────┘
 
 Kommunikation:
@@ -102,13 +102,13 @@ Kommunikation:
 ```
          ┌──────────────┐
          │   CEO        │
-         │   @joe       │
+         │   CEO       │
          └──────┬───────┘
     ┌────────────┼────────────┐
     │            │            │
 ┌───┴──────┐ ┌──┴──────┐ ┌───┴──────┐
 │Dev Lead  │ │QA Lead  │ │Ops Lead  │
-│  @jim    │ │ @john   │ │ @lisa    │
+│  Manager-Agent    │ │ QA-Agent   │ │ Infrastructure-Agent    │
 └───┬──────┘ └──┬──────┘ └───┬──────┘
     │           │             │
  3 Devs      2 QAs         2 Ops
@@ -131,7 +131,7 @@ Multi-Agent Systeme brauchen einen strukturierten Kommunikationskanal:
 
 ### 1. Chat-Basiert (Synchron)
 
-**Medium**: Mattermost, Slack, Discord
+**Medium**: Team-Chat, Slack, Discord
 
 ```
 Agent A: "@Agent B, bitte X"
@@ -171,7 +171,7 @@ Agent A: HTTP 200 + Result
 
 **Latenz**: ~10-100ms
 **Best fuer**: Synchrone Multi-Step Flows
-**Playbook01**: Selten (Mattermost + n8n preferred)
+**Playbook01**: Selten (Team-Chat + n8n preferred)
 
 ## State Management
 
@@ -225,7 +225,7 @@ Agent B: Verantwortlich fuer Users N-Z
 Keine Konflikte moeglich!
 ```
 
-**Playbook01**: Sharding + Mattermost Channels (Channel = shard)
+**Playbook01**: Sharding + Team-Chat Channels (Channel = shard)
 
 ## Error Handling
 
@@ -332,22 +332,22 @@ Dann kann man alle Logs nach `trace-abc123` suchen und den vollstaendigen Ablauf
 
 ## Fallstudien aus Playbook01
 
-### Case 1: @jim als Orchestrator
+### Case 1: Manager-Agent als Orchestrator
 
 ```
 Joe: "Deploy v1.2.3"
-→ Reaches @jim via Mattermost
-→ @jim versteht: "Deploy to Production"
-→ @jim delegiert @jim01: "git push to main"
-→ @jim01 macht es, meldet Erfolg
-→ @jim delegiert @lisa01: "restart CF Pages"
-→ @lisa01 macht es
-→ @jim meldet Joe: "v1.2.3 live"
+→ Reaches Manager-Agent via Team-Chat
+→ Manager-Agent versteht: "Deploy to Production"
+→ Manager-Agent delegiert Developer-Agent: "git push to main"
+→ Developer-Agent macht es, meldet Erfolg
+→ Manager-Agent delegiert Infrastructure-Agent: "restart CF Pages"
+→ Infrastructure-Agent macht es
+→ Manager-Agent meldet Joe: "v1.2.3 live"
 ```
 
-**Pattern**: Hub & Spoke (Manager = @jim)
-**Communication**: Mattermost + Polling
-**Fehlerbehandlung**: @jim retry 3x, dann escalate zu @joe
+**Pattern**: Hub & Spoke (Manager = Manager-Agent)
+**Communication**: Message Bus + Polling
+**Fehlerbehandlung**: Manager-Agent retry 3x, dann escalate zu CEO
 
 ### Case 2: Stripe → n8n → Email Workflow
 
@@ -365,22 +365,22 @@ Stripe sends webhook: "Payment received"
 **Communication**: n8n + Webhooks
 **Fehlerbehandlung**: n8n Retry bis 3x, dann Alert
 
-### Case 3: @echo_log Agent Team
+### Case 3: Logger-Agent Agent Team
 
 ```
 Echo_log = Single "API" but powered by multiple agents:
 
 User: "Create a deployment"
-→ Mattermost receives message
+→ Message Bus receives message
 → Echo_log Poller detects
-→ @echo_log AI processes
-→ Wenn komplex, delegiert zu @jim02 (browser)
-  oder @jim01 (code)
+→ Logger-Agent AI processes
+→ Wenn komplex, delegiert zu QA-Agent (browser)
+  oder Developer-Agent (code)
 → Result aggregated + sent back
 ```
 
 **Pattern**: Hybrid (Manager + Sub-Agents)
-**Communication**: Mattermost + Bridge Services
+**Communication**: Team-Chat + Bridge Services
 **State**: Persisted in Vault + Message history
 
 ## Best Practices fuer Multi-Agent Design
@@ -396,7 +396,7 @@ User: "Create a deployment"
 ## Weiter lesen
 
 - [Agent Orchestration Grundlagen](/de/grundlagen/was-ist-agent-orchestration)
-- [Mattermost als Communication Backbone](/de/tools/mattermost)
+- [Team-Chat als Communication Backbone](/de/tools/mattermost)
 - [n8n Workflow Automation](/de/tools/n8n)
 - [Claude Code Sub-Agents](/de/tools/agents)
 - [Playbook01 Agent-Team](/de/tools/agents)

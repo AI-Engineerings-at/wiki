@@ -10,7 +10,7 @@ author: "AI Engineering"
 
 Du wirst ein verteiltes Agent-System aufbauen, das selbstständig arbeitet: Ein Manager verteilt Tasks, Worker führen sie aus, Specialists kümmern sich um ihre Domain. Kommunikation läuft über n8n, Logs über Prometheus.
 
-**Voraussetzung**: Ollama + n8n + Mattermost/Slack (oder Email) funktioniierend.
+**Voraussetzung**: Ollama + n8n + Team-Chat/Slack (oder Email) funktioniierend.
 
 ## Architektur-Überblick
 
@@ -31,7 +31,7 @@ Du wirst ein verteiltes Agent-System aufbauen, das selbstständig arbeitet: Ein 
                       │
             ┌─────────▼─────────┐
             │  Communication    │
-            │  (Mattermost)     │
+            │  (Team-Chat)     │
             └───────────────────┘
                       │
             ┌─────────▼─────────┐
@@ -111,7 +111,7 @@ return {
 **3. For Each Agent Type**
 
 - Loop über `by_agent` Keys
-- Pro Agent: Mattermost Message schreiben
+- Pro Agent: Team-Chat Message schreiben
 
 Message Template:
 
@@ -125,7 +125,7 @@ Neue Tasks für @{{ $json.agent }}:
 
 **4. Update Task Status**
 
-Nach Mattermost-Post: Status auf "assigned" setzen
+Nach Team-Chat-Post: Status auf "assigned" setzen
 
 ```sql
 UPDATE agent_tasks
@@ -135,9 +135,9 @@ WHERE task_id = '{{ $json.task_id }}'
 
 ## Schritt 3: Worker-Agents (Task-Execution)
 
-Worker hören auf Mattermost Commands oder Poll eine Queue.
+Worker hören auf Team-Chat Commands oder Poll eine Queue.
 
-### Option A: Mattermost Slash-Command Trigger
+### Option A: Team-Chat Slash-Command Trigger
 
 **n8n Workflow: "Content Worker"**
 
@@ -146,7 +146,7 @@ Worker hören auf Mattermost Commands oder Poll eine Queue.
 - URL: `/webhook/worker-content`
 - Method: POST
 
-Mattermost schickt:
+Team-Chat schickt:
 
 ```json
 {
@@ -200,7 +200,7 @@ SET status = 'done',
 WHERE task_id = '{{ $json.task_id }}'
 ```
 
-Mattermost Notification:
+Team-Chat Notification:
 
 ```
 ✅ Task {{ $json.task_id }} abgeschlossen!
@@ -211,7 +211,7 @@ Ergebnis:
 
 ### Option B: Polling (für keine Webhooks)
 
-Falls keine Mattermost Webhook-Integration:
+Falls keine Team-Chat Webhook-Integration:
 
 **n8n Workflow: "Worker Poller"**
 
@@ -234,7 +234,7 @@ WHERE task_id = ...
 UPDATE agent_tasks SET status = 'done', completed_at = NOW()
 WHERE task_id = ...
 
-// 5. Mattermost notify
+// 5. Team-Chat notify
 ```
 
 ## Schritt 4: Specialist Agents (Domain-Experts)
@@ -281,34 +281,34 @@ return JSON.parse(result.response);
 
 Dann basierend auf Ergebnis:
 - Wenn PASSED: Task zu "done"
-- Wenn FAILED: Mattermost Alert, zurück zu "pending"
+- Wenn FAILED: Team-Chat Alert, zurück zu "pending"
 
-## Schritt 5: Communication Hub (Mattermost)
+## Schritt 5: Communication Hub (Team-Chat)
 
-Alle Agents reden über Mattermost. Setup:
+Alle Agents reden über den Team-Chat. Setup:
 
-### Mattermost Webhook für n8n
+### Team-Chat Webhook für n8n
 
-**In Mattermost**:
+**Im Team-Chat**:
 1. Geh zu Main Menu → Integrations → Webhooks
 2. Erstelle einen **Incoming Webhook**
 3. Channel: #agents (oder #agent-logs)
 4. URL kopieren: `http://mattermost:8065/hooks/abc123...`
 
 **In n8n**:
-Jeder Workflow hat einen "Send Message to Mattermost" Node:
+Jeder Workflow hat einen "Send Message to Team-Chat" Node:
 
 ```yaml
-Type: Mattermost
+Type: Team-Chat
 Method: Post Message
 Channel: #agents
 Message: "Agent {{ $json.agent_name }} completed {{ $json.task_title }}"
-Webhook URL: [aus Mattermost kopiert]
+Webhook URL: [aus Team-Chat kopiert]
 ```
 
-### Mattermost Slash Command für Task-Trigger
+### Team-Chat Slash Command für Task-Trigger
 
-**In Mattermost**:
+**Im Team-Chat**:
 1. Main Menu → Integrations → Slash Commands
 2. Erstelle `/execute_task`
 3. Request URL: `http://n8n:5678/webhook/worker-content`
@@ -451,7 +451,7 @@ scrape_configs:
 
 2. ASSIGN
    Manager-Workflow sieht pending Task
-   Versendet Mattermost Message
+   Versendet Team-Chat Message
    Status: "assigned"
 
 3. START
@@ -520,10 +520,10 @@ Falls du mehrere Server hast:
 ```
 Server A: Manager + Specialist (Dev)
 Server B: Worker (Content) + Worker (QA)
-Server C: PostgreSQL + Mattermost (Zentral)
+Server C: PostgreSQL + Team-Chat (Zentral)
 ```
 
-Alle reden über PostgreSQL Task-Queue und Mattermost Webhooks (Netzwerk-kommunikation).
+Alle reden über PostgreSQL Task-Queue und Team-Chat Webhooks (Netzwerk-kommunikation).
 
 Prometheus läuft zentral, scrapet alle 3 Server per HTTP.
 
@@ -545,7 +545,7 @@ SET status = 'pending', started_at = NULL
 WHERE task_id = '...'
 ```
 
-### Mattermost Webhook antwortet nicht
+### Team-Chat Webhook antwortet nicht
 
 ```bash
 curl -X POST http://mattermost:8065/hooks/abc123 \
@@ -585,8 +585,8 @@ Lösungen:
 - [ ] Manager-Workflow (Task-Vergabe) gebaut
 - [ ] Mindestens 1 Worker-Workflow gebaut
 - [ ] Mindestens 1 Specialist-Workflow gebaut
-- [ ] Mattermost Webhook konfiguriert
-- [ ] Mattermost Slash Command konfiguriert
+- [ ] Team-Chat Webhook konfiguriert
+- [ ] Team-Chat Slash Command konfiguriert
 - [ ] Agent Metrics Script läuft
 - [ ] Prometheus scrapet Agent Metrics
 - [ ] Grafana Dashboard für Agent Stats erstellt

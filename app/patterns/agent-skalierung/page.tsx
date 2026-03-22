@@ -50,7 +50,7 @@ export default function AgentSkalierung() {
               <h3 className="font-semibold text-white">Bot-Account erstellen</h3>
             </div>
             <p className="text-gray-300 text-sm">
-              Im Team-Chat (z.B. Mattermost) einen neuen Bot erstellen mit beschreibendem
+              Im Team-Chat (z.B. Team-Chat) einen neuen Bot erstellen mit beschreibendem
               Namen. Access Token generieren und sicher speichern.
             </p>
           </div>

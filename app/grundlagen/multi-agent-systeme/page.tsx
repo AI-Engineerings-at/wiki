@@ -81,11 +81,11 @@ skinparam activityBackgroundColor #0F172A
 title Agent-Kommunikation in einem Multi-Agent System
 
 rectangle "Benutzer" as user
-rectangle "Manager Agent\\n(@jim)" as manager #1E3A5F
-rectangle "Coder Agent\\n(@jim01)" as coder #0F172A
-rectangle "Review Agent\\n(@lisa01)" as reviewer #0F172A
-rectangle "Test Agent\\n(@john01)" as tester #0F172A
-rectangle "Mattermost\\n(Kommunikationsbus)" as mm #1a1a2e
+rectangle "Manager Agent\\n(Manager-Agent)" as manager #1E3A5F
+rectangle "Coder Agent\\n(Developer-Agent)" as coder #0F172A
+rectangle "Review Agent\\n(Infrastructure-Agent)" as reviewer #0F172A
+rectangle "Test Agent\\n(QA-Agent)" as tester #0F172A
+rectangle "Team-Chat\\n(Message Bus)" as mm #1a1a2e
 
 user --> manager : Anfrage
 manager --> mm : Task verteilen
@@ -98,7 +98,7 @@ tester --> mm : Tests bestanden
 mm --> manager : Ergebnisse
 manager --> user : Fertig
 @enduml`}
-          caption="Agent-Kommunikation: Manager delegiert über Mattermost an spezialisierte Worker"
+          caption="Agent-Kommunikation: Manager delegiert über den Team-Chat an spezialisierte Worker"
         />
 
         <h2 className="text-xl font-semibold text-white mt-8">Architektur-Muster</h2>
@@ -106,7 +106,7 @@ manager --> user : Fertig
         <h3 className="text-lg font-medium text-white mt-4">1. Hierarchisches Modell</h3>
         <p className="text-gray-300">
           Ein Manager-Agent delegiert Aufgaben an spezialisierte Worker-Agenten. 
-          Unser Team funktioniert so: @jim (Manager) → @jim01, @lisa01, @john01 (Worker).
+          Unser Team funktioniert so: Manager-Agent (Manager) → Developer-Agent, Infrastructure-Agent, QA-Agent (Worker).
         </p>
 
         <h3 className="text-lg font-medium text-white mt-4">2. Peer-to-Peer Modell</h3>
@@ -201,7 +201,7 @@ rectangle "Pipeline" {
 
         <h2 className="text-xl font-semibold text-white mt-8">Unser Setup in der Praxis</h2>
         <p className="text-gray-300">
-          Wir nutzen Mattermost als Kommunikationsbus. Das funktioniert so:
+          Wir nutzen Team-Chat als Message Bus. Das funktioniert so:
         </p>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
@@ -210,16 +210,16 @@ rectangle "Pipeline" {
 {`User postet in #echo_log:
 "Neue Feature: Dark Mode für Dashboard"
 
-@jim (Manager) → priorisiert:
-→ @jim01: Frontend-Implementation
-→ @lisa01: CSS/Styling Review
-→ @john01: Screenshot-Tests
+Manager-Agent (Manager) → priorisiert:
+→ Developer-Agent: Frontend-Implementation
+→ Infrastructure-Agent: CSS/Styling Review
+→ QA-Agent: Screenshot-Tests
 
-@jim01 → setzt um → postet PR
-@lisa01 → reviewed → approved
-@john01 → tested → passed
+Developer-Agent → setzt um → postet PR
+Infrastructure-Agent → reviewed → approved
+QA-Agent → tested → passed
 
-@jim → merged → posted "Fertig"`}
+Manager-Agent → merged → posted "Fertig"`}
           </pre>
         </div>
 

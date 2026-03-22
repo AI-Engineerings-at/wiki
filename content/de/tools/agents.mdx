@@ -487,12 +487,12 @@ export CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1
 
 ## Beziehung zu Agents in Playbook01
 
-Im Playbook01-Team ([@jim, @jim01, @lisa01, etc.](docs/tools/agents)) sind das **Mattermost Bots**, nicht Claude Code Sub-Agents. Sie kommunizieren ueber Mattermost Webhooks und Bridge-Services.
+Im Playbook01-Team ([Manager-Agent, Developer-Agent, Infrastructure-Agent, etc.](docs/tools/agents)) sind das **Team-Chat Bots**, nicht Claude Code Sub-Agents. Sie kommunizieren ueber Team-Chat Webhooks und Bridge-Services.
 
 **Sub-Agents** = Claude Code, isolierter Context, Tool-kontrolliert
-**Team Agents** = Mattermost Bots, Multi-Session Orchestration, Chat-basiert
+**Team Agents** = Team-Chat Bots, Multi-Session Orchestration, Chat-basiert
 
-Beides kann kombiniert werden: Sub-Agents kuennten zu Mattermost posten, Team-Agents koennen Claude Code aufrufen.
+Beides kann kombiniert werden: Sub-Agents kuennten zum Team-Chat posten, Team-Agents koennen Claude Code aufrufen.
 
 ## Best Practices
 
@@ -508,7 +508,7 @@ Beides kann kombiniert werden: Sub-Agents kuennten zu Mattermost posten, Team-Ag
 - [Claude Code Agents Referenz](https://code.claude.com/docs/en/sub-agents)
 - [Skills erstellen](/de/skills/erstellen) — Reusable Prompts in Sub-Agents
 - [Multi-Agent Systeme](/de/grundlagen/multi-agent-systeme) — Agent Orchestration
-- [Mattermost Integration](/de/tools/mattermost) — Team Agent Communication
+- [Team-Chat Integration](/de/tools/mattermost) — Team Agent Communication
 
 ---
 

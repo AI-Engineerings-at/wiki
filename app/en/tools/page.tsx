@@ -34,8 +34,8 @@ export default function ToolsPage() {
       date: '2026-03-01',
     },
     {
-      title: 'Mattermost Agent',
-      description: 'Build an AI agent for Mattermost chat. Bot setup, prompts.',
+      title: 'Team-Chat Agent',
+      description: 'Build an AI agent for Team-Chat. Bot setup, prompts.',
       href: '/en/tools/mattermost-agent',
       date: '2026-03-01',
     },

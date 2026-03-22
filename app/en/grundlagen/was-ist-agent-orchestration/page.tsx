@@ -46,19 +46,19 @@ export default function WasIstAgentOrchestrationPage() {
             </thead>
             <tbody className="text-gray-300">
               <tr className="border-b border-gray-800">
-                <td className="py-2">@jim</td>
+                <td className="py-2">Manager-Agent</td>
                 <td className="py-2">Manager — prioritization, approvals</td>
               </tr>
               <tr className="border-b border-gray-800">
-                <td className="py-2">@jim01</td>
+                <td className="py-2">Developer-Agent</td>
                 <td className="py-2">Frontend/App/CI — Next.js, tests</td>
               </tr>
               <tr className="border-b border-gray-800">
-                <td className="py-2">@lisa01</td>
+                <td className="py-2">Infrastructure-Agent</td>
                 <td className="py-2">Backend/Infra — n8n, Docker, monitoring</td>
               </tr>
               <tr>
-                <td className="py-2">@john01</td>
+                <td className="py-2">QA-Agent</td>
                 <td className="py-2">QA/Content — testing, research</td>
               </tr>
             </tbody>
@@ -67,7 +67,7 @@ export default function WasIstAgentOrchestrationPage() {
 
         <h2 className="text-xl font-semibold text-white mt-8">Communication</h2>
         <p className="text-gray-300">
-          Agents communicate through a central bus. We use Mattermost for this. 
+          Agents communicate through a central bus. We use Team-Chat for this. 
           Each agent has its own polling scripts that respond to messages relevant to them.
         </p>
 
@@ -76,15 +76,15 @@ export default function WasIstAgentOrchestrationPage() {
           <pre className="text-sm text-gray-300 overflow-x-auto">
 {`1. Joe posts task in #echo_log
     ↓
-2. @jim (Manager) prioritizes and delegates
+2. Manager-Agent (Manager) prioritizes and delegates
     ↓
-3. @jim01 → writes code
-   @lisa01 → prepares infrastructure
-   @john01 → checks content
+3. Developer-Agent → writes code
+   Infrastructure-Agent → prepares infrastructure
+   QA-Agent → checks content
     ↓
 4. All post results back
     ↓
-5. @jim aggregates and reports completion`}
+5. Manager-Agent aggregates and reports completion`}
           </pre>
         </div>
 
@@ -93,7 +93,7 @@ export default function WasIstAgentOrchestrationPage() {
           <li><strong>Parallelization:</strong> Run multiple agents at the same time</li>
           <li><strong>Specialization:</strong> Each agent is an expert in their domain</li>
           <li><strong>Scalability:</strong> Adding a new agent is straightforward</li>
-          <li><strong>Auditability:</strong> Every action gets logged to Mattermost</li>
+          <li><strong>Auditability:</strong> Every action gets logged to Team-Chat</li>
           <li><strong>GDPR:</strong> Everything stays local — no prompt training on your data</li>
         </ul>
 
@@ -102,7 +102,7 @@ export default function WasIstAgentOrchestrationPage() {
           Our setup uses:
         </p>
         <ul className="list-disc list-inside text-gray-300 space-y-2 mt-2">
-          <li><strong>Mattermost</strong> — Team chat as the message bus</li>
+          <li><strong>Team-Chat</strong> — Team chat as the message bus</li>
           <li><strong>n8n</strong> — Workflow automation</li>
           <li><strong>Docker Swarm</strong> — Container orchestration</li>
           <li><strong>Claude Code</strong> — CLI access to LLM capabilities</li>

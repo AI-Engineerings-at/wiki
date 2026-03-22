@@ -39,7 +39,7 @@ Alle wesentlichen Änderungen an der AI Engineering Wiki.
 ### Infrastruktur
 - 19 Bilder auf .90 RTX 3090 generiert (ComfyUI FLUX Dev)
 - ComfyUI output braucht Volume-Mount (TODO)
-- Bilder von .90 + Mattermost gesichert
+- Bilder von .90 + Team-Chat gesichert
 - Lighthouse: 87/94/96/100 (Perf/A11y/BP/SEO)
 - CI/CD: 5/5 Runs erfolgreich, ~1:20 pro Deploy
 
