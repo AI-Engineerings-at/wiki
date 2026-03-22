@@ -21,9 +21,6 @@ function getConfig(pathname: string): CtaConfig {
   const isTools = localPath === '/tools' || localPath.startsWith('/tools/')
   const isCompliance = localPath === '/compliance' || localPath.startsWith('/compliance/')
 
-  const playbookHref = 'https://buy.stripe.com/8x28wP7VBbapbdQgs4fQI00'
-  const n8nHref = 'https://buy.stripe.com/8x2fZh7VB2DT2Hk1xafQI01'
-  const dsgvoHref = 'https://buy.stripe.com/bJe7sLb7N92ha9MejWfQI02'
   const productsHref = 'https://www.ai-engineering.at/products'
 
   const base: Pick<
@@ -64,8 +61,8 @@ function getConfig(pathname: string): CtaConfig {
       body: isEn
         ? 'Use proven n8n patterns, templates and integrations for workflows that stay local, documented, and auditable.'
         : 'Nutze bewährte n8n-Patterns, Templates und Integrationen für Workflows, die lokal, dokumentiert und auditierbar bleiben.',
-      primaryHref: n8nHref,
-      primaryLabel: isEn ? 'View n8n Bundle' : 'n8n Bundle ansehen',
+      primaryHref: productsHref,
+      primaryLabel: isEn ? 'View Products' : 'Produkte ansehen',
     }
   }
 
@@ -78,8 +75,8 @@ function getConfig(pathname: string): CtaConfig {
       body: isEn
         ? 'Use ready-to-run GDPR templates, checklists and practical guidance for AI systems that need documentation and auditability.'
         : 'Nutze fertige DSGVO-Templates, Checklisten und Praxis-Guides für AI-Systeme, die dokumentiert und auditierbar sein müssen.',
-      primaryHref: dsgvoHref,
-      primaryLabel: isEn ? 'View GDPR Bundle' : 'DSGVO Bundle ansehen',
+      primaryHref: productsHref,
+      primaryLabel: isEn ? 'View Products' : 'Produkte ansehen',
     }
   }
 
@@ -91,8 +88,8 @@ function getConfig(pathname: string): CtaConfig {
     body: isEn
       ? 'If you want more than theory: setups, workflows and templates from real operations for teams that want local, documented AI systems.'
       : 'Wenn du mehr willst als Theorie: Setups, Workflows und Vorlagen aus dem echten Betrieb für Teams, die lokale und dokumentierte AI-Systeme wollen.',
-    primaryHref: playbookHref,
-    primaryLabel: isEn ? 'View AI-Stack Playbook - EUR 49' : 'AI-Stack Playbook ansehen - EUR 49',
+    primaryHref: productsHref,
+    primaryLabel: isEn ? 'View Products & Bundles' : 'Produkte & Bundles ansehen',
   }
 }
 

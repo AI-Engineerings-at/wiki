@@ -31,11 +31,31 @@ const navEn = [
   { href: '/blog', label: 'Blog', icon: '📝' },
 ]
 
+// DE→EN path mappings for routes that differ between languages
+const deToEn: Record<string, string> = {
+  '/lernpfad': '/en/learning-path',
+  '/oesterreich': '/en/austria',
+  '/tools/open-source-projekte': '/en/tools/open-source-projects',
+  '/tools/ai-tools-datenbank': '/en/tools/ai-tools-database',
+  '/tools/vergleich-alternativen': '/en/tools/comparison-alternatives',
+  '/tools/cli-coding-agents-vergleich': '/en/tools/cli-coding-agents-comparison',
+  '/tools/n8n-workflow-bundle': '/en/tools/n8n-workflow-bundle',
+  '/patterns/ai-agent-digitaler-mitarbeiter': '/en/patterns/ai-agent-digital-employee',
+  '/patterns/agent-skalierung': '/en/patterns/agent-skalierung',
+}
+const enToDe: Record<string, string> = Object.fromEntries(
+  Object.entries(deToEn).map(([de, en]) => [en, de])
+)
+
 function getToggleHref(pathname: string, isEn: boolean): string {
   if (isEn) {
+    // Check mapping first
+    if (enToDe[pathname]) return enToDe[pathname]
     const dePath = pathname.replace(/^\/en\/?/, '/')
     return dePath === '' ? '/' : dePath
   }
+  // Check mapping first
+  if (deToEn[pathname]) return deToEn[pathname]
   return pathname === '/' ? '/en' : `/en${pathname}`
 }
 

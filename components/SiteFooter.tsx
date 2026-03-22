@@ -12,18 +12,18 @@ export function SiteFooter() {
         title: 'Products',
         items: [
           { label: 'All Products', href: 'https://www.ai-engineering.at/products' },
-          { label: 'AI-Stack Playbook', href: 'https://buy.stripe.com/8x28wP7VBbapbdQgs4fQI00' },
-          { label: 'n8n Bundle', href: 'https://buy.stripe.com/8x2fZh7VB2DT2Hk1xafQI01' },
-          { label: 'GDPR Bundle', href: 'https://buy.stripe.com/bJe7sLb7N92ha9MejWfQI02' },
+          { label: 'AI-Stack Playbook', href: 'https://www.ai-engineering.at/products' },
+          { label: 'n8n Bundle', href: 'https://www.ai-engineering.at/products' },
+          { label: 'GDPR Bundle', href: 'https://www.ai-engineering.at/products' },
         ],
       }
     : {
         title: 'Produkte',
         items: [
           { label: 'Alle Produkte', href: 'https://www.ai-engineering.at/products' },
-          { label: 'AI-Stack Playbook', href: 'https://buy.stripe.com/8x28wP7VBbapbdQgs4fQI00' },
-          { label: 'n8n Bundle', href: 'https://buy.stripe.com/8x2fZh7VB2DT2Hk1xafQI01' },
-          { label: 'DSGVO Bundle', href: 'https://buy.stripe.com/bJe7sLb7N92ha9MejWfQI02' },
+          { label: 'AI-Stack Playbook', href: 'https://www.ai-engineering.at/products' },
+          { label: 'n8n Bundle', href: 'https://www.ai-engineering.at/products' },
+          { label: 'DSGVO Bundle', href: 'https://www.ai-engineering.at/products' },
         ],
       }
 
@@ -131,7 +131,7 @@ export function SiteFooter() {
           <p>
             {isEn
               ? 'No VAT charged (Austrian small business regulation, §6 Abs. 1 Z 27 UStG)'
-              : 'Keine Umsatzsteuer gemaess Paragraph 6 Abs. 1 Z 27 UStG'}
+              : 'Keine Umsatzsteuer gemäß § 6 Abs. 1 Z 27 UStG'}
           </p>
         </div>
       </div>
