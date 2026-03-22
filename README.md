@@ -115,8 +115,10 @@ graph LR
 | [Tailwind CSS](https://tailwindcss.com/) | 3.4 | Styling (Blue/Slate Theme) |
 | [MDX](https://mdxjs.com/) | 3.0 | Markdown + JSX Content |
 | [TypeScript](https://typescriptlang.org/) | 5 | Type Safety |
-| [PlantUML / Kroki](https://kroki.io/) | — | Technische Diagramme |
+| [PlantUML / Kroki](https://kroki.io/) | — | Technische Diagramme* |
 | [Cloudflare Pages](https://pages.cloudflare.com/) | — | Hosting & CDN |
+
+> *PlantUML-Diagramme werden client-seitig über kroki.io gerendert. Dabei wird die IP-Adresse des Nutzers an den Kroki-Server übermittelt.
 
 ---
 
