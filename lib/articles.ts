@@ -45,6 +45,7 @@ const complianceArticles: Article[] = [
   { title: 'Datenschutz-Folgenabschaetzung (DPIA)', description: 'Wann ist eine DPIA Pflicht, wie fuehrt man sie durch, DPIA und EU AI Act.', href: '/compliance/dpia', category: 'compliance', categoryLabel: 'Compliance', date: '2026-03-21' },
   { title: 'Datenschutz Praxis', description: 'Praktische Umsetzung — TOM, AVV, Dokumentation, Betroffenenrechte.', href: '/compliance/datenschutz-praxis', category: 'compliance', categoryLabel: 'Compliance', date: '2026-02-28' },
   { title: 'AI Agent Legal Framework', description: 'Von der Risikobewertung bis zum Compliance-Paket: EU AI Act + DSGVO für AI-Agenten in KMUs.', href: '/compliance/ai-agent-legal-framework', category: 'compliance', categoryLabel: 'Compliance', date: '2026-03-21', popular: true },
+  { title: 'EU AI Act Readiness Check', description: 'Interaktives 10-Fragen Self-Assessment: Wie gut ist dein Unternehmen auf den EU AI Act vorbereitet?', href: '/compliance/self-assessment', category: 'compliance', categoryLabel: 'Compliance', date: '2026-03-22' },
 ]
 
 const toolsArticles: Article[] = [
@@ -247,6 +248,7 @@ export const relatedArticlesMap: Record<string, string[]> = {
   '/patterns/self-improving-agents': ['/patterns/memory-management', '/patterns/safety-hooks', '/patterns/ai-agent-digitaler-mitarbeiter'],
   // Compliance (new)
   '/compliance/ai-agent-legal-framework': ['/compliance/eu-ai-act', '/compliance/dpia', '/patterns/ai-agent-digitaler-mitarbeiter'],
+  '/compliance/self-assessment': ['/compliance/eu-ai-act', '/compliance/ki-kompetenz-art4', '/compliance/eu-ai-act-checkliste'],
   // Papers
   '/papers/attention-is-all-you-need': ['/grundlagen/was-ist-ein-llm', '/papers/lora-paper', '/papers/rag-paper'],
   '/papers/rag-paper': ['/tools/rag-guide', '/papers/attention-is-all-you-need', '/papers/react-paper'],
