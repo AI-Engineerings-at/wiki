@@ -1,62 +1,62 @@
 export const metadata = {
   title: 'Tools & Infrastruktur | AI Engineering Wiki',
   description:
-    'Tools und Infrastruktur für deinen lokalen AI-Stack: Docker Swarm, Ollama, RAG, n8n, Mattermost, Grafana und Proxmox.',
+    'Die Werkzeuge die du brauchst: KI installieren, automatisieren, überwachen. Schritt-für-Schritt Anleitungen.',
 }
 
 export default function ToolsPage() {
   const articles = [
     {
       title: 'Docker Compose vs Docker Swarm',
-      description: 'Welches für AI-Workloads? Vergleich, Use Cases, Entscheidungshilfe.',
+      description: 'Welches brauchst du? Einfacher Vergleich mit klarer Empfehlung je nach Situation.',
       href: '/tools/docker-vs-swarm',
       date: '2026-03-01',
     },
     {
       title: 'Ollama: Lokale LLMs einfach gemacht',
-      description: 'Installation, Modelle, GPU-Setup, REST API, Open WebUI Integration.',
+      description: 'Deine eigene KI in 5 Minuten installieren. Schritt für Schritt, mit Bildern.',
       href: '/tools/ollama-tutorial',
       date: '2026-03-01',
     },
     {
       title: 'RAG Complete Guide',
-      description: 'Retrieval Augmented Generation: Vector Databases, Embeddings, Hybrid Search.',
+      description: 'Deine KI mit eigenem Firmenwissen füttern — damit sie Antworten aus DEINEN Dokumenten gibt, nicht aus dem Internet.',
       href: '/tools/rag-guide',
       date: '2026-03-01',
     },
     {
       title: 'n8n: Workflow-Automatisierung',
-      description: 'Grundlagen, Nodes, Workflow-Beispiele, AI-Integration.',
+      description: 'Aufgaben automatisieren ohne zu programmieren: Emails beantworten, Berichte erstellen, Daten verarbeiten.',
       href: '/tools/n8n-für-anfaenger',
       date: '2026-03-01',
     },
     {
       title: 'Mattermost: Agent-Kommunikation',
-      description: 'Polling, Webhooks, Nachrichten-Format, Team-Kommunikation.',
+      description: 'Deine KI-Agenten über einen Team-Chat steuern — Aufträge geben und Ergebnisse bekommen.',
       href: '/tools/mattermost-agent',
       date: '2026-03-01',
     },
     {
       title: 'Grafana: Monitoring für Homelab',
-      description: 'Prometheus, Dashboards, Alerting, Container-Metriken.',
+      description: 'Auf einen Blick sehen ob alles läuft — und automatisch gewarnt werden wenn nicht.',
       href: '/tools/grafana-monitoring',
       date: '2026-03-01',
     },
     {
       title: 'Proxmox: Homelab Virtualisierung',
-      description: 'Installation, VMs, LXC, GPU-Passthrough, Backup-Strategie.',
+      description: 'Einen Server in viele aufteilen — damit KI, Datenbank und Backup sauber getrennt laufen.',
       href: '/tools/proxmox-setup',
       date: '2026-03-01',
     },
     {
       title: 'Model Selection Guide',
-      description: 'Waehle das richtige AI-Modell für deinen Anwendungsfall — von Llama bis Mistral.',
+      description: 'Welches KI-Modell passt zu dir? Ehrlicher Vergleich nach Qualität, Geschwindigkeit und Hardwarebedarf.',
       href: '/tools/model-selection',
       date: '2026-03-01',
     },
     {
       title: 'MCP Server Setup',
-      description: 'Model Context Protocol Server für AI-Integrationen aufsetzen.',
+      description: 'Deiner KI Zugriff auf externe Werkzeuge geben — Dateien lesen, APIs aufrufen, Datenbanken abfragen.',
       href: '/tools/mcp-server',
       date: '2026-03-01',
     },
@@ -67,7 +67,7 @@ export default function ToolsPage() {
       <div>
         <h1 className="text-3xl font-bold text-white">Tools & Infrastruktur</h1>
         <p className="text-slate-400 mt-2">
-          Die Tools und Services hinter einem produktionsreifen AI-Stack.
+          Die Werkzeuge die du brauchst — mit Anleitungen die auch ohne IT-Studium funktionieren.
         </p>
       </div>
 

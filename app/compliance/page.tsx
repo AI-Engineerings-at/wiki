@@ -1,56 +1,56 @@
 export const metadata = {
   title: 'Compliance | AI Engineering Wiki',
   description:
-    'DSGVO und EU AI Act in der Praxis: Grundlagen, Transparenzpflichten, verbotene Praktiken und Checklisten für AI-Systeme.',
+    'Was du als Unternehmen tun musst wenn du KI einsetzt: DSGVO, EU AI Act, Pflichten und Checklisten — verständlich erklärt.',
 }
 
 export default function CompliancePage() {
   const articles = [
     {
       title: 'DSGVO Grundlagen',
-      description: 'Was bedeutet DSGVO für AI-Anwendungen — Datenschutz, Einwilligung, Loeschfristen.',
+      description: 'Was die DSGVO für deine KI-Nutzung bedeutet — wann du Einwilligungen brauchst und was du dokumentieren musst.',
       href: '/compliance/dsgvo-grundlagen',
       date: '2026-02-28',
     },
     {
       title: 'EU AI Act',
-      description: 'Risikoklassen, Verbote, Transparenzpflichten für AI-Systeme in der EU.',
+      description: 'Das neue KI-Gesetz der EU: Was erlaubt ist, was verboten ist, und was du als Unternehmen tun musst.',
       href: '/compliance/eu-ai-act',
       date: '2026-02-28',
     },
     {
       title: 'KI-Kompetenz nach Art. 4',
-      description: 'KI-Kompetenz Pflicht: Wer ist betroffen, was muss geschult werden, Deadline 02.08.2026.',
+      description: 'Dein Team muss KI-Grundwissen haben — das ist Pflicht. Wer betroffen ist und bis wann du handeln musst.',
       href: '/compliance/ki-kompetenz-art4',
       date: '2026-03-21',
     },
     {
       title: 'EU AI Act Checkliste',
-      description: '7-Schritte Leitfaden zur EU AI Act Bereitschaft. Risikoklassen, Termine, Pflichten.',
+      description: '7 Schritte zum Abhaken: Bist du bereit für den EU AI Act? Klare Anleitung mit Terminen.',
       href: '/compliance/eu-ai-act-checkliste',
       date: '2026-03-01',
     },
     {
       title: 'Verbotene AI-Praktiken',
-      description: 'Article 5 - Was seit Feb 2025 verboten ist. Social Scoring, Emotion Recognition.',
+      description: 'Diese KI-Anwendungen sind in der EU verboten — seit Februar 2025. Prüfe ob du betroffen bist.',
       href: '/compliance/verbotene-ai-praktiken',
       date: '2026-03-01',
     },
     {
       title: 'Chatbot Transparenzpflichten',
-      description: 'Kennzeichnungspflichten für Chatbots und KI-generierte Inhalte.',
+      description: 'Wenn dein Chatbot mit Kunden spricht, müssen die das wissen. So kennzeichnest du richtig.',
       href: '/compliance/chatbot-transparenzpflichten',
       date: '2026-03-01',
     },
     {
       title: 'Datenschutz-Folgenabschaetzung (DPIA)',
-      description: 'Wann ist eine DPIA Pflicht, wie fuehrt man sie durch, DPIA und EU AI Act.',
+      description: 'Wann du eine Datenschutz-Folgenabschätzung brauchst und wie du sie ohne Anwalt erstellst.',
       href: '/compliance/dpia',
       date: '2026-03-21',
     },
     {
       title: 'Datenschutz Praxis',
-      description: 'Praktische Umsetzung — TOM, AVV, Dokumentation, Betroffenenrechte.',
+      description: 'Die praktische Seite: Welche Dokumente du brauchst, welche Maßnahmen du treffen musst.',
       href: '/compliance/datenschutz-praxis',
       date: '2026-02-28',
     },
@@ -61,7 +61,7 @@ export default function CompliancePage() {
       <div>
         <h1 className="text-3xl font-bold text-white">Compliance</h1>
         <p className="text-slate-400 mt-2">
-          DSGVO und EU AI Act — rechtliche Anforderungen für AI-Systeme.
+          Was du rechtlich beachten musst wenn du KI im Unternehmen einsetzt — ohne Juristendeutsch.
         </p>
       </div>
 

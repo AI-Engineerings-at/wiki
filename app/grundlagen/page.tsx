@@ -1,62 +1,62 @@
 export const metadata = {
   title: 'Grundlagen | AI Engineering Wiki',
   description:
-    'Einstieg in Agent Orchestration, Multi-Agent Systeme und lokalen AI-Stack: Rollen, Kosten, lokal vs Cloud, Quickstart.',
+    'Die Basis: Was ist KI, warum lokal statt Cloud, was kostet es wirklich — und wie baust du dein erstes System auf.',
 }
 
 export default function GrundlagenPage() {
   const articles = [
     {
       title: 'Was ist Agent Orchestration?',
-      description: 'Einführung in Agent Orchestration und Multi-Agent Systeme.',
+      description: 'Wie du mehrere KI-Helfer koordinierst, damit sie zusammenarbeiten statt sich in die Quere kommen.',
       href: '/grundlagen/was-ist-agent-orchestration',
       date: '2026-03-01',
     },
     {
       title: 'Multi-Agent Systeme erklärt',
-      description: 'Wie mehrere AI-Agenten zusammenarbeiten und warum das besser ist als ein einzelnes LLM.',
+      description: 'Einer recherchiert, einer schreibt, einer prüft — warum ein Team aus KI-Agenten mehr schafft als ein einzelner Chatbot.',
       href: '/grundlagen/multi-agent-systeme',
       date: '2026-03-01',
     },
     {
       title: 'Agent Rollen & Verantwortung',
-      description: 'Developer, QA, Infra, Browser — welche Rollen braucht ein Agent-Team?',
+      description: 'Welche Aufgaben kann ein KI-Agent übernehmen? Vom Entwickler über die Qualitätskontrolle bis zur Recherche.',
       href: '/grundlagen/agent-rollen',
       date: '2026-03-01',
     },
     {
       title: 'Lokale AI vs. Cloud: Der TCO-Vergleich',
-      description: 'Was kostet Self-Hosted AI wirklich? Hardware, Strom, Wartung vs. API-Kosten.',
+      description: 'Was kostet eigene KI wirklich? Ehrlicher Vergleich: eigene Hardware vs. monatliche Cloud-Rechnung.',
       href: '/grundlagen/lokal-vs-cloud',
       date: '2026-03-01',
     },
     {
       title: 'Ollama vs Cloud LLM: Vergleich',
-      description: 'Wann lokal, wann Cloud? Qualität, Kosten, Datenschutz.',
+      description: 'Wann lohnt sich eigene KI, wann reicht die Cloud? Eine ehrliche Entscheidungshilfe.',
       href: '/grundlagen/ollama-vs-cloud',
       date: '2026-03-01',
     },
     {
       title: 'AI Agent Team aufbauen',
-      description: 'Arten von Agenten, Team-Struktur, Tools-Integration.',
+      description: 'Schritt für Schritt dein eigenes KI-Team zusammenstellen — welche Agenten du brauchst und wie sie zusammenspielen.',
       href: '/grundlagen/ai-agent-team',
       date: '2026-03-01',
     },
     {
       title: 'Self-hosted vs Cloud Services',
-      description: 'Welche Services selbst hosten, welche in die Cloud?',
+      description: 'Nicht alles muss auf deinem eigenen Server laufen. Wo sich eigenes Hosting lohnt und wo die Cloud reicht.',
       href: '/grundlagen/selfhosted-vs-cloud',
       date: '2026-03-01',
     },
     {
       title: '30-Tage Quickstart Guide',
-      description: 'In 30 Tagen zum eigenen AI-Stack. Tag-für-Tag Anleitung.',
+      description: 'In 30 Tagen zur eigenen KI. Tag für Tag eine Aufgabe — am Ende hast du ein laufendes System.',
       href: '/grundlagen/30-tage-quickstart',
       date: '2026-03-01',
     },
     {
       title: 'AI im Unternehmen',
-      description: 'Warum Unternehmen lokale AI einsetzen: Datenschutz, Kostenkontrolle, Souveränität.',
+      description: 'Warum immer mehr Unternehmen eigene KI einsetzen — und welche konkreten Vorteile das bringt.',
       href: '/grundlagen/ki-unternehmen',
       date: '2026-03-01',
     },
@@ -67,7 +67,7 @@ export default function GrundlagenPage() {
       <div>
         <h1 className="text-3xl font-bold text-white">Grundlagen</h1>
         <p className="text-slate-400 mt-2">
-          Einstieg in Agent Orchestration, Multi-Agent Systeme und AI Infrastructure.
+          Was KI kann, was sie kostet, und wie du sie sinnvoll einsetzt — verständlich erklärt.
         </p>
       </div>
 

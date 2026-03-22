@@ -33,11 +33,11 @@ export default function Home() {
             <span className="text-[#4262FF]"> Wiki</span>
           </h1>
           <p className="text-xl md:text-2xl text-slate-200 max-w-3xl mx-auto mb-2">
-            Kostenloses Wissen über lokale KI, DSGVO und Automatisierung
+            KI verstehen, einsetzen und kontrollieren — ohne Informatik-Studium
           </p>
           <p className="text-slate-400 max-w-2xl mx-auto mb-10">
-            Für DACH-KMUs, die lokale AI-Systeme DSGVO-konform einführen, dokumentieren
-            und auditierbar betreiben wollen. Aus echtem Betrieb in Österreich.
+            Für KMUs im DACH-Raum, die KI nutzen wollen ohne ihre Daten aus der Hand zu geben.
+            Verständlich erklärt, aus echtem Betrieb in Österreich. Komplett kostenlos.
           </p>
 
           {/* Search */}
@@ -76,13 +76,13 @@ export default function Home() {
             href="/compliance/eu-ai-act"
             icon="⚖️"
             title="EU AI Act"
-            subtitle="In Kraft seit 08.2024 — Art. 4 gilt seit 02.2025"
+            subtitle="Was du als Unternehmen wissen musst — jetzt"
           />
           <QuickLink
             href="/compliance/dsgvo-grundlagen"
             icon="🛡️"
             title="DSGVO für AI"
-            subtitle="Rechtsgrundlagen, Art. 30, DPIA"
+            subtitle="Wann du haftest und wie du dich schützt"
           />
           <QuickLink
             href="/tools/ollama-tutorial"
@@ -94,7 +94,7 @@ export default function Home() {
             href="/grundlagen/was-ist-ein-llm"
             icon="🧠"
             title="Was ist ein LLM?"
-            subtitle="Transformer, Tokens, Halluzinationen"
+            subtitle="Einfach erklärt — ohne Fachjargon"
           />
         </div>
       </section>
@@ -139,7 +139,7 @@ export default function Home() {
           <span className="text-3xl">⚖️</span>
           <div>
             <h2 className="text-2xl font-bold text-white">Compliance & Recht</h2>
-            <p className="text-slate-400 text-sm">EU AI Act, DSGVO, Risikoklassen — alles was du wissen musst</p>
+            <p className="text-slate-400 text-sm">Was du rechtlich beachten musst wenn du KI im Unternehmen einsetzt</p>
           </div>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -158,7 +158,7 @@ export default function Home() {
       {/* Patterns & Architecture */}
       <section>
         <h2 className="text-2xl font-bold text-white mb-2">Patterns & Architektur</h2>
-        <p className="text-slate-400 text-sm mb-6">Bewährte Muster für AI-Agent-Systeme im Produktivbetrieb</p>
+        <p className="text-slate-400 text-sm mb-6">Erprobte Rezepte für KI-Systeme die zuverlässig laufen — nicht nur im Labor</p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <ToolLink href="/patterns/agent-orchestration-patterns" label="Agent Orchestration" tag="Pattern" />
           <ToolLink href="/patterns/safety-hooks" label="Safety Hooks" tag="Security" />
@@ -316,8 +316,8 @@ export default function Home() {
           Strukturiert lernen?
         </h2>
         <p className="text-slate-400 max-w-lg mx-auto mb-6">
-          Der 30-Tage Lernpfad führt dich Schritt für Schritt vom ersten lokalen LLM
-          bis zum vollständigen AI-Stack mit Monitoring und Compliance.
+          In 8 Schritten von &quot;Was ist KI eigentlich?&quot; bis zu einem laufenden System
+          das Emails beantwortet, Berichte schreibt und deine Daten schützt.
         </p>
         <Link
           href="/lernpfad"

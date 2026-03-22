@@ -62,6 +62,7 @@ const toolsArticles: Article[] = [
   { title: 'Open Source Tools & Projekte', description: 'Kuratierte Liste der besten Open-Source-Tools für lokale AI: LLM Runtimes, Agent Frameworks, RAG, Automation und Security.', href: '/tools/open-source-projekte', category: 'tools', categoryLabel: 'Tools', date: '2026-03-22' },
   { title: 'AI OS Setup Guide', description: 'Claude Code als AI-Betriebssystem einrichten: Ordnerstruktur, Business-Wizard, Context-Dateien und erste Befehle.', href: '/tools/ai-os-setup', category: 'tools', categoryLabel: 'Tools', date: '2026-03-22' },
   { title: 'n8n AI Workflow Bundle v3', description: '14 produktionsreife n8n-Workflows mit Error Handling, Dual-LLM-Fallback und DSGVO-Compliance. Architektur, Kategorien und Best Practices.', href: '/tools/n8n-workflow-bundle', category: 'tools', categoryLabel: 'Tools', date: '2026-03-22' },
+  { title: 'AI Tools Datenbank', description: 'Kuratierte Sammlung von 68+ Tools für lokale AI-Infrastruktur: LLM Runtimes, Chat Interfaces, RAG, Agents, Monitoring und mehr.', href: '/tools/ai-tools-datenbank', category: 'tools', categoryLabel: 'Tools', date: '2026-03-22', popular: true },
 ]
 
 const patternsArticles: Article[] = [
@@ -259,6 +260,8 @@ export const relatedArticlesMap: Record<string, string[]> = {
   '/patterns/agent-skalierung': ['/grundlagen/agent-rollen', '/grundlagen/ai-agent-team', '/patterns/memory-management'],
   // n8n Workflow Bundle
   '/tools/n8n-workflow-bundle': ['/tools/n8n-für-anfaenger', '/tools/ollama-tutorial', '/tools/grafana-monitoring'],
+  // AI Tools Datenbank
+  '/tools/ai-tools-datenbank': ['/tools/open-source-projekte', '/tools/ollama-tutorial', '/tools/ai-stack-setup'],
 }
 
 export function getRelatedArticles(href: string): Article[] {

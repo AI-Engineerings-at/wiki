@@ -1,426 +1,572 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
-export const metadata = {
-  title: 'Lernpfad: Von 0 bis Production | AI Engineering Wiki',
-  description:
-    'Der strukturierte Einstieg in lokale AI-Systeme — von den Grundlagen bis zum produktiven Multi-Agent-Stack. 8 Stufen, kein Vorwissen nötig.',
-}
+/* ───────────────────────────── Quiz Data ───────────────────────────── */
 
-const phases = [
+const questions = [
   {
-    phase: 1,
-    label: 'Verstehen',
-    icon: '🧠',
-    color: 'blue',
-    estimatedTime: '~2 Stunden',
-    steps: [
-      {
-        level: 0,
-        title: 'Was ist ein Large Language Model?',
-        description:
-          'LLMs sind keine Suchmaschinen und keine denkenden Systeme. Verstehe Token-Prediction, Halluzinierung und warum Modelle manchmal lügen — bevor du anfängst.',
-        href: '/blog/2026-03-12-was-ist-ein-llm',
-        readTime: '~8 Min',
-        icon: '📖',
-      },
-      {
-        level: 1,
-        title: 'Warum lokal statt Cloud?',
-        description:
-          'DSGVO, EU AI Act, Datensouveränität: Was auf dem Spiel steht, wenn Unternehmensdaten in Cloud-Modelle fließen — und was das konkret für dich bedeutet.',
-        href: '/blog/2026-03-12-warum-lokale-ki-statt-cloud',
-        readTime: '~7 Min',
-        icon: '🔒',
-      },
+    id: 1,
+    question: 'Was beschreibt dich am besten?',
+    options: [
+      { key: 'A', label: 'Ich führe ein Unternehmen / bin in der Geschäftsleitung' },
+      { key: 'B', label: 'Ich bin in der IT / Administration' },
+      { key: 'C', label: 'Ich bin Entwickler / Programmierer' },
+      { key: 'D', label: 'Ich bin für Compliance / Recht zuständig' },
+      { key: 'E', label: 'Ich bin komplett neu bei KI' },
     ],
   },
   {
-    phase: 2,
-    label: 'Einrichten',
-    icon: '🛠️',
-    color: 'green',
-    estimatedTime: '~3 Stunden',
-    steps: [
-      {
-        level: 2,
-        title: 'Terminal-Grundlagen für AI',
-        description:
-          '10 Befehle — das ist alles was zwischen dir und deinem ersten lokalen LLM steht. cd, curl, docker ps, ssh, grep und mehr.',
-        href: '/blog/2026-03-12-terminal-grundlagen-für-ai',
-        readTime: '~6 Min',
-        icon: '💻',
-      },
-      {
-        level: 3,
-        title: 'Ollama installieren',
-        description:
-          'In 5 Minuten läuft dein erstes lokales Modell. Eine Installation, ein Befehl — und du chattest mit Qwen oder Llama komplett offline.',
-        href: '/blog/2026-03-12-ollama-installieren-schritt-für-schritt',
-        readTime: '~8 Min',
-        icon: '🦙',
-      },
-      {
-        level: 4,
-        title: 'Erster Chatbot mit Open WebUI',
-        description:
-          'Vom Terminal-Chat zum Browser-Interface. Open WebUI gibt dir ein ChatGPT-ähnliches Interface für deine lokalen Modelle — als Docker-Container.',
-        href: '/blog/2026-03-12-open-webui-erster-chatbot',
-        readTime: '~10 Min',
-        icon: '💬',
-      },
+    id: 2,
+    question: 'Was willst du erreichen?',
+    options: [
+      { key: 'A', label: 'Verstehen was KI kostet und was sie kann' },
+      { key: 'B', label: 'KI-Systeme einrichten und betreiben' },
+      { key: 'C', label: 'Eigene KI-Anwendungen bauen' },
+      { key: 'D', label: 'Compliance-Anforderungen erfüllen' },
+      { key: 'E', label: 'Einfach mal anfangen und ausprobieren' },
     ],
   },
   {
-    phase: 3,
-    label: 'Aufbauen',
-    icon: '🏗️',
-    color: 'purple',
-    estimatedTime: '~5 Stunden',
-    steps: [
-      {
-        level: 5,
-        title: 'Docker Basics für AI',
-        description:
-          'Ohne Docker läuft kein moderner AI-Stack. Container, Volumes, Compose — die Konzepte die du wirklich brauchst, ohne dich in Details zu verlieren.',
-        href: '/blog/2026-03-12-docker-grundlagen-für-ai',
-        readTime: '~12 Min',
-        icon: '🐳',
-      },
-      {
-        level: 6,
-        title: 'Agent Stack aufbauen',
-        description:
-          'Mehrere Agenten, die zusammenarbeiten. Ein Manager-Agent delegiert Tasks an Spezialisten. Das ist der Kern von modernem AI Engineering.',
-        href: '/grundlagen/ai-agent-team',
-        readTime: '~25 Min',
-        icon: '🤖',
-      },
-    ],
-  },
-  {
-    phase: 4,
-    label: 'Produktiv gehen',
-    icon: '🚀',
-    color: 'orange',
-    estimatedTime: '~4 Stunden + laufend',
-    steps: [
-      {
-        level: 7,
-        title: 'n8n Automatisierung',
-        description:
-          'AI ohne Automatisierung ist nur ein Chatbot. n8n verbindet deinen Stack mit E-Mails, Webhooks und APIs — damit laufen echte Workflows ohne manuelle Eingriffe.',
-        href: '/tools/n8n-für-anfaenger',
-        readTime: '~20 Min',
-        icon: '⚡',
-      },
-      {
-        level: 8,
-        title: 'Production Ready → Playbook',
-        description:
-          'Monitoring, Security, Backup. Der vollständige Stack mit getesteten Docker Compose Files, Grafana Dashboards, n8n Vorlagen und DSGVO-Checklisten.',
-        href: 'https://www.ai-engineering.at/products',
-        readTime: 'EUR 49',
-        icon: '📦',
-        isCta: true,
-      },
+    id: 3,
+    question: 'Wie technisch bist du?',
+    options: [
+      { key: 'A', label: 'Nicht technisch — ich will Ergebnisse, keine Details' },
+      { key: 'B', label: 'Grundkenntnisse — ich kenne mich mit PCs aus' },
+      { key: 'C', label: 'Fortgeschritten — Terminal, Docker sind mir bekannt' },
+      { key: 'D', label: 'Experte — Ich entwickle Software' },
     ],
   },
 ]
 
-const phaseColorMap: Record<string, { bg: string; border: string; text: string; barBg: string }> = {
-  blue: { bg: 'bg-blue-500/10', border: 'border-blue-500/30', text: 'text-blue-400', barBg: 'bg-blue-500' },
-  green: { bg: 'bg-green-500/10', border: 'border-green-500/30', text: 'text-green-400', barBg: 'bg-green-500' },
-  purple: { bg: 'bg-purple-500/10', border: 'border-purple-500/30', text: 'text-purple-400', barBg: 'bg-purple-500' },
-  orange: { bg: 'bg-orange-500/10', border: 'border-orange-500/30', text: 'text-orange-400', barBg: 'bg-orange-500' },
+/* ───────────────────────────── Path Data ───────────────────────────── */
+
+type PathId = 'management' | 'it-admin' | 'developer' | 'compliance' | 'beginner'
+
+interface PathInfo {
+  id: PathId
+  icon: string
+  title: string
+  subtitle: string
+  technical: string
+  duration: string
+  articleCount: number
+  result: string
+  articles: { href: string; title: string; description: string }[]
 }
 
+const paths: PathInfo[] = [
+  {
+    id: 'management',
+    icon: '\u{1F3E2}',
+    title: 'Geschäftsführung & Management',
+    subtitle: 'Was KI für dein Unternehmen bedeutet — Kosten, Nutzen, Risiken, Pflichten',
+    technical: 'Nein',
+    duration: '~2h',
+    articleCount: 6,
+    result: 'Entscheidungen treffen',
+    articles: [
+      { href: '/grundlagen/ki-unternehmen', title: 'KI im Unternehmen: Was bringt es wirklich?', description: 'Chancen, Grenzen und konkrete Einsatzfelder — ohne Hype.' },
+      { href: '/grundlagen/ai-kosten-vergleich', title: 'Was kostet KI? Der ehrliche Vergleich', description: 'Cloud-APIs vs. lokale Hardware: Was rechnet sich wann?' },
+      { href: '/grundlagen/lokal-vs-cloud', title: 'Lokal vs Cloud: Was ist sicherer?', description: 'Datenschutz, Kontrolle, Abhängigkeit — die Fakten.' },
+      { href: '/compliance/eu-ai-act', title: 'EU AI Act: Was du als Chef wissen musst', description: 'Die wichtigsten Pflichten auf einen Blick.' },
+      { href: '/compliance/ki-kompetenz-art4', title: 'Art. 4: Was du tun MUSST', description: 'KI-Kompetenzpflicht seit Februar 2025 — betrifft jedes Unternehmen.' },
+      { href: '/oesterreich', title: 'KI-Förderungen und Anlaufstellen in Österreich', description: 'Welche Förderungen es gibt und wo du Hilfe bekommst.' },
+    ],
+  },
+  {
+    id: 'it-admin',
+    icon: '\u{1F6E0}\u{FE0F}',
+    title: 'IT & Administration',
+    subtitle: 'KI-Systeme einrichten, betreiben und absichern',
+    technical: 'Mittel',
+    duration: '~4h',
+    articleCount: 7,
+    result: 'Stack betreiben',
+    articles: [
+      { href: '/tools/ollama-tutorial', title: 'Ollama: Lokales LLM in 5 Minuten', description: 'Ein Befehl, ein Modell — los gehts.' },
+      { href: '/tools/docker-grundlagen', title: 'Docker: Warum Container?', description: 'Was Docker ist und warum du es für KI brauchst.' },
+      { href: '/tools/ai-stack-setup', title: 'Den kompletten AI-Stack einrichten', description: 'Ollama + Open WebUI + n8n — alles zusammen.' },
+      { href: '/tools/grafana-monitoring', title: 'Monitoring: Siehst du ob alles läuft?', description: 'Grafana-Dashboards für deinen AI-Stack.' },
+      { href: '/security/firewall-setup', title: 'Netzwerk absichern', description: 'Firewall-Regeln für selbst gehostete KI-Systeme.' },
+      { href: '/security/backup-strategie', title: 'Backup: Wenn was schiefgeht', description: 'Automatische Backups — damit nichts verloren geht.' },
+      { href: '/tools/n8n-fuer-anfaenger', title: 'Automatisierung mit n8n', description: 'Workflows bauen ohne Programmieren.' },
+    ],
+  },
+  {
+    id: 'developer',
+    icon: '\u{1F4BB}',
+    title: 'Entwickler',
+    subtitle: 'KI-Anwendungen bauen: Agents, RAG, APIs',
+    technical: 'Hoch',
+    duration: '~6h',
+    articleCount: 8,
+    result: 'Apps bauen',
+    articles: [
+      { href: '/grundlagen/was-ist-ein-llm', title: 'Wie LLMs funktionieren', description: 'Token-Prediction, Attention, Context Window — die Grundlagen.' },
+      { href: '/tools/model-selection', title: 'Welches Modell für welchen Zweck?', description: 'Qwen, Llama, Mistral — wann nimmst du was?' },
+      { href: '/tools/rag-guide', title: 'RAG: Eigene Daten + LLM', description: 'Retrieval Augmented Generation — dein Wissen, dein Modell.' },
+      { href: '/patterns/agent-orchestration-patterns', title: 'Agent Patterns', description: 'Sequential, Parallel, Hierarchical — die wichtigsten Muster.' },
+      { href: '/patterns/memory-management', title: 'Memory & Context', description: 'Wie Agents sich erinnern und Kontext verwalten.' },
+      { href: '/tools/mcp-server', title: 'MCP: Tools für LLMs', description: 'Model Context Protocol — so gibst du LLMs Werkzeuge.' },
+      { href: '/patterns/self-improving-agents', title: 'Self-Improving Agents', description: 'Agents die aus Fehlern lernen und sich selbst verbessern.' },
+      { href: '/tools/n8n-workflow-bundle', title: 'n8n AI Workflows', description: 'Fertige Workflow-Templates für typische AI-Aufgaben.' },
+    ],
+  },
+  {
+    id: 'compliance',
+    icon: '\u{2696}\u{FE0F}',
+    title: 'Compliance & Recht',
+    subtitle: 'EU AI Act, DSGVO, Dokumentation — was Pflicht ist',
+    technical: 'Nein',
+    duration: '~3h',
+    articleCount: 8,
+    result: 'Compliance sichern',
+    articles: [
+      { href: '/compliance/eu-ai-act', title: 'EU AI Act Leitfaden', description: 'Der komplette Überblick — verständlich erklärt.' },
+      { href: '/compliance/ki-kompetenz-art4', title: 'Art. 4 KI-Kompetenz (gilt seit 02.2025!)', description: 'Was Artikel 4 konkret von dir verlangt.' },
+      { href: '/compliance/eu-ai-act-checkliste', title: 'Compliance Checkliste', description: 'Punkt für Punkt prüfen ob du alles erfüllst.' },
+      { href: '/compliance/dsgvo-grundlagen', title: 'DSGVO für KI-Systeme', description: 'Datenschutz-Grundverordnung trifft auf KI.' },
+      { href: '/compliance/dpia', title: 'Datenschutz-Folgenabschätzung', description: 'Wann du eine DPIA brauchst und wie du sie erstellst.' },
+      { href: '/compliance/verbotene-ai-praktiken', title: 'Was VERBOTEN ist', description: 'Social Scoring, Emotionserkennung am Arbeitsplatz und mehr.' },
+      { href: '/compliance/ai-agent-legal-framework', title: 'Agents rechtlich einordnen', description: 'Wer haftet wenn ein Agent Fehler macht?' },
+      { href: '/downloads', title: 'Templates & Checklisten', description: 'Fertige Dokumente zum Herunterladen.' },
+    ],
+  },
+  {
+    id: 'beginner',
+    icon: '\u{1F331}',
+    title: 'Einsteiger',
+    subtitle: 'Komplett neu? Hier startest du — Schritt für Schritt, kein Vorwissen nötig',
+    technical: 'Nein',
+    duration: '~4h',
+    articleCount: 7,
+    result: 'Grundlagen verstehen',
+    articles: [
+      { href: '/blog/2026-03-12-was-ist-ein-llm', title: 'Was ist KI? Einfach erklärt', description: 'Keine Fachbegriffe, keine Formeln — nur das Wesentliche.' },
+      { href: '/blog/2026-03-12-warum-lokale-ki-statt-cloud', title: 'Warum lokal?', description: 'Warum deine Daten besser bei dir bleiben.' },
+      { href: '/blog/2026-03-12-terminal-grundlagen-fuer-ai', title: '10 Befehle — mehr brauchst du nicht', description: 'Terminal-Grundlagen für absolute Anfänger.' },
+      { href: '/blog/2026-03-12-ollama-installieren-schritt-fuer-schritt', title: 'Dein erstes LLM installieren', description: 'Ollama installieren — Schritt für Schritt mit Screenshots.' },
+      { href: '/blog/2026-03-12-open-webui-erster-chatbot', title: 'Dein erster Chatbot', description: 'Open WebUI: ChatGPT-Oberfläche für dein lokales Modell.' },
+      { href: '/blog/2026-03-12-docker-grundlagen-fuer-ai', title: 'Docker verstehen', description: 'Container, Images, Volumes — einfach erklärt.' },
+      { href: '/grundlagen/30-tage-quickstart', title: '30-Tage Quickstart Plan', description: 'Dein Fahrplan für den ersten Monat mit lokaler KI.' },
+    ],
+  },
+]
+
+/* ───────────────────────────── Scoring ───────────────────────────── */
+
+function recommendPath(answers: Record<number, string>): PathId {
+  const scores: Record<PathId, number> = {
+    management: 0,
+    'it-admin': 0,
+    developer: 0,
+    compliance: 0,
+    beginner: 0,
+  }
+
+  // Q1: Role
+  const q1 = answers[1]
+  if (q1 === 'A') scores.management += 3
+  if (q1 === 'B') scores['it-admin'] += 3
+  if (q1 === 'C') scores.developer += 3
+  if (q1 === 'D') scores.compliance += 3
+  if (q1 === 'E') scores.beginner += 3
+
+  // Q2: Goal
+  const q2 = answers[2]
+  if (q2 === 'A') { scores.management += 2; scores.beginner += 1 }
+  if (q2 === 'B') { scores['it-admin'] += 2; scores.developer += 1 }
+  if (q2 === 'C') { scores.developer += 2; scores['it-admin'] += 1 }
+  if (q2 === 'D') { scores.compliance += 2; scores.management += 1 }
+  if (q2 === 'E') { scores.beginner += 2 }
+
+  // Q3: Technical level
+  const q3 = answers[3]
+  if (q3 === 'A') { scores.management += 1; scores.compliance += 1; scores.beginner += 1 }
+  if (q3 === 'B') { scores['it-admin'] += 1; scores.beginner += 1 }
+  if (q3 === 'C') { scores['it-admin'] += 2; scores.developer += 1 }
+  if (q3 === 'D') { scores.developer += 2 }
+
+  const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1])
+  return sorted[0][0] as PathId
+}
+
+/* ───────────────────────────── Progress Hook ───────────────────────────── */
+
+function useProgress() {
+  const [completed, setCompleted] = useState<string[]>([])
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('lernpfad-progress')
+      if (stored) setCompleted(JSON.parse(stored))
+    } catch { /* ignore */ }
+  }, [])
+
+  const toggle = (href: string) => {
+    setCompleted(prev => {
+      const next = prev.includes(href) ? prev.filter(h => h !== href) : [...prev, href]
+      try { localStorage.setItem('lernpfad-progress', JSON.stringify(next)) } catch { /* ignore */ }
+      return next
+    })
+  }
+
+  return { completed: { has: (h: string) => completed.includes(h), size: completed.length }, toggle }
+}
+
+/* ───────────────────────────── Components ───────────────────────────── */
+
+function QuizCard({
+  question,
+  options,
+  selected,
+  onSelect,
+}: {
+  question: string
+  options: { key: string; label: string }[]
+  selected: string | undefined
+  onSelect: (key: string) => void
+}) {
+  return (
+    <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-4">
+      <h3 className="text-lg font-semibold text-white">{question}</h3>
+      <div className="space-y-2">
+        {options.map(opt => (
+          <button
+            key={opt.key}
+            onClick={() => onSelect(opt.key)}
+            className={`w-full text-left px-4 py-3 rounded-lg border transition-all text-sm ${
+              selected === opt.key
+                ? 'border-[#4262FF] bg-[#4262FF]/10 text-white'
+                : 'border-slate-700 bg-slate-800/50 text-slate-300 hover:border-slate-600 hover:bg-slate-800'
+            }`}
+          >
+            <span className={`inline-block w-6 font-mono font-bold ${selected === opt.key ? 'text-[#4262FF]' : 'text-slate-500'}`}>
+              {opt.key})
+            </span>
+            {opt.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function PathCard({
+  path,
+  isRecommended,
+  defaultOpen,
+  completed,
+  onToggle,
+}: {
+  path: PathInfo
+  isRecommended: boolean
+  defaultOpen: boolean
+  completed: Set<string>
+  onToggle: (href: string) => void
+}) {
+  const [open, setOpen] = useState(defaultOpen)
+  const done = path.articles.filter(a => completed.has(a.href)).length
+
+  return (
+    <div
+      className={`rounded-xl border transition-colors ${
+        isRecommended
+          ? 'border-[#4262FF] bg-gradient-to-r from-[#4262FF]/5 to-blue-600/5'
+          : 'border-slate-800 bg-slate-900'
+      }`}
+    >
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full text-left p-5 flex items-start gap-4"
+      >
+        <span className="text-2xl shrink-0 mt-0.5">{path.icon}</span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="text-base font-semibold text-white">{path.title}</h3>
+            {isRecommended && (
+              <span className="text-xs bg-[#4262FF] text-white px-2 py-0.5 rounded font-medium">
+                Empfohlen
+              </span>
+            )}
+            <span className="text-xs text-slate-500">{path.duration} &middot; {path.articleCount} Artikel</span>
+          </div>
+          <p className="text-slate-400 text-sm mt-1">{path.subtitle}</p>
+          {done > 0 && (
+            <div className="mt-2 flex items-center gap-2">
+              <div className="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-[#4262FF] rounded-full transition-all"
+                  style={{ width: `${(done / path.articles.length) * 100}%` }}
+                />
+              </div>
+              <span className="text-xs text-slate-500">{done}/{path.articles.length}</span>
+            </div>
+          )}
+        </div>
+        <span className={`text-slate-500 transition-transform ${open ? 'rotate-180' : ''}`}>
+          &#9660;
+        </span>
+      </button>
+
+      {open && (
+        <div className="px-5 pb-5 space-y-2">
+          {path.articles.map((article, i) => (
+            <div key={article.href} className="flex items-start gap-3 group">
+              <button
+                onClick={() => onToggle(article.href)}
+                className={`shrink-0 mt-1 w-5 h-5 rounded border flex items-center justify-center transition-colors ${
+                  completed.has(article.href)
+                    ? 'bg-[#4262FF] border-[#4262FF] text-white'
+                    : 'border-slate-600 hover:border-slate-500'
+                }`}
+                aria-label={completed.has(article.href) ? 'Als ungelesen markieren' : 'Als gelesen markieren'}
+              >
+                {completed.has(article.href) && (
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </button>
+              <div className="flex-1 min-w-0">
+                <Link
+                  href={article.href}
+                  className={`text-sm font-medium transition-colors ${
+                    completed.has(article.href)
+                      ? 'text-slate-500 line-through'
+                      : 'text-white hover:text-[#4262FF]'
+                  }`}
+                >
+                  <span className="text-slate-600 mr-2">{i + 1}.</span>
+                  {article.title}
+                </Link>
+                <p className="text-xs text-slate-500 mt-0.5">{article.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ───────────────────────────── Main Page ───────────────────────────── */
+
 export default function LernpfadPage() {
+  const [answers, setAnswers] = useState<Record<number, string>>({})
+  const [currentQ, setCurrentQ] = useState(0)
+  const [recommended, setRecommended] = useState<PathId | null>(null)
+  const [showAllPaths, setShowAllPaths] = useState(false)
+  const { completed, toggle } = useProgress()
+
+  const handleSelect = (qId: number, key: string) => {
+    const next = { ...answers, [qId]: key }
+    setAnswers(next)
+
+    // Auto-advance after short delay
+    setTimeout(() => {
+      if (currentQ < questions.length - 1) {
+        setCurrentQ(currentQ + 1)
+      } else {
+        // All answered
+        setRecommended(recommendPath(next))
+      }
+    }, 300)
+  }
+
+  const resetQuiz = () => {
+    setAnswers({})
+    setCurrentQ(0)
+    setRecommended(null)
+  }
+
+  const recommendedPath = recommended ? paths.find(p => p.id === recommended) : null
+
   return (
     <div className="space-y-12 max-w-3xl mx-auto">
       {/* Header */}
-      <div>
+      <div className="text-center">
         <p className="text-sm text-[#4262FF] font-semibold uppercase tracking-wide mb-2">
           Lernpfad
         </p>
         <h1 className="text-3xl md:text-4xl font-bold text-white">
-          Von 0 bis Production
+          Dein Weg in die lokale KI
         </h1>
-        <p className="text-lg text-slate-400 mt-3">
-          Der strukturierte Einstieg in lokale AI-Systeme — von den Grundlagen
-          bis zum produktiven Multi-Agent-Stack. Kein Vorwissen nötig.
+        <p className="text-lg text-slate-400 mt-3 max-w-xl mx-auto">
+          3 Fragen — dann zeigen wir dir genau die Artikel die DU brauchst.
+          Kein Raten, kein Umherirren.
         </p>
       </div>
 
-      {/* Was du lernst — Überblick */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-        <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-4">
-          Was du lernst
-        </h2>
-        <div className="grid sm:grid-cols-2 gap-3">
-          <div className="flex items-start gap-2">
-            <span className="text-green-400 shrink-0 mt-0.5">✓</span>
-            <span className="text-slate-300 text-sm">Wie LLMs funktionieren — Token-Prediction, Halluzinationen, Grenzen</span>
+      {/* Quiz */}
+      {!recommended && (
+        <div className="space-y-6">
+          <div className="flex items-center gap-3 mb-2">
+            {questions.map((_, i) => (
+              <div
+                key={i}
+                className={`h-1.5 flex-1 rounded-full transition-colors ${
+                  i < currentQ
+                    ? 'bg-[#4262FF]'
+                    : i === currentQ
+                      ? 'bg-[#4262FF]/50'
+                      : 'bg-slate-800'
+                }`}
+              />
+            ))}
           </div>
-          <div className="flex items-start gap-2">
-            <span className="text-green-400 shrink-0 mt-0.5">✓</span>
-            <span className="text-slate-300 text-sm">Warum lokale AI der DSGVO-konforme Weg ist</span>
+
+          <p className="text-sm text-slate-500">
+            Frage {currentQ + 1} von {questions.length}
+          </p>
+
+          <QuizCard
+            question={questions[currentQ].question}
+            options={questions[currentQ].options}
+            selected={answers[questions[currentQ].id]}
+            onSelect={key => handleSelect(questions[currentQ].id, key)}
+          />
+        </div>
+      )}
+
+      {/* Recommendation */}
+      {recommended && recommendedPath && (
+        <div className="space-y-6">
+          <div className="bg-gradient-to-r from-[#4262FF]/10 to-blue-600/5 border border-[#4262FF]/40 rounded-xl p-6 text-center">
+            <p className="text-sm text-[#4262FF] font-semibold mb-2">Dein Pfad</p>
+            <p className="text-2xl font-bold text-white">
+              {recommendedPath.icon} {recommendedPath.title}
+            </p>
+            <p className="text-slate-400 text-sm mt-2">{recommendedPath.subtitle}</p>
+            <div className="flex justify-center gap-4 mt-4 text-xs text-slate-500">
+              <span>{recommendedPath.duration} Lesezeit</span>
+              <span>&middot;</span>
+              <span>{recommendedPath.articleCount} Artikel</span>
+              <span>&middot;</span>
+              <span>Technisch: {recommendedPath.technical}</span>
+            </div>
+            <button
+              onClick={resetQuiz}
+              className="text-xs text-slate-500 hover:text-slate-400 mt-4 underline"
+            >
+              Quiz wiederholen
+            </button>
           </div>
-          <div className="flex items-start gap-2">
-            <span className="text-green-400 shrink-0 mt-0.5">✓</span>
-            <span className="text-slate-300 text-sm">Terminal, Docker und die Tools die du wirklich brauchst</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <span className="text-green-400 shrink-0 mt-0.5">✓</span>
-            <span className="text-slate-300 text-sm">Ollama installieren und dein erstes lokales LLM starten</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <span className="text-green-400 shrink-0 mt-0.5">✓</span>
-            <span className="text-slate-300 text-sm">Ein Multi-Agent-System mit Orchestration aufbauen</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <span className="text-green-400 shrink-0 mt-0.5">✓</span>
-            <span className="text-slate-300 text-sm">Automatisierung mit n8n — echte Workflows statt nur Chatbot</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <span className="text-green-400 shrink-0 mt-0.5">✓</span>
-            <span className="text-slate-300 text-sm">Production-Ready: Monitoring, Security, Backup</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <span className="text-green-400 shrink-0 mt-0.5">✓</span>
-            <span className="text-slate-300 text-sm">EU AI Act und Compliance-Basics für den Betrieb</span>
-          </div>
+
+          <PathCard
+            path={recommendedPath}
+            isRecommended={true}
+            defaultOpen={true}
+            completed={completed}
+            onToggle={toggle}
+          />
+        </div>
+      )}
+
+      {/* Comparison Table */}
+      <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+        <div className="p-5 border-b border-slate-800">
+          <h2 className="text-base font-semibold text-white">Alle 5 Pfade im Vergleich</h2>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left text-slate-400 text-xs uppercase tracking-wide">
+                <th className="p-3 pl-5 font-medium"></th>
+                <th className="p-3 font-medium">{'\u{1F3E2}'} Geschäfts&shy;führung</th>
+                <th className="p-3 font-medium">{'\u{1F6E0}\u{FE0F}'} IT/Admin</th>
+                <th className="p-3 font-medium">{'\u{1F4BB}'} Entwickler</th>
+                <th className="p-3 font-medium">{'\u{2696}\u{FE0F}'} Compliance</th>
+                <th className="p-3 pr-5 font-medium">{'\u{1F331}'} Einsteiger</th>
+              </tr>
+            </thead>
+            <tbody className="text-slate-300">
+              <tr className="border-t border-slate-800">
+                <td className="p-3 pl-5 text-slate-400 font-medium">Technisch?</td>
+                <td className="p-3">Nein</td>
+                <td className="p-3">Mittel</td>
+                <td className="p-3">Hoch</td>
+                <td className="p-3">Nein</td>
+                <td className="p-3 pr-5">Nein</td>
+              </tr>
+              <tr className="border-t border-slate-800">
+                <td className="p-3 pl-5 text-slate-400 font-medium">Dauer</td>
+                <td className="p-3">~2h</td>
+                <td className="p-3">~4h</td>
+                <td className="p-3">~6h</td>
+                <td className="p-3">~3h</td>
+                <td className="p-3 pr-5">~4h</td>
+              </tr>
+              <tr className="border-t border-slate-800">
+                <td className="p-3 pl-5 text-slate-400 font-medium">Artikel</td>
+                <td className="p-3">6</td>
+                <td className="p-3">7</td>
+                <td className="p-3">8</td>
+                <td className="p-3">8</td>
+                <td className="p-3 pr-5">7</td>
+              </tr>
+              <tr className="border-t border-slate-800">
+                <td className="p-3 pl-5 text-slate-400 font-medium">Ergebnis</td>
+                <td className="p-3">Entscheidungen treffen</td>
+                <td className="p-3">Stack betreiben</td>
+                <td className="p-3">Apps bauen</td>
+                <td className="p-3">Compliance sichern</td>
+                <td className="p-3 pr-5">Grundlagen verstehen</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
-      {/* Target audience */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-        <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-3">
-          Für wen ist dieser Pfad?
-        </h2>
-        <ul className="space-y-2 text-slate-300 text-sm">
-          <li className="flex gap-2">
-            <span className="text-[#4262FF] shrink-0">→</span>
-            Entwickler und IT-Profis, die AI <strong className="text-white">verstehen</strong> wollen — nicht nur nutzen
-          </li>
-          <li className="flex gap-2">
-            <span className="text-[#4262FF] shrink-0">→</span>
-            Unternehmen, die wegen <strong className="text-white">DSGVO und EU AI Act</strong> keine Cloud-Lösungen einsetzen können
-          </li>
-          <li className="flex gap-2">
-            <span className="text-[#4262FF] shrink-0">→</span>
-            Einsteiger ohne AI-Vorkenntnisse, die <strong className="text-white">strukturiert lernen</strong> möchten
-          </li>
-        </ul>
-      </div>
+      {/* All Paths */}
+      <div>
+        <button
+          onClick={() => setShowAllPaths(!showAllPaths)}
+          className="flex items-center gap-2 text-sm font-semibold text-slate-300 hover:text-white transition-colors mb-4"
+        >
+          <span className={`transition-transform ${showAllPaths ? 'rotate-180' : ''}`}>&#9660;</span>
+          Alle 5 Pfade auf einen Blick
+        </button>
 
-      {/* Phases */}
-      <div className="space-y-10">
-        {phases.map((phase) => {
-          const colors = phaseColorMap[phase.color]
-          return (
-            <div key={phase.phase} className="space-y-4">
-              {/* Phase Header with Progress */}
-              <div className={`${colors.bg} ${colors.border} border rounded-xl p-4`}>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{phase.icon}</span>
-                    <div>
-                      <p className={`text-xs font-bold ${colors.text} uppercase tracking-wider`}>
-                        Phase {phase.phase} von 4
-                      </p>
-                      <h2 className="text-lg font-bold text-white">{phase.label}</h2>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-xs text-slate-400">Geschätzte Zeit</span>
-                    <p className={`text-sm font-semibold ${colors.text}`}>{phase.estimatedTime}</p>
-                  </div>
-                </div>
-                {/* Progress Bar */}
-                <div className="w-full bg-slate-800 rounded-full h-2">
-                  <div
-                    className={`${colors.barBg} h-2 rounded-full transition-all`}
-                    style={{ width: `${(phase.phase / 4) * 100}%` }}
-                  />
-                </div>
-                <p className="text-xs text-slate-500 mt-1 text-right">
-                  {phase.phase === 4 ? 'Ziel erreicht' : `${phase.phase}/4 Phasen`}
-                </p>
-              </div>
-
-              {/* Steps in this phase */}
-              {phase.steps.map((step, index) => (
-                <div key={step.level} className="relative">
-                  {/* Connector line */}
-                  {index < phase.steps.length - 1 && (
-                    <div className="absolute left-5 top-full w-px h-4 bg-slate-800 z-10" />
-                  )}
-
-                  {step.isCta ? (
-                    <a
-                      href={step.href}
-                      target={step.href.startsWith('http') ? '_blank' : undefined}
-                      rel={step.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                      className="block p-5 bg-gradient-to-r from-[#4262FF]/10 to-blue-600/5 border border-[#4262FF]/40 rounded-xl hover:border-[#4262FF] transition-colors group"
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className="shrink-0 w-10 h-10 rounded-lg bg-[#4262FF] flex items-center justify-center text-lg">
-                          {step.icon}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="text-base font-semibold text-white group-hover:text-[#4262FF] transition-colors">
-                              {step.title}
-                            </h3>
-                            <span className="text-xs bg-[#4262FF] text-white px-2 py-0.5 rounded font-medium">
-                              {step.readTime}
-                            </span>
-                          </div>
-                          <p className="text-slate-400 text-sm mt-1">{step.description}</p>
-                        </div>
-                      </div>
-                    </a>
-                  ) : (
-                    <Link
-                      href={step.href}
-                      className="block p-5 bg-slate-900 border border-slate-800 rounded-xl hover:border-[#4262FF]/50 transition-colors group"
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className="shrink-0 w-10 h-10 rounded-lg bg-slate-800 group-hover:bg-slate-700 flex items-center justify-center text-lg transition-colors">
-                          {step.icon}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="text-base font-semibold text-white group-hover:text-[#4262FF] transition-colors">
-                              {step.title}
-                            </h3>
-                            <span className="text-xs text-slate-500">{step.readTime}</span>
-                          </div>
-                          <p className="text-slate-400 text-sm mt-1">{step.description}</p>
-                        </div>
-                      </div>
-                    </Link>
-                  )}
-                </div>
-              ))}
-            </div>
-          )
-        })}
-      </div>
-
-      {/* Weiterführende Ressourcen — Österreichische Quellen */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-        <h2 className="text-lg font-bold text-white mb-4">
-          Weiterführende Ressourcen
-        </h2>
-        <p className="text-slate-400 text-sm mb-4">
-          Offizielle österreichische und EU-Quellen für AI, Compliance und Förderungen.
-        </p>
-        <div className="space-y-3">
-          <a
-            href="https://www.wko.at/oe/gruendung/ai-toolbox.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg hover:bg-slate-800 transition-colors group"
-          >
-            <span className="text-lg shrink-0 mt-0.5">🇦🇹</span>
-            <div>
-              <h3 className="text-sm font-semibold text-white group-hover:text-blue-400 transition-colors">
-                WKO AI-Toolbox ↗
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Praktische AI-Tools und Leitfäden der Wirtschaftskammer Österreich für KMUs
-              </p>
-            </div>
-          </a>
-          <a
-            href="https://www.wko.at/oe/oesterreich/wkoe-gewerbe-und-handwerk-nuetzliche-ki-helfer"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg hover:bg-slate-800 transition-colors group"
-          >
-            <span className="text-lg shrink-0 mt-0.5">🇦🇹</span>
-            <div>
-              <h3 className="text-sm font-semibold text-white group-hover:text-blue-400 transition-colors">
-                WKO KI-Handbuch Gewerbe & Handwerk ↗
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Nützliche KI-Helfer für Gewerbe und Handwerk — Branchenspezifische Empfehlungen
-              </p>
-            </div>
-          </a>
-          <a
-            href="https://www.ffg.at/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg hover:bg-slate-800 transition-colors group"
-          >
-            <span className="text-lg shrink-0 mt-0.5">🇦🇹</span>
-            <div>
-              <h3 className="text-sm font-semibold text-white group-hover:text-blue-400 transition-colors">
-                FFG — Österreichische Forschungsförderungsgesellschaft ↗
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Förderungen für AI-Projekte und Digitalisierung in österreichischen Unternehmen
-              </p>
-            </div>
-          </a>
-          <a
-            href="https://www.rtr.at/rtr/service/ki-servicestelle/projekte-initiativen/Projekte_-_Initiativen.de.html"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg hover:bg-slate-800 transition-colors group"
-          >
-            <span className="text-lg shrink-0 mt-0.5">🇦🇹</span>
-            <div>
-              <h3 className="text-sm font-semibold text-white group-hover:text-blue-400 transition-colors">
-                RTR KI-Servicestelle ↗
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Die österreichische KI-Servicestelle der Rundfunk und Telekom Regulierungs-GmbH — Projekte und Initiativen
-              </p>
-            </div>
-          </a>
-          <a
-            href="https://caralegal.eu/blog/ki-richtlinie-guide-und-vorlage/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg hover:bg-slate-800 transition-colors group"
-          >
-            <span className="text-lg shrink-0 mt-0.5">📋</span>
-            <div>
-              <h3 className="text-sm font-semibold text-white group-hover:text-blue-400 transition-colors">
-                caralegal KI-Richtlinie Guide & Vorlage ↗
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Praktischer Guide mit Vorlage für unternehmenseigene KI-Richtlinien
-              </p>
-            </div>
-          </a>
-        </div>
+        {showAllPaths && (
+          <div className="space-y-3">
+            {paths.map(path => (
+              <PathCard
+                key={path.id}
+                path={path}
+                isRecommended={path.id === recommended}
+                defaultOpen={false}
+                completed={completed}
+                onToggle={toggle}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Bottom CTA */}
       <div className="bg-slate-900 border border-slate-700 rounded-xl p-8 text-center">
         <h2 className="text-xl font-bold text-white mb-2">
-          Bereit den kompletten Stack aufzubauen?
+          Bereit für den kompletten Stack?
         </h2>
         <p className="text-slate-400 text-sm mb-6 max-w-md mx-auto">
-          Das P1 Playbook gibt dir getestete Configs, Grafana Dashboards,
-          n8n Templates und DSGVO-Checklisten für deinen lokalen AI-Stack.
+          Das P1 Playbook gibt dir getestete Configs, Grafana-Dashboards,
+          n8n-Templates und DSGVO-Checklisten für deinen lokalen AI-Stack.
         </p>
         <div className="flex flex-wrap justify-center gap-3">
           <a
             href="https://www.ai-engineering.at/products"
             className="bg-[#4262FF] hover:bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
           >
-            Playbook P1 kaufen — EUR 49
+            Playbook P1 holen — EUR 49
           </a>
           <a
             href="https://www.ai-engineering.at/contact"
             className="bg-slate-800 hover:bg-slate-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
           >
-            Kostenloses Gespräch
+            Kostenlose Beratung
           </a>
         </div>
       </div>
