@@ -76,6 +76,8 @@ const patternsArticles: Article[] = [
   { title: 'AI Agent als digitaler Mitarbeiter', description: 'Agent-Onboarding: Credential-Isolation, Network Policy, Skill-System und EU AI Act Kennzeichnung.', href: '/patterns/ai-agent-digitaler-mitarbeiter', category: 'patterns', categoryLabel: 'Patterns', date: '2026-03-21', popular: true },
   { title: 'Self-Improving Agents', description: '3-Tier Memory, corrections.md, Pre-Action Gates und Self-Eskalation — das NemoClaw Pattern.', href: '/patterns/self-improving-agents', category: 'patterns', categoryLabel: 'Patterns', date: '2026-03-21' },
   { title: 'Agent Team skalieren', description: 'Neue Agenten hinzufügen, Multi-Agent Workflows erstellen und ein Agent-Team skalieren.', href: '/patterns/agent-skalierung', category: 'patterns', categoryLabel: 'Patterns', date: '2026-03-22' },
+  { title: 'Evals & Guardrails', description: 'LLM-Qualität messen und absichern: Evaluations, Prompt Injection Protection, Hallucination Detection, Content Filtering.', href: '/patterns/evals-guardrails', category: 'patterns', categoryLabel: 'Patterns', date: '2026-03-22' },
+  { title: 'Human-in-the-Loop', description: 'Approval Workflows, Escalation Patterns, Confidence Thresholds, Audit Trail und EU AI Act Art. 14 Human Oversight.', href: '/patterns/human-in-the-loop', category: 'patterns', categoryLabel: 'Patterns', date: '2026-03-22' },
 ]
 
 const papersArticles: Article[] = [
@@ -267,6 +269,10 @@ export const relatedArticlesMap: Record<string, string[]> = {
   '/tools/ai-tools-datenbank': ['/tools/open-source-projekte', '/tools/ollama-tutorial', '/tools/ai-stack-setup'],
   // Vergleich Alternativen
   '/tools/vergleich-alternativen': ['/compliance/eu-ai-act', '/tools/n8n-für-anfaenger', '/tools/ollama-tutorial'],
+  // Evals & Guardrails
+  '/patterns/evals-guardrails': ['/patterns/safety-hooks', '/patterns/human-in-the-loop', '/tools/n8n-für-anfaenger'],
+  // Human-in-the-Loop
+  '/patterns/human-in-the-loop': ['/patterns/evals-guardrails', '/compliance/eu-ai-act', '/patterns/self-improving-agents'],
 }
 
 export function getRelatedArticles(href: string): Article[] {
