@@ -104,4 +104,4 @@ Alle diese Workflows laufen über n8n, und kein einziger davon braucht eine exte
 
 ## Zum Mitnehmen
 
-Wir haben unsere komplette DSGVO-Dokumentation und Compliance-Checklisten als [DSGVO Compliance Bundle](https://buy.stripe.com/bJe7sLb7N92ha9MejWfQI02) zusammengestellt — EUR 79, 6 Templates, sofort einsetzbar. Enthalten: Verarbeitungsverzeichnis, DSFA-Vorlage, AVV-Muster, und eine AI-spezifische Checkliste für den EU AI Act.
+Wir haben unsere komplette DSGVO-Dokumentation und Compliance-Checklisten als [DSGVO Compliance Bundle](https://www.ai-engineering.at/products) zusammengestellt — EUR 79, 6 Templates, sofort einsetzbar. Enthalten: Verarbeitungsverzeichnis, DSFA-Vorlage, AVV-Muster, und eine AI-spezifische Checkliste für den EU AI Act.

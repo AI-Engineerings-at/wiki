@@ -27,7 +27,7 @@ Jeder Agent hat genau eine Rolle. Keiner kann alles, aber zusammen decken sie de
 
 ### Orchestrator
 
-Ein Agent der nicht selbst arbeitet, sondern koordiniert. In unserem Fall: **@jim**.
+Ein Agent der nicht selbst arbeitet, sondern koordiniert. In unserem Fall: **Manager-Agent**.
 
 - Empfängt alle eingehenden Tasks
 - Priorisiert nach Dringlichkeit und Abhängigkeiten
@@ -43,9 +43,9 @@ Agents die Tasks ausführen. Jeder Worker hat einen klaren Scope:
 
 | Worker | Scope | Maschine |
 |--------|-------|----------|
-| @jim01 | Code, Git, API, CI/CD, Deployments | Dev-PC |
-| @lisa01 | n8n Workflows, Docker, Infrastructure | Worker-Node |
-| @john01 | Browser-Tasks, Shop-Updates | Remote-PC |
+| Developer-Agent | Code, Git, API, CI/CD, Deployments | Dev-PC |
+| Infrastructure-Agent | n8n Workflows, Docker, Infrastructure | Worker-Node |
+| QA-Agent | Browser-Tasks, Shop-Updates | Remote-PC |
 | @codex_assistant | Code-Analyse via CLI Bridge | Worker-Node |
 
 ### Specialist
@@ -54,8 +54,8 @@ Agents mit tiefem Wissen in einem Bereich:
 
 | Specialist | Fokus |
 |-----------|-------|
-| @jim02 | Browser-Tests, QA, Playwright |
-| @echo_log | Conversational AI, 36 Tools, Memory |
+| QA-Agent | Browser-Tests, QA, Playwright |
+| Logger-Agent | Conversational AI, 36 Tools, Memory |
 | @copilot_cli | Research, Code-Generierung |
 | @gemini_cli | Code Reviews, alternative Perspektiven |
 
@@ -63,7 +63,7 @@ Der Unterschied zum Worker: Specialists werden nicht für allgemeine Tasks einge
 
 ### Observer
 
-**@alerts** überwacht den Stack und meldet Probleme. Kein aktives Eingreifen — nur beobachten und Alarm schlagen. Das ist bewusst so: Ein Agent der gleichzeitig überwacht und eingreift, kann seine eigenen Fehler nicht erkennen.
+**Alert-Agent** überwacht den Stack und meldet Probleme. Kein aktives Eingreifen — nur beobachten und Alarm schlagen. Das ist bewusst so: Ein Agent der gleichzeitig überwacht und eingreift, kann seine eigenen Fehler nicht erkennen.
 
 ## Delegation in der Praxis
 
@@ -73,20 +73,20 @@ Der Unterschied zum Worker: Specialists werden nicht für allgemeine Tasks einge
 ### Der Happy Path
 
 ```
-CEO gibt Richtung → @jim priorisiert
-  → @jim delegiert an Worker → Worker führt aus
-  → Worker meldet Ergebnis → @jim prüft
-  → @jim meldet an CEO → Nächster Task
+CEO gibt Richtung → Manager-Agent priorisiert
+  → Manager-Agent delegiert an Worker → Worker führt aus
+  → Worker meldet Ergebnis → Manager-Agent prüft
+  → Manager-Agent meldet an CEO → Nächster Task
 ```
 
 ### Was passiert bei Problemen?
 
 | Situation | Aktion |
 |-----------|--------|
-| Worker antwortet nicht | @jim: 3x Retry, dann CEO informieren |
-| Task braucht Daten löschen | @jim fragt CEO — nie eigenmächtig |
-| Zwei Worker brauchen gleiche Ressource | @jim koordiniert Reihenfolge |
-| Unbekannter Task-Typ | @jim fragt CEO statt zu raten |
+| Worker antwortet nicht | Manager-Agent: 3x Retry, dann CEO informieren |
+| Task braucht Daten löschen | Manager-Agent fragt CEO — nie eigenmächtig |
+| Zwei Worker brauchen gleiche Ressource | Manager-Agent koordiniert Reihenfolge |
+| Unbekannter Task-Typ | Manager-Agent fragt CEO statt zu raten |
 
 ### Was NICHT passiert
 
@@ -128,7 +128,7 @@ Unsere Lösung: 6 Schutzschichten.
 3. **Tool-Call Dedup** — gleiche Tool-Calls werden nicht zweimal ausgeführt
 4. **Keyword-Router** — nur explizite @mentions triggern Aktionen, nicht Namensnennungen
 5. **STOP-Signals** — bei Fehlern wird sofort gestoppt
-6. **Mention-Entschärfung** — `@echo_log` wird in Antworten zu `@echo-log` (kein Retrigger)
+6. **Mention-Entschärfung** — `Logger-Agent` wird in Antworten zu `Logger-Agent` (kein Retrigger)
 
 Das war nötig. Ohne diese Schichten hatten wir in der ersten Woche mehrere Endlosschleifen. Ein Agent hat 45 Nachrichten in 2 Minuten gepostet — der CEO war nicht begeistert.
 
@@ -137,12 +137,12 @@ Das war nötig. Ohne diese Schichten hatten wir in der ersten Woche mehrere Endl
 Nicht alle Agents laufen nativ in Claude Code. Copilot, Gemini, und Codex brauchen ihre eigenen CLIs. Dafür gibt es Bridges:
 
 ```
-@echo_log erkennt: "Das braucht Copilot"
+Logger-Agent erkennt: "Das braucht Copilot"
   → POST an #copilot-bridge Channel
   → Bridge-Service auf Worker-Node liest die Nachricht
   → Startet Copilot CLI mit dem Task
   → Postet das Ergebnis als @copilot_cli
-  → @echo_log liest das Ergebnis
+  → Logger-Agent liest das Ergebnis
 ```
 
 Bridges laufen als systemd User-Services. Jede Bridge hat ihren eigenen Token, eigenen Channel, eigenes Logging.
@@ -163,7 +163,7 @@ Jeder Agent hat seinen eigenen Mattermost-Token. Nie teilen, nie tauschen. Sonst
 
 ### 4. Observer dürfen nicht eingreifen
 
-@alerts meldet "Disk voll". @alerts darf NICHT eigenmächtig aufräumen. Melden → Orchestrator entscheidet → Worker führt aus → Observer verifiziert.
+Alert-Agent meldet "Disk voll". Alert-Agent darf NICHT eigenmächtig aufräumen. Melden → Orchestrator entscheidet → Worker führt aus → Observer verifiziert.
 
 ### 5. STOP muss sofort wirken
 
@@ -173,23 +173,23 @@ Wenn der CEO "STOP" sagt, halten alle Agents an. Sofort. Kein "nur noch kurz fer
 
 ```
                     ┌─────────┐
-                    │  @joe   │
+                    │  CEO   │
                     │  (CEO)  │
                     └────┬────┘
                          │
                     ┌────▼────┐
-                    │  @jim   │
+                    │  Manager-Agent   │
                     │ (Orch.) │
                     └────┬────┘
            ┌─────────┬──┴──┬─────────┐
       ┌────▼──┐ ┌────▼──┐ ┌▼────┐ ┌──▼───┐
-      │@jim01 │ │@lisa01│ │@jim02│ │@john01│
+      │Developer-Agent │ │Infrastructure-Agent│ │QA-Agent│ │QA-Agent│
       │Worker │ │Worker │ │Spec.│ │Worker │
       └───────┘ └───────┘ └─────┘ └──────┘
                     │
               ┌─────┴─────┐
          ┌────▼──┐   ┌────▼────┐
-         │@alerts│   │@echo_log│
+         │Alert-Agent│   │Logger-Agent│
          │ Obs.  │   │  Spec.  │
          └───────┘   └─────────┘
 ```
@@ -208,4 +208,4 @@ Wenn der CEO "STOP" sagt, halten alle Agents an. Sofort. Kein "nur noch kurz fer
 
 ## Zum Mitnehmen
 
-Das [AI Agent Team Blueprint](https://buy.stripe.com/00w3cv1xdemBgyadfSfQI05) für EUR 19 enthält alle 11 Agent-Definitionen mit Rollen, Permissions, Delegation-Matrix und Anti-Loop Konfiguration.
+Das [AI Agent Team Blueprint](https://www.ai-engineering.at/products) für EUR 19 enthält alle 11 Agent-Definitionen mit Rollen, Permissions, Delegation-Matrix und Anti-Loop Konfiguration.

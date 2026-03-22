@@ -153,7 +153,7 @@ This isn't hype. autoresearch is useful today for research experiments. Whether 
 - **Fully local** execution possible — no data transfer when using a local LLM
 - MIT license, active development, last commit today (co-authored by Claude Opus 4.6)
 
-The [Claude Code AI OS Template](https://buy.stripe.com/bJe9AT5Nt0vL81Efo0fQI07) includes our complete Skill infrastructure with program.md-style agent definitions for EUR 249.
+The [Claude Code AI OS Template](https://www.ai-engineering.at/products) includes our complete Skill infrastructure with program.md-style agent definitions for EUR 249.
 
 ---
 

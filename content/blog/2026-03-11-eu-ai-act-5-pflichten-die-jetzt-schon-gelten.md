@@ -62,7 +62,7 @@ Die Bußgelder bei Verstößen gegen die Verbote aus Artikel 5 können bis zu **
 
 Die volle Regulierung kommt im August 2026. Aber wer bis dahin wartet, hat bereits 5 Pflichten verpasst. Wer jetzt anfängt, hat einen Vorsprung.
 
-Unser [DSGVO Compliance Bundle](https://buy.stripe.com/bJe7sLb7N92ha9MejWfQI02) enthält Vorlagen für AI-Risikobewertung, Transparenzhinweise und eine EU AI Act Compliance-Checkliste — für EUR 79.
+Unser [DSGVO Compliance Bundle](https://www.ai-engineering.at/products) enthält Vorlagen für AI-Risikobewertung, Transparenzhinweise und eine EU AI Act Compliance-Checkliste — für EUR 79.
 
 ---
 

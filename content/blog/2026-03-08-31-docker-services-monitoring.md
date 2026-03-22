@@ -81,4 +81,4 @@ Das ist der Vorteil von Local-First: Wir verstehen jeden Layer, wir kontrolliere
 
 Enterprise-Monitoring muss nicht teuer sein. Prometheus, Grafana, Alertmanager und Loki sind Open Source. Die einzige Investition ist Zeit für die Konfiguration. Dafür bekommt man volle Kontrolle und DSGVO-Konformität ohne Kompromisse.
 
-Unser komplettes Grafana-Setup mit 22 vorkonfigurierten Dashboards gibt es als [Grafana Homelab Dashboard Pack](https://buy.stripe.com/3cIdR95Nt2DT81E0t6fQI03) für EUR 39. Alle Dashboards sind getestet mit Docker Swarm, node-exporter und GPU-Metriken.
+Unser komplettes Grafana-Setup mit 22 vorkonfigurierten Dashboards gibt es als [Grafana Homelab Dashboard Pack](https://www.ai-engineering.at/products) für EUR 39. Alle Dashboards sind getestet mit Docker Swarm, node-exporter und GPU-Metriken.

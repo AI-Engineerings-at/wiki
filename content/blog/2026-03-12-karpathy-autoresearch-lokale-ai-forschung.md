@@ -149,7 +149,7 @@ Das ist kein Hype. autoresearch ist heute nützlich für Forschungsexperimente. 
 - **Vollständig lokal** ausführbar — mit lokalem LLM kein Datentransfer nötig
 - MIT-Lizenz, aktive Entwicklung, letzter Commit heute
 
-Das [Claude Code AI OS Template](https://buy.stripe.com/bJe9AT5Nt0vL81Efo0fQI07) enthält unsere vollständige Skill-Infrastruktur inklusive program.md-ähnlicher Agent-Definitionen für EUR 249.
+Das [Claude Code AI OS Template](https://www.ai-engineering.at/products) enthält unsere vollständige Skill-Infrastruktur inklusive program.md-ähnlicher Agent-Definitionen für EUR 249.
 
 ---
 
