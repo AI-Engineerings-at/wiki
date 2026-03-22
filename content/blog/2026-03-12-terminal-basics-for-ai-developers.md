@@ -11,6 +11,10 @@ seriesStep: 2
 
 # Terminal Basics for AI Developers — the 10 Commands You Actually Need
 
+<figure style="margin: 2rem 0;">
+  <img src="/images/generated/hero-ai-terminal.png" alt="Terminal and command line interface for AI development" style="border-radius: 12px; width: 100%;" />
+</figure>
+
 | Category | Commands | Use Case |
 |----------|----------|----------|
 | Navigation | `cd`, `ls`, `pwd` | Move around, find files |

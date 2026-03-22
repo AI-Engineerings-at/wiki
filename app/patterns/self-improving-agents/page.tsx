@@ -32,6 +32,11 @@ export default function SelfImprovingAgentsPage() {
         </div>
       </div>
 
+      <figure className="my-8">
+        <img src="/images/generated/hero-self-improving.png" alt="Self-Improving Agents" className="rounded-xl border border-white/10 w-full" />
+        <figcaption className="text-center text-white/40 text-sm mt-2">Self-Improving Agents</figcaption>
+      </figure>
+
       <div className="prose prose-invert max-w-none">
         <Callout type="summary" title="Auf einen Blick">
           <p>

@@ -21,6 +21,11 @@ export default function GrafanaMonitoring() {
         </div>
       </div>
 
+      <figure className="my-8">
+        <img src="/images/generated/hero-grafana-monitoring.png" alt="Grafana Monitoring Stack" className="rounded-xl border border-white/10 w-full" />
+        <figcaption className="text-center text-white/40 text-sm mt-2">Grafana Monitoring Stack</figcaption>
+      </figure>
+
       <div className="prose prose-invert max-w-none">
         <Callout type="summary" title="Auf einen Blick">
           <p>

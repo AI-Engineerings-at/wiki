@@ -15,6 +15,11 @@ export default function AgentOrchestrationPatterns() {
         <p className="text-gray-400 mt-2">Patterns · 8 min</p>
       </div>
 
+      <figure className="my-8">
+        <img src="/images/generated/hero-agent-orchestration.png" alt="AI Agent Orchestration" className="rounded-xl border border-white/10 w-full" />
+        <figcaption className="text-center text-white/40 text-sm mt-2">AI Agent Orchestration</figcaption>
+      </figure>
+
       <div className="prose prose-invert max-w-none">
         <p className="text-lg text-gray-300">
           Wie koordinierst du mehrere AI-Agenten? Es gibt bewährte Patterns dafür.

@@ -11,6 +11,10 @@ seriesStep: 5
 
 # Docker für AI: Warum Container deinen Stack production-ready machen
 
+<figure style="margin: 2rem 0;">
+  <img src="/images/generated/hero-ai-docker.png" alt="KI-gesteuerte Docker-Container-Infrastruktur" style="border-radius: 12px; width: 100%;" />
+</figure>
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    Docker Image Layers                       │

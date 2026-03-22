@@ -16,6 +16,11 @@ export default function EuAiActLeitfaden() {
         <p className="text-gray-400 mt-2">Compliance · 10 min</p>
       </div>
 
+      <figure className="my-8">
+        <img src="/images/generated/hero-eu-ai-act.png" alt="EU AI Act — Compliance Guide" className="rounded-xl border border-white/10 w-full" />
+        <figcaption className="text-center text-white/40 text-sm mt-2">EU AI Act — Compliance Guide</figcaption>
+      </figure>
+
       <div className="prose prose-invert max-w-none">
         <Callout type="summary" title="Auf einen Blick">
           <p>

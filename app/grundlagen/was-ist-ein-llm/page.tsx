@@ -31,6 +31,11 @@ export default function WasIstEinLLMPage() {
         </div>
       </div>
 
+      <figure className="my-8">
+        <img src="/images/generated/hero-was-ist-llm.png" alt="Was ist ein Large Language Model?" className="rounded-xl border border-white/10 w-full" />
+        <figcaption className="text-center text-white/40 text-sm mt-2">Was ist ein Large Language Model?</figcaption>
+      </figure>
+
       <div className="prose prose-invert max-w-none">
         {/* Summary Callout */}
         <Callout type="summary" title="Auf einen Blick">

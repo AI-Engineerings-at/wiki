@@ -11,6 +11,10 @@ seriesStep: 1
 
 # Why You Shouldn't Use ChatGPT at Work — and What to Use Instead
 
+<figure style="margin: 2rem 0;">
+  <img src="/images/generated/hero-ai-cloud-vs-local.png" alt="Local AI vs cloud services comparison" style="border-radius: 12px; width: 100%;" />
+</figure>
+
 | Criterion | Cloud AI (ChatGPT) | Local AI (Ollama) |
 |-----------|--------------------|--------------------|
 | Data storage | US servers (OpenAI) | Your own server |

@@ -11,6 +11,10 @@ seriesStep: 4
 
 # Dein erster lokaler AI-Chatbot: Open WebUI in 10 Minuten einrichten
 
+<figure style="margin: 2rem 0;">
+  <img src="/images/generated/hero-ai-agents.png" alt="KI-Agenten und Chatbot-Interaktion" style="border-radius: 12px; width: 100%;" />
+</figure>
+
 | Schritt | Was passiert | Ergebnis |
 |---------|-------------|----------|
 | 1 | Docker installieren (falls noch nicht vorhanden) | Docker Engine läuft |

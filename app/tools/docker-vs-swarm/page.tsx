@@ -20,6 +20,11 @@ export default function DockerVsSwarm() {
         </div>
       </div>
 
+      <figure className="my-8">
+        <img src="/images/generated/hero-docker-container.png" alt="Docker Container Orchestration" className="rounded-xl border border-white/10 w-full" />
+        <figcaption className="text-center text-white/40 text-sm mt-2">Docker Container Orchestration</figcaption>
+      </figure>
+
       <div className="prose prose-invert max-w-none">
         <Callout type="summary" title="Auf einen Blick">
           <p>

@@ -15,6 +15,11 @@ export default function BackupStrategie() {
         <p className="text-gray-400 mt-2">Security · 5 min</p>
       </div>
 
+      <figure className="my-8">
+        <img src="/images/generated/hero-backup-recovery.png" alt="Backup und Disaster Recovery" className="rounded-xl border border-white/10 w-full" />
+        <figcaption className="text-center text-white/40 text-sm mt-2">Backup und Disaster Recovery</figcaption>
+      </figure>
+
       <div className="prose prose-invert max-w-none">
         <Callout type="summary" title="Auf einen Blick">
           <p>

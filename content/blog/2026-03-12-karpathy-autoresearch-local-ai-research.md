@@ -9,6 +9,10 @@ author: "AI Engineering"
 
 # Karpathy's autoresearch: Autonomous AI Research on Your Local GPU
 
+<figure style="margin: 2rem 0;">
+  <img src="/images/generated/hero-ai-data-flow.png" alt="AI data flow and research automation" style="border-radius: 12px; width: 100%;" />
+</figure>
+
 ```
  ┌──────────────────── autoresearch Pipeline ────────────────────┐
  │                                                               │

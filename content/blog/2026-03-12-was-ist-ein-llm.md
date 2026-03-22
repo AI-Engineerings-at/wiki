@@ -11,6 +11,10 @@ seriesStep: 0
 
 # Was ist ein Large Language Model? Erklärt ohne Buzzwords
 
+<figure style="margin: 2rem 0;">
+  <img src="/images/generated/hero-ai-neural-network.png" alt="Neuronales Netzwerk und KI-Visualisierung" style="border-radius: 12px; width: 100%;" />
+</figure>
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                 Transformer-Architektur                  │

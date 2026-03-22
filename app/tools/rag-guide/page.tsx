@@ -41,6 +41,11 @@ export default function RagGuide() {
         </div>
       </div>
 
+      <figure className="my-8">
+        <img src="/images/generated/hero-rag-pipeline-v2.png" alt="RAG Pipeline — Wissen verbinden" className="rounded-xl border border-white/10 w-full" />
+        <figcaption className="text-center text-white/40 text-sm mt-2">RAG Pipeline — Wissen verbinden</figcaption>
+      </figure>
+
       <Callout type="summary" title="Überblick">
         RAG (Retrieval Augmented Generation) kombiniert Information Retrieval mit Textgenerierung:
         Dein LLM greift auf eigene Dokumente zu statt nur auf Trainingsdaten. Dieser Guide deckt

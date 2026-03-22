@@ -20,6 +20,11 @@ export default function OllamaTutorial() {
         </div>
       </div>
 
+      <figure className="my-8">
+        <img src="/images/generated/hero-ollama-local-ai.png" alt="Lokale KI mit Ollama" className="rounded-xl border border-white/10 w-full" />
+        <figcaption className="text-center text-white/40 text-sm mt-2">Lokale KI mit Ollama</figcaption>
+      </figure>
+
       <div className="prose prose-invert max-w-none">
         <Callout type="summary" title="Auf einen Blick">
           <p>

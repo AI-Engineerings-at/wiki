@@ -18,6 +18,11 @@ export default function OesterreichPage() {
         </p>
       </div>
 
+      <figure className="my-8">
+        <img src="/images/generated/hero-oesterreich-ki.png" alt="KI in Österreich" className="rounded-xl border border-white/10 w-full" />
+        <figcaption className="text-center text-white/40 text-sm mt-2">KI in Österreich</figcaption>
+      </figure>
+
       <Callout type="summary" title="Überblick">
         Alle österreichischen KI-Ressourcen auf einen Blick: Behörden (RTR, DSB, Digital Austria),
         Förderprogramme (FFG, aws), WKO-Leitfäden für KMU, Community-Events und die aktuelle Rechtslage

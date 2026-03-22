@@ -11,6 +11,10 @@ seriesStep: 3
 
 # Install Ollama in 5 Minutes — Step by Step (Windows, Mac, Linux)
 
+<figure style="margin: 2rem 0;">
+  <img src="/images/generated/hero-ai-infrastructure.png" alt="AI infrastructure setup and deployment" style="border-radius: 12px; width: 100%;" />
+</figure>
+
 | Step | Action | Time |
 |------|--------|------|
 | 1 | Install Ollama (winget / brew / curl) | 1 min |

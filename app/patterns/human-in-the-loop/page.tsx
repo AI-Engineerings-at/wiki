@@ -32,6 +32,11 @@ export default function HumanInTheLoopPage() {
         </div>
       </div>
 
+      <figure className="my-8">
+        <img src="/images/generated/hero-human-in-loop.png" alt="Human-in-the-Loop Approval" className="rounded-xl border border-white/10 w-full" />
+        <figcaption className="text-center text-white/40 text-sm mt-2">Human-in-the-Loop Approval</figcaption>
+      </figure>
+
       <div className="prose prose-invert max-w-none">
         <Callout type="summary" title="Auf einen Blick">
           <p>

@@ -11,6 +11,10 @@ seriesStep: 1
 
 # Warum du kein ChatGPT im Unternehmen nutzen solltest — und was stattdessen
 
+<figure style="margin: 2rem 0;">
+  <img src="/images/generated/hero-ai-cloud-vs-local.png" alt="Lokale KI vs Cloud-Dienste Vergleich" style="border-radius: 12px; width: 100%;" />
+</figure>
+
 | Kriterium | Cloud AI (ChatGPT) | Lokale AI (Ollama) |
 |-----------|--------------------|--------------------|
 | Datenspeicherung | US-Server (OpenAI) | Dein eigener Server |

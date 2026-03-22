@@ -1586,6 +1586,11 @@ export default function LernpfadPage() {
         </p>
       </div>
 
+      <figure className="my-8">
+        <img src="/images/generated/hero-lernpfad-v2.png" alt="Dein KI-Lernpfad" className="rounded-xl border border-white/10 w-full" />
+        <figcaption className="text-center text-white/40 text-sm mt-2">Dein KI-Lernpfad</figcaption>
+      </figure>
+
       {/* Intro Quiz */}
       {!recommended && (
         <div className="space-y-6">

@@ -11,6 +11,10 @@ seriesStep: 2
 
 # Terminal-Grundlagen für AI-Entwickler — die 10 Befehle die du wirklich brauchst
 
+<figure style="margin: 2rem 0;">
+  <img src="/images/generated/hero-ai-terminal.png" alt="Terminal und Kommandozeile fuer KI-Entwicklung" style="border-radius: 12px; width: 100%;" />
+</figure>
+
 | Kategorie | Befehle | Einsatzgebiet |
 |-----------|---------|---------------|
 | Navigation | `cd`, `ls`, `pwd` | Bewegen, Dateien finden |

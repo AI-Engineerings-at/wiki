@@ -22,6 +22,20 @@ const blogImages: Record<string, string> = {
   '2026-03-08-ollama-self-hosted-gotchas': '/images/blog/ollama-self-hosted-gotchas.png',
   '2026-03-08-prompt-injection-self-hosted-ai': '/images/blog/prompt-injection-self-hosted-ai.png',
   '2026-03-09-skill-creation-best-practices': '/images/blog/skill-creation-best-practices.png',
+  '2026-03-12-docker-grundlagen-fuer-ai': '/images/generated/hero-ai-docker.png',
+  '2026-03-12-docker-basics-for-ai': '/images/generated/hero-ai-docker.png',
+  '2026-03-12-install-ollama-step-by-step': '/images/generated/hero-ai-infrastructure.png',
+  '2026-03-12-ollama-installieren-schritt-fuer-schritt': '/images/generated/hero-ai-infrastructure.png',
+  '2026-03-12-open-webui-erster-chatbot': '/images/generated/hero-ai-agents.png',
+  '2026-03-12-open-webui-first-chatbot': '/images/generated/hero-ai-agents.png',
+  '2026-03-12-terminal-basics-for-ai-developers': '/images/generated/hero-ai-terminal.png',
+  '2026-03-12-terminal-grundlagen-fuer-ai': '/images/generated/hero-ai-terminal.png',
+  '2026-03-12-warum-lokale-ki-statt-cloud': '/images/generated/hero-ai-cloud-vs-local.png',
+  '2026-03-12-why-local-ai-instead-of-cloud': '/images/generated/hero-ai-cloud-vs-local.png',
+  '2026-03-12-was-ist-ein-llm': '/images/generated/hero-ai-neural-network.png',
+  '2026-03-12-what-is-a-large-language-model': '/images/generated/hero-ai-neural-network.png',
+  '2026-03-12-karpathy-autoresearch-lokale-ai-forschung': '/images/generated/hero-ai-data-flow.png',
+  '2026-03-12-karpathy-autoresearch-local-ai-research': '/images/generated/hero-ai-data-flow.png',
 }
 
 const tagColors: Record<string, string> = {

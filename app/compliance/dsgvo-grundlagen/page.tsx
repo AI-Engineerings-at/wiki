@@ -16,6 +16,11 @@ export default function DsgvoGrundlagen() {
         <p className="text-gray-400 mt-2">Compliance · 8 min</p>
       </div>
 
+      <figure className="my-8">
+        <img src="/images/generated/hero-dsgvo-compliance.png" alt="DSGVO Compliance für AI-Systeme" className="rounded-xl border border-white/10 w-full" />
+        <figcaption className="text-center text-white/40 text-sm mt-2">DSGVO Compliance für AI-Systeme</figcaption>
+      </figure>
+
       <div className="prose prose-invert max-w-none">
         <Callout type="summary" title="Auf einen Blick">
           <p>

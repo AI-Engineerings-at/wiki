@@ -15,6 +15,11 @@ export default function ApiKeysSicher() {
         <p className="text-gray-400 mt-2">Security · 5 min</p>
       </div>
 
+      <figure className="my-8">
+        <img src="/images/generated/hero-security-keys.png" alt="Security und API Key Management" className="rounded-xl border border-white/10 w-full" />
+        <figcaption className="text-center text-white/40 text-sm mt-2">Security und API Key Management</figcaption>
+      </figure>
+
       <div className="prose prose-invert max-w-none">
         <Callout type="summary" title="Auf einen Blick">
           <p>
