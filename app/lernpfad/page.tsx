@@ -264,7 +264,7 @@ function PathCard({
   path: PathInfo
   isRecommended: boolean
   defaultOpen: boolean
-  completed: Set<string>
+  completed: { has: (h: string) => boolean; size: number }
   onToggle: (href: string) => void
 }) {
   const [open, setOpen] = useState(defaultOpen)
@@ -313,6 +313,25 @@ function PathCard({
 
       {open && (
         <div className="px-5 pb-5 space-y-2">
+          {/* Completion Reward */}
+          {done === path.articles.length && path.articles.length > 0 && (
+            <div className="bg-gradient-to-r from-emerald-500/10 to-green-500/10 border border-emerald-500/30 rounded-xl p-5 mb-4 text-center">
+              <div className="text-3xl mb-2">🎉</div>
+              <h4 className="text-lg font-bold text-white mb-1">Pfad abgeschlossen!</h4>
+              <p className="text-sm text-slate-400 mb-3">
+                Du hast alle {path.articles.length} Artikel durchgearbeitet. Hier ist dein Rabattcode:
+              </p>
+              <div className="inline-block bg-slate-950 border-2 border-emerald-500/50 rounded-lg px-6 py-3">
+                <span className="text-2xl font-black text-emerald-400 tracking-widest">WIKI20</span>
+              </div>
+              <p className="text-xs text-slate-500 mt-3">
+                20% Rabatt auf alle Produkte & Kurse auf{' '}
+                <a href="https://www.ai-engineering.at" className="text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">
+                  ai-engineering.at
+                </a>
+              </p>
+            </div>
+          )}
           {path.articles.map((article, i) => (
             <div key={article.href} className="flex items-start gap-3 group">
               <button
