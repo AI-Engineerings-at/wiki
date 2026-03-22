@@ -260,7 +260,7 @@ rclone sync $BACKUP_DIR remote:homelab-backup --transfers 2`}</code>
             <li><a href="https://restic.net/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Restic — Backup-Tool</a> — Schnell, sicher, dedupliziert</li>
             <li><a href="https://rclone.org/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Rclone</a> — Cloud-Sync für 70+ Storage-Provider</li>
             <li><a href="https://www.backblaze.com/cloud-storage" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Backblaze B2</a> — Guenstiger Cloud-Storage für Offsite-Backups</li>
-            <li><a href="https://www.proxmox.com/en/proxmox-backup-server" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Proxmox Backup Server</a> — Spezialisierte Backup-Loesung für PVE</li>
+            <li><a href="https://www.proxmox.com/en/products/proxmox-backup-server/overview" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Proxmox Backup Server</a> — Spezialisierte Backup-Loesung für PVE</li>
           </ul>
         </section>
       </div>

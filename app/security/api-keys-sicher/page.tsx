@@ -280,7 +280,7 @@ def rotate_stripe_key():
           <h2 className="text-xl font-bold text-white mb-4">Quellen</h2>
           <ul className="space-y-2 text-sm text-white/50">
             <li><a href="https://owasp.org/www-community/vulnerabilities/Use_of_hard-coded_password" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">OWASP: Use of Hard-coded Credentials</a></li>
-            <li><a href="https://docs.github.com/en/code-security/secret-scanning" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">GitHub: Secret Scanning</a> — Automatische Erkennung geleakter Secrets</li>
+            <li><a href="https://docs.github.com/en/code-security/how-tos/secure-your-secrets" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">GitHub: Secret Scanning</a> — Automatische Erkennung geleakter Secrets</li>
             <li><a href="https://github.com/pyca/cryptography" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">GitHub: pyca/cryptography</a> — Python Fernet Encryption</li>
             <li><a href="https://12factor.net/config" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">The Twelve-Factor App: Config</a> — Environment Variables Best Practice</li>
           </ul>

@@ -37,7 +37,7 @@ export default function Home() {
           </p>
           <p className="text-slate-400 max-w-2xl mx-auto mb-10">
             Für KMUs im DACH-Raum, die KI nutzen wollen ohne ihre Daten aus der Hand zu geben.
-            Verständlich erklärt, aus echtem Betrieb in Österreich. Komplett kostenlos.
+            Verständlich erklärt, aus der Praxis in Österreich. Komplett kostenlos.
           </p>
 
           {/* Search */}
@@ -60,8 +60,8 @@ export default function Home() {
               <div className="text-slate-400">Kostenlos</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-white">Echt</div>
-              <div className="text-slate-400">Geprüfte Quellen</div>
+              <div className="text-2xl font-bold text-white">Quellen</div>
+              <div className="text-slate-400">Jeder Artikel mit Quellenangaben</div>
             </div>
           </div>
         </div>
@@ -238,7 +238,7 @@ export default function Home() {
             description="Offizielle Verordnung (EU) 2024/1689"
           />
           <ExternalLink
-            href="https://www.dsb.gv.at/"
+            href="https://dsb.gv.at/"
             title="Datenschutzbehörde AT"
             description="Österreichische Aufsichtsbehörde"
           />
@@ -276,6 +276,31 @@ export default function Home() {
             href="https://www.ffg.at/"
             title="FFG Förderungen"
             description="Forschungsförderung für AI-Projekte"
+          />
+          <ExternalLink
+            href="https://www.nist.gov/itl/ai-risk-management-framework"
+            title="NIST AI RMF"
+            description="US-Rahmenwerk für KI-Risikomanagement"
+          />
+          <ExternalLink
+            href="https://oecd.ai/en/"
+            title="OECD.AI"
+            description="Internationale KI-Policy-Datenbank"
+          />
+          <ExternalLink
+            href="https://digital-strategy.ec.europa.eu/en/policies/ai-office"
+            title="EU AI Office"
+            description="Zentrale EU-Stelle für KI-Governance"
+          />
+          <ExternalLink
+            href="https://github.com/n8n-io/self-hosted-ai-starter-kit"
+            title="n8n AI Starter Kit"
+            description="Offizielles Starter Kit für lokale AI"
+          />
+          <ExternalLink
+            href="https://www.datacamp.com/de/tutorial/local-ai"
+            title="DataCamp Local AI"
+            description="Tutorial: Lokale KI mit Docker, n8n und Ollama"
           />
         </div>
       </section>
@@ -330,7 +355,7 @@ export default function Home() {
       {/* Bottom note */}
       <div className="text-center text-xs text-slate-600 py-4">
         <p>
-          Open Knowledge von AI Engineering — aus echtem Betrieb, für Teams
+          Open Knowledge von AI Engineering — aus der Praxis, für Teams
           die lokale AI unter eigener Kontrolle betreiben wollen.
         </p>
       </div>

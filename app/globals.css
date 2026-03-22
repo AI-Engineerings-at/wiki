@@ -68,6 +68,30 @@
   }
 }
 
+/* Dark scrollbar for entire site */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #334155 #0f172a;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
 @layer components {
   .btn-primary {
     @apply bg-[#4262FF] hover:bg-[#3550DD] text-white font-bold py-3 px-6 rounded-full transition-all hover:scale-105 shadow-lg shadow-blue-500/30;

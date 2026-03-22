@@ -203,6 +203,16 @@ Webhook -> Ollama -> Notion -> Slack`}</code>
           </ul>
         </div>
 
+        <Callout type="info" title="Siehe auch">
+          <p>
+            n8n bietet ein offizielles{" "}
+            <a href="https://github.com/n8n-io/self-hosted-ai-starter-kit" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+              Self-hosted AI Starter Kit
+            </a>{" "}
+            — ein guter Ausgangspunkt wenn du nur n8n + Ollama brauchst.
+          </p>
+        </Callout>
+
         {/* Quellen */}
         <section className="mt-16 pt-8 border-t border-white/10">
           <h2 className="text-xl font-bold text-white mb-4">Quellen</h2>
@@ -211,6 +221,10 @@ Webhook -> Ollama -> Notion -> Slack`}</code>
             <li><a href="https://docs.n8n.io/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">n8n Dokumentation</a> — Nodes, Expressions, API</li>
             <li><a href="https://github.com/n8n-io/n8n" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">GitHub: n8n-io/n8n</a> — Source Code</li>
             <li><a href="https://community.n8n.io/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">n8n Community Forum</a> — Hilfe und Workflow-Vorlagen</li>
+            <li><a href="https://github.com/n8n-io/self-hosted-ai-starter-kit" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">n8n Self-hosted AI Starter Kit</a> — Offizielles Starter Kit für lokale AI mit n8n, Ollama und Qdrant</li>
+            <li><a href="https://docs.n8n.io/advanced-ai/intro-tutorial/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">n8n AI Tutorial</a> — Offizielles Tutorial: AI-Workflow mit n8n bauen</li>
+            <li><a href="https://docs.n8n.io/hosting/starter-kits/ai-starter-kit/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">n8n AI Starter Kit Dokumentation</a> — Offizielle Dokumentation zum Self-hosted AI Starter Kit</li>
+            <li><a href="https://www.datacamp.com/de/tutorial/local-ai" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">DataCamp: Lokale KI mit Docker, n8n, Qdrant und Ollama</a> — Schritt-für-Schritt Tutorial für lokale AI-Infrastruktur</li>
           </ul>
         </section>
       </div>

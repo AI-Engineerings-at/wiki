@@ -440,7 +440,7 @@ export default function WhatIsAnLLMPage() {
           <h2 className="text-xl font-bold text-white mb-4">Sources</h2>
           <ul className="space-y-2 text-sm text-white/50">
             <li><a href="https://vellum.ai/blog/llama-3-3-70b-vs-gpt-4o" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Vellum: Llama 3.3 70B vs GPT-4o</a> — MMLU, HumanEval, IFEval, MATH benchmark data</li>
-            <li><a href="https://blog.getbind.co/2024/12/13/llama-3-3-70b-vs-gpt-4o-which-is-better-for-coding/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Bind AI: Llama 3.3 70B vs GPT-4o Coding</a> — HumanEval comparison</li>
+            <li><a href="https://blog.getbind.co/llama-3-3-70b-vs-gpt-4o-which-is-better-for-coding/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Bind AI: Llama 3.3 70B vs GPT-4o Coding</a> — HumanEval comparison</li>
             <li><a href="https://intuitionlabs.ai/articles/local-llm-deployment-24gb-gpu-optimization" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">IntuitionLabs: 24GB GPU Optimization</a> — VRAM limit 24 GB, max ~34B quantized</li>
             <li><a href="https://localaimaster.com/blog/best-gpus-for-ai-2025" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">LocalAIMaster: Best GPUs for AI</a> — Inference speed RTX 3090 (tok/s)</li>
             <li><a href="https://corelab.tech/llmgpu/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">CoreLab: LLM GPU Benchmarks</a> — 8B models ~112 tok/s on RTX 3090</li>

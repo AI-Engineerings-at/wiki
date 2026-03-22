@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 
-const GITHUB_BASE = 'https://github.com/AI-Engineerings-at/Playbook01/edit/main/wiki/app'
+const GITHUB_BASE = 'https://github.com/AI-Engineerings-at/wiki/edit/main/app'
 
 export function EditOnGithub() {
   const pathname = usePathname() || '/'

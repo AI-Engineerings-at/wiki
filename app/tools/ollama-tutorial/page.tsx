@@ -360,6 +360,8 @@ services:
             <li><a href="https://github.com/ollama/ollama" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">GitHub: ollama/ollama</a> — Source Code und Dokumentation</li>
             <li><a href="https://ollama.com/library" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Ollama Model Library</a> — Alle verfügbaren Modelle</li>
             <li><a href="https://github.com/open-webui/open-webui" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">GitHub: Open WebUI</a> — ChatGPT-aehnliches Interface für Ollama</li>
+            <li><a href="https://huggingface.co/docs/hub/ollama" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Hugging Face: Ollama mit GGUF-Modellen</a> — GGUF-Modelle direkt von Hugging Face in Ollama nutzen</li>
+            <li><a href="https://huggingface.co/docs/transformers/index" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Hugging Face Transformers Dokumentation</a> — Offizielle Dokumentation der Transformers-Bibliothek</li>
           </ul>
         </section>
       </div>

@@ -238,7 +238,7 @@ export default function HomePage() {
             description="Official Regulation (EU) 2024/1689"
           />
           <ExternalLink
-            href="https://www.dsb.gv.at/"
+            href="https://dsb.gv.at/"
             title="Data Protection Authority AT"
             description="Austrian supervisory authority"
           />

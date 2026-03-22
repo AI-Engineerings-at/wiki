@@ -275,7 +275,7 @@ rectangle "Docker Swarm" as swarm #22543d {
             <li><a href="https://docs.docker.com/compose/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Docker Docs: Docker Compose</a></li>
             <li><a href="https://docs.docker.com/engine/swarm/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Docker Docs: Swarm Mode Overview</a></li>
             <li><a href="https://docs.docker.com/engine/swarm/services/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Docker Docs: Deploy Services to a Swarm</a></li>
-            <li><a href="https://docs.docker.com/compose/gpu-support/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Docker Docs: GPU Support in Compose</a></li>
+            <li><a href="https://docs.docker.com/compose/how-tos/gpu-support/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Docker Docs: GPU Support in Compose</a></li>
           </ul>
         </section>
       </div>

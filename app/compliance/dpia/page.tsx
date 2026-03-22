@@ -118,7 +118,7 @@ export default function DPIAPage() {
         <h2 className="text-xl font-semibold text-white mt-8">Quellen</h2>
         <ul className="list-disc list-inside text-gray-300 space-y-1">
           <li><a href="https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX:32016R0679" target="_blank" className="text-blue-400 hover:underline">DSGVO Art. 35 — Datenschutz-Folgenabschätzung (EUR-Lex)</a></li>
-          <li><a href="https://www.dsb.gv.at/download-links/dokumente-zum-datenschutz.html" target="_blank" className="text-blue-400 hover:underline">Österreichische Datenschutzbehörde — DPIA Ressourcen</a></li>
+          <li><a href="https://dsb.gv.at/download-links/dokumente-zum-datenschutz.html" target="_blank" className="text-blue-400 hover:underline">Österreichische Datenschutzbehörde — DPIA Ressourcen</a></li>
         </ul>
       </div>
     </div>

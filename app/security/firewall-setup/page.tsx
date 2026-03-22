@@ -292,7 +292,7 @@ nmap -sT -p 22,80,443,3000,8080,9090 192.168.1.100
             <li><a href="https://help.ubuntu.com/community/UFW" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Ubuntu Wiki: UFW</a> — Uncomplicated Firewall Dokumentation</li>
             <li><a href="https://github.com/fail2ban/fail2ban" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">GitHub: fail2ban</a> — Brute-Force-Schutz</li>
             <li><a href="https://doc.traefik.io/traefik/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Traefik Dokumentation</a> — Reverse Proxy und TLS</li>
-            <li><a href="https://docs.docker.com/network/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Docker Docs: Networking</a> — Overlay Networks und Segmentierung</li>
+            <li><a href="https://docs.docker.com/engine/network/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Docker Docs: Networking</a> — Overlay Networks und Segmentierung</li>
           </ul>
         </section>
       </div>

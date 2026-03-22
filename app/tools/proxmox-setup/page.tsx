@@ -245,10 +245,10 @@ lvconvert --type thin-pool vg00/data-thinpool
         <section className="mt-16 pt-8 border-t border-white/10">
           <h2 className="text-xl font-bold text-white mb-4">Quellen</h2>
           <ul className="space-y-2 text-sm text-white/50">
-            <li><a href="https://www.proxmox.com/en/proxmox-virtual-environment/overview" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Proxmox VE — Offizielle Website</a></li>
+            <li><a href="https://www.proxmox.com/en/products/proxmox-virtual-environment/overview" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Proxmox VE — Offizielle Website</a></li>
             <li><a href="https://pve.proxmox.com/wiki/Main_Page" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Proxmox VE Wiki</a> — Dokumentation und Anleitungen</li>
             <li><a href="https://pve.proxmox.com/wiki/PCI_Passthrough" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Proxmox Wiki: PCI Passthrough</a> — GPU-Passthrough Anleitung</li>
-            <li><a href="https://www.proxmox.com/en/proxmox-backup-server/overview" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Proxmox Backup Server</a> — Dedizierte Backup-Lösung</li>
+            <li><a href="https://www.proxmox.com/en/products/proxmox-backup-server/overview" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Proxmox Backup Server</a> — Dedizierte Backup-Lösung</li>
           </ul>
         </section>
       </div>

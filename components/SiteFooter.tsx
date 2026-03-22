@@ -53,7 +53,7 @@ export function SiteFooter() {
 
   const description = isEn
     ? 'Local AI systems for DACH SMBs. GDPR-compliant, documented, auditable, and grounded in real operations.'
-    : 'Lokale AI-Systeme für DACH-KMUs. DSGVO-konform, dokumentiert, auditierbar und aus dem echten Betrieb.'
+    : 'Lokale AI-Systeme für DACH-KMUs. DSGVO-konform, dokumentiert, auditierbar und aus der Praxis.'
 
   const copyright = isEn
     ? '© 2026 AI Engineering - All rights reserved | Made in Austria'
@@ -121,7 +121,12 @@ export function SiteFooter() {
           </div>
         </nav>
 
-        <div className="border-t border-slate-800 mt-8 pt-8 text-center text-sm text-slate-500">
+        <div className="border-t border-slate-800 mt-8 pt-8 text-center text-sm text-slate-500 space-y-3">
+          <p className="text-slate-400 font-medium border border-slate-700 rounded-lg px-4 py-2 inline-block">
+            {isEn
+              ? 'This wiki is for informational purposes only and does not constitute legal advice.'
+              : 'Dieses Wiki dient ausschließlich der Information und ersetzt keine Rechtsberatung.'}
+          </p>
           <p>{copyright}</p>
           <p>
             {isEn

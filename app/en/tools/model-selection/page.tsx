@@ -223,7 +223,7 @@ OLLAMA_MODELS=/root/.ollama/models`}</code>
             <li><a href="https://corelab.tech/llmgpu/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">CoreLab: LLM GPU Benchmarks</a> — 8B ~112 tok/s on RTX 3090</li>
             <li><a href="https://intuitionlabs.ai/articles/local-llm-deployment-24gb-gpu-optimization" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">IntuitionLabs: 24GB GPU Optimization</a> — Max ~34B on 24 GB VRAM</li>
             <li><a href="https://ollama.com/library" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Ollama Model Library</a> — Available models and quantizations</li>
-            <li><a href="https://lmarena.ai" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">LMSYS Chatbot Arena</a> — Community-based model ranking</li>
+            <li><a href="https://arena.ai" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">LMSYS Chatbot Arena</a> — Community-based model ranking</li>
           </ul>
         </section>
       </div>

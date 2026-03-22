@@ -186,9 +186,9 @@ Manager (Planner)
         <section className="mt-16 pt-8 border-t border-white/10">
           <h2 className="text-xl font-bold text-white mb-4">Quellen</h2>
           <ul className="space-y-2 text-sm text-white/50">
-            <li><a href="https://docs.anthropic.com/en/docs/build-with-claude/agent-patterns" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Anthropic: Agent Patterns</a> — ReAct, Tool Use, Orchestration</li>
+            <li><a href="https://platform.claude.com/docs/en/docs/build-with-claude/agent-patterns" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Anthropic: Agent Patterns</a> — ReAct, Tool Use, Orchestration</li>
             <li><a href="https://react-lm.github.io/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">ReAct: Synergizing Reasoning and Acting</a> — Original Paper</li>
-            <li><a href="https://docs.anthropic.com/en/docs/build-with-claude/tool-use" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Anthropic: Tool Use</a> — Function Calling Dokumentation</li>
+            <li><a href="https://platform.claude.com/docs/en/docs/build-with-claude/tool-use" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Anthropic: Tool Use</a> — Function Calling Dokumentation</li>
           </ul>
         </section>
       </div>

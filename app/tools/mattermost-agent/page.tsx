@@ -224,7 +224,7 @@ curl -X POST \
             <li><a href="https://mattermost.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Mattermost — Offizielle Website</a></li>
             <li><a href="https://developers.mattermost.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Mattermost Developer Documentation</a> — API, Webhooks, Bots</li>
             <li><a href="https://github.com/mattermost/mattermost" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">GitHub: mattermost/mattermost</a> — Source Code</li>
-            <li><a href="https://api.mattermost.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Mattermost API Reference</a> — REST API v4</li>
+            <li><a href="https://developers.mattermost.com/api-documentation" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Mattermost API Reference</a> — REST API v4</li>
           </ul>
         </section>
       </div>

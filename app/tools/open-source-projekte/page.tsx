@@ -1,7 +1,7 @@
 export const metadata = {
   title: 'Open Source Tools & Projekte | AI Engineering Wiki',
   description:
-    'Kuratierte Liste der besten Open-Source-Tools für lokale AI: LLM Runtimes, Agent Frameworks, RAG, Monitoring, Automation und Security.',
+    'Kuratierte Liste empfehlenswerter Open-Source-Tools für lokale AI: LLM Runtimes, Agent Frameworks, RAG, Monitoring, Automation und Security.',
 }
 
 type Tool = {
@@ -210,6 +210,13 @@ const categories: Category[] = [
         url: 'https://github.com/Zie619/n8n-workflows',
         description: 'Riesige Sammlung von n8n Community-Workflows.',
         tags: ['n8n', 'Beispiele', 'Community'],
+      },
+      {
+        name: 'n8n Self-hosted AI Starter Kit',
+        url: 'https://github.com/n8n-io/self-hosted-ai-starter-kit',
+        description:
+          'Offizielles Starter Kit von n8n für Self-hosted AI mit Ollama, Qdrant und PostgreSQL.',
+        tags: ['n8n', 'Starter Kit', 'Self-Hosted', 'Ollama'],
       },
       {
         name: 'Kestra',
@@ -531,6 +538,13 @@ const categories: Category[] = [
           'Machine Learning Systems — Lehrbuch von Harvard.',
         tags: ['Buch', 'Harvard', 'ML Systems'],
       },
+      {
+        name: 'DataCamp: Lokale AI Tutorial',
+        url: 'https://www.datacamp.com/de/tutorial/local-ai',
+        description:
+          'Praxistutorial von DataCamp zum Aufsetzen und Nutzen lokaler KI-Modelle.',
+        tags: ['Tutorial', 'Lokal', 'Lernressource'],
+      },
     ],
   },
 ]
@@ -558,7 +572,7 @@ export default function OpenSourceProjektePage() {
           Open Source Tools &amp; Projekte
         </h1>
         <p className="text-slate-400 mt-2 max-w-2xl">
-          Kuratierte Sammlung der besten Open-Source-Tools für lokale AI,
+          Kuratierte Sammlung empfehlenswerter Open-Source-Tools für lokale AI,
           Agent-Frameworks, RAG, Monitoring und Automation. Alle Tools sind
           Self-Hosted-fähig und auf GitHub verfügbar.
         </p>

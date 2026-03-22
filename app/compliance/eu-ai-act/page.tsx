@@ -30,7 +30,7 @@ export default function EuAiActLeitfaden() {
         <p className="text-lg text-gray-300">
           Der EU AI Act (Verordnung 2024/1689) wurde am <strong>12. Juli 2024</strong> im
           EU-Amtsblatt veröffentlicht und ist am <strong>1. August 2024</strong> in Kraft
-          getreten. Er ist der weltweit strengste Regelungsrahmen für Künstliche Intelligenz.
+          getreten. Er ist der umfassendste Regelungsrahmen der EU für Künstliche Intelligenz.
           Einige Pflichten — wie die Verbote (Art. 5) und die KI-Kompetenz (Art. 4) — gelten
           bereits seit <strong>2. Februar 2025</strong>. Die vollständige Anwendung mit
           Enforcement und Strafen startet ab <strong>2. August 2026</strong>.
@@ -432,8 +432,12 @@ Verarbeitet das System biometrische Daten?
             <li><a href="https://www.wko.at/oe/gruendung/ai-toolbox.pdf" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">WKO AI-Toolbox</a> — Praktische AI-Tools und Leitfäden der Wirtschaftskammer Österreich</li>
             <li><a href="https://www.rtr.at/rtr/service/ki-servicestelle/projekte-initiativen/Projekte_-_Initiativen.de.html" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">RTR KI-Servicestelle</a> — Österreichische KI-Servicestelle, Projekte und Initiativen</li>
             <li><a href="https://www.ffg.at/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">FFG — Österreichische Forschungsförderungsgesellschaft</a> — Förderungen für AI-Projekte und Digitalisierung</li>
-            <li><a href="https://caralegal.eu/blog/ki-richtlinie-guide-und-vorlage/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">caralegal KI-Richtlinie Guide & Vorlage</a> — Praktischer Guide für unternehmenseigene KI-Richtlinien</li>
+            <li><a href="https://caralegal.eu/blog/ki-richtlinie-unternehmen-leitfaden" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">caralegal KI-Richtlinie Guide & Vorlage</a> — Praktischer Guide für unternehmenseigene KI-Richtlinien</li>
             <li><a href="https://digital-strategy.ec.europa.eu/en/faqs/ai-literacy-questions-answers" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">EU-Kommission: AI Literacy — Questions and Answers</a> — Offizielle FAQ zu Art. 4 KI-Kompetenz</li>
+            <li><a href="https://www.wko.at/digitalisierung/ai-act-eu" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">WKO AI Act Übersicht</a> — Praxisnahe Übersicht der Wirtschaftskammer Österreich zum EU AI Act für Unternehmen</li>
+            <li><a href="https://digital-strategy.ec.europa.eu/en/policies/ai-office" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">EU AI Office</a> — Zentrale Stelle der EU-Kommission für KI-Governance und Durchsetzung</li>
+            <li><a href="https://www.nist.gov/itl/ai-risk-management-framework" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">NIST AI Risk Management Framework</a> — US-amerikanisches Rahmenwerk für KI-Risikomanagement</li>
+            <li><a href="https://oecd.ai/en/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">OECD.AI Policy Observatory</a> — Internationale KI-Policy-Datenbank und Ländervergleiche</li>
           </ul>
         </section>
       </div>

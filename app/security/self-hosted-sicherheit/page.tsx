@@ -352,7 +352,7 @@ sudo fail2ban-client status sshd`}</code>
               — Die häufigsten Sicherheitsrisiken in Webanwendungen
             </li>
             <li>
-              <a href="https://www.fail2ban.org/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+              <a href="https://github.com/fail2ban/fail2ban" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
                 fail2ban
               </a>{" "}
               — Brute-Force-Schutz für SSH und andere Services

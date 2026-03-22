@@ -262,7 +262,7 @@ rectangle "Pipeline" {
         <section className="mt-16 pt-8 border-t border-white/10">
           <h2 className="text-xl font-bold text-white mb-4">Quellen</h2>
           <ul className="space-y-2 text-sm text-white/50">
-            <li><a href="https://docs.anthropic.com/en/docs/build-with-claude/agent-patterns" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Anthropic: Building Effective Agents</a> — Agent Patterns und Best Practices</li>
+            <li><a href="https://platform.claude.com/docs/en/docs/build-with-claude/agent-patterns" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Anthropic: Building Effective Agents</a> — Agent Patterns und Best Practices</li>
             <li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Anthropic Engineering: Building Effective Agents</a></li>
             <li><a href="https://langchain-ai.github.io/langgraph/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">LangGraph Documentation</a> — Multi-Agent Orchestration Framework</li>
             <li><a href="https://github.com/microsoft/autogen" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">GitHub: microsoft/autogen</a> — Multi-Agent Conversation Framework</li>

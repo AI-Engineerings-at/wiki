@@ -1063,7 +1063,7 @@ function MilestoneCard({ percent, pathName, pathId, state, onRating, onAddCommen
           </a>
         </div>
         <a
-          href="https://github.com/AI-Engineering-at/wiki"
+          href="https://github.com/AI-Engineerings-at/wiki"
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 text-xs text-slate-500 hover:text-slate-400 transition-colors"
@@ -1166,7 +1166,7 @@ function MilestoneCard({ percent, pathName, pathId, state, onRating, onAddCommen
             <p className="text-sm text-slate-300">Want to be notified about new articles?</p>
             <div className="flex justify-center gap-2">
               <a
-                href="https://www.ai-engineering.at/newsletter"
+                href="https://www.ai-engineering.at"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-[#4262FF] hover:bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
@@ -1185,7 +1185,7 @@ function MilestoneCard({ percent, pathName, pathId, state, onRating, onAddCommen
 
         {/* GitHub Star */}
         <a
-          href="https://github.com/AI-Engineering-at/wiki"
+          href="https://github.com/AI-Engineerings-at/wiki"
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-sm text-white transition-colors"
@@ -1725,7 +1725,7 @@ export default function LearningPathPage() {
             Get Playbook P1 — EUR 49
           </a>
           <a
-            href="https://www.ai-engineering.at/contact"
+            href="https://www.ai-engineering.at"
             className="bg-slate-800 hover:bg-slate-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
           >
             Free consultation

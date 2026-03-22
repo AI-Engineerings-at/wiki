@@ -37,7 +37,7 @@ export default function AustriaPage() {
             <span className="text-xs text-slate-500 mt-2 inline-block">rtr.at</span>
           </a>
           <a
-            href="https://www.dsb.gv.at/"
+            href="https://dsb.gv.at/"
             target="_blank"
             rel="noopener noreferrer"
             className="block p-5 bg-slate-900 border border-slate-800 rounded-xl hover:border-blue-500/50 transition-colors group"

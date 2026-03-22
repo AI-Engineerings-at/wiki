@@ -149,7 +149,7 @@ export default function WasIstAgentOrchestration() {
           <h2 className="text-xl font-bold text-white mb-4">Quellen</h2>
           <ul className="space-y-2 text-sm text-white/50">
             <li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Anthropic Engineering: Building Effective Agents</a></li>
-            <li><a href="https://docs.anthropic.com/en/docs/build-with-claude/agent-patterns" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Anthropic Docs: Agent Patterns</a></li>
+            <li><a href="https://platform.claude.com/docs/en/docs/build-with-claude/agent-patterns" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Anthropic Docs: Agent Patterns</a></li>
             <li><a href="https://mattermost.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Mattermost</a> — Self-hosted Messaging als Agent-Kommunikationsbus</li>
           </ul>
         </section>

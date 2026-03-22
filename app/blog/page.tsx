@@ -51,7 +51,7 @@ export default function BlogIndex() {
       <div>
         <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Blog</h1>
         <p className="text-slate-400 max-w-2xl">
-          Praxis-Artikel aus echtem Betrieb — lokaler AI-Stack, DSGVO-Compliance,
+          Praxis-Artikel — lokaler AI-Stack, DSGVO-Compliance,
           Agent Orchestration und Automatisierung. Keine Theorie, nur was funktioniert.
         </p>
         <div className="flex gap-4 mt-4 text-sm text-slate-500">

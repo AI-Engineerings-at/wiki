@@ -283,7 +283,7 @@ export default function KIKompetenzArt4Page() {
         <ul className="list-disc list-inside text-gray-300 space-y-1">
           <li><a href="https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX:32024R1689" target="_blank" className="text-blue-400 hover:underline">EU AI Act Volltext (EUR-Lex, DE)</a></li>
           <li><a href="https://artificialintelligenceact.eu/article/4/" target="_blank" className="text-blue-400 hover:underline">Art. 4 AI Literacy (AI Act Explorer)</a></li>
-          <li><a href="https://www.wko.at/digitalisierung/künstliche-intelligenz" target="_blank" className="text-blue-400 hover:underline">WKO: Künstliche Intelligenz im Unternehmen</a></li>
+          <li><a href="https://www.wko.at/digitalisierung/ki-oesterreich" target="_blank" className="text-blue-400 hover:underline">WKO: Künstliche Intelligenz im Unternehmen</a></li>
           <li><a href="https://digital-strategy.ec.europa.eu/en/faqs/ai-literacy-questions-answers" target="_blank" className="text-blue-400 hover:underline">EU-Kommission: AI Literacy — Questions and Answers</a></li>
         </ul>
       </div>

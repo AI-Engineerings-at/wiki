@@ -96,7 +96,7 @@ return $input.item;`}</code>
 
         <h2>Sources</h2>
         <ul>
-          <li><a href="https://docs.anthropic.com/en/docs/safety" target="_blank" className="text-blue-400 hover:underline">Anthropic Safety Guidelines</a></li>
+          <li><a href="https://platform.claude.com/docs/en/docs/safety" target="_blank" className="text-blue-400 hover:underline">Anthropic Safety Guidelines</a></li>
         </ul>
       </div>
     </div>

@@ -154,7 +154,7 @@ export default function MemoryManagementPage() {
 
         <h2 className="text-xl font-semibold text-white mt-8">Sources</h2>
         <ul>
-          <li><a href="https://docs.anthropic.com/en/docs/claude-code/memory" target="_blank" className="text-blue-400 hover:underline">Anthropic Memory Docs</a></li>
+          <li><a href="https://code.claude.com/docs/en/memory" target="_blank" className="text-blue-400 hover:underline">Anthropic Memory Docs</a></li>
           <li><a href="https://github.com/anthropics/claude-code" target="_blank" className="text-blue-400 hover:underline">CLAUDE.md Specification</a></li>
         </ul>
       </div>

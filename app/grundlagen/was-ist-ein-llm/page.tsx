@@ -520,7 +520,7 @@ llm --> out3
           <h2 className="text-xl font-bold text-white mb-4">Quellen</h2>
           <ul className="space-y-2 text-sm text-white/50">
             <li><a href="https://vellum.ai/blog/llama-3-3-70b-vs-gpt-4o" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Vellum: Llama 3.3 70B vs GPT-4o</a> — MMLU, HumanEval, IFEval, MATH Benchmark-Zahlen</li>
-            <li><a href="https://blog.getbind.co/2024/12/13/llama-3-3-70b-vs-gpt-4o-which-is-better-for-coding/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Bind AI: Llama 3.3 70B vs GPT-4o Coding</a> — HumanEval Vergleich</li>
+            <li><a href="https://blog.getbind.co/llama-3-3-70b-vs-gpt-4o-which-is-better-for-coding/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Bind AI: Llama 3.3 70B vs GPT-4o Coding</a> — HumanEval Vergleich</li>
             <li><a href="https://intuitionlabs.ai/articles/local-llm-deployment-24gb-gpu-optimization" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">IntuitionLabs: 24GB GPU Optimization</a> — VRAM-Limit 24 GB, max ~34B quantisiert</li>
             <li><a href="https://localaimaster.com/blog/best-gpus-for-ai-2025" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">LocalAIMaster: Best GPUs for AI</a> — Inference Speed RTX 3090 (tok/s)</li>
             <li><a href="https://corelab.tech/llmgpu/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">CoreLab: LLM GPU Benchmarks</a> — 8B Modelle ~112 tok/s auf RTX 3090</li>
@@ -528,6 +528,7 @@ llm --> out3
             <li><a href="https://bestvaluegpu.com/en-eu/history/new-and-used-rtx-3090-price-history-and-specs/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">BestValueGPU: RTX 3090 Preisentwicklung</a> — Gebrauchtpreise EUR 750-1.123</li>
             <li><a href="https://www.wko.at/oe/gruendung/ai-toolbox.pdf" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">WKO AI-Toolbox</a> — Praktische AI-Tools und Leitfäden der Wirtschaftskammer Österreich</li>
             <li><a href="https://www.wko.at/oe/oesterreich/wkoe-gewerbe-und-handwerk-nuetzliche-ki-helfer" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">WKO KI-Handbuch Gewerbe & Handwerk</a> — Nützliche KI-Helfer für Gewerbe und Handwerk</li>
+            <li><a href="https://huggingface.co/docs/transformers/index" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Hugging Face Transformers Dokumentation</a> — Offizielle Dokumentation der Transformers-Bibliothek für LLM-Training, Fine-Tuning und Inferenz</li>
           </ul>
         </section>
 

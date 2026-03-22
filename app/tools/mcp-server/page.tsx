@@ -229,7 +229,7 @@ Claude: "Klar, einen Moment..."
               <p className="text-gray-500 text-xs">Offizielle Dokumentation</p>
             </li>
             <li>
-              <a href="https://github.com/jlowin/FastMCP" className="text-blue-400 hover:underline">
+              <a href="https://github.com/PrefectHQ/fastmcp" className="text-blue-400 hover:underline">
                 FastMCP Framework
               </a>
               <p className="text-gray-500 text-xs">Python-Framework für MCP-Server</p>

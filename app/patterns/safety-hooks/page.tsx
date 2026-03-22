@@ -185,7 +185,7 @@ def memory_capture_hook(func):
 
         <h2>Quellen</h2>
         <ul>
-          <li><a href="https://docs.anthropic.com/en/docs/safety" target="_blank" className="text-brand-blue hover:underline">Anthropic Safety Guidelines</a></li>
+          <li><a href="https://platform.claude.com/docs/en/docs/safety" target="_blank" className="text-brand-blue hover:underline">Anthropic Safety Guidelines</a></li>
         </ul>
       </div>
     </div>

@@ -285,7 +285,7 @@ curl http://localhost:11434/api/tags`}</code>
           <h2 className="text-xl font-bold text-white mb-4">Quellen</h2>
           <ul className="space-y-2 text-sm text-white/50">
             <li><a href="https://docs.docker.com/engine/daemon/logs/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Docker Docs: Logging</a> — Container-Logs konfigurieren und lesen</li>
-            <li><a href="https://github.com/ollama/ollama/blob/main/docs/troubleshooting.md" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Ollama Troubleshooting</a> — Offizielle Fehlerbehandlung</li>
+            <li><a href="https://github.com/ollama/ollama/blob/main/docs/faq.md" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Ollama Troubleshooting</a> — Offizielle Fehlerbehandlung</li>
             <li><a href="https://docs.n8n.io/hosting/configuration/environment-variables/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">n8n Environment Variables</a> — Konfiguration und Debugging</li>
             <li><a href="https://docs.docker.com/engine/swarm/how-swarm-mode-works/services/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Docker Docs: Swarm Services</a> — Service-Debugging im Cluster</li>
           </ul>

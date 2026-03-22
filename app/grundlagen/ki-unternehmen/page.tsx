@@ -106,8 +106,7 @@ export default function KIUnternehmenPage() {
 
         <h2>Quellen</h2>
         <ul>
-          <li><a href="https://localaimaster.com/local-vs-cloud-llm" target="_blank" className="text-brand-blue hover:underline">LocalAI Master Cost Comparison</a></li>
-          <li><a href="https://www.enterprise-ai-rescue.com/local-vs-cloud-llm" target="_blank" className="text-brand-blue hover:underline">Enterprise AI Rescue</a></li>
+          <li><a href="https://www.ibm.com/think/topics/ai-on-premises-vs-cloud" target="_blank" className="text-brand-blue hover:underline">IBM: On-Premises vs Cloud AI</a></li>
         </ul>
       </div>
     </div>

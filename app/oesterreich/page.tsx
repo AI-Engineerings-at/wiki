@@ -37,7 +37,7 @@ export default function OesterreichPage() {
             <span className="text-xs text-slate-500 mt-2 inline-block">rtr.at</span>
           </a>
           <a
-            href="https://www.dsb.gv.at/"
+            href="https://dsb.gv.at/"
             target="_blank"
             rel="noopener noreferrer"
             className="block p-5 bg-slate-900 border border-slate-800 rounded-xl hover:border-blue-500/50 transition-colors group"
@@ -188,6 +188,66 @@ export default function OesterreichPage() {
               Live Code, keine Slides, Builder-to-Builder — die Wiener Community für AI-Praktiker und Entwickler.
             </p>
             <span className="text-xs text-slate-500 mt-2 inline-block">vienna.aitinkerers.org</span>
+          </a>
+        </div>
+      </section>
+
+      {/* EU AI Act & Recht */}
+      <section className="space-y-4">
+        <h2 className="text-xl font-semibold text-white border-b border-slate-800 pb-2">
+          EU AI Act &amp; Recht
+        </h2>
+        <div className="space-y-3">
+          <a
+            href="https://www.wko.at/digitalisierung/ai-act-eu"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block p-5 bg-slate-900 border border-slate-800 rounded-xl hover:border-blue-500/50 transition-colors group"
+          >
+            <h3 className="text-lg font-semibold text-white group-hover:text-blue-400 transition-colors">
+              WKO AI Act Übersicht
+            </h3>
+            <p className="text-slate-400 text-sm mt-1">
+              Praxisnahe Übersicht der Wirtschaftskammer Österreich zum EU AI Act — KMU-Perspektive, Pflichten und Fristen.
+            </p>
+            <span className="text-xs text-slate-500 mt-2 inline-block">wko.at</span>
+          </a>
+        </div>
+      </section>
+
+      {/* Internationale Referenzen */}
+      <section className="space-y-4">
+        <h2 className="text-xl font-semibold text-white border-b border-slate-800 pb-2">
+          Internationale Referenzen
+        </h2>
+        <div className="space-y-3">
+          <a
+            href="https://digital-strategy.ec.europa.eu/en/policies/ai-office"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block p-5 bg-slate-900 border border-slate-800 rounded-xl hover:border-blue-500/50 transition-colors group"
+          >
+            <h3 className="text-lg font-semibold text-white group-hover:text-blue-400 transition-colors">
+              EU AI Office
+            </h3>
+            <p className="text-slate-400 text-sm mt-1">
+              Zentrale Stelle der EU-Kommission für KI-Governance, Durchsetzung des AI Act und internationale Koordination.
+            </p>
+            <span className="text-xs text-slate-500 mt-2 inline-block">digital-strategy.ec.europa.eu</span>
+          </a>
+          <a
+            href="https://oecd.ai/en/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block p-5 bg-slate-900 border border-slate-800 rounded-xl hover:border-blue-500/50 transition-colors group"
+          >
+            <h3 className="text-lg font-semibold text-white group-hover:text-blue-400 transition-colors">
+              OECD.AI Policy Observatory
+            </h3>
+            <p className="text-slate-400 text-sm mt-1">
+              Internationale KI-Policy-Datenbank mit Ländervergleichen, Trends und Empfehlungen der OECD.
+            </p>
+            <span className="text-xs text-slate-500 mt-2 inline-block">oecd.ai</span>
           </a>
         </div>
       </section>

@@ -100,7 +100,7 @@ export default function VerboteneAIPraktikenPage() {
         <h2>Sources</h2>
         <ul>
           <li><a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689" target="_blank" className="text-blue-400 hover:underline">EU AI Act Original Text (EUR-Lex)</a></li>
-          <li><a href="https://www.eyreact.com/eu-ai-act-article-5-complete-guide-to-prohibited-ai-practices/" target="_blank" className="text-blue-400 hover:underline">EYreACT: Article 5 Guide</a></li>
+          <li><a href="https://eyreact.com/eu-ai-act-article-5-complete-guide-to-prohibited-ai-practices/" target="_blank" className="text-blue-400 hover:underline">EYreACT: Article 5 Guide</a></li>
           <li><a href="https://fpf.org/blog/red-lines-under-the-eu-ai-act-understanding-prohibited-ai-practices-and-their-interplay-with-the-gdpr-dsa/" target="_blank" className="text-blue-400 hover:underline">FPF: Red Lines under EU AI Act</a></li>
         </ul>
       </div>

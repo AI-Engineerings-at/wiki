@@ -356,6 +356,17 @@ docker compose ps
           </Callout>
         </section>
 
+        {/* Alternative Starter Kits */}
+        <Callout type="info" title="Siehe auch">
+          <p>
+            n8n bietet ein offizielles{" "}
+            <a href="https://github.com/n8n-io/self-hosted-ai-starter-kit" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+              Self-hosted AI Starter Kit
+            </a>{" "}
+            — ein guter Ausgangspunkt wenn du nur n8n + Ollama brauchst.
+          </p>
+        </Callout>
+
         {/* Key Takeaway */}
         <KeyTakeaway
           points={[
@@ -394,6 +405,30 @@ docker compose ps
                 LocalAIMaster: Best GPUs for AI
               </a>{" "}
               — GPU Inference Benchmarks (tok/s)
+            </li>
+            <li>
+              <a href="https://github.com/n8n-io/self-hosted-ai-starter-kit" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+                n8n Self-hosted AI Starter Kit
+              </a>{" "}
+              — Offizielles Starter Kit für lokale AI mit n8n, Ollama und Qdrant
+            </li>
+            <li>
+              <a href="https://docs.n8n.io/advanced-ai/intro-tutorial/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+                n8n AI Tutorial
+              </a>{" "}
+              — Offizielles Tutorial: AI-Workflow mit n8n bauen
+            </li>
+            <li>
+              <a href="https://docs.n8n.io/hosting/starter-kits/ai-starter-kit/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+                n8n AI Starter Kit Dokumentation
+              </a>{" "}
+              — Offizielle Dokumentation zum Self-hosted AI Starter Kit
+            </li>
+            <li>
+              <a href="https://www.datacamp.com/de/tutorial/local-ai" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+                DataCamp: Lokale KI mit Docker, n8n, Qdrant und Ollama
+              </a>{" "}
+              — Schritt-für-Schritt Tutorial für lokale AI-Infrastruktur
             </li>
           </ul>
         </section>

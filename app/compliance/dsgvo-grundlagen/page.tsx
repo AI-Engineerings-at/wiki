@@ -337,11 +337,11 @@ Email: max@musterfirma.at
           <h2 className="text-xl font-bold text-white mb-4">Quellen</h2>
           <ul className="space-y-2 text-sm text-white/50">
             <li><a href="https://eur-lex.europa.eu/eli/reg/2016/679/oj" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">EUR-Lex: Verordnung (EU) 2016/679 — DSGVO Volltext</a></li>
-            <li><a href="https://www.dsb.gv.at/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Österreichische Datenschutzbehoerde (DSB)</a> — Nationale Aufsichtsbehoerde</li>
+            <li><a href="https://dsb.gv.at/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Österreichische Datenschutzbehoerde (DSB)</a> — Nationale Aufsichtsbehoerde</li>
             <li><a href="https://www.edpb.europa.eu/edpb_en" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">European Data Protection Board (EDPB)</a> — Leitlinien und Empfehlungen</li>
             <li><a href="https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10001597" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">RIS: Datenschutzgesetz (DSG)</a> — Österreichisches Datenschutzgesetz</li>
             <li><a href="https://www.rtr.at/rtr/service/ki-servicestelle/projekte-initiativen/Projekte_-_Initiativen.de.html" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">RTR KI-Servicestelle</a> — Österreichische KI-Servicestelle, Projekte und Initiativen</li>
-            <li><a href="https://caralegal.eu/blog/ki-richtlinie-guide-und-vorlage/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">caralegal KI-Richtlinie Guide & Vorlage</a> — Praktischer Guide für unternehmenseigene KI-Richtlinien</li>
+            <li><a href="https://caralegal.eu/blog/ki-richtlinie-unternehmen-leitfaden" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">caralegal KI-Richtlinie Guide & Vorlage</a> — Praktischer Guide für unternehmenseigene KI-Richtlinien</li>
           </ul>
         </section>
       </div>

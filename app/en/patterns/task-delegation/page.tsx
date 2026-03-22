@@ -77,7 +77,7 @@ export default function TaskDelegationPage() {
         <h2 className="text-xl font-semibold text-white mt-8">Sources</h2>
         <ul>
           <li><a href="https://arxiv.org/abs/2308.11432" target="_blank" className="text-blue-400 hover:underline">Agent Architectures (ArXiv)</a></li>
-          <li><a href="https://www.kore.ai/platform/agent-platform" target="_blank" className="text-blue-400 hover:underline">Kore.ai Agent Orchestration</a></li>
+          <li><a href="https://kore.ai/" target="_blank" className="text-blue-400 hover:underline">Kore.ai Agent Orchestration</a></li>
         </ul>
       </div>
     </div>
