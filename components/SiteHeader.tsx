@@ -142,6 +142,7 @@ export function SiteHeader() {
           </div>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
+            onTouchEnd={(e) => { e.preventDefault(); setMobileOpen(!mobileOpen); }}
             className="p-3 min-w-[48px] min-h-[48px] flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer"
             aria-label={mobileOpen ? 'Menü schließen' : 'Menü öffnen'}
             type="button"
