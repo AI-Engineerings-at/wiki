@@ -2,6 +2,9 @@ export const metadata = {
   title: 'Patterns | AI Engineering Wiki',
   description:
     'Proven Agent Orchestration patterns: memory management, task delegation, safety hooks and monitoring for Multi-Agent Systems.',
+  openGraph: {
+    images: [{ url: '/images/og/og-patterns.png', width: 1200, height: 630, alt: 'AI Engineering Wiki — Patterns' }],
+  },
 }
 
 export default function PatternsPage() {

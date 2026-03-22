@@ -2,6 +2,9 @@ export const metadata = {
   title: 'AI Papers | AI Engineering Wiki',
   description:
     'The most important papers on LLMs, RAG, Agents and AI Safety — summarized and explained in plain language.',
+  openGraph: {
+    images: [{ url: '/images/og/og-papers.png', width: 1200, height: 630, alt: 'AI Engineering Wiki — Papers' }],
+  },
 }
 
 export default function PapersPage() {

@@ -2,6 +2,9 @@ export const metadata = {
   title: 'Compliance | AI Engineering Wiki',
   description:
     'GDPR and EU AI Act in practice: basics, transparency requirements, prohibited practices and readiness checklists for AI systems.',
+  openGraph: {
+    images: [{ url: '/images/og/og-compliance.png', width: 1200, height: 630, alt: 'AI Engineering Wiki — Compliance' }],
+  },
 }
 
 export default function CompliancePage() {

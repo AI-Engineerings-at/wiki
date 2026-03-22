@@ -2,6 +2,9 @@ export const metadata = {
   title: 'Tools | AI Engineering Wiki',
   description:
     'Tools and infrastructure for your GDPR-compliant, 100% self-hosted AI stack: Docker, Ollama, n8n, Grafana, RAG, Proxmox and MCP.',
+  openGraph: {
+    images: [{ url: '/images/og/og-tools.png', width: 1200, height: 630, alt: 'AI Engineering Wiki — Tools' }],
+  },
 }
 
 export default function ToolsPage() {

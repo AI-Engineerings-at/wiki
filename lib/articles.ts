@@ -65,6 +65,7 @@ const toolsArticles: Article[] = [
   { title: 'n8n AI Workflow Bundle v3', description: '14 produktionsreife n8n-Workflows mit Error Handling, Dual-LLM-Fallback und DSGVO-Compliance. Architektur, Kategorien und Best Practices.', href: '/tools/n8n-workflow-bundle', category: 'tools', categoryLabel: 'Tools', date: '2026-03-22' },
   { title: 'AI Tools Datenbank', description: 'Kuratierte Sammlung von 68+ Tools für lokale AI-Infrastruktur: LLM Runtimes, Chat Interfaces, RAG, Agents, Monitoring und mehr.', href: '/tools/ai-tools-datenbank', category: 'tools', categoryLabel: 'Tools', date: '2026-03-22', popular: true },
   { title: 'Vergleichbare Ressourcen', description: 'Ehrlicher Vergleich: Wo andere Quellen besser sind als unsere Wiki — EU-Kommission, WKO, n8n, Hugging Face, NIST, OECD.', href: '/tools/vergleich-alternativen', category: 'tools', categoryLabel: 'Tools', date: '2026-03-22' },
+  { title: 'CLI Coding Agents im Vergleich', description: 'Claude Code, Mistral Vibe, Gemini CLI und Codex CLI: Feature-Matrix, Preise, DSGVO-Bewertung und Praxis-Tests.', href: '/tools/cli-coding-agents-vergleich', category: 'tools', categoryLabel: 'Tools', date: '2026-03-22', popular: true },
 ]
 
 const patternsArticles: Article[] = [
@@ -269,6 +270,8 @@ export const relatedArticlesMap: Record<string, string[]> = {
   '/tools/ai-tools-datenbank': ['/tools/open-source-projekte', '/tools/ollama-tutorial', '/tools/ai-stack-setup'],
   // Vergleich Alternativen
   '/tools/vergleich-alternativen': ['/compliance/eu-ai-act', '/tools/n8n-für-anfaenger', '/tools/ollama-tutorial'],
+  // CLI Coding Agents Vergleich
+  '/tools/cli-coding-agents-vergleich': ['/tools/mcp-server', '/tools/model-selection', '/tools/ai-tools-datenbank'],
   // Evals & Guardrails
   '/patterns/evals-guardrails': ['/patterns/safety-hooks', '/patterns/human-in-the-loop', '/tools/n8n-für-anfaenger'],
   // Human-in-the-Loop

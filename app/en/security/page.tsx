@@ -2,6 +2,9 @@ export const metadata = {
   title: 'Security | AI Engineering Wiki',
   description:
     'Security for local AI infrastructure: API key handling, firewall setup, network segmentation and backup strategies.',
+  openGraph: {
+    images: [{ url: '/images/og/og-security.png', width: 1200, height: 630, alt: 'AI Engineering Wiki — Security' }],
+  },
 }
 
 export default function SecurityPage() {

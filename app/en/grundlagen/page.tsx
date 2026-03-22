@@ -2,6 +2,9 @@ export const metadata = {
   title: 'Basics | AI Engineering Wiki',
   description:
     'Getting started with Agent Orchestration, Multi-Agent Systems and a GDPR-compliant local AI stack: roles, costs, local vs cloud, quickstart.',
+  openGraph: {
+    images: [{ url: '/images/og/og-grundlagen.png', width: 1200, height: 630, alt: 'AI Engineering Wiki — Grundlagen' }],
+  },
 }
 
 export default function BasicsPage() {
