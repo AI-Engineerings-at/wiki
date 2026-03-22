@@ -1,10 +1,17 @@
-import { redirect } from 'next/navigation'
+'use client'
 
-export const metadata = {
-  title: 'Self-hosted vs Cloud Services | AI Engineering Wiki',
-  description: 'Redirected to: Local AI vs Cloud: TCO Comparison',
-}
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function SelfHostedVsCloudServices() {
-  redirect('/en/grundlagen/lokal-vs-cloud')
+  const router = useRouter()
+  useEffect(() => {
+    router.replace('/en/grundlagen/lokal-vs-cloud')
+  }, [router])
+
+  return (
+    <div className="flex items-center justify-center min-h-[50vh]">
+      <p className="text-slate-400">Redirecting...</p>
+    </div>
+  )
 }
