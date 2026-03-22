@@ -142,8 +142,9 @@ export function SiteHeader() {
           </div>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="p-2 text-slate-400 hover:text-white transition-colors"
+            className="p-3 min-w-[48px] min-h-[48px] flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer"
             aria-label={mobileOpen ? 'Menü schließen' : 'Menü öffnen'}
+            type="button"
           >
             {mobileOpen ? (
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
