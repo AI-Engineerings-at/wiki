@@ -1,0 +1,10 @@
+{
+  "name": "wiki-ops",
+  "version": "1.0.0",
+  "description": "Wiki Operations — Content Feeds, Image Generation, Quality Audits, Legal Checks for wiki.ai-engineering.at",
+  "author": {
+    "name": "AI Engineering",
+    "url": "https://www.ai-engineering.at"
+  },
+  "keywords": ["wiki", "content-pipeline", "quality", "seo", "a11y", "dsgvo", "papers", "thumbnails"]
+}
