@@ -1,5 +1,5 @@
 {
-  "id": "fcb970d2-27d8-4ece-a6d4-396bf9656b35",
+  "id": "6dd0f26b-68d3-45f0-ab41-cabd07ad806e",
   "revision": 0,
   "last_node_id": 22,
   "last_link_id": 18,
@@ -388,7 +388,7 @@
         "Node name for S&R": "FluxGuidance"
       },
       "widgets_values": [
-        3.5
+        3.0
       ]
     },
     {
@@ -504,7 +504,7 @@
       "widgets_values": [
         42,
         "randomize",
-        35,
+        34,
         1.0,
         "euler",
         "beta",

@@ -1,8 +1,8 @@
 {
-  "id": "e72d3c5f-d545-490e-a471-536e0b4832aa",
+  "id": "e6089b0b-adf7-4db3-828a-8d5957813c81",
   "revision": 0,
   "last_node_id": 15,
-  "last_link_id": 16,
+  "last_link_id": 15,
   "nodes": [
     {
       "id": 1,
@@ -388,7 +388,7 @@
         "Node name for S&R": "FluxGuidance"
       },
       "widgets_values": [
-        3.5
+        3.0
       ]
     },
     {
@@ -504,7 +504,7 @@
       "widgets_values": [
         42,
         "randomize",
-        28,
+        34,
         1.0,
         "euler",
         "beta",
@@ -558,15 +558,15 @@
       "widgets_values": []
     },
     {
-      "id": 9,
-      "type": "ImageScaleBy",
+      "id": 10,
+      "type": "AIEngLogoOverlay",
       "pos": [
         1646,
         74
       ],
       "size": [
-        276,
-        114
+        372,
+        214
       ],
       "flags": {},
       "order": 9,
@@ -577,67 +577,6 @@
           "name": "image",
           "type": "IMAGE",
           "link": 9
-        },
-        {
-          "localized_name": "upscale_method",
-          "name": "upscale_method",
-          "type": "COMBO",
-          "widget": {
-            "name": "upscale_method"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "scale_by",
-          "name": "scale_by",
-          "type": "FLOAT",
-          "widget": {
-            "name": "scale_by"
-          },
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "IMAGE",
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "slot_index": 0,
-          "links": [
-            15
-          ]
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.15.1",
-        "Node name for S&R": "ImageScaleBy"
-      },
-      "widgets_values": [
-        "lanczos",
-        1.5
-      ]
-    },
-    {
-      "id": 10,
-      "type": "AIEngLogoOverlay",
-      "pos": [
-        1976,
-        74
-      ],
-      "size": [
-        372,
-        214
-      ],
-      "flags": {},
-      "order": 10,
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "image",
-          "name": "image",
-          "type": "IMAGE",
-          "link": 15
         },
         {
           "localized_name": "logo_filename",
@@ -692,7 +631,7 @@
           "type": "IMAGE",
           "slot_index": 0,
           "links": [
-            16
+            15
           ]
         }
       ],
@@ -712,7 +651,7 @@
       "id": 12,
       "type": "SaveImage",
       "pos": [
-        2396,
+        2066,
         74
       ],
       "size": [
@@ -720,14 +659,14 @@
         83.328125
       ],
       "flags": {},
-      "order": 11,
+      "order": 10,
       "mode": 0,
       "inputs": [
         {
           "localized_name": "images",
           "name": "images",
           "type": "IMAGE",
-          "link": 16
+          "link": 15
         },
         {
           "localized_name": "filename_prefix",
@@ -811,7 +750,7 @@
       9,
       8,
       0,
-      9,
+      10,
       0,
       "IMAGE"
     ],
@@ -833,14 +772,6 @@
     ],
     [
       15,
-      9,
-      0,
-      10,
-      0,
-      "IMAGE"
-    ],
-    [
-      16,
       10,
       0,
       12,

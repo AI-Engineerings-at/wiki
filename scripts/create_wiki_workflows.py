@@ -3,16 +3,16 @@ Create 5 ComfyUI UI-format workflow JSONs for Wiki/Social media use.
 
 Workflows:
   W1: wiki-thumbnail.json     512x384,   20 steps, no upscale, Logo+Text
-  W2: wiki-hero.json          1344x768,  28 steps, 1.5x lanczos, Logo only
-  W3: social-hq-v4.json       1024x1024, 28 steps, 1.5x lanczos, Logo+Text
-  W4: blog-hero-4k.json       1344x768,  35 steps, 4x NMKD AI upscale (cap 3840x2160), Logo only
-  W5: ultra-4k.json           1024x1024, 35 steps, 4x NMKD AI upscale (cap 3840x2160), Logo+Text
+  W2: wiki-hero.json          1344x768,  34 steps, no upscale, Logo only
+  W3: social-hq-v4.json       1344x1344, 34 steps, no upscale, Logo+Text
+  W4: blog-hero-4k.json       1344x768,  34 steps, 4x NMKD AI upscale (cap 3840x2160), Logo only
+  W5: ultra-4k.json           1344x1344, 34 steps, 4x NMKD AI upscale (cap 3840x2160), Logo+Text
 
 Base config (all workflows):
   UNETLoader:     flux2_dev_fp8mixed.safetensors, fp8_e4m3fn
   CLIPLoader:     mistral_3_small_flux2_fp8.safetensors, type=flux2
   VAELoader:      flux2-vae.safetensors
-  FluxGuidance:   3.5
+  FluxGuidance:   3.0
   KSampler:       euler, beta, cfg=1.0
   AIEngLogoOverlay: logo-new.png, bottom-left, 12%, 3% padding, 0.85 opacity
   AIEngTextOverlay: SpaceGrotesk-Bold, 72, brand_blue, center/top
@@ -178,7 +178,7 @@ def node_flux_guidance(node_id: int, order: int, pos: list, cond_link: int,
              "slot_index": 0, "links": out_links},
         ],
         "properties": {"cnr_id": "comfy-core", "ver": "0.15.1", "Node name for S&R": "FluxGuidance"},
-        "widgets_values": [3.5],
+        "widgets_values": [3.0],
     }
 
 
@@ -675,28 +675,28 @@ WORKFLOWS = {
         pos_prompt=POSITIVE_PROMPT,
     ),
     "wiki-hero.json": build_workflow(
-        width=1344, height=768, steps=28,
+        width=1344, height=768, steps=34,
         save_prefix="wiki_hero",
         include_text=False,
-        upscale_mode="lanczos_1_5",
+        upscale_mode="none",
         pos_prompt=POSITIVE_PROMPT,
     ),
     "social-hq-v4.json": build_workflow(
-        width=1024, height=1024, steps=28,
+        width=1344, height=1344, steps=34,
         save_prefix="social_hq_v4",
         include_text=True,
-        upscale_mode="lanczos_1_5",
+        upscale_mode="none",
         pos_prompt=POSITIVE_PROMPT,
     ),
     "blog-hero-4k.json": build_workflow(
-        width=1344, height=768, steps=35,
+        width=1344, height=768, steps=34,
         save_prefix="blog_hero_4k",
         include_text=False,
         upscale_mode="nmkd_4k",
         pos_prompt=POSITIVE_PROMPT,
     ),
     "ultra-4k.json": build_workflow(
-        width=1024, height=1024, steps=35,
+        width=1344, height=1344, steps=34,
         save_prefix="ultra_4k",
         include_text=True,
         upscale_mode="nmkd_4k",

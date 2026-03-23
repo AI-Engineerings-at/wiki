@@ -1,5 +1,5 @@
 {
-  "id": "a66d89e7-38db-4f8c-b1cb-d3abc419d20e",
+  "id": "663bc366-7d9a-45f7-bb6a-0487215f617c",
   "revision": 0,
   "last_node_id": 22,
   "last_link_id": 19,
@@ -231,8 +231,8 @@
         "Node name for S&R": "EmptyLatentImage"
       },
       "widgets_values": [
-        1024,
-        1024,
+        1344,
+        1344,
         1
       ]
     },
@@ -388,7 +388,7 @@
         "Node name for S&R": "FluxGuidance"
       },
       "widgets_values": [
-        3.5
+        3.0
       ]
     },
     {
@@ -504,7 +504,7 @@
       "widgets_values": [
         42,
         "randomize",
-        35,
+        34,
         1.0,
         "euler",
         "beta",
