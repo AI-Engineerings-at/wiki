@@ -88,6 +88,7 @@ const papersArticles: Article[] = [
   { title: 'LoRA: Low-Rank Adaptation (2021)', description: 'Parameter-effizientes Fine-Tuning: Große Modelle anpassen ohne alles neu zu trainieren.', href: '/papers/lora-paper', category: 'papers', categoryLabel: 'Papers', date: '2026-03-21' },
   { title: 'ReAct: Reasoning and Acting (2022)', description: 'Das Agent-Pattern ReAct: Wie LLMs durch abwechselndes Denken und Handeln Aufgaben lösen.', href: '/papers/react-paper', category: 'papers', categoryLabel: 'Papers', date: '2026-03-21' },
   { title: 'Constitutional AI (2022)', description: 'AI Safety von Anthropic: Wie man AI-Systeme durch Prinzipien statt durch Menschen aligned.', href: '/papers/constitutional-ai', category: 'papers', categoryLabel: 'Papers', date: '2026-03-21' },
+  { title: 'Hierarchical Reasoning Model (2025)', description: 'Rekurrente Architektur mit nur 27M Parametern die ohne Chain-of-Thought komplexe Aufgaben loest — Sudoku, Pfadfindung, ARC.', href: '/papers/hierarchical-reasoning', category: 'papers', categoryLabel: 'Papers', date: '2025-06-26', popular: true, thumbnail: '/images/thumbnails/papers/default.svg' },
 ]
 
 const securityArticles: Article[] = [
@@ -259,6 +260,7 @@ export const relatedArticlesMap: Record<string, string[]> = {
   '/papers/lora-paper': ['/papers/attention-is-all-you-need', '/tools/model-selection', '/tools/ollama-tutorial'],
   '/papers/react-paper': ['/patterns/agent-orchestration-patterns', '/papers/rag-paper', '/papers/constitutional-ai'],
   '/papers/constitutional-ai': ['/papers/react-paper', '/compliance/eu-ai-act', '/patterns/self-improving-agents'],
+  '/papers/hierarchical-reasoning': ['/papers/attention-is-all-you-need', '/papers/react-paper', '/grundlagen/was-ist-ein-llm'],
   // Open Source Tools
   '/tools/open-source-projekte': ['/tools/ollama-tutorial', '/tools/rag-guide', '/tools/mcp-server'],
   // AI OS Setup
