@@ -284,3 +284,23 @@ export function getRelatedArticles(href: string): Article[] {
     .map((h) => getArticleByHref(h))
     .filter((a): a is Article => a !== undefined)
 }
+
+/**
+ * DE→EN slug translation for routes where EN directories use different names.
+ * Only needed for slugs that differ between languages.
+ */
+export const deToEnSlugMap: Record<string, string> = {
+  '/tools/ai-tools-datenbank': '/tools/ai-tools-database',
+  '/tools/cli-coding-agents-vergleich': '/tools/cli-coding-agents-comparison',
+  '/tools/open-source-projekte': '/tools/open-source-projects',
+  '/tools/vergleich-alternativen': '/tools/comparison-alternatives',
+  '/patterns/ai-agent-digitaler-mitarbeiter': '/patterns/ai-agent-digital-employee',
+}
+
+/**
+ * Get the EN href for an article. Uses translation map if available,
+ * otherwise prefixes with /en.
+ */
+export function getEnHref(deHref: string): string {
+  return `/en${deToEnSlugMap[deHref] || deHref}`
+}

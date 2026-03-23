@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { categories, getRecentArticles, getPopularArticles } from '../../lib/articles'
+import { categories, getRecentArticles, getPopularArticles, getEnHref } from '../../lib/articles'
 import { SearchBar } from '../../components/SearchBar'
 
 export const metadata = {
@@ -178,7 +178,7 @@ export default function HomePage() {
             {recentArticles.map((article) => (
               <Link
                 key={article.href}
-                href={`/en${article.href}`}
+                href={getEnHref(article.href)}
                 className="block p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-blue-500/50 transition-colors group"
               >
                 <div className="flex items-start justify-between">
@@ -201,7 +201,7 @@ export default function HomePage() {
             {popularArticles.map((article) => (
               <Link
                 key={article.href}
-                href={`/en${article.href}`}
+                href={getEnHref(article.href)}
                 className="block p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-blue-500/50 transition-colors group"
               >
                 <div className="flex items-start justify-between">
