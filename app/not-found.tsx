@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import { WikiLink as Link } from '../components/WikiLink'
 import { usePathname } from 'next/navigation'
 import { SearchBar } from '../components/SearchBar'
 

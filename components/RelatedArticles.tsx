@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import { WikiLink as Link } from './WikiLink'
 import { usePathname } from 'next/navigation'
 import { getRelatedArticles } from '../lib/articles'
 

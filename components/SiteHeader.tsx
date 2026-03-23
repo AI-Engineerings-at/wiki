@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
+import { WikiLink as Link } from './WikiLink'
 import { usePathname } from 'next/navigation'
 import { SearchBar } from './SearchBar'
 

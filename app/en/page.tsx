@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { WikiLink as Link } from '../../components/WikiLink'
 import Image from 'next/image'
 import { categories, getRecentArticles, getPopularArticles, getEnHref } from '../../lib/articles'
 import { SearchBar } from '../../components/SearchBar'

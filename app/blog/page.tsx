@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { WikiLink as Link } from '../../components/WikiLink'
 import Image from 'next/image'
 import { getAllBlogPosts } from '../../lib/blog'
 

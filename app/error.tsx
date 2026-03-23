@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import { WikiLink as Link } from '../components/WikiLink'
 
 export default function Error({
   error,
