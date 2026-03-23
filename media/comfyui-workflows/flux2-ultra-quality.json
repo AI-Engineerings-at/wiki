@@ -1,0 +1,1019 @@
+{
+  "id": "41ccee46-870a-478a-9ead-e30de928eed5",
+  "revision": 0,
+  "last_node_id": 24,
+  "last_link_id": 24,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "UNETLoader",
+      "title": "\u00e2\u2018\u00a0 UNET (Flux2 FP8)",
+      "pos": [
+        26,
+        60
+      ],
+      "size": [
+        280,
+        97
+      ],
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "slot_index": 0,
+          "links": [
+            2
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.15.1",
+        "Node name for S&R": "UNETLoader"
+      },
+      "widgets_values": [
+        "flux2_dev_fp8mixed.safetensors",
+        "fp8_e4m3fn"
+      ],
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "type": "CLIPLoader",
+      "title": "\u00e2\u2018\u00a1 CLIP (Mistral Flux2)",
+      "pos": [
+        26,
+        200
+      ],
+      "size": [
+        280,
+        124
+      ],
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "slot_index": 0,
+          "links": [
+            1
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.15.1",
+        "Node name for S&R": "CLIPLoader"
+      },
+      "widgets_values": [
+        "mistral_3_small_flux2_fp8.safetensors",
+        "flux2",
+        "default"
+      ],
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "type": "VAELoader",
+      "title": "\u00e2\u2018\u00a2 VAE",
+      "pos": [
+        26,
+        360
+      ],
+      "size": [
+        280,
+        82
+      ],
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "slot_index": 0,
+          "links": [
+            8,
+            9
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.15.1",
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "flux2-vae.safetensors"
+      ],
+      "flags": {}
+    },
+    {
+      "id": 4,
+      "type": "EmptyLatentImage",
+      "title": "\u00e2\u2018\u00a3 Resolution 1024\u00c3\u20141024",
+      "pos": [
+        26,
+        480
+      ],
+      "size": [
+        280,
+        143
+      ],
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "slot_index": 0,
+          "links": [
+            10
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.15.1",
+        "Node name for S&R": "EmptyLatentImage"
+      },
+      "widgets_values": [
+        1024,
+        1024,
+        1
+      ],
+      "flags": {}
+    },
+    {
+      "id": 8,
+      "type": "LoraLoader",
+      "title": "\u00e2\u2018\u00a4 LoRA: Flux Detailer",
+      "pos": [
+        380,
+        60
+      ],
+      "size": [
+        300,
+        126
+      ],
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 2
+        },
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "slot_index": 0,
+          "links": [
+            5,
+            6
+          ]
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "slot_index": 1,
+          "links": [
+            3,
+            4
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.15.1",
+        "Node name for S&R": "LoraLoader"
+      },
+      "widgets_values": [
+        "flux-detailer.safetensors",
+        0.85,
+        0.85
+      ],
+      "flags": {}
+    },
+    {
+      "id": 5,
+      "type": "CLIPTextEncode",
+      "title": "\u00e2\u2018\u00a5 Positive Prompt",
+      "pos": [
+        760,
+        60
+      ],
+      "size": [
+        480,
+        160
+      ],
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": [
+            11
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.15.1",
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "[YOUR SUBJECT], photorealistic, ultra detailed, 8k, RAW photo, sharp focus, natural skin texture, subsurface scattering, physically based rendering, cinematic lighting, depth of field, masterpiece quality, no artifacts"
+      ],
+      "flags": {}
+    },
+    {
+      "id": 15,
+      "type": "CLIPTextEncode",
+      "title": "\u00e2\u2018\u00a6 Negative Prompt",
+      "pos": [
+        760,
+        270
+      ],
+      "size": [
+        480,
+        100
+      ],
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": [
+            13
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.15.1",
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        ""
+      ],
+      "flags": {}
+    },
+    {
+      "id": 6,
+      "type": "FluxGuidance",
+      "title": "\u00e2\u2018\u00a7 Guidance 3.5",
+      "pos": [
+        760,
+        420
+      ],
+      "size": [
+        280,
+        79
+      ],
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 11
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": [
+            12,
+            14
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.15.1",
+        "Node name for S&R": "FluxGuidance"
+      },
+      "widgets_values": [
+        3.5
+      ],
+      "flags": {}
+    },
+    {
+      "id": 7,
+      "type": "KSampler",
+      "title": "\u00e2\u2018\u00a8 KSampler \u00e2\u20ac\u201d 30 Steps",
+      "pos": [
+        1320,
+        60
+      ],
+      "size": [
+        310,
+        316
+      ],
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 5
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 12
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 13
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 10
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "slot_index": 0,
+          "links": [
+            16
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.15.1",
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        0,
+        "randomize",
+        30,
+        1,
+        "euler",
+        "beta",
+        1
+      ],
+      "flags": {}
+    },
+    {
+      "id": 9,
+      "type": "VAEDecode",
+      "title": "\u00e2\u2018\u00a9 VAE Decode",
+      "pos": [
+        1700,
+        60
+      ],
+      "size": [
+        225,
+        71
+      ],
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 16
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 8
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            17
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.15.1",
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": [],
+      "flags": {}
+    },
+    {
+      "id": 17,
+      "type": "UltralyticsDetectorProvider",
+      "title": "\u00e2\u2018\u00aa Face Detector YOLOv8",
+      "pos": [
+        1700,
+        200
+      ],
+      "size": [
+        300,
+        58
+      ],
+      "order": 10,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "BBOX_DETECTOR",
+          "type": "BBOX_DETECTOR",
+          "slot_index": 0,
+          "links": [
+            22
+          ]
+        },
+        {
+          "name": "SEGM_DETECTOR",
+          "type": "SEGM_DETECTOR",
+          "slot_index": 1,
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-impact",
+        "Node name for S&R": "UltralyticsDetectorProvider"
+      },
+      "widgets_values": [
+        "bbox/face_yolov8m.pt"
+      ],
+      "flags": {}
+    },
+    {
+      "id": 18,
+      "type": "FaceDetailer",
+      "title": "\u00e2\u2018\u00ab FaceDetailer (2-cycle)",
+      "pos": [
+        2080,
+        60
+      ],
+      "size": [
+        360,
+        560
+      ],
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 17
+        },
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 6
+        },
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 7
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 9
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 14
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 15
+        },
+        {
+          "name": "bbox_detector",
+          "type": "BBOX_DETECTOR",
+          "link": 22
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            18
+          ]
+        },
+        {
+          "name": "cropped_refined",
+          "type": "IMAGE",
+          "slot_index": 1,
+          "links": []
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "slot_index": 2,
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-impact",
+        "Node name for S&R": "FaceDetailer"
+      },
+      "widgets_values": [
+        512,
+        true,
+        1024,
+        0,
+        "randomize",
+        20,
+        1.0,
+        "euler",
+        "beta",
+        0.45,
+        5,
+        true,
+        true,
+        0.5,
+        10,
+        3.0,
+        "center-1",
+        0,
+        0.93,
+        0,
+        0.7,
+        false,
+        10,
+        0.2,
+        2
+      ],
+      "flags": {}
+    },
+    {
+      "id": 19,
+      "type": "UpscaleModelLoader",
+      "title": "\u00e2\u2018\u00ac Upscaler: 4x NMKD",
+      "pos": [
+        2080,
+        700
+      ],
+      "size": [
+        300,
+        58
+      ],
+      "order": 12,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "UPSCALE_MODEL",
+          "type": "UPSCALE_MODEL",
+          "slot_index": 0,
+          "links": [
+            19
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.15.1",
+        "Node name for S&R": "UpscaleModelLoader"
+      },
+      "widgets_values": [
+        "4x_NMKD-Superscale-SP_178000_G.pth"
+      ],
+      "flags": {}
+    },
+    {
+      "id": 20,
+      "type": "ImageUpscaleWithModel",
+      "title": "\u00e2\u2018\u00ad 4\u00c3\u2014 Upscale \u00e2\u2020\u2019 ~4096px",
+      "pos": [
+        2500,
+        700
+      ],
+      "size": [
+        260,
+        71
+      ],
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "upscale_model",
+          "type": "UPSCALE_MODEL",
+          "link": 19
+        },
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 18
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            20
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.15.1",
+        "Node name for S&R": "ImageUpscaleWithModel"
+      },
+      "widgets_values": [],
+      "flags": {}
+    },
+    {
+      "id": 21,
+      "type": "ImageScale",
+      "title": "\u00e2\u2018\u00ae Cap: 3840\u00c3\u20142160 (4K)",
+      "pos": [
+        2500,
+        820
+      ],
+      "size": [
+        280,
+        100
+      ],
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 20
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            23
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.15.1",
+        "Node name for S&R": "ImageScale"
+      },
+      "widgets_values": [
+        "lanczos",
+        3840,
+        2160,
+        "disabled",
+        false
+      ],
+      "flags": {}
+    },
+    {
+      "id": 12,
+      "type": "SaveImage",
+      "title": "\u00e2\u2018\u00af Save \u00e2\u20ac\u201d Ultra Quality",
+      "pos": [
+        2860,
+        700
+      ],
+      "size": [
+        260,
+        83
+      ],
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 24
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.15.1",
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "flux2_ultra_%date%"
+      ],
+      "flags": {}
+    },
+    {
+      "id": 23,
+      "type": "AIEngLogoOverlay",
+      "title": "\u2477 Logo Overlay",
+      "pos": [2200, 60],
+      "size": [280, 180],
+      "order": 15,
+      "mode": 0,
+      "flags": {},
+      "inputs": [
+        {"name": "image", "type": "IMAGE", "link": 21}
+      ],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "slot_index": 0, "links": [23]}
+      ],
+      "properties": {"Node name for S&R": "AIEngLogoOverlay"},
+      "widgets_values": ["logo-new.png", 12.0, "bottom-left", 3.0, 0.85]
+    },
+    {
+      "id": 24,
+      "type": "AIEngTextOverlay",
+      "title": "\u2478 Text Overlay",
+      "pos": [2200, 300],
+      "size": [280, 400],
+      "order": 16,
+      "mode": 0,
+      "flags": {},
+      "inputs": [
+        {"name": "image", "type": "IMAGE", "link": 23}
+      ],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "slot_index": 0, "links": [24]}
+      ],
+      "properties": {"Node name for S&R": "AIEngTextOverlay"},
+      "widgets_values": ["AI Engineering", "SpaceGrotesk-Bold", 80, "brand_blue", "center", "top", 60, 40, 1.0, "#FFFFFF", "#4262FF", "#4262FF"]
+    }
+  ],
+  "links": [
+    [
+      1,
+      2,
+      0,
+      8,
+      0,
+      "CLIP"
+    ],
+    [
+      2,
+      1,
+      0,
+      8,
+      0,
+      "MODEL"
+    ],
+    [
+      3,
+      8,
+      1,
+      5,
+      0,
+      "CLIP"
+    ],
+    [
+      4,
+      8,
+      1,
+      15,
+      0,
+      "CLIP"
+    ],
+    [
+      5,
+      8,
+      0,
+      7,
+      0,
+      "MODEL"
+    ],
+    [
+      6,
+      8,
+      0,
+      18,
+      1,
+      "MODEL"
+    ],
+    [
+      7,
+      8,
+      1,
+      18,
+      2,
+      "CLIP"
+    ],
+    [
+      8,
+      3,
+      0,
+      9,
+      1,
+      "VAE"
+    ],
+    [
+      9,
+      3,
+      0,
+      18,
+      3,
+      "VAE"
+    ],
+    [
+      10,
+      4,
+      0,
+      7,
+      3,
+      "LATENT"
+    ],
+    [
+      11,
+      5,
+      0,
+      6,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      12,
+      6,
+      0,
+      7,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      13,
+      15,
+      0,
+      7,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      14,
+      6,
+      0,
+      18,
+      4,
+      "CONDITIONING"
+    ],
+    [
+      15,
+      15,
+      0,
+      18,
+      5,
+      "CONDITIONING"
+    ],
+    [
+      16,
+      7,
+      0,
+      9,
+      0,
+      "LATENT"
+    ],
+    [
+      17,
+      9,
+      0,
+      18,
+      0,
+      "IMAGE"
+    ],
+    [
+      18,
+      18,
+      0,
+      20,
+      1,
+      "IMAGE"
+    ],
+    [
+      19,
+      19,
+      0,
+      20,
+      0,
+      "UPSCALE_MODEL"
+    ],
+    [
+      20,
+      20,
+      0,
+      21,
+      0,
+      "IMAGE"
+    ],
+    [
+      21,
+      21,
+      0,
+      23,
+      0,
+      "IMAGE"
+    ],
+    [
+      22,
+      17,
+      0,
+      18,
+      6,
+      "BBOX_DETECTOR"
+    ],
+    [
+      23,
+      23,
+      0,
+      24,
+      0,
+      "IMAGE"
+    ],
+    [
+      24,
+      24,
+      0,
+      12,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [
+    {
+      "title": "Stage 1 \u00e2\u20ac\u201d Text-to-Image (Flux2 FP8 + LoRA)",
+      "bounding": [
+        0,
+        40,
+        1660,
+        680
+      ],
+      "color": "#1a3a5c"
+    },
+    {
+      "title": "Stage 2 \u00e2\u20ac\u201d FaceDetailer (Impact Pack 2-cycle)",
+      "bounding": [
+        1680,
+        40,
+        780,
+        680
+      ],
+      "color": "#3a1a5c"
+    },
+    {
+      "title": "Stage 3 \u00e2\u20ac\u201d 4K AI Upscale (NMKD Superscale)",
+      "bounding": [
+        2060,
+        680,
+        1100,
+        280
+      ],
+      "color": "#1a5c2a"
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.45,
+      "offset": [
+        0,
+        0
+      ]
+    },
+    "workflowRendererVersion": "Vue-corrected",
+    "frontendVersion": "1.41.21"
+  },
+  "version": 0.4
+}
