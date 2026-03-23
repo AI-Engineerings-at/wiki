@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 48">
+  <rect width="64" height="48" rx="6" fill="#1e293b"/>
+  <!-- Balance scale -->
+  <!-- Center pole -->
+  <line x1="32" y1="10" x2="32" y2="42" stroke="#94a3b8" stroke-width="2.5"/>
+  <!-- Base -->
+  <rect x="22" y="40" width="20" height="4" rx="2" fill="#94a3b8"/>
+  <!-- Beam -->
+  <rect x="10" y="16" width="44" height="3" rx="1.5" fill="#4262FF"/>
+  <!-- Pivot point -->
+  <circle cx="32" cy="17" r="3" fill="#94a3b8"/>
+  <!-- Left pan string -->
+  <line x1="14" y1="19" x2="14" y2="28" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="10" y1="19" x2="18" y2="19" stroke="#94a3b8" stroke-width="1.5"/>
+  <!-- Right pan string -->
+  <line x1="50" y1="19" x2="50" y2="28" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="46" y1="19" x2="54" y2="19" stroke="#94a3b8" stroke-width="1.5"/>
+  <!-- Left pan -->
+  <path d="M8,28 Q14,32 20,28" fill="none" stroke="#4262FF" stroke-width="2"/>
+  <!-- Right pan -->
+  <path d="M44,28 Q50,32 56,28" fill="none" stroke="#4262FF" stroke-width="2"/>
+  <!-- Items on pans -->
+  <circle cx="14" cy="26" r="3" fill="#4262FF" opacity="0.7"/>
+  <circle cx="50" cy="26" r="3" fill="#94a3b8" opacity="0.7"/>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 48">
+  <rect width="64" height="48" rx="6" fill="#1e293b"/>
+  <!-- Open lock body -->
+  <rect x="18" y="26" width="28" height="18" rx="3" fill="#4262FF"/>
+  <!-- Lock shackle (open - shifted up and to the right) -->
+  <path d="M38,26 L38,18 Q38,10 28,10 Q18,10 18,18 L18,22" fill="none" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
+  <!-- Keyhole -->
+  <circle cx="32" cy="34" r="4" fill="#1e293b"/>
+  <rect x="30" y="34" width="4" height="5" rx="1" fill="#1e293b"/>
+</svg>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 48">
+  <rect width="64" height="48" rx="6" fill="#1e293b"/>
+  <!-- Server/cube isometric -->
+  <!-- Top face -->
+  <polygon points="32,8 52,18 32,28 12,18" fill="#4262FF"/>
+  <!-- Left face -->
+  <polygon points="12,18 32,28 32,40 12,30" fill="#2d4ed8"/>
+  <!-- Right face -->
+  <polygon points="52,18 32,28 32,40 52,30" fill="#94a3b8"/>
+  <!-- Server rack lines on right face -->
+  <line x1="35" y1="30" x2="50" y2="24" stroke="#1e293b" stroke-width="1" opacity="0.5"/>
+  <line x1="35" y1="33" x2="50" y2="27" stroke="#1e293b" stroke-width="1" opacity="0.5"/>
+  <line x1="35" y1="36" x2="50" y2="30" stroke="#1e293b" stroke-width="1" opacity="0.5"/>
+</svg>

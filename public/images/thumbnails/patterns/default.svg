@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 48">
+  <rect width="64" height="48" rx="6" fill="#1e293b"/>
+  <!-- Circular flow pattern -->
+  <!-- Outer ring arrows suggesting orchestration loop -->
+  <circle cx="32" cy="24" r="14" fill="none" stroke="#4262FF" stroke-width="2" stroke-dasharray="6,3"/>
+  <!-- Nodes at cardinal points -->
+  <circle cx="32" cy="10" r="4" fill="#4262FF"/>
+  <circle cx="46" cy="24" r="4" fill="#4262FF"/>
+  <circle cx="32" cy="38" r="4" fill="#94a3b8"/>
+  <circle cx="18" cy="24" r="4" fill="#94a3b8"/>
+  <!-- Center hub -->
+  <circle cx="32" cy="24" r="5" fill="#2d4ed8"/>
+  <!-- Arrow indicator -->
+  <polygon points="32,6 35,11 29,11" fill="#94a3b8"/>
+</svg>

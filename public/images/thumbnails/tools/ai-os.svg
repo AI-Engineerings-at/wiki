@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 48">
+  <rect width="64" height="48" rx="6" fill="#1e293b"/>
+  <!-- Terminal window -->
+  <rect x="8" y="10" width="48" height="32" rx="3" fill="#0f172a"/>
+  <!-- Title bar -->
+  <rect x="8" y="10" width="48" height="8" rx="3" fill="#334155"/>
+  <rect x="8" y="14" width="48" height="4" fill="#334155"/>
+  <!-- Window controls -->
+  <circle cx="16" cy="14" r="2" fill="#ef4444"/>
+  <circle cx="23" cy="14" r="2" fill="#f59e0b"/>
+  <circle cx="30" cy="14" r="2" fill="#22c55e"/>
+  <!-- Terminal prompt -->
+  <text x="13" y="28" font-family="monospace" font-size="7" fill="#4262FF">$</text>
+  <rect x="19" y="23" width="16" height="2" rx="1" fill="#94a3b8"/>
+  <!-- Cursor blink -->
+  <rect x="37" y="23" width="4" height="6" rx="0.5" fill="#4262FF"/>
+  <!-- Second line -->
+  <rect x="13" y="31" width="24" height="2" rx="1" fill="#4ade80" opacity="0.7"/>
+  <!-- Third line -->
+  <rect x="13" y="36" width="10" height="2" rx="1" fill="#94a3b8" opacity="0.5"/>
+</svg>

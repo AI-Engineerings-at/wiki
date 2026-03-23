@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 48">
+  <rect width="64" height="48" rx="6" fill="#1e293b"/>
+  <!-- Package box -->
+  <rect x="10" y="18" width="34" height="24" rx="2" fill="#4262FF"/>
+  <!-- Box top/lid -->
+  <polygon points="10,18 44,18 50,12 16,12" fill="#2d4ed8"/>
+  <!-- Box side -->
+  <polygon points="44,18 50,12 50,36 44,42" fill="#1e3a5f"/>
+  <!-- Package tape/ribbon -->
+  <line x1="27" y1="18" x2="27" y2="42" stroke="#94a3b8" stroke-width="2"/>
+  <line x1="10" y1="30" x2="44" y2="30" stroke="#94a3b8" stroke-width="2"/>
+  <!-- n8n badge -->
+  <circle cx="50" cy="36" r="8" fill="#EA4B71"/>
+  <text x="47" y="39" font-family="monospace" font-size="6" fill="white" font-weight="bold">n8</text>
+</svg>

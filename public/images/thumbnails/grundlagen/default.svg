@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 48">
+  <rect width="64" height="48" rx="6" fill="#1e293b"/>
+  <!-- Lightbulb -->
+  <!-- Bulb top -->
+  <path d="M32,8 Q44,8 44,20 Q44,28 38,32 L26,32 Q20,28 20,20 Q20,8 32,8 Z" fill="#f59e0b"/>
+  <!-- Bulb filament glow -->
+  <ellipse cx="32" cy="20" rx="6" ry="6" fill="#fde68a" opacity="0.5"/>
+  <!-- Base rings -->
+  <rect x="26" y="32" width="12" height="3" rx="1" fill="#94a3b8"/>
+  <rect x="27" y="36" width="10" height="3" rx="1" fill="#94a3b8"/>
+  <rect x="28" y="40" width="8" height="2" rx="1" fill="#94a3b8"/>
+  <!-- Light rays -->
+  <line x1="32" y1="4" x2="32" y2="7" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+  <line x1="44" y1="7" x2="42" y2="9" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+  <line x1="20" y1="7" x2="22" y2="9" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+  <line x1="48" y1="20" x2="45" y2="20" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+  <line x1="16" y1="20" x2="19" y2="20" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+</svg>

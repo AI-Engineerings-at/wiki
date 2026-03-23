@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 48">
+  <rect width="64" height="48" rx="6" fill="#1e293b"/>
+  <!-- Llama head outline -->
+  <!-- Neck -->
+  <rect x="27" y="30" width="10" height="12" rx="2" fill="#4262FF"/>
+  <!-- Head -->
+  <ellipse cx="32" cy="26" rx="10" ry="9" fill="#4262FF"/>
+  <!-- Ears -->
+  <ellipse cx="23" cy="18" rx="3" ry="5" fill="#4262FF"/>
+  <ellipse cx="41" cy="18" rx="3" ry="5" fill="#4262FF"/>
+  <!-- Eyes -->
+  <circle cx="28" cy="24" r="2" fill="#1e293b"/>
+  <circle cx="36" cy="24" r="2" fill="#1e293b"/>
+  <!-- Snout -->
+  <ellipse cx="32" cy="30" rx="5" ry="3" fill="#94a3b8"/>
+  <!-- Nose -->
+  <circle cx="30" cy="29" r="1" fill="#1e293b"/>
+  <circle cx="34" cy="29" r="1" fill="#1e293b"/>
+</svg>

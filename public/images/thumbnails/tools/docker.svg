@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 48">
+  <rect width="64" height="48" rx="6" fill="#1e293b"/>
+  <!-- Docker whale body -->
+  <ellipse cx="32" cy="30" rx="18" ry="9" fill="#2496ED"/>
+  <!-- Container boxes on whale -->
+  <rect x="17" y="18" width="7" height="5" rx="1" fill="#4262FF"/>
+  <rect x="26" y="18" width="7" height="5" rx="1" fill="#4262FF"/>
+  <rect x="35" y="18" width="7" height="5" rx="1" fill="#4262FF"/>
+  <rect x="21" y="12" width="7" height="5" rx="1" fill="#94a3b8"/>
+  <rect x="30" y="12" width="7" height="5" rx="1" fill="#94a3b8"/>
+  <!-- Whale tail -->
+  <path d="M48 28 Q56 22 54 32 Q52 36 48 33 Z" fill="#2496ED"/>
+  <!-- Water spout -->
+  <path d="M14 27 Q10 18 13 14 Q16 18 14 27" fill="#94a3b8" opacity="0.6"/>
+</svg>
