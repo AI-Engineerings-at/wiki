@@ -3,14 +3,17 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { categories } from '../lib/articles'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export function Sidebar() {
   const pathname = usePathname() || '/'
-  const [openCategory, setOpenCategory] = useState<string | null>(() => {
+  const [openCategory, setOpenCategory] = useState<string | null>(null)
+
+  // Set initial open category after hydration to avoid server/client mismatch
+  useEffect(() => {
     const seg = pathname.split('/').filter(Boolean)[0]
-    return seg || null
-  })
+    setOpenCategory(seg || null)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <aside className="hidden lg:block w-64 shrink-0">
