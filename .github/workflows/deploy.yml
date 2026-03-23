@@ -33,10 +33,16 @@ jobs:
       - name: Install Playwright
         run: npx playwright install chromium --with-deps
 
-      - name: Run E2E tests against live wiki
-        run: npx playwright test --reporter=list
+      - name: Install serve
+        run: npm install -g serve
+
+      - name: Run E2E tests against local build
+        run: |
+          serve out -l 3939 &
+          sleep 2
+          npx playwright test --reporter=list
         env:
-          WIKI_URL: https://wiki.ai-engineering.at
+          WIKI_URL: http://localhost:3939
 
       - name: Upload test report
         uses: actions/upload-artifact@v4
