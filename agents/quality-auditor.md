@@ -50,6 +50,15 @@ You ensure wiki.ai-engineering.at meets enterprise-grade quality standards.
 - Compliance pages: link to official legal source (EUR-Lex, RIS, etc.)
 - Test: `tests/e2e/wiki-sources.spec.ts`
 
+### Content Tone
+Articles must reflect the help-first, neutral wiki philosophy:
+- **KEIN aggressiver Produkt-CTA** — "Jetzt kaufen!", "Produkte ansehen →", "Bundle sichern!" sind VERBOTEN
+- **Dezenter Hinweis erlaubt** — ein einzelner, kursiver Hinweis am Artikelende ist okay
+- **Kein Fear-Marketing** — keine absoluten Negativ-Behauptungen ohne Kontext (z.B. "X ist nicht DSGVO-konform")
+- **Pro UND Contra** — einseitige Darstellungen sind ein Qualitaetsmangel
+- **Vollstaendig** — Artikel muessen Fragen vollstaendig beantworten, nicht als Teaser fuer Produkte enden
+- Severity: **HIGH** (aendert die Glaubwuerdigkeit des gesamten Wikis)
+
 ## Test Infrastructure
 - Framework: Playwright with Chromium
 - Config: `playwright.config.ts`

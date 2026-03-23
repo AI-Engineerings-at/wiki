@@ -43,6 +43,11 @@ Before committing:
 - [ ] Alt-Texte auf Bildern?
 - [ ] DE + EN Version?
 - [ ] articles.ts updated?
+- [ ] Kein aggressiver Produkt-CTA? ("Jetzt kaufen", "Produkte ansehen →" sind VERBOTEN)
+- [ ] Neutral formuliert? (Keine absoluten Behauptungen ohne Beleg)
+- [ ] Pro UND Contra dargestellt? (Einseitige Darstellung = Qualitaetsmangel)
+- [ ] Artikel beantwortet die Frage VOLLSTAENDIG? (Kein Teaser fuer Produkte)
+- [ ] Falls Produkt-Hinweis: nur ein dezenter, kursiver Satz ganz am Ende?
 
 ### Step 5: Register
 - Add to `lib/articles.ts` (article entry + relatedArticlesMap)

@@ -34,6 +34,14 @@ Verify legal compliance of wiki content before publishing.
 - [ ] "Stand: YYYY-MM-DD" date present on compliance articles
 - [ ] Disclaimer: "Kein Ersatz fuer Rechtsberatung"
 
+### Content Neutrality (Rechtliches Risiko)
+Fear-Marketing Behauptungen sind rechtlich riskant (UWG, Irrefuehrung). Immer differenziert formulieren:
+- [ ] Keine absoluten Negativ-Claims ohne Differenzierung
+  - Falsch: "X ist nicht DSGVO-konform" → Richtig: "X KANN konform sein, WENN [Bedingungen]"
+- [ ] Keine pauschalen Diskreditierungen von Wettbewerbern
+- [ ] Rechtliche Aussagen mit Quellenbeleg versehen
+- [ ] Bei Unsicherheit: Joe fragen statt raten
+
 ## License Quick Reference
 | Source | License | Can We Use? |
 |--------|---------|-------------|

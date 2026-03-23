@@ -64,11 +64,21 @@ authors: [Author List]
 ## Architektur
 [PlantUML Diagramm]
 
-## Relevanz fuer KMU
-[Warum ist das fuer lokale AI relevant?]
+## Relevanz fuer die Praxis
+[Warum ist das relevant? Ehrliche Einschaetzung inkl. Einschraenkungen.]
+
+## Einschraenkungen und offene Fragen
+[Was loest das Paper NICHT? Wo ist weitere Forschung noetig?]
+
+## Weiterfuehrende Artikel
+- [Verwandter Wiki-Artikel 1](/link)
+- [Verwandter Wiki-Artikel 2](/link)
 
 ## Quellen
 - [Originallink]
+
+---
+*Wenn du Unterstuetzung bei der Umsetzung brauchst, findest du [Ressourcen und Templates](/products) auf ai-engineering.at.*
 ```
 
 ### Compliance News Template
@@ -77,6 +87,8 @@ authors: [Author List]
 ## Wer ist betroffen?
 ## Was muss ich tun?
 ## Deadline
+## Weiterfuehrende Artikel
+- [Verwandter Wiki-Artikel 1](/link)
 ## Quelle: [EUR-Lex/RIS Link]
 ```
 
@@ -86,6 +98,8 @@ authors: [Author List]
 ## Wichtigste Aenderungen
 ## Breaking Changes
 ## Update-Anleitung
+## Weiterfuehrende Artikel
+- [Verwandter Wiki-Artikel 1](/link)
 ## Quelle: [GitHub Release Link]
 ```
 

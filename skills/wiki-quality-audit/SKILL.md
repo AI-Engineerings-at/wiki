@@ -38,7 +38,17 @@ Run enterprise-grade quality checks on the wiki.
 - Paper pages have external source links
 - Compliance pages link to official legal sources
 
-### 5. Pages (wiki-pages.spec.ts)
+### 5. Content Tone
+Verify articles reflect the help-first, neutral wiki philosophy:
+- [ ] Kein aggressiver Produkt-CTA? ("Jetzt kaufen!", "Produkte ansehen →" = FAIL)
+- [ ] Kein Fear-Marketing? (Absolute Negativ-Behauptungen ohne Differenzierung = FAIL)
+- [ ] Einseitige Darstellung vermieden? (Pro UND Contra erwartet)
+- [ ] Artikel vollstaendig? (Endet nicht als Teaser fuer ein Produkt)
+- [ ] Produkthinweis wenn vorhanden: dezent und am Ende? (Nicht als Haupt-CTA)
+
+**Severity:** HIGH — verletzt die Grundphilosophie des Wikis
+
+### 6. Pages (wiki-pages.spec.ts)
 - All 137 pages return HTTP 200
 - All pages have visible h1
 - No console errors

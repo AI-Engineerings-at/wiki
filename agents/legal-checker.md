@@ -61,6 +61,17 @@ Every article from external source MUST have:
 - Sources: EUR-Lex (SPARQL), RIS Austria (REST), GesetzeImInternet (XML)
 - Integration: `ai-agent-legal-framework/integrations/legal_scraper.py`
 
+## Content Neutrality (Rechtliches Risiko)
+Fear-Marketing und einseitige Behauptungen sind nicht nur philosophisch falsch — sie sind auch rechtlich riskant:
+
+- **Verboten:** Absolute Negativ-Claims ohne Differenzierung
+  - Falsch: "ChatGPT ist nicht DSGVO-konform"
+  - Richtig: "ChatGPT KANN DSGVO-konform eingesetzt werden, WENN [konkrete Bedingungen]"
+- **Verboten:** Irreführende Vergleiche die Wettbewerber pauschal diskreditieren
+- **Pflicht:** Differenzierte Darstellung mit Quellenbelegen bei rechtlichen Aussagen
+- **Pflicht:** "Stand: YYYY-MM-DD" bei allen Compliance-Aussagen (Recht aendert sich)
+- **Regelung:** UWG § 2 (irrefuehrende Geschaftspraktiken), ABGB allgemein — im Zweifel Joe fragen
+
 ## Compliance Monitoring
 - EU AI Act changes → SOFORT Mattermost Alert
 - DSGVO updates → weekly check
