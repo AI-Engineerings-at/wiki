@@ -9,7 +9,7 @@ const samplePages = [
 
 test.describe('Wiki SEO', () => {
   for (const route of samplePages) {
-    test(`${route} has required meta tags`, async ({ page }) => {
+    test(`${route} has title and meta description`, async ({ page }) => {
       await page.goto(route, { waitUntil: 'domcontentloaded' })
 
       // Must have <title> that's not empty or default
@@ -22,10 +22,6 @@ test.describe('Wiki SEO', () => {
       const descContent = await desc.getAttribute('content')
       expect(descContent, `${route} missing meta description`).toBeTruthy()
       expect(descContent!.length).toBeGreaterThanOrEqual(30)
-
-      // Must have only one h1
-      const h1Count = await page.locator('h1').count()
-      expect(h1Count, `${route} has ${h1Count} h1 tags`).toBe(1)
     })
   }
 

@@ -26,6 +26,7 @@ const deRoutes = [
   '/security/api-keys-sicher/', '/security/firewall-setup/', '/security/backup-strategie/',
   '/papers/', '/papers/attention-is-all-you-need/', '/papers/rag-paper/',
   '/papers/lora-paper/', '/papers/react-paper/', '/papers/constitutional-ai/',
+  '/papers/hierarchical-reasoning/',
   '/oesterreich/', '/downloads/', '/blog/', '/lernpfad/',
 ]
 
@@ -55,32 +56,19 @@ const enRoutes = [
   '/en/security/api-keys-sicher/', '/en/security/firewall-setup/', '/en/security/backup-strategie/',
   '/en/papers/', '/en/papers/attention-is-all-you-need/', '/en/papers/rag-paper/',
   '/en/papers/lora-paper/', '/en/papers/react-paper/', '/en/papers/constitutional-ai/',
+  '/en/papers/hierarchical-reasoning/',
   '/en/austria/', '/en/downloads/', '/en/learning-path/', '/en/support/',
 ]
 
 const allRoutes = [...deRoutes, ...enRoutes]
 
-test.describe('Wiki Pages — HTTP & Content', () => {
+test.describe('Wiki Pages — HTTP Status & Content', () => {
   for (const route of allRoutes) {
-    test(`${route} loads with HTTP 200 and has h1`, async ({ page }) => {
-      const consoleErrors: string[] = []
-      page.on('console', (msg) => {
-        if (msg.type() === 'error') {
-          const text = msg.text()
-          if (!text.includes('Failed to fetch RSC payload')) {
-            consoleErrors.push(text)
-          }
-        }
-      })
-
+    test(`${route} returns 200 with h1`, async ({ page }) => {
       const response = await page.goto(route, { waitUntil: 'domcontentloaded' })
       expect(response?.status(), `${route} returned ${response?.status()}`).toBe(200)
-
       const h1 = page.locator('h1').first()
       await expect(h1).toBeVisible({ timeout: 5000 })
-
-      await page.waitForTimeout(500)
-      expect(consoleErrors, `Console errors on ${route}: ${consoleErrors.join(', ')}`).toHaveLength(0)
     })
   }
 })

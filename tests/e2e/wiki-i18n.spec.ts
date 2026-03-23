@@ -1,21 +1,15 @@
 import { test, expect } from '@playwright/test'
 
-test.describe('Wiki i18n — Language Parity', () => {
-  test('DE homepage has correct h1', async ({ page }) => {
-    await page.goto('/')
+test.describe('Wiki i18n', () => {
+  test('DE homepage loads with correct h1', async ({ page }) => {
+    const resp = await page.goto('/', { waitUntil: 'domcontentloaded' })
+    expect(resp?.status()).toBe(200)
     await expect(page.locator('h1')).toContainText('AI Engineering')
   })
 
-  test('EN homepage has correct h1', async ({ page }) => {
-    await page.goto('/en/')
+  test('EN homepage loads with correct h1', async ({ page }) => {
+    const resp = await page.goto('/en/', { waitUntil: 'domcontentloaded' })
+    expect(resp?.status()).toBe(200)
     await expect(page.locator('h1')).toContainText('AI Engineering')
-  })
-
-  test('DE and EN homepages both load', async ({ page }) => {
-    const deResp = await page.goto('/', { waitUntil: 'domcontentloaded' })
-    expect(deResp?.status()).toBe(200)
-
-    const enResp = await page.goto('/en/', { waitUntil: 'domcontentloaded' })
-    expect(enResp?.status()).toBe(200)
   })
 })
