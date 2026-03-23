@@ -304,16 +304,14 @@ sudo fail2ban-client status sshd`}</code>
             <p>
               Erstelle ein dediziertes Security-Dashboard mit fail2ban-Bans,
               SSH-Logins, API-Fehlerraten und Disk-Nutzung auf einen Blick. So
-              siehst du in 5 Sekunden ob etwas nicht stimmt. Unser{" "}
+              siehst du in 5 Sekunden ob etwas nicht stimmt. Im{" "}
               <a
-                href="https://www.ai-engineering.at"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/tools/grafana-monitoring"
                 className="text-blue-400 hover:underline"
               >
-                Grafana Homelab Dashboard Pack
+                Grafana Monitoring Guide
               </a>{" "}
-              enthält vorgefertigte Security-Panels.
+              findest du Anleitungen fuer Security-Panels.
             </p>
           </Callout>
         </section>

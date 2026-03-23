@@ -72,23 +72,22 @@ export default function DSGVOGrundlagenPage() {
           <ul className="text-green-300 space-y-2">
             <li>✅ <strong>No third-country transfer</strong> — Data stays in EU</li>
             <li>✅ <strong>Full control</strong> — You decide who has access</li>
-            <li>✅ <strong>No cloud risk</strong> — No USA Patriot Act danger</li>
+            <li>✅ <strong>No third-country transfer needed</strong> — Data stays in the EU (Art. 44 ff. GDPR)</li>
             <li>✅ <strong>Easy documentation</strong> — All on your hardware</li>
             <li>✅ <strong>Fast deletion</strong> — Physical control over data</li>
           </ul>
         </div>
       </div>
 
-      <div className="mt-12 pt-8 border-t border-white/10 text-center">
-        <p className="text-sm text-slate-500">
-          All wiki articles are free. Looking for ready-made templates and bundles?
+      <div className="mt-12 pt-8 border-t border-white/10 text-center text-sm text-slate-600">
+        <p>Related articles:{' '}
+          <a href="/en/compliance/eu-ai-act" className="text-blue-400 hover:text-blue-300">EU AI Act</a>
+          {' · '}
+          <a href="/en/compliance/chatbot-transparenzpflichten" className="text-blue-400 hover:text-blue-300">Chatbot Transparency</a>
         </p>
-        <a
-          href="https://www.ai-engineering.at"
-          className="text-sm text-blue-400 hover:text-blue-300 transition-colors mt-2 inline-block"
-        >
-          View Products & Bundles →
-        </a>
+        <p className="mt-2 italic text-slate-700">
+          For implementation support, find <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">resources</a> at ai-engineering.at.
+        </p>
       </div>
     </div>
   )

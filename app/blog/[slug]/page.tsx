@@ -221,17 +221,18 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         </div>
       </div>
 
-      {/* Subtle footer note — no product push */}
-      <div className="mt-12 pt-8 border-t border-white/10 text-center">
-        <p className="text-sm text-slate-500">
-          Alle Wiki-Artikel sind kostenlos. Wenn du fertige Templates und Bundles suchst:
+      {/* Wiki-internal links */}
+      <div className="mt-12 pt-8 border-t border-white/10 text-center text-sm text-slate-600">
+        <p>Weiterfuehrende Artikel:{' '}
+          <a href="/grundlagen/was-ist-ein-llm" className="text-blue-400 hover:text-blue-300">Was ist ein LLM?</a>
+          {' · '}
+          <a href="/tools/ai-tools-datenbank" className="text-blue-400 hover:text-blue-300">AI Tools Datenbank</a>
+          {' · '}
+          <a href="/lernpfad" className="text-blue-400 hover:text-blue-300">Lernpfad</a>
         </p>
-        <a
-          href="https://www.ai-engineering.at"
-          className="text-sm text-blue-400 hover:text-blue-300 transition-colors mt-2 inline-block"
-        >
-          Produkte & Bundles ansehen →
-        </a>
+        <p className="mt-2 italic text-slate-700">
+          Fuer die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
+        </p>
       </div>
 
       {/* Related Posts */}

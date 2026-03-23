@@ -292,14 +292,12 @@ sudo fail2ban-client status sshd`}</code>
               logins, API error rates, and disk usage at a glance. You can see
               in 5 seconds if something is off. Our{" "}
               <a
-                href="https://www.ai-engineering.at"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/en/tools/grafana-monitoring"
                 className="text-blue-400 hover:underline"
               >
-                Grafana Homelab Dashboard Pack
+                Grafana Monitoring Guide
               </a>{" "}
-              includes pre-built security panels.
+              covers setting up security panels.
             </p>
           </Callout>
         </section>

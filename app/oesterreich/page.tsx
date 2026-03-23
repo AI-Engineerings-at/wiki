@@ -314,13 +314,17 @@ export default function OesterreichPage() {
         </ul>
       </section>
 
-      <div className="mt-12 pt-8 border-t border-white/10 text-center">
-        <p className="text-sm text-slate-500">
-          Alle Wiki-Artikel sind kostenlos. Wenn du fertige Templates und Bundles suchst:
+      <div className="mt-12 pt-8 border-t border-white/10 text-center text-sm text-slate-600">
+        <p>Weiterfuehrende Artikel:{' '}
+          <a href="/compliance/eu-ai-act" className="text-blue-400 hover:text-blue-300">EU AI Act</a>
+          {' · '}
+          <a href="/compliance/dsgvo-grundlagen" className="text-blue-400 hover:text-blue-300">DSGVO Grundlagen</a>
+          {' · '}
+          <a href="/compliance/ki-kompetenz-art4" className="text-blue-400 hover:text-blue-300">KI-Kompetenz Art. 4</a>
         </p>
-        <a href="https://www.ai-engineering.at" className="text-sm text-blue-400 hover:text-blue-300 transition-colors mt-2 inline-block">
-          Produkte &amp; Bundles ansehen →
-        </a>
+        <p className="mt-2 italic text-slate-700">
+          Fuer die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
+        </p>
       </div>
     </div>
   )

@@ -95,16 +95,15 @@ Webhook → Ollama → Notion → Slack`}</code>
         </ol>
       </div>
 
-      <div className="mt-12 pt-8 border-t border-white/10 text-center">
-        <p className="text-sm text-slate-500">
-          All wiki articles are free. Looking for ready-made templates and bundles?
+      <div className="mt-12 pt-8 border-t border-white/10 text-center text-sm text-slate-600">
+        <p>Related articles:{' '}
+          <a href="/en/tools/n8n-workflow-bundle" className="text-blue-400 hover:text-blue-300">n8n Workflow Bundle</a>
+          {' · '}
+          <a href="/en/tools/ollama-tutorial" className="text-blue-400 hover:text-blue-300">Ollama Tutorial</a>
         </p>
-        <a
-          href="https://www.ai-engineering.at"
-          className="text-sm text-blue-400 hover:text-blue-300 transition-colors mt-2 inline-block"
-        >
-          View Products & Bundles →
-        </a>
+        <p className="mt-2 italic text-slate-700">
+          For implementation support, find <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">resources</a> at ai-engineering.at.
+        </p>
       </div>
     </div>
   )

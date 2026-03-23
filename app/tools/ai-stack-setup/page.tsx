@@ -342,16 +342,20 @@ docker compose ps
             <p>
               Dieses Tutorial deckt den Schnellstart ab. Für eine umfassende
               Anleitung mit Hardware-Empfehlungen, Network Setup, Backup-Strategie
-              und Produktionshärtung — unser{" "}
+              und Produktionshärtung findest du in den Artikeln{" "}
               <a
-                href="https://www.ai-engineering.at"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/security/self-hosted-sicherheit"
                 className="text-blue-400 hover:underline"
               >
-                Der Lokale AI-Stack Playbook
+                Self-Hosted Sicherheit
               </a>{" "}
-              führt dich durch den gesamten Prozess.
+              und{" "}
+              <a
+                href="/security/backup-strategie"
+                className="text-blue-400 hover:underline"
+              >
+                Backup-Strategie
+              </a>.
             </p>
           </Callout>
         </section>

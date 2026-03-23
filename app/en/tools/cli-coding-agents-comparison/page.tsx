@@ -702,14 +702,16 @@ export default function CLICodingAgentsComparisonPage() {
           </ul>
         </section>
 
-        <div className="mt-12 pt-8 border-t border-white/10 text-center">
-          <p className="text-sm text-slate-500">
-            All wiki articles are free. If you are looking for ready-made templates and bundles:
-          </p>
-          <a href="https://www.ai-engineering.at" className="text-sm text-blue-400 hover:text-blue-300 transition-colors mt-2 inline-block">
-            View Products &amp; Bundles →
-          </a>
-        </div>
+        <div className="mt-12 pt-8 border-t border-white/10 text-center text-sm text-slate-600">
+        <p>Related articles:{' '}
+          <a href="/en/tools/ai-tools-datenbank" className="text-blue-400 hover:text-blue-300">AI Tools Database</a>
+          {' · '}
+          <a href="/en/grundlagen/was-ist-ein-llm" className="text-blue-400 hover:text-blue-300">What is an LLM?</a>
+        </p>
+        <p className="mt-2 italic text-slate-700">
+          For implementation support, find <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">resources</a> at ai-engineering.at.
+        </p>
+      </div>
       </div>
     </div>
   )

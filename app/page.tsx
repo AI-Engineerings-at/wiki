@@ -259,8 +259,8 @@ export default function Home() {
           />
           <ExternalLink
             href="https://www.ai-engineering.at"
-            title="AI Engineering Shop"
-            description="Produkte & Bundles"
+            title="AI Engineering"
+            description="Templates & Ressourcen"
           />
           <ExternalLink
             href="https://www.wko.at/oe/gruendung/ai-toolbox.pdf"

@@ -280,14 +280,12 @@ sudo mount /dev/mapper/encrypted-data /mnt/secure-data`}</code>
               </a>{" "}
               Artikel und im{" "}
               <a
-                href="https://www.ai-engineering.at"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/compliance/datenschutz-praxis"
                 className="text-blue-400 hover:underline"
               >
-                DSGVO Compliance Bundle
-              </a>
-              .
+                Datenschutz Praxis
+              </a>{" "}
+              Artikel.
             </p>
           </Callout>
         </section>

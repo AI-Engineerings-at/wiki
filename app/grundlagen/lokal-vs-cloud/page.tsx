@@ -127,8 +127,8 @@ export default function LokalVsCloud() {
             desto mehr Calls. Oft 2-3x höher als initial geplant.
           </li>
           <li>
-            <strong>DSGVO-Risiko</strong> — Daten gehen in die USA. Art. 44 ff. DSGVO 
-            erfordert zusätzliche Maßnahmen (SCCs, TIAs). Rechtsberatung: €1.000+.
+            <strong>Drittlandtransfer pruefen</strong> — Bei US-Anbietern greift Art. 44 ff. DSGVO.
+            Zusaetzliche Massnahmen (SCCs, TIAs) sind erforderlich. Rechtsberatung empfohlen.
           </li>
           <li>
             <strong>Vendor Lock-in</strong> — Deine Prompts, Workflows, Daten sind beim 

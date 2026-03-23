@@ -1128,21 +1128,10 @@ function MilestoneCard({ percent, pathName, pathId, state, onRating, onAddCommen
     const currentRating = state.rating[pathId] || 0
 
     return (
-      <div className="bg-gradient-to-r from-emerald-500/10 to-green-500/10 border border-emerald-500/30 rounded-xl p-6 text-center space-y-5">
+      <div className="text-center p-6 bg-slate-900 rounded-xl border border-green-500/20 space-y-5">
         <div className="text-4xl">{'\u{1F389}'}</div>
-        <h4 className="text-xl font-bold text-white">Pfad abgeschlossen!</h4>
-        <p className="text-sm text-slate-400">
-          Du hast alle Stages durchgearbeitet. Hier ist dein Rabattcode:
-        </p>
-        <div className="inline-block bg-slate-950 border-2 border-emerald-500/50 rounded-lg px-6 py-3">
-          <span className="text-2xl font-black text-emerald-400 tracking-widest">WIKI20</span>
-        </div>
-        <p className="text-xs text-slate-500">
-          20% Rabatt auf alle Produkte & Kurse auf{' '}
-          <a href="https://www.ai-engineering.at" className="text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">
-            ai-engineering.at
-          </a>
-        </p>
+        <h3 className="text-xl font-bold text-white mb-2">Alle Stages abgeschlossen!</h3>
+        <p className="text-slate-400 mb-4">Du hast die Grundlagen fuer deinen lokalen AI-Stack drauf.</p>
 
         {/* Star Rating */}
         <div className="space-y-2 pt-2">
@@ -1161,32 +1150,9 @@ function MilestoneCard({ percent, pathName, pathId, state, onRating, onAddCommen
             ))}
           </div>
           {currentRating > 0 && (
-            <p className="text-xs text-slate-500">Danke für deine Bewertung!</p>
+            <p className="text-xs text-slate-500">Danke fuer deine Bewertung!</p>
           )}
         </div>
-
-        {/* Newsletter */}
-        {!state.newsletterDismissed && (
-          <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4 space-y-2">
-            <p className="text-sm text-slate-300">Willst du über neue Artikel informiert werden?</p>
-            <div className="flex justify-center gap-2">
-              <a
-                href="https://www.ai-engineering.at"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-[#4262FF] hover:bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-              >
-                Newsletter abonnieren
-              </a>
-              <button
-                onClick={onDismissNewsletter}
-                className="text-sm text-slate-500 hover:text-slate-400 px-4 py-2"
-              >
-                Nein danke
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* GitHub Star */}
         <a
@@ -1199,19 +1165,15 @@ function MilestoneCard({ percent, pathName, pathId, state, onRating, onAddCommen
           Wiki auf GitHub {'\u{2B50}'}
         </a>
 
-        {/* Course Teaser */}
-        <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4 space-y-2">
-          <p className="text-sm font-semibold text-white">Bereit für den nächsten Schritt?</p>
-          <p className="text-xs text-slate-400">Das P1 Playbook gibt dir getestete Configs, Dashboards und Templates.</p>
-          <a
-            href="https://www.ai-engineering.at/products"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block bg-[#4262FF] hover:bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-          >
-            Playbook P1 holen — EUR 49
-          </a>
+        <p className="text-slate-500 text-sm">Weiterlesen:</p>
+        <div className="flex flex-wrap justify-center gap-3 mt-3">
+          <a href="/patterns/agent-orchestration-patterns" className="text-blue-400 hover:text-blue-300 text-sm">Agent Orchestration</a>
+          <a href="/security/self-hosted-sicherheit" className="text-blue-400 hover:text-blue-300 text-sm">Security Hardening</a>
+          <a href="/compliance/eu-ai-act" className="text-blue-400 hover:text-blue-300 text-sm">EU AI Act</a>
         </div>
+        <p className="mt-4 italic text-slate-700 text-xs">
+          Fuer die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
+        </p>
       </div>
     )
   }
@@ -1744,30 +1706,20 @@ export default function LernpfadPage() {
         </>
       )}
 
-      {/* Bottom CTA */}
-      <div className="bg-slate-900 border border-slate-700 rounded-xl p-8 text-center">
-        <h2 className="text-xl font-bold text-white mb-2">
-          Bereit für den kompletten Stack?
-        </h2>
-        <p className="text-slate-400 text-sm mb-6 max-w-md mx-auto">
-          Das P1 Playbook gibt dir getestete Configs, Grafana-Dashboards,
-          n8n-Templates und DSGVO-Checklisten für deinen lokalen AI-Stack.
+      {/* Next steps */}
+      <section className="text-center py-8">
+        <h2 className="text-2xl font-bold text-white mb-3">Und jetzt?</h2>
+        <p className="text-slate-400 max-w-lg mx-auto mb-6">
+          Du hast das Fundament. Jetzt geht es an die Vertiefung — Patterns, Security, Compliance.
         </p>
-        <div className="flex flex-wrap justify-center gap-3">
-          <a
-            href="https://www.ai-engineering.at/products"
-            className="bg-[#4262FF] hover:bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
-          >
-            Playbook P1 holen — EUR 49
-          </a>
-          <a
-            href="https://www.ai-engineering.at"
-            className="bg-slate-800 hover:bg-slate-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
-          >
-            Kostenlose Beratung
-          </a>
+        <div className="flex flex-wrap justify-center gap-4">
+          <a href="/patterns/" className="bg-slate-800 hover:bg-slate-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors">Patterns entdecken</a>
+          <a href="/security/" className="bg-slate-800 hover:bg-slate-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors">Security vertiefen</a>
         </div>
-      </div>
+        <p className="mt-6 italic text-slate-700 text-xs">
+          Fuer die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
+        </p>
+      </section>
     </div>
   )
 }
