@@ -11,6 +11,7 @@ export type Article = {
   categoryLabel: string
   date: string
   popular?: boolean
+  thumbnail?: string  // Path to thumbnail image in /images/thumbnails/
 }
 
 export type Category = {

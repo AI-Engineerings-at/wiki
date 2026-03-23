@@ -145,6 +145,24 @@ Der Content Processor (`content_processor.py`) auf dem Social Poster erzwingt di
 
 Kein Content wird ohne Humanizer + Sanitizer veroeffentlicht.
 
+## Bilder & Thumbnails
+
+### Kachel-Bilder (Thumbnails)
+- Groesse: 200x150px Display, 512x384px Source
+- Format: WebP bevorzugt, PNG Fallback
+- Max Dateigroesse: 50KB
+- Pfad: /public/images/thumbnails/<kategorie>/<slug>.webp
+- Alt-Text: Immer beschreibend ("Docker Logo" nicht "Bild")
+- Fallback: Kategorie-Emoji wenn kein Thumbnail vorhanden
+
+### Bild-Prioritaeten
+1. Offizielle Tool-Logos (Docker, Ollama, n8n, etc.)
+2. ComfyUI-generierte Bilder (Konzepte ohne Logo)
+3. Emoji (NUR als Fallback fuer kleine Elemente)
+
+### Grosses Emoji als Hauptbild = VERBOTEN
+Grosse Emojis als Hauptbild wirken unprofessionell. Immer echtes Bild verwenden.
+
 ## 10. Qualitaets-Checkliste
 
 - [ ] Du-Form verwendet
