@@ -2,11 +2,12 @@
 
 import { WikiLink as Link } from './WikiLink'
 import { usePathname } from 'next/navigation'
-import { categories } from '../lib/articles'
+import { categories, getEnHref } from '../lib/articles'
 import { useState, useEffect } from 'react'
 
 export function Sidebar() {
   const pathname = usePathname() || '/'
+  const isEn = pathname.startsWith('/en/')
   const [openCategory, setOpenCategory] = useState<string | null>(null)
 
   // Set initial open category after hydration to avoid server/client mismatch
@@ -52,9 +53,9 @@ export function Sidebar() {
               {isOpen && (
                 <div className="ml-4 mt-1 space-y-0.5 border-l border-slate-800 pl-3">
                   <Link
-                    href={cat.href}
+                    href={isEn ? getEnHref(cat.href) : cat.href}
                     className={`block px-2 py-1.5 text-xs rounded transition-colors ${
-                      pathname === cat.href
+                      pathname === (isEn ? getEnHref(cat.href) : cat.href)
                         ? 'text-blue-400'
                         : 'text-slate-500 hover:text-slate-300'
                     }`}
@@ -64,9 +65,9 @@ export function Sidebar() {
                   {cat.articles.map((article) => (
                     <Link
                       key={article.href}
-                      href={article.href}
+                      href={isEn ? getEnHref(article.href) : article.href}
                       className={`block px-2 py-1.5 text-xs rounded transition-colors ${
-                        pathname === article.href
+                        pathname === (isEn ? getEnHref(article.href) : article.href)
                           ? 'text-blue-400 bg-blue-500/5'
                           : 'text-slate-500 hover:text-slate-300'
                       }`}

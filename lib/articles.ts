@@ -298,6 +298,7 @@ export const deToEnSlugMap: Record<string, string> = {
   '/tools/open-source-projekte': '/tools/open-source-projects',
   '/tools/vergleich-alternativen': '/tools/comparison-alternatives',
   '/patterns/ai-agent-digitaler-mitarbeiter': '/patterns/ai-agent-digital-employee',
+  '/oesterreich': '/austria',
 }
 
 /**
