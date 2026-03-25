@@ -11,8 +11,11 @@ Erstellt und verwaltet Bilder fuer die Wiki: Thumbnails fuer Kacheln, Hero-Bilde
 
 ## Regeln
 - Siehe `.claude/rules/01-wiki-rules.md` — Bild-Regeln sind PFLICHT
-- ComfyUI API: `http://10.40.10.90:8188/prompt`
-- Workflow: `phantom-ai/n8n-workflows/comfyui-media-generator.json`
+- **NICHT direkt an ComfyUI API senden!** Social Poster nutzen (Gotcha 15)
+- Social Poster: `POST http://10.40.10.99:8099/generate-image` mit `quality: hq`
+- Zentral-Index: `phantom-ai/.claude/knowledge/COMFYUI-INDEX.md`
+- Max Resolution: 1024x1024 (1344x1344 crasht auf RTX 3090)
+- ComfyUI Image: comfyui-prod:v4-pinned mit --disable-pinned-memory
 - Bilder speichern in: `/public/images/thumbnails/` (Kacheln) oder `/public/images/` (Hero)
 - Lizenz-Checkliste: Docker (Apache 2.0), Ollama (MIT), n8n (Sustainable Use), Grafana (AGPL), Proxmox (AGPL), Mattermost (MIT)
 
