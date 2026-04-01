@@ -95,8 +95,41 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const twitterShareUrl = `https://x.com/intent/tweet?text=${shareTitle}&url=${encodeURIComponent(shareUrl)}`
   const linkedInShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`
 
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": post.title,
+    "description": post.summary || post.title,
+    "datePublished": post.date,
+    "dateModified": post.date,
+    "author": {
+      "@type": "Person",
+      "name": post.author || "AI Engineering Team"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "AI Engineering",
+      "url": "https://ai-engineering.at",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://wiki.ai-engineering.at/android-chrome-512x512.png"
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": shareUrl
+    },
+    ...(heroImage ? { "image": `https://wiki.ai-engineering.at${heroImage}` } : {}),
+    "keywords": post.tags.join(", "),
+    "inLanguage": post.slug.match(/-en$|english|step-by-step|first-chatbot|basics-for|instead-of-cloud|what-is|local-ai-research/) ? "en" : "de"
+  }
+
   return (
     <div className="max-w-4xl mx-auto">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-slate-500 mb-8">
         <Link href="/blog" className="hover:text-blue-400 transition-colors">

@@ -4,6 +4,38 @@ import { SiteFooter } from '../components/SiteFooter'
 import { ClientLayout } from '../components/ClientLayout'
 import './globals.css'
 
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "AI Engineering",
+  "url": "https://ai-engineering.at",
+  "logo": "https://wiki.ai-engineering.at/android-chrome-512x512.png",
+  "description": "Sovereign AI Platform for DACH SMEs — local AI systems, GDPR-compliant, auditable, production-ready.",
+  "email": "info@ai-engineering.at",
+  "address": {
+    "@type": "PostalAddress",
+    "addressCountry": "AT"
+  },
+  "sameAs": [
+    "https://www.ai-engineering.at",
+    "https://wiki.ai-engineering.at"
+  ]
+}
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "AI Engineering Wiki",
+  "url": "https://wiki.ai-engineering.at",
+  "description": "Deutschsprachige Wissensbasis fuer AI Engineering, Sovereign AI und EU AI Act Compliance. 100+ kostenlose Artikel.",
+  "inLanguage": ["de", "en"],
+  "publisher": {
+    "@type": "Organization",
+    "name": "AI Engineering",
+    "url": "https://ai-engineering.at"
+  }
+}
+
 export const metadata: Metadata = {
   title: {
     default: 'AI Engineering Wiki — Kostenloses Wissen über lokale KI, DSGVO und Automatisierung',
@@ -26,6 +58,11 @@ export const metadata: Metadata = {
     type: 'website',
     images: [{ url: '/images/og-image.png', width: 1200, height: 630, alt: 'AI Engineering Wiki' }],
   },
+  alternates: {
+    types: {
+      'application/rss+xml': '/feed.xml',
+    },
+  },
 }
 
 export default function RootLayout({
@@ -35,6 +72,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="de">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        />
+      </head>
       <body className="min-h-screen flex flex-col" suppressHydrationWarning>
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:bg-[#4262FF] focus:text-white focus:px-4 focus:py-2 focus:rounded">
           Zum Inhalt springen

@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>AI Engineering Wiki — Blog</title>
+    <link>https://wiki.ai-engineering.at/blog</link>
+    <description>Praxis-Artikel zu lokalem AI-Stack, DSGVO-Compliance, Agent Orchestration und Automatisierung. Aus der Praxis in Oesterreich.</description>
+    <language>de-at</language>
+    <lastBuildDate>Mon, 31 Mar 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://wiki.ai-engineering.at/feed.xml" rel="self" type="application/rss+xml"/>
+    <image>
+      <url>https://wiki.ai-engineering.at/android-chrome-512x512.png</url>
+      <title>AI Engineering Wiki</title>
+      <link>https://wiki.ai-engineering.at</link>
+    </image>
+    <item>
+      <title>n8n AI Workflow Bundle v3: 14 Enterprise-Workflows fuer lokale Automatisierung</title>
+      <link>https://wiki.ai-engineering.at/blog/2026-03-22-n8n-ai-workflow-bundle-v3</link>
+      <guid isPermaLink="true">https://wiki.ai-engineering.at/blog/2026-03-22-n8n-ai-workflow-bundle-v3</guid>
+      <pubDate>Sun, 22 Mar 2026 00:00:00 +0000</pubDate>
+      <description>14 produktionsreife n8n-Workflows mit Error Handling, Dual-LLM-Fallback, DSGVO-Compliance und Monitoring. Was drin ist, warum v3 und fuer wen.</description>
+      <dc:creator>AI Engineering</dc:creator>
+    </item>
+    <item>
+      <title>TuneForge: Spezialisierte KI-Modelle lokal benchmarken und fine-tunen</title>
+      <link>https://wiki.ai-engineering.at/blog/tuneforge-self-finetune-stack</link>
+      <guid isPermaLink="true">https://wiki.ai-engineering.at/blog/tuneforge-self-finetune-stack</guid>
+      <pubDate>Tue, 17 Mar 2026 00:00:00 +0000</pubDate>
+      <description>TuneForge bringt benchmark-first Self-Finetuning, Docker-First-Betrieb und reproduzierbare Release-Bundles auf reale Hardware.</description>
+      <dc:creator>AI Engineering</dc:creator>
+    </item>
+    <item>
+      <title>Was ist ein Large Language Model? Erklaert ohne Buzzwords</title>
+      <link>https://wiki.ai-engineering.at/blog/2026-03-12-was-ist-ein-llm</link>
+      <guid isPermaLink="true">https://wiki.ai-engineering.at/blog/2026-03-12-was-ist-ein-llm</guid>
+      <pubDate>Thu, 12 Mar 2026 00:00:00 +0000</pubDate>
+      <description>LLM, GPT, Transformer — was steckt wirklich dahinter? Eine ehrliche Erklaerung ohne Marketing-Sprache.</description>
+      <dc:creator>AI Engineering</dc:creator>
+    </item>
+    <item>
+      <title>What Is a Large Language Model? Explained Without Buzzwords</title>
+      <link>https://wiki.ai-engineering.at/blog/2026-03-12-what-is-a-large-language-model</link>
+      <guid isPermaLink="true">https://wiki.ai-engineering.at/blog/2026-03-12-what-is-a-large-language-model</guid>
+      <pubDate>Thu, 12 Mar 2026 00:00:00 +0000</pubDate>
+      <description>LLM, GPT, Transformer — what's actually going on inside? An honest explanation without marketing speak.</description>
+      <dc:creator>AI Engineering</dc:creator>
+    </item>
+    <item>
+      <title>Warum du kein ChatGPT im Unternehmen nutzen solltest</title>
+      <link>https://wiki.ai-engineering.at/blog/2026-03-12-warum-lokale-ki-statt-cloud</link>
+      <guid isPermaLink="true">https://wiki.ai-engineering.at/blog/2026-03-12-warum-lokale-ki-statt-cloud</guid>
+      <pubDate>Thu, 12 Mar 2026 00:00:00 +0000</pubDate>
+      <description>DSGVO Art. 5, EU AI Act, Datentransfer in die USA: Die drei Gruende warum Self-Hosted AI fuer Unternehmen Pflicht ist.</description>
+      <dc:creator>AI Engineering</dc:creator>
+    </item>
+    <item>
+      <title>Why You Shouldn't Use ChatGPT at Work</title>
+      <link>https://wiki.ai-engineering.at/blog/2026-03-12-why-local-ai-instead-of-cloud</link>
+      <guid isPermaLink="true">https://wiki.ai-engineering.at/blog/2026-03-12-why-local-ai-instead-of-cloud</guid>
+      <pubDate>Thu, 12 Mar 2026 00:00:00 +0000</pubDate>
+      <description>GDPR Art. 5, EU AI Act, data transfer to the US: three reasons why self-hosted AI is mandatory for European companies.</description>
+      <dc:creator>AI Engineering</dc:creator>
+    </item>
+    <item>
+      <title>Docker fuer AI: Warum Container deinen Stack production-ready machen</title>
+      <link>https://wiki.ai-engineering.at/blog/2026-03-12-docker-grundlagen-fuer-ai</link>
+      <guid isPermaLink="true">https://wiki.ai-engineering.at/blog/2026-03-12-docker-grundlagen-fuer-ai</guid>
+      <pubDate>Thu, 12 Mar 2026 00:00:00 +0000</pubDate>
+      <description>Ohne Docker laeuft dein AI-Stack nur auf deinem Rechner. Mit Docker laeuft er ueberall.</description>
+      <dc:creator>AI Engineering</dc:creator>
+    </item>
+    <item>
+      <title>Docker for AI: Why Containers Make Your Stack Production-Ready</title>
+      <link>https://wiki.ai-engineering.at/blog/2026-03-12-docker-basics-for-ai</link>
+      <guid isPermaLink="true">https://wiki.ai-engineering.at/blog/2026-03-12-docker-basics-for-ai</guid>
+      <pubDate>Thu, 12 Mar 2026 00:00:00 +0000</pubDate>
+      <description>Without Docker, your AI stack only runs on your machine. With Docker, it runs everywhere.</description>
+      <dc:creator>AI Engineering</dc:creator>
+    </item>
+    <item>
+      <title>Ollama installieren in 5 Minuten</title>
+      <link>https://wiki.ai-engineering.at/blog/2026-03-12-ollama-installieren-schritt-fuer-schritt</link>
+      <guid isPermaLink="true">https://wiki.ai-engineering.at/blog/2026-03-12-ollama-installieren-schritt-fuer-schritt</guid>
+      <pubDate>Thu, 12 Mar 2026 00:00:00 +0000</pubDate>
+      <description>Von 0 zum laufenden lokalen LLM in 5 Minuten. Getestet auf Windows 11, macOS Sonoma und Ubuntu 24.04.</description>
+      <dc:creator>AI Engineering</dc:creator>
+    </item>
+    <item>
+      <title>Install Ollama in 5 Minutes — Step by Step</title>
+      <link>https://wiki.ai-engineering.at/blog/2026-03-12-install-ollama-step-by-step</link>
+      <guid isPermaLink="true">https://wiki.ai-engineering.at/blog/2026-03-12-install-ollama-step-by-step</guid>
+      <pubDate>Thu, 12 Mar 2026 00:00:00 +0000</pubDate>
+      <description>From zero to running local LLM in 5 minutes. Tested on Windows 11, macOS Sonoma and Ubuntu 24.04.</description>
+      <dc:creator>AI Engineering</dc:creator>
+    </item>
+    <item>
+      <title>Dein erster lokaler AI-Chatbot: Open WebUI in 10 Minuten einrichten</title>
+      <link>https://wiki.ai-engineering.at/blog/2026-03-12-open-webui-erster-chatbot</link>
+      <guid isPermaLink="true">https://wiki.ai-engineering.at/blog/2026-03-12-open-webui-erster-chatbot</guid>
+      <pubDate>Thu, 12 Mar 2026 00:00:00 +0000</pubDate>
+      <description>Ollama laeuft, aber du willst ein Browser-Interface. So richtest du Open WebUI ein.</description>
+      <dc:creator>AI Engineering</dc:creator>
+    </item>
+    <item>
+      <title>Your First Local AI Chatbot: Set Up Open WebUI in 10 Minutes</title>
+      <link>https://wiki.ai-engineering.at/blog/2026-03-12-open-webui-first-chatbot</link>
+      <guid isPermaLink="true">https://wiki.ai-engineering.at/blog/2026-03-12-open-webui-first-chatbot</guid>
+      <pubDate>Thu, 12 Mar 2026 00:00:00 +0000</pubDate>
+      <description>Ollama is running, but you want a browser interface. Here's how to set up Open WebUI.</description>
+      <dc:creator>AI Engineering</dc:creator>
+    </item>
+    <item>
+      <title>Terminal-Grundlagen fuer AI-Entwickler</title>
+      <link>https://wiki.ai-engineering.at/blog/2026-03-12-terminal-grundlagen-fuer-ai</link>
+      <guid isPermaLink="true">https://wiki.ai-engineering.at/blog/2026-03-12-terminal-grundlagen-fuer-ai</guid>
+      <pubDate>Thu, 12 Mar 2026 00:00:00 +0000</pubDate>
+      <description>Kein Informatikstudium noetig. Diese 10 Terminal-Befehle reichen um deinen eigenen AI-Stack zu starten.</description>
+      <dc:creator>AI Engineering</dc:creator>
+    </item>
+    <item>
+      <title>Terminal Basics for AI Developers</title>
+      <link>https://wiki.ai-engineering.at/blog/2026-03-12-terminal-basics-for-ai-developers</link>
+      <guid isPermaLink="true">https://wiki.ai-engineering.at/blog/2026-03-12-terminal-basics-for-ai-developers</guid>
+      <pubDate>Thu, 12 Mar 2026 00:00:00 +0000</pubDate>
+      <description>No CS degree needed. These 10 terminal commands are all you need to start your own AI stack.</description>
+      <dc:creator>AI Engineering</dc:creator>
+    </item>
+    <item>
+      <title>Karpathy AutoResearch: Lokale AI-Forschung automatisieren</title>
+      <link>https://wiki.ai-engineering.at/blog/2026-03-12-karpathy-autoresearch-lokale-ai-forschung</link>
+      <guid isPermaLink="true">https://wiki.ai-engineering.at/blog/2026-03-12-karpathy-autoresearch-lokale-ai-forschung</guid>
+      <pubDate>Thu, 12 Mar 2026 00:00:00 +0000</pubDate>
+      <description>Karpathy AutoResearch fuer lokale AI-Forschungs-Automatisierung.</description>
+      <dc:creator>AI Engineering</dc:creator>
+    </item>
+    <item>
+      <title>Karpathy AutoResearch: Local AI Research Automation</title>
+      <link>https://wiki.ai-engineering.at/blog/2026-03-12-karpathy-autoresearch-local-ai-research</link>
+      <guid isPermaLink="true">https://wiki.ai-engineering.at/blog/2026-03-12-karpathy-autoresearch-local-ai-research</guid>
+      <pubDate>Thu, 12 Mar 2026 00:00:00 +0000</pubDate>
+      <description>Karpathy AutoResearch for local AI research automation.</description>
+      <dc:creator>AI Engineering</dc:creator>
+    </item>
+    <item>
+      <title>EU AI Act: 5 Pflichten die jetzt schon gelten</title>
+      <link>https://wiki.ai-engineering.at/blog/2026-03-11-eu-ai-act-5-pflichten-die-jetzt-schon-gelten</link>
+      <guid isPermaLink="true">https://wiki.ai-engineering.at/blog/2026-03-11-eu-ai-act-5-pflichten-die-jetzt-schon-gelten</guid>
+      <pubDate>Wed, 11 Mar 2026 00:00:00 +0000</pubDate>
+      <description>5 Pflichten aus dem EU AI Act die seit Februar 2025 gelten.</description>
+      <dc:creator>AI Engineering</dc:creator>
+    </item>
+    <item>
+      <title>49 Custom Skills fuer Claude Code</title>
+      <link>https://wiki.ai-engineering.at/blog/2026-03-09-49-custom-skills</link>
+      <guid isPermaLink="true">https://wiki.ai-engineering.at/blog/2026-03-09-49-custom-skills</guid>
+      <pubDate>Sun, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <description>Wie wir 49 massgeschneiderte Skills gebaut haben, die unsere AI-Agents steuern.</description>
+      <dc:creator>AI Engineering</dc:creator>
+    </item>
+    <item>
+      <title>Agent Team Architecture</title>
+      <link>https://wiki.ai-engineering.at/blog/2026-03-09-agent-team-architecture</link>
+      <guid isPermaLink="true">https://wiki.ai-engineering.at/blog/2026-03-09-agent-team-architecture</guid>
+      <pubDate>Sun, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <description>Multi-Agent Orchestration mit Claude Code — von der Theorie zur Praxis.</description>
+      <dc:creator>AI Engineering</dc:creator>
+    </item>
+    <item>
+      <title>Skill Creation Best Practices</title>
+      <link>https://wiki.ai-engineering.at/blog/2026-03-09-skill-creation-best-practices</link>
+      <guid isPermaLink="true">https://wiki.ai-engineering.at/blog/2026-03-09-skill-creation-best-practices</guid>
+      <pubDate>Sun, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <description>Best Practices fuer die Erstellung von Custom Skills.</description>
+      <dc:creator>AI Engineering</dc:creator>
+    </item>
+  </channel>
+</rss>

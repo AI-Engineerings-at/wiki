@@ -1,4 +1,12 @@
+# wiki.ai-engineering.at — robots.txt
+# Updated 2026-04-01
+
 User-agent: *
 Allow: /
+
+# AI Agent Discovery
+# llms.txt: https://wiki.ai-engineering.at/llms.txt
+# agents.json: https://wiki.ai-engineering.at/agents.json
+# Clean Markdown: https://wiki.ai-engineering.at/md/index.json
 
 Sitemap: https://wiki.ai-engineering.at/sitemap.xml

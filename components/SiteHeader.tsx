@@ -48,6 +48,10 @@ const enToDe: Record<string, string> = Object.fromEntries(
 )
 
 function getToggleHref(pathname: string, isEn: boolean): string {
+  // Handle _not-found pages — redirect to home instead of broken paths
+  if (pathname.includes('_not-found') || pathname.includes('/_not-found')) {
+    return isEn ? '/' : '/en'
+  }
   if (isEn) {
     // Check mapping first
     if (enToDe[pathname]) return enToDe[pathname]
@@ -60,7 +64,11 @@ function getToggleHref(pathname: string, isEn: boolean): string {
 }
 
 export function SiteHeader() {
-  const pathname = usePathname() || '/'
+  const rawPathname = usePathname() || '/'
+  // Normalize _not-found paths to home — fixes language switcher on 404 pages
+  const pathname = rawPathname.includes('_not-found')
+    ? (rawPathname.startsWith('/en') ? '/en' : '/')
+    : rawPathname
   const isEn = pathname === '/en' || pathname.startsWith('/en/')
   const nav = isEn ? navEn : navDe
   const homeHref = isEn ? '/en' : '/'

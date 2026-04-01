@@ -355,3 +355,24 @@ git push origin main
 6. **MCP (comfy-pilot)** — direkter Zugriff statt SSH+Docker Chaos
 7. **Workflows in UI testbar** — JSONs im UI-Format, nicht API-Format
 8. **Bewiesener Stil** — gleicher Brand-Suffix wie 500+ Social Poster Bilder
+
+---
+
+## Joe's Quality-Tuning Feedback (angewendet)
+
+| Parameter | Vorher | Nachher | Begründung |
+|-----------|--------|---------|------------|
+| steps | 28 | **34** | Feinere Details |
+| FluxGuidance | 3.5 | **3.0** | Weniger steif/hart, natürlicher |
+| EmptyLatentImage | 1024x1024 | **1344x1344** | Größter Qualitätshebel: native Resolution |
+| ImageScaleBy 1.5x | Vorhanden | **ENTFERNT** | Lanczos Resize = Qualitätsverlust |
+| Overlay | Am Ende | Am Ende | Unverändert |
+
+**Neue HQ-Basis:** latent 1344x1344, guidance 3.0, 34 steps, euler/beta, cfg 1, kein Post-Resize.
+
+**Anpassung pro Workflow:**
+- W1 Thumbnail: 512x384, 20 steps, guidance 3.0 (Thumbnail braucht nicht 34 steps)
+- W2 Hero: 1344x768, 34 steps, guidance 3.0, KEIN Upscale
+- W3 Social HQ: 1344x1344, 34 steps, guidance 3.0, KEIN Upscale
+- W4 Blog 4K: 1344x768, 34 steps, guidance 3.0, 4x NMKD Upscale (für 4K)
+- W5 Ultra 4K: 1344x1344, 34 steps, guidance 3.0, 4x NMKD Upscale

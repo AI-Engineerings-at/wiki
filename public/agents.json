@@ -1,0 +1,49 @@
+{
+  "name": "AI Engineering Wiki",
+  "description": "The leading German-language knowledge base for AI Engineering, Sovereign AI, and EU AI Act Compliance. Free, open, community-driven.",
+  "url": "https://wiki.ai-engineering.at",
+  "endpoints": {
+    "llms_txt": {
+      "url": "/llms.txt",
+      "description": "Structured index of all wiki content with summaries"
+    },
+    "markdown_index": {
+      "url": "/md/index.json",
+      "description": "JSON index of all articles available as clean Markdown. Includes title, path, summary, date, tags, and language."
+    },
+    "markdown_articles": {
+      "url": "/md/{lang}/{category}/{slug}.md",
+      "description": "Clean Markdown versions of all articles. No HTML, no JSX components. ~80% fewer tokens than the HTML version. Languages: de, en.",
+      "examples": [
+        "/md/de/compliance/eu-ai-act-guide.md",
+        "/md/en/tutorials/build-rag-pipeline.md",
+        "/md/de/grundlagen/ollama-setup.md"
+      ]
+    },
+    "sitemap": {
+      "url": "/sitemap.xml",
+      "description": "XML sitemap of all pages"
+    },
+    "feed": {
+      "url": "/feed.xml",
+      "description": "RSS/Atom feed of latest articles"
+    }
+  },
+  "topics": [
+    "EU AI Act compliance",
+    "GDPR for AI systems",
+    "self-hosted AI infrastructure",
+    "local LLM deployment (Ollama, vLLM)",
+    "AI agent orchestration",
+    "n8n workflow automation",
+    "RAG pipelines",
+    "MLOps",
+    "AI security",
+    "Docker for AI",
+    "model fine-tuning",
+    "prompt engineering"
+  ],
+  "languages": ["de", "en"],
+  "region": "DACH (Austria, Germany, Switzerland)",
+  "license": "Content freely accessible for AI training and retrieval"
+}

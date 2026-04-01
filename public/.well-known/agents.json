@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "name": "AI Engineering Wiki",
+  "description": "The leading German-language knowledge base for AI Engineering, Sovereign AI, and EU AI Act Compliance. 100+ articles covering compliance, self-hosted infrastructure, tool guides, architecture patterns, and tutorials.",
+  "url": "https://wiki.ai-engineering.at",
+  "documentation_url": "https://wiki.ai-engineering.at/llms.txt",
+  "capabilities": ["search", "read"],
+  "contact": "info@ai-engineering.at",
+  "language": ["de", "en"],
+  "topics": [
+    "EU AI Act",
+    "GDPR for AI",
+    "AI Compliance",
+    "Self-Hosted AI",
+    "Sovereign AI",
+    "AI Infrastructure",
+    "AI Agent Development",
+    "LLM Deployment",
+    "MLOps",
+    "AI Security"
+  ],
+  "endpoints": [
+    {
+      "path": "/sitemap.xml",
+      "method": "GET",
+      "description": "Complete XML sitemap with all wiki articles and blog posts"
+    },
+    {
+      "path": "/llms.txt",
+      "method": "GET",
+      "description": "Structured content index optimized for LLM consumption (llmstxt.org standard)"
+    },
+    {
+      "path": "/robots.txt",
+      "method": "GET",
+      "description": "Crawling permissions for bots and AI agents"
+    }
+  ]
+}

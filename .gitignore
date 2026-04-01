@@ -33,6 +33,9 @@ yarn-error.log*
 Thumbs.db
 logs/
 
+# Generated Markdown for Agents (built from content/*.mdx)
+public/md/
+
 # Playwright
 playwright-report/
 test-results/

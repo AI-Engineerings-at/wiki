@@ -1,0 +1,131 @@
+# AI Engineering Wiki
+
+> The leading German-language knowledge base for AI Engineering, Sovereign AI, and EU AI Act Compliance. Free, open, community-driven.
+
+## About
+AI Engineering (ai-engineering.at) helps DACH SMEs deploy local AI systems that are GDPR-compliant, auditable, and production-ready. This wiki contains 100+ articles covering compliance, self-hosted AI infrastructure, tool guides, architecture patterns, and step-by-step tutorials.
+
+## EU AI Act & Compliance
+- [EU AI Act Guide](/compliance/eu-ai-act): Complete guide to EU AI Act requirements, timelines, and obligations
+- [EU AI Act Checklist](/compliance/eu-ai-act-checkliste): Actionable compliance checklist for businesses
+- [GDPR & AI Basics](/compliance/dsgvo-grundlagen): Data protection fundamentals for AI systems
+- [AI Competence (Art. 4)](/compliance/ki-kompetenz-art4): AI literacy requirements under Article 4
+- [Prohibited AI Practices](/compliance/verbotene-ai-praktiken): What the EU AI Act bans outright
+- [DPIA for AI](/compliance/dpia): Data Protection Impact Assessments for AI systems
+- [Chatbot Transparency](/compliance/chatbot-transparenzpflichten): Disclosure obligations for AI chatbots
+- [AI Agent Legal Framework](/compliance/ai-agent-legal-framework): Legal considerations for autonomous AI agents
+- [GDPR Compliance Check Tutorial](/en/tutorials/gdpr-compliance-check): Step-by-step GDPR compliance walkthrough
+- [EU AI Act (EN)](/en/compliance/eu-ai-act-guide): English version of the EU AI Act guide
+- [GDPR (EN)](/en/compliance/gdpr): English version of GDPR guide
+- [Risk Categories (EN)](/en/compliance/risk-categories): AI risk classification under EU AI Act
+
+## Self-Hosted AI & Infrastructure
+- [Local vs Cloud AI](/grundlagen/lokal-vs-cloud): Why local AI beats cloud for privacy and cost
+- [AI Cost Comparison](/grundlagen/ai-kosten-vergleich): Real cost analysis of local vs cloud AI
+- [AI Stack Setup Tutorial](/en/tutorials/ai-stack-setup): Complete self-hosted AI stack deployment guide
+- [Docker Compose AI Stack](/en/tutorials/docker-compose-ai-stack): Docker-based AI infrastructure setup
+- [Proxmox Setup](/tools/proxmox-setup): Virtualization platform for AI workloads
+- [AI Gateway Pattern](/en/architecture/ai-gateway-pattern): API gateway pattern for AI services
+- [Inference Server](/en/architecture/inference-server): Running your own inference server
+- [Microservices for AI](/en/architecture/microservices-for-ai): Microservice patterns for AI systems
+
+## AI Tools & Guides
+- [Ollama Tutorial](/tools/ollama-tutorial): Run LLMs locally with Ollama
+- [n8n for Beginners](/tools/n8n-fuer-anfaenger): AI workflow automation with n8n
+- [Model Selection Guide](/tools/model-selection): How to choose the right AI model
+- [RAG Guide](/tools/rag-guide): Retrieval-Augmented Generation explained
+- [MCP Servers](/tools/mcp-server): Model Context Protocol server setup
+- [Grafana Monitoring](/tools/grafana-monitoring): Monitor your AI infrastructure
+- [Docker vs Swarm](/tools/docker-vs-swarm): Container orchestration comparison
+- [Open WebUI Setup](/en/tutorials/open-webui-setup): Deploy your own ChatGPT-like interface
+- [Claude Code CLI](/en/tools/claude-code-cli): Using Claude Code as a development tool
+- [Claude Code Hooks](/en/tools/claude-code-hooks): Automation hooks for Claude Code
+- [GDPR Traffic Light](/en/tools/gdpr-traffic-light): Quick GDPR assessment tool for AI tools
+
+## Comparisons
+- [Claude vs ChatGPT](/en/comparisons/claude-vs-chatgpt): Feature comparison of major AI assistants
+- [Ollama vs Cloud LLMs](/en/comparisons/ollama-vs-cloud-llms): Local vs hosted LLM comparison
+- [n8n vs Zapier vs Make](/en/comparisons/n8n-vs-zapier-vs-make): Workflow automation platform comparison
+- [LangChain vs LlamaIndex](/en/comparisons/langchain-vs-llamaindex): RAG framework comparison
+- [Vector Databases](/en/comparisons/vector-databases): Comparing vector database options
+- [Agent Frameworks](/en/comparisons/agent-frameworks): AI agent framework comparison
+- [RAG vs Fine-Tuning](/en/comparisons/rag-vs-fine-tuning): When to use RAG vs fine-tuning
+- [Cursor vs Claude Code](/en/comparisons/cursor-vs-claude-code): AI coding assistant comparison
+
+## Architecture Patterns
+- [Agent Orchestration Patterns](/patterns/agent-orchestration-patterns): Design patterns for multi-agent systems
+- [Safety Hooks](/patterns/safety-hooks): Safety mechanisms for AI agents
+- [Memory Management](/patterns/memory-management): State and memory for AI agents
+- [Task Delegation](/patterns/task-delegation): Delegating work between AI agents
+- [Self-Improving Agents](/patterns/self-improving-agents): Agents that learn from feedback
+- [Heartbeat Monitoring](/patterns/heartbeat-monitoring): Health checking AI systems
+
+## Tutorials
+- [Build a RAG Pipeline](/en/tutorials/build-rag-pipeline): Step-by-step RAG implementation
+- [Build an AI Agent](/en/tutorials/build-ai-agent): Create your first AI agent
+- [Local LLM Setup](/en/tutorials/local-llm-setup): Complete local LLM deployment
+- [Multi-Agent Setup](/en/tutorials/multi-agent-setup): Deploy a multi-agent system
+- [Fine-Tuning Guide](/en/tutorials/fine-tuning-guide): Custom model fine-tuning
+- [Whisper Transcription](/en/tutorials/whisper-transcription): Speech-to-text with Whisper
+- [Grafana AI Monitoring](/en/tutorials/grafana-ai-monitoring): Monitoring dashboards for AI
+
+## AI Concepts
+- [What is an LLM](/grundlagen/was-ist-ein-llm): Large Language Models explained
+- [RAG Explained](/en/concepts/rag-explained): Retrieval-Augmented Generation deep dive
+- [Transformer Architecture](/en/concepts/transformer-architecture): The architecture behind modern AI
+- [LoRA Adapters](/en/concepts/lora-adapters): Efficient model adaptation
+- [Quantization](/en/concepts/quantization): Making models smaller and faster
+- [Agent Orchestration](/grundlagen/was-ist-agent-orchestration): Multi-agent system coordination
+- [Multi-Agent Systems](/grundlagen/multi-agent-systeme): Building teams of AI agents
+
+## Security
+- [API Key Security](/security/api-keys-sicher): Securing API keys for AI services
+- [Self-Hosted Security](/security/self-hosted-sicherheit): Security for self-hosted AI
+- [Prompt Injection](/en/security/prompt-injection): Defending against prompt injection attacks
+- [LLM Red Teaming](/en/security/llm-red-teaming): Testing AI systems for vulnerabilities
+
+## Research Papers
+- [Attention Is All You Need](/papers/attention-is-all-you-need): The Transformer paper explained
+- [RAG Paper](/papers/rag-paper): Original RAG research paper summary
+- [LoRA Paper](/papers/lora-paper): Low-Rank Adaptation paper summary
+- [ReAct Paper](/papers/react-paper): Reasoning and Acting in LLMs
+- [Constitutional AI](/papers/constitutional-ai): Anthropic's alignment approach
+
+## Blog (Latest)
+- [EU AI Act: 5 Obligations Already in Effect](/blog/2026-03-11-eu-ai-act-5-pflichten-die-jetzt-schon-gelten)
+- [DSGVO-Compliant AI Stack](/blog/2026-03-08-dsgvo-konformer-ai-stack)
+- [Agent Team Architecture](/blog/2026-03-09-agent-team-architecture)
+- [Ollama Self-Hosted Gotchas](/blog/2026-03-08-ollama-self-hosted-gotchas)
+- [Prompt Injection in Self-Hosted AI](/blog/2026-03-08-prompt-injection-self-hosted-ai)
+- [n8n AI Workflow Bundle v3](/blog/2026-03-22-n8n-ai-workflow-bundle-v3)
+
+## Clean Markdown for AI Agents
+All articles are available as clean Markdown (no HTML, no JSX) for token-efficient consumption:
+- Index: https://wiki.ai-engineering.at/md/index.json (all articles with metadata)
+- Format: https://wiki.ai-engineering.at/md/{lang}/{category}/{slug}.md
+- Example: https://wiki.ai-engineering.at/md/de/compliance/eu-ai-act-guide.md
+- Example: https://wiki.ai-engineering.at/md/en/tutorials/build-rag-pipeline.md
+
+### Key DE Articles (Markdown)
+- [EU AI Act Guide](/md/de/compliance/eu-ai-act-guide.md): Complete EU AI Act guide for SMEs
+- [DSGVO & AI](/md/de/compliance/dsgvo.md): GDPR fundamentals for AI systems
+- [Ollama Setup](/md/de/grundlagen/ollama-setup.md): Local LLM setup with Ollama
+- [n8n Einführung](/md/de/grundlagen/n8n-einfuehrung.md): AI workflow automation with n8n
+- [Docker für AI](/md/de/grundlagen/docker-fuer-ai.md): Docker basics for AI workloads
+- [RAG Erklärt](/md/de/konzepte/rag-erklaert.md): Retrieval-Augmented Generation explained
+- [Agent Patterns](/md/de/patterns/agent-patterns.md): Design patterns for AI agents
+- [KI-Bildgenerierung Kosten](/md/de/vergleiche/ki-bildgenerierung-kosten.md): Local vs cloud image generation costs
+
+### Key EN Articles (Markdown)
+- [EU AI Act Guide](/md/en/compliance/eu-ai-act-guide.md): English EU AI Act guide
+- [Build RAG Pipeline](/md/en/tutorials/build-rag-pipeline.md): Step-by-step RAG implementation
+- [Claude Code CLI](/md/en/tools/claude-code-cli.md): Using Claude Code as a dev tool
+- [Agent Frameworks](/md/en/comparisons/agent-frameworks.md): AI agent framework comparison
+- [Local LLM Setup](/md/en/tutorials/local-llm-setup.md): Complete local LLM deployment
+- [AI Stack Setup](/md/en/tutorials/ai-stack-setup.md): Self-hosted AI stack deployment
+
+## Contact
+- Website: https://www.ai-engineering.at
+- Wiki: https://wiki.ai-engineering.at
+- Email: info@ai-engineering.at
+- Location: Austria (DACH region)
