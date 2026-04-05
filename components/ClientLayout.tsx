@@ -6,6 +6,7 @@ import { Breadcrumbs } from './Breadcrumbs'
 import { RelatedArticles } from './RelatedArticles'
 import { ArticleFeedback } from './ArticleFeedback'
 import { EditOnGithub } from './EditOnGithub'
+import { AuthorBox } from './AuthorBox'
 import { GlobalCta } from './GlobalCta'
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
@@ -13,9 +14,10 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
   const isHomepage = pathname === '/'
   const isEn = pathname === '/en' || pathname.startsWith('/en/')
 
-  // Only show article-level components on article pages (depth >= 2, e.g. /grundlagen/was-ist-agent-orchestration)
+  // Show article-level components on article pages (depth >= 2)
   const segments = pathname.split('/').filter(Boolean)
-  const isArticlePage = segments.length >= 2 && !isEn && !pathname.startsWith('/blog/')
+  const enSegments = isEn ? segments.slice(1) : segments
+  const isArticlePage = enSegments.length >= 2 && !pathname.startsWith('/blog/')
 
   return (
     <div className="flex-1 max-w-7xl mx-auto px-4 md:px-8 py-8 w-full flex gap-8">
@@ -26,6 +28,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
 
         {children}
 
+        {isArticlePage && <AuthorBox />}
         {isArticlePage && <RelatedArticles />}
         {isArticlePage && <ArticleFeedback />}
         {isArticlePage && <EditOnGithub />}
