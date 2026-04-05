@@ -67,6 +67,28 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Lernpfad CTA — prominent, direkt nach Hero */}
+      <section className="bg-gradient-to-r from-[#4262FF]/10 to-[#31F1A8]/10 border border-[#4262FF]/20 rounded-2xl p-8">
+        <div className="flex flex-col md:flex-row items-center gap-6">
+          <div className="flex-1">
+            <div className="text-xs font-bold text-[#31F1A8] mb-2">LERNPFAD</div>
+            <h2 className="text-2xl font-bold text-white mb-2">
+              In 8 Schritten zum laufenden AI-System
+            </h2>
+            <p className="text-slate-400 text-sm">
+              Von &quot;Was ist KI?&quot; bis zu einem System das Emails beantwortet,
+              Berichte schreibt und deine Daten schuetzt. Strukturiert, Schritt fuer Schritt.
+            </p>
+          </div>
+          <Link
+            href="/lernpfad"
+            className="shrink-0 bg-[#4262FF] hover:bg-[#3550DD] text-white font-bold py-3 px-8 rounded-full transition-all hover:scale-105 text-sm"
+          >
+            Lernpfad starten →
+          </Link>
+        </div>
+      </section>
+
       {/* Quick Access — Wichtigste Themen */}
       <section>
         <h2 className="text-2xl font-bold text-white mb-2">Direkt einsteigen</h2>
@@ -258,6 +280,11 @@ export default function Home() {
             description="Aktuelle Forschung"
           />
           <ExternalLink
+            href="https://hub.ai-engineering.at"
+            title="AI Skills Hub"
+            description="668+ MCP Server & 274 Skills durchsuchen"
+          />
+          <ExternalLink
             href="https://www.ai-engineering.at"
             title="AI Engineering"
             description="Templates & Ressourcen"
@@ -335,20 +362,16 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Lernpfad CTA */}
+      {/* Lernpfad Bottom Reminder */}
       <section className="text-center py-8">
-        <h2 className="text-2xl font-bold text-white mb-3">
-          Strukturiert lernen?
-        </h2>
-        <p className="text-slate-400 max-w-lg mx-auto mb-6">
-          In 8 Schritten von &quot;Was ist KI eigentlich?&quot; bis zu einem laufenden System
-          das Emails beantwortet, Berichte schreibt und deine Daten schützt.
+        <p className="text-slate-400 max-w-lg mx-auto mb-4 text-sm">
+          Nicht sicher wo anfangen?
         </p>
         <Link
           href="/lernpfad"
           className="inline-block bg-[#4262FF] hover:bg-[#3550DD] text-white font-bold py-3 px-8 rounded-full transition-all hover:scale-105 text-sm"
         >
-          Lernpfad starten
+          Lernpfad starten →
         </Link>
       </section>
 
