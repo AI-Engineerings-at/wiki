@@ -3,6 +3,7 @@
 import { WikiLink as Link } from './WikiLink'
 import { usePathname } from 'next/navigation'
 import { categories, getArticleByHref } from '../lib/articles'
+import { ReadingTime } from './ReadingTime'
 
 export function Breadcrumbs() {
   const pathname = usePathname() || '/'
@@ -36,7 +37,7 @@ export function Breadcrumbs() {
   }
 
   return (
-    <nav aria-label="Breadcrumb" className="mb-6 text-sm">
+    <nav aria-label="Breadcrumb" className="mb-6 text-sm flex items-center justify-between">
       <ol className="flex items-center gap-2 text-slate-400">
         {crumbs.map((crumb, i) => {
           const isLast = i === crumbs.length - 1
@@ -54,6 +55,7 @@ export function Breadcrumbs() {
           )
         })}
       </ol>
+      <ReadingTime />
     </nav>
   )
 }
