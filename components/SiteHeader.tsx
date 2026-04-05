@@ -16,6 +16,7 @@ const navDe = [
   { href: '/oesterreich', label: 'Österreich', icon: '🇦🇹' },
   { href: '/downloads', label: 'Downloads', icon: '📥' },
   { href: '/blog', label: 'Blog', icon: '📝' },
+  { href: 'https://hub.ai-engineering.at', label: 'Hub', icon: '🔌' },
 ]
 
 const navEn = [
@@ -29,6 +30,7 @@ const navEn = [
   { href: '/en/austria', label: 'Austria', icon: '🇦🇹' },
   { href: '/en/downloads', label: 'Downloads', icon: '📥' },
   { href: '/blog', label: 'Blog', icon: '📝' },
+  { href: 'https://hub.ai-engineering.at/en', label: 'Hub', icon: '🔌' },
 ]
 
 // DE→EN path mappings for routes that differ between languages
