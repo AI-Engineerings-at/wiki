@@ -725,7 +725,7 @@ git push origin main
 
 - [ ] **Step 5: Monitor GitHub Actions**
 
-Watch the workflow at `https://github.com/AI-Engineerings-at/wiki/actions` — quality-gate must pass, then deploy runs.
+Watch the workflow at `https://github.com/AI-Engineering-at/wiki/actions` — quality-gate must pass, then deploy runs.
 
 - [ ] **Step 6: Re-run live Playwright test to confirm all fixes**
 

@@ -105,7 +105,7 @@ Alle wesentlichen Änderungen an der AI Engineering Wiki.
 
 ### Architektur
 - Eigene GitHub-Repo (extrahiert aus Playbook01)
-- Repo PUBLIC: github.com/AI-Engineerings-at/wiki
+- Repo PUBLIC: github.com/AI-Engineering-at/wiki
 - GitHub Actions Workflow für Cloudflare Pages Deploy
 - next.config.mjs mit `output: 'export'` für Static Export
 

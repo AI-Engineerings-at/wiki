@@ -583,7 +583,7 @@ Open `http://localhost:3939/tools/` — every article card should show a real th
 ```bash
 git push origin main
 # Wait for CI to pass
-gh run list --repo AI-Engineerings-at/wiki --limit 1
+gh run list --repo AI-Engineering-at/wiki --limit 1
 ```
 
 - [ ] **Step 5: Live verification after deploy**
