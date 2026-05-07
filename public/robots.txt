@@ -1,12 +1,81 @@
 # wiki.ai-engineering.at — robots.txt
-# Updated 2026-04-01
+# Stand: 2026-05-07
 
-User-agent: *
+# === Standard Search-Engines: alles erlauben ===
+User-agent: Googlebot
 Allow: /
 
-# AI Agent Discovery
-# llms.txt: https://wiki.ai-engineering.at/llms.txt
-# agents.json: https://wiki.ai-engineering.at/agents.json
-# Clean Markdown: https://wiki.ai-engineering.at/md/index.json
+User-agent: Bingbot
+Allow: /
 
+User-agent: DuckDuckBot
+Allow: /
+
+# === AI-Crawler — explizit erlaubt (Discoverability für AI-Search) ===
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
+# === Bulk-Scraper — blockiert (training only, keine Citation) ===
+User-agent: CCBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+# === Spezielle Pfade — Block für alle ===
+User-agent: *
+Disallow: /admin/
+Disallow: /api/internal/
+Disallow: /_next/data/
+Disallow: /tmp/
+Disallow: /draft/
+Disallow: /*?preview=
+Disallow: /*?token=
+
+# === Sitemap ===
 Sitemap: https://wiki.ai-engineering.at/sitemap.xml
+
+# === LLM-Index + Agent-Discovery ===
+# https://llmstxt.org/
+# https://wiki.ai-engineering.at/llms.txt
+# https://wiki.ai-engineering.at/agents.json
+# https://wiki.ai-engineering.at/md/index.json (Clean Markdown for AI Agents)
