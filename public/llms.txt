@@ -1,6 +1,7 @@
 # AI Engineering Wiki
+# Stand: 2026-05-07
 
-> The leading German-language knowledge base for AI Engineering, Sovereign AI, and EU AI Act Compliance. Free, open, community-driven.
+> The leading German-language knowledge base for AI Engineering, Sovereign AI, and EU AI Act Compliance. Free, open, community-driven. Maintained by AI Engineering (Eisenstadt, AT) — die österreichische Werkstatt für Legal-Aligned AI Infrastructure für DACH-KMU.
 
 ## About
 AI Engineering (ai-engineering.at) helps DACH SMEs deploy local AI systems that are GDPR-compliant, auditable, and production-ready. This wiki contains 100+ articles covering compliance, self-hosted AI infrastructure, tool guides, architecture patterns, and step-by-step tutorials.
