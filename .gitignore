@@ -39,3 +39,6 @@ public/md/
 # Playwright
 playwright-report/
 test-results/
+
+# Windows shortcut files (never belong in repo)
+*.lnk
