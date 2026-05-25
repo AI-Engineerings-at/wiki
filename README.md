@@ -8,7 +8,7 @@ Die deutschsprachige Wissensdatenbank zu Agent Orchestration, Multi-Agent System
 
 [![Next.js 14](https://img.shields.io/badge/Next.js-14.2-black?logo=next.js)](https://nextjs.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38bdf8?logo=tailwindcss)](https://tailwindcss.com/)
-[![Pages](https://img.shields.io/badge/Seiten-106-4262FF)](#content-overview)
+[![Pages](https://img.shields.io/badge/Seiten-109-4262FF)](#content-overview)
 [![License](https://img.shields.io/badge/Lizenz-Proprietary-red)](#lizenz)
 [![DE](https://img.shields.io/badge/lang-DE-000?logo=googletranslate)](./README.md)
 [![EN](https://img.shields.io/badge/lang-EN-000?logo=googletranslate)](./README-EN.md)
@@ -51,7 +51,7 @@ graph TD
     end
 
     subgraph Content["Content Layer"]
-        G[DE: 54 Seiten]
+        G[DE: 57 Seiten]
         H[EN: 52 Seiten]
         I[PlantUML / Kroki Diagramme]
     end
@@ -100,9 +100,17 @@ graph LR
 | **Tools** | 12 | 12 | Docker, Ollama, RAG, n8n, Grafana, Proxmox, MCP Server |
 | **Patterns** | 8 | 8 | Orchestration Patterns, Memory, Task Delegation, Safety Hooks |
 | **Security** | 6 | 6 | API Keys, Firewall, Backup, Hardening |
-| **Compliance** | 10 | 10 | DSGVO, EU AI Act, Transparenzpflichten, Datenschutz |
+| **Compliance** | 13 | 10 | DSGVO, EU AI Act, Transparenzpflichten, Datenschutz, EDPS, VerifyWise, 02.08.2026 |
 | **Support** | 2 | 2 | Troubleshooting, FAQ |
-| **Gesamt** | **54** | **52** | **106 Seiten** |
+| **Gesamt** | **57** | **52** | **109 Seiten** |
+
+> Cross-Surface-Konsistenz: Die Wiki ist Teil der **AI Engineering Plattform-Familie**.
+> Weitere Surfaces (Stand Mai 2026): **Hub** ([hub.ai-engineering.at](https://hub.ai-engineering.at))
+> mit kuratierten Skills und MCP Servern, **YouTube** ([@AIEngineering-at](https://www.youtube.com/@AIEngineering-at)),
+> **LinkedIn** ([Joerg Fuchs](https://www.linkedin.com/in/joerg-fuchs-ai/))
+> und **GitHub** ([github.com/AI-Engineering-at](https://github.com/AI-Engineering-at)).
+> Genaue Zaehlung von Skills, MCP Servern und Zertifikaten bitte direkt am Hub
+> verifizieren — sie sind die Single Source of Truth fuer diese Metriken.
 
 ---
 
@@ -261,7 +269,7 @@ wiki/
 │   ├── tools/                   # 12 Artikel
 │   ├── patterns/                # 8 Artikel
 │   ├── security/                # 6 Artikel
-│   ├── compliance/              # 10 Artikel
+│   ├── compliance/              # 13 Artikel
 │   ├── support/                 # 2 Artikel
 │   └── en/                      # Englische Versionen
 │       ├── layout.tsx
