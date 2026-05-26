@@ -16,7 +16,7 @@ export default function VerifyWisePage() {
 
       <div className="prose prose-invert max-w-none">
         <Callout type="summary" title="Überblick">
-          <strong>VerifyWise</strong> ist ein Open-Source-Tool (AGPL-3.0) für AI-Governance,
+          <strong>VerifyWise</strong> ist ein Open-Source-Tool (BSL 1.1) für AI-Governance,
           Risk-Management und Compliance. Es deckt die EU AI Act und ISO 42001 ab und kann
           self-hosted betrieben werden — relevant für DACH-KMUs, die ihre Compliance-
           Dokumentation nicht in eine US-Cloud auslagern wollen. Funktionen: KI-Inventar,
@@ -29,7 +29,7 @@ export default function VerifyWisePage() {
 
         <p className="text-gray-300">
           VerifyWise ist eine Open-Source-Plattform für „AI Governance, Risk and Compliance" (GRC),
-          entwickelt vom Bluewave-Labs-Team. Lizenz: AGPL-3.0. Das Tool bildet den Lebenszyklus
+          entwickelt vom Bluewave-Labs-Team. Lizenz: BSL 1.1. Das Tool bildet den Lebenszyklus
           von KI-Systemen ab — von der Erfassung im Inventar über die Risiko-Klassifizierung
           und Vendor-Bewertung bis zur Audit-Vorbereitung. Es positioniert sich als
           self-hosted-Alternative zu kommerziellen GRC-SaaS-Anbietern wie Credo AI, Holistic AI
@@ -129,7 +129,7 @@ export default function VerifyWisePage() {
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
           <p className="text-gray-300 font-mono text-xs">
-            git clone https://github.com/bluewave-labs/verifywise.git<br />
+            git clone https://github.com/verifywise-ai/verifywise.git<br />
             cd verifywise<br />
             cp .env.example .env<br />
             # .env anpassen (DB-Passwort, Admin-User, SMTP)<br />
@@ -199,7 +199,7 @@ export default function VerifyWisePage() {
             <tbody className="text-gray-300">
               <tr className="border-b border-gray-800">
                 <td className="py-2 align-top">VerifyWise</td>
-                <td className="py-2">AGPL-3.0 / Self-Hosted</td>
+                <td className="py-2">BSL 1.1 / Self-Hosted</td>
                 <td className="py-2">Open Source, DACH-tauglich</td>
               </tr>
               <tr className="border-b border-gray-800">
@@ -256,7 +256,7 @@ export default function VerifyWisePage() {
 
         <h2 className="text-xl font-semibold text-white mt-8">Quellen</h2>
         <ul className="list-disc list-inside text-gray-300 space-y-1">
-          <li><a href="https://github.com/bluewave-labs/verifywise" target="_blank" className="text-blue-400 hover:underline">VerifyWise — GitHub Repository (Bluewave Labs)</a></li>
+          <li><a href="https://github.com/verifywise-ai/verifywise" target="_blank" className="text-blue-400 hover:underline">VerifyWise — GitHub Repository (Bluewave Labs)</a></li>
           <li><a href="https://verifywise.ai/" target="_blank" className="text-blue-400 hover:underline">VerifyWise — Projekt-Website</a></li>
           <li><a href="https://www.iso.org/standard/81230.html" target="_blank" className="text-blue-400 hover:underline">ISO/IEC 42001:2023 — Information technology — Artificial intelligence — Management system</a></li>
           <li><a href="https://www.nist.gov/itl/ai-risk-management-framework" target="_blank" className="text-blue-400 hover:underline">NIST AI Risk Management Framework</a></li>
