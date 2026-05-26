@@ -47,6 +47,9 @@ const complianceArticles: Article[] = [
   { title: 'Datenschutz Praxis', description: 'Praktische Umsetzung — TOM, AVV, Dokumentation, Betroffenenrechte.', href: '/compliance/datenschutz-praxis', category: 'compliance', categoryLabel: 'Compliance', date: '2026-02-28' },
   { title: 'AI Agent Legal Framework', description: 'Von der Risikobewertung bis zum Compliance-Paket: EU AI Act + DSGVO für AI-Agenten in KMUs.', href: '/compliance/ai-agent-legal-framework', category: 'compliance', categoryLabel: 'Compliance', date: '2026-03-21', popular: true },
   { title: 'EU AI Act Readiness Check', description: 'Interaktives 10-Fragen Self-Assessment: Wie gut ist dein Unternehmen auf den EU AI Act vorbereitet?', href: '/compliance/self-assessment', category: 'compliance', categoryLabel: 'Compliance', date: '2026-03-22' },
+  { title: '02.08.2026 — EU AI Act Enforcement-Start', description: 'Was sich am 2. August 2026 für KMUs ändert: Governance, GPAI-Pflichten, Strafrahmen — und 6 Schritte bis zum Stichtag.', href: '/compliance/ai-act-august-2026', category: 'compliance', categoryLabel: 'Compliance', date: '2026-05-26', popular: true },
+  { title: 'VerifyWise — Open-Source AI-Governance', description: 'Open-Source-Tool für EU AI Act, ISO 42001 und NIST AI RMF. Self-Hosted Governance-Plattform fuer DACH-KMUs.', href: '/compliance/verifywise-integration', category: 'compliance', categoryLabel: 'Compliance', date: '2026-05-26' },
+  { title: 'EDPS Guidelines fuer KI', description: 'Was der European Data Protection Supervisor fuer Generative-AI-Einsatz vorgibt — De-facto-Massstab auch fuer nationale Aufsichtsbehoerden.', href: '/compliance/edps-guidelines', category: 'compliance', categoryLabel: 'Compliance', date: '2026-05-26' },
 ]
 
 const toolsArticles: Article[] = [
@@ -254,6 +257,10 @@ export const relatedArticlesMap: Record<string, string[]> = {
   // Compliance (new)
   '/compliance/ai-agent-legal-framework': ['/compliance/eu-ai-act', '/compliance/dpia', '/patterns/ai-agent-digitaler-mitarbeiter'],
   '/compliance/self-assessment': ['/compliance/eu-ai-act', '/compliance/ki-kompetenz-art4', '/compliance/eu-ai-act-checkliste'],
+  // Compliance (W41 — Welle-41 Wiki-Refresh)
+  '/compliance/ai-act-august-2026': ['/compliance/ki-kompetenz-art4', '/compliance/eu-ai-act', '/compliance/verifywise-integration'],
+  '/compliance/verifywise-integration': ['/compliance/ai-act-august-2026', '/compliance/eu-ai-act-checkliste', '/compliance/dpia'],
+  '/compliance/edps-guidelines': ['/compliance/dsgvo-grundlagen', '/compliance/dpia', '/compliance/ai-act-august-2026'],
   // Papers
   '/papers/attention-is-all-you-need': ['/grundlagen/was-ist-ein-llm', '/papers/lora-paper', '/papers/rag-paper'],
   '/papers/rag-paper': ['/tools/rag-guide', '/papers/attention-is-all-you-need', '/papers/react-paper'],
