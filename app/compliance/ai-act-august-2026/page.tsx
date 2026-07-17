@@ -31,9 +31,10 @@ export default function AiActAugust2026Page() {
 
         <div className="bg-red-900/30 border border-red-700 rounded-lg p-4 mt-6">
           <p className="text-red-300 text-sm">
-            <strong>Hard Date:</strong> 2. August 2026 — Anwendungsbeginn nach
-            Art. 113 lit. b der Verordnung (EU) 2024/1689 für die meisten
-            Bestimmungen. Der Digital Omnibus (EP-Billigung 16.06.2026) hat
+            <strong>Hard Date:</strong> 2. August 2026 — allgemeiner
+            Anwendungsbeginn nach Art. 113 der Verordnung (EU) 2024/1689 für die
+            meisten Bestimmungen (Kapitel I/II bereits seit 02.02.2025, einzelne
+            weitere Bestimmungen seit 02.08.2025). Der Digital Omnibus (EP-Billigung 16.06.2026) hat
             gezielt die Hochrisiko-Fristen und die Kennzeichnungspflicht
             verschoben — nicht aber Art. 4, Art. 5 oder den Start der
             Marktaufsicht.
