@@ -37,8 +37,11 @@ export default function EuAiActLeitfaden() {
           EU-Amtsblatt veröffentlicht und ist am <strong>1. August 2024</strong> in Kraft
           getreten. Er ist der umfassendste Regelungsrahmen der EU für Künstliche Intelligenz.
           Einige Pflichten — wie die Verbote (Art. 5) und die KI-Kompetenz (Art. 4) — gelten
-          bereits seit <strong>2. Februar 2025</strong>. Die vollständige Anwendung mit
-          Enforcement und Strafen startet ab <strong>2. August 2026</strong>.
+          bereits seit <strong>2. Februar 2025</strong>. Die meisten übrigen Bestimmungen samt
+          Marktaufsicht und Strafrahmen gelten ab <strong>2. August 2026</strong>. Der
+          „Digital Omnibus on AI&ldquo; (EP-Billigung 16.06.2026) hat die Pflichten für
+          Hochrisiko-KI auf <strong>02.12.2027</strong> (eigenständige Systeme, Anhang III)
+          bzw. <strong>02.08.2028</strong> (eingebettet in regulierte Produkte) verschoben.
         </p>
 
         <Callout type="warning" title="Art. 4 KI-Kompetenz gilt BEREITS">
@@ -52,8 +55,8 @@ export default function EuAiActLeitfaden() {
 
         <Callout type="warning" title="Strafen">
           <p>
-            Bis zu 35 Millionen Euro oder 6% des globalen Jahresumsatzes sind möglich.
-            Für KMU gelten etwas mildere Regeln, aber die Pflichten bleiben.
+            Bis zu 35 Millionen Euro oder 7% des globalen Jahresumsatzes sind möglich
+            (Art. 99 Abs. 3). Für KMU gelten etwas mildere Regeln, aber die Pflichten bleiben.
           </p>
         </Callout>
 
@@ -270,11 +273,15 @@ export default function EuAiActLeitfaden() {
               </tr>
               <tr className="border-b border-gray-800">
                 <td className="py-2 font-mono text-red-400 font-semibold">02. Aug 2026</td>
-                <td className="py-2 font-semibold">Vollständige Anwendung (High-Risk etc.) + Enforcement/Überwachung startet</td>
+                <td className="py-2 font-semibold">Marktaufsicht + Strafrahmen starten; die meisten übrigen Bestimmungen gelten</td>
+              </tr>
+              <tr className="border-b border-gray-800">
+                <td className="py-2 font-mono text-gray-500">02. Dez 2027</td>
+                <td className="py-2">Eigenständige Hochrisiko-KI (Anhang III) — per Digital Omnibus verschoben, vorher 02.08.2026</td>
               </tr>
               <tr>
-                <td className="py-2 font-mono text-gray-500">02. Aug 2027</td>
-                <td className="py-2">Hochrisiko-KI in regulierten Produkten</td>
+                <td className="py-2 font-mono text-gray-500">02. Aug 2028</td>
+                <td className="py-2">Hochrisiko-KI in regulierten Produkten (Anhang I) — per Digital Omnibus verschoben, vorher 02.08.2027</td>
               </tr>
             </tbody>
           </table>
@@ -417,6 +424,7 @@ Verarbeitet das System biometrische Daten?
           <h2 className="text-xl font-bold text-white mb-4">Quellen</h2>
           <ul className="space-y-2 text-sm text-white/50">
             <li><a href="https://eur-lex.europa.eu/eli/reg/2024/1689/oj" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">EUR-Lex: Verordnung (EU) 2024/1689 — EU AI Act Volltext</a></li>
+            <li><a href="https://www.europarl.europa.eu/news/en/press-room/20260611IPR45207/ai-act-ep-approves-simplification-measures-and-nudifier-app-ban" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Europäisches Parlament: Digital Omnibus on AI — Plenarabstimmung 16.06.2026</a></li>
             <li><a href="https://artificialintelligenceact.eu/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">AI Act Explorer</a> — Interaktive Aufbereitung aller Artikel</li>
             <li><a href="https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">EU-Kommission: Regulatory Framework for AI</a> — Offizielle Übersicht</li>
             <li><a href="https://www.ris.bka.gv.at/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">RIS — Rechtsinformationssystem des Bundes</a> — Österreichische Umsetzung</li>

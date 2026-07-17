@@ -10,7 +10,7 @@ export default function EUAIActChecklistePage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-white">EU AI Act Compliance Checkliste</h1>
-        <p className="text-slate-400 mt-2">Compliance · 6 min · Stand: März 2026</p>
+        <p className="text-slate-400 mt-2">Compliance · 6 min · Stand: Juli 2026</p>
       </div>
 
       <div className="prose prose-invert max-w-none">
@@ -41,14 +41,30 @@ export default function EUAIActChecklistePage() {
             </tr>
             <tr className="border-b border-slate-800">
               <td className="py-3 font-mono text-red-400">Aug 2026</td>
-              <td className="py-3"><strong>High-Risk Systeme</strong> (Haupttermin)</td>
+              <td className="py-3"><strong>Marktaufsicht + Strafrahmen</strong>, die meisten übrigen Bestimmungen</td>
+            </tr>
+            <tr className="border-b border-slate-800">
+              <td className="py-3 font-mono text-blue-400">Dez 2027</td>
+              <td className="py-3">Eigenständige High-Risk-Systeme (Anhang III) — per Digital Omnibus verschoben, vorher Aug 2026</td>
             </tr>
             <tr>
-              <td className="py-3 font-mono text-slate-500">Aug 2027</td>
-              <td className="py-3">Hochrisiko in regulierten Produkten</td>
+              <td className="py-3 font-mono text-slate-500">Aug 2028</td>
+              <td className="py-3">Hochrisiko in regulierten Produkten (Anhang I) — per Digital Omnibus verschoben, vorher Aug 2027</td>
             </tr>
           </tbody>
         </table>
+
+        <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mt-4">
+          <p className="text-slate-300 text-sm mb-0">
+            <strong>Digital Omnibus (Juni 2026):</strong> Das Europäische Parlament hat am
+            16.06.2026 Änderungen am AI Act gebilligt, die die Hochrisiko-Fristen verschieben.
+            Unverändert bleiben: die Verbote (Art. 5), die KI-Kompetenz-Pflicht (Art. 4) und
+            der Start der Marktaufsicht am 02.08.2026. Quelle:{' '}
+            <a href="https://www.europarl.europa.eu/news/en/press-room/20260611IPR45207/ai-act-ep-approves-simplification-measures-and-nudifier-app-ban" target="_blank" className="text-blue-400 hover:underline">
+              EP-Pressemitteilung 16.06.2026
+            </a>.
+          </p>
+        </div>
 
         <figure className="my-8">
           <img src="/images/infographics/eu-ai-act-7-schritte-checkliste.png" alt="EU AI Act 7 Schritte Checkliste — Von Inventory bis Monitoring" className="rounded-xl border border-white/10 w-full" />
