@@ -279,10 +279,12 @@ export default function Home() {
             title="arXiv AI Papers"
             description="Aktuelle Forschung"
           />
+          {/* Counter-Stand: Live-Abgleich hub.ai-engineering.at 2026-07-17 (770 MCP / 417 Skills).
+              Bei Redeploys gegen den Live-Hub prüfen — Zahl driftet mit jedem Katalog-Import. */}
           <ExternalLink
             href="https://hub.ai-engineering.at"
             title="AI Skills Hub"
-            description="668+ MCP Server & 274 Skills durchsuchen"
+            description="770+ MCP Server & 417 Skills durchsuchen"
           />
           <ExternalLink
             href="https://www.ai-engineering.at"
