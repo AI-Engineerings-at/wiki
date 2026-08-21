@@ -17,7 +17,6 @@
 
 import fs from 'fs'
 import path from 'path'
-import matter from 'gray-matter'
 import { unified } from 'unified'
 import remarkParse from 'remark-parse'
 import remarkGfm from 'remark-gfm'
@@ -27,6 +26,39 @@ import { getIndex, type IndexEntry } from './index'
 import { TSX_META } from './generated/index'
 
 const CONTENT_DIR = path.join(process.cwd(), 'content')
+
+/**
+ * Frontmatter lesen — bewusst NICHT mit gray-matter/js-yaml: 15 von 406
+ * Frontmatter-Blöcken sind kein gültiges YAML (gemessen 2026-08-21 mit PyYAML,
+ * z. B. papers/scaling-laws.mdx: `summary: "…" (Kaplan et al.) + …`), und ein
+ * strenger Parser würde den Build an genau diesen 15 Seiten abbrechen.
+ * Dieselbe Teilmenge wie scripts/build-index.js: `key: wert`, Anführungszeichen,
+ * `[a, b]`-Listen, `- item`-Listen. Trennung am ersten `:`.
+ */
+function matter(raw: string): { data: Record<string, string | string[]>; content: string } {
+  const m = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/)
+  if (!m) return { data: {}, content: raw }
+  const data: Record<string, string | string[]> = {}
+  let listKey: string | null = null
+  const unq = (v: string) => {
+    v = v.trim()
+    if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) return v.slice(1, -1)
+    return v
+  }
+  for (const line of m[1].split('\n')) {
+    const li = line.match(/^\s*-\s+(.*)$/)
+    if (li && listKey) { (data[listKey] as string[]).push(unq(li[1])); continue }
+    const kv = line.match(/^([\w-]+):\s*(.*)$/)
+    if (!kv) continue
+    const key = kv[1]
+    const val = kv[2].trim()
+    if (val === '') { data[key] = []; listKey = key; continue }
+    listKey = null
+    if (val.startsWith('[') && val.endsWith(']')) data[key] = val.slice(1, -1).split(',').map(unq).filter(Boolean)
+    else data[key] = unq(val)
+  }
+  return { data, content: m[2] }
+}
 
 export type MdxArticle = IndexEntry & {
   body: string
