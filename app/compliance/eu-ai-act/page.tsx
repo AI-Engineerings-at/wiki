@@ -5,7 +5,7 @@ import Callout from "../../../components/Callout"
 export const metadata = {
   title: 'EU AI Act | AI Engineering Wiki',
   description:
-    'EU AI Act seit 1. August 2024 in Kraft. Art. 4 KI-Kompetenz gilt seit 02.02.2025, vollständige Anwendung ab 02.08.2026. Risikoklassen, Pflichten, Strafen.',
+    'EU AI Act seit 1. August 2024 in Kraft. Art. 4 KI-Kompetenz gilt seit 02.02.2025, vollständige Anwendung seit 02.08.2026. Risikoklassen, Pflichten, Strafen.',
 }
 
 export default function EuAiActLeitfaden() {
@@ -38,7 +38,7 @@ export default function EuAiActLeitfaden() {
           getreten. Er ist der umfassendste Regelungsrahmen der EU für Künstliche Intelligenz.
           Einige Pflichten — wie die Verbote (Art. 5) und die KI-Kompetenz (Art. 4) — gelten
           bereits seit <strong>2. Februar 2025</strong>. Die meisten übrigen Bestimmungen samt
-          Marktaufsicht und Strafrahmen gelten ab <strong>2. August 2026</strong>. Der
+          Marktaufsicht und Strafrahmen gelten seit <strong>2. August 2026</strong>. Der
           „Digital Omnibus on AI&ldquo; (EP-Billigung 16.06.2026) hat die Pflichten für
           Hochrisiko-KI auf <strong>02.12.2027</strong> (eigenständige Systeme, Anhang III)
           bzw. <strong>02.08.2028</strong> (eingebettet in regulierte Produkte) verschoben.
@@ -49,7 +49,7 @@ export default function EuAiActLeitfaden() {
             Die Pflicht zur KI-Kompetenz (Art. 4) gilt seit <strong>2. Februar 2025</strong>.
             Es gibt keine Einheitszertifizierung, keine Pflicht zu einem AI Officer und keine
             One-size-fits-all-Schulung. Die Überwachung und Durchsetzung (Enforcement)
-            startet ab <strong>August 2026</strong>.
+            läuft seit <strong>August 2026</strong>.
           </p>
         </Callout>
 
@@ -273,7 +273,7 @@ export default function EuAiActLeitfaden() {
               </tr>
               <tr className="border-b border-gray-800">
                 <td className="py-2 font-mono text-red-400 font-semibold">02. Aug 2026</td>
-                <td className="py-2 font-semibold">Marktaufsicht + Strafrahmen starten; die meisten übrigen Bestimmungen gelten</td>
+                <td className="py-2 font-semibold">Marktaufsicht + Strafrahmen gestartet; die meisten übrigen Bestimmungen gelten</td>
               </tr>
               <tr className="border-b border-gray-800">
                 <td className="py-2 font-mono text-gray-500">02. Dez 2027</td>

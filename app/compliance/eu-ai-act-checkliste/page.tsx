@@ -10,7 +10,7 @@ export default function EUAIActChecklistePage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-white">EU AI Act Compliance Checkliste</h1>
-        <p className="text-slate-400 mt-2">Compliance · 6 min · Stand: Juli 2026</p>
+        <p className="text-slate-400 mt-2">Compliance · 6 min · Stand: 21. August 2026</p>
       </div>
 
       <div className="prose prose-invert max-w-none">

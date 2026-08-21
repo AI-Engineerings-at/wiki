@@ -3,7 +3,7 @@
 export const metadata = {
   title: 'KI-Kompetenz nach Art. 4 EU AI Act | AI Engineering Wiki',
   description:
-    'Art. 4 EU AI Act: KI-Kompetenz Pflicht gilt seit 02.02.2025 für alle Unternehmen — auch nach dem Digital Omnibus 2026. Aufsicht durch nationale Marktaufsicht ab 02.08.2026. Praxis-Guide für DACH-KMUs.',
+    'Art. 4 EU AI Act: KI-Kompetenz Pflicht gilt seit 02.02.2025 für alle Unternehmen — auch nach dem Digital Omnibus 2026. Aufsicht durch nationale Marktaufsicht seit 02.08.2026. Praxis-Guide für DACH-KMUs.',
 }
 
 export default function KIKompetenzArt4Page() {
@@ -11,7 +11,7 @@ export default function KIKompetenzArt4Page() {
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-white">KI-Kompetenz nach Art. 4 EU AI Act</h1>
-        <p className="text-gray-400 mt-2">Compliance · 12 min · Stand: Juli 2026</p>
+        <p className="text-gray-400 mt-2">Compliance · 12 min · Stand: 21. August 2026</p>
       </div>
 
       <div className="prose prose-invert max-w-none">
@@ -24,7 +24,7 @@ export default function KIKompetenzArt4Page() {
             Mitarbeitenden über ausreichende KI-Kompetenz verfügen. Es gibt keine
             Einheitszertifizierung, keine Pflicht zu einem AI Officer und keine
             One-size-fits-all-Schulung. Die <strong>Überwachung und Durchsetzung durch die
-            nationalen Marktaufsichtsbehörden</strong> startet ab <strong>2. August 2026</strong>;
+            nationalen Marktaufsichtsbehörden</strong> läuft seit <strong>2. August 2026</strong>;
             Sanktionen für Art.-4-Verstöße richten sich nach nationalem Recht (Art. 99 Abs. 1) —
             Details im Abschnitt „Was droht bei Nichteinhaltung?&ldquo; unten.
           </p>
@@ -36,12 +36,11 @@ export default function KIKompetenzArt4Page() {
           Am <strong>16. Juni 2026</strong> hat das Europäische Parlament die Änderungen am
           EU AI Act aus dem „Digital Omnibus on AI&ldquo; in erster Lesung gebilligt
           (423 Ja-Stimmen, 57 Nein, 174 Enthaltungen). Das Paket geht auf den
-          Kommissionsvorschlag vom 19. November 2025 zurück. Vor dem Inkrafttreten muss der
-          Rat den Text noch förmlich annehmen; die Veröffentlichung im EU-Amtsblatt wurde
-          für Juli 2026 — vor dem 2. August 2026 — erwartet.
-          {/* [PRÜFEN] Amtsblatt-Veröffentlichung der Omnibus-Änderungsverordnung: Stand
-              Redaktionsschluss 17.07.2026 nicht T1-verifiziert. Vor Publish prüfen und
-              CELEX-Nummer ergänzen. */}
+          Kommissionsvorschlag vom 19. November 2025 zurück. Der Rechtsakt ist inzwischen in
+          Kraft: Die <strong>Verordnung (EU) 2026/1744</strong> vom 8. Juli 2026 wurde am
+          <strong>24. Juli 2026</strong> im EU-Amtsblatt veröffentlicht
+          (ABl. L, 2026/1744; CELEX 32026R1744) und ist am <strong>27. Juli 2026</strong>
+          in Kraft getreten — also vor dem 2. August 2026. Geprüft an EUR-Lex am 21.08.2026.
         </p>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
@@ -93,7 +92,7 @@ export default function KIKompetenzArt4Page() {
             <strong>Kernbotschaft für KMUs:</strong> Der Digital Omnibus verschiebt
             Hochrisiko-Fristen — er ist <strong>keine Entwarnung für Art. 4</strong>. Die
             KI-Kompetenz-Pflicht gilt unverändert seit Februar 2025, und die Aufsicht durch
-            die nationalen Marktaufsichtsbehörden beginnt planmäßig am 2. August 2026.
+            die nationalen Marktaufsichtsbehörden läuft seit dem 2. August 2026.
           </p>
         </div>
 
@@ -168,7 +167,7 @@ export default function KIKompetenzArt4Page() {
 
         <figure className="my-8">
           <img src="/images/infographics/art4-timeline.png" alt="Art. 4 EU AI Act Timeline — Fristen und Pflichten" className="rounded-xl border border-white/10 w-full" />
-          <figcaption className="text-center text-white/40 text-sm mt-2">Art. 4 Timeline: Pflicht seit 02.02.2025 — Enforcement ab August 2026</figcaption>
+          <figcaption className="text-center text-white/40 text-sm mt-2">Art. 4 Timeline: Pflicht seit 02.02.2025 — Enforcement seit August 2026</figcaption>
         </figure>
 
         <figure className="my-8">
@@ -235,7 +234,7 @@ export default function KIKompetenzArt4Page() {
 
         <ul className="list-disc list-inside text-gray-300 space-y-1 mt-2">
           <li><strong>Öffentliche Durchsetzung:</strong> Die nationalen Marktaufsichtsbehörden
-            können ab 2. August 2026 Verstöße gegen Art. 4 mit Sanktionen und
+            können seit dem 2. August 2026 Verstöße gegen Art. 4 mit Sanktionen und
             Aufsichtsmaßnahmen belegen — auf Basis der nationalen Sanktionsregeln, die die
             Mitgliedstaaten nach Art. 99 Abs. 1 festlegen müssen. Die Durchsetzung folgt
             einem Verhältnismäßigkeitsansatz.</li>
@@ -307,7 +306,7 @@ export default function KIKompetenzArt4Page() {
               </tr>
               <tr className="border-b border-gray-800">
                 <td className="py-2 font-mono text-red-400 font-semibold">02.08.2026</td>
-                <td className="py-2 font-semibold">Marktaufsicht + Durchsetzung starten (inkl. Art. 4); die meisten übrigen Bestimmungen gelten</td>
+                <td className="py-2 font-semibold">Marktaufsicht + Durchsetzung gestartet (inkl. Art. 4); die meisten übrigen Bestimmungen gelten</td>
               </tr>
               <tr className="border-b border-gray-800">
                 <td className="py-2 font-mono text-blue-400">02.12.2026</td>
@@ -356,9 +355,16 @@ export default function KIKompetenzArt4Page() {
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
           <ul className="text-gray-300 space-y-2">
-            <li><strong>Zuständige Behörde:</strong> Nach unserem Stand (Juli 2026) noch nicht final festgelegt. Die RTR (Rundfunk und Telekom Regulierungs-GmbH) betreibt die KI-Servicestelle und ist als Marktaufsichtsbehörde im Gespräch.
-              {/* [PRÜFEN] Österreichisches KI-Begleitgesetz / finale Behördenbenennung vor Publish
-                  gegen RIS/Parlament verifizieren — Stand 17.07.2026 nicht T1-belegt. */}
+            <li><strong>Zuständige Behörde:</strong> Stand 21.08.2026 ist in Österreich
+              <strong>keine nationale Marktüberwachungsbehörde nach dem AI Act kundgemacht</strong>.
+              Im konsolidierten Bundesrecht (RIS) liegt dazu kein Gesetz vor: Die Titelsuche
+              „künstliche Intelligenz&ldquo; liefert am 21.08.2026 keinen Treffer
+              (Positivkontrolle „Datenschutzgesetz&ldquo; über dieselbe Suche: 144 Treffer).
+              Der Entschließungsantrag 517/A(E) „KI-Behörde endlich benennen&ldquo; wurde im
+              Wissenschaftsausschuss des Nationalrats zuletzt am 3. Juni 2026 vertagt.
+              Die RTR (Rundfunk und Telekom Regulierungs-GmbH) betreibt die KI-Servicestelle
+              als Informations- und Anlaufstelle — das ist eine Service-, keine Aufsichtsfunktion.
+              Geprüft an RIS und parlament.gv.at am 21.08.2026.
             </li>
             <li><strong>Gewerberecht:</strong> KI-Schulungen fallen unter freies Gewerbe (Lebens- und Sozialberatung, Unternehmensberatung) — keine Gewerbeberechtigung nötig für allgemeine KI-Schulungen.</li>
             <li><strong>WKO Förderungen:</strong> Digitalisierungsförderungen des BMAW können für KI-Schulungen genutzt werden.</li>

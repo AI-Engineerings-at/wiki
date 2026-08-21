@@ -3,22 +3,22 @@ import Callout from "../../../components/Callout"
 export const metadata = {
   title: 'Was passiert am 02.08.2026? EU AI Act Enforcement-Start | AI Engineering Wiki',
   description:
-    'Am 2. August 2026 starten Marktaufsicht und Strafrahmen des EU AI Act. Was nach dem Digital Omnibus (Juni 2026) konkret gilt, was verschoben wurde und welche 6 Schritte KMUs jetzt gehen müssen.',
+    'Seit dem 2. August 2026 gelten Marktaufsicht und Strafrahmen des EU AI Act. Was nach dem Digital Omnibus (Juni 2026) konkret gilt, was verschoben wurde und welche 6 Schritte KMUs jetzt gehen müssen.',
 }
 
 export default function AiActAugust2026Page() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-white">02.08.2026 — was am Enforcement-Start des EU AI Act passiert</h1>
-        <p className="text-gray-400 mt-2">Compliance · 10 min · Stand: Juli 2026</p>
+        <h1 className="text-3xl font-bold text-white">02.08.2026 — was seit dem Enforcement-Start des EU AI Act gilt</h1>
+        <p className="text-gray-400 mt-2">Compliance · 10 min · Stand: 21. August 2026</p>
       </div>
 
       <div className="prose prose-invert max-w-none">
         <Callout type="summary" title="Überblick">
-          Am <strong>2. August 2026</strong> beginnt die Anwendung der meisten
+          Seit dem <strong>2. August 2026</strong> läuft die Anwendung der meisten
           Bestimmungen des EU AI Act — inklusive Marktaufsicht und Strafrahmen.
-          Ab diesem Tag können Behörden Strafen verhängen — bis zu EUR 35 Mio.
+          Seit diesem Tag können Behörden Strafen verhängen — bis zu EUR 35 Mio.
           oder 7 % des weltweiten Jahresumsatzes (je nachdem, welcher Betrag
           höher ist). Der <strong>Digital Omnibus vom Juni 2026</strong> hat die
           Pflichten für Hochrisiko-KI verschoben (eigenständige Systeme auf
@@ -41,7 +41,7 @@ export default function AiActAugust2026Page() {
           </p>
         </div>
 
-        <h2 className="text-xl font-semibold text-white mt-8">Was ändert sich am 2. August 2026 konkret?</h2>
+        <h2 className="text-xl font-semibold text-white mt-8">Was hat sich am 2. August 2026 konkret geändert?</h2>
 
         <p className="text-gray-300">
           Bis dahin galten viele Teile des EU AI Act bereits — aber ohne aktiven
@@ -55,7 +55,7 @@ export default function AiActAugust2026Page() {
               <li>Nationale Aufsichtsbehörden (Market Surveillance Authorities) müssen benannt sein</li>
               <li>Notified Bodies für Konformitätsbewertung von High-Risk-Systemen sind akkreditiert</li>
               <li>Das European AI Office (Brüssel) übernimmt die Aufsicht über General-Purpose AI</li>
-              <li>EU AI Board und Advisory Forum starten formell</li>
+              <li>EU AI Board und Advisory Forum sind formell gestartet</li>
             </ul>
           </div>
 
@@ -73,13 +73,13 @@ export default function AiActAugust2026Page() {
             <h3 className="font-semibold text-white">3. Art. 4 (KI-Kompetenz) wird behördlich durchsetzbar</h3>
             <ul className="text-gray-300 text-sm space-y-1 mt-2">
               <li>Art. 4 (KI-Kompetenz) gilt rechtlich seit 02.02.2025 — bislang ohne aktive Aufsicht</li>
-              <li>Ab 02.08.2026: Die nationalen Marktaufsichtsbehörden können Art.-4-Verstöße mit Sanktionen und Maßnahmen nach nationalem Recht belegen (Art. 99 Abs. 1); Art. 99 Abs. 4 sieht für Art. 4 keinen eigenen EU-Bußgeldtatbestand vor</li>
-              <li>Art. 5 (Verbote) wird durchsetzbar mit bis zu EUR 35 Mio. oder 7% Umsatz (Art. 99 Abs. 3)</li>
+              <li>Seit 02.08.2026: Die nationalen Marktaufsichtsbehörden können Art.-4-Verstöße mit Sanktionen und Maßnahmen nach nationalem Recht belegen (Art. 99 Abs. 1); Art. 99 Abs. 4 sieht für Art. 4 keinen eigenen EU-Bußgeldtatbestand vor</li>
+              <li>Art. 5 (Verbote) ist durchsetzbar mit bis zu EUR 35 Mio. oder 7% Umsatz (Art. 99 Abs. 3)</li>
             </ul>
           </div>
         </div>
 
-        <h2 className="text-xl font-semibold text-white mt-8">Digital Omnibus: Was am 02.08.2026 NICHT mehr startet</h2>
+        <h2 className="text-xl font-semibold text-white mt-8">Digital Omnibus: Was seit dem 02.08.2026 gilt — und was der Omnibus verschoben hat</h2>
 
         <p className="text-gray-300">
           Das Europäische Parlament hat am <strong>16. Juni 2026</strong> die Änderungen aus dem
@@ -96,10 +96,9 @@ export default function AiActAugust2026Page() {
               <li><strong>Neu:</strong> Verbot von „Nudifier&ldquo;-Apps und KI-generiertem Missbrauchsmaterial — Übergangsfrist bis 02.12.2026</li>
             </ul>
             <p className="text-gray-500 text-xs mt-3">
-              Formale Annahme durch den Rat und Veröffentlichung im EU-Amtsblatt wurden für
-              Juli 2026 erwartet.
-              {/* [PRÜFEN] Amtsblatt-Veröffentlichung der Omnibus-Änderungsverordnung vor Publish
-                  verifizieren (Stand Redaktionsschluss 17.07.2026 nicht T1-belegt). */}
+              Rechtsgrundlage: Verordnung (EU) 2026/1744 vom 8. Juli 2026, veröffentlicht im
+              EU-Amtsblatt am 24. Juli 2026 (ABl. L, 2026/1744; CELEX 32026R1744), in Kraft
+              seit 27. Juli 2026. Geprüft an EUR-Lex am 21.08.2026.
             </p>
           </div>
         </div>
@@ -111,7 +110,7 @@ export default function AiActAugust2026Page() {
             <thead>
               <tr className="border-b border-gray-700">
                 <th className="text-left py-2 text-gray-400">Rolle</th>
-                <th className="text-left py-2 text-gray-400">Was ab 02.08.2026 verpflichtend ist</th>
+                <th className="text-left py-2 text-gray-400">Was seit 02.08.2026 verpflichtend ist</th>
               </tr>
             </thead>
             <tbody className="text-gray-300">
