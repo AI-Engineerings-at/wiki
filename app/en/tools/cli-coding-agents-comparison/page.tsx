@@ -704,7 +704,7 @@ export default function CLICodingAgentsComparisonPage() {
 
         <div className="mt-12 pt-8 border-t border-white/10 text-center text-sm text-slate-600">
         <p>Related articles:{' '}
-          <a href="/en/tools/ai-tools-datenbank" className="text-blue-400 hover:text-blue-300">AI Tools Database</a>
+          <a href="/en/tools/ai-tools-database" className="text-blue-400 hover:text-blue-300">AI Tools Database</a>
           {' · '}
           <a href="/en/grundlagen/was-ist-ein-llm" className="text-blue-400 hover:text-blue-300">What is an LLM?</a>
         </p>

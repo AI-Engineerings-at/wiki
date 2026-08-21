@@ -1,6 +1,7 @@
 import { WikiLink as Link } from '../../components/WikiLink'
 import Image from 'next/image'
-import { categories, getRecentArticles, getPopularArticles, getEnHref } from '../../lib/articles'
+import { categories, getRecentArticlesEn, getPopularArticlesEn } from '../../lib/articles'
+import { alternatePath } from '../../lib/alternates'
 import { SearchBar } from '../../components/SearchBar'
 
 export const metadata = {
@@ -10,8 +11,8 @@ export const metadata = {
 }
 
 export default function HomePage() {
-  const recentArticles = getRecentArticles(5)
-  const popularArticles = getPopularArticles(5)
+  const recentArticles = getRecentArticlesEn(5)
+  const popularArticles = getPopularArticlesEn(5)
 
   return (
     <div className="space-y-16">
@@ -109,7 +110,7 @@ export default function HomePage() {
               icon={cat.icon}
               title={categoryLabelsEN[cat.slug] || cat.label}
               description={categoryDescriptionsEN[cat.slug] || cat.description}
-              href={`/en${cat.href}`}
+              href={alternatePath(cat.href) ?? cat.href}
               count={cat.articles.length}
             />
           ))}
@@ -178,7 +179,7 @@ export default function HomePage() {
             {recentArticles.map((article) => (
               <Link
                 key={article.href}
-                href={getEnHref(article.href)}
+                href={article.enHref}
                 className="block p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-blue-500/50 transition-colors group"
               >
                 <div className="flex items-start justify-between">
@@ -201,7 +202,7 @@ export default function HomePage() {
             {popularArticles.map((article) => (
               <Link
                 key={article.href}
-                href={getEnHref(article.href)}
+                href={article.enHref}
                 className="block p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-blue-500/50 transition-colors group"
               >
                 <div className="flex items-start justify-between">

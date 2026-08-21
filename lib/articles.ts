@@ -3,6 +3,8 @@
  * Used by Homepage (recent/popular), Sidebar, Breadcrumbs, Related Articles.
  */
 
+import { alternatePath, isEnglishPath } from './alternates'
+
 export type Article = {
   title: string
   description: string
@@ -193,6 +195,32 @@ export function getPopularArticles(count: number = 5): Article[] {
     .slice(0, count)
 }
 
+/** Artikel mit gesichertem EN-Pfad — nur solche, die es auf Englisch gibt. */
+export type EnArticle = Article & { enHref: string }
+
+function withEnHref(articles: Article[]): EnArticle[] {
+  return articles.flatMap((a) => {
+    const enHref = getEnHref(a.href)
+    return enHref ? [{ ...a, enHref }] : []
+  })
+}
+
+/**
+ * Wie `getRecentArticles`, aber nur Artikel mit existierender EN-Seite.
+ * Gefiltert wird VOR dem Abschneiden, damit die EN-Startseite so viele
+ * Einträge zeigt wie die deutsche — statt Lücken oder toter Links.
+ */
+export function getRecentArticlesEn(count: number = 5): EnArticle[] {
+  return withEnHref(
+    getAllArticles().sort((a, b) => b.date.localeCompare(a.date))
+  ).slice(0, count)
+}
+
+/** Wie `getPopularArticles`, aber nur Artikel mit existierender EN-Seite. */
+export function getPopularArticlesEn(count: number = 5): EnArticle[] {
+  return withEnHref(getAllArticles().filter((a) => a.popular)).slice(0, count)
+}
+
 export function getCategoryBySlug(slug: string): Category | undefined {
   return categories.find((c) => c.slug === slug)
 }
@@ -214,7 +242,7 @@ export const relatedArticlesMap: Record<string, string[]> = {
   '/grundlagen/ollama-vs-cloud': ['/grundlagen/lokal-vs-cloud', '/tools/ollama-tutorial', '/tools/model-selection'],
   '/grundlagen/ai-agent-team': ['/grundlagen/agent-rollen', '/grundlagen/was-ist-agent-orchestration', '/patterns/task-delegation'],
   '/grundlagen/selfhosted-vs-cloud': ['/grundlagen/lokal-vs-cloud', '/tools/docker-vs-swarm', '/security/backup-strategie'],
-  '/grundlagen/30-tage-quickstart': ['/tools/ollama-tutorial', '/tools/docker-vs-swarm', '/tools/n8n-für-anfaenger'],
+  '/grundlagen/30-tage-quickstart': ['/tools/ollama-tutorial', '/tools/docker-vs-swarm', '/tools/n8n-fuer-anfaenger'],
   '/grundlagen/ki-unternehmen': ['/compliance/dsgvo-grundlagen', '/grundlagen/lokal-vs-cloud', '/compliance/eu-ai-act'],
   '/grundlagen/was-ist-ein-llm': ['/grundlagen/lokal-vs-cloud', '/tools/ollama-tutorial', '/tools/rag-guide'],
   // Compliance
@@ -230,12 +258,12 @@ export const relatedArticlesMap: Record<string, string[]> = {
   '/tools/docker-vs-swarm': ['/tools/proxmox-setup', '/tools/grafana-monitoring', '/grundlagen/selfhosted-vs-cloud'],
   '/tools/ollama-tutorial': ['/tools/model-selection', '/tools/rag-guide', '/grundlagen/ollama-vs-cloud'],
   '/tools/rag-guide': ['/tools/ollama-tutorial', '/tools/model-selection', '/patterns/memory-management'],
-  '/tools/n8n-für-anfaenger': ['/tools/mattermost-agent', '/tools/grafana-monitoring', '/grundlagen/30-tage-quickstart'],
-  '/tools/mattermost-agent': ['/tools/n8n-für-anfaenger', '/patterns/heartbeat-monitoring', '/patterns/task-delegation'],
+  '/tools/n8n-fuer-anfaenger': ['/tools/mattermost-agent', '/tools/grafana-monitoring', '/grundlagen/30-tage-quickstart'],
+  '/tools/mattermost-agent': ['/tools/n8n-fuer-anfaenger', '/patterns/heartbeat-monitoring', '/patterns/task-delegation'],
   '/tools/grafana-monitoring': ['/tools/docker-vs-swarm', '/patterns/heartbeat-monitoring', '/tools/proxmox-setup'],
   '/tools/proxmox-setup': ['/tools/docker-vs-swarm', '/security/backup-strategie', '/tools/grafana-monitoring'],
   '/tools/model-selection': ['/tools/ollama-tutorial', '/tools/rag-guide', '/grundlagen/ollama-vs-cloud'],
-  '/tools/mcp-server': ['/tools/n8n-für-anfaenger', '/tools/ollama-tutorial', '/patterns/agent-orchestration-patterns'],
+  '/tools/mcp-server': ['/tools/n8n-fuer-anfaenger', '/tools/ollama-tutorial', '/patterns/agent-orchestration-patterns'],
   // Patterns
   '/patterns/agent-orchestration-patterns': ['/grundlagen/was-ist-agent-orchestration', '/patterns/task-delegation', '/patterns/safety-hooks'],
   '/patterns/memory-management': ['/tools/rag-guide', '/patterns/agent-orchestration-patterns', '/patterns/safety-hooks'],
@@ -275,15 +303,15 @@ export const relatedArticlesMap: Record<string, string[]> = {
   // Agent Skalierung
   '/patterns/agent-skalierung': ['/grundlagen/agent-rollen', '/grundlagen/ai-agent-team', '/patterns/memory-management'],
   // n8n Workflow Bundle
-  '/tools/n8n-workflow-bundle': ['/tools/n8n-für-anfaenger', '/tools/ollama-tutorial', '/tools/grafana-monitoring'],
+  '/tools/n8n-workflow-bundle': ['/tools/n8n-fuer-anfaenger', '/tools/ollama-tutorial', '/tools/grafana-monitoring'],
   // AI Tools Datenbank
   '/tools/ai-tools-datenbank': ['/tools/open-source-projekte', '/tools/ollama-tutorial', '/tools/ai-stack-setup'],
   // Vergleich Alternativen
-  '/tools/vergleich-alternativen': ['/compliance/eu-ai-act', '/tools/n8n-für-anfaenger', '/tools/ollama-tutorial'],
+  '/tools/vergleich-alternativen': ['/compliance/eu-ai-act', '/tools/n8n-fuer-anfaenger', '/tools/ollama-tutorial'],
   // CLI Coding Agents Vergleich
   '/tools/cli-coding-agents-vergleich': ['/tools/mcp-server', '/tools/model-selection', '/tools/ai-tools-datenbank'],
   // Evals & Guardrails
-  '/patterns/evals-guardrails': ['/patterns/safety-hooks', '/patterns/human-in-the-loop', '/tools/n8n-für-anfaenger'],
+  '/patterns/evals-guardrails': ['/patterns/safety-hooks', '/patterns/human-in-the-loop', '/tools/n8n-fuer-anfaenger'],
   // Human-in-the-Loop
   '/patterns/human-in-the-loop': ['/patterns/evals-guardrails', '/compliance/eu-ai-act', '/patterns/self-improving-agents'],
 }
@@ -296,22 +324,19 @@ export function getRelatedArticles(href: string): Article[] {
 }
 
 /**
- * DE→EN slug translation for routes where EN directories use different names.
- * Only needed for slugs that differ between languages.
+ * Der EN-Pfad zu einem DE-Pfad — oder `null`, wenn es keine EN-Seite gibt.
+ *
+ * Vorher wurde hier `/en` davorgehängt, wenn die Übersetzungstabelle nichts
+ * hergab. Das erzeugte Links auf Seiten, die nie gebaut wurden: der Crawl
+ * über das gebaute Wiki fand am 2026-08-21 u. a. `/en/compliance/
+ * ai-act-august-2026/`, `/en/compliance/edps-guidelines/` und
+ * `/en/compliance/verifywise-integration/` als 404 — für diese drei DE-Seiten
+ * gibt es kein EN-Pendant (6 von 80 DE-Routen haben keines).
+ *
+ * `null` heißt: kein Link. Kein Platzhalter, kein Pfad auf gut Glück.
+ * Quelle der Paare ist `lib/alternates.ts`, erhoben aus dem app/-Baum.
  */
-export const deToEnSlugMap: Record<string, string> = {
-  '/tools/ai-tools-datenbank': '/tools/ai-tools-database',
-  '/tools/cli-coding-agents-vergleich': '/tools/cli-coding-agents-comparison',
-  '/tools/open-source-projekte': '/tools/open-source-projects',
-  '/tools/vergleich-alternativen': '/tools/comparison-alternatives',
-  '/patterns/ai-agent-digitaler-mitarbeiter': '/patterns/ai-agent-digital-employee',
-  '/oesterreich': '/austria',
-}
-
-/**
- * Get the EN href for an article. Uses translation map if available,
- * otherwise prefixes with /en.
- */
-export function getEnHref(deHref: string): string {
-  return `/en${deToEnSlugMap[deHref] || deHref}`
+export function getEnHref(deHref: string): string | null {
+  const alternate = alternatePath(deHref)
+  return alternate && isEnglishPath(alternate) ? alternate : null
 }

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { WikiLink as Link } from './WikiLink'
 import { usePathname } from 'next/navigation'
 import { SearchBar } from './SearchBar'
+import { isEnglishPath, switchLanguageHref } from '../lib/alternates'
 
 const navDe = [
   { href: '/lernpfad', label: 'Lernpfad', icon: '🎯' },
@@ -33,36 +34,19 @@ const navEn = [
   { href: 'https://hub.ai-engineering.at/en', label: 'Hub', icon: '🔌' },
 ]
 
-// DE→EN path mappings for routes that differ between languages
-const deToEn: Record<string, string> = {
-  '/lernpfad': '/en/learning-path',
-  '/oesterreich': '/en/austria',
-  '/tools/open-source-projekte': '/en/tools/open-source-projects',
-  '/tools/ai-tools-datenbank': '/en/tools/ai-tools-database',
-  '/tools/vergleich-alternativen': '/en/tools/comparison-alternatives',
-  '/tools/cli-coding-agents-vergleich': '/en/tools/cli-coding-agents-comparison',
-  '/tools/n8n-workflow-bundle': '/en/tools/n8n-workflow-bundle',
-  '/patterns/ai-agent-digitaler-mitarbeiter': '/en/patterns/ai-agent-digital-employee',
-  '/patterns/agent-skalierung': '/en/patterns/agent-skalierung',
-}
-const enToDe: Record<string, string> = Object.fromEntries(
-  Object.entries(deToEn).map(([de, en]) => [en, de])
-)
-
 function getToggleHref(pathname: string, isEn: boolean): string {
   // Handle _not-found pages — redirect to home instead of broken paths
   if (pathname.includes('_not-found') || pathname.includes('/_not-found')) {
     return isEn ? '/' : '/en'
   }
-  if (isEn) {
-    // Check mapping first
-    if (enToDe[pathname]) return enToDe[pathname]
-    const dePath = pathname.replace(/^\/en\/?/, '/')
-    return dePath === '' ? '/' : dePath
-  }
-  // Check mapping first
-  if (deToEn[pathname]) return deToEn[pathname]
-  return pathname === '/' ? '/en' : `/en${pathname}`
+  // Paartabelle statt Pfad-Umschreiben: der Umschalter zeigt nur auf Seiten,
+  // die es gibt, sonst auf die Startseite der Zielsprache. Die alte Tabelle
+  // stand hier lokal, war richtig befüllt und wurde nie getroffen — sie
+  // führte Pfade ohne Schrägstrich, `usePathname()` liefert bei
+  // `trailingSlash: true` aber `/en/austria/`. Gemessen am gebauten Wiki:
+  // die EN-Oesterreich-Seite zeigte im DE-Knopf auf /austria/ (404) statt
+  // auf /oesterreich/ (200).
+  return switchLanguageHref(pathname)
 }
 
 export function SiteHeader() {
@@ -71,7 +55,7 @@ export function SiteHeader() {
   const pathname = rawPathname.includes('_not-found')
     ? (rawPathname.startsWith('/en') ? '/en' : '/')
     : rawPathname
-  const isEn = pathname === '/en' || pathname.startsWith('/en/')
+  const isEn = isEnglishPath(pathname)
   const nav = isEn ? navEn : navDe
   const homeHref = isEn ? '/en' : '/'
   const toggleHref = getToggleHref(pathname, isEn)

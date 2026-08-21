@@ -332,7 +332,7 @@ docker compose ps
             rows={[
               ["Docker Grundlagen lernen", "Verstehen was unter der Haube passiert", "/tools/docker-grundlagen"],
               ["Mehrere Modelle testen", "Verschiedene Stärken für verschiedene Aufgaben", "/tools/model-selection"],
-              ["n8n Workflows bauen", "LLM in automatisierte Prozesse einbinden", "/tools/n8n-für-anfänger"],
+              ["n8n Workflows bauen", "LLM in automatisierte Prozesse einbinden", "/tools/n8n-fuer-anfaenger"],
               ["Monitoring einrichten", "GPU-Auslastung und Container-Health überwachen", "/tools/grafana-monitoring"],
               ["Security prüfen", "Lokal heisst nicht automatisch sicher", "/security/self-hosted-sicherheit"],
             ]}

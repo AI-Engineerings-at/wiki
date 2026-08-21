@@ -3,11 +3,12 @@
 import { WikiLink as Link } from './WikiLink'
 import { usePathname } from 'next/navigation'
 import { categories, getEnHref } from '../lib/articles'
+import { isEnglishPath, normalizePath } from '../lib/alternates'
 import { useState, useEffect } from 'react'
 
 export function Sidebar() {
   const pathname = usePathname() || '/'
-  const isEn = pathname.startsWith('/en/')
+  const isEn = isEnglishPath(pathname)
   const [openCategory, setOpenCategory] = useState<string | null>(null)
 
   // Set initial open category after hydration to avoid server/client mismatch
@@ -32,6 +33,7 @@ export function Sidebar() {
 
         {categories.map((cat) => {
           const isOpen = openCategory === cat.slug
+          const catHref = isEn ? getEnHref(cat.href) : cat.href
           const isCategoryActive = pathname === cat.href || pathname.startsWith(cat.href + '/')
 
           return (
@@ -52,29 +54,39 @@ export function Sidebar() {
 
               {isOpen && (
                 <div className="ml-4 mt-1 space-y-0.5 border-l border-slate-800 pl-3">
-                  <Link
-                    href={isEn ? getEnHref(cat.href) : cat.href}
-                    className={`block px-2 py-1.5 text-xs rounded transition-colors ${
-                      pathname === (isEn ? getEnHref(cat.href) : cat.href)
-                        ? 'text-blue-400'
-                        : 'text-slate-500 hover:text-slate-300'
-                    }`}
-                  >
-                    Alle {cat.label}
-                  </Link>
-                  {cat.articles.map((article) => (
+                  {catHref && (
                     <Link
-                      key={article.href}
-                      href={isEn ? getEnHref(article.href) : article.href}
+                      href={catHref}
                       className={`block px-2 py-1.5 text-xs rounded transition-colors ${
-                        pathname === (isEn ? getEnHref(article.href) : article.href)
-                          ? 'text-blue-400 bg-blue-500/5'
+                        normalizePath(pathname) === catHref
+                          ? 'text-blue-400'
                           : 'text-slate-500 hover:text-slate-300'
                       }`}
                     >
-                      {article.title}
+                      Alle {cat.label}
                     </Link>
-                  ))}
+                  )}
+                  {cat.articles.map((article) => {
+                    // Auf EN-Seiten nur Artikel zeigen, die es auf Englisch
+                    // gibt. Vorher wurde `/en` vorangestellt, auch wenn keine
+                    // EN-Seite existierte — das erzeugte tote Links in der
+                    // Seitenleiste jeder EN-Seite.
+                    const href = isEn ? getEnHref(article.href) : article.href
+                    if (!href) return null
+                    return (
+                      <Link
+                        key={article.href}
+                        href={href}
+                        className={`block px-2 py-1.5 text-xs rounded transition-colors ${
+                          normalizePath(pathname) === href
+                            ? 'text-blue-400 bg-blue-500/5'
+                            : 'text-slate-500 hover:text-slate-300'
+                        }`}
+                      >
+                        {article.title}
+                      </Link>
+                    )
+                  })}
                 </div>
               )}
             </div>
