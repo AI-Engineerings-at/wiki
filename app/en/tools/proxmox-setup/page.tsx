@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/en/tools/proxmox-setup'),
-  title: 'Proxmox Setup | AI Engineering Wiki',
+  title: 'Proxmox Setup',
   description: 'Virtualization with Proxmox VE. VMs, containers, cluster.',
 }
 

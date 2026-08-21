@@ -8,7 +8,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/grundlagen/was-ist-ein-llm'),
-  title: "Was ist ein LLM? Large Language Models erklärt | AI Engineering Wiki",
+  title: "Was ist ein LLM? Large Language Models erklärt",
   description:
     "Was ist ein Large Language Model (LLM)? Wie funktionieren Transformer, Tokens und Inferenz? Modellgrößen, VRAM-Anforderungen und praktische Tipps.",
 }

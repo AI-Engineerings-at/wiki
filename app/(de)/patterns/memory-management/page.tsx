@@ -5,7 +5,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/patterns/memory-management'),
-  title: 'Memory Management Pattern | AI Engineering Wiki',
+  title: 'Memory Management Pattern',
   description: 'Wie AI-Agenten persistentes Wissen speichern und abrufen — CLAUDE.md, Topic Files, Knowledge Graphs.',
 }
 

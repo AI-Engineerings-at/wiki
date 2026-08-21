@@ -8,7 +8,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/en/patterns/evals-guardrails'),
-  title: "Evals & Guardrails — Measuring and Securing LLM Quality | AI Engineering Wiki",
+  title: "Evals & Guardrails — Measuring and Securing LLM Quality",
   description:
     "LLM Evaluations, Guardrails, Prompt Injection Protection, Hallucination Detection. Tools: promptfoo, Langfuse, RAGAS. With n8n eval workflow example.",
 }

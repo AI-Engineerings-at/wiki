@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/en/tools/mattermost-agent'),
-  title: 'Mattermost AI Agent | AI Engineering Wiki',
+  title: 'Mattermost AI Agent',
   description: 'Build an AI agent for Mattermost chat. Bot setup, prompts.',
 }
 

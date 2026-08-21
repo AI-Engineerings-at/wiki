@@ -1,7 +1,7 @@
 import { alternatesFor } from '../../../lib/alternates'
 export const metadata = {
   alternates: alternatesFor('/en/downloads'),
-  title: 'Downloads | AI Engineering Wiki',
+  title: 'Downloads',
   description:
     'Free templates for AI compliance, documentation and operations: templates, checklists and guides.',
 }

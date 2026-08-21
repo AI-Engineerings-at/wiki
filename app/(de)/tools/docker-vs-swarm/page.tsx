@@ -5,7 +5,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/tools/docker-vs-swarm'),
-  title: 'Docker Compose vs Docker Swarm | AI Engineering Wiki',
+  title: 'Docker Compose vs Docker Swarm',
   description:
     'Vergleich Docker Compose vs Docker Swarm für AI-Workloads: Setup, Skalierung, Updates, Observability und was 2026 in Production wirklich zählt.',
 }

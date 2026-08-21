@@ -5,7 +5,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/en/papers/rag-paper'),
-  title: "Retrieval-Augmented Generation (RAG) Paper Explained | AI Engineering Wiki",
+  title: "Retrieval-Augmented Generation (RAG) Paper Explained",
   description:
     "The RAG paper by Lewis et al. (2020) explained: How LLMs become better and more reliable through external knowledge sources.",
 }

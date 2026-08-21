@@ -4,7 +4,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/tools/rag-guide'),
-  title: 'RAG Guide | AI Engineering Wiki',
+  title: 'RAG Guide',
   description:
     'RAG (Retrieval Augmented Generation) in der Praxis: Embeddings, Vector DBs (ChromaDB/Qdrant), Hybrid Search und wie du dein eigenes Wissen ins LLM bringst.',
 }

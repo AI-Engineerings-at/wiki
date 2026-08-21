@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/grundlagen/ai-agent-team'),
-  title: 'AI Agent Team aufbauen | AI Engineering Wiki',
+  title: 'AI Agent Team aufbauen',
   description:
     'Wie du ein AI-Agent-Team aufbaust: Agent-Typen, Rollen, Tools-Integration und Guardrails. Praxisnah, lokal und DSGVO-konform gedacht.',
 }

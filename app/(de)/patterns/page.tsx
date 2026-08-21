@@ -4,7 +4,7 @@ import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/patterns'),
-  title: 'Patterns | AI Engineering Wiki',
+  title: 'Patterns',
   description:
     'Erprobte Agent-Orchestration Patterns aus der Praxis: Memory Management, Task Delegation, Safety Hooks und Monitoring.',
 }

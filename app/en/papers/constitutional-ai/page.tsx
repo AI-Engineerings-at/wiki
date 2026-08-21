@@ -5,7 +5,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/en/papers/constitutional-ai'),
-  title: "Constitutional AI Explained | AI Engineering Wiki",
+  title: "Constitutional AI Explained",
   description:
     "The Constitutional AI paper by Bai et al. (2022, Anthropic) explained: How to align AI systems through principles instead of human feedback alone.",
 }

@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/en/grundlagen/multi-agent-systeme'),
-  title: 'Multi-Agent Systems Explained | AI Engineering Wiki',
+  title: 'Multi-Agent Systems Explained',
   description: 'How multiple AI agents work together, how they communicate, and why it beats a single LLM.',
 }
 

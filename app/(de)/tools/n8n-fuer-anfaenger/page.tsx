@@ -5,7 +5,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/tools/n8n-fuer-anfaenger'),
-  title: 'n8n für Anfänger | AI Engineering Wiki',
+  title: 'n8n für Anfänger',
   description:
     'n8n Workflow-Automatisierung im lokalen AI-Stack: Installation, Nodes, Beispiele und Integration mit Ollama, Slack/Team-Chat und Stripe.',
 }

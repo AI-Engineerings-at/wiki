@@ -8,7 +8,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/tools/ai-stack-setup'),
-  title: "AI Stack Setup in 30 Minuten: Ollama + Open WebUI + Docker | AI Engineering Wiki",
+  title: "AI Stack Setup in 30 Minuten: Ollama + Open WebUI + Docker",
   description:
     "Schritt-für-Schritt: Ollama installieren, LLM herunterladen, Open WebUI starten. In 30 Minuten läuft dein eigener AI-Stack lokal.",
 }

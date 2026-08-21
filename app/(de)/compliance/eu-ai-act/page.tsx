@@ -5,7 +5,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/compliance/eu-ai-act'),
-  title: 'EU AI Act | AI Engineering Wiki',
+  title: 'EU AI Act',
   description:
     'EU AI Act seit 1. August 2024 in Kraft. Art. 4 KI-Kompetenz gilt seit 02.02.2025, vollständige Anwendung seit 02.08.2026. Risikoklassen, Pflichten, Strafen.',
 }

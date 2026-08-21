@@ -6,7 +6,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/papers/hierarchical-reasoning'),
-  title: "Hierarchical Reasoning Model (2025) — Rekurrente AI ohne Chain-of-Thought | AI Engineering Wiki",
+  title: "Hierarchical Reasoning Model (2025) — Rekurrente AI ohne Chain-of-Thought",
   description:
     "Das Hierarchical Reasoning Model (HRM) löst komplexe Aufgaben wie Sudoku, Labyrinth und ARC mit nur 27M Parametern und 1000 Trainingsbeispielen — ohne Chain-of-Thought.",
 }

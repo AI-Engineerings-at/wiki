@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/en/security/firewall-setup'),
-  title: 'Firewall Setup | AI Engineering Wiki',
+  title: 'Firewall Setup',
   description: 'UFW, fail2ban, network segmentation for local AI infrastructure.',
 }
 

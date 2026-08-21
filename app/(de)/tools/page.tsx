@@ -4,7 +4,7 @@ import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/tools'),
-  title: 'Tools & Infrastruktur | AI Engineering Wiki',
+  title: 'Tools & Infrastruktur',
   description:
     'Die Werkzeuge die du brauchst: KI installieren, automatisieren, überwachen. Schritt-für-Schritt Anleitungen.',
 }

@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/en/tools/grafana-monitoring'),
-  title: 'Grafana Monitoring | AI Engineering Wiki',
+  title: 'Grafana Monitoring',
   description: 'Monitoring with Prometheus + Grafana. Dashboards, alerts.',
 }
 

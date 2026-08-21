@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/en/tools/docker-vs-swarm'),
-  title: 'Docker vs Docker Swarm for AI | AI Engineering Wiki',
+  title: 'Docker vs Docker Swarm for AI',
   description: 'Which is right for AI? Compose for development, Swarm for production.',
 }
 

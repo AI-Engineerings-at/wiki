@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/en/compliance/eu-ai-act'),
-  title: 'EU AI Act | AI Engineering Wiki',
+  title: 'EU AI Act',
   description: 'Risk classes, prohibitions, transparency requirements for AI systems in the EU.',
 }
 

@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/en/tools/mcp-server'),
-  title: 'MCP Server | AI Engineering Wiki',
+  title: 'MCP Server',
   description: 'Model Context Protocol. Connect Claude to your infrastructure.',
 }
 

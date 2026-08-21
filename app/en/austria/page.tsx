@@ -1,7 +1,7 @@
 import { alternatesFor } from '../../../lib/alternates'
 export const metadata = {
   alternates: alternatesFor('/en/austria'),
-  title: 'AI in Austria | AI Engineering Wiki',
+  title: 'AI in Austria',
   description:
     'Authorities, funding, community and legal overview: All relevant Austrian AI resources at a glance.',
 }

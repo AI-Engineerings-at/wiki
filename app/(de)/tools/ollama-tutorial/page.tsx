@@ -5,7 +5,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/tools/ollama-tutorial'),
-  title: 'Ollama Tutorial | AI Engineering Wiki',
+  title: 'Ollama Tutorial',
   description:
     'Ollama Tutorial: lokale LLMs installieren, Modelle auswählen, API nutzen und in deinen lokalen, DSGVO-konformen AI-Stack integrieren.',
 }

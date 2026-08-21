@@ -5,7 +5,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/grundlagen/ai-kosten-vergleich'),
-  title: 'AI Kosten Vergleich | AI Engineering Wiki',
+  title: 'AI Kosten Vergleich',
   description:
     'Realistischer Kostenvergleich 2026: lokal vs Cloud vs hybrid. Setup, laufende Kosten, GPU/Hardware und typische Business-Workloads.',
 }

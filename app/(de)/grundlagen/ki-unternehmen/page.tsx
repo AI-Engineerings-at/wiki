@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/grundlagen/ki-unternehmen'),
-  title: 'AI im Unternehmen | AI Engineering Wiki',
+  title: 'AI im Unternehmen',
   description: 'Warum Unternehmen lokale AI einsetzen: Datenschutz (DSGVO), Kostenkontrolle und technische Souveränität.',
 }
 

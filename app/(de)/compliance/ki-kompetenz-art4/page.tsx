@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/compliance/ki-kompetenz-art4'),
-  title: 'KI-Kompetenz nach Art. 4 EU AI Act | AI Engineering Wiki',
+  title: 'KI-Kompetenz nach Art. 4 EU AI Act',
   description:
     'Art. 4 EU AI Act: KI-Kompetenz Pflicht gilt seit 02.02.2025 für alle Unternehmen — auch nach dem Digital Omnibus 2026. Aufsicht durch nationale Marktaufsicht seit 02.08.2026. Praxis-Guide für DACH-KMUs.',
 }

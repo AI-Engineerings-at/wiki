@@ -1,7 +1,7 @@
 import { alternatesFor } from '../../../../lib/alternates'
 export const metadata = {
   alternates: alternatesFor('/en/tools/ai-os-setup'),
-  title: 'AI OS Setup Guide | AI Engineering Wiki',
+  title: 'AI OS Setup Guide',
   description:
     'Set up Claude Code as an AI operating system: folder structure, business setup wizard, context files, and first commands in 15 minutes.',
 }

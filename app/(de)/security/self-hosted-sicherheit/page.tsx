@@ -9,7 +9,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/security/self-hosted-sicherheit'),
-  title: "Self-Hosted Sicherheit: Das 6-Layer Modell | AI Engineering Wiki",
+  title: "Self-Hosted Sicherheit: Das 6-Layer Modell",
   description:
     "6 Sicherheitsebenen für selbst gehostete AI-Infrastruktur: Netzwerk, SSH, Firewall, Container, Anwendung, Monitoring. Praxisnahe Anleitung.",
 }

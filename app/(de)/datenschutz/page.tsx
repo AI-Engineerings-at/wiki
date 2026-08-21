@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/datenschutz'),
-  title: 'Datenschutzerklärung | AI Engineering Wiki',
+  title: 'Datenschutzerklärung',
   description: 'Datenschutzerklärung und Informationen zum Umgang mit personenbezogenen Daten auf wiki.ai-engineering.at.',
 }
 

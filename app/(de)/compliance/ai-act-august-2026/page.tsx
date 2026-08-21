@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/compliance/ai-act-august-2026'),
-  title: 'Was passiert am 02.08.2026? EU AI Act Enforcement-Start | AI Engineering Wiki',
+  title: 'Was passiert am 02.08.2026? EU AI Act Enforcement-Start',
   description:
     'Seit dem 2. August 2026 gelten Marktaufsicht und Strafrahmen des EU AI Act. Was nach dem Digital Omnibus (Juni 2026) konkret gilt, was verschoben wurde und welche 6 Schritte KMUs jetzt gehen müssen.',
 }

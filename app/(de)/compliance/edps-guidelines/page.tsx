@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/compliance/edps-guidelines'),
-  title: 'EDPS Guidelines — Was der EU-Datenschutzbeauftragte für KI vorgibt | AI Engineering Wiki',
+  title: 'EDPS Guidelines — Was der EU-Datenschutzbeauftragte für KI vorgibt',
   description:
     'Der European Data Protection Supervisor (EDPS) veröffentlicht verbindliche Guidelines für den KI-Einsatz in EU-Institutionen und sie sind De-facto-Maßstab auch für KMUs. Überblick, Praxis-Hinweise und Cross-Ref zu DSGVO und EU AI Act.',
 }

@@ -4,7 +4,7 @@ import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/compliance'),
-  title: 'Compliance | AI Engineering Wiki',
+  title: 'Compliance',
   description:
     'Was du als Unternehmen tun musst wenn du KI einsetzt: DSGVO, EU AI Act, Pflichten und Checklisten — verständlich erklärt.',
 }

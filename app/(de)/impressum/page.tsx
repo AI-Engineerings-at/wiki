@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/impressum'),
-  title: 'Impressum | AI Engineering Wiki',
+  title: 'Impressum',
   description: 'Impressum und rechtliche Angaben gemäß § 5 ECG für AI Engineering.',
 }
 

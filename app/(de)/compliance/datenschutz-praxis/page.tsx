@@ -4,7 +4,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/compliance/datenschutz-praxis'),
-  title: 'Datenschutz Praxis | AI Engineering Wiki',
+  title: 'Datenschutz Praxis',
   description:
     'DSGVO in der Praxis umsetzen: technische und organisatorische Massnahmen (TOM), Zugriffskontrollen, Logging, Monitoring und Checklisten.',
 }

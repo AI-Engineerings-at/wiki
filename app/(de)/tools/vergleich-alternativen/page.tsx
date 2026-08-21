@@ -31,7 +31,7 @@ governance -down-> governance_quellen
 
 export const metadata = {
   alternates: alternatesFor('/tools/vergleich-alternativen'),
-  title: 'Vergleichbare Ressourcen \u2014 Wo du sonst noch lernen kannst | AI Engineering Wiki',
+  title: 'Vergleichbare Ressourcen \u2014 Wo du sonst noch lernen kannst',
   description:
     'Ehrlicher Vergleich: Welche externen Quellen in bestimmten Bereichen besser sind als unsere Wiki. EU-Kommission, WKO, n8n, Hugging Face, NIST, OECD und mehr.',
 }

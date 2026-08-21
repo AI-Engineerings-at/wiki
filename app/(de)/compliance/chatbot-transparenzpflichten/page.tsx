@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/compliance/chatbot-transparenzpflichten'),
-  title: 'Chatbot Transparenzpflichten nach EU AI Act | AI Engineering Wiki',
+  title: 'Chatbot Transparenzpflichten nach EU AI Act',
   description: 'Was du bei Chatbots und KI-generierten Inhalten beachten musst. Kennzeichnungspflichten, Offenlegung, Copyright - alles kompakt.',
 }
 

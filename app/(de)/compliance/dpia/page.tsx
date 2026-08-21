@@ -4,7 +4,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/compliance/dpia'),
-  title: 'Datenschutz-Folgenabschätzung (DPIA) | AI Engineering Wiki',
+  title: 'Datenschutz-Folgenabschätzung (DPIA)',
   description:
     'DPIA für KI-Systeme: Wann ist eine Datenschutz-Folgenabschätzung Pflicht, wie führt man sie durch, und was muss dokumentiert werden.',
 }

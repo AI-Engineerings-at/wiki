@@ -4,7 +4,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/security/api-keys-sicher'),
-  title: 'API Keys sicher speichern | AI Engineering Wiki',
+  title: 'API Keys sicher speichern',
   description:
     'Best Practices für Secrets: API-Keys nie committen, Env Vars, Vault/Secrets Manager, Rotation und Audit. Fokus: lokaler AI-Stack.',
 }

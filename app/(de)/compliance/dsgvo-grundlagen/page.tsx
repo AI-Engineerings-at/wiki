@@ -5,7 +5,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/compliance/dsgvo-grundlagen'),
-  title: 'DSGVO Grundlagen | AI Engineering Wiki',
+  title: 'DSGVO Grundlagen',
   description:
     'DSGVO-Grundlagen für AI-Systeme: Pflichten, Rechtsgrundlagen, Dokumentation und Praxis-Hinweise. Kein Ersatz für Rechtsberatung.',
 }

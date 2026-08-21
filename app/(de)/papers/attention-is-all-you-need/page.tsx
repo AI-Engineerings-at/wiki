@@ -6,7 +6,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/papers/attention-is-all-you-need'),
-  title: "Attention Is All You Need — Transformer erklärt | AI Engineering Wiki",
+  title: "Attention Is All You Need — Transformer erklärt",
   description:
     "Das Transformer-Paper von Vaswani et al. (2017) verständlich erklärt: Self-Attention, Multi-Head Attention und warum dieses Paper die gesamte AI-Landschaft verändert hat.",
 }

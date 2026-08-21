@@ -1,7 +1,7 @@
 import { alternatesFor } from '../../../../lib/alternates'
 export const metadata = {
   alternates: alternatesFor('/en/tools/comparison-alternatives'),
-  title: 'Comparable Resources \u2014 Where Else You Can Learn | AI Engineering Wiki',
+  title: 'Comparable Resources \u2014 Where Else You Can Learn',
   description:
     'Honest comparison: Which external sources are better than our wiki in certain areas. EU Commission, WKO, n8n, Hugging Face, NIST, OECD and more.',
 }

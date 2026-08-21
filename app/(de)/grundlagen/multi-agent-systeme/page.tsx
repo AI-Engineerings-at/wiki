@@ -4,7 +4,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/grundlagen/multi-agent-systeme'),
-  title: 'Multi-Agent Systeme erklärt | AI Engineering Wiki',
+  title: 'Multi-Agent Systeme erklärt',
   description:
     'Was ist ein Multi-Agent System (MAS)? Vorteile gegenüber einem einzelnen LLM, Rollen, Kommunikation und typische Architektur-Patterns aus der Praxis.',
 }

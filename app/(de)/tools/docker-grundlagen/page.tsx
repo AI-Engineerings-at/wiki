@@ -9,7 +9,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/tools/docker-grundlagen'),
-  title: "Docker Grundlagen: Container, Compose & Swarm | AI Engineering Wiki",
+  title: "Docker Grundlagen: Container, Compose & Swarm",
   description:
     "Docker für AI-Workloads verstehen: Container vs VMs, Docker Compose für lokale Stacks, Docker Swarm für Multi-Node Deployments. Praxisnah erklärt.",
 }

@@ -7,7 +7,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/en/compliance/ai-agent-legal-framework'),
-  title: "AI Agent Legal Framework — EU AI Act Compliance | AI Engineering Wiki",
+  title: "AI Agent Legal Framework — EU AI Act Compliance",
   description:
     "How to deploy AI agents legally: EU AI Act, GDPR, risk assessment, compliance documents and hash chain for tamper-proof documentation.",
 }

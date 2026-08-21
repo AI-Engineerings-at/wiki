@@ -60,7 +60,7 @@ end note
 
 export const metadata = {
   alternates: alternatesFor('/tools/cli-coding-agents-vergleich'),
-  title: 'CLI Coding Agents im Vergleich — Claude Code, Mistral Vibe, Gemini CLI, Codex CLI | AI Engineering Wiki',
+  title: 'CLI Coding Agents im Vergleich — Claude Code, Mistral Vibe, Gemini CLI, Codex CLI',
   description:
     'Umfassender Vergleich von CLI Coding Agents: Claude Code, Mistral Vibe, Gemini CLI und OpenAI Codex CLI. Features, Preise, DSGVO-Tauglichkeit und Praxis-Tests.',
 }

@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/en/tools/n8n-fuer-anfaenger'),
-  title: 'n8n for Beginners | AI Engineering Wiki',
+  title: 'n8n for Beginners',
   description: 'Workflow automation with n8n. Getting started, nodes, triggers, integrations.',
 }
 

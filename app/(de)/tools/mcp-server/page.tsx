@@ -4,7 +4,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/tools/mcp-server'),
-  title: 'MCP Server | AI Engineering Wiki',
+  title: 'MCP Server',
   description:
     'Model Context Protocol (MCP): Verbinde Claude Desktop mit deiner Infrastruktur. Setup, Beispiel-Server und typische Queries für Homelab/AI-Stack.',
 }

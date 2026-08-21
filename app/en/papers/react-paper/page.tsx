@@ -5,7 +5,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/en/papers/react-paper'),
-  title: "ReAct: Reasoning and Acting Explained | AI Engineering Wiki",
+  title: "ReAct: Reasoning and Acting Explained",
   description:
     "The ReAct paper by Yao et al. (2022) explained: How LLMs become capable agents by alternating between thinking and acting.",
 }

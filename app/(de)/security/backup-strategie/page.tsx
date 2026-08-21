@@ -4,7 +4,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/security/backup-strategie'),
-  title: 'Backup Strategie | AI Engineering Wiki',
+  title: 'Backup Strategie',
   description:
     'Backup-Strategie für deinen lokalen AI-Stack: 3-2-1 Regel, Restore-Tests, n8n/Ollama/Postgres sichern und Automatisierung in der Praxis.',
 }

@@ -1,7 +1,7 @@
 import { alternatesFor } from '../../../lib/alternates'
 export const metadata = {
   alternates: alternatesFor('/en/patterns'),
-  title: 'Patterns | AI Engineering Wiki',
+  title: 'Patterns',
   description:
     'Proven Agent Orchestration patterns: memory management, task delegation, safety hooks and monitoring for Multi-Agent Systems.',
   openGraph: {

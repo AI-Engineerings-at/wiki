@@ -7,7 +7,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/en/patterns/self-improving-agents'),
-  title: "Self-Improving Agents — NemoClaw Pattern | AI Engineering Wiki",
+  title: "Self-Improving Agents — NemoClaw Pattern",
   description:
     "How AI agents learn from mistakes: 3-tier memory, corrections.md, pre-action gates, self-escalation and two-tier heartbeat.",
 }

@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/en/terms'),
-  title: 'Terms & Conditions | AI Engineering Wiki',
+  title: 'Terms & Conditions',
   description: 'General Terms and Conditions for the purchase of digital products at AI Engineering.',
 }
 

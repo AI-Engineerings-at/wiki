@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/tools/mattermost-agent'),
-  title: 'Mattermost Agent Kommunikation | AI Engineering Wiki',
+  title: 'Mattermost Agent Kommunikation',
   description:
     'Mattermost als Kommunikationsbus für Multi-Agent Systeme: Bot-Setup, Webhooks, Polling, Nachrichtenformat und Audit-Trail in der Praxis.',
 }

@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/support/troubleshooting'),
-  title: 'Troubleshooting | AI Engineering Wiki',
+  title: 'Troubleshooting',
   description:
     'Systematisches Troubleshooting für deinen lokalen AI-Stack: Logs, Netzwerk, Container, Ollama, n8n und typische Fehlerbilder in 5 Schritten.',
 }

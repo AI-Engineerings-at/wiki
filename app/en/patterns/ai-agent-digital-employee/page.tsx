@@ -7,7 +7,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/en/patterns/ai-agent-digital-employee'),
-  title: "AI Agent as Digital Employee — Patterns & Architecture | AI Engineering Wiki",
+  title: "AI Agent as Digital Employee — Patterns & Architecture",
   description:
     "How to onboard an AI agent as a digital employee: security architecture, skill system, credential isolation and EU AI Act compliance.",
 }

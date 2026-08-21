@@ -6,7 +6,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/papers/lora-paper'),
-  title: "LoRA: Low-Rank Adaptation erklärt | AI Engineering Wiki",
+  title: "LoRA: Low-Rank Adaptation erklärt",
   description:
     "Das LoRA-Paper von Hu et al. (2021) verständlich erklärt: Parameter-effizientes Fine-Tuning großer Sprachmodelle ohne alle Gewichte neu zu trainieren.",
 }

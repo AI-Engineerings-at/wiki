@@ -5,7 +5,7 @@ import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/blog'),
-  title: 'Blog | AI Engineering Wiki',
+  title: 'Blog',
   description:
     'Praxis-Artikel zu lokalem AI-Stack, Automation, DSGVO-Compliance und Agent Orchestration.',
 }

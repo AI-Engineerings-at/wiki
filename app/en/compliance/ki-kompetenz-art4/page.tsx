@@ -1,7 +1,7 @@
 import { alternatesFor } from '../../../../lib/alternates'
 export const metadata = {
   alternates: alternatesFor('/en/compliance/ki-kompetenz-art4'),
-  title: 'AI Literacy under Art. 4 EU AI Act | AI Engineering Wiki',
+  title: 'AI Literacy under Art. 4 EU AI Act',
   description:
     'Art. 4 EU AI Act: AI literacy obligation applies since Feb 2, 2025. Enforcement from Aug 2026, penalties up to EUR 15M. Practical guide for SMEs.',
 }

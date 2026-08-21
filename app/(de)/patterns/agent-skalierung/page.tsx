@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/patterns/agent-skalierung'),
-  title: 'Agent Team skalieren | AI Engineering Wiki',
+  title: 'Agent Team skalieren',
   description:
     'Neue Agenten hinzufügen, Multi-Agent Workflows erstellen und ein Agent-Team skalieren: Schritt-für-Schritt-Anleitung mit Praxis-Patterns.',
 }

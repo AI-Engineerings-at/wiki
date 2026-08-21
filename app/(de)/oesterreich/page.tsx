@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/oesterreich'),
-  title: 'KI in Österreich | AI Engineering Wiki',
+  title: 'KI in Österreich',
   description:
     'Behörden, Förderungen, Community und Rechtslage: Alle relevanten österreichischen KI-Ressourcen auf einen Blick.',
 }

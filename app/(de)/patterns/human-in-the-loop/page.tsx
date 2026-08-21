@@ -8,7 +8,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/patterns/human-in-the-loop'),
-  title: "Human-in-the-Loop — Mensch-KI Zusammenarbeit | AI Engineering Wiki",
+  title: "Human-in-the-Loop — Mensch-KI Zusammenarbeit",
   description:
     "Approval Workflows, Escalation Patterns, Confidence Thresholds, Audit Trail. EU AI Act Art. 14 Human Oversight. Mit n8n Approval Workflow Beispiel.",
 }

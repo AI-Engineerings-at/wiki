@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/en/patterns/task-delegation'),
-  title: 'Task Delegation Pattern | AI Engineering Wiki',
+  title: 'Task Delegation Pattern',
   description: 'Orchestrator assigns tasks to specialized agents. Routing, priorities, deadlines.',
 }
 

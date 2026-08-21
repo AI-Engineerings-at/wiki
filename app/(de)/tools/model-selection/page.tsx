@@ -4,7 +4,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/tools/model-selection'),
-  title: 'Model Selection Guide | AI Engineering Wiki',
+  title: 'Model Selection Guide',
   description: 'Wähle das richtige AI-Modell für deinen Anwendungsfall — von Llama bis Mistral.',
 }
 

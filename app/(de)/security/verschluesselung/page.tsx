@@ -9,7 +9,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/security/verschluesselung'),
-  title: "Verschlüsselung: At Rest, In Transit, In Use | AI Engineering Wiki",
+  title: "Verschlüsselung: At Rest, In Transit, In Use",
   description:
     "Verschlüsselung für Self-Hosted AI: Daten auf der Festplatte, im Netzwerk und während der Verarbeitung schützen. LUKS, TLS, Confidential Computing erklärt.",
 }

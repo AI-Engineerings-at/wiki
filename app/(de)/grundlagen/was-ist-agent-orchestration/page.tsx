@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/grundlagen/was-ist-agent-orchestration'),
-  title: 'Was ist Agent Orchestration? | AI Engineering Wiki',
+  title: 'Was ist Agent Orchestration?',
   description:
     'Agent Orchestration koordiniert mehrere spezialisierte AI-Agenten. Grundlagen, Rollen, Kommunikationsfluss und Vorteile von Multi-Agent Systemen.',
 }

@@ -4,7 +4,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/tools/n8n-workflow-bundle'),
-  title: 'n8n AI Workflow Bundle v3 | AI Engineering Wiki',
+  title: 'n8n AI Workflow Bundle v3',
   description:
     '14 produktionsreife n8n-Workflows mit Error Handling, Dual-LLM-Fallback und DSGVO-Compliance. Architektur, Kategorien und Best Practices.',
 }

@@ -4,7 +4,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/patterns/agent-orchestration-patterns'),
-  title: 'Agent Orchestration Patterns | AI Engineering Wiki',
+  title: 'Agent Orchestration Patterns',
   description:
     'Übersicht über bewährte Agent-Orchestration Patterns: sequential, parallel, hierarchical, router und supervisor. Praktisch erklärt.',
 }

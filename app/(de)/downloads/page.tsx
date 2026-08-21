@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/downloads'),
-  title: 'Praxis-Downloads | AI Engineering Wiki',
+  title: 'Praxis-Downloads',
   description:
     'Kostenlose Vorlagen für KI-Compliance, Dokumentation und Betrieb: Templates, Checklisten und Leitfäden.',
 }

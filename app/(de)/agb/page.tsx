@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/agb'),
-  title: 'AGB | AI Engineering Wiki',
+  title: 'AGB',
   description: 'Allgemeine Geschäftsbedingungen für den Kauf digitaler Produkte bei AI Engineering.',
 }
 

@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/compliance/eu-ai-act-checkliste'),
-  title: 'EU AI Act Compliance Checkliste | AI Engineering Wiki',
+  title: 'EU AI Act Compliance Checkliste',
   description: 'Ihre 7-Schritte Checkliste zur EU AI Act Bereitschaft. Risikoklassen, Transparenzpflichten, Verbote - alles kompakt.',
 }
 

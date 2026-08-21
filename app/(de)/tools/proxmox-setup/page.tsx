@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/tools/proxmox-setup'),
-  title: 'Proxmox Setup | AI Engineering Wiki',
+  title: 'Proxmox Setup',
   description:
     'Proxmox VE im Homelab: Installation, VMs/LXC, GPU-Passthrough für Ollama, Backups und CLI-Befehle. Basis für deinen lokalen AI-Stack.',
 }
