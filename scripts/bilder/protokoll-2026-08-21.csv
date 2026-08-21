@@ -1,2 +1,61 @@
 slug,lang,kategorie,prompt_hash,seed,dauer_s,bytes,status
 ai-audio-speech,de,ai-tools,dc0dab8c93fc,45305444794433,118.8,37520,ok
+ai-chat-assistenten,de,ai-tools,9085168ff328,216345668836808,17.0,23040,ok
+ai-coding-tools,de,ai-tools,52e1dea65cc4,172150975932199,15.0,33560,ok
+ai-development-frameworks,de,ai-tools,56941cd18fc0,261510942419271,14.8,39028,ok
+ai-image-generierung,de,ai-tools,1de8539fdbf7,125714117164095,14.8,27218,ok
+ai-monitoring-tools,de,ai-tools,59b68e33d8b8,223679435343380,12.7,37266,ok
+ai-search-engines,de,ai-tools,4f6693344e52,8405280150141,13.0,29528,ok
+ai-video-tools,de,ai-tools,af9d2c4206ad,57246163179466,13.1,32870,ok
+ai-workflow-automation,de,ai-tools,56ad277553cb,4895213261877,13.0,44498,ok
+dify,de,ai-tools,08020b301a33,241497085508571,12.7,57148,ok
+flowise,de,ai-tools,f06026102a1b,159706866692527,13.0,41554,ok
+gpu-hardware-guide,de,ai-tools,bccf6e5ae0bd,269970775198230,12.7,40430,ok
+hugging-face,de,ai-tools,9d3eb4d3ec1e,209611913993360,13.1,26902,ok
+label-studio,de,ai-tools,f5304e93afe3,27625514368444,12.8,32770,ok
+litellm,de,ai-tools,3f3e5fce0434,242755163941731,13.2,34382,ok
+lm-studio,de,ai-tools,db4505e07714,277450875066522,15.8,26348,ok
+mlflow,de,ai-tools,f3a57cfe00c5,195339149955754,12.6,24240,ok
+open-source-llms,de,ai-tools,4424ef207c29,32169329895247,12.7,36810,ok
+open-webui,de,ai-tools,3dc8c49dcd85,233744067827940,12.8,26194,ok
+vektor-db-vergleich,de,ai-tools,9da006012d93,98249438585063,12.7,38958,ok
+ai-gateway-pattern,de,architektur,699d8150ce4c,180778056573791,13.7,49940,ok
+ai-pipeline-design,de,architektur,7e7690bcb112,8290792277660,12.6,70492,ok
+caching-fuer-ai,de,architektur,d18aa9806243,156312053810593,16.2,51886,ok
+inference-server,de,architektur,30bd4cdd19db,117478823498993,12.9,30358,ok
+load-balancing-llms,de,architektur,3916bdae3002,144920905385362,12.7,36538,ok
+microservices-fuer-ai,de,architektur,ca3db11aa647,213004723944842,12.6,37002,ok
+ai-act-august-2026,de,compliance,294455a35526,234699021091624,12.6,35368,ok
+ai-agent-legal-framework,de,compliance,33b0d9e60108,268756296614317,12.6,38098,ok
+checkliste,de,compliance,892d0935882a,33734277011185,12.6,28976,ok
+dsgvo,de,compliance,06f27161751c,11998324791329,13.0,22024,ok
+edps-guidelines,de,compliance,c4d98f150312,126355205311299,12.6,26078,ok
+eu-ai-act-guide,de,compliance,836771205b79,226461973594534,12.7,32646,ok
+oesterreich,de,compliance,6f909efac0c3,45595394747550,16.2,34276,ok
+risikoklassen,de,compliance,02a37b24b9a3,79671644109074,16.1,32464,ok
+self-assessment,de,compliance,af03157dacc5,222010298360944,12.9,31902,ok
+verifywise-integration,de,compliance,3e5df5339a6c,99248544156747,12.7,30704,ok
+ai-bias,de,ethik,1da666e6adc3,174735513335365,19.1,0,"fehlt: WebP ungueltig (1344, 768) 12428 B"
+ai-governance,de,ethik,bfd58842dd40,46236960692021,19.3,0,"fehlt: WebP ungueltig (1344, 768) 9216 B"
+erklaerbare-ai,de,ethik,474c2cb9388e,2922312233990,22.1,0,"fehlt: WebP ungueltig (1344, 768) 10672 B"
+umweltauswirkungen,de,ethik,6eb3c27095be,280427834871066,22.6,0,"fehlt: WebP ungueltig (1344, 768) 10256 B"
+ai-deployment,de,grundlagen,46512167af65,155685855489423,19.2,0,"fehlt: WebP ungueltig (1344, 768) 6498 B"
+api-grundlagen,de,grundlagen,83c598f6f4d4,133550519467863,19.3,0,"fehlt: WebP ungueltig (1344, 768) 8070 B"
+docker-fuer-ai,de,grundlagen,fefcaf06401f,265769900460759,19.1,0,"fehlt: WebP ungueltig (1344, 768) 15156 B"
+embeddings-erklaert,de,grundlagen,a1b24c7ec96b,95980399224596,19.1,0,"fehlt: WebP ungueltig (1344, 768) 10738 B"
+grafana-einfuehrung,de,grundlagen,12143bdaf0d3,45083697122120,12.9,22966,ok
+multi-agent-systeme,de,grundlagen,494cfdd283e7,250876047483587,22.5,0,"fehlt: WebP ungueltig (1344, 768) 8180 B"
+n8n-einfuehrung,de,grundlagen,7cceb00e937e,89254770560701,18.9,0,"fehlt: WebP ungueltig (1344, 768) 8190 B"
+ollama-setup,de,grundlagen,1ad3c08f4739,254257415778767,18.9,0,"fehlt: WebP ungueltig (1344, 768) 8492 B"
+ollama-vs-cloud,de,grundlagen,,,0,0,uebersprungen: REDIRECT: router.replace('/grundlagen/lokal-vs-cloud') — kein Motiv
+prompt-engineering-advanced,de,grundlagen,ab8af5aa0b7d,67077054077903,18.8,0,"fehlt: WebP ungueltig (1344, 768) 10310 B"
+selfhosted-vs-cloud,de,grundlagen,,,0,0,uebersprungen: REDIRECT: router.replace('/grundlagen/lokal-vs-cloud') — kein Motiv
+was-ist-agent-orchestration,de,grundlagen,16e52b40bd40,148330298576674,19.0,0,"fehlt: WebP ungueltig (1344, 768) 12424 B"
+ai-agenten,de,kategorien,4fd42001ba04,138180950120893,12.9,28424,ok
+ai-coding,de,kategorien,9b2900bc6b96,4646937743275,12.7,30900,ok
+fine-tuning-und-training,de,kategorien,c600e69dc659,7723168409211,13.7,31590,ok
+image-generation,de,kategorien,82d2c6a662d5,29793494637820,19.2,0,"fehlt: WebP ungueltig (1344, 768) 18282 B"
+llm-modelle,de,kategorien,f40c0071850c,229627278621145,15.8,28688,ok
+monitoring,de,kategorien,3cd506e188e3,22686863158197,12.7,22474,ok
+rag-und-retrieval,de,kategorien,2c06c63a856c,227015483116284,13.3,31340,ok
+ai-bias,de,ethik,1da666e6adc3,174735513335364,12.7,9988,ok

@@ -45,7 +45,8 @@ OWNER = "bild-agent"
 CKPT = "flux1-schnell-fp8.safetensors"
 W, H = 1344, 768
 STEPS, CFG, SAMPLER, SCHED = 4, 1.0, "euler", "simple"
-MIN_BYTES = 20 * 1024
+MIN_BYTES = 20 * 1024        # PNG aus ComfyUI (Brief B1)
+MIN_WEBP = 4 * 1024          # WebP: sehr dunkle Motive komprimieren auf 6-18 KB (gemessen 21:08); Untergrenze gegen Schwarzbild
 MAX_WEBP = 200 * 1024
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -219,7 +220,7 @@ def to_webp(png, webp):
 
 
 def valid_target(path):
-    if not os.path.isfile(path) or os.path.getsize(path) < MIN_BYTES:
+    if not os.path.isfile(path) or os.path.getsize(path) < MIN_WEBP:
         return False
     return webp_size(path) == (W, H)
 
