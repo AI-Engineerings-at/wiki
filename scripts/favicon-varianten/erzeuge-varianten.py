@@ -328,13 +328,26 @@ def final():
     print('Rendering A: Luft 10 %, Kontur 16 px@512  -> 512/192/180/32')
     print('Rendering B: Luft  8 %, Kontur 32 px@512  -> 16')
 
+    # apple-touch-icon deckend: iOS legt Touch-Icons auf einen eigenen
+    # Hintergrund (haeufig weiss) und rundet selbst. Ein Sechseck mit
+    # transparenten Ecken stuende dort auf Weiss statt auf Dunkel. Deshalb
+    # fuer diese eine Datei das Sechseck auf einen quadratischen
+    # #020617-Grund legen — Alpha ueberall 255.
+    deckend = fh.composite(N, N, gross, DUNKEL)
+
     bilder = {}
     for name, g in ZIELE.items():
-        basis = klein if g == 16 else gross
+        if name == 'apple-touch-icon.png':
+            basis = deckend
+        elif g == 16:
+            basis = klein
+        else:
+            basis = gross
         px = basis if g == N else box_skalieren(basis, g)
         bilder[g] = px
         open(os.path.join(public, name), 'wb').write(fh.write_png(g, g, px))
-        print('  public/%-28s %dx%d' % (name, g, g))
+        print('  public/%-28s %dx%d%s' % (name, g, g,
+              '  (deckend)' if name == 'apple-touch-icon.png' else ''))
 
     ico = fh.write_ico([fh.write_png(16, 16, bilder[16]),
                         fh.write_png(32, 32, bilder[32])])
