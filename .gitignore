@@ -35,6 +35,8 @@ logs/
 
 # Generated Markdown for Agents (built from content/*.mdx)
 public/md/
+# Build-Artefakt aus scripts/generate-markdown-for-agents.js (Schritt 6)
+public/llms-full.txt
 
 # Playwright
 playwright-report/
