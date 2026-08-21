@@ -3,7 +3,7 @@ import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
   alternates: alternatesFor('/patterns/safety-hooks'),
-  title: 'Safety Hooks Pattern | Playbook01 Wiki',
+  title: 'Safety Hooks Pattern',
   description: 'Guardrails, Output-Validierung und Memory-Capture als automatische Sicherheitsschicht.',
 }
 
