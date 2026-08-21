@@ -179,12 +179,12 @@ export function postProcessHtml(html: string, lang: 'de' | 'en', category: strin
   const dropped: string[] = []
   let kept = 0
   // Links
-  html = html.replace(/<a href="([^"]*)">([\s\S]*?)<\/a>/g, (_m, href: string, inner: string) => {
+  html = html.replace(/<a href="([^"]*)"([^>]*)>([\s\S]*?)<\/a>/g, (_m, href: string, attrs: string, inner: string) => {
     const target = resolveInternalLink(href, lang, category)
     if (target === null) { dropped.push(href); return inner }
     kept++
-    if (/^https?:/.test(target)) return `<a href="${target}" target="_blank" rel="noopener noreferrer">${inner}</a>`
-    return `<a href="${target}">${inner}</a>`
+    if (/^https?:/.test(target)) return `<a href="${target}"${attrs} target="_blank" rel="noopener noreferrer">${inner}</a>`
+    return `<a href="${target}"${attrs}>${inner}</a>`
   })
   // Tabellen scrollbar
   html = html.replace(/<table>/g, '<div class="table-wrap"><table>').replace(/<\/table>/g, '</table></div>')
