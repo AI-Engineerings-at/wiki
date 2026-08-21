@@ -21,6 +21,9 @@ export default function AgentRollen() {
           where its boundaries are, and who to escalate to when things go wrong — just like a human team.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/agent-rollen-pyramide.png" alt="The Minimum Viable Team — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">The Minimum Viable Team</h2>
         <p className="text-gray-300">
           For most use cases, you need at least these three roles:
@@ -61,6 +64,9 @@ export default function AgentRollen() {
           </div>
         </div>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/agent-rollen-minimum-viable-team.png" alt="Why Agents Need Tool Restrictions — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">Why Agents Need Tool Restrictions</h2>
         <p className="text-gray-300">
           Why not just give every agent access to every tool? The answer is security. You would not

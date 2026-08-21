@@ -22,6 +22,9 @@ export default function MultiAgentSystemePage() {
           Instead of one all-powerful AI, you have specialized agents that communicate and collaborate.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/single-vs-multi-agent.png" alt="Why Multiple Agents? — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2>Why Multiple Agents?</h2>
         <ul className="list-disc list-inside text-slate-300 space-y-1">
           <li><strong>Specialization:</strong> Each agent can be optimized for a specific task</li>
@@ -30,6 +33,9 @@ export default function MultiAgentSystemePage() {
           <li><strong>Cost efficiency:</strong> Use simple agents for simple tasks</li>
         </ul>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/multi-agent-architektur-muster.png" alt="Agent Types — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2>Agent Types</h2>
 
         <h3>1. Research Agent</h3>

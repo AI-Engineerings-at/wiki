@@ -22,6 +22,15 @@ export default function OllamaTutorial() {
           on your hardware.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/generated/hero-ollama-local-ai.png" alt="What is Ollama? — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
+        <figure className="my-8">
+          <img src="/images/infographics/ollama-stack.png" alt="What is Ollama? — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
+        <figure className="my-8">
+          <img src="/images/diagrams/tools-ollama-architektur.png" alt="What is Ollama? — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">What is Ollama?</h2>
         <p className="text-gray-300">
           Ollama is a CLI tool to run LLMs locally. Supports 132+ models 
@@ -86,6 +95,9 @@ export default function OllamaTutorial() {
         </pre>
         </CodeBlock>
 
+        <figure className="my-8">
+          <img src="/images/screenshots/ollama-install.png" alt="Download Models — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">Download Models</h2>
 
         <p className="text-gray-300">
@@ -154,6 +166,9 @@ ollama show llama3.2`}</code>
           </div>
         </div>
 
+        <figure className="my-8">
+          <img src="/images/screenshots/ollama-pull.png" alt="Using Ollama — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">Using Ollama</h2>
 
         <h3 className="text-lg font-medium text-white mt-4">Interactive Chat</h3>
@@ -187,6 +202,12 @@ curl -X POST http://localhost:11434/api/generate \\
         </pre>
         </CodeBlock>
 
+        <figure className="my-8">
+          <img src="/images/screenshots/ollama-run.png" alt="GPU Configuration — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
+        <figure className="my-8">
+          <img src="/images/screenshots/ollama-api.png" alt="GPU Configuration — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">GPU Configuration</h2>
 
         <p className="text-gray-300">

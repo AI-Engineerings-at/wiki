@@ -21,6 +21,9 @@ export default function MCPServerPage() {
           MCP (Model Context Protocol) connects AI assistants like Claude directly to your infrastructure.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/tools-mcp-architektur.png" alt="What is MCP? — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">What is MCP?</h2>
         <ul className="list-disc list-inside text-slate-300 space-y-1">
           <li>Open standard for AI-tool integration</li>
@@ -91,6 +94,9 @@ export default function MCPServerPage() {
         </pre>
         </CodeBlock>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/tools-skills-architektur.png" alt="Use Cases — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">Use Cases</h2>
         <ul className="list-disc list-inside text-slate-300 space-y-1">
           <li>"Show me CPU usage of my Docker containers"</li>

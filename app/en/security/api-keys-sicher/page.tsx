@@ -22,6 +22,12 @@ export default function ApiKeysSicherPage() {
           your data, your money. Heres how to store them securely.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/generated/hero-security-keys.png" alt="Never Do This — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
+        <figure className="my-8">
+          <img src="/images/diagrams/security-secret-management.png" alt="Never Do This — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">Never Do This</h2>
         <div className="bg-red-900/20 border border-red-700 rounded-lg p-4">
           <ul className="text-red-300 space-y-1">

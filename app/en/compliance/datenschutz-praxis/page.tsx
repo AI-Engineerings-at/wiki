@@ -20,6 +20,9 @@ export default function DatenschutzPraxisPage() {
           Practical steps to implement data protection in your AI projects.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/infographics/datenschutz-tom-uebersicht.png" alt="Technical & Organizational Measures (TOM) — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2>Technical & Organizational Measures (TOM)</h2>
         <ul className="list-disc list-inside text-slate-300 space-y-1">
           <li>Encryption at rest and in transit</li>
@@ -30,6 +33,9 @@ export default function DatenschutzPraxisPage() {
           <li>Incident response plan</li>
         </ul>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/datenschutz-verschluesselung.png" alt="Data Processing Agreement (DPA) — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2>Data Processing Agreement (DPA)</h2>
         <ul className="list-disc list-inside text-slate-300 space-y-1">
           <li>Contract with all processors</li>
@@ -77,6 +83,9 @@ export default function DatenschutzPraxisPage() {
         </table>
         </div>
 
+        <figure className="my-8">
+          <img src="/images/infographics/tools-dsgvo-ampel.png" alt="AI-Specific Considerations — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2>AI-Specific Considerations</h2>
         <ul className="list-disc list-inside text-slate-300 space-y-1">
           <li>Log AI decisions for accountability</li>

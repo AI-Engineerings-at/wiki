@@ -23,6 +23,9 @@ export default function TaskDelegationPage() {
           You need a system that selects the right agent for the right task.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/patterns-task-delegation.png" alt="Architecture — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">Architecture</h2>
         <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">

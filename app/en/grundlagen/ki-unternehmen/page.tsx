@@ -16,6 +16,9 @@ export default function KIUnternehmenPage() {
       </div>
 
       <div className="prose prose-invert max-w-none">
+        <figure className="my-8">
+          <img src="/images/infographics/ki-unternehmen-4-saeulen.png" alt="The Paradigm Shift — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2>The Paradigm Shift</h2>
         <p className="text-slate-300">
           Cloud AI is fast to start, but not always the right default. Local AI gives you data sovereignty,

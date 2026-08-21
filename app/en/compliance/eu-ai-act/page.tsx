@@ -38,6 +38,9 @@ export default function EUAIActPage() {
           </div>
         </div>
 
+        <figure className="my-8">
+          <img src="/images/generated/hero-eu-ai-act.png" alt="Risk Classes — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2>Risk Classes</h2>
         <div className="table-wrap">
         <table className="w-full text-sm">
@@ -73,6 +76,12 @@ export default function EUAIActPage() {
         </table>
         </div>
 
+        <figure className="my-8">
+          <img src="/images/infographics/eu-ai-act-risiko-pyramide.png" alt="Typical Business AI Scenarios — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
+        <figure className="my-8">
+          <img src="/images/infographics/eu-ai-act-risikoklassen-entscheidungsbaum.png" alt="Typical Business AI Scenarios — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2>Typical Business AI Scenarios</h2>
         <div className="table-wrap">
         <table className="w-full text-sm">

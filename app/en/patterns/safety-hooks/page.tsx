@@ -23,6 +23,9 @@ export default function SafetyHooksPage() {
           data leaks, or unintended actions happen.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/patterns-safety-hooks.png" alt="Solution: Safety Hooks — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2>Solution: Safety Hooks</h2>
         <p className="text-slate-300">
           Hooks are automatic checks that run on every call.

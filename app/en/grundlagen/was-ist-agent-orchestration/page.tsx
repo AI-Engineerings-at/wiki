@@ -22,6 +22,9 @@ export default function WasIstAgentOrchestrationPage() {
           Instead of a single chat, you run a team of specialized agents with clear responsibilities.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/agent-orchestration-diagram.png" alt="The problem with a single LLM — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">The problem with a single LLM</h2>
         <p className="text-gray-300">
           A single Large Language Model (LLM) like ChatGPT can handle plenty of tasks, but it has real limits:

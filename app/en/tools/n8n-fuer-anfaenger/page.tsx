@@ -22,6 +22,12 @@ export default function N8nAnfänger() {
           It connects apps, services and APIs — without programming.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/generated/hero-n8n-automation-v2.png" alt="Why n8n? — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
+        <figure className="my-8">
+          <img src="/images/diagrams/tools-n8n-architektur.png" alt="Why n8n? — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">Why n8n?</h2>
 
         <div className="grid md:grid-cols-2 gap-4 mt-4">

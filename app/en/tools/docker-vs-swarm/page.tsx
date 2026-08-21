@@ -21,6 +21,9 @@ export default function DockerVsSwarmPage() {
           Docker Compose or Docker Swarm? The answer determines how your stack scales.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/generated/hero-docker-container.png" alt="Docker Compose in 60 Seconds — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">Docker Compose in 60 Seconds</h2>
         <p className="text-slate-300">
           Docker Compose is the best friend of every developer. You write a 
@@ -38,6 +41,9 @@ export default function DockerVsSwarmPage() {
           <li>GPU-intensive workloads (Ollama with A100 or 3090)</li>
         </ul>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/tools-docker-architektur.png" alt="Docker Swarm in 60 Seconds — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">Docker Swarm in 60 Seconds</h2>
         <p className="text-slate-300">
           Docker Swarm is Dockers built-in orchestration platform. You cluster 3+ machines, 

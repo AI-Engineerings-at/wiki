@@ -22,6 +22,9 @@ export default function Quickstart30TagePage() {
         </p>
 
         <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-6">
+          <figure className="my-8">
+            <img src="/images/infographics/30-tage-quickstart-timeline.png" alt="What Youll Have at the End — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+          </figure>
           <h2 className="text-xl font-bold text-white mt-0 mb-2">What You'll Have at the End</h2>
           <ul className="text-slate-300 mb-0">
             <li>Docker Swarm Cluster (3 Nodes)</li>
@@ -41,6 +44,12 @@ export default function Quickstart30TagePage() {
           <li>Day 6-7: Documentation</li>
         </ul>
 
+        <figure className="my-8">
+          <img src="/images/infographics/30-tage-quickstart-hardware.png" alt="Phase 2: AI Core (Day 8-14) — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
+        <figure className="my-8">
+          <img src="/images/screenshots/docker-ps.png" alt="Phase 2: AI Core (Day 8-14) — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2>Phase 2: AI Core (Day 8-14)</h2>
         <ul className="list-disc list-inside text-slate-300">
           <li>Day 8-9: Ollama Installation</li>

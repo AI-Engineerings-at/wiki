@@ -41,6 +41,9 @@ export default function WhatIsAnLLMPage() {
 
         {/* Section 1 */}
         <section className="mt-10">
+          <figure className="my-8">
+            <img src="/images/generated/hero-was-ist-llm.png" alt="Illustration — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+          </figure>
           <h2 className="text-2xl font-bold text-white mb-4">
             What exactly is an LLM?
           </h2>

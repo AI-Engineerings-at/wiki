@@ -21,6 +21,15 @@ export default function AgentOrchestrationPatternsPage() {
           How do you coordinate multiple AI agents? There are proven patterns for that.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/generated/hero-agent-orchestration.png" alt="1. Sequential Pattern — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
+        <figure className="my-8">
+          <img src="/images/diagrams/agent-orchestration-diagram.png" alt="1. Sequential Pattern — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
+        <figure className="my-8">
+          <img src="/images/diagrams/patterns-orchestration-overview.png" alt="1. Sequential Pattern — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">1. Sequential Pattern</h2>
         <p className="text-slate-300">
           Agent A → Agent B → Agent C. Each waits for the previous.
@@ -43,11 +52,17 @@ Research C → Aggregate</code>
         </pre>
         </CodeBlock>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/patterns-orchestration-hierarchical.png" alt="3. Hierarchical Pattern — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">3. Hierarchical Pattern</h2>
         <p className="text-slate-300">
           Manager coordinates sub-managers who coordinate workers.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/patterns-orchestration-router.png" alt="4. Hub & Spoke — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">4. Hub & Spoke</h2>
         <p className="text-slate-300">
           Central hub connects to all agents, routes requests.
@@ -58,6 +73,9 @@ Research C → Aggregate</code>
           Data flows through agents like a pipeline. Each transforms the data.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/tools-dispatch-routing.png" alt="When to Use What — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">When to Use What</h2>
         <div className="table-wrap">
         <table className="w-full text-sm">

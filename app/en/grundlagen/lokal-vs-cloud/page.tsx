@@ -48,6 +48,12 @@ export default function LokalVsCloud() {
           </div>
         </div>
 
+        <figure className="my-8">
+          <img src="/images/infographics/lokal-vs-cloud-vergleich.png" alt="Cost Comparison (per month) — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
+        <figure className="my-8">
+          <img src="/images/infographics/lokal-vs-cloud-tco-vergleich.png" alt="Cost Comparison (per month) — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">Cost Comparison (per month)</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4 overflow-x-auto">

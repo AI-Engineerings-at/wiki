@@ -20,6 +20,9 @@ export default function AiAgentTeam() {
           One AI agent isn't enough. You need a team — specialized agents that work together.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/ai-agent-typen-uebersicht.png" alt="What is an AI Agent? — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">What is an AI Agent?</h2>
 
         <p className="text-gray-300 mt-2">
@@ -94,6 +97,9 @@ export default function AiAgentTeam() {
           </div>
         </div>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/ai-agent-team-architektur.png" alt="Team Structure — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">Team Structure</h2>
 
         <CodeBlock lang="en">

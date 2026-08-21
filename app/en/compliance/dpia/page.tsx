@@ -31,6 +31,9 @@ export default function DPIAPage() {
           <li><strong>New technologies</strong> (AI systems qualify as new technology)</li>
         </ul>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/dpia-6-schritte-flow.png" alt="DPIA Process in 6 Steps — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">DPIA Process in 6 Steps</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
@@ -44,6 +47,9 @@ export default function DPIAPage() {
           </ol>
         </div>
 
+        <figure className="my-8">
+          <img src="/images/infographics/dpia-risikomatrix.png" alt="DPIA and EU AI Act — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">DPIA and EU AI Act</h2>
 
         <p className="text-gray-300">

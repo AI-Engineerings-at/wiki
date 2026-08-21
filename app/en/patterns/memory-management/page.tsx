@@ -17,12 +17,18 @@ export default function MemoryManagementPage() {
       </div>
 
       <div className="prose prose-invert max-w-none">
+        <figure className="my-8">
+          <img src="/images/diagrams/patterns-memory-3tier.png" alt="The Problem — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">The Problem</h2>
         <p className="text-slate-300">
           Every API call is an empty session. Your agent doesnt know what happened yesterday. 
           Memory Management solves this through structured persistence.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/patterns-memory-flow.png" alt="The Three-Tier Memory System in Practice — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">The Three-Tier Memory System in Practice</h2>
         <p className="text-slate-300">
           A productive memory system solves the forgetting problem with three tiers that work

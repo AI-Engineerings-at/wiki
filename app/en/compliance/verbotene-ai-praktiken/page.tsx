@@ -24,6 +24,9 @@ export default function VerboteneAIPraktikenPage() {
           </p>
         </div>
 
+        <figure className="my-8">
+          <img src="/images/infographics/verbotene-ai-praktiken.png" alt="The 6 Prohibited Practices — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2>The 6 Prohibited Practices</h2>
 
         <h3>1. Subversive Manipulation (Art. 5(1)(a))</h3>

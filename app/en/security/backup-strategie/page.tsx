@@ -21,6 +21,12 @@ export default function BackupStrategiePage() {
           Backups are your insurance policy. Heres how to backup your AI stack properly.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/generated/hero-backup-recovery.png" alt="3-2-1 Rule — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
+        <figure className="my-8">
+          <img src="/images/infographics/security-backup-321.png" alt="3-2-1 Rule — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">3-2-1 Rule</h2>
         <ul className="list-disc list-inside text-slate-300 space-y-1">
           <li><strong>3</strong> copies of data</li>

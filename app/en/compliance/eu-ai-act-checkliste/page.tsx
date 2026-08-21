@@ -54,6 +54,9 @@ export default function EUAIActChecklistePage() {
         </table>
         </div>
 
+        <figure className="my-8">
+          <img src="/images/infographics/eu-ai-act-7-schritte-checkliste.png" alt="7 Steps to Compliance — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2>7 Steps to Compliance</h2>
 
         <h3>1. Create AI System Inventory</h3>
@@ -128,6 +131,9 @@ export default function EUAIActChecklistePage() {
           <li>Establish basic understanding in the company</li>
         </ul>
 
+        <figure className="my-8">
+          <img src="/images/infographics/eu-ai-act-risikoklassen-entscheidungsbaum.png" alt="Sources — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2>Sources</h2>
         <ul>
           <li><a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689" target="_blank" className="text-blue-400 hover:underline">EU AI Act Original Text (EUR-Lex)</a></li>

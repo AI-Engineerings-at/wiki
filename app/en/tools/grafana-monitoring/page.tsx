@@ -17,6 +17,9 @@ export default function GrafanaMonitoringPage() {
       </div>
 
       <div className="prose prose-invert max-w-none">
+        <figure className="my-8">
+          <img src="/images/generated/hero-grafana-monitoring.png" alt="The Blind Flight Problem — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">The Blind Flight Problem</h2>
         <p className="text-slate-300">
           Imagine you run a homelab with ten, twenty, or thirty services. Everything seems to be
@@ -51,6 +54,9 @@ export default function GrafanaMonitoringPage() {
           <li>Self-hosted - all data stays local</li>
         </ul>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/tools-grafana-stack.png" alt="Components — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">Components</h2>
         <div className="grid md:grid-cols-2 gap-4 mt-4">
           <div className="bg-slate-900 border border-slate-700 rounded-lg p-4">

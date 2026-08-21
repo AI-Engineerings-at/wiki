@@ -80,6 +80,9 @@ export default function AILiteracyArt4Page() {
           The same applies to all companies in the EU/EEA.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/infographics/ki-kompetenz-betroffen-matrix.png" alt="What must be trained? — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">What must be trained?</h2>
 
         <div className="space-y-4 mt-4">
@@ -123,6 +126,12 @@ export default function AILiteracyArt4Page() {
           </div>
         </div>
 
+        <figure className="my-8">
+          <img src="/images/infographics/art4-timeline.png" alt="Penalties — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
+        <figure className="my-8">
+          <img src="/images/infographics/ki-kompetenz-schulungsplan.png" alt="Penalties — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">Penalties</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">

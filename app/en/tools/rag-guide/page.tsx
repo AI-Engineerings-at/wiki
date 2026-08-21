@@ -22,6 +22,9 @@ export default function RAGGuidePage() {
           The AI can answer questions about your data - without training.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/generated/hero-rag-pipeline-v2.png" alt="How RAG Works — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">How RAG Works</h2>
         <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
@@ -34,6 +37,9 @@ export default function RAGGuidePage() {
         </pre>
         </CodeBlock>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/tools-rag-pipeline.png" alt="Components — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">Components</h2>
         <ul className="list-disc list-inside text-slate-300 space-y-1">
           <li><strong>Document Loader:</strong> PDF, Markdown, HTML, Text</li>
