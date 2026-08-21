@@ -7,23 +7,25 @@ export function SiteFooter() {
   const pathname = usePathname() || '/'
   const isEn = pathname === '/en' || pathname.startsWith('/en/')
 
+  // Vorher: Spalte "Produkte" mit vier Eintraegen, alle vier auf dieselbe
+  // Produktseite von ai-engineering.at, wo Stripe noch verkauft, obwohl der
+  // Verkauf deaktiviert ist (E35). Jetzt die Kette Wiki -> Lernpfad -> Hub
+  // (E38). Keine Preise, keine Produktnamen im Wiki.
   const products = isEn
     ? {
-        title: 'Products',
+        title: 'Keep learning',
         items: [
-          { label: 'All Products', href: 'https://www.ai-engineering.at/products' },
-          { label: 'AI-Stack Playbook', href: 'https://www.ai-engineering.at/products' },
-          { label: 'n8n Bundle', href: 'https://www.ai-engineering.at/products' },
-          { label: 'GDPR Bundle', href: 'https://www.ai-engineering.at/products' },
+          { label: 'Learning path', href: '/en/learning-path/' },
+          { label: 'Hub', href: 'https://hub.ai-engineering.at/' },
+          { label: 'Blog', href: '/blog/' },
         ],
       }
     : {
-        title: 'Produkte',
+        title: 'Weiter lernen',
         items: [
-          { label: 'Alle Produkte', href: 'https://www.ai-engineering.at/products' },
-          { label: 'AI-Stack Playbook', href: 'https://www.ai-engineering.at/products' },
-          { label: 'n8n Bundle', href: 'https://www.ai-engineering.at/products' },
-          { label: 'DSGVO Bundle', href: 'https://www.ai-engineering.at/products' },
+          { label: 'Lernpfad', href: '/lernpfad/' },
+          { label: 'Hub', href: 'https://hub.ai-engineering.at/' },
+          { label: 'Blog', href: '/blog/' },
         ],
       }
 

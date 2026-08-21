@@ -1,6 +1,20 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import { isEnglishPath } from '../lib/alternates'
+
+/**
+ * Überleitung am Ende jeder Seite: Wiki -> Lernpfad -> Hub.
+ *
+ * Vorher zeigten alle drei Varianten (allgemein, Tools, Compliance) auf die
+ * Produktseite von ai-engineering.at — dort verkauft noch Stripe, obwohl der
+ * Verkauf deaktiviert ist (E35). Ein Wiki-Artikel, der auf eine tote Kasse
+ * zeigt, ist schlimmer als einer ohne Weiterführung.
+ *
+ * Jetzt eine Überleitung statt drei Verkaufstexte: der Lernpfad bringt die
+ * Inhalte in Reihenfolge, der Hub führt die geprüften Bausteine. Keine
+ * Preise, keine Produktnamen.
+ */
 
 type CtaConfig = {
   headline: string
@@ -14,82 +28,49 @@ type CtaConfig = {
   legalNote: string
 }
 
+const HUB_HREF = 'https://hub.ai-engineering.at/'
+
 function getConfig(pathname: string): CtaConfig {
-  const isEn = pathname === '/en' || pathname.startsWith('/en/')
-  const localPath = isEn ? pathname.replace(/^\/en(\/|$)/, '/') : pathname
+  const isEn = isEnglishPath(pathname)
 
-  const isTools = localPath === '/tools' || localPath.startsWith('/tools/')
-  const isCompliance = localPath === '/compliance' || localPath.startsWith('/compliance/')
-
-  const productsHref = 'https://www.ai-engineering.at/products'
-
-  const base: Pick<
-    CtaConfig,
-    'secondaryHref' | 'secondaryLabel' | 'trustTitle' | 'trustItems' | 'legalNote'
-  > = isEn
-    ? {
-        secondaryHref: productsHref,
-        secondaryLabel: 'View all products',
-        trustTitle: 'Why AI Engineering',
-        trustItems: [
-          'Local and self-hosted by default',
-          'Documented and auditable',
-          'Built from our own runtime',
-          'Made in Austria',
-        ],
-        legalNote: 'Not legal advice.',
-      }
-    : {
-        secondaryHref: productsHref,
-        secondaryLabel: 'Alle Produkte ansehen',
-        trustTitle: 'Warum AI Engineering',
-        trustItems: [
-          'Lokal und self-hosted gedacht',
-          'Dokumentiert und auditierbar',
-          'Aus eigener Runtime entwickelt',
-          'Made in Austria',
-        ],
-        legalNote: 'Kein Ersatz für Rechtsberatung.',
-      }
-
-  if (isTools) {
+  if (isEn) {
     return {
-      ...base,
-      headline: isEn
-        ? 'Next step: ship workflows that stay operable'
-        : 'Nächster Schritt: Workflows sauber in Betrieb bringen',
-      body: isEn
-        ? 'Use proven n8n patterns, templates and integrations for workflows that stay local, documented, and auditable.'
-        : 'Nutze bewährte n8n-Patterns, Templates und Integrationen für Workflows, die lokal, dokumentiert und auditierbar bleiben.',
-      primaryHref: productsHref,
-      primaryLabel: isEn ? 'View Products' : 'Produkte ansehen',
-    }
-  }
-
-  if (isCompliance) {
-    return {
-      ...base,
-      headline: isEn
-        ? 'Next step: operationalize compliance'
-        : 'Nächster Schritt: Compliance in den Betrieb bringen',
-      body: isEn
-        ? 'Use ready-to-run GDPR templates, checklists and practical guidance for AI systems that need documentation and auditability.'
-        : 'Nutze fertige DSGVO-Templates, Checklisten und Praxis-Guides für AI-Systeme, die dokumentiert und auditierbar sein müssen.',
-      primaryHref: productsHref,
-      primaryLabel: isEn ? 'View Products' : 'Produkte ansehen',
+      headline: 'Continue the learning path',
+      body:
+        'The learning path puts these articles in order, and the Hub carries the ' +
+        'building blocks we have checked in our own operations.',
+      primaryHref: '/en/learning-path/',
+      primaryLabel: 'Open the learning path',
+      secondaryHref: HUB_HREF,
+      secondaryLabel: 'Open the Hub',
+      trustTitle: 'Why AI Engineering',
+      trustItems: [
+        'Local and self-hosted',
+        'Documented and verifiable',
+        'From our own operations',
+        'Made in Austria',
+      ],
+      legalNote: 'Not legal advice.',
     }
   }
 
   return {
-    ...base,
-    headline: isEn
-      ? 'Next step: move from knowledge to implementation'
-      : 'Nächster Schritt: vom Wissen in die Umsetzung',
-    body: isEn
-      ? 'If you want more than theory: setups, workflows and templates from real operations for teams that want local, documented AI systems.'
-      : 'Wenn du mehr willst als Theorie: Setups, Workflows und Vorlagen aus dem echten Betrieb für Teams, die lokale und dokumentierte AI-Systeme wollen.',
-    primaryHref: productsHref,
-    primaryLabel: isEn ? 'View Products & Bundles' : 'Produkte & Bundles ansehen',
+    headline: 'Weiter im Lernpfad',
+    body:
+      'Der Lernpfad bringt diese Artikel in eine Reihenfolge, und der Hub führt ' +
+      'die Bausteine, die wir im eigenen Betrieb geprüft haben.',
+    primaryHref: '/lernpfad/',
+    primaryLabel: 'Zum Lernpfad',
+    secondaryHref: HUB_HREF,
+    secondaryLabel: 'Zum Hub',
+    trustTitle: 'Warum AI Engineering',
+    trustItems: [
+      'Lokal und selbst gehostet',
+      'Dokumentiert und prüfbar',
+      'Aus eigenem Betrieb',
+      'Made in Austria',
+    ],
+    legalNote: 'Kein Ersatz für Rechtsberatung.',
   }
 }
 
