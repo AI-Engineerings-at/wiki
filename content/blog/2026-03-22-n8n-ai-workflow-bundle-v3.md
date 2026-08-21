@@ -71,7 +71,7 @@ v3 nutzt eine einheitliche Architektur für alle 14 Workflows:
 
 **DSGVO-sensitive Unternehmen**: Alle Workflows verarbeiten Daten lokal. E-Mail-Inhalte, Kundendaten aus Stripe, Lead-Informationen — alles bleibt in deinem Netzwerk. Der Cloud-LLM-Fallback ist optional und kann komplett deaktiviert werden.
 
-**Nicht geeignet für**: Teams ohne n8n-Erfahrung. Das Bundle setzt voraus, dass du weißt, was Nodes, Workflows, Credentials und Expressions in n8n sind. Wenn du n8n noch nie benutzt hast, starte mit dem [n8n Anfänger-Guide](/tools/n8n-für-anfaenger) im Wiki.
+**Nicht geeignet für**: Teams ohne n8n-Erfahrung. Das Bundle setzt voraus, dass du weißt, was Nodes, Workflows, Credentials und Expressions in n8n sind. Wenn du n8n noch nie benutzt hast, starte mit dem [n8n Anfänger-Guide](/tools/n8n-fuer-anfaenger) im Wiki.
 
 ## Setup: Wie importieren?
 

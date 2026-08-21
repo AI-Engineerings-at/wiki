@@ -159,4 +159,4 @@ Der Trade-off: etwas weniger Modellqualität an der Spitze vs. vollständige Dat
 
 ---
 
-Wenn du die DSGVO-Dokumentation für deinen AI-Einsatz brauchst: Das [DSGVO Compliance Bundle](/produkte) enthält Verarbeitungsverzeichnis, DSFA-Vorlage, AVV-Muster und eine AI-spezifische Checkliste für den EU AI Act — EUR 79, sofort einsetzbar.
+Wenn du die DSGVO-Dokumentation für deinen AI-Einsatz brauchst: Das [DSGVO Compliance Bundle](https://www.ai-engineering.at/products) enthält Verarbeitungsverzeichnis, DSFA-Vorlage, AVV-Muster und eine AI-spezifische Checkliste für den EU AI Act — EUR 79, sofort einsetzbar.
