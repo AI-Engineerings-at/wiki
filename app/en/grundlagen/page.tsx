@@ -1,3 +1,4 @@
+import { MdxCategoryAppendix } from '../../../components/MdxCategoryAppendix'
 import { alternatesFor } from '../../../lib/alternates'
 export const metadata = {
   alternates: alternatesFor('/en/grundlagen'),
@@ -99,6 +100,8 @@ export default function BasicsPage() {
           </a>
         ))}
       </div>
+
+      <MdxCategoryAppendix category="grundlagen" lang="en" />
     </div>
   )
 }

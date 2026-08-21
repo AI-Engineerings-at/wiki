@@ -1,3 +1,4 @@
+import { MdxCategoryAppendix } from '../../../components/MdxCategoryAppendix'
 import { alternatesFor } from '../../../lib/alternates'
 export const metadata = {
   alternates: alternatesFor('/en/security'),
@@ -63,6 +64,8 @@ export default function SecurityPage() {
           </a>
         ))}
       </div>
+
+      <MdxCategoryAppendix category="security" lang="en" />
     </div>
   )
 }

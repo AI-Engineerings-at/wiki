@@ -1,4 +1,5 @@
 import { ArticleCard } from '../../../components/ArticleCard'
+import { MdxCategoryAppendix } from '../../../components/MdxCategoryAppendix'
 import { getCategoryBySlug } from '../../../lib/articles'
 import { alternatesFor } from '../../../lib/alternates'
 
@@ -31,6 +32,8 @@ export default function SecurityPage() {
           <ArticleCard key={article.href} article={article} />
         ))}
       </div>
+
+      <MdxCategoryAppendix category="security" lang="de" />
     </div>
   )
 }

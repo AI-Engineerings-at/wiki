@@ -1,3 +1,4 @@
+import { MdxCategoryAppendix } from '../../../components/MdxCategoryAppendix'
 import { alternatesFor } from '../../../lib/alternates'
 export const metadata = {
   alternates: alternatesFor('/en/tools'),
@@ -99,6 +100,8 @@ export default function ToolsPage() {
           </a>
         ))}
       </div>
+
+      <MdxCategoryAppendix category="tools" lang="en" />
     </div>
   )
 }

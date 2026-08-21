@@ -1,4 +1,5 @@
 import { ArticleCard } from '../../../components/ArticleCard'
+import { MdxCategoryAppendix } from '../../../components/MdxCategoryAppendix'
 import { getCategoryBySlug } from '../../../lib/articles'
 import { alternatesFor } from '../../../lib/alternates'
 
@@ -31,6 +32,8 @@ export default function PatternsPage() {
           <ArticleCard key={article.href} article={article} />
         ))}
       </div>
+
+      <MdxCategoryAppendix category="patterns" lang="de" />
     </div>
   )
 }
