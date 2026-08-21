@@ -13,14 +13,15 @@ export function RelatedArticles() {
   // über den DE-Zwilling nachschlagen und nur Ziele mit EN-Seite zeigen.
   const deHref = isEn ? alternatePath(pathname) : pathname
   const related = deHref ? getRelatedArticles(deHref) : []
-  const items = isEn
+  type Item = { href: string; title: string; description: string; categoryLabel: string }
+  const items: Item[] = isEn
     ? related.flatMap((a) => {
         const en = getEnHref(a.href)
         if (!en) return []
         const meta = TSX_META[en]
         return [{ href: en, title: meta?.title || a.title, description: meta?.description || a.description, categoryLabel: a.categoryLabel }]
       })
-    : related
+    : related.map((a) => ({ href: a.href, title: a.title, description: a.description, categoryLabel: a.categoryLabel }))
 
   if (items.length === 0) return null
 
