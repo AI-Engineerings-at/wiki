@@ -43,7 +43,9 @@ function collectRoutes() {
   const dynamic = []
   for (const file of walk(path.join(ROOT, 'app'), (f) => path.basename(f) === 'page.tsx')) {
     const rel = path.relative(path.join(ROOT, 'app'), path.dirname(file))
-    const route = rel === '' ? '/' : '/' + rel.split(path.sep).join('/')
+    // Route-Gruppen wie (de) sind Ordner, aber keine URL-Segmente.
+    const segs = rel.split(path.sep).filter((s) => s && !/^\(.*\)$/.test(s))
+    const route = segs.length === 0 ? '/' : '/' + segs.join('/')
     if (route.includes('[')) {
       // /blog/[slug] -> ^/blog/[^/]+$
       const pattern = '^' + route.replace(/\[[^\]]+\]/g, '[^/]+') + '$'

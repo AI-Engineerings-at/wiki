@@ -46,7 +46,9 @@ test.describe('Wiki SEO', () => {
         if (entry.isDirectory()) walk(full)
         else if (entry.name === 'page.tsx') {
           const rel = path.relative(appDir, path.dirname(full))
-          const route = rel === '' ? '/' : '/' + rel.split(path.sep).join('/')
+          // Route-Gruppen wie (de) sind Ordner, aber keine URL-Segmente.
+          const segs = rel.split(path.sep).filter((s) => s && !/^\(.*\)$/.test(s))
+          const route = segs.length === 0 ? '/' : '/' + segs.join('/')
           if (!route.includes('[')) routes.push(route)
         }
       }

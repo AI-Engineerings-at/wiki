@@ -32,7 +32,9 @@ function collectPageFiles(dir: string, acc: Entry[] = []): Entry[] {
       collectPageFiles(full, acc)
     } else if (entry.name === 'page.tsx') {
       const rel = path.relative(APP_DIR, path.dirname(full))
-      const route = rel === '' ? '/' : '/' + rel.split(path.sep).join('/')
+      // Route-Gruppen wie (de) sind Ordner, aber keine URL-Segmente.
+      const segs = rel.split(path.sep).filter((s) => s && !/^\(.*\)$/.test(s))
+      const route = segs.length === 0 ? '/' : '/' + segs.join('/')
       // Dynamische Segmente werden unten durch ihre konkreten Slugs ersetzt.
       if (!route.includes('[')) acc.push({ route, source: full })
     }
