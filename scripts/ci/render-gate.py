@@ -20,6 +20,11 @@ SVG wirklich erscheint, misst nur ein Browser-Lauf. Das `<svg`-Kriterium
 aus dem Auftrag wird mitgeführt, ist aber nicht diagnostisch: Kopf- und
 Fußzeile (SiteHeader/SiteFooter) enthalten auf jeder Seite Inline-SVG.
 
+Seit 2026-08-21 (gesamt/wiki) zusätzlich [9]–[18]: Favicon-Pixelprobe, theme-color,
+ASCII-Umlaute, EN-Shell, MDX-Seitenzahl, Suchindex, Lernpfad, Kopier-Knöpfe,
+Tabellen-Wrapper, Titel, tote interne Links im Export. Soll-Zahlen aus
+lib/generated/stats.json (scripts/build-index.js).
+
 Nur Standardbibliothek.
 """
 
