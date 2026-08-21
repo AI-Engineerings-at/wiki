@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 
 /**
  * Wurzel-Layout der deutschen Route-Gruppe.
@@ -8,7 +8,7 @@ import type { Metadata } from 'next'
  * ein div mit Sprachattribut en — ein div-Attribut korrigiert das
  * Dokumentattribut nicht, also lieferte jede der 74 EN-Seiten die Sprache de
  * aus (gemessen am gebauten Wiki, Stufe 1 P4). Im statischen Export kennt ein
- * gemeinsames Wurzel-Layout den Pfad nicht, deshalb zwei Wurzel-Layouts ueber
+ * gemeinsames Wurzel-Layout den Pfad nicht, deshalb zwei Wurzel-Layouts über
  * Route-Gruppen. Die Gruppe (de) taucht NICHT in der URL auf: /agb bleibt /agb.
  */
 
@@ -40,13 +40,23 @@ const websiteSchema = {
   "@type": "WebSite",
   "name": "AI Engineering Wiki",
   "url": "https://wiki.ai-engineering.at",
-  "description": "Deutschsprachige Wissensbasis fuer AI Engineering, Sovereign AI und EU AI Act Compliance. 100+ kostenlose Artikel.",
+  "description": "Deutschsprachige Wissensbasis für AI Engineering, Sovereign AI und EU AI Act Compliance. 100+ kostenlose Artikel.",
   "inLanguage": ["de", "en"],
   "publisher": {
     "@type": "Organization",
     "name": "AI Engineering",
     "url": "https://ai-engineering.at"
   }
+}
+
+/**
+ * theme-color #020617 (W1): ohne ihn bleibt der Tab-Streifen in Safari/Chrome
+ * hell — und das dunkle Favicon stand in einem weißen Quadrat (Joes Augen §1).
+ * Gemessen vorher: 0 von 182 Seiten mit <meta name="theme-color">.
+ */
+export const viewport: Viewport = {
+  themeColor: '#020617',
+  colorScheme: 'dark',
 }
 
 export const metadata: Metadata = {
