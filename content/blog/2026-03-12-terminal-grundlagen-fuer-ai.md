@@ -125,4 +125,4 @@ Terminal läuft? Dann kommt der eigentliche Schritt: Ollama installieren und das
 
 **Weiter zu Stufe 3: [Ollama installieren in 5 Minuten →](/blog/2026-03-12-ollama-installieren-schritt-fuer-schritt)**
 
-Oder direkt zum kompletten Setup-Guide: Das **[Local AI Playbook P1](https://www.ai-engineering.at/products/playbook-p1)** (EUR 49) nimmt dich von Terminal bis zu einem produktionsfähigen Stack mit Browser-Interface, API-Zugang und fertig konfigurierten Docker-Containern.
+Oder direkt zum kompletten Setup-Guide: Das **Local AI Playbook P1** nimmt dich vom Terminal bis zu einem produktionsfähigen Stack mit Browser-Interface, API-Zugang und fertig konfigurierten Docker-Containern. Die Inhalte dieses Playbooks werden überarbeitet und erscheinen geprüft im Hub. [Weiter im Lernpfad](/lernpfad/)

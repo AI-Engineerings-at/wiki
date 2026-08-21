@@ -124,7 +124,7 @@ Ollama läuft. Die API antwortet. Das ist die Basis. Jetzt fehlt noch ein Browse
 
 **Weiter zu Stufe 4: Browser-Interface einrichten mit Open WebUI →**
 
-Oder direkt zum kompletten Setup — das **[Local AI Playbook P1](https://www.ai-engineering.at/products/playbook-p1)** (EUR 49) enthält fertig konfigurierte Docker-Compose-Files für Ollama + Open WebUI + Monitoring, detaillierte Anleitungen für alle Betriebssysteme, und den kompletten Stack den wir selbst in Production betreiben.
+Oder direkt zum kompletten Setup — das **Local AI Playbook P1** enthält fertig konfigurierte Docker-Compose-Files für Ollama + Open WebUI + Monitoring, detaillierte Anleitungen für alle Betriebssysteme und den kompletten Stack, den wir selbst in Production betreiben. Die Inhalte dieses Playbooks werden überarbeitet und erscheinen geprüft im Hub. [Weiter im Lernpfad](/lernpfad/)
 
 ---
 

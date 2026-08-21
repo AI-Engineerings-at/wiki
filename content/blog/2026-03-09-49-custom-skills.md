@@ -137,4 +137,4 @@ Aktuell ist 1 von 49 Skills deprecated (`task-manager`, ersetzt durch ERPNext Ta
 
 ## Zum Mitnehmen
 
-Wer den kompletten Stack will — Skills, Agents, Infrastructure, Workflows: Das [Claude Code AI OS Template](https://www.ai-engineering.at/products) für EUR 249 enthält unsere komplette Skill-Library mit 49 Skills, Agent-Definitionen und die Quality Gate Pipeline.
+Wer den kompletten Stack will — Skills, Agents, Infrastructure, Workflows: Das Claude Code AI OS Template enthält unsere komplette Skill-Library mit 49 Skills, Agent-Definitionen und die Quality Gate Pipeline. Die Inhalte dieses Templates werden überarbeitet und erscheinen geprüft im Hub. [Weiter im Lernpfad](/lernpfad/)

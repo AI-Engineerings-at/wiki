@@ -126,7 +126,7 @@ Docker gives you reproducibility and portability. What is still missing for real
 
 That is where Docker Swarm or Kubernetes come in. How 11 AI agents work together on this foundation — and what that kind of architecture looks like in practice — is covered in detail here: [Agent Team Architecture: How We Orchestrate 11 AI Agents →](/blog/2026-03-09-agent-team-architecture)
 
-All the details for building the complete stack — from Ollama to Docker Swarm, from monitoring to GDPR compliance — are in 70 pages: [The Local AI Stack Playbook for EUR 49](https://www.ai-engineering.at/products)
+All the details for building the complete stack — from Ollama to Docker Swarm, from monitoring to GDPR compliance — are in the 70-page Local AI Stack Playbook. The contents of this playbook are being reworked and will appear, tested, in the Hub. [Continue the learning path](/en/learning-path/)
 
 ---
 

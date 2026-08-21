@@ -125,4 +125,4 @@ Terminal working? Then comes the real step: install Ollama and run your first mo
 
 **Continue to Step 3: [Install Ollama in 5 Minutes →](/blog/2026-03-12-install-ollama-step-by-step)**
 
-Or jump straight to the complete setup guide: the **[Local AI Playbook P1](https://www.ai-engineering.at/products/playbook-p1)** (EUR 49) takes you from terminal to a production-ready stack with browser interface, API access, and pre-configured Docker containers.
+Or jump straight to the complete setup guide: the **Local AI Playbook P1** takes you from terminal to a production-ready stack with browser interface, API access, and pre-configured Docker containers. The contents of this playbook are being reworked and will appear, tested, in the Hub. [Continue the learning path](/en/learning-path/)

@@ -159,4 +159,4 @@ The trade-off: slightly less top-end model quality vs. full data control, no ong
 
 ---
 
-If you need GDPR documentation for your AI deployment: the [DSGVO Compliance Bundle](https://www.ai-engineering.at/products) includes a processing register, DPIA template, DPA template, and an AI-specific checklist for the EU AI Act — €79, ready to use immediately.
+If you need GDPR documentation for your AI deployment: the DSGVO Compliance Bundle includes a processing register, DPIA template, DPA template, and an AI-specific checklist for the EU AI Act. The contents of this bundle are being reworked and will appear, tested, in the Hub. [Continue the learning path](/en/learning-path/)
