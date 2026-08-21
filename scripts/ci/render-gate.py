@@ -50,6 +50,7 @@ ERROR_BOUNDARY_TEXT = "Etwas ist schiefgelaufen"
 DIAGRAM_ERROR_TEXT = "Diagramm konnte nicht geladen werden"
 # components/PlantUMLDynamic.tsx (SSR-Fallback) + PlantUMLDiagram.tsx (loading)
 DIAGRAM_CONTAINER_TEXT = "Diagramm wird geladen"
+DIAGRAM_CONTAINER_TEXT_EN = "Loading diagram"   # seit W3: Lade-Hinweis in der Sprache der Seite
 DIAGRAM_MARKERS = ("@startuml", "kroki.io", 'class="mermaid')
 TITLE_DUPLICATE = "| AI Engineering Wiki | AI Engineering Wiki"
 # Verkaufs-Muster. Das bloße Wort "stripe"/"gumroad" steht auf 444255d in
@@ -144,12 +145,12 @@ def main(argv):
     diag_pages = [f for f, c in contents.items() if any(m in c for m in DIAGRAM_MARKERS)]
     n_diag = len(diag_pages)
     ohne_container = [rel(f, out_dir) for f in diag_pages
-                      if DIAGRAM_CONTAINER_TEXT not in contents[f]]
+                      if DIAGRAM_CONTAINER_TEXT not in contents[f] and DIAGRAM_CONTAINER_TEXT_EN not in contents[f]]
     ohne_svg = [rel(f, out_dir) for f in diag_pages
                 if "<svg" not in contents[f] and "kroki.io" not in contents[f]]
     print(f"[2] Diagramm-Seiten (Marker {DIAGRAM_MARKERS}): ist {n_diag} / soll "
           f"{SOLL_DIAGRAMM_SEITEN} von {n_html} HTML")
-    print(f"[2] davon mit Render-Container ('{DIAGRAM_CONTAINER_TEXT}'): "
+    print(f"[2] davon mit Render-Container ('{DIAGRAM_CONTAINER_TEXT}' / '{DIAGRAM_CONTAINER_TEXT_EN}'): "
           f"ist {n_diag - len(ohne_container)} / soll {n_diag} von {n_diag}")
     print(f"[2] davon mit <svg oder kroki.io-Quelle: ist {n_diag - len(ohne_svg)} / soll {n_diag} "
           f"von {n_diag} (nicht diagnostisch: Kopf-/Fußzeile tragen Inline-SVG; "
