@@ -101,10 +101,19 @@ def main(argv):
         print("FEHLER: 0 HTML-Dateien — nichts erhoben, kein Befund möglich")
         return 2
 
-    pages = [f for f in html_files if os.path.basename(f) == "index.html"]
+    # Geroutete Seiten = index.html ohne Nexts Not-Found-Export (404/index.html).
+    # Sonstige HTML (404.html, statische Dateien aus public/) werden gezaehlt
+    # und benannt, aber nicht gegen Seiten-Regeln (lang, Sitemap) gehalten:
+    # Lauf 1 (087aa1a) zeigte 404.html, 404/index.html und
+    # images/kroki-test/compare.html ohne <html lang> — Nexts Not-Found liegt
+    # ausserhalb beider Root-Layouts, compare.html ist eine Testdatei in public/.
+    pages = [f for f in html_files
+             if os.path.basename(f) == "index.html"
+             and rel(f, out_dir) != os.path.join("404", "index.html")]
     n_pages = len(pages)
-    print(f"Seiten (index.html): {n_pages} von {n_html} HTML-Dateien; "
-          f"sonstige: {[rel(f, out_dir) for f in html_files if f not in pages]}")
+    sonstige = [rel(f, out_dir) for f in html_files if f not in pages]
+    print(f"Geroutete Seiten (index.html ohne 404/): {n_pages} von {n_html} HTML-Dateien; "
+          f"sonstige {len(sonstige)}: {sonstige}")
 
     verletzungen = []
     funde = []
@@ -145,8 +154,8 @@ def main(argv):
 
     # 3. <html lang> --------------------------------------------------------
     en_prefix = os.path.join(out_dir, "en") + os.sep
-    en_files = [f for f in html_files if f.startswith(en_prefix)]
-    de_files = [f for f in html_files if not f.startswith(en_prefix)]
+    en_files = [f for f in pages if f.startswith(en_prefix)]
+    de_files = [f for f in pages if not f.startswith(en_prefix)]
 
     def lang_of(f):
         m = HTML_LANG_RE.search(contents[f])
@@ -160,15 +169,17 @@ def main(argv):
     n_en_ok = sum(1 for f in en_files if lang_of(f) == "en")
     n_de_ok = sum(1 for f in de_files if lang_of(f) == "de")
     print(f"[3] <html lang=\"en\"> unter {out_dir}/en/: ist {n_en_ok} / soll {len(en_files)} "
-          f"von {len(en_files)} (Soll-Anzahl Lauf 3: {SOLL_LANG_EN})")
+          f"von {len(en_files)} Seiten (Soll-Anzahl Lauf 3: {SOLL_LANG_EN})")
     print(f"[3] <html lang=\"de\"> sonst: ist {n_de_ok} / soll {len(de_files)} "
-          f"von {len(de_files)} (Soll-Anzahl Lauf 3: {SOLL_LANG_DE}; 404.html zählt hier mit)")
+          f"von {len(de_files)} Seiten (Soll-Anzahl Lauf 3: {SOLL_LANG_DE})")
+    sonstige_ohne_lang = [rel(f, out_dir) for f in html_files
+                          if f not in pages and lang_of(f) is None]
+    print(f"[3] informativ, kein Gate — sonstige HTML ohne <html lang>: "
+          f"{len(sonstige_ohne_lang)} von {len(sonstige)}: {sonstige_ohne_lang}")
     if lang_falsch:
         verletzungen.append(f"lang falsch/fehlt: {lang_falsch}")
-    en_pages = [f for f in pages if f.startswith(en_prefix)]
-    de_pages = [f for f in pages if not f.startswith(en_prefix)]
-    if len(en_pages) != SOLL_LANG_EN or len(de_pages) != SOLL_LANG_DE:
-        funde.append(f"Seiten-Verteilung en/de {len(en_pages)}/{len(de_pages)} statt "
+    if len(en_files) != SOLL_LANG_EN or len(de_files) != SOLL_LANG_DE:
+        funde.append(f"Seiten-Verteilung en/de {len(en_files)}/{len(de_files)} statt "
                      f"{SOLL_LANG_EN}/{SOLL_LANG_DE} (Fund, kein Gate-Fehler)")
 
     # 4. Titel ---------------------------------------------------------------
@@ -216,11 +227,11 @@ def main(argv):
         locs = LOC_RE.findall(read(sm_path))
         n_loc = len(locs)
         print(f"[8] sitemap.xml <loc>: ist {n_loc} / soll {SOLL_SITEMAP_LOC} "
-              f"(Seiten im Export: {n_pages} index.html)")
+              f"(geroutete Seiten im Export: {n_pages})")
         if n_loc != SOLL_SITEMAP_LOC:
             verletzungen.append(f"sitemap.xml: {n_loc} <loc> statt {SOLL_SITEMAP_LOC}")
         if n_loc != n_pages:
-            verletzungen.append(f"sitemap.xml: {n_loc} <loc> vs. {n_pages} exportierte Seiten")
+            verletzungen.append(f"sitemap.xml: {n_loc} <loc> vs. {n_pages} geroutete Seiten")
     else:
         print(f"[8] sitemap.xml FEHLT unter {out_dir}/")
         verletzungen.append("sitemap.xml fehlt")
