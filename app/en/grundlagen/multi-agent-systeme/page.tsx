@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
 
@@ -47,6 +48,7 @@ export default function MultiAgentSystemePage() {
         <p className="text-slate-300">Runs tests, reports bugs, validates outputs.</p>
 
         <h2>Communication Patterns</h2>
+        <div className="table-wrap">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700">
@@ -73,8 +75,10 @@ export default function MultiAgentSystemePage() {
             </tr>
           </tbody>
         </table>
+        </div>
 
         <h2>Real-World Example</h2>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`User: "Write a web app"
   |
@@ -90,6 +94,7 @@ export default function MultiAgentSystemePage() {
   v
 Final Web App`}</code>
         </pre>
+        </CodeBlock>
       </div>
     </div>
   )

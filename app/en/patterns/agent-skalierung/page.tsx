@@ -101,6 +101,7 @@ export default function AgentScaling() {
         <h2 className="text-xl font-semibold text-white mt-8">Multi-Agent Workflows</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -123,11 +124,13 @@ export default function AgentScaling() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Scaling Factors</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -159,6 +162,7 @@ export default function AgentScaling() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Advanced Patterns</h2>

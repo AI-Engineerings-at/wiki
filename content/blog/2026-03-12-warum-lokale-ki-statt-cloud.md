@@ -1,4 +1,5 @@
 ---
+pendant: "2026-03-12-why-local-ai-instead-of-cloud"
 title: "Warum du kein ChatGPT im Unternehmen nutzen solltest — und was stattdessen"
 date: "2026-03-12"
 description: "DSGVO Art. 5, EU AI Act, Datentransfer in die USA: Die drei Gründe warum Self-Hosted AI für Unternehmen Pflicht ist."
@@ -159,4 +160,4 @@ Der Trade-off: etwas weniger Modellqualität an der Spitze vs. vollständige Dat
 
 ---
 
-Wenn du die DSGVO-Dokumentation für deinen AI-Einsatz brauchst: Das DSGVO Compliance Bundle enthält Verarbeitungsverzeichnis, DSFA-Vorlage, AVV-Muster und eine AI-spezifische Checkliste für den EU AI Act. Die Inhalte dieses Bundles werden überarbeitet und erscheinen geprüft im Hub. [Weiter im Lernpfad](/lernpfad/)
+Wenn du die DSGVO-Dokumentation für deinen AI-Einsatz brauchst: Das DSGVO Compliance Bundle enthält Verarbeitungsverzeichnis, DSFA-Vorlage, AVV-Muster und eine AI-spezifische Checkliste für den EU AI Act. Stand 21. August 2026: dieses Produkt wird nicht mehr verkauft; die Inhalte dieses Bundles wandern überarbeitet in den Hub (hub.ai-engineering.at) — ohne Termin. [Weiter im Lernpfad](/lernpfad/)

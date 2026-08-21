@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 
 import Callout from "../../../../components/Callout"
 import ComparisonTable from "../../../../components/ComparisonTable"
@@ -129,8 +130,8 @@ export default function LokalVsCloud() {
             desto mehr Calls. Oft 2-3x höher als initial geplant.
           </li>
           <li>
-            <strong>Drittlandtransfer pruefen</strong> — Bei US-Anbietern greift Art. 44 ff. DSGVO.
-            Zusaetzliche Massnahmen (SCCs, TIAs) sind erforderlich. Rechtsberatung empfohlen.
+            <strong>Drittlandtransfer prüfen</strong> — Bei US-Anbietern greift Art. 44 ff. DSGVO.
+            Zusätzliche Massnahmen (SCCs, TIAs) sind erforderlich. Rechtsberatung empfohlen.
           </li>
           <li>
             <strong>Vendor Lock-in</strong> — Deine Prompts, Workflows, Daten sind beim 
@@ -149,6 +150,7 @@ export default function LokalVsCloud() {
         <h2 className="text-xl font-semibold text-white mt-8">Wann Cloud günstiger ist</h2>
         
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -179,6 +181,7 @@ export default function LokalVsCloud() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Break-Even Analyse (ehrlich)</h2>
@@ -188,6 +191,7 @@ export default function LokalVsCloud() {
         </p>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <CodeBlock>
           <pre className="text-gray-300">
 {`TCO Faustregel (Consumer Hardware, Österreich):
 
@@ -213,6 +217,7 @@ Cloud API Preise (März 2026, pro 1M Tokens):
   Gemini 2.5 Pro:   $1.25 Input / $10.00 Output
   GPT-4o-mini:      $0.15 Input / $0.60 Output`}
           </pre>
+          </CodeBlock>
         </div>
 
         <Callout type="info" title="Break-Even ist nutzungsabhängig">

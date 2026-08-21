@@ -1,4 +1,6 @@
 ---
+lang: "en"
+pendant: "2026-03-12-docker-grundlagen-fuer-ai"
 title: "Docker for AI: Why Containers Make Your Stack Production-Ready"
 date: "2026-03-12"
 description: "Without Docker, your AI stack only runs on your machine. With Docker, it runs everywhere. The entry point for AI developers."

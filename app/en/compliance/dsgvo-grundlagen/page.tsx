@@ -32,6 +32,7 @@ export default function DSGVOGrundlagenPage() {
         </ul>
 
         <h2>Legal Bases (Art. 6)</h2>
+        <div className="table-wrap">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700">
@@ -58,6 +59,7 @@ export default function DSGVOGrundlagenPage() {
             </tr>
           </tbody>
         </table>
+        </div>
 
         <h2>Rights of Data Subjects (Art. 15-22)</h2>
         <ul className="list-disc list-inside text-slate-300 space-y-2">

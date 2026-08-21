@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
 
@@ -27,6 +28,7 @@ export default function SafetyHooksPage() {
           Hooks are automatic checks that run on every call.
         </p>
 
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`User Input
      |
@@ -49,6 +51,7 @@ export default function SafetyHooksPage() {
      v
 User Response`}</code>
         </pre>
+        </CodeBlock>
 
         <h2>Types of Hooks</h2>
 
@@ -74,6 +77,7 @@ User Response`}</code>
         </ul>
 
         <h2>Implementation in n8n</h2>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`// n8n Function Node - Input Hook
 const forbidden = ['hack', 'exploit', 'bypass'];
@@ -87,6 +91,7 @@ for (const word of forbidden) {
 
 return $input.item;`}</code>
         </pre>
+        </CodeBlock>
 
         <h2>Best Practices</h2>
         <ul className="list-disc list-inside text-slate-300 space-y-1">

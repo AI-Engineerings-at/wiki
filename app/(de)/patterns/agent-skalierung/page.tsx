@@ -115,6 +115,7 @@ export default function AgentSkalierung() {
         </p>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -137,6 +138,7 @@ export default function AgentSkalierung() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <p className="text-gray-300 mt-4">
@@ -148,6 +150,7 @@ export default function AgentSkalierung() {
         <h2 className="text-xl font-semibold text-white mt-8">Skalierungs-Faktoren</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -179,6 +182,7 @@ export default function AgentSkalierung() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Fortgeschrittene Patterns</h2>

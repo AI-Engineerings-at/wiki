@@ -1,5 +1,7 @@
 "use client"
 import { useEffect, useRef, useState } from "react"
+import { usePathname } from "next/navigation"
+import { isEnglishPath } from "../lib/alternates"
 
 interface PlantUMLDiagramProps {
   diagram: string
@@ -8,6 +10,7 @@ interface PlantUMLDiagramProps {
 }
 
 export default function PlantUMLDiagram({ diagram, caption, darkBg = false }: PlantUMLDiagramProps) {
+  const isEn = isEnglishPath(usePathname() || '/')
   const containerRef = useRef<HTMLDivElement>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -52,7 +55,7 @@ export default function PlantUMLDiagram({ diagram, caption, darkBg = false }: Pl
     return (
       <figure className="my-8">
         <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400 text-sm">
-          Diagramm konnte nicht geladen werden: {error}
+          {isEn ? 'Diagram could not be loaded' : 'Diagramm konnte nicht geladen werden'}: {error}
         </div>
       </figure>
     )
@@ -61,14 +64,14 @@ export default function PlantUMLDiagram({ diagram, caption, darkBg = false }: Pl
   return (
     <figure className="my-8">
       {/* Der Lade-Hinweis steht BEWUSST ausserhalb des ref-Containers:
-          der Container wird unten per DOM-API geleert und befuellt (removeChild/appendChild).
+          der Container wird unten per DOM-API geleert und befüllt (removeChild/appendChild).
           Rendert React ein Kind in denselben Container, versucht es beim Zustandswechsel,
-          ein bereits entferntes Element zu loeschen -> NotFoundError: removeChild ->
+          ein bereits entferntes Element zu löschen -> NotFoundError: removeChild ->
           Fehlerseite "Etwas ist schiefgelaufen" (gemessen 2026-08-21: 44 von 182 Seiten,
           alle mit PlantUMLDiagram, online identisch). React darf in diesem Container
           keine Kinder besitzen. */}
       {loading && (
-        <div className="text-white/30 text-sm text-center py-4">Diagramm wird geladen...</div>
+        <div className="text-white/30 text-sm text-center py-4" data-diagram-loading="1">{isEn ? 'Loading diagram...' : 'Diagramm wird geladen...'}</div>
       )}
       <div
         ref={containerRef}

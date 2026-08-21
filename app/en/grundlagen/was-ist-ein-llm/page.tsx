@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { alternatesFor } from '../../../../lib/alternates'
 export const metadata = {
   alternates: alternatesFor('/en/grundlagen/was-ist-ein-llm'),
@@ -129,6 +130,7 @@ export default function WhatIsAnLLMPage() {
             most likely.
           </p>
 
+          <div className="table-wrap">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-gray-700">
@@ -146,6 +148,7 @@ export default function WhatIsAnLLMPage() {
               <tr><td className="py-2">Cost</td><td className="py-2">Free (with ads)</td><td className="py-2">API costs or local hardware</td></tr>
             </tbody>
           </table>
+          </div>
         </section>
 
         {/* Section 5: Hallucinations */}
@@ -194,6 +197,7 @@ export default function WhatIsAnLLMPage() {
             responses. The art lies in finding the right trade-off.
           </p>
 
+          <div className="table-wrap">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-gray-700">
@@ -211,6 +215,7 @@ export default function WhatIsAnLLMPage() {
               <tr><td className="py-2">70B</td><td className="py-2">~40 GB</td><td className="py-2">Does NOT fit on 24 GB GPU</td><td className="py-2">Best local quality</td><td className="py-2">Llama 3.3 70B, Qwen 2.5 72B</td></tr>
             </tbody>
           </table>
+          </div>
 
           <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-5 my-6">
             <h3 className="text-lg font-bold text-white mt-0 mb-2">70B Needs More Than 24 GB VRAM</h3>
@@ -244,6 +249,7 @@ export default function WhatIsAnLLMPage() {
             quality loss.
           </p>
 
+          <div className="table-wrap">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-gray-700">
@@ -260,6 +266,7 @@ export default function WhatIsAnLLMPage() {
               <tr><td className="py-2">Q3_K_M</td><td className="py-2">~20%</td><td className="py-2">~85%</td><td className="py-2">Only when VRAM is extremely tight</td></tr>
             </tbody>
           </table>
+          </div>
 
           <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-5 my-6">
             <p className="text-white/70 mb-0">
@@ -283,6 +290,7 @@ export default function WhatIsAnLLMPage() {
             their place.
           </p>
 
+          <div className="table-wrap">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-gray-700">
@@ -300,6 +308,7 @@ export default function WhatIsAnLLMPage() {
               <tr><td className="py-2">Maintenance</td><td className="py-2">None</td><td className="py-2">Updates, monitoring (~1h/month)</td></tr>
             </tbody>
           </table>
+          </div>
 
           <h3 className="text-xl font-bold text-white mt-8 mb-4">
             Honest Benchmark: Cloud vs. Local
@@ -309,6 +318,7 @@ export default function WhatIsAnLLMPage() {
             honest comparison numbers (as of March 2026):
           </p>
 
+          <div className="table-wrap">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-gray-700">
@@ -325,6 +335,7 @@ export default function WhatIsAnLLMPage() {
               <tr><td className="py-2">MATH (Mathematics)</td><td className="py-2">--</td><td className="py-2">77%</td><td className="py-2">Vellum</td></tr>
             </tbody>
           </table>
+          </div>
 
           <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-5 my-6">
             <h3 className="text-lg font-bold text-white mt-0 mb-2">Reading Benchmarks Correctly</h3>
@@ -400,11 +411,13 @@ export default function WhatIsAnLLMPage() {
               </span>
               <div>
                 <p className="text-white font-medium">Start a model</p>
+                <CodeBlock lang="en">
                 <pre className="bg-black/30 rounded-lg p-3 mt-2 overflow-x-auto">
                   <code className="text-sm text-green-400">
                     ollama run llama3.3
                   </code>
                 </pre>
+                </CodeBlock>
               </div>
             </div>
             <div className="flex items-start gap-3">

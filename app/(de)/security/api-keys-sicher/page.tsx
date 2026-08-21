@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { alternatesFor } from '../../../../lib/alternates'
@@ -95,6 +96,7 @@ stop
           Python-Skript, das Keys aus einer verschlüsselten Datei liest:
         </p>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# vault.py
 import os
@@ -132,6 +134,7 @@ def get(service, key):
 api_key = vault.get("stripe", "secret_key")
 print(f"Stripe Key: {api_key[:8]}...")  # sk_live_xxxx → sk_live_x...`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Umgebungsvariablen</h2>
 
@@ -139,6 +142,7 @@ print(f"Stripe Key: {api_key[:8]}...")  # sk_live_xxxx → sk_live_x...`}</code>
           Die sicherste Methode: Keys als Environment Variables:
         </p>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# .env Datei (NIEMALS committen!)
 STRIPE_SECRET_KEY=sk_live_xxxxx
@@ -149,10 +153,12 @@ OLLAMA_API_KEY=
 STRIPE_SECRET_KEY=
 GRAFANA_API_KEY=`}</code>
         </pre>
+        </CodeBlock>
 
         <p className="text-gray-300 mt-4">
           In Python mit python-dotenv:
         </p>
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# config.py
 from dotenv import load_dotenv
@@ -167,6 +173,7 @@ GRAFANA_KEY = os.getenv("GRAFANA_API_KEY")
 if not STRIPE_KEY:
     raise ValueError("STRIPE_SECRET_KEY nicht gesetzt")`}</code>
         </pre>
+        </CodeBlock>
 
         <div className="bg-yellow-900/30 border border-yellow-700 rounded-lg p-4 mt-4">
           <p className="text-yellow-300 text-sm">
@@ -174,6 +181,7 @@ if not STRIPE_KEY:
           </p>
         </div>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# .gitignore
 .env
@@ -183,10 +191,12 @@ vault.json.enc
 *.pem
 *.key`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Unser System</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -217,6 +227,7 @@ vault.json.enc
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Praktische Regeln</h2>
@@ -231,6 +242,7 @@ vault.json.enc
 
         <h2 className="text-xl font-semibold text-white mt-8">Key Rotation Script</h2>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# rotate_keys.py - Keys automatisch rotieren
 import os
@@ -266,6 +278,7 @@ def rotate_stripe_key():
 
 # Cron: 0 0 1 */6 * → alle 6 Monate`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Checkliste</h2>
 

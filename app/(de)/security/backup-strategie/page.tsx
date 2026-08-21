@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { alternatesFor } from '../../../../lib/alternates'
@@ -92,6 +93,7 @@ offsite --> test : Verify
         <h2 className="text-xl font-semibold text-white mt-8">Was sichern?</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -123,6 +125,7 @@ offsite --> test : Verify
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Backup Tools</h2>
@@ -136,6 +139,7 @@ offsite --> test : Verify
 
         <h2 className="text-xl font-semibold text-white mt-8">Beispiel: Restic</h2>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Restic installieren
 sudo apt install restic
@@ -163,9 +167,11 @@ restic restore latest --target /tmp/restore
 # Snapshots anzeigen
 restic snapshots`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Rclone für Cloud-Backup</h2>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Rclone konfigurieren
 rclone config
@@ -185,9 +191,11 @@ rclone sync /data remote:backup \
   --progress \
   --transfers 4`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Docker Volume Backup</h2>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Volume sichern
 docker run --rm \
@@ -206,6 +214,7 @@ docker run --rm \
 # Automatisch mit cron
 # 0 3 * * * /opt/scripts/docker-backup.sh`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Wichtige Regeln</h2>
 
@@ -218,6 +227,7 @@ docker run --rm \
 
         <h2 className="text-xl font-semibold text-white mt-8">Unser Setup</h2>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Unser Backup Stack:
 # 1. Lokal: Restic auf NAS (täglich)
@@ -246,6 +256,7 @@ restic forget --keep-daily 7 --keep-weekly 4 --prune
 # Cloud Sync
 rclone sync $BACKUP_DIR remote:homelab-backup --transfers 2`}</code>
         </pre>
+        </CodeBlock>
 
         <Callout type="warning" title="Restore testen">
           <p>

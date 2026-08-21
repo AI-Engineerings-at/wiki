@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import Callout from "../../../../components/Callout"
 import { alternatesFor } from '../../../../lib/alternates'
 
@@ -56,6 +57,7 @@ export default function WasIstAgentOrchestration() {
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
           <h3 className="font-semibold text-white mb-3">Beispiel: Agent-Team</h3>
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -82,6 +84,7 @@ export default function WasIstAgentOrchestration() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Kommunikation</h2>
@@ -92,6 +95,7 @@ export default function WasIstAgentOrchestration() {
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
           <h3 className="font-semibold text-white mb-2">Kommunikationsfluss</h3>
+          <CodeBlock>
           <pre className="text-sm text-gray-300 overflow-x-auto">
 {`1. Joe postet Task in #echo_log
     ↓
@@ -105,6 +109,7 @@ export default function WasIstAgentOrchestration() {
     ↓
 5. Manager-Agent aggregiert und meldet Fertig`}
           </pre>
+          </CodeBlock>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Vorteile</h2>

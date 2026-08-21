@@ -1,4 +1,6 @@
 ---
+lang: "en"
+pendant: "2026-03-12-terminal-grundlagen-fuer-ai"
 title: "Terminal Basics for AI Developers — the 10 Commands You Actually Need"
 date: "2026-03-12"
 description: "No CS degree needed. These 10 terminal commands are all you need to start your own AI stack."
@@ -123,6 +125,6 @@ If a version number appears — perfect. If not, curl isn't installed. On Window
 
 Terminal working? Then comes the real step: install Ollama and run your first model locally.
 
-**Continue to Step 3: [Install Ollama in 5 Minutes →](/blog/2026-03-12-install-ollama-step-by-step)**
+**Continue to Step 3: [Install Ollama in 5 Minutes →](/en/blog/2026-03-12-install-ollama-step-by-step)**
 
 Or jump straight to the complete setup guide: the **Local AI Playbook P1** takes you from terminal to a production-ready stack with browser interface, API access, and pre-configured Docker containers. The contents of this playbook are being reworked and will appear, tested, in the Hub. [Continue the learning path](/en/learning-path/)

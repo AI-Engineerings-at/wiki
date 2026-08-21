@@ -146,10 +146,10 @@ package "High-Level Modul\\n(Abstrakte Planung)" as hl {
 
 package "Low-Level Modul\\n(Detaillierte Berechnung)" as ll {
   rectangle "Detaillierter\\nZustand L_t" as lstate #1E3A5F
-  rectangle "Konkrete\\nAusfuehrung" as exec #1E3A5F
+  rectangle "Konkrete\\nAusführung" as exec #1E3A5F
 }
 
-rectangle "Ausgabe\\n(Loesung)" as output #065F46
+rectangle "Ausgabe\\n(Lösung)" as output #065F46
 
 input --> hstate
 hstate --> strategy

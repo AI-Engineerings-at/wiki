@@ -48,6 +48,7 @@ export default function DatenschutzPraxisPage() {
         </ul>
 
         <h2>Data Subject Rights</h2>
+        <div className="table-wrap">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700">
@@ -74,6 +75,7 @@ export default function DatenschutzPraxisPage() {
             </tr>
           </tbody>
         </table>
+        </div>
 
         <h2>AI-Specific Considerations</h2>
         <ul className="list-disc list-inside text-slate-300 space-y-1">

@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import Callout from "../../../../components/Callout"
 import { alternatesFor } from '../../../../lib/alternates'
 
@@ -61,6 +62,7 @@ export default function ProxmoxSetup() {
         <h2 className="text-xl font-semibold text-white mt-8">Begriffe</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -91,10 +93,12 @@ export default function ProxmoxSetup() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Unser Setup</h2>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Hardware
 - CPU: Intel Xeon 6-Core
@@ -112,6 +116,7 @@ export default function ProxmoxSetup() {
 - monitoring (Prometheus, Grafana)
 - vault (Credentials)`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">GPU-Passthrough</h2>
 
@@ -119,6 +124,7 @@ export default function ProxmoxSetup() {
           Wichtig für Ollama: Die GPU muss an eine VM durchgereicht werden:
         </p>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# /etc/modprobe.d/blacklist.conf
 blacklist nvidia
@@ -131,6 +137,7 @@ options vfio-pci ids=10de:2204,10de:1aef
 # /etc/kernel/kernel.conf - IOMMU aktivieren
 GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"`}</code>
         </pre>
+        </CodeBlock>
 
         <p className="text-gray-300 mt-3">
           Nach dem Konfigurieren im Web-Interface:
@@ -153,6 +160,7 @@ GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"`}</code>
 
         <h2 className="text-xl font-semibold text-white mt-8">Nützliche CLI-Befehle</h2>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# VM starten
 qm start 100
@@ -194,6 +202,7 @@ qm list
 # Container Liste
 pct list`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Storage Konfiguration</h2>
 
@@ -201,6 +210,7 @@ pct list`}</code>
           So richtest du zusätzlichen Storage ein:
         </p>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# LVM Thin Pool erstellen
 lvcreate -L 2T -n data-thinpool vg00
@@ -212,8 +222,10 @@ lvconvert --type thin-pool vg00/data-thinpool
 # Oder für ZFS:
 # Datacenter → Storage → Hinzufügen → ZFS`}</code>
         </pre>
+        </CodeBlock>
         <h2 className="text-xl font-semibold text-white mt-8">Networking</h2>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Bridge erstellen (vmbr1)
 # Im Web-Interface: Node → Network → Create → Linux Bridge
@@ -225,6 +237,7 @@ lvconvert --type thin-pool vg00/data-thinpool
 # vmbr0.20 → VLAN 20 (Docker)
 # vmbr0.30 → VLAN 30 (Gäste)`}</code>
         </pre>
+        </CodeBlock>
 
         <Callout type="warning" title="GPU-Passthrough">
           <p>

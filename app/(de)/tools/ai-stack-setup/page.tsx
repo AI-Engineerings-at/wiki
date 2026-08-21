@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from "next"
 import Image from "next/image"
 import Callout from "../../../../components/Callout"
@@ -95,6 +96,7 @@ export default function AiStackSetupPage() {
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
             <p className="text-white font-medium mb-3">Linux / macOS</p>
+            <CodeBlock>
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`# Ein-Befehl Installation
 curl -fsSL https://ollama.com/install.sh | sh
@@ -102,15 +104,18 @@ curl -fsSL https://ollama.com/install.sh | sh
 # Prüfen ob es läuft
 ollama --version`}</code>
             </pre>
+            </CodeBlock>
           </div>
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
             <p className="text-white font-medium mb-3">Windows</p>
+            <CodeBlock>
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`# Download von https://ollama.com/download
 # Installer ausführen
 # Ollama läuft als Hintergrund-Service`}</code>
             </pre>
+            </CodeBlock>
           </div>
         </section>
 
@@ -135,6 +140,7 @@ ollama --version`}</code>
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
             <p className="text-white font-medium mb-3">Modell herunterladen und testen</p>
+            <CodeBlock>
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`# Empfehlung für den Einstieg: Llama 3.3 (8B)
 ollama pull llama3.3
@@ -145,6 +151,7 @@ ollama run llama3.3
 # Installierte Modelle anzeigen
 ollama list`}</code>
             </pre>
+            </CodeBlock>
           </div>
 
           <ComparisonTable
@@ -196,6 +203,7 @@ ollama list`}</code>
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
             <p className="text-white font-medium mb-3">Docker Compose (empfohlen)</p>
+            <CodeBlock>
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`# docker-compose.yml erstellen
 cat > docker-compose.yml << 'EOF'
@@ -221,6 +229,7 @@ docker compose up -d
 
 # Browser öffnen: http://localhost:3000`}</code>
             </pre>
+            </CodeBlock>
           </div>
 
           <Callout type="info" title="Linux: host-gateway">
@@ -290,6 +299,7 @@ docker compose up -d
           </p>
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
+            <CodeBlock>
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`# Ollama API erreichbar?
 curl http://localhost:11434/api/tags
@@ -307,6 +317,7 @@ nvidia-smi
 docker compose ps
 # open-webui sollte "Up" sein`}</code>
             </pre>
+            </CodeBlock>
           </div>
 
           <Callout type="tip" title="Ollama REST API">

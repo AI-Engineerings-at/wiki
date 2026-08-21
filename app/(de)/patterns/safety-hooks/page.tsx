@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
 
@@ -35,6 +36,7 @@ export default function SafetyHooksPage() {
           Hooks sind automatische Prüfungen, die bei jedem Call ausgeführt werden.
         </p>
 
+        <CodeBlock>
         <pre className="bg-gray-900 p-4 rounded-lg text-sm overflow-x-auto">
 {`User Input
      |
@@ -57,6 +59,7 @@ export default function SafetyHooksPage() {
      v
 User Response`}
         </pre>
+        </CodeBlock>
 
         <h2>Typen von Hooks</h2>
 
@@ -82,6 +85,7 @@ User Response`}
         </ul>
 
         <h2>Implementierung in Python</h2>
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Safety Hooks als Decorator
 from functools import wraps
@@ -125,8 +129,10 @@ def agent_execute(prompt: str) -> str:
     # Hier passiert die eigentliche Agent-Logik
     return llama3.2(prompt)`}</code>
         </pre>
+        </CodeBlock>
 
         <h2>Implementierung in n8n</h2>
+        <CodeBlock>
         <pre className="bg-gray-900 p-4 rounded-lg text-sm overflow-x-auto">
 {`// n8n Function Node - Input Hook
 const forbidden = ['hack', 'exploit', 'bypass'];
@@ -140,8 +146,10 @@ for (const word of forbidden) {
 
 return $input.item;`}
         </pre>
+        </CodeBlock>
 
         <h2>Memory Capture Hook</h2>
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Memory Capture Hook - speichert jeden Call
 import sqlite3
@@ -176,6 +184,7 @@ def memory_capture_hook(func):
         return result
     return wrapper`}</code>
         </pre>
+        </CodeBlock>
 
         <h2>Best Practices</h2>
         <ul>

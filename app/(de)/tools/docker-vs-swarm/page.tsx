@@ -266,7 +266,7 @@ rectangle "Docker Swarm" as swarm #22543d {
             Ollama muss auf der Node mit GPU laufen. Nutze
             deploy.placement.constraints: [node.hostname == gpu-node] in deiner
             Swarm-Konfiguration. Ohne Pinning landet der Service auf einem
-            zufaelligen Node — ohne GPU.
+            zufälligen Node — ohne GPU.
           </p>
         </Callout>
 
@@ -293,7 +293,7 @@ rectangle "Docker Swarm" as swarm #22543d {
       </div>
 
       <div className="mt-12 pt-8 border-t border-white/10 text-center text-sm text-slate-600">
-        <p>Weiterfuehrende Artikel:{' '}
+        <p>Weiterführende Artikel:{' '}
           <a href="/tools/docker-grundlagen" className="text-blue-400 hover:text-blue-300">Docker Grundlagen</a>
           {' · '}
           <a href="/tools/ai-stack-setup" className="text-blue-400 hover:text-blue-300">AI Stack Setup</a>
@@ -301,7 +301,7 @@ rectangle "Docker Swarm" as swarm #22543d {
           <a href="/tools/grafana-monitoring" className="text-blue-400 hover:text-blue-300">Grafana Monitoring</a>
         </p>
         <p className="mt-2 italic text-slate-700">
-          Fuer die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
+          Für die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
         </p>
       </div>
     </div>

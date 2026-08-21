@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from "next"
 import Callout from "../../../../components/Callout"
 import KeyTakeaway from "../../../../components/KeyTakeaway"
@@ -485,11 +486,13 @@ llm --> out3
               </span>
               <div>
                 <p className="text-white font-medium">Modell starten</p>
+                <CodeBlock>
                 <pre className="bg-black/30 rounded-lg p-3 mt-2 overflow-x-auto">
                   <code className="text-sm text-green-400">
                     ollama run llama3.3
                   </code>
                 </pre>
+                </CodeBlock>
               </div>
             </div>
             <div className="flex items-start gap-3">

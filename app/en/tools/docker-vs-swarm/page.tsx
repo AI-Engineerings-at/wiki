@@ -46,6 +46,7 @@ export default function DockerVsSwarmPage() {
         </p>
 
         <h2 className="text-xl font-semibold text-white mt-8">The Direct Comparison</h2>
+        <div className="table-wrap">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700">
@@ -87,6 +88,7 @@ export default function DockerVsSwarmPage() {
             </tr>
           </tbody>
         </table>
+        </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">When to Use What?</h2>
         <div className="grid md:grid-cols-2 gap-4 mt-4">

@@ -4,9 +4,9 @@ import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata = {
   alternates: alternatesFor('/de'),
-  title: 'AI Engineering Wiki — Kostenloses Wissen ueber lokale KI, DSGVO und Automatisierung',
+  title: 'AI Engineering Wiki — Kostenloses Wissen über lokale KI, DSGVO und Automatisierung',
   description:
-    'Kostenloses Wissen ueber lokale KI, DSGVO-Compliance und Automatisierung. Fuer DACH-KMUs, die lokale AI-Systeme sauber einfuehren wollen.',
+    'Kostenloses Wissen über lokale KI, DSGVO-Compliance und Automatisierung. Für DACH-KMUs, die lokale AI-Systeme sauber einführen wollen.',
 }
 
 /**
@@ -27,10 +27,10 @@ export default function DeHomePage() {
           <span className="text-[#4262FF]"> Wiki</span>
         </h1>
         <p className="text-xl text-slate-300 max-w-2xl mx-auto mb-2">
-          Kostenloses Wissen ueber lokale KI, DSGVO und Automatisierung
+          Kostenloses Wissen über lokale KI, DSGVO und Automatisierung
         </p>
         <p className="text-slate-400 max-w-xl mx-auto mb-8">
-          Fuer KMUs im DACH-Raum, die KI nutzen wollen ohne ihre Daten aus der Hand zu geben.
+          Für KMUs im DACH-Raum, die KI nutzen wollen ohne ihre Daten aus der Hand zu geben.
         </p>
         <Link
           href="/"

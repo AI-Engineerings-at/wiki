@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from "next"
 import Image from "next/image"
 import Callout from "../../../../components/Callout"
@@ -108,6 +109,7 @@ export default function VerschlüsselungPage() {
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
             <p className="text-white font-medium mb-3">Existierende Partition verschlüsseln</p>
+            <CodeBlock>
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`# ACHTUNG: Backup VORHER erstellen!
 
@@ -123,6 +125,7 @@ sudo mkfs.ext4 /dev/mapper/encrypted-data
 # Mounten
 sudo mount /dev/mapper/encrypted-data /mnt/secure-data`}</code>
             </pre>
+            </CodeBlock>
           </div>
 
           <Callout type="warning" title="Performance-Impact">

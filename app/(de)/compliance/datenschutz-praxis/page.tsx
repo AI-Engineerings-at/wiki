@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { alternatesFor } from '../../../../lib/alternates'
@@ -69,12 +70,13 @@ export default function DatenschutzPraxis() {
         </ul>
 
         <figure className="my-8">
-          <img src="/images/diagrams/datenschutz-verschluesselung.png" alt="Datenschutz Verschluesselung — TLS, At-Rest, Datenbank" className="rounded-xl border border-white/10 w-full" />
-          <figcaption className="text-center text-white/40 text-sm mt-2">Verschluesselung in der Praxis: TLS, At-Rest und Datenbank-Verschluesselung</figcaption>
+          <img src="/images/diagrams/datenschutz-verschluesselung.png" alt="Datenschutz Verschlüsselung — TLS, At-Rest, Datenbank" className="rounded-xl border border-white/10 w-full" />
+          <figcaption className="text-center text-white/40 text-sm mt-2">Verschlüsselung in der Praxis: TLS, At-Rest und Datenbank-Verschlüsselung</figcaption>
         </figure>
 
         <h2 className="text-xl font-semibold text-white mt-8">Technische Maßnahmen: Code-Beispiele</h2>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# TLS-Konfiguration in Nginx
 server {
@@ -98,6 +100,7 @@ ssl_key_file = '/etc/ssl/private/ssl-cert.key'
 # /etc/crypttab
 data UUID=xxx none luks`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Organisatorische Maßnahmen</h2>
 
@@ -158,6 +161,7 @@ data UUID=xxx none luks`}</code>
 
         <h2 className="text-xl font-semibold text-white mt-8">AVV Checkliste</h2>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Auftragsverarbeitungsvertrag (AVV) Prüfliste
 
@@ -196,6 +200,7 @@ data UUID=xxx none luks`}</code>
 [ ] Fragebogen-Audits akzeptiert
 [ ] Zertifizierungen als Nachweis`}</code>
         </pre>
+        </CodeBlock>
 
         <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mt-8">
           <h3 className="font-semibold text-white mb-2">Checkliste</h3>
@@ -221,15 +226,15 @@ data UUID=xxx none luks`}</code>
         </section>
 
         <div className="mt-12 pt-8 border-t border-white/10 text-center text-sm text-slate-600">
-        <p>Weiterfuehrende Artikel:{' '}
-          <a href="/compliance/dpia" className="text-blue-400 hover:text-blue-300">DPIA fuer KI-Systeme</a>
+        <p>Weiterführende Artikel:{' '}
+          <a href="/compliance/dpia" className="text-blue-400 hover:text-blue-300">DPIA für KI-Systeme</a>
           {' · '}
           <a href="/compliance/dsgvo-grundlagen" className="text-blue-400 hover:text-blue-300">DSGVO Grundlagen</a>
           {' · '}
-          <a href="/security/verschluesselung" className="text-blue-400 hover:text-blue-300">Verschluesselung</a>
+          <a href="/security/verschluesselung" className="text-blue-400 hover:text-blue-300">Verschlüsselung</a>
         </p>
         <p className="mt-2 italic text-slate-700">
-          Fuer die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
+          Für die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
         </p>
       </div>
       </div>

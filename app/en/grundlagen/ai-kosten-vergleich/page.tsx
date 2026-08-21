@@ -22,6 +22,7 @@ export default function AiKostenVergleich() {
         <h2 className="text-xl font-semibold text-white mt-8">Cost Overview 2026</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -53,6 +54,7 @@ export default function AiKostenVergleich() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Break-Even</h2>

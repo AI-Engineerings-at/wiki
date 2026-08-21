@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
@@ -106,11 +107,13 @@ title 30-Tage Lernpfad: Vier Phasen
         </ul>
 
         <h3>Tag 2: Docker Installation</h3>
+        <CodeBlock>
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`curl -fsSL https://get.docker.com | sh
 sudo usermod -aG docker $USER
 docker --version`}</code>
         </pre>
+        </CodeBlock>
 
         <h3>Tag 3: Netzwerk und Security</h3>
         <ul className="list-disc list-inside text-slate-300">
@@ -141,13 +144,16 @@ docker --version`}</code>
         <h2>Phase 2: AI Core (Tag 8-14)</h2>
 
         <h3>Tag 8-9: Ollama</h3>
+        <CodeBlock>
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`curl -fsSL https://ollama.com/install.sh | sh
 ollama pull llama3:8b
 ollama pull mistral`}</code>
         </pre>
+        </CodeBlock>
 
         <h3>Tag 10-11: Modell-Auswahl</h3>
+        <div className="table-wrap">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700">
@@ -179,6 +185,7 @@ ollama pull mistral`}</code>
             </tr>
           </tbody>
         </table>
+        </div>
 
         <h3>Tag 12-13: Chat Interface</h3>
         <p className="text-slate-300">Open WebUI oder Alternative installieren</p>
@@ -189,6 +196,7 @@ ollama pull mistral`}</code>
         <h2>Phase 3: Automation (Tag 15-21)</h2>
 
         <h3>Tag 15-16: n8n Installation</h3>
+        <CodeBlock>
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`services:
   n8n:
@@ -196,6 +204,7 @@ ollama pull mistral`}</code>
     ports:
       - "5678:5678"`}</code>
         </pre>
+        </CodeBlock>
 
         <h3>Tag 17-18: AI-Workflows</h3>
         <ul className="list-disc list-inside text-slate-300">
@@ -267,7 +276,7 @@ ollama pull mistral`}</code>
       </div>
 
       <div className="mt-12 pt-8 border-t border-white/10 text-center text-sm text-slate-600">
-        <p>Weiterfuehrende Artikel:{' '}
+        <p>Weiterführende Artikel:{' '}
           <a href="/tools/ai-stack-setup" className="text-blue-400 hover:text-blue-300">AI Stack Setup</a>
           {' · '}
           <a href="/tools/ollama-tutorial" className="text-blue-400 hover:text-blue-300">Ollama Tutorial</a>
@@ -275,7 +284,7 @@ ollama pull mistral`}</code>
           <a href="/tools/docker-grundlagen" className="text-blue-400 hover:text-blue-300">Docker Grundlagen</a>
         </p>
         <p className="mt-2 italic text-slate-700">
-          Fuer die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
+          Für die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
         </p>
       </div>
     </div>

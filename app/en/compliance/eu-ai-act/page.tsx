@@ -39,6 +39,7 @@ export default function EUAIActPage() {
         </div>
 
         <h2>Risk Classes</h2>
+        <div className="table-wrap">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700">
@@ -70,8 +71,10 @@ export default function EUAIActPage() {
             </tr>
           </tbody>
         </table>
+        </div>
 
         <h2>Typical Business AI Scenarios</h2>
+        <div className="table-wrap">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700">
@@ -103,6 +106,7 @@ export default function EUAIActPage() {
             </tr>
           </tbody>
         </table>
+        </div>
 
         <h2>High-Risk Requirements Detail</h2>
         <ul className="list-disc list-inside text-slate-300 space-y-2">

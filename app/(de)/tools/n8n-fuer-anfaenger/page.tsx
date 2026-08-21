@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { CaseStudyBox } from '../../../../components/CaseStudyBox'
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
@@ -142,6 +143,7 @@ stop
 
         <h2 className="text-xl font-semibold text-white mt-8">Installation</h2>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`services:
   n8n:
@@ -151,6 +153,7 @@ stop
     volumes:
       - n8n_data:/home/node/.n8n`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Grundkonzepte</h2>
 
@@ -173,6 +176,7 @@ stop
 
         <h2 className="text-xl font-semibold text-white mt-8">Praktische Beispiele</h2>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Stripe Payment -> E-Mail
 Webhook (Stripe) -> IF (success) -> Email Send
@@ -183,6 +187,7 @@ RSS Read (täglich) -> Slack -> Email Send
 # Formular -> AI -> Speichern
 Webhook -> Ollama -> Notion -> Slack`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Best Practices</h2>
 
@@ -237,7 +242,7 @@ Webhook -> Ollama -> Notion -> Slack`}</code>
       </div>
 
       <div className="mt-12 pt-8 border-t border-white/10 text-center text-sm text-slate-600">
-        <p>Weiterfuehrende Artikel:{' '}
+        <p>Weiterführende Artikel:{' '}
           <a href="/tools/n8n-workflow-bundle" className="text-blue-400 hover:text-blue-300">n8n Workflow Bundle</a>
           {' · '}
           <a href="/tools/ai-stack-setup" className="text-blue-400 hover:text-blue-300">AI Stack Setup</a>
@@ -245,7 +250,7 @@ Webhook -> Ollama -> Notion -> Slack`}</code>
           <a href="/tools/ollama-tutorial" className="text-blue-400 hover:text-blue-300">Ollama Tutorial</a>
         </p>
         <p className="mt-2 italic text-slate-700">
-          Fuer die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
+          Für die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
         </p>
       </div>
     </div>

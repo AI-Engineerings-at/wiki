@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { CaseStudyBox } from '../../../../components/CaseStudyBox'
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
@@ -31,7 +32,7 @@ export default function OllamaTutorial() {
         <Callout type="summary" title="Auf einen Blick">
           <p>
             Ollama ist ein CLI-Tool für lokale LLMs. Installation in 5 Minuten,
-            200+ Modelle verfügbar, REST API auf Port 11434. Keine Cloud noetig,
+            200+ Modelle verfügbar, REST API auf Port 11434. Keine Cloud nötig,
             keine API-Kosten, DSGVO-konform. Für den Einstieg reicht eine GPU
             mit 6 GB VRAM.
           </p>
@@ -99,7 +100,7 @@ registry --> storage : ollama pull
         </p>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
-          <h3 className="font-semibold text-white mb-3">Unterstuetzte Modelle (Auswahl)</h3>
+          <h3 className="font-semibold text-white mb-3">Unterstützte Modelle (Auswahl)</h3>
           <div className="grid md:grid-cols-2 gap-2 text-sm text-gray-300">
             <div>
               <p className="text-white font-medium">Llama 3.3</p>
@@ -136,16 +137,21 @@ registry --> storage : ollama pull
         </figure>
 
         <h3 className="text-lg font-medium text-white mt-4">macOS</h3>
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">brew install ollama</code>
         </pre>
+        </CodeBlock>
 
         <h3 className="text-lg font-medium text-white mt-4">Linux/WSL2</h3>
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">curl -fsSL https://ollama.com/install.sh | sh</code>
         </pre>
+        </CodeBlock>
 
         <h3 className="text-lg font-medium text-white mt-4">Docker (unsere Empfehlung)</h3>
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`docker run -d \\
   --name ollama \\
@@ -153,6 +159,7 @@ registry --> storage : ollama pull
   -p 11434:11434 \\
   ollama/ollama:latest`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Modelle herunterladen</h2>
 
@@ -166,6 +173,7 @@ registry --> storage : ollama pull
           <figcaption className="text-center text-white/40 text-sm mt-2">ollama pull: Modelle mit einem Befehl herunterladen</figcaption>
         </figure>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Modell herunterladen
 ollama pull llama3.2
@@ -176,9 +184,11 @@ ollama list
 # Modell-Info anzeigen
 ollama show llama3.2`}</code>
         </pre>
+        </CodeBlock>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
           <h3 className="font-semibold text-white mb-3">Empfohlene Starter-Modelle</h3>
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -221,14 +231,17 @@ ollama show llama3.2`}</code>
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Ollama nutzen</h2>
 
         <h3 className="text-lg font-medium text-white mt-4">Interaktiver Chat</h3>
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">ollama run llama3.2</code>
         </pre>
+        </CodeBlock>
 
         <figure className="my-8">
           <img src="/images/screenshots/ollama-run.png" alt="ollama run — Interaktiver Chat im Terminal" className="rounded-xl border border-white/10 w-full" />
@@ -239,6 +252,7 @@ ollama show llama3.2`}</code>
         <p className="text-gray-300 mt-2">
           Ollama bietet eine REST API auf Port 11434:
         </p>
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Chat
 curl -X POST http://localhost:11434/api/chat \\
@@ -256,6 +270,7 @@ curl -X POST http://localhost:11434/api/generate \\
     "prompt": "Was ist Docker?"
   }'`}</code>
         </pre>
+        </CodeBlock>
 
         <figure className="my-8">
           <img src="/images/screenshots/ollama-api.png" alt="Ollama REST API — curl Beispiel" className="rounded-xl border border-white/10 w-full" />
@@ -269,6 +284,7 @@ curl -X POST http://localhost:11434/api/generate \\
           durchgeschleift werden:
         </p>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# NVIDIA GPU
 docker run -d --gpus all \\
@@ -291,6 +307,7 @@ services:
           devices:
             - capabilities: [gpu]`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Unser Docker Swarm Setup</h2>
 
@@ -298,6 +315,7 @@ services:
           In unserem 3-Node Swarm läuft Ollama auf der GPU-Node (docker-swarm3):
         </p>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`services:
   ollama:
@@ -317,6 +335,7 @@ services:
     networks:
       - ai-network`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Web Interface: Open WebUI</h2>
 
@@ -324,6 +343,7 @@ services:
           Für ein ChatGPT-ähnliches Interface nutzen wir Open WebUI:
         </p>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`services:
   open-webui:
@@ -339,6 +359,7 @@ services:
     networks:
       - ai-network`}</code>
         </pre>
+        </CodeBlock>
 
         <Callout type="tip" title="GPU-Tipp">
           <p>

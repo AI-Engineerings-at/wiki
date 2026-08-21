@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
 
@@ -30,14 +31,17 @@ export default function ProxmoxSetupPage() {
         </ul>
 
         <h2 className="text-xl font-semibold text-white mt-8">Installation</h2>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`# Download ISO from proxmox.com
 # Boot from USB
 # Follow installation wizard
 # Access via https://your-ip:8006`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">AI Stack Resources</h2>
+        <div className="table-wrap">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700">
@@ -74,8 +78,10 @@ export default function ProxmoxSetupPage() {
             </tr>
           </tbody>
         </table>
+        </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">GPU Passthrough</h2>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`# /etc/modprobe.d/blacklist.conf
 blacklist nvidia
@@ -88,6 +94,7 @@ nvidia_uvm
 # In VM config:
 hostpci0: 01:00,pcie=1`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Cluster Setup</h2>
         <ul className="list-disc list-inside text-slate-300 space-y-1">

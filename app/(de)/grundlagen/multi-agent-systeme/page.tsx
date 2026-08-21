@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { alternatesFor } from '../../../../lib/alternates'
@@ -168,6 +169,7 @@ rectangle "Pipeline" {
         <h2 className="text-xl font-semibold text-white mt-8">Kommunikationsparadigmen</h2>
         
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -199,6 +201,7 @@ rectangle "Pipeline" {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Unser Setup in der Praxis</h2>
@@ -208,6 +211,7 @@ rectangle "Pipeline" {
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
           <h3 className="font-semibold text-white mb-3">Beispiel: Feature-Request</h3>
+          <CodeBlock>
           <pre className="text-sm text-gray-300 overflow-x-auto">
 {`User postet in #echo_log:
 "Neue Feature: Dark Mode für Dashboard"
@@ -223,6 +227,7 @@ QA-Agent → tested → passed
 
 Manager-Agent → merged → posted "Fertig"`}
           </pre>
+          </CodeBlock>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Herausforderungen</h2>

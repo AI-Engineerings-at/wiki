@@ -16,10 +16,10 @@ title CLI Coding Agents — Entscheidungsbaum
 
 rectangle "Was brauchst du?" as start
 
-rectangle "Beste Reasoning-\\nQualitaet" as quality
+rectangle "Beste Reasoning-\\nQualität" as quality
 rectangle "DSGVO / Lokal\\n(keine Cloud)" as dsgvo
 rectangle "Kostenlos\\nstarten" as budget
-rectangle "OpenAI-\\nOekosystem" as openai
+rectangle "OpenAI-\\nÖkosystem" as openai
 
 rectangle "Claude Code\\n(Anthropic)" as cc #1E3A5F
 rectangle "Mistral Vibe\\nDevstral 24B lokal" as mv #1E3A5F
@@ -43,7 +43,7 @@ end note
 
 note right of mv
   Open Source, MIT,
-  RTX 3090 genuegt
+  RTX 3090 genügt
 end note
 
 note right of gc
@@ -699,7 +699,7 @@ export default function CLICodingAgentsVergleichPage() {
         </section>
 
         <div className="mt-12 pt-8 border-t border-white/10 text-center text-sm text-slate-600">
-        <p>Weiterfuehrende Artikel:{' '}
+        <p>Weiterführende Artikel:{' '}
           <a href="/tools/ai-tools-datenbank" className="text-blue-400 hover:text-blue-300">AI Tools Datenbank</a>
           {' · '}
           <a href="/tools/mcp-server" className="text-blue-400 hover:text-blue-300">MCP Server</a>
@@ -707,7 +707,7 @@ export default function CLICodingAgentsVergleichPage() {
           <a href="/grundlagen/was-ist-agent-orchestration" className="text-blue-400 hover:text-blue-300">Agent Orchestration</a>
         </p>
         <p className="mt-2 italic text-slate-700">
-          Fuer die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
+          Für die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
         </p>
       </div>
       </div>

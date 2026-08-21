@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from "next"
 import Image from "next/image"
 import Callout from "../../../../components/Callout"
@@ -96,6 +97,7 @@ export default function SelfHostedSicherheitPage() {
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
             <p className="text-white font-medium mb-3">UFW Grundkonfiguration</p>
+            <CodeBlock>
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`# Alles sperren (Default Deny)
 sudo ufw default deny incoming
@@ -111,6 +113,7 @@ sudo ufw allow 443/tcp
 sudo ufw enable
 sudo ufw status verbose`}</code>
             </pre>
+            </CodeBlock>
           </div>
 
           <Callout type="warning" title="Ports NICHT öffentlich freigeben">
@@ -144,6 +147,7 @@ sudo ufw status verbose`}</code>
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
             <p className="text-white font-medium mb-3">SSH härten (/etc/ssh/sshd_config)</p>
+            <CodeBlock>
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`# Passwort-Login deaktivieren
 PasswordAuthentication no
@@ -160,10 +164,12 @@ ClientAliveCountMax 0
 
 # Neustart: sudo systemctl restart sshd`}</code>
             </pre>
+            </CodeBlock>
           </div>
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
             <p className="text-white font-medium mb-3">fail2ban installieren</p>
+            <CodeBlock>
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`# Installation
 sudo apt install fail2ban
@@ -183,6 +189,7 @@ sudo systemctl start fail2ban
 # Status prüfen
 sudo fail2ban-client status sshd`}</code>
             </pre>
+            </CodeBlock>
           </div>
 
           <Callout type="info" title="SSH Keys generieren">
@@ -313,7 +320,7 @@ sudo fail2ban-client status sshd`}</code>
               >
                 Grafana Monitoring Guide
               </a>{" "}
-              findest du Anleitungen fuer Security-Panels.
+              findest du Anleitungen für Security-Panels.
             </p>
           </Callout>
         </section>

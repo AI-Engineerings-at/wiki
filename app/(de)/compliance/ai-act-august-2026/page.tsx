@@ -108,6 +108,7 @@ export default function AiActAugust2026Page() {
         <h2 className="text-xl font-semibold text-white mt-8">Wer ist betroffen?</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -134,6 +135,7 @@ export default function AiActAugust2026Page() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">6 Schritte für KMUs bis zum 02.08.2026</h2>
@@ -170,6 +172,7 @@ export default function AiActAugust2026Page() {
         <h2 className="text-xl font-semibold text-white mt-8">Timeline bis Enforcement</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -204,6 +207,7 @@ export default function AiActAugust2026Page() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <div className="bg-yellow-900/30 border border-yellow-700 rounded-lg p-4 mt-6">

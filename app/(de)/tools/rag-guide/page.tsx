@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { alternatesFor } from '../../../../lib/alternates'
@@ -98,6 +99,7 @@ export default function RagGuide() {
         <h2 className="text-xl font-semibold text-white mt-8">Vector Databases</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -140,11 +142,13 @@ export default function RagGuide() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Embedding Models</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -187,6 +191,7 @@ export default function RagGuide() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Best Practices</h2>
@@ -211,6 +216,7 @@ export default function RagGuide() {
 
         <h2 className="text-xl font-semibold text-white mt-8">Einfaches RAG Setup mit Ollama</h2>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# 1. Ollama mit LangChain/LlamaIndex
 pip install langchain langchain-community llama-index
@@ -244,16 +250,19 @@ qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff",
 result = qa.run("Was steht in meinen Dokumenten?")
 print(result)`}</code>
         </pre>
+        </CodeBlock>
 
         <p className="text-gray-300 mt-3">
           Erwartete Ausgabe:
         </p>
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Beispielausgabe:
 # "In Ihren Dokumenten geht es um die Projektplanung für Q1 2026.
 # Die Hauptpunkte sind: Budgetfreigabe, Team-Ressourcen und 
 # Meilenstein-Definitionen."`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Hybrid RAG: BM25 + Vektor</h2>
 
@@ -262,6 +271,7 @@ print(result)`}</code>
           semantischer Suche:
         </p>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Hybrid Search mit LangChain
 from langchain.retrievers import ContextualCompressionRetriever
@@ -284,6 +294,7 @@ ensemble = EnsembleRetriever(
 # Fusion Retrieval (neuere Alternative)
 # Alle Ergebnisse mischen und nach Score neu sortieren`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Fortgeschritten: Query Transformations</h2>
 
@@ -291,6 +302,7 @@ ensemble = EnsembleRetriever(
           Du kannst die Query vor dem Retrieval verbessern:
         </p>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Multi-Query Retrieval
 from langchain.retrievers.multi_query import MultiQueryRetriever
@@ -312,6 +324,7 @@ Frage allgemeiner formuliert: {question}
 # HyDE (Hypothetical Document Embeddings)
 # LLM generiert hypothetische Antwort → embedden → Retrieval`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Unser Hybrid RAG Stack</h2>
 
@@ -349,7 +362,7 @@ Frage allgemeiner formuliert: {question}
         </section>
 
         <div className="mt-12 pt-8 border-t border-white/10 text-center text-sm text-slate-600">
-        <p>Weiterfuehrende Artikel:{' '}
+        <p>Weiterführende Artikel:{' '}
           <a href="/tools/ollama-tutorial" className="text-blue-400 hover:text-blue-300">Ollama Tutorial</a>
           {' · '}
           <a href="/grundlagen/was-ist-ein-llm" className="text-blue-400 hover:text-blue-300">Was ist ein LLM?</a>
@@ -357,7 +370,7 @@ Frage allgemeiner formuliert: {question}
           <a href="/tools/n8n-workflow-bundle" className="text-blue-400 hover:text-blue-300">n8n Workflow Bundle</a>
         </p>
         <p className="mt-2 italic text-slate-700">
-          Fuer die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
+          Für die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
         </p>
       </div>
       </div>

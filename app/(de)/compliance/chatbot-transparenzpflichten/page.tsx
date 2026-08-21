@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
 
@@ -108,6 +109,7 @@ export default function ChatbotTransparenzpflichtenPage() {
 
         <h2>Implementation: KI-Hinweis in Chatbot</h2>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# HTML: KI-Hinweis im Chat-Fenster
 <div class="chat-header">
@@ -134,6 +136,7 @@ Meine Antworten werden von AI generiert und können Fehler enthalten.
 Für wichtige Entscheidungen bitte zusätzliche Quellen prüfen.
 """)`}</code>
         </pre>
+        </CodeBlock>
 
         <h2>Strafen bei Verstoß</h2>
         <p className="text-slate-300">
@@ -153,7 +156,7 @@ Für wichtige Entscheidungen bitte zusätzliche Quellen prüfen.
       </div>
 
       <div className="mt-12 pt-8 border-t border-white/10 text-center text-sm text-slate-600">
-        <p>Weiterfuehrende Artikel:{' '}
+        <p>Weiterführende Artikel:{' '}
           <a href="/compliance/eu-ai-act" className="text-blue-400 hover:text-blue-300">EU AI Act</a>
           {' · '}
           <a href="/compliance/ki-kompetenz-art4" className="text-blue-400 hover:text-blue-300">KI-Kompetenz Art. 4</a>
@@ -161,7 +164,7 @@ Für wichtige Entscheidungen bitte zusätzliche Quellen prüfen.
           <a href="/compliance/dsgvo-grundlagen" className="text-blue-400 hover:text-blue-300">DSGVO Grundlagen</a>
         </p>
         <p className="mt-2 italic text-slate-700">
-          Fuer die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
+          Für die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
         </p>
       </div>
     </div>

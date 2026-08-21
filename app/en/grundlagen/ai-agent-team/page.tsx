@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { alternatesFor } from '../../../../lib/alternates'
 export const metadata = {
   alternates: alternatesFor('/en/grundlagen/ai-agent-team'),
@@ -63,6 +64,7 @@ export default function AiAgentTeam() {
         <h2 className="text-xl font-semibold text-white mt-8">Types of Agents</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -89,10 +91,12 @@ export default function AiAgentTeam() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Team Structure</h2>
 
+        <CodeBlock lang="en">
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Our Team
 Manager (Planner)
@@ -101,6 +105,7 @@ Manager (Planner)
   → Researcher (research)
   → Deployer (ship it)`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Key Components</h2>
 

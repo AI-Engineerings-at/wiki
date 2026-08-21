@@ -1,4 +1,5 @@
 ---
+pendant: "2026-03-12-karpathy-autoresearch-local-ai-research"
 title: "Karpathy's autoresearch: Autonome AI-Forschung auf deiner lokalen GPU"
 date: "2026-03-12"
 description: "26.000 GitHub Stars in 6 Tagen — was steckt hinter Andrej Karpathys neuestem Projekt? Und wie läuft es auf einer RTX 3090?"
@@ -149,7 +150,7 @@ Das ist kein Hype. autoresearch ist heute nützlich für Forschungsexperimente. 
 - **Vollständig lokal** ausführbar — mit lokalem LLM kein Datentransfer nötig
 - MIT-Lizenz, aktive Entwicklung, letzter Commit heute
 
-Das Claude Code AI OS Template enthält unsere vollständige Skill-Infrastruktur inklusive program.md-ähnlicher Agent-Definitionen. Die Inhalte dieses Templates werden überarbeitet und erscheinen geprüft im Hub. [Weiter im Lernpfad](/lernpfad/)
+Das Claude Code AI OS Template enthält unsere vollständige Skill-Infrastruktur inklusive program.md-ähnlicher Agent-Definitionen. Stand 21. August 2026: dieses Produkt wird nicht mehr verkauft; die Inhalte dieses Templates wandern überarbeitet in den Hub (hub.ai-engineering.at) — ohne Termin. [Weiter im Lernpfad](/lernpfad/)
 
 ---
 

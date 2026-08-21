@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
 
@@ -106,6 +107,7 @@ export default function VerboteneAIPraktikenPage() {
         </ol>
 
         <h2>Prüfe dein System</h2>
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Checkliste: Ist dein System verboten?
 
@@ -129,6 +131,7 @@ export default function VerboteneAIPraktikenPage() {
 → Scraping aus dem Internet
 → VERBOTEN wenn JA`}</code>
         </pre>
+        </CodeBlock>
 
         <h2>Quellen</h2>
         <ul>
@@ -139,7 +142,7 @@ export default function VerboteneAIPraktikenPage() {
       </div>
 
       <div className="mt-12 pt-8 border-t border-white/10 text-center text-sm text-slate-600">
-        <p>Weiterfuehrende Artikel:{' '}
+        <p>Weiterführende Artikel:{' '}
           <a href="/compliance/eu-ai-act" className="text-blue-400 hover:text-blue-300">EU AI Act</a>
           {' · '}
           <a href="/compliance/eu-ai-act-checkliste" className="text-blue-400 hover:text-blue-300">EU AI Act Checkliste</a>
@@ -147,7 +150,7 @@ export default function VerboteneAIPraktikenPage() {
           <a href="/compliance/dsgvo-grundlagen" className="text-blue-400 hover:text-blue-300">DSGVO Grundlagen</a>
         </p>
         <p className="mt-2 italic text-slate-700">
-          Fuer die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
+          Für die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
         </p>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
@@ -141,6 +142,7 @@ warm -[#22c55e]-> hot : Promotion\\n(3x in 7 Tagen)
           Die einfachste Methode: Eine Markdown-Datei im Projektwurzelverzeichnis,
           die alle wichtigen Infos enthält. Wird bei jedem Run automatisch geladen.
         </p>
+        <CodeBlock>
         <pre className="bg-gray-900 p-4 rounded-lg text-sm overflow-x-auto">
 {`# Project Context
 - Stack: Ollama + n8n + PostgreSQL
@@ -155,12 +157,14 @@ warm -[#22c55e]-> hot : Promotion\\n(3x in 7 Tagen)
 - /src/api - REST Endpoints
 - /tests - pytest Suite`}
         </pre>
+        </CodeBlock>
 
         <h3 className="text-lg font-semibold text-white mt-6">2. Topic Files</h3>
         <p>
           Für komplexere Projekte: Mehrere Markdown-Dateien in einem /docs Verzeichnis.
           Jede Datei behandelt ein Thema (Architektur, API, Deployment, etc.).
         </p>
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`/docs/
 ├── ARCHITEKTUR.md    # System-Übersicht
@@ -168,6 +172,7 @@ warm -[#22c55e]-> hot : Promotion\\n(3x in 7 Tagen)
 ├── DEPLOYMENT.md     # CI/CD, Server
 └── ENTSCHEIDUNGEN.md # Projekt-Geschichten`}</code>
         </pre>
+        </CodeBlock>
 
         <h3 className="text-lg font-semibold text-white mt-6">3. Knowledge Graphs</h3>
         <p>
@@ -177,6 +182,7 @@ warm -[#22c55e]-> hot : Promotion\\n(3x in 7 Tagen)
         </p>
 
         <h3 className="text-lg font-semibold text-white mt-6">4. Session Memory (Kurzzeit)</h3>
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Python: Session Memory mit SQLite
 import sqlite3
@@ -196,8 +202,10 @@ def load_session(agent_id):
         (agent_id,)
     ).fetchone()`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Wann was verwenden?</h2>
+        <div className="table-wrap">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-gray-700">
@@ -234,12 +242,14 @@ def load_session(agent_id):
             </tr>
           </tbody>
         </table>
+        </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Beispiel: ChromaDB für Vektorspeicher</h2>
         <p className="text-gray-300">
           Wenn dein Wissen über 50K Tokens hinausgeht, speichere Dokumente
           als Embeddings und suche per Ähnlichkeit:
         </p>
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# ChromaDB: Vektorspeicher für Agent-Memory
 import chromadb
@@ -276,6 +286,7 @@ results = collection.query(
 print(results["documents"])
 # → [["PostgreSQL läuft auf Port 5432 im Docker Swarm", ...]]`}</code>
         </pre>
+        </CodeBlock>
 
         <Callout type="tip" title="Praxis-Tipp">
           <p>

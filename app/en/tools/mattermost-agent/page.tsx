@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
 
@@ -29,6 +30,7 @@ export default function MattermostAgentPage() {
         </ul>
 
         <h2 className="text-xl font-semibold text-white mt-8">Bot Setup</h2>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`# 1. Create Bot Account
 # In Mattermost: System Console > Integrations > Bot Accounts
@@ -39,8 +41,10 @@ export default function MattermostAgentPage() {
 # 3. Add to channel
 /memberadd @ai-bot`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Python Bot Example</h2>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`import mattermost
 from mattermost import Webhook
@@ -57,6 +61,7 @@ def handle_message(event):
         response = ollama.chat('llama3', prompt)
         client.post_message(event.channel, response)`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">With n8n</h2>
         <ul className="list-disc list-inside text-slate-300 space-y-1">
@@ -67,6 +72,7 @@ def handle_message(event):
         </ul>
 
         <h2 className="text-xl font-semibold text-white mt-8">Commands</h2>
+        <div className="table-wrap">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700">
@@ -89,6 +95,7 @@ def handle_message(event):
             </tr>
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   )

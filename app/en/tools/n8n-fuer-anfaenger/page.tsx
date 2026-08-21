@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
 
@@ -45,6 +46,7 @@ export default function N8nAnfänger() {
 
         <h2 className="text-xl font-semibold text-white mt-8">Installation</h2>
 
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-slate-300">{`services:
   n8n:
@@ -54,6 +56,7 @@ export default function N8nAnfänger() {
     volumes:
       - n8n_data:/home/node/.n8n`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Basic Concepts</h2>
 
@@ -76,6 +79,7 @@ export default function N8nAnfänger() {
 
         <h2 className="text-xl font-semibold text-white mt-8">Practical Examples</h2>
 
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-slate-300">{`# Stripe Payment → E-Mail
 Webhook (Stripe) → IF (success) → Email Send
@@ -86,6 +90,7 @@ RSS Read (daily) → Slack → Email Send
 # Form → AI → Save
 Webhook → Ollama → Notion → Slack`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Best Practices</h2>
 

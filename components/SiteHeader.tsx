@@ -8,15 +8,15 @@ import { isEnglishPath, switchLanguageHref } from '../lib/alternates'
 
 // Zwei Listen, absichtlich getrennt.
 //
-// Joe, 2026-08-21: "wieso 2 Menues ... die Leiste oben ist schon sehr voll".
-// Gemessen waren es 13 Eintraege plus Suche im Kopf, 9 davon eine Zeile
+// Joe, 2026-08-21: "wieso 2 Menüs ... die Leiste oben ist schon sehr voll".
+// Gemessen waren es 13 Einträge plus Suche im Kopf, 9 davon eine Zeile
 // tiefer in der Seitenleiste wiederholt. Vorher speiste EINE Liste beide
-// Menues — wer den Kopf kuerzte, kuerzte das Mobilmenue mit.
+// Menüs — wer den Kopf kürzte, kürzte das Mobilmenü mit.
 //
 // Desktop: nur der Weg durch die Seite (Lernpfad, Blog, Hub). Die acht
 // Kategorien stehen dort in der Seitenleiste und werden nicht wiederholt.
-// Mobil: die Seitenleiste ist eingeklappt, also traegt das Menue die
-// Kategorien — sonst waeren sie unter xl gar nicht erreichbar.
+// Mobil: die Seitenleiste ist eingeklappt, also trägt das Menü die
+// Kategorien — sonst wären sie unter xl gar nicht erreichbar.
 const navMobileDe = [
   { href: '/lernpfad', label: 'Lernpfad', icon: '🎯' },
   { href: '/grundlagen', label: 'Grundlagen', icon: '📖' },
@@ -41,7 +41,7 @@ const navMobileEn = [
   { href: '/en/papers', label: 'Papers', icon: '📄' },
   { href: '/en/austria', label: 'Austria', icon: '🇦🇹' },
   { href: '/en/downloads', label: 'Downloads', icon: '📥' },
-  { href: '/blog', label: 'Blog', icon: '📝' },
+  { href: '/en/blog', label: 'Blog', icon: '📝' },
   { href: 'https://hub.ai-engineering.at/en', label: 'Hub', icon: '🔌' },
 ]
 
@@ -53,23 +53,43 @@ const navDesktopDe = [
 
 const navDesktopEn = [
   { href: '/en/learning-path', label: 'Learning Path', icon: '🎯' },
-  { href: '/blog', label: 'Blog', icon: '📝' },
+  { href: '/en/blog', label: 'Blog', icon: '📝' },
   { href: 'https://hub.ai-engineering.at/en', label: 'Hub', icon: '🔌' },
 ]
 
-function getToggleHref(pathname: string, isEn: boolean): string {
+function getToggleHref(pathname: string, isEn: boolean): string | null {
   // Handle _not-found pages — redirect to home instead of broken paths
   if (pathname.includes('_not-found') || pathname.includes('/_not-found')) {
     return isEn ? '/' : '/en'
   }
   // Paartabelle statt Pfad-Umschreiben: der Umschalter zeigt nur auf Seiten,
-  // die es gibt, sonst auf die Startseite der Zielsprache. Die alte Tabelle
-  // stand hier lokal, war richtig befüllt und wurde nie getroffen — sie
-  // führte Pfade ohne Schrägstrich, `usePathname()` liefert bei
-  // `trailingSlash: true` aber `/en/austria/`. Gemessen am gebauten Wiki:
-  // die EN-Oesterreich-Seite zeigte im DE-Knopf auf /austria/ (404) statt
-  // auf /oesterreich/ (200).
+  // die es gibt — sonst `null`, und der Knopf ist sichtbar deaktiviert
+  // (vorher: Sprung auf die Startseite, 30 von 30 Blog-Seiten, Fund 15).
+  // Die alte Tabelle stand hier lokal, war richtig befüllt und wurde nie
+  // getroffen — sie führte Pfade ohne Schrägstrich, `usePathname()` liefert
+  // bei `trailingSlash: true` aber `/en/austria/`.
   return switchLanguageHref(pathname)
+}
+
+/** DE/EN-Umschalter: aktive Sprache markiert, fehlendes Pendant sichtbar deaktiviert. */
+function LangToggle({ pathname, isEn, toggleHref, size }: { pathname: string; isEn: boolean; toggleHref: string | null; size: 'sm' | 'xs' }) {
+  const pad = size === 'sm' ? 'px-3 py-1' : 'px-2 py-0.5'
+  const active = 'bg-[#4262FF]/20 text-blue-400'
+  const idle = 'text-slate-400 hover:text-white hover:bg-slate-800'
+  const off = 'text-slate-600 cursor-not-allowed'
+  const missingTitle = isEn ? 'Only available in English' : 'Nur auf Deutsch verfügbar'
+  const renderOther = (label: string) =>
+    toggleHref ? (
+      <Link href={toggleHref} className={`${pad} transition-all ${idle}`}>{label}</Link>
+    ) : (
+      <span className={`${pad} ${off}`} title={missingTitle} aria-disabled="true" data-lang-missing="1">{label}</span>
+    )
+  return (
+    <div className={`flex items-center border border-slate-700 rounded-full overflow-hidden font-medium ${size === 'sm' ? 'text-sm' : 'text-xs'}`}>
+      {isEn ? renderOther('DE') : <Link href={pathname} className={`${pad} ${active}`} aria-current="true">DE</Link>}
+      {isEn ? <Link href={pathname} className={`${pad} ${active}`} aria-current="true">EN</Link> : renderOther('EN')}
+    </div>
+  )
 }
 
 export function SiteHeader() {
@@ -120,43 +140,17 @@ export function SiteHeader() {
               </Link>
             )
           })}
-          <div className="flex items-center border border-slate-700 rounded-full overflow-hidden text-sm font-medium">
-            <Link
-              href={isEn ? toggleHref : pathname}
-              className={`px-3 py-1 transition-all ${!isEn ? 'bg-[#4262FF]/20 text-blue-400' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}
-            >
-              DE
-            </Link>
-            <Link
-              href={isEn ? pathname : toggleHref}
-              className={`px-3 py-1 transition-all ${isEn ? 'bg-[#4262FF]/20 text-blue-400' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}
-            >
-              EN
-            </Link>
-          </div>
+          <LangToggle pathname={pathname} isEn={isEn} toggleHref={toggleHref} size="sm" />
         </nav>
 
         {/* Mobile: DE/EN + Hamburger */}
         <div className="flex xl:hidden items-center gap-3">
-          <div className="flex items-center border border-slate-700 rounded-full overflow-hidden text-xs font-medium">
-            <Link
-              href={isEn ? toggleHref : pathname}
-              className={`px-2 py-0.5 ${!isEn ? 'bg-[#4262FF]/20 text-blue-400' : 'text-slate-400'}`}
-            >
-              DE
-            </Link>
-            <Link
-              href={isEn ? pathname : toggleHref}
-              className={`px-2 py-0.5 ${isEn ? 'bg-[#4262FF]/20 text-blue-400' : 'text-slate-400'}`}
-            >
-              EN
-            </Link>
-          </div>
+          <LangToggle pathname={pathname} isEn={isEn} toggleHref={toggleHref} size="xs" />
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             onTouchEnd={(e) => { e.preventDefault(); setMobileOpen(!mobileOpen); }}
             className="p-3 min-w-[48px] min-h-[48px] flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer"
-            aria-label={mobileOpen ? 'Menü schließen' : 'Menü öffnen'}
+            aria-label={mobileOpen ? (isEn ? 'Close menu' : 'Menü schließen') : (isEn ? 'Open menu' : 'Menü öffnen')}
             type="button"
           >
             {mobileOpen ? (
@@ -181,7 +175,7 @@ export function SiteHeader() {
       {mobileOpen && (
         <nav
           className="xl:hidden border-t border-slate-800 bg-slate-950/95 backdrop-blur-sm"
-          aria-label="Mobile Navigation"
+          aria-label={isEn ? 'Mobile navigation' : 'Mobile Navigation'}
         >
           <div className="max-w-7xl mx-auto px-4 py-4 grid grid-cols-2 gap-1">
             {nav.map((item) => {

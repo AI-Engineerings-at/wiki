@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { alternatesFor } from '../../../../lib/alternates'
@@ -114,6 +115,7 @@ stop
         </figure>
 
         <h2 className="text-xl font-semibold text-white mt-8">Vergleichstabelle (Stand März 2026)</h2>
+        <div className="table-wrap">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-gray-700">
@@ -169,6 +171,7 @@ stop
             </tr>
           </tbody>
         </table>
+        </div>
 
         <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mt-4">
           <p className="text-blue-300 text-sm">
@@ -189,6 +192,7 @@ stop
           Hier ist, was du brauchst um die Modelle lokal zu betreiben:
         </p>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Ollama Modelle laden und testen
 ollama pull llama3.2
@@ -202,10 +206,12 @@ ollama run llama3.2 "Hallo, wer bist du?"
 # Hardware check
 ollama run llama3.2 "Wie viel RAM hast du verwendet?"`}</code>
         </pre>
+        </CodeBlock>
 
         <p className="text-gray-300 mt-3">
           Typische RAM-Belastung bei Ollama:
         </p>
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# VRAM Verbrauch (ca., Q4 quantisiert)
 gemma2:2b           ~2GB VRAM   → 200+ tok/s
@@ -222,6 +228,7 @@ llama3.3:70b       ~40GB VRAM   → PASST NICHT auf 24GB GPU!
 ollama pull llama3.3:q4_K_M   # 4-bit Quantisierung, ~5GB
 ollama pull qwen3:14b         # 4-bit default, ~10GB`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Entscheidungshilfe</h2>
         <ul className="list-disc list-inside text-gray-300 space-y-1">
@@ -235,6 +242,7 @@ ollama pull qwen3:14b         # 4-bit default, ~10GB`}</code>
 
         <h2 className="text-xl font-semibold text-white mt-8">Unser Stack</h2>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Wir nutzen (Stand März 2026):
 # - mistral-small3.2:24b auf RTX 3090 (.90) für Chat/Code (stark bei Deutsch)
@@ -259,6 +267,7 @@ services:
 OLLAMA_HOST=0.0.0.0:11434
 OLLAMA_MODELS=/root/.ollama/models`}</code>
         </pre>
+        </CodeBlock>
 
         <section className="mt-16 pt-8 border-t border-white/10">
           <h2 className="text-xl font-bold text-white mb-4">Quellen</h2>

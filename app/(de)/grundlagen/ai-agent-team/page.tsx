@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import Callout from "../../../../components/Callout"
 import { alternatesFor } from '../../../../lib/alternates'
 
@@ -79,6 +80,7 @@ export default function AiAgentTeam() {
         <h2 className="text-xl font-semibold text-white mt-8">Arten von Agenten</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -105,6 +107,7 @@ export default function AiAgentTeam() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <figure className="my-8">
@@ -114,6 +117,7 @@ export default function AiAgentTeam() {
 
         <h2 className="text-xl font-semibold text-white mt-8">Team-Struktur</h2>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Unser Team
 Manager (Planner)
@@ -122,6 +126,7 @@ Manager (Planner)
   → Researcher (Recherche)
   → Deployer (Verteilen)`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Wichtige Komponenten</h2>
 

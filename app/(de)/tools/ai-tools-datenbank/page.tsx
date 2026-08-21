@@ -426,7 +426,7 @@ export default function AIToolsDatenbankPage() {
       </section>
 
       <div className="mt-12 pt-8 border-t border-white/10 text-center text-sm text-slate-600">
-        <p>Weiterfuehrende Artikel:{' '}
+        <p>Weiterführende Artikel:{' '}
           <a href="/tools/vergleich-alternativen" className="text-blue-400 hover:text-blue-300">Vergleich Alternativen</a>
           {' · '}
           <a href="/tools/ollama-tutorial" className="text-blue-400 hover:text-blue-300">Ollama Tutorial</a>
@@ -434,7 +434,7 @@ export default function AIToolsDatenbankPage() {
           <a href="/grundlagen/was-ist-ein-llm" className="text-blue-400 hover:text-blue-300">Was ist ein LLM?</a>
         </p>
         <p className="mt-2 italic text-slate-700">
-          Fuer die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
+          Für die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
         </p>
       </div>
     </div>

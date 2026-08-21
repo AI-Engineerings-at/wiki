@@ -46,6 +46,7 @@ export default function KIKompetenzArt4Page() {
         </p>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -87,6 +88,7 @@ export default function KIKompetenzArt4Page() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <div className="bg-orange-900/30 border border-orange-700 rounded-lg p-4 mt-4">
@@ -127,6 +129,7 @@ export default function KIKompetenzArt4Page() {
         <h2 className="text-xl font-semibold text-white mt-8">Wer ist betroffen?</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -158,6 +161,7 @@ export default function KIKompetenzArt4Page() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <p className="text-gray-300 mt-4">
@@ -246,6 +250,7 @@ export default function KIKompetenzArt4Page() {
         </ul>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -272,6 +277,7 @@ export default function KIKompetenzArt4Page() {
               </tr>
             </tbody>
           </table>
+          </div>
           <p className="text-gray-500 text-xs mt-2">
             Für KMUs und Start-ups gelten proportionale Höchstbeträge — der jeweils niedrigere Betrag.
             Fehlende Schulungsnachweise wirken zudem in jedem Aufsichts- oder Haftungsverfahren
@@ -282,6 +288,7 @@ export default function KIKompetenzArt4Page() {
         <h2 className="text-xl font-semibold text-white mt-8">Timeline</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -324,6 +331,7 @@ export default function KIKompetenzArt4Page() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Checkliste: KI-Kompetenz umsetzen</h2>

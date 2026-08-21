@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
 
@@ -29,6 +30,7 @@ export default function MCPServerPage() {
         </ul>
 
         <h2 className="text-xl font-semibold text-white mt-8">Popular MCP Servers</h2>
+        <div className="table-wrap">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700">
@@ -63,8 +65,10 @@ export default function MCPServerPage() {
             </tr>
           </tbody>
         </table>
+        </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Setup Example</h2>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`# claude_desktop_config.json
 
@@ -85,6 +89,7 @@ export default function MCPServerPage() {
   }
 }`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Use Cases</h2>
         <ul className="list-disc list-inside text-slate-300 space-y-1">

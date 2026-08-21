@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from "next"
 import Callout from "../../../../components/Callout"
 import KeyTakeaway from "../../../../components/KeyTakeaway"
@@ -239,6 +240,7 @@ export default function AIAgentLegalFrameworkPage() {
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
             <p className="text-white font-medium mb-3">Prinzip der Hash Chain:</p>
+            <CodeBlock>
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`Dokument v1  →  SHA-256: a1b2c3...  (previous: null)
 Dokument v2  →  SHA-256: d4e5f6...  (previous: a1b2c3...)
@@ -249,6 +251,7 @@ Manipulation von v1?
 → previous_hash von v2 stimmt nicht mehr
 → Kette ist gebrochen = Manipulation erkannt`}</code>
             </pre>
+            </CodeBlock>
           </div>
 
           <Callout type="info" title="Kein Blockchain, kein ID Austria">

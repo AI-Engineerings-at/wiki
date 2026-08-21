@@ -8,7 +8,7 @@ author: "AI Engineering"
 
 # n8n AI Workflow Bundle v3: 14 Enterprise-Workflows für lokale Automatisierung
 
-> **Stand 21.08.2026:** Dieses Bundle ist derzeit nicht erhältlich; die Inhalte werden überarbeitet und erscheinen geprüft im Hub.
+> **Stand 21.08.2026:** Stand 21. August 2026: dieses Bundle wird nicht mehr verkauft; die Inhalte wandern überarbeitet in den Hub (hub.ai-engineering.at) — ohne Termin.
 
 Das n8n AI Workflow Bundle ist eine Sammlung von 14 produktionsreifen n8n-Workflows. Jeder Workflow ist als JSON-Datei exportiert, direkt importierbar in jede n8n-Instanz ab Version 2.x. Kein SaaS, keine Cloud-Abhängigkeit, keine monatlichen Kosten nach dem Kauf.
 

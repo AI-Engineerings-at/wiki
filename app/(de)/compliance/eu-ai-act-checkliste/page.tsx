@@ -25,6 +25,7 @@ export default function EUAIActChecklistePage() {
         </div>
 
         <h2>Zeitplan: Wann was gilt</h2>
+        <div className="table-wrap">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700">
@@ -55,6 +56,7 @@ export default function EUAIActChecklistePage() {
             </tr>
           </tbody>
         </table>
+        </div>
 
         <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mt-4">
           <p className="text-slate-300 text-sm mb-0">
@@ -85,10 +87,11 @@ export default function EUAIActChecklistePage() {
 
         <figure className="my-8">
           <img src="/images/infographics/eu-ai-act-risikoklassen-entscheidungsbaum.png" alt="EU AI Act Risikoklassen Entscheidungsbaum — Verboten, Hoch, Begrenzt, Minimal" className="rounded-xl border border-white/10 w-full" />
-          <figcaption className="text-center text-white/40 text-sm mt-2">Risikoklassen-Entscheidungsbaum: In welche Kategorie faellt dein KI-System?</figcaption>
+          <figcaption className="text-center text-white/40 text-sm mt-2">Risikoklassen-Entscheidungsbaum: In welche Kategorie fällt dein KI-System?</figcaption>
         </figure>
 
         <h3>2. Risikoklassifizierung durchführen</h3>
+        <div className="table-wrap">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700">
@@ -120,6 +123,7 @@ export default function EUAIActChecklistePage() {
             </tr>
           </tbody>
         </table>
+        </div>
 
         <h3>3. Verbote prüfen (Article 5)</h3>
         <p className="text-slate-300">
@@ -173,7 +177,7 @@ export default function EUAIActChecklistePage() {
       </div>
 
       <div className="mt-12 pt-8 border-t border-white/10 text-center text-sm text-slate-600">
-        <p>Weiterfuehrende Artikel:{' '}
+        <p>Weiterführende Artikel:{' '}
           <a href="/compliance/eu-ai-act" className="text-blue-400 hover:text-blue-300">EU AI Act</a>
           {' · '}
           <a href="/compliance/verbotene-ai-praktiken" className="text-blue-400 hover:text-blue-300">Verbotene AI-Praktiken</a>
@@ -181,7 +185,7 @@ export default function EUAIActChecklistePage() {
           <a href="/compliance/ki-kompetenz-art4" className="text-blue-400 hover:text-blue-300">KI-Kompetenz Art. 4</a>
         </p>
         <p className="mt-2 italic text-slate-700">
-          Fuer die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
+          Für die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
         </p>
       </div>
     </div>

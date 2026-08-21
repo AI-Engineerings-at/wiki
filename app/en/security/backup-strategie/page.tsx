@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
 
@@ -28,6 +29,7 @@ export default function BackupStrategiePage() {
         </ul>
 
         <h2 className="text-xl font-semibold text-white mt-8">What to Backup</h2>
+        <div className="table-wrap">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700">
@@ -59,8 +61,10 @@ export default function BackupStrategiePage() {
             </tr>
           </tbody>
         </table>
+        </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Backup Script</h2>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`#!/bin/bash
 DATE=$(date +%Y%m%d_%H%M)
@@ -80,13 +84,16 @@ rclone copy . remote:backups/$DATE/
 # Keep only 7 days locally
 find . -name "*.sql" -mtime +7 -delete`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Cron Schedule</h2>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`# /etc/cron.d/backup
 # Daily at 2am
 0 2 * * * root /opt/scripts/backup.sh`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Recovery Test</h2>
         <ul className="list-disc list-inside text-slate-300 space-y-1">

@@ -159,7 +159,7 @@ export default function DownloadsPage() {
       </section>
 
       <div className="mt-12 pt-8 border-t border-white/10 text-center text-sm text-slate-600">
-        <p>Weiterfuehrende Artikel:{' '}
+        <p>Weiterführende Artikel:{' '}
           <a href="/tools/ai-tools-datenbank" className="text-blue-400 hover:text-blue-300">AI Tools Datenbank</a>
           {' · '}
           <a href="/grundlagen/30-tage-quickstart" className="text-blue-400 hover:text-blue-300">30-Tage Quickstart</a>
@@ -167,7 +167,7 @@ export default function DownloadsPage() {
           <a href="/lernpfad" className="text-blue-400 hover:text-blue-300">Lernpfad</a>
         </p>
         <p className="mt-2 italic text-slate-700">
-          Fuer die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
+          Für die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
         </p>
       </div>
     </div>

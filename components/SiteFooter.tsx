@@ -7,7 +7,7 @@ export function SiteFooter() {
   const pathname = usePathname() || '/'
   const isEn = pathname === '/en' || pathname.startsWith('/en/')
 
-  // Vorher: Spalte "Produkte" mit vier Eintraegen, alle vier auf dieselbe
+  // Vorher: Spalte "Produkte" mit vier Einträgen, alle vier auf dieselbe
   // Produktseite von ai-engineering.at, wo Stripe noch verkauft, obwohl der
   // Verkauf deaktiviert ist (E35). Jetzt die Kette Wiki -> Lernpfad -> Hub
   // (E38). Keine Preise, keine Produktnamen im Wiki.
@@ -16,8 +16,8 @@ export function SiteFooter() {
         title: 'Keep learning',
         items: [
           { label: 'Learning path', href: '/en/learning-path/' },
-          { label: 'Hub', href: 'https://hub.ai-engineering.at/' },
-          { label: 'Blog', href: '/blog/' },
+          { label: 'Hub', href: 'https://hub.ai-engineering.at/en' },
+          { label: 'Blog', href: '/en/blog/' },
         ],
       }
     : {
@@ -106,7 +106,7 @@ export function SiteFooter() {
             <ul className="space-y-2 text-sm text-slate-400">
               <li>
                 <Link href="https://www.ai-engineering.at/impressum" className="hover:text-[#31F1A8]">
-                  Impressum
+                  {isEn ? 'Imprint' : 'Impressum'}
                 </Link>
               </li>
               <li>

@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { alternatesFor } from '../../../../lib/alternates'
@@ -90,6 +91,7 @@ proto --> claude : Antwort
         <h2 className="text-xl font-semibold text-white mt-8">Unsere MCP Server</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -131,10 +133,12 @@ proto --> claude : Antwort
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Installation</h2>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# 1. Python installieren
 pip install mcp
@@ -151,6 +155,7 @@ pip install mcp
   }
 }`}</code>
         </pre>
+        </CodeBlock>
 
         <p className="text-gray-300 mt-3">
           Nach dem Neustart von Claude Desktop siehst du die verfügbaren Tools im Menü.
@@ -163,6 +168,7 @@ pip install mcp
 
         <h2 className="text-xl font-semibold text-white mt-8">Eigener MCP Server mit FastMCP</h2>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# 1. FastMCP installieren
 pip install fastmcp
@@ -206,6 +212,7 @@ def restart_service(service: str) -> str:
 if __name__ == "__main__":
     mcp.run(transport="stdio")`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Beispiel-Queries</h2>
 
@@ -216,6 +223,7 @@ if __name__ == "__main__":
           <li>• <strong>"Wie viel VRAM nutzt Ollama?"</strong></li>
         </ul>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Erwartete Claude-Antworten:
 
@@ -229,6 +237,7 @@ Claude: "Klar, einen Moment..."
 → nutzt restart_service("n8n")
 → "Done. n8n läuft wieder."`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Offizielle Quellen</h2>
 

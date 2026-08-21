@@ -39,6 +39,7 @@ export default function AILiteracyArt4Page() {
         <h2 className="text-xl font-semibold text-white mt-8">Who is affected?</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -70,6 +71,7 @@ export default function AILiteracyArt4Page() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <p className="text-gray-300 mt-4">
@@ -124,6 +126,7 @@ export default function AILiteracyArt4Page() {
         <h2 className="text-xl font-semibold text-white mt-8">Penalties</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -146,6 +149,7 @@ export default function AILiteracyArt4Page() {
               </tr>
             </tbody>
           </table>
+          </div>
           <p className="text-gray-500 text-xs mt-2">
             For SMEs and startups, proportionate caps apply — whichever amount is lower.
           </p>

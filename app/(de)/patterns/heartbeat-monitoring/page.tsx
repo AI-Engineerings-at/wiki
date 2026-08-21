@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
@@ -101,6 +102,7 @@ kuma --> notify : Status-Alerts
           Ein regelmäßiges Signal, das dem System mitteilt: „Ich lebe noch“.
         </p>
 
+        <CodeBlock>
         <pre className="bg-gray-900 p-4 rounded-lg text-sm overflow-x-auto">
 {`// Heartbeat Loop (Pseudocode)
 every 60 seconds:
@@ -115,8 +117,10 @@ every 60 seconds:
   if status != 'healthy':
     alert.oncall('Agent unhealthy', status)`}
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Python Implementation</h2>
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Heartbeat Service
 import asyncio
@@ -162,6 +166,7 @@ class Heartbeat:
 heartbeat = Heartbeat("jim01", interval=60)
 asyncio.create_task(heartbeat.run())`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Metriken erfassen</h2>
 
@@ -183,6 +188,7 @@ asyncio.create_task(heartbeat.run())`}</code>
         </ul>
 
         <h2 className="text-xl font-semibold text-white mt-8">Alerting Regeln</h2>
+        <CodeBlock>
         <pre className="bg-gray-900 p-4 rounded-lg text-sm overflow-x-auto">
 {`# Prometheus Alert Rules
 groups:
@@ -212,6 +218,7 @@ groups:
     annotations:
       summary: "Agent {{ $labels.agent }} stuck for > 5min"`}
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Tools</h2>
         <ul>
@@ -234,6 +241,7 @@ groups:
           Self-hosted Monitoring Tool mit Web-UI, das HTTP-Checks,
           TCP-Checks und Docker-Container überwachen kann:
         </p>
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Uptime Kuma als Docker Container
 docker run -d \\
@@ -254,6 +262,7 @@ docker run -d \\
 # - E-Mail
 # - Telegram Bot`}</code>
         </pre>
+        </CodeBlock>
 
         {/* Quellen */}
         <section className="mt-16 pt-8 border-t border-white/10">

@@ -242,4 +242,4 @@ Vor dem Einsatz muss jeder Skill bestehen:
 
 ## Zum Mitnehmen
 
-Das Claude Code AI OS Template enthält unsere komplette Skill-Library mit 49 Skills, Agent-Definitionen und die Quality Gate Pipeline. Die Inhalte dieses Templates werden überarbeitet und erscheinen geprüft im Hub. [Weiter im Lernpfad](/lernpfad/)
+Das Claude Code AI OS Template enthält unsere komplette Skill-Library mit 49 Skills, Agent-Definitionen und die Quality Gate Pipeline. Stand 21. August 2026: dieses Produkt wird nicht mehr verkauft; die Inhalte dieses Templates wandern überarbeitet in den Hub (hub.ai-engineering.at) — ohne Termin. [Weiter im Lernpfad](/lernpfad/)

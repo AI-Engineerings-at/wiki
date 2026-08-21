@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
 
@@ -39,6 +40,7 @@ export default function WasIstAgentOrchestrationPage() {
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
           <h3 className="font-semibold text-white mb-3">Example: Agent Team</h3>
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -65,6 +67,7 @@ export default function WasIstAgentOrchestrationPage() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Communication</h2>
@@ -75,6 +78,7 @@ export default function WasIstAgentOrchestrationPage() {
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
           <h3 className="font-semibold text-white mb-2">Communication flow</h3>
+          <CodeBlock lang="en">
           <pre className="text-sm text-gray-300 overflow-x-auto">
 {`1. Joe posts task in #echo_log
     ↓
@@ -88,6 +92,7 @@ export default function WasIstAgentOrchestrationPage() {
     ↓
 5. Manager-Agent aggregates and reports completion`}
           </pre>
+          </CodeBlock>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Benefits</h2>

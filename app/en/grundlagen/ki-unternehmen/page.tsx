@@ -64,6 +64,7 @@ export default function KIUnternehmenPage() {
         </ul>
 
         <h2>Cost Comparison (Example)</h2>
+        <div className="table-wrap">
         <table className="w-full text-left">
           <thead>
             <tr className="border-b border-slate-700">
@@ -90,6 +91,7 @@ export default function KIUnternehmenPage() {
             </tr>
           </tbody>
         </table>
+        </div>
 
         <h2>Conclusion</h2>
         <p className="text-slate-300">

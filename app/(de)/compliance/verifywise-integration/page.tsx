@@ -41,6 +41,7 @@ export default function VerifyWisePage() {
         <h2 className="text-xl font-semibold text-white mt-8">Welche Frameworks deckt VerifyWise ab?</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -67,6 +68,7 @@ export default function VerifyWisePage() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Funktionen im Überblick</h2>
@@ -150,6 +152,7 @@ export default function VerifyWisePage() {
         <h2 className="text-xl font-semibold text-white mt-8">Wann passt VerifyWise zu deinem KMU?</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -176,6 +179,7 @@ export default function VerifyWisePage() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Was VerifyWise nicht leistet</h2>
@@ -190,6 +194,7 @@ export default function VerifyWisePage() {
         <h2 className="text-xl font-semibold text-white mt-8">Alternativen im Vergleich</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -221,6 +226,7 @@ export default function VerifyWisePage() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Empfohlener Workflow</h2>

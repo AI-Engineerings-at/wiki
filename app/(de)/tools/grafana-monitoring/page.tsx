@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { CaseStudyBox } from '../../../../components/CaseStudyBox'
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
@@ -185,6 +186,7 @@ alert --> notify : Notification
             Hier ist unser docker-compose.yml für ein komplettes Monitoring-Stack:
           </p>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# docker-compose.yml
 services:
@@ -212,6 +214,7 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana`}</code>
         </pre>
+        </CodeBlock>
 
         <p className="text-gray-300 mt-3">
           Nach dem Starten über <code>docker compose up -d</code> findest du:
@@ -225,6 +228,7 @@ services:
 
         <h2 className="text-xl font-semibold text-white mt-8">Prometheus Konfiguration</h2>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# prometheus.yml
 global:
@@ -243,6 +247,7 @@ scrape_configs:
     static_configs:
       - targets: ['cadvisor:8080']`}</code>
         </pre>
+        </CodeBlock>
 
         <p className="text-gray-300 mt-3">
           Teste mit: <code>curl http://localhost:9090/api/v1/query?query=up</code>
@@ -251,6 +256,7 @@ scrape_configs:
         <h2 className="text-xl font-semibold text-white mt-8">Wichtige Metriken</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -281,6 +287,7 @@ scrape_configs:
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Alerting</h2>
@@ -289,6 +296,7 @@ scrape_configs:
           So richtest du Alerts ein, die dich bei Problemen benachrichtigen:
         </p>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# alerts.yml - Alert-Regeln
 groups:
@@ -316,10 +324,12 @@ groups:
     labels:
       severity: warning`}</code>
         </pre>
+        </CodeBlock>
 
         <p className="text-gray-300 mt-3">
           Prometheus Query-Beispiele zum Testen:
         </p>
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Alle laufenden Container
 up{job="docker"}
@@ -330,6 +340,7 @@ up{job="docker"}
 # CPU Usage
 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Unsere Dashboards</h2>
 
@@ -353,6 +364,7 @@ up{job="docker"}
           Für GPU-Monitoring brauchst du den nvidia-exporter:
         </p>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# docker-compose.yml erweitern
   nvidia-exporter:
@@ -371,10 +383,12 @@ up{job="docker"}
               count: all
               capabilities: [gpu]`}</code>
         </pre>
+        </CodeBlock>
 
         <p className="text-gray-300 mt-3">
           Wichtige GPU-Metriken in Prometheus:
         </p>
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# GPU Temperature
 nvidia_gpu_temperature_celsius
@@ -388,12 +402,13 @@ nvidia_gpu_memory_used_bytes / nvidia_gpu_memory_total_bytes * 100
 # Power Usage
 nvidia_gpu_power_draw_watts`}</code>
         </pre>
+        </CodeBlock>
 
         <Callout type="tip" title="Prometheus Config Reload">
           <p>
-            Nach Aenderungen an prometheus.yml musst du nicht den Container neu
+            Nach Änderungen an prometheus.yml musst du nicht den Container neu
             starten. Ein einfaches curl -X POST http://localhost:9090/-/reload
-            genügt, damit Prometheus die neue Konfiguration laedt.
+            genügt, damit Prometheus die neue Konfiguration lädt.
           </p>
         </Callout>
 
@@ -418,7 +433,7 @@ nvidia_gpu_power_draw_watts`}</code>
       </div>
 
       <div className="mt-12 pt-8 border-t border-white/10 text-center text-sm text-slate-600">
-        <p>Weiterfuehrende Artikel:{' '}
+        <p>Weiterführende Artikel:{' '}
           <a href="/tools/docker-grundlagen" className="text-blue-400 hover:text-blue-300">Docker Grundlagen</a>
           {' · '}
           <a href="/security/self-hosted-sicherheit" className="text-blue-400 hover:text-blue-300">Self-Hosted Sicherheit</a>
@@ -426,7 +441,7 @@ nvidia_gpu_power_draw_watts`}</code>
           <a href="/tools/ai-stack-setup" className="text-blue-400 hover:text-blue-300">AI Stack Setup</a>
         </p>
         <p className="mt-2 italic text-slate-700">
-          Fuer die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
+          Für die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
         </p>
       </div>
     </div>

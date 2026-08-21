@@ -118,6 +118,7 @@ export default function AiOsSetup() {
         <h2 className="text-xl font-semibold text-white mt-8">Schritt 3: Prüfen ob alles funktioniert</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -144,6 +145,7 @@ export default function AiOsSetup() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <p className="text-gray-300 mt-4">
@@ -165,6 +167,7 @@ export default function AiOsSetup() {
         <h2 className="text-xl font-semibold text-white mt-8">Häufige Probleme beim ersten Mal</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -191,6 +194,7 @@ export default function AiOsSetup() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Was du jetzt hast</h2>

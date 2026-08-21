@@ -25,6 +25,7 @@ export default function EUAIActChecklistePage() {
         </div>
 
         <h2>Timeline: What When</h2>
+        <div className="table-wrap">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700">
@@ -51,6 +52,7 @@ export default function EUAIActChecklistePage() {
             </tr>
           </tbody>
         </table>
+        </div>
 
         <h2>7 Steps to Compliance</h2>
 
@@ -63,6 +65,7 @@ export default function EUAIActChecklistePage() {
         </ul>
 
         <h3>2. Conduct Risk Classification</h3>
+        <div className="table-wrap">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700">
@@ -94,6 +97,7 @@ export default function EUAIActChecklistePage() {
             </tr>
           </tbody>
         </table>
+        </div>
 
         <h3>3. Check Prohibitions (Article 5)</h3>
         <p className="text-slate-300">

@@ -101,4 +101,4 @@ Der EU AI Act ist keine Strafe, sondern eine Chance. Unternehmen, die ihre AI-Nu
 
 ## Zum Mitnehmen
 
-Wir haben unsere Compliance-Vorlagen als DSGVO Compliance Bundle zusammengestellt, 6 Templates: Verarbeitungsverzeichnis, Datenschutz-Folgenabschätzung (DSFA), Auftragsverarbeitungsvertrag (AVV), AI-Risikobewertung, Transparenzhinweise und eine EU AI Act Compliance-Checkliste. Die Inhalte dieses Bundles werden überarbeitet und erscheinen geprüft im Hub. [Weiter im Lernpfad](/lernpfad/)
+Wir haben unsere Compliance-Vorlagen als DSGVO Compliance Bundle zusammengestellt, 6 Templates: Verarbeitungsverzeichnis, Datenschutz-Folgenabschätzung (DSFA), Auftragsverarbeitungsvertrag (AVV), AI-Risikobewertung, Transparenzhinweise und eine EU AI Act Compliance-Checkliste. Stand 21. August 2026: dieses Produkt wird nicht mehr verkauft; die Inhalte dieses Bundles wandern überarbeitet in den Hub (hub.ai-engineering.at) — ohne Termin. [Weiter im Lernpfad](/lernpfad/)

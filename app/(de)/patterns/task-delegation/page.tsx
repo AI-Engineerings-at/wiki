@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { alternatesFor } from '../../../../lib/alternates'
@@ -77,6 +78,7 @@ stop
         />
 
         <h2 className="text-xl font-semibold text-white mt-8">Architektur</h2>
+        <CodeBlock>
         <pre className="bg-gray-900 p-4 rounded-lg text-sm overflow-x-auto">
           <code>{`User Request
      |
@@ -92,6 +94,7 @@ stop
      v
   Final Response`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Implementierung</h2>
 
@@ -100,6 +103,7 @@ stop
           Der Orchestrator klassifiziert die Benutzeranfrage und leitet sie
           an den passenden Agenten weiter.
         </p>
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Intent Classification mit Ollama
 from langchain.llms import Ollama
@@ -116,8 +120,10 @@ def classify_intent(user_input: str) -> str:
     """
     return llm(prompt).strip().lower()`}</code>
         </pre>
+        </CodeBlock>
 
         <h3 className="text-lg font-semibold text-white mt-6">2. Routing Matrix</h3>
+        <CodeBlock>
         <pre className="bg-gray-900 p-4 rounded-lg text-sm overflow-x-auto">
           <code>{`const routes = {
   'code-generation': coderAgent,
@@ -133,12 +139,14 @@ function route(task) {
   return routes[intent] || qaAgent
 }`}</code>
         </pre>
+        </CodeBlock>
 
         <h3 className="text-lg font-semibold text-white mt-6">3. Priority Queue</h3>
         <p>
           Für mehrere gleichzeitige Tasks: Prioritäten setzen (1 = highest).
           Deadline-Tracking verhindert, dass Tasks ewig warten.
         </p>
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Priority Queue mit Python
 import heapq
@@ -170,12 +178,14 @@ def dequeue():
 enqueue(Task(1, datetime.now() + timedelta(minutes=5), "coder", {"code": "..."}))
 enqueue(Task(2, datetime.now() + timedelta(minutes=10), "reviewer", {"pr": "..."}))`}</code>
         </pre>
+        </CodeBlock>
 
         <h3 className="text-lg font-semibold text-white mt-6">4. Result Aggregation</h3>
         <p>
           Der Orchestrator sammelt die Ergebnisse aller Sub-Agenten und
           synthetisiert eine finale Antwort.
         </p>
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Result Aggregation
 async def aggregate_results(sub_tasks: list) -> str:
@@ -192,6 +202,7 @@ async def aggregate_results(sub_tasks: list) -> str:
     """
     return llama3.2(synthesis_prompt)`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Wichtige Aspekte</h2>
         <ul className="list-disc list-inside text-gray-300 space-y-2 mt-4">
@@ -206,6 +217,7 @@ async def aggregate_results(sub_tasks: list) -> str:
           Wenn ein Agent fehlschlägt, braucht der Orchestrator einen Plan B.
           Hier ein bewährtes Pattern mit Retry und Graceful Degradation:
         </p>
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Fallback mit Retry und Degradation
 import asyncio
@@ -240,6 +252,7 @@ async def fallback_handler(task: Task) -> str:
     return f"Task '{task.agent}' konnte nicht ausgeführt werden. " \\
            f"Bitte manuell prüfen: {task.payload}"`}</code>
         </pre>
+        </CodeBlock>
 
         <Callout type="warning" title="Endlos-Schleifen vermeiden">
           <p>

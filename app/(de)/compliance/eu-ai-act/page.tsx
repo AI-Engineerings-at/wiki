@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 // PlantUML via Kroki ersetzt Mermaid — Infografik-PNGs sind besser
 import Callout from "../../../../components/Callout"
 import { alternatesFor } from '../../../../lib/alternates'
@@ -139,6 +140,7 @@ export default function EuAiActLeitfaden() {
         <h2 className="text-xl font-semibold text-white mt-8">Was das für typische Business-KI-Nutzung bedeutet</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -170,11 +172,13 @@ export default function EuAiActLeitfaden() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Für wen gilt der AI Act?</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -197,11 +201,13 @@ export default function EuAiActLeitfaden() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Pflichten für High-Risk AI</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -244,11 +250,13 @@ export default function EuAiActLeitfaden() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Timeline: Wann gilt was?</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -287,10 +295,12 @@ export default function EuAiActLeitfaden() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Dreistufiges Sanktionssystem</h2>
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -313,6 +323,7 @@ export default function EuAiActLeitfaden() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
         <p className="text-gray-300 mt-2">
           Für kleine und mittlere Unternehmen werden die Bussgelder verhältnismässig angepasst,
@@ -344,6 +355,7 @@ export default function EuAiActLeitfaden() {
 
         <h2 className="text-xl font-semibold text-white mt-8">Beispiel: AI-System kategorisieren</h2>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Fragebogen zur Risikokategorisierung
 
@@ -379,6 +391,7 @@ Verarbeitet das System biometrische Daten?
 → Beschäftigung → HIGH RISK ❌
 → Dokumentation + menschliche Aufsicht nötig`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Checkliste: Bereitschaft für AI Act</h2>
 

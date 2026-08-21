@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
 
@@ -71,6 +72,7 @@ export default function MemoryManagementPage() {
           The simplest method: A Markdown file in the project root containing all important info.
           Loaded automatically on every run.
         </p>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`# Project Context
 - Stack: Ollama + n8n + PostgreSQL
@@ -81,6 +83,7 @@ export default function MemoryManagementPage() {
 - Docker Compose for Deployment
 - PostgreSQL for data`}</code>
         </pre>
+        </CodeBlock>
 
         <h3 className="text-lg font-semibold text-white mt-6">2. Topic Files</h3>
         <p className="text-slate-300">
@@ -96,6 +99,7 @@ export default function MemoryManagementPage() {
         </p>
 
         <h2 className="text-xl font-semibold text-white mt-8">When to Use What?</h2>
+        <div className="table-wrap">
         <table className="w-full text-left">
           <thead>
             <tr className="border-b border-slate-700">
@@ -126,6 +130,7 @@ export default function MemoryManagementPage() {
             </tr>
           </tbody>
         </table>
+        </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Practice Tip</h2>
         <p className="text-slate-300">

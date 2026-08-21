@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import Callout from "../../../../components/Callout"
 import { alternatesFor } from '../../../../lib/alternates'
 
@@ -45,6 +46,7 @@ export default function MattermostAgent() {
         <h2 className="text-xl font-semibold text-white mt-8">Unser Setup</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -75,10 +77,12 @@ export default function MattermostAgent() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Docker Compose Setup</h2>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# docker-compose.yml
 services:
@@ -95,6 +99,7 @@ services:
       - MM_TEAMSSETTINGS_SITENAME=Echo_log
     restart: unless-stopped`}</code>
         </pre>
+        </CodeBlock>
 
         <p className="text-gray-300 mt-3">
           Nach dem Start: http://localhost:8065 — erster User wird Admin.
@@ -106,6 +111,7 @@ services:
           Jeder Agent hat ein Polling-Skript, das ständig den Channel überwacht:
         </p>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Python: Polling-Loop
 import mattermostdriver
@@ -131,9 +137,11 @@ async def poll_channel():
 # Start polling
 asyncio.run(poll_channel())`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Nachrichten-Format</h2>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Task-Request
 Developer-Agent Bitte deploye die neue Landing Page auf .99
@@ -152,6 +160,7 @@ CEO Ich schaue mir das mal an...
 - Deploying to production...
 ✓ Fertig!`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Webhook-Integration</h2>
 
@@ -159,6 +168,7 @@ CEO Ich schaue mir das mal an...
           Mattermost Webhooks ermöglichen externe Integration:
         </p>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Outgoing Webhook (zu anderen Diensten)
 curl -X POST \
@@ -184,6 +194,7 @@ curl -X POST \
   }' \
   https://mattermost.example.com/hooks/xxx`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Bot erstellen</h2>
 
@@ -205,7 +216,7 @@ curl -X POST \
 
         <Callout type="info" title="Nachrichten-Limit">
           <p>
-            Mattermost hat ein Limit von 4.000 Zeichen pro Nachricht. Bei laengeren
+            Mattermost hat ein Limit von 4.000 Zeichen pro Nachricht. Bei längeren
             Agent-Antworten muss der Text automatisch an Absatz-Grenzen gesplittet
             werden.
           </p>

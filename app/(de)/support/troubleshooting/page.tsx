@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import Callout from "../../../../components/Callout"
 import { alternatesFor } from '../../../../lib/alternates'
 
@@ -69,6 +70,7 @@ export default function Troubleshooting() {
         <h2 className="text-xl font-semibold text-white mt-8">Häufige Probleme Docker</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -99,10 +101,12 @@ export default function Troubleshooting() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Wichtige Debug-Befehle</h2>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Container-Logs
 docker logs -f container_name
@@ -128,9 +132,11 @@ docker exec -it container_name /bin/bash
 # Neustart
 docker restart container_name`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Docker Swarm Debugging</h2>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Service-Status
 docker service ls
@@ -148,6 +154,7 @@ docker node ls
 # Cluster-Status
 docker info`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Log-Analyse</h2>
 
@@ -178,6 +185,7 @@ docker info`}</code>
         <h2 className="text-xl font-semibold text-white mt-8">Ollama Troubleshooting</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -209,8 +217,10 @@ docker info`}</code>
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Ollama Debug-Befehle
 # GPU-Status prüfen
@@ -228,10 +238,12 @@ docker logs ollama --tail 50
 # API Health-Check
 curl http://localhost:11434/api/tags`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">n8n Troubleshooting</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -258,6 +270,7 @@ curl http://localhost:11434/api/tags`}</code>
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <Callout type="warning" title="Docker und OOM-Kills">

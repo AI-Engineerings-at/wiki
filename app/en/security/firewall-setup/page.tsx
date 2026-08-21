@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
 
@@ -21,6 +22,7 @@ export default function FirewallSetupPage() {
         </p>
 
         <h2 className="text-xl font-semibold text-white mt-8">UFW Basics</h2>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`# Install UFW
 sudo apt install ufw
@@ -42,8 +44,10 @@ sudo ufw allow 443/tcp
 # Check status
 sudo ufw status verbose`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Docker + UFW</h2>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`# Edit /etc/docker/daemon.json
 {
@@ -52,8 +56,10 @@ sudo ufw status verbose`}</code>
 
 # Then UFW will manage Docker containers`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Fail2Ban</h2>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`# Install
 sudo apt install fail2ban
@@ -72,8 +78,10 @@ bantime = 1h
 # Restart
 sudo systemctl restart fail2ban`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Network Segmentation</h2>
+        <div className="table-wrap">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700">
@@ -100,6 +108,7 @@ sudo systemctl restart fail2ban`}</code>
             </tr>
           </tbody>
         </table>
+        </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Checklist</h2>
         <ul className="list-disc list-inside text-slate-300 space-y-1">

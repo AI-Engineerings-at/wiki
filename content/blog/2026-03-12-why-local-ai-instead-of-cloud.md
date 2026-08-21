@@ -1,4 +1,6 @@
 ---
+lang: "en"
+pendant: "2026-03-12-warum-lokale-ki-statt-cloud"
 title: "Why You Shouldn't Use ChatGPT at Work — and What to Use Instead"
 date: "2026-03-12"
 description: "GDPR Art. 5, EU AI Act, data transfer to the US: three reasons why self-hosted AI is mandatory for European companies."
@@ -155,7 +157,7 @@ The trade-off: slightly less top-end model quality vs. full data control, no ong
 
 **The compliance arguments are clear. The next step: install Ollama in 5 minutes and run your first local model.**
 
-→ **[Step 2: Terminal Basics for AI Developers](/blog/2026-03-12-terminal-basics-for-ai-developers)**
+→ **[Step 2: Terminal Basics for AI Developers](/en/blog/2026-03-12-terminal-basics-for-ai-developers)**
 
 ---
 

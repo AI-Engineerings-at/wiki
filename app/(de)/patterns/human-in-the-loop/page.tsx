@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from "next"
 import Callout from "../../../../components/Callout"
 import KeyTakeaway from "../../../../components/KeyTakeaway"
@@ -148,6 +149,7 @@ export default function HumanInTheLoopPage() {
           />
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-4">
+            <CodeBlock>
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`Escalation-Logik (Pseudocode):
 
@@ -170,6 +172,7 @@ function shouldEscalate(task, confidence, context):
 
   return { escalate: false }`}</code>
             </pre>
+            </CodeBlock>
           </div>
         </section>
 
@@ -219,6 +222,7 @@ function shouldEscalate(task, confidence, context):
             Was muss geloggt werden?
           </h3>
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-4">
+            <CodeBlock>
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`Audit Trail Entry:
 {
@@ -236,6 +240,7 @@ function shouldEscalate(task, confidence, context):
   "retention_days": 365
 }`}</code>
             </pre>
+            </CodeBlock>
           </div>
 
           <ul className="list-disc list-inside text-white/70 space-y-2 ml-4 mt-4">
@@ -264,6 +269,7 @@ function shouldEscalate(task, confidence, context):
           </p>
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-4">
+            <CodeBlock>
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`n8n Approval Workflow:
 
@@ -296,6 +302,7 @@ function shouldEscalate(task, confidence, context):
 6. Audit Log (bei jedem Ausgang)
    → Entscheidung, Confidence, Approval-Status loggen`}</code>
             </pre>
+            </CodeBlock>
           </div>
         </section>
 

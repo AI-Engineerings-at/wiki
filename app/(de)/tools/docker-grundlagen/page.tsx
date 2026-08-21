@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from "next"
 import Image from "next/image"
 import Callout from "../../../../components/Callout"
@@ -156,6 +157,7 @@ export default function DockerGrundlagenPage() {
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
             <p className="text-white font-medium mb-3">Beispiel: Minimaler AI-Stack</p>
+            <CodeBlock>
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`# docker-compose.yml
 services:
@@ -183,10 +185,12 @@ services:
 volumes:
   ollama-data:`}</code>
             </pre>
+            </CodeBlock>
           </div>
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
             <p className="text-white font-medium mb-3">Starten und Stoppen</p>
+            <CodeBlock>
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`# Stack starten (im Hintergrund)
 docker compose up -d
@@ -203,6 +207,7 @@ docker compose down
 # Stack stoppen UND Volumes löschen (ACHTUNG: Daten weg!)
 docker compose down -v`}</code>
             </pre>
+            </CodeBlock>
           </div>
 
           <Callout type="warning" title="Volumes sind deine Daten">
@@ -291,6 +296,7 @@ docker compose down -v`}</code>
               </span>
               <div>
                 <p className="text-white font-medium">NVIDIA Container Toolkit</p>
+                <CodeBlock>
                 <pre className="bg-black/30 rounded-lg p-3 mt-2 overflow-x-auto">
                   <code className="text-sm text-green-400">{`# Installation (Ubuntu/Debian)
 curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey \\
@@ -299,6 +305,7 @@ sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
 sudo nvidia-ctk runtime configure --runtime=docker
 sudo systemctl restart docker`}</code>
                 </pre>
+                </CodeBlock>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -307,9 +314,11 @@ sudo systemctl restart docker`}</code>
               </span>
               <div>
                 <p className="text-white font-medium">Testen</p>
+                <CodeBlock>
                 <pre className="bg-black/30 rounded-lg p-3 mt-2 overflow-x-auto">
                   <code className="text-sm text-green-400">{`docker run --rm --gpus all nvidia/cuda:12.6.0-base-ubuntu24.04 nvidia-smi`}</code>
                 </pre>
+                </CodeBlock>
               </div>
             </div>
           </div>

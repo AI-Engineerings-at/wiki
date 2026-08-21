@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { CaseStudyBox } from '../../../../components/CaseStudyBox'
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { alternatesFor } from '../../../../lib/alternates'
@@ -92,6 +93,7 @@ rectangle "Router" as rtr {
         <p className="text-gray-300">
           Agent A → Agent B → Agent C. Jeder wartet auf den vorherigen.
         </p>
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`Recherche -> Zusammenfassung -> Übersetzung
 
@@ -100,11 +102,13 @@ research_agent.run("Thema: Container-Orchestrierung")
 → summary_agent.run(ergebnis)
 → translation_agent.run(zusammenfassung, "de")`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">2. Parallel Pattern</h2>
         <p className="text-gray-300">
           Mehrere Agenten arbeiten gleichzeitig an verschiedenen Aufgaben.
         </p>
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Parallel: Gleiche Recherche, verschiedene Quellen
 asyncio.gather(
@@ -114,6 +118,7 @@ asyncio.gather(
 )
 → aggregate(alle_ergebnisse)`}</code>
         </pre>
+        </CodeBlock>
 
         <figure className="my-8">
           <img src="/images/diagrams/patterns-orchestration-hierarchical.png" alt="Hierarchical Orchestration Pattern — Manager delegiert an Worker" className="rounded-xl border border-white/10 w-full" />
@@ -124,6 +129,7 @@ asyncio.gather(
         <p className="text-gray-300">
           Manager-Agent delegiert an Worker-Agenten. Unser Praxismodell.
         </p>
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Manager-Agent delegiert an:
 # - Researcher:Infos sammeln
@@ -139,6 +145,7 @@ if task.requires_code:
 if review_result.approved:
     deployer_agent.execute(coder_result)`}</code>
         </pre>
+        </CodeBlock>
 
         <figure className="my-8">
           <img src="/images/diagrams/patterns-orchestration-router.png" alt="Router Orchestration Pattern — Intent Detection und Routing" className="rounded-xl border border-white/10 w-full" />
@@ -149,6 +156,7 @@ if review_result.approved:
         <p className="text-gray-300">
           Eingabe wird analysiert und an den passenden Agenten weitergeleitet.
         </p>
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Intent Detection
 intent = llm.classify(user_input)
@@ -160,11 +168,13 @@ router.dispatch(intent, user_input)
 # research → researcher_agent
 # qa → qa_agent`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">5. Supervisor Pattern</h2>
         <p className="text-gray-300">
           Ein Supervisor-Agent koordiniert mehrere Sub-Agenten mit eigenem Loop.
         </p>
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Supervisor Loop
 while not task.complete:
@@ -176,6 +186,7 @@ while not task.complete:
     else:
         task.complete = True`}</code>
         </pre>
+        </CodeBlock>
 
         <figure className="my-8">
           <img src="/images/diagrams/tools-dispatch-routing.png" alt="Dispatch Routing" className="rounded-xl border border-white/10 w-full" />

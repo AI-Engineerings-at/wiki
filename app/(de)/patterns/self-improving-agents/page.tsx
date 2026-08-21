@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from "next"
 import Callout from "../../../../components/Callout"
 import KeyTakeaway from "../../../../components/KeyTakeaway"
@@ -158,6 +159,7 @@ export default function SelfImprovingAgentsPage() {
           </p>
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
+            <CodeBlock>
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`| DATE       | CONTEXT      | CORRECTION          | LESSON                           | USED |
 |------------|-------------|---------------------|----------------------------------|------|
@@ -165,6 +167,7 @@ export default function SelfImprovingAgentsPage() {
 | 2026-03-20 | Credentials | stdout ausgegeben   | NIEMALS printen, nur Variable    | 5x   |
 | 2026-03-21 | API Call    | Docs nicht gelesen  | VOR API-Call Docs prüfen        | 1x   |`}</code>
             </pre>
+            </CodeBlock>
           </div>
 
           <p className="text-white/70 leading-relaxed mt-4">
@@ -195,6 +198,7 @@ export default function SelfImprovingAgentsPage() {
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
             <p className="text-white font-medium mb-3">Typische Pre-Action Gates:</p>
+            <CodeBlock>
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`VOR Credential-Zugriff → Wie? (Vault, nicht stdout)
 VOR Browser-Aktion    → Existierende Session? MCP offen?
@@ -202,6 +206,7 @@ VOR Remote-Zugriff    → Lokal verfügbar? Lokale Daten zuerst
 VOR Daten-Nutzung     → Echt? Keine Mock-Daten?
 VOR API-Call          → Docs der API gelesen?`}</code>
             </pre>
+            </CodeBlock>
           </div>
 
           <ComparisonTable
@@ -327,6 +332,7 @@ stop
           </p>
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
+            <CodeBlock>
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`Agent bekommt Task
   │
@@ -349,6 +355,7 @@ stop
               ├── 30 Tage ungenutzt → WARM Demotion
               └── 90 Tage ungenutzt → COLD Demotion`}</code>
             </pre>
+            </CodeBlock>
           </div>
         </section>
 

@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
 
@@ -23,6 +24,7 @@ export default function TaskDelegationPage() {
         </p>
 
         <h2 className="text-xl font-semibold text-white mt-8">Architecture</h2>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`User Request
      |
@@ -38,6 +40,7 @@ export default function TaskDelegationPage() {
      v
   Final Response`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Implementation</h2>
 
@@ -47,6 +50,7 @@ export default function TaskDelegationPage() {
         </p>
 
         <h3 className="text-lg font-semibold text-white mt-6">2. Routing Matrix</h3>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`const routes = {
   'code-generation': coderAgent,
@@ -56,6 +60,7 @@ export default function TaskDelegationPage() {
   'question': qaAgent,
 }`}</code>
         </pre>
+        </CodeBlock>
 
         <h3 className="text-lg font-semibold text-white mt-6">3. Priority Queue</h3>
         <p className="text-slate-300">

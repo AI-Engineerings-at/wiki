@@ -19,8 +19,8 @@ export default function KIUnternehmenPage() {
 
       <div className="prose prose-invert max-w-none">
         <figure className="my-8">
-          <img src="/images/infographics/ki-unternehmen-4-saeulen.png" alt="KI im Unternehmen — Die 4 Saeulen: Datensouveraenitaet, Kosten, Latenz, Anpassung" className="rounded-xl border border-white/10 w-full" />
-          <figcaption className="text-center text-white/40 text-sm mt-2">Die 4 Saeulen lokaler KI im Unternehmen: Datensouveraenitaet, Kosten, Latenz und Anpassung</figcaption>
+          <img src="/images/infographics/ki-unternehmen-4-saeulen.png" alt="KI im Unternehmen — Die 4 Säulen: Datensouveränität, Kosten, Latenz, Anpassung" className="rounded-xl border border-white/10 w-full" />
+          <figcaption className="text-center text-white/40 text-sm mt-2">Die 4 Säulen lokaler KI im Unternehmen: Datensouveränität, Kosten, Latenz und Anpassung</figcaption>
         </figure>
 
         <h2>Der Paradigmenwechsel</h2>
@@ -73,6 +73,7 @@ export default function KIUnternehmenPage() {
         </ul>
 
         <h2>Kostenvergleich (Beispiel)</h2>
+        <div className="table-wrap">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-gray-700">
@@ -99,6 +100,7 @@ export default function KIUnternehmenPage() {
             </tr>
           </tbody>
         </table>
+        </div>
 
         <h2>Fazit</h2>
         <p>

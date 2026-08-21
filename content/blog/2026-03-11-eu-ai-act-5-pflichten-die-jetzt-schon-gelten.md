@@ -62,7 +62,7 @@ Die Bußgelder bei Verstößen gegen die Verbote aus Artikel 5 können bis zu **
 
 Die volle Regulierung kommt im August 2026. Aber wer bis dahin wartet, hat bereits 5 Pflichten verpasst. Wer jetzt anfängt, hat einen Vorsprung.
 
-Unser DSGVO Compliance Bundle enthält Vorlagen für AI-Risikobewertung, Transparenzhinweise und eine EU AI Act Compliance-Checkliste. Die Inhalte dieses Bundles werden überarbeitet und erscheinen geprüft im Hub. [Weiter im Lernpfad](/lernpfad/)
+Unser DSGVO Compliance Bundle enthält Vorlagen für AI-Risikobewertung, Transparenzhinweise und eine EU AI Act Compliance-Checkliste. Stand 21. August 2026: dieses Produkt wird nicht mehr verkauft; die Inhalte dieses Bundles wandern überarbeitet in den Hub (hub.ai-engineering.at) — ohne Termin. [Weiter im Lernpfad](/lernpfad/)
 
 ---
 

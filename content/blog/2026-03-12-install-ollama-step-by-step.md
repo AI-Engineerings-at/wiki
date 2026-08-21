@@ -1,4 +1,6 @@
 ---
+lang: "en"
+pendant: "2026-03-12-ollama-installieren-schritt-fuer-schritt"
 title: "Install Ollama in 5 Minutes — Step by Step (Windows, Mac, Linux)"
 date: "2026-03-12"
 description: "From zero to running local LLM in 5 minutes. Tested on Windows 11, macOS Sonoma and Ubuntu 24.04."

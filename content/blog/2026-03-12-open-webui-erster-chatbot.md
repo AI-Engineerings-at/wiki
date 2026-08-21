@@ -1,4 +1,5 @@
 ---
+pendant: "2026-03-12-open-webui-first-chatbot"
 title: "Dein erster lokaler AI-Chatbot: Open WebUI in 10 Minuten einrichten"
 date: "2026-03-12"
 description: "Ollama läuft, aber du willst ein Browser-Interface. So richtest du Open WebUI ein — das ChatGPT-Interface für deinen lokalen Stack."

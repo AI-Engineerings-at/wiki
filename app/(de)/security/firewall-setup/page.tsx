@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { alternatesFor } from '../../../../lib/alternates'
@@ -91,6 +92,7 @@ priv --> services
         <h2 className="text-xl font-semibold text-white mt-8">Port-Bereiche</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -127,10 +129,12 @@ priv --> services
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Docker Network</h2>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Eigenes Netzwerk erstellen
 docker network create --driver overlay ai-network
@@ -157,9 +161,11 @@ services:
     networks:
       - internal  # Nur Backend`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">UFW Regeln (Ubuntu)</h2>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# UFW aktivieren
 ufw enable
@@ -186,6 +192,7 @@ ufw status verbose
 # Alle Regeln anzeigen
 ufw status numbered`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Traefik als Reverse Proxy</h2>
 
@@ -193,6 +200,7 @@ ufw status numbered`}</code>
           Alle Services hinter Traefik verstecken:
         </p>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# docker-compose.yml für Traefik
 services:
@@ -219,6 +227,7 @@ services:
     networks:
       - internal`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Best Practices</h2>
 
@@ -232,6 +241,7 @@ services:
 
         <h2 className="text-xl font-semibold text-white mt-8">Fail2ban Konfiguration</h2>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# /etc/fail2ban/jail.local
 [DEFAULT]
@@ -257,9 +267,11 @@ sudo fail2ban-client reload
 # Status prüfen
 sudo fail2ban-client status`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Port-Scan regelmäßig</h2>
 
+        <CodeBlock>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# nmap Installation
 sudo apt install nmap
@@ -274,6 +286,7 @@ nmap -sT -p 22,80,443,3000,8080,9090 192.168.1.100
 # https://www.shodan.io/
 # https://www.grc.com/`}</code>
         </pre>
+        </CodeBlock>
 
         <Callout type="warning" title="Docker und UFW">
           <p>

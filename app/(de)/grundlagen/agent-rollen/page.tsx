@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { alternatesFor } from '../../../../lib/alternates'
@@ -143,6 +144,7 @@ export default function AgentRollen() {
         </p>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -179,11 +181,13 @@ export default function AgentRollen() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Unser Team als Referenz</h2>
         
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -220,6 +224,7 @@ export default function AgentRollen() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Verantwortungsketten (RACI)</h2>
@@ -228,6 +233,7 @@ export default function AgentRollen() {
         </p>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -259,6 +265,7 @@ export default function AgentRollen() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Agent-Zusammenarbeit und Handoffs</h2>
@@ -295,6 +302,7 @@ export default function AgentRollen() {
         </p>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <CodeBlock>
           <pre className="text-sm text-gray-300">
 {`1. Worker erkennt Problem → versucht Fix (2 Versuche)
    ↓
@@ -308,6 +316,7 @@ export default function AgentRollen() {
    ↓
 5. CEO entscheidet → weitermachen / verwerfen / extern holen`}
           </pre>
+          </CodeBlock>
         </div>
 
         <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mt-8">
@@ -333,7 +342,7 @@ export default function AgentRollen() {
         </section>
 
         <div className="mt-12 pt-8 border-t border-white/10 text-center text-sm text-slate-600">
-        <p>Weiterfuehrende Artikel:{' '}
+        <p>Weiterführende Artikel:{' '}
           <a href="/grundlagen/was-ist-agent-orchestration" className="text-blue-400 hover:text-blue-300">Was ist Agent Orchestration</a>
           {' · '}
           <a href="/patterns/agent-orchestration-patterns" className="text-blue-400 hover:text-blue-300">Agent Orchestration Patterns</a>
@@ -341,7 +350,7 @@ export default function AgentRollen() {
           <a href="/grundlagen/multi-agent-systeme" className="text-blue-400 hover:text-blue-300">Multi-Agent Systeme</a>
         </p>
         <p className="mt-2 italic text-slate-700">
-          Fuer die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
+          Für die Umsetzung gibt es <a href="https://www.ai-engineering.at" className="underline" target="_blank" rel="noopener noreferrer">Ressourcen</a> auf ai-engineering.at.
         </p>
       </div>
       </div>

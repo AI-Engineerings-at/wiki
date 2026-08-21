@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { alternatesFor } from '../../../../lib/alternates'
 export const metadata = {
   alternates: alternatesFor('/en/tools/model-selection'),
@@ -68,6 +69,7 @@ export default function ModelSelectionPage() {
         </figure>
 
         <h2 className="text-xl font-semibold text-white mt-8">Comparison Table (as of March 2026)</h2>
+        <div className="table-wrap">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-gray-700">
@@ -123,6 +125,7 @@ export default function ModelSelectionPage() {
             </tr>
           </tbody>
         </table>
+        </div>
 
         <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mt-4">
           <p className="text-blue-300 text-sm">
@@ -143,6 +146,7 @@ export default function ModelSelectionPage() {
           Here is what you need to run the models locally:
         </p>
 
+        <CodeBlock lang="en">
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Load and test Ollama models
 ollama pull llama3.2
@@ -156,10 +160,12 @@ ollama run llama3.2 "Hello, who are you?"
 # Hardware check
 ollama run llama3.2 "How much RAM did you use?"`}</code>
         </pre>
+        </CodeBlock>
 
         <p className="text-gray-300 mt-3">
           Typical RAM usage with Ollama:
         </p>
+        <CodeBlock lang="en">
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# VRAM usage (approx., Q4 quantized)
 gemma2:2b           ~2GB VRAM   → 200+ tok/s
@@ -176,6 +182,7 @@ llama3.3:70b       ~40GB VRAM   → DOES NOT FIT on 24GB GPU!
 ollama pull llama3.3:q4_K_M   # 4-bit quantization, ~5GB
 ollama pull qwen3:14b         # 4-bit default, ~10GB`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Decision Guide</h2>
         <ul className="list-disc list-inside text-gray-300 space-y-1">
@@ -189,6 +196,7 @@ ollama pull qwen3:14b         # 4-bit default, ~10GB`}</code>
 
         <h2 className="text-xl font-semibold text-white mt-8">Our Stack</h2>
 
+        <CodeBlock lang="en">
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# We use (as of March 2026):
 # - mistral-small3.2:24b on RTX 3090 (.90) for chat/code (strong in German)
@@ -213,6 +221,7 @@ services:
 OLLAMA_HOST=0.0.0.0:11434
 OLLAMA_MODELS=/root/.ollama/models`}</code>
         </pre>
+        </CodeBlock>
 
         <section className="mt-16 pt-8 border-t border-white/10">
           <h2 className="text-xl font-bold text-white mb-4">Sources</h2>
