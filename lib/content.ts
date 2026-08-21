@@ -85,7 +85,7 @@ export function mdxCategories(lang: 'de' | 'en'): { slug: string; label: string;
     if (cur) cur.count++
     else seen.set(e.category, { slug: e.category, label: e.categoryLabel, count: 1 })
   }
-  return [...seen.values()].sort((a, b) => a.slug.localeCompare(b.slug))
+  return Array.from(seen.values()).sort((a, b) => a.slug.localeCompare(b.slug))
 }
 
 /** Kategorien ohne eigene TSX-Seite (die bekommen die dynamische Kategorie-Seite). */

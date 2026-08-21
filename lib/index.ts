@@ -134,7 +134,7 @@ export function getSidebar(lang: 'de' | 'en'): SidebarCategory[] {
     const slug = lang === 'en' ? (enHref ? enHref.split('/')[2] : c.slug) : c.slug
     if (byCat.has(slug) && !order.includes(slug)) order.push(slug)
   }
-  for (const slug of [...byCat.keys()].sort()) if (!order.includes(slug)) order.push(slug)
+  for (const slug of Array.from(byCat.keys()).sort()) if (!order.includes(slug)) order.push(slug)
 
   return order.map((slug) => {
     const list = byCat.get(slug)!
