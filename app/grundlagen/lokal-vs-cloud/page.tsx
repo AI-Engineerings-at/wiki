@@ -1,8 +1,10 @@
 
 import Callout from "../../../components/Callout"
 import ComparisonTable from "../../../components/ComparisonTable"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata = {
+  alternates: alternatesFor('/grundlagen/lokal-vs-cloud'),
   title: 'Lokal vs Cloud: TCO Vergleich | AI Engineering Wiki',
   description:
     'TCO-Vergleich für AI-Workloads: Cloud API vs lokaler AI-Stack (Ollama, n8n, Monitoring). Kosten, Risiken, DSGVO und Betrieb in der Praxis.',

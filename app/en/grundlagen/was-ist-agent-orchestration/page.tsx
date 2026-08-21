@@ -1,6 +1,8 @@
 import { Metadata } from 'next'
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/en/grundlagen/was-ist-agent-orchestration'),
   title: 'What is Agent Orchestration? | AI Engineering Wiki',
   description: 'Agent Orchestration coordinates multiple specialized AI agents. Roles, communication flow, and why it beats a single LLM.',
 }

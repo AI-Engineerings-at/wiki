@@ -1,15 +1,10 @@
 import type { Metadata } from 'next'
+import { alternatesFor } from '../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/datenschutz'),
   title: 'Datenschutzerklärung | AI Engineering Wiki',
   description: 'Datenschutzerklärung und Informationen zum Umgang mit personenbezogenen Daten auf wiki.ai-engineering.at.',
-  alternates: {
-    canonical: 'https://wiki.ai-engineering.at/datenschutz',
-    languages: {
-      'de-AT': 'https://wiki.ai-engineering.at/datenschutz',
-      'en': 'https://wiki.ai-engineering.at/en/privacy',
-    },
-  },
 }
 
 export default function DatenschutzPage() {

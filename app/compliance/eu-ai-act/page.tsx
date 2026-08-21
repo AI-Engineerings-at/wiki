@@ -1,8 +1,10 @@
 // PlantUML via Kroki ersetzt Mermaid — Infografik-PNGs sind besser
 import Callout from "../../../components/Callout"
+import { alternatesFor } from '../../../lib/alternates'
 // PlantUMLDiagram entfernt — externer Kroki-Fetch crashte die Seite (E-fix 2026-03-27)
 
 export const metadata = {
+  alternates: alternatesFor('/compliance/eu-ai-act'),
   title: 'EU AI Act | AI Engineering Wiki',
   description:
     'EU AI Act seit 1. August 2024 in Kraft. Art. 4 KI-Kompetenz gilt seit 02.02.2025, vollständige Anwendung ab 02.08.2026. Risikoklassen, Pflichten, Strafen.',

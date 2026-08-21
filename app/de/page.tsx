@@ -1,7 +1,9 @@
 import { WikiLink as Link } from '../../components/WikiLink'
 import { categories, getRecentArticles, getPopularArticles } from '../../lib/articles'
+import { alternatesFor } from '../../lib/alternates'
 
 export const metadata = {
+  alternates: alternatesFor('/de'),
   title: 'AI Engineering Wiki — Kostenloses Wissen ueber lokale KI, DSGVO und Automatisierung',
   description:
     'Kostenloses Wissen ueber lokale KI, DSGVO-Compliance und Automatisierung. Fuer DACH-KMUs, die lokale AI-Systeme sauber einfuehren wollen.',

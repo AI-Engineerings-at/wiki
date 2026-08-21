@@ -4,8 +4,10 @@ import Callout from "../../../../components/Callout"
 import KeyTakeaway from "../../../../components/KeyTakeaway"
 import ComparisonTable from "../../../../components/ComparisonTable"
 import { RelatedArticles } from "../../../../components/RelatedArticles"
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/en/tools/ai-stack-setup'),
   title: "AI Stack Setup in 30 Minutes: Ollama + Open WebUI + Docker | AI Engineering Wiki",
   description:
     "Step-by-step: Install Ollama, download an LLM, start Open WebUI. Your own AI stack running locally in 30 minutes.",

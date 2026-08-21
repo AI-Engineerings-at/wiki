@@ -1,7 +1,9 @@
 import { ArticleCard } from '../../components/ArticleCard'
 import { getCategoryBySlug } from '../../lib/articles'
+import { alternatesFor } from '../../lib/alternates'
 
 export const metadata = {
+  alternates: alternatesFor('/compliance'),
   title: 'Compliance | AI Engineering Wiki',
   description:
     'Was du als Unternehmen tun musst wenn du KI einsetzt: DSGVO, EU AI Act, Pflichten und Checklisten — verständlich erklärt.',

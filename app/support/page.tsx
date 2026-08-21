@@ -1,4 +1,6 @@
+import { alternatesFor } from '../../lib/alternates'
 export const metadata = {
+  alternates: alternatesFor('/support'),
   title: 'Support | AI Engineering Wiki',
   description:
     'Troubleshooting und Hilfe für deinen lokalen AI-Stack: Ollama, n8n, Docker, Networking und typische Fehlerbilder.',

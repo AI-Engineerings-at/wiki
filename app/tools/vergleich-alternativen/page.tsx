@@ -1,5 +1,6 @@
 import Callout from "../../../components/Callout"
 import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
+import { alternatesFor } from '../../../lib/alternates'
 
 const entscheidungsbaumDiagram = `@startuml
 skinparam backgroundColor transparent
@@ -29,6 +30,7 @@ governance -down-> governance_quellen
 @enduml`
 
 export const metadata = {
+  alternates: alternatesFor('/tools/vergleich-alternativen'),
   title: 'Vergleichbare Ressourcen \u2014 Wo du sonst noch lernen kannst | AI Engineering Wiki',
   description:
     'Ehrlicher Vergleich: Welche externen Quellen in bestimmten Bereichen besser sind als unsere Wiki. EU-Kommission, WKO, n8n, Hugging Face, NIST, OECD und mehr.',

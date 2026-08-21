@@ -1,8 +1,10 @@
 import { CaseStudyBox } from '../../../components/CaseStudyBox'
 import Callout from "../../../components/Callout"
 import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata = {
+  alternates: alternatesFor('/tools/ollama-tutorial'),
   title: 'Ollama Tutorial | AI Engineering Wiki',
   description:
     'Ollama Tutorial: lokale LLMs installieren, Modelle auswählen, API nutzen und in deinen lokalen, DSGVO-konformen AI-Stack integrieren.',

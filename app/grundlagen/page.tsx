@@ -1,7 +1,9 @@
 import { ArticleCard } from '../../components/ArticleCard'
 import { getCategoryBySlug } from '../../lib/articles'
+import { alternatesFor } from '../../lib/alternates'
 
 export const metadata = {
+  alternates: alternatesFor('/grundlagen'),
   title: 'Grundlagen | AI Engineering Wiki',
   description:
     'Die Basis: Was ist KI, warum lokal statt Cloud, was kostet es wirklich — und wie baust du dein erstes System auf.',

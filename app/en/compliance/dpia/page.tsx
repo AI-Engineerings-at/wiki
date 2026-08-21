@@ -1,4 +1,6 @@
+import { alternatesFor } from '../../../../lib/alternates'
 export const metadata = {
+  alternates: alternatesFor('/en/compliance/dpia'),
   title: 'Data Protection Impact Assessment (DPIA) | AI Engineering Wiki',
   description:
     'DPIA for AI systems: When is a Data Protection Impact Assessment required, how to conduct one, and what to document.',

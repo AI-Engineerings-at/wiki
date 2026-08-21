@@ -1,6 +1,8 @@
 import { Metadata } from 'next'
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/en/grundlagen/30-tage-quickstart'),
   title: '30-Day Local AI-Stack Quickstart | AI Engineering Wiki',
   description: 'Build a local, GDPR-compliant AI stack in 30 days. Day-by-day guide: Docker, Ollama, n8n, monitoring.',
 }

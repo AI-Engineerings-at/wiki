@@ -1,4 +1,6 @@
+import { alternatesFor } from '../../../lib/alternates'
 export const metadata = {
+  alternates: alternatesFor('/en/security'),
   title: 'Security | AI Engineering Wiki',
   description:
     'Security for local AI infrastructure: API key handling, firewall setup, network segmentation and backup strategies.',

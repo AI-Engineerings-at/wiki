@@ -1,6 +1,8 @@
 import { Metadata } from 'next'
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/en/patterns/heartbeat-monitoring'),
   title: 'Heartbeat & Monitoring | AI Engineering Wiki',
   description: 'How to know if agents are running. Health checks, status updates, alerting.',
 }

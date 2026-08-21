@@ -3,8 +3,10 @@ import Callout from "../../../components/Callout"
 import KeyTakeaway from "../../../components/KeyTakeaway"
 import ComparisonTable from "../../../components/ComparisonTable"
 import { RelatedArticles } from "../../../components/RelatedArticles"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/compliance/ai-agent-legal-framework'),
   title: "AI Agent Legal Framework — EU AI Act Compliance | AI Engineering Wiki",
   description:
     "Wie du AI-Agenten gesetzeskonform einsetzt: EU AI Act, DSGVO, Risikobewertung, Compliance-Dokumente und Hash Chain für Manipulationssicherheit.",

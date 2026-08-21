@@ -2,8 +2,10 @@ import { Metadata } from "next"
 import Callout from "../../../components/Callout"
 import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 import { RelatedArticles } from "../../../components/RelatedArticles"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/papers/hierarchical-reasoning'),
   title: "Hierarchical Reasoning Model (2025) — Rekurrente AI ohne Chain-of-Thought | AI Engineering Wiki",
   description:
     "Das Hierarchical Reasoning Model (HRM) löst komplexe Aufgaben wie Sudoku, Labyrinth und ARC mit nur 27M Parametern und 1000 Trainingsbeispielen — ohne Chain-of-Thought.",

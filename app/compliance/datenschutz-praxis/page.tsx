@@ -1,7 +1,9 @@
 import Callout from "../../../components/Callout"
 import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata = {
+  alternates: alternatesFor('/compliance/datenschutz-praxis'),
   title: 'Datenschutz Praxis | AI Engineering Wiki',
   description:
     'DSGVO in der Praxis umsetzen: technische und organisatorische Massnahmen (TOM), Zugriffskontrollen, Logging, Monitoring und Checklisten.',

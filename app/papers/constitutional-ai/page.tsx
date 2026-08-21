@@ -2,8 +2,10 @@ import { Metadata } from "next"
 import Callout from "../../../components/Callout"
 import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 import { RelatedArticles } from "../../../components/RelatedArticles"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/papers/constitutional-ai'),
   title: "Constitutional AI erklärt | AI Engineering Wiki",
   description:
     "Das Constitutional AI Paper von Bai et al. (2022, Anthropic) verständlich erklärt: Wie man AI-Systeme durch Prinzipien statt durch menschliches Feedback aligned.",

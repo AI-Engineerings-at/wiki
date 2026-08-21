@@ -2,8 +2,10 @@ import { Metadata } from "next"
 import Callout from "../../../components/Callout"
 import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 import { RelatedArticles } from "../../../components/RelatedArticles"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/papers/react-paper'),
   title: "ReAct: Reasoning and Acting erklärt | AI Engineering Wiki",
   description:
     "Das ReAct-Paper von Yao et al. (2022) verständlich erklärt: Wie LLMs durch abwechselndes Denken und Handeln zu leistungsfähigen Agenten werden.",

@@ -1,4 +1,6 @@
+import { alternatesFor } from '../../../lib/alternates'
 export const metadata = {
+  alternates: alternatesFor('/en/grundlagen'),
   title: 'Basics | AI Engineering Wiki',
   description:
     'Getting started with Agent Orchestration, Multi-Agent Systems and a GDPR-compliant local AI stack: roles, costs, local vs cloud, quickstart.',

@@ -1,8 +1,10 @@
 import { Metadata } from "next"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { RelatedArticles } from "../../../../components/RelatedArticles"
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/en/papers/attention-is-all-you-need'),
   title: "Attention Is All You Need — Transformer Explained | AI Engineering Wiki",
   description:
     "The Transformer paper by Vaswani et al. (2017) explained: Self-Attention, Multi-Head Attention and why this paper changed the entire AI landscape.",

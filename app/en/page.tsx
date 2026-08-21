@@ -3,8 +3,10 @@ import Image from 'next/image'
 import { categories, getRecentArticlesEn, getPopularArticlesEn } from '../../lib/articles'
 import { alternatePath } from '../../lib/alternates'
 import { SearchBar } from '../../components/SearchBar'
+import { alternatesFor } from '../../lib/alternates'
 
 export const metadata = {
+  alternates: alternatesFor('/en'),
   title: 'AI Engineering Wiki — Free Knowledge on Local AI, GDPR & Automation',
   description:
     'Free knowledge on local AI, GDPR compliance and automation. For SMEs building self-hosted AI systems with proper documentation and audit trails.',

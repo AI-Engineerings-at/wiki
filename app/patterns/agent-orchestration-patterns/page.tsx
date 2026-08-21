@@ -1,7 +1,9 @@
 import { CaseStudyBox } from '../../../components/CaseStudyBox'
 import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata = {
+  alternates: alternatesFor('/patterns/agent-orchestration-patterns'),
   title: 'Agent Orchestration Patterns | AI Engineering Wiki',
   description:
     'Übersicht über bewährte Agent-Orchestration Patterns: sequential, parallel, hierarchical, router und supervisor. Praktisch erklärt.',

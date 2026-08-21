@@ -1,7 +1,9 @@
 import { ArticleCard } from '../../components/ArticleCard'
 import { getCategoryBySlug } from '../../lib/articles'
+import { alternatesFor } from '../../lib/alternates'
 
 export const metadata = {
+  alternates: alternatesFor('/tools'),
   title: 'Tools & Infrastruktur | AI Engineering Wiki',
   description:
     'Die Werkzeuge die du brauchst: KI installieren, automatisieren, überwachen. Schritt-für-Schritt Anleitungen.',

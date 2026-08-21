@@ -1,8 +1,10 @@
 import { WikiLink as Link } from '../../components/WikiLink'
 import Image from 'next/image'
 import { getAllBlogPosts } from '../../lib/blog'
+import { alternatesFor } from '../../lib/alternates'
 
 export const metadata = {
+  alternates: alternatesFor('/blog'),
   title: 'Blog | AI Engineering Wiki',
   description:
     'Praxis-Artikel zu lokalem AI-Stack, Automation, DSGVO-Compliance und Agent Orchestration.',

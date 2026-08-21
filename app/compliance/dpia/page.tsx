@@ -1,7 +1,9 @@
 import Callout from "../../../components/Callout"
 import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata = {
+  alternates: alternatesFor('/compliance/dpia'),
   title: 'Datenschutz-Folgenabschätzung (DPIA) | AI Engineering Wiki',
   description:
     'DPIA für KI-Systeme: Wann ist eine Datenschutz-Folgenabschätzung Pflicht, wie führt man sie durch, und was muss dokumentiert werden.',

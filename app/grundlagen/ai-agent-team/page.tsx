@@ -1,6 +1,8 @@
 import Callout from "../../../components/Callout"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata = {
+  alternates: alternatesFor('/grundlagen/ai-agent-team'),
   title: 'AI Agent Team aufbauen | AI Engineering Wiki',
   description:
     'Wie du ein AI-Agent-Team aufbaust: Agent-Typen, Rollen, Tools-Integration und Guardrails. Praxisnah, lokal und DSGVO-konform gedacht.',

@@ -1,7 +1,9 @@
 import Callout from "../../../components/Callout"
 import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata = {
+  alternates: alternatesFor('/security/api-keys-sicher'),
   title: 'API Keys sicher speichern | AI Engineering Wiki',
   description:
     'Best Practices für Secrets: API-Keys nie committen, Env Vars, Vault/Secrets Manager, Rotation und Audit. Fokus: lokaler AI-Stack.',

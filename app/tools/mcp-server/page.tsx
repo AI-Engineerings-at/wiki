@@ -1,7 +1,9 @@
 import Callout from "../../../components/Callout"
 import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata = {
+  alternates: alternatesFor('/tools/mcp-server'),
   title: 'MCP Server | AI Engineering Wiki',
   description:
     'Model Context Protocol (MCP): Verbinde Claude Desktop mit deiner Infrastruktur. Setup, Beispiel-Server und typische Queries für Homelab/AI-Stack.',

@@ -5,8 +5,10 @@ import KeyTakeaway from "../../../../components/KeyTakeaway"
 import ComparisonTable from "../../../../components/ComparisonTable"
 
 import { RelatedArticles } from "../../../../components/RelatedArticles"
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/en/tools/docker-grundlagen'),
   title: "Docker Basics: Containers, Compose & Swarm | AI Engineering Wiki",
   description:
     "Understand Docker for AI workloads: Containers vs VMs, Docker Compose for local stacks, Docker Swarm for multi-node deployments. Hands-on guide.",

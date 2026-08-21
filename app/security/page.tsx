@@ -1,7 +1,9 @@
 import { ArticleCard } from '../../components/ArticleCard'
 import { getCategoryBySlug } from '../../lib/articles'
+import { alternatesFor } from '../../lib/alternates'
 
 export const metadata = {
+  alternates: alternatesFor('/security'),
   title: 'Security | AI Engineering Wiki',
   description:
     'Security für lokale AI-Infrastruktur: API-Keys, Firewall, Netzwerk-Segmentation und Backup-Strategien (3-2-1).',

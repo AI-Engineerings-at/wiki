@@ -1,15 +1,10 @@
 import type { Metadata } from 'next'
+import { alternatesFor } from '../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/agb'),
   title: 'AGB | AI Engineering Wiki',
   description: 'Allgemeine Geschäftsbedingungen für den Kauf digitaler Produkte bei AI Engineering.',
-  alternates: {
-    canonical: 'https://wiki.ai-engineering.at/agb',
-    languages: {
-      'de-AT': 'https://wiki.ai-engineering.at/agb',
-      'en': 'https://wiki.ai-engineering.at/en/terms',
-    },
-  },
 }
 
 export default function AGBPage() {

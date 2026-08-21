@@ -2,8 +2,10 @@ import { Metadata } from "next"
 import Callout from "../../../components/Callout"
 import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 import { RelatedArticles } from "../../../components/RelatedArticles"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/papers/rag-paper'),
   title: "Retrieval-Augmented Generation (RAG) Paper erklärt | AI Engineering Wiki",
   description:
     "Das RAG-Paper von Lewis et al. (2020) verständlich erklärt: Wie LLMs durch externe Wissensquellen besser und zuverlässiger werden.",

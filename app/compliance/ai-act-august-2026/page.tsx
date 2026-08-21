@@ -1,6 +1,8 @@
 import Callout from "../../../components/Callout"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata = {
+  alternates: alternatesFor('/compliance/ai-act-august-2026'),
   title: 'Was passiert am 02.08.2026? EU AI Act Enforcement-Start | AI Engineering Wiki',
   description:
     'Am 2. August 2026 startet die vollständige Anwendung des EU AI Act inkl. Strafen. Was sich konkret ändert, wer betroffen ist und welche 6 Schritte KMUs jetzt gehen müssen.',

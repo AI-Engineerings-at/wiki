@@ -1,6 +1,8 @@
 import { Metadata } from 'next'
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/en/compliance/dsgvo-grundlagen'),
   title: 'GDPR Basics | AI Engineering Wiki',
   description: 'What does GDPR mean for AI applications? Data protection, consent, retention.',
 }

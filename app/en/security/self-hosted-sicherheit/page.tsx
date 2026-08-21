@@ -5,8 +5,10 @@ import KeyTakeaway from "../../../../components/KeyTakeaway"
 import ComparisonTable from "../../../../components/ComparisonTable"
 
 import { RelatedArticles } from "../../../../components/RelatedArticles"
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/en/security/self-hosted-sicherheit'),
   title: "Self-Hosted Security: The 6-Layer Model | AI Engineering Wiki",
   description:
     "6 security layers for self-hosted AI infrastructure: network, SSH, firewall, containers, application, monitoring. Practical hands-on guide.",

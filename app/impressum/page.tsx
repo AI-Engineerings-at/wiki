@@ -1,15 +1,10 @@
 import type { Metadata } from 'next'
+import { alternatesFor } from '../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/impressum'),
   title: 'Impressum | AI Engineering Wiki',
   description: 'Impressum und rechtliche Angaben gemäß § 5 ECG für AI Engineering.',
-  alternates: {
-    canonical: 'https://wiki.ai-engineering.at/impressum',
-    languages: {
-      'de-AT': 'https://wiki.ai-engineering.at/impressum',
-      'en': 'https://wiki.ai-engineering.at/en/imprint',
-    },
-  },
 }
 
 export default function ImpressumPage() {

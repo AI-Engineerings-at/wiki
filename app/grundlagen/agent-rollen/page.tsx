@@ -1,7 +1,9 @@
 import Callout from "../../../components/Callout"
 import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata = {
+  alternates: alternatesFor('/grundlagen/agent-rollen'),
   title: 'Agent Rollen & Verantwortung | AI Engineering Wiki',
   description:
     'Rollenmodell für Multi-Agent Systeme: Orchestrator, Worker, QA/Review und Infra. Klare Verantwortung, Boundaries und Eskalation in der Praxis.',

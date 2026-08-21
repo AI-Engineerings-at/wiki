@@ -1,6 +1,8 @@
 import { Metadata } from 'next'
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/en/tools/rag-guide'),
   title: 'RAG Guide | AI Engineering Wiki',
   description: 'Retrieval-Augmented Generation with ChromaDB, Qdrant, Neo4j.',
 }

@@ -1,8 +1,10 @@
 import { CaseStudyBox } from '../../../components/CaseStudyBox'
 import Callout from "../../../components/Callout"
 import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata = {
+  alternates: alternatesFor('/tools/docker-vs-swarm'),
   title: 'Docker Compose vs Docker Swarm | AI Engineering Wiki',
   description:
     'Vergleich Docker Compose vs Docker Swarm für AI-Workloads: Setup, Skalierung, Updates, Observability und was 2026 in Production wirklich zählt.',

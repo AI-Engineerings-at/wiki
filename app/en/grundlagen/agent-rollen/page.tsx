@@ -1,4 +1,6 @@
+import { alternatesFor } from '../../../../lib/alternates'
 export const metadata = {
+  alternates: alternatesFor('/en/grundlagen/agent-rollen'),
   title: 'Agent Roles & Responsibilities | AI Engineering Wiki',
   description:
     'Role model for Multi-Agent Systems: orchestrator, workers, QA/review and infra. Clear ownership, boundaries and escalation paths in practice.',

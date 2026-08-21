@@ -1,4 +1,6 @@
+import { alternatesFor } from '../../../lib/alternates'
 export const metadata = {
+  alternates: alternatesFor('/en/tools'),
   title: 'Tools | AI Engineering Wiki',
   description:
     'Tools and infrastructure for your GDPR-compliant, 100% self-hosted AI stack: Docker, Ollama, n8n, Grafana, RAG, Proxmox and MCP.',

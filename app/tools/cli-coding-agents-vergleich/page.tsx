@@ -1,5 +1,6 @@
 import Callout from "../../../components/Callout"
 import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
+import { alternatesFor } from '../../../lib/alternates'
 
 const vergleichDiagram = `@startuml
 skinparam backgroundColor transparent
@@ -58,6 +59,7 @@ end note
 @enduml`
 
 export const metadata = {
+  alternates: alternatesFor('/tools/cli-coding-agents-vergleich'),
   title: 'CLI Coding Agents im Vergleich — Claude Code, Mistral Vibe, Gemini CLI, Codex CLI | AI Engineering Wiki',
   description:
     'Umfassender Vergleich von CLI Coding Agents: Claude Code, Mistral Vibe, Gemini CLI und OpenAI Codex CLI. Features, Preise, DSGVO-Tauglichkeit und Praxis-Tests.',

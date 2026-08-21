@@ -1,4 +1,6 @@
+import { alternatesFor } from '../../../../lib/alternates'
 export const metadata = {
+  alternates: alternatesFor('/en/grundlagen/lokal-vs-cloud'),
   title: 'Local vs Cloud: TCO Comparison | AI Engineering Wiki',
   description:
     'TCO comparison for AI workloads: cloud APIs vs a local AI stack (Ollama, n8n, monitoring). Costs, risks, privacy and operations in practice.',

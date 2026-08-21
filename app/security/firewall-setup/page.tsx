@@ -1,7 +1,9 @@
 import Callout from "../../../components/Callout"
 import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata = {
+  alternates: alternatesFor('/security/firewall-setup'),
   title: 'Firewall Setup | AI Engineering Wiki',
   description:
     'Firewall-Setup für lokale AI-Infrastruktur: UFW, fail2ban, Netzwerk-Segmentation und Ports für Ollama, n8n, Grafana und Team-Chat.',

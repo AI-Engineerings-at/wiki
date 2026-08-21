@@ -1,6 +1,8 @@
 import { Metadata } from 'next'
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/en/security/backup-strategie'),
   title: 'Backup Strategy | AI Engineering Wiki',
   description: '3-2-1 rule, automated backups for Ollama, n8n, PostgreSQL.',
 }

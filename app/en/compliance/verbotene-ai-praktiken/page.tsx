@@ -1,6 +1,8 @@
 import { Metadata } from 'next'
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/en/compliance/verbotene-ai-praktiken'),
   title: 'Prohibited AI Practices under EU AI Act | AI Engineering Wiki',
   description: 'Article 5 prohibits certain AI practices. Social Scoring, Emotion Recognition, Biometric Surveillance - what has been forbidden since Feb 2025.',
 }

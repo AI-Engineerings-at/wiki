@@ -1,8 +1,10 @@
 import { Metadata } from 'next'
 import Callout from "../../../components/Callout"
 import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/patterns/memory-management'),
   title: 'Memory Management Pattern | AI Engineering Wiki',
   description: 'Wie AI-Agenten persistentes Wissen speichern und abrufen — CLAUDE.md, Topic Files, Knowledge Graphs.',
 }

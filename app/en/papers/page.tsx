@@ -1,4 +1,6 @@
+import { alternatesFor } from '../../../lib/alternates'
 export const metadata = {
+  alternates: alternatesFor('/en/papers'),
   title: 'AI Papers | AI Engineering Wiki',
   description:
     'The most important papers on LLMs, RAG, Agents and AI Safety — summarized and explained in plain language.',

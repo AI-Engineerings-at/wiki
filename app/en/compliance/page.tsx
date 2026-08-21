@@ -1,4 +1,6 @@
+import { alternatesFor } from '../../../lib/alternates'
 export const metadata = {
+  alternates: alternatesFor('/en/compliance'),
   title: 'Compliance | AI Engineering Wiki',
   description:
     'GDPR and EU AI Act in practice: basics, transparency requirements, prohibited practices and readiness checklists for AI systems.',

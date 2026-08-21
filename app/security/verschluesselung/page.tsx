@@ -5,8 +5,10 @@ import KeyTakeaway from "../../../components/KeyTakeaway"
 import ComparisonTable from "../../../components/ComparisonTable"
 
 import { RelatedArticles } from "../../../components/RelatedArticles"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/security/verschluesselung'),
   title: "Verschlüsselung: At Rest, In Transit, In Use | AI Engineering Wiki",
   description:
     "Verschlüsselung für Self-Hosted AI: Daten auf der Festplatte, im Netzwerk und während der Verarbeitung schützen. LUKS, TLS, Confidential Computing erklärt.",

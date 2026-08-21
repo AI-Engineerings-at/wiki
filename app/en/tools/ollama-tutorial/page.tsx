@@ -1,4 +1,6 @@
+import { alternatesFor } from '../../../../lib/alternates'
 export const metadata = {
+  alternates: alternatesFor('/en/tools/ollama-tutorial'),
   title: 'Ollama Tutorial | AI Engineering Wiki',
   description:
     'Run local LLMs with Ollama: install, pick models, use the API and integrate into a GDPR-compliant, 100% self-hosted AI stack.',

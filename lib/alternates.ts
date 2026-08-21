@@ -146,3 +146,45 @@ export function switchLanguageHref(pathname: string): string {
 export function hasAlternate(pathname: string): boolean {
   return alternatePath(pathname) !== null
 }
+
+/** Muss zu `metadataBase` in app/layout.tsx passen. */
+const BASE_URL = 'https://wiki.ai-engineering.at'
+
+/** Absolute URL mit abschließendem Schrägstrich — `trailingSlash: true`. */
+function absoluteUrl(pathname: string): string {
+  const p = normalizePath(pathname)
+  return p === '/' ? `${BASE_URL}/` : `${BASE_URL}${p}/`
+}
+
+/**
+ * `alternates`-Block für das `metadata`-Objekt einer Seite: `canonical`
+ * immer, `languages` nur bei echtem Pendant.
+ *
+ * Befund davor (Stufe 1 §6): 5 von 154 Seiten trugen ein `canonical`,
+ * 0 ein `hreflang`. Ein hreflang auf eine Seite, die es nicht gibt, wäre
+ * schlimmer als keines — deshalb kommt `languages` aus der Paartabelle
+ * oben und nicht aus einer Pfadregel.
+ *
+ * `x-default` zeigt auf die deutsche Fassung: das Wiki ist deutschsprachig,
+ * die EN-Seiten sind die Übersetzung.
+ */
+export function alternatesFor(pathname: string): {
+  canonical: string
+  languages?: Record<string, string>
+} {
+  const p = normalizePath(pathname)
+  const canonical = absoluteUrl(p)
+  const other = alternatePath(p)
+  if (!other) return { canonical }
+
+  const dePath = isEnglishPath(p) ? other : p
+  const enPath = isEnglishPath(p) ? p : other
+  return {
+    canonical,
+    languages: {
+      de: absoluteUrl(dePath),
+      en: absoluteUrl(enPath),
+      'x-default': absoluteUrl(dePath),
+    },
+  }
+}

@@ -7,6 +7,7 @@ import {
   getBlogPostBySlug,
   renderMarkdown,
 } from '../../../lib/blog'
+import { alternatesFor } from '../../../lib/alternates'
 
 interface BlogPostPageProps {
   params: { slug: string }
@@ -80,6 +81,9 @@ export function generateMetadata({ params }: BlogPostPageProps): Metadata {
   return {
     title: `${post.title} | AI Engineering Blog`,
     description: post.summary,
+    // Blog gibt es nur auf Deutsch: canonical ja, hreflang nein.
+    // Genau daher kamen die 32 toten /en/blog/*-Pfade im Crawl.
+    alternates: alternatesFor(`/blog/${params.slug}`),
   }
 }
 

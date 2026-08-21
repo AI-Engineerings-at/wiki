@@ -1,8 +1,10 @@
 import { Metadata } from 'next'
 import Callout from "../../../components/Callout"
 import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/grundlagen/30-tage-quickstart'),
   title: '30-Tage Local AI-Stack Quickstart | AI Engineering Wiki',
   description: 'In 30 Tagen zum eigenen AI-Stack. Tag-für-Tag Anleitung: Docker, Ollama, n8n, Monitoring.',
 }

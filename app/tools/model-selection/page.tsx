@@ -1,7 +1,9 @@
 import { Metadata } from 'next'
 import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/tools/model-selection'),
   title: 'Model Selection Guide | AI Engineering Wiki',
   description: 'Wähle das richtige AI-Modell für deinen Anwendungsfall — von Llama bis Mistral.',
 }

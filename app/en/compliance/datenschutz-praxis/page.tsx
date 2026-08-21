@@ -1,6 +1,8 @@
 import { Metadata } from 'next'
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/en/compliance/datenschutz-praxis'),
   title: 'Privacy Practices | AI Engineering Wiki',
   description: 'Practical implementation — TOM, DPA, documentation, data subject rights.',
 }

@@ -4,8 +4,10 @@ import KeyTakeaway from "../../../components/KeyTakeaway"
 import ComparisonTable from "../../../components/ComparisonTable"
 import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 import { RelatedArticles } from "../../../components/RelatedArticles"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/grundlagen/was-ist-ein-llm'),
   title: "Was ist ein LLM? Large Language Models erklärt | AI Engineering Wiki",
   description:
     "Was ist ein Large Language Model (LLM)? Wie funktionieren Transformer, Tokens und Inferenz? Modellgrößen, VRAM-Anforderungen und praktische Tipps.",

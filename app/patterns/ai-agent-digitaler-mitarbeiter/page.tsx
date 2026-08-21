@@ -3,8 +3,10 @@ import Callout from "../../../components/Callout"
 import KeyTakeaway from "../../../components/KeyTakeaway"
 import ComparisonTable from "../../../components/ComparisonTable"
 import { RelatedArticles } from "../../../components/RelatedArticles"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/patterns/ai-agent-digitaler-mitarbeiter'),
   title: "AI Agent als digitaler Mitarbeiter — Patterns & Architektur | AI Engineering Wiki",
   description:
     "Wie du einen AI Agent als digitalen Mitarbeiter aufsetzt: Sicherheitsarchitektur, Skill-System, Credential-Isolation und EU AI Act Kennzeichnung.",

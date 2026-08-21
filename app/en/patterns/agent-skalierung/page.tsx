@@ -1,4 +1,6 @@
+import { alternatesFor } from '../../../../lib/alternates'
 export const metadata = {
+  alternates: alternatesFor('/en/patterns/agent-skalierung'),
   title: 'Scaling Agent Teams | AI Engineering Wiki',
   description:
     'Add new agents, create multi-agent workflows, and scale an agent team: step-by-step guide with practical patterns.',

@@ -2,8 +2,10 @@ import { Metadata } from "next"
 import Callout from "../../../components/Callout"
 import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 import { RelatedArticles } from "../../../components/RelatedArticles"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/papers/lora-paper'),
   title: "LoRA: Low-Rank Adaptation erklärt | AI Engineering Wiki",
   description:
     "Das LoRA-Paper von Hu et al. (2021) verständlich erklärt: Parameter-effizientes Fine-Tuning großer Sprachmodelle ohne alle Gewichte neu zu trainieren.",

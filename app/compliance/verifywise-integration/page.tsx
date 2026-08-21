@@ -1,6 +1,8 @@
 import Callout from "../../../components/Callout"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata = {
+  alternates: alternatesFor('/compliance/verifywise-integration'),
   title: 'VerifyWise — Open-Source-Tool für EU AI Act Compliance | AI Engineering Wiki',
   description:
     'VerifyWise ist ein Open-Source-Tool für AI-Governance, Risk und Compliance — speziell für EU AI Act und ISO 42001. Funktionen, Self-Hosting-Setup und Einordnung für DACH-KMUs.',

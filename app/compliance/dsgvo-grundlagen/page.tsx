@@ -1,8 +1,10 @@
 import { CaseStudyBox } from '../../../components/CaseStudyBox'
 import Callout from "../../../components/Callout"
 import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata = {
+  alternates: alternatesFor('/compliance/dsgvo-grundlagen'),
   title: 'DSGVO Grundlagen | AI Engineering Wiki',
   description:
     'DSGVO-Grundlagen für AI-Systeme: Pflichten, Rechtsgrundlagen, Dokumentation und Praxis-Hinweise. Kein Ersatz für Rechtsberatung.',

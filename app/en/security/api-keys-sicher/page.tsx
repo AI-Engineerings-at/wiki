@@ -1,6 +1,8 @@
 import { Metadata } from 'next'
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/en/security/api-keys-sicher'),
   title: 'API Keys Secure Storage | AI Engineering Wiki',
   description: 'Vault, Environment Variables, Secrets Management for AI Stack.',
 }

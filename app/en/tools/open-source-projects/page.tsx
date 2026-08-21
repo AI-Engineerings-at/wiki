@@ -1,4 +1,6 @@
+import { alternatesFor } from '../../../../lib/alternates'
 export const metadata = {
+  alternates: alternatesFor('/en/tools/open-source-projects'),
   title: 'Open Source Tools & Projects | AI Engineering Wiki',
   description:
     'Curated list of the best open source tools for local AI: LLM runtimes, agent frameworks, RAG, monitoring, automation and security.',

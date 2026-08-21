@@ -4,8 +4,10 @@ import KeyTakeaway from "../../../components/KeyTakeaway"
 import ComparisonTable from "../../../components/ComparisonTable"
 import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
 import { RelatedArticles } from "../../../components/RelatedArticles"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/patterns/evals-guardrails'),
   title: "Evals & Guardrails — LLM-Qualität messen und absichern | AI Engineering Wiki",
   description:
     "LLM Evaluations, Guardrails, Prompt Injection Protection, Hallucination Detection. Tools: promptfoo, Langfuse, RAGAS. Mit n8n Eval-Workflow Beispiel.",

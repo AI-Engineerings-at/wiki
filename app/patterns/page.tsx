@@ -1,7 +1,9 @@
 import { ArticleCard } from '../../components/ArticleCard'
 import { getCategoryBySlug } from '../../lib/articles'
+import { alternatesFor } from '../../lib/alternates'
 
 export const metadata = {
+  alternates: alternatesFor('/patterns'),
   title: 'Patterns | AI Engineering Wiki',
   description:
     'Erprobte Agent-Orchestration Patterns aus der Praxis: Memory Management, Task Delegation, Safety Hooks und Monitoring.',

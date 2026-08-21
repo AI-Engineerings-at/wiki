@@ -1,7 +1,9 @@
 import { ArticleCard } from '../../components/ArticleCard'
 import { getCategoryBySlug } from '../../lib/articles'
+import { alternatesFor } from '../../lib/alternates'
 
 export const metadata = {
+  alternates: alternatesFor('/papers'),
   title: 'AI Papers | AI Engineering Wiki',
   description:
     'Die wichtigsten Papers zu LLMs, RAG, Agents und AI Safety — auf Deutsch zusammengefasst und verständlich erklärt.',

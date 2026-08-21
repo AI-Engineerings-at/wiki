@@ -1,8 +1,10 @@
 import Callout from "../../../components/Callout"
 import ComparisonTable from "../../../components/ComparisonTable"
 import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata = {
+  alternates: alternatesFor('/grundlagen/ai-kosten-vergleich'),
   title: 'AI Kosten Vergleich | AI Engineering Wiki',
   description:
     'Realistischer Kostenvergleich 2026: lokal vs Cloud vs hybrid. Setup, laufende Kosten, GPU/Hardware und typische Business-Workloads.',

@@ -1,8 +1,10 @@
 import { Metadata } from 'next'
 import Callout from "../../../components/Callout"
 import PlantUMLDiagram from "../../../components/PlantUMLDynamic"
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata: Metadata = {
+  alternates: alternatesFor('/patterns/heartbeat-monitoring'),
   title: 'Heartbeat & Monitoring Pattern | AI Engineering Wiki',
   description: 'Wie du weißt, ob Agenten laufen — Health Checks, Status-Updates, Alerting.',
 }
