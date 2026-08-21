@@ -1,8 +1,8 @@
 'use client'
 
-import { WikiLink as Link } from '../components/WikiLink'
+import { WikiLink as Link } from '../../components/WikiLink'
 import { usePathname } from 'next/navigation'
-import { SearchBar } from '../components/SearchBar'
+import { SearchBar } from '../../components/SearchBar'
 
 export default function NotFound() {
   const pathname = usePathname()

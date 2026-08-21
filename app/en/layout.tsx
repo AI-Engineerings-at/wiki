@@ -9,9 +9,9 @@ import type { Metadata } from 'next'
  * erbte dessen Sprachattribut.
  */
 
-import { SiteHeader } from '../components/SiteHeader'
-import { SiteFooter } from '../components/SiteFooter'
-import { ClientLayout } from '../components/ClientLayout'
+import { SiteHeader } from '../../components/SiteHeader'
+import { SiteFooter } from '../../components/SiteFooter'
+import { ClientLayout } from '../../components/ClientLayout'
 import '../globals.css'
 
 const organizationSchema = {
