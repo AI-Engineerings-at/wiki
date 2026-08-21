@@ -1,7 +1,9 @@
 import fs from 'fs'
 import path from 'path'
 import type { MetadataRoute } from 'next'
-import { languagePairs } from '../lib/alternates'
+import { allLanguagePairs } from '../lib/alternates'
+import { getIndex } from '../lib/index'
+import { mdxOnlyCategories } from '../lib/content'
 
 /**
  * Sitemap aus dem Routenbaum, nicht aus einer gepflegten Liste.
@@ -11,9 +13,9 @@ import { languagePairs } from '../lib/alternates'
  * darunter 70 der 74 EN-Routen (Stufe 1 §6). Eine Liste, die von Hand
  * gepflegt wird, driftet gegen den Baum, den sie beschreibt.
  *
- * Diese Datei zaehlt beim Build ab, was es wirklich gibt:
+ * Diese Datei zählt beim Build ab, was es wirklich gibt:
  *   - jede `app/**\/page.tsx` ohne dynamisches Segment
- *   - jeden Blog-Slug aus `content/blog/*.md|mdx` fuer `/blog/[slug]`
+ *   - jeden Blog-Slug aus `content/blog/*.md|mdx` für `/blog/[slug]`
  *
  * `lastmod` kommt aus der Änderungszeit der Quelldatei (`mtime`), nicht
  * aus einem eingetragenen Datum — damit es nicht wieder einfriert.
@@ -21,7 +23,6 @@ import { languagePairs } from '../lib/alternates'
 
 const BASE_URL = 'https://wiki.ai-engineering.at'
 const APP_DIR = path.join(process.cwd(), 'app')
-const BLOG_DIR = path.join(process.cwd(), 'content', 'blog')
 
 type Entry = { route: string; source: string }
 
@@ -42,15 +43,22 @@ function collectPageFiles(dir: string, acc: Entry[] = []): Entry[] {
   return acc
 }
 
-function blogEntries(): Entry[] {
-  if (!fs.existsSync(BLOG_DIR)) return []
-  return fs
-    .readdirSync(BLOG_DIR)
-    .filter((f) => f.endsWith('.md') || f.endsWith('.mdx'))
-    .map((f) => ({
-      route: '/blog/' + f.replace(/\.mdx?$/, ''),
-      source: path.join(BLOG_DIR, f),
-    }))
+/** MDX-Artikel + Blog-Posts aus dem Gesamtindex, Quelle = Datei (mtime). */
+function indexEntries(): Entry[] {
+  return getIndex()
+    .filter((e) => e.source !== 'tsx' && e.file)
+    .map((e) => ({ route: e.href, source: path.join(process.cwd(), e.file) }))
+}
+
+/** Kategorie-Seiten der MDX-Kategorien ohne TSX-Seite (app/(de)/[kategorie], app/en/[kategorie]). */
+function categoryEntries(): Entry[] {
+  const out: Entry[] = []
+  for (const lang of ['de', 'en'] as const) {
+    for (const c of mdxOnlyCategories(lang)) {
+      out.push({ route: (lang === 'en' ? '/en/' : '/') + c.slug, source: path.join(process.cwd(), 'content', lang, c.slug) })
+    }
+  }
+  return out
 }
 
 /** Startseiten und Kategorie-Einstiege bekommen mehr Gewicht als Unterseiten. */
@@ -63,13 +71,13 @@ function priorityFor(route: string): number {
 }
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const entries = [...collectPageFiles(APP_DIR), ...blogEntries()].sort((a, b) =>
+  const entries = [...collectPageFiles(APP_DIR), ...indexEntries(), ...categoryEntries()].sort((a, b) =>
     a.route.localeCompare(b.route)
   )
 
   // Sprachalternativen aus derselben Paartabelle wie Umschalter und hreflang.
-  const deToEn = new Map(languagePairs.map(([de, en]) => [de, en]))
-  const enToDe = new Map(languagePairs.map(([de, en]) => [en, de]))
+  const deToEn = new Map(allLanguagePairs.map(([de, en]) => [de, en]))
+  const enToDe = new Map(allLanguagePairs.map(([de, en]) => [en, de]))
 
   const absolute = (p: string) => `${BASE_URL}${p === '/' ? '' : p}/`
 

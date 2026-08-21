@@ -57,8 +57,18 @@ function collectRoutes() {
   return { routes, dynamic }
 }
 
-/** Blog-Slugs -> konkrete Routen, damit /blog/[slug] nicht alles durchwinkt. */
+/**
+ * Konkrete Routen der dynamischen Segmente — Blog (DE/EN nach Frontmatter
+ * `lang`), MDX-Artikel und MDX-Kategorie-Seiten — aus lib/generated/routes.json
+ * (scripts/build-index.js, laeuft vor diesem Pruefer im Build). Ohne die Datei
+ * faellt der Pruefer auf die Blog-Slugs zurueck und meldet das.
+ */
 function collectBlogRoutes() {
+  const routesFile = path.join(ROOT, 'lib', 'generated', 'routes.json')
+  if (fs.existsSync(routesFile)) {
+    return JSON.parse(fs.readFileSync(routesFile, 'utf-8'))
+  }
+  console.log('HINWEIS: lib/generated/routes.json fehlt — nur Blog-Slugs als dynamische Ziele (node scripts/build-index.js zuerst)')
   const dir = path.join(ROOT, 'content', 'blog')
   if (!fs.existsSync(dir)) return []
   return fs
@@ -181,7 +191,7 @@ function main() {
   console.log('')
   console.log(
     `Ziele: ${targets.size} (${routes.size} statische Routen laut app/**/page.tsx, ` +
-      `${dynamic.length} dynamische, ${blogRoutes.length} Blog-Slugs, ` +
+      `${dynamic.length} dynamische, ${blogRoutes.length} konkrete Ziele dynamischer Segmente (routes.json), ` +
       `${publicFiles.length} Dateien unter public/)`
   )
   console.log(

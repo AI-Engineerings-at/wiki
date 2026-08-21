@@ -9,9 +9,9 @@ interface Props {
 
 export const dynamicParams = false
 
-/** Nur deutsche Posts (Frontmatter lang != en); die englischen liegen unter /en/blog/. */
+/** Nur englische Posts (Frontmatter lang: en) — vorher lagen sie unter /blog/ mit lang="de". */
 export function generateStaticParams() {
-  return getAllBlogPosts('de').map((p) => ({ slug: p.slug }))
+  return getAllBlogPosts('en').map((p) => ({ slug: p.slug }))
 }
 
 export function generateMetadata({ params }: Props): Metadata {
@@ -19,11 +19,10 @@ export function generateMetadata({ params }: Props): Metadata {
   return {
     title: `${post.title} | AI Engineering Blog`,
     description: post.summary,
-    // canonical immer; hreflang nur bei Pendant (Paartabelle aus dem Index)
-    alternates: alternatesFor(`/blog/${params.slug}`),
+    alternates: alternatesFor(`/en/blog/${params.slug}`),
   }
 }
 
 export default function Page({ params }: Props) {
-  return <BlogPostPage slug={params.slug} lang="de" />
+  return <BlogPostPage slug={params.slug} lang="en" />
 }

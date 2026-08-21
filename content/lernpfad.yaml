@@ -1,0 +1,242 @@
+pfad: wiki-einstieg
+titel_de: Lernpfad — vom ersten Satz über Sprachmodelle bis zum eigenen Stack
+titel_en: Learning path — from your first sentence about language models to your own stack
+einheiten_gesamt: 18
+minuten_gesamt: 98
+kopfzeile_de: 17 Artikel · ~96 min
+kopfzeile_en: 17 articles · ~96 min
+abschnitte:
+  - id: grundlagen
+    titel_de: Grundlagen
+    titel_en: Foundations
+  - id: recht
+    titel_de: Recht und Art. 4
+    titel_en: Law and Article 4
+  - id: werkzeuge
+    titel_de: Werkzeuge
+    titel_en: Tools
+  - id: praxis
+    titel_de: Praxis und Agenten
+    titel_en: Practice and agents
+  - id: ueberleitung
+    titel_de: Weiter
+    titel_en: Next
+einheiten:
+  - slug: was-ist-ein-llm
+    abschnitt: grundlagen
+    position: 1
+    route_de: /grundlagen/was-ist-ein-llm
+    route_en: /en/grundlagen/was-ist-ein-llm
+    minuten: 8
+    minuten_quelle: formel
+    woerter: 1043
+    lernziel_de: Du kannst erklären, was ein Sprachmodell tut, und weißt, warum es manchmal falsch antwortet.
+    lernziel_en: You can explain what a language model does and why it sometimes answers wrongly.
+    voraussetzungen: []
+    nachfolger: [ki-unternehmen, eu-ai-act]
+  - slug: ki-unternehmen
+    abschnitt: grundlagen
+    position: 2
+    route_de: /grundlagen/ki-unternehmen
+    route_en: /en/grundlagen/ki-unternehmen
+    minuten: 2
+    minuten_quelle: formel
+    woerter: 235
+    lernziel_de: Du kannst benennen, welchen betrieblichen Zweck KI im eigenen Haus hat — Datenschutz, Kosten, Souveränität.
+    lernziel_en: You can name the operational purpose of AI in your own company — data protection, cost, sovereignty.
+    voraussetzungen: [was-ist-ein-llm]
+    nachfolger: [lokal-vs-cloud]
+  - slug: lokal-vs-cloud
+    abschnitt: grundlagen
+    position: 3
+    route_de: /grundlagen/lokal-vs-cloud
+    route_en: /en/grundlagen/lokal-vs-cloud
+    minuten: 7
+    minuten_quelle: formel
+    woerter: 845
+    lernziel_de: Du kannst die Gesamtkosten von Cloud-API und eigenem Stack gegeneinanderstellen.
+    lernziel_en: You can weigh the total cost of a cloud API against running your own stack.
+    voraussetzungen: [ki-unternehmen]
+    nachfolger: [ai-stack-setup]
+  - slug: eu-ai-act
+    abschnitt: recht
+    position: 4
+    route_de: /compliance/eu-ai-act
+    route_en: /en/compliance/eu-ai-act
+    minuten: 8
+    minuten_quelle: formel
+    woerter: 1022
+    lernziel_de: Du kannst die vier Risikoklassen des EU AI Act unterscheiden und dein eigenes System einordnen.
+    lernziel_en: You can tell the four risk classes of the EU AI Act apart and place your own system.
+    voraussetzungen: [was-ist-ein-llm]
+    nachfolger: [verbotene-ai-praktiken, ki-kompetenz-art4, dsgvo-grundlagen]
+  - slug: verbotene-ai-praktiken
+    abschnitt: recht
+    position: 5
+    route_de: /compliance/verbotene-ai-praktiken
+    route_en: /en/compliance/verbotene-ai-praktiken
+    minuten: 4
+    minuten_quelle: formel
+    woerter: 411
+    lernziel_de: Du erkennst die nach Art. 5 verbotenen Praktiken und prüfst, ob eine davon im eigenen Haus vorkommt.
+    lernziel_en: You recognise the practices banned under Article 5 and check whether any occur in your own company.
+    voraussetzungen: [eu-ai-act]
+    nachfolger: [eu-ai-act-checkliste]
+  - slug: ki-kompetenz-art4
+    abschnitt: recht
+    position: 6
+    route_de: /compliance/ki-kompetenz-art4
+    route_en: /en/compliance/ki-kompetenz-art4
+    minuten: 10
+    minuten_quelle: formel
+    woerter: 1262
+    lernziel_de: Du kannst sagen, wen die KI-Kompetenzpflicht aus Art. 4 trifft und was als Nachweis taugt.
+    lernziel_en: You can say whom the Article 4 AI-literacy duty applies to and what counts as evidence.
+    voraussetzungen: [eu-ai-act]
+    nachfolger: [eu-ai-act-checkliste, human-in-the-loop]
+  - slug: dsgvo-grundlagen
+    abschnitt: recht
+    position: 7
+    route_de: /compliance/dsgvo-grundlagen
+    route_en: /en/compliance/dsgvo-grundlagen
+    minuten: 5
+    minuten_quelle: formel
+    woerter: 601
+    lernziel_de: Du kannst benennen, auf welche Rechtsgrundlage eine KI-Verarbeitung personenbezogener Daten gestützt wird.
+    lernziel_en: You can name the legal basis on which an AI processing of personal data rests.
+    voraussetzungen: [eu-ai-act]
+    nachfolger: [ai-act-august-2026]
+  - slug: ai-act-august-2026
+    abschnitt: recht
+    position: 8
+    route_de: /compliance/ai-act-august-2026
+    route_en: ""
+    en_luecke: kein Pendant in lib/alternates.ts — siehe Lücke L1
+    minuten: 9
+    minuten_quelle: formel
+    woerter: 1106
+    lernziel_de: Du weißt, was seit dem Enforcement-Start am 02.08.2026 tatsächlich durchgesetzt wird und was verschoben wurde.
+    lernziel_en: You know what has actually been enforced since the 02.08.2026 start and what was postponed.
+    voraussetzungen: [eu-ai-act, dsgvo-grundlagen]
+    nachfolger: [eu-ai-act-checkliste]
+  - slug: eu-ai-act-checkliste
+    abschnitt: recht
+    position: 9
+    route_de: /compliance/eu-ai-act-checkliste
+    route_en: /en/compliance/eu-ai-act-checkliste
+    minuten: 3
+    minuten_quelle: formel
+    woerter: 370
+    lernziel_de: Du hast eine abarbeitbare Liste, mit der du den eigenen Stand in sieben Schritten festhältst.
+    lernziel_en: You have a workable list to record where you stand in seven steps.
+    voraussetzungen: [verbotene-ai-praktiken, ki-kompetenz-art4, ai-act-august-2026]
+    nachfolger: [weiter-im-hub]
+  - slug: ai-stack-setup
+    abschnitt: werkzeuge
+    position: 10
+    route_de: /tools/ai-stack-setup
+    route_en: /en/tools/ai-stack-setup
+    minuten: 5
+    minuten_quelle: formel
+    woerter: 601
+    lernziel_de: Du kannst einen lokalen Stack aus Ollama, Open WebUI und Docker aufsetzen.
+    lernziel_en: You can set up a local stack of Ollama, Open WebUI and Docker.
+    voraussetzungen: [lokal-vs-cloud]
+    nachfolger: [ollama-tutorial, api-keys-sicher]
+  - slug: ollama-tutorial
+    abschnitt: werkzeuge
+    position: 11
+    route_de: /tools/ollama-tutorial
+    route_en: /en/tools/ollama-tutorial
+    minuten: 5
+    minuten_quelle: formel
+    woerter: 661
+    lernziel_de: Du kannst Modelle laden, wechseln und über die lokale API ansprechen.
+    lernziel_en: You can pull models, switch between them and call them over the local API.
+    voraussetzungen: [ai-stack-setup]
+    nachfolger: [model-selection]
+  - slug: model-selection
+    abschnitt: werkzeuge
+    position: 12
+    route_de: /tools/model-selection
+    route_en: /en/tools/model-selection
+    minuten: 6
+    minuten_quelle: formel
+    woerter: 729
+    lernziel_de: Du kannst für einen konkreten Anwendungsfall ein Modell begründet auswählen.
+    lernziel_en: You can pick a model for a concrete use case and say why.
+    voraussetzungen: [ollama-tutorial]
+    nachfolger: [rag-guide]
+  - slug: api-keys-sicher
+    abschnitt: werkzeuge
+    position: 13
+    route_de: /security/api-keys-sicher
+    route_en: /en/security/api-keys-sicher
+    minuten: 5
+    minuten_quelle: formel
+    woerter: 536
+    lernziel_de: Du kannst Zugangsdaten so ablegen, dass sie nicht im Repository landen, und weißt, wann du sie wechselst.
+    lernziel_en: You can store credentials so they never reach the repository, and you know when to rotate them.
+    voraussetzungen: [ai-stack-setup]
+    nachfolger: [mcp-server]
+  - slug: mcp-server
+    abschnitt: praxis
+    position: 14
+    route_de: /tools/mcp-server
+    route_en: /en/tools/mcp-server
+    minuten: 3
+    minuten_quelle: formel
+    woerter: 371
+    lernziel_de: Du kannst ein Modell über MCP an eine eigene Datenquelle anschließen.
+    lernziel_en: You can connect a model to your own data source over MCP.
+    voraussetzungen: [api-keys-sicher]
+    nachfolger: [was-ist-agent-orchestration]
+  - slug: rag-guide
+    abschnitt: praxis
+    position: 15
+    route_de: /tools/rag-guide
+    route_en: /en/tools/rag-guide
+    minuten: 6
+    minuten_quelle: formel
+    woerter: 793
+    lernziel_de: Du kannst eigenes Wissen als Embeddings ablegen und abfragen, statt es ins Modell zu schreiben.
+    lernziel_en: You can store and query your own knowledge as embeddings instead of writing it into the model.
+    voraussetzungen: [model-selection]
+    nachfolger: [weiter-im-hub]
+  - slug: was-ist-agent-orchestration
+    abschnitt: praxis
+    position: 16
+    route_de: /grundlagen/was-ist-agent-orchestration
+    route_en: /en/grundlagen/was-ist-agent-orchestration
+    minuten: 3
+    minuten_quelle: formel
+    woerter: 331
+    lernziel_de: Du kannst beschreiben, wie mehrere Agenten eine Aufgabe unter sich aufteilen.
+    lernziel_en: You can describe how several agents divide one task among themselves.
+    voraussetzungen: [mcp-server]
+    nachfolger: [human-in-the-loop]
+  - slug: human-in-the-loop
+    abschnitt: praxis
+    position: 17
+    route_de: /patterns/human-in-the-loop
+    route_en: /en/patterns/human-in-the-loop
+    minuten: 7
+    minuten_quelle: formel
+    woerter: 850
+    lernziel_de: Du kannst festlegen, an welcher Stelle ein Mensch zustimmen muss — das ist Art. 14 in der Praxis.
+    lernziel_en: You can decide where a human has to approve — Article 14 in practice.
+    voraussetzungen: [was-ist-agent-orchestration, ki-kompetenz-art4]
+    nachfolger: [weiter-im-hub]
+  - slug: weiter-im-hub
+    abschnitt: ueberleitung
+    position: 18
+    route_de: https://hub.ai-engineering.at/
+    route_en: https://hub.ai-engineering.at/en
+    extern_geprueft: 2026-08-21 curl 200/200, Negativkontrolle 404
+    minuten: 2
+    minuten_quelle: schaetzung-orientierung
+    woerter: 0
+    lernziel_de: Du findest den Ort, an dem aus dem Gelesenen Arbeit wird, und weißt, was dich dort erwartet.
+    lernziel_en: You find the place where what you have read turns into work, and know what awaits you there.
+    voraussetzungen: [eu-ai-act-checkliste, human-in-the-loop]
+    nachfolger: []

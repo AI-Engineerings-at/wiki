@@ -16,6 +16,10 @@ export interface BlogPost {
   summary: string
   tags: string[]
   author: string
+  /** 'de' (Standard) oder 'en' — Frontmatter `lang`. EN-Posts liegen unter /en/blog/. */
+  lang: 'de' | 'en'
+  /** Slug des Pendants in der anderen Sprache (Frontmatter `pendant`), leer wenn keins. */
+  pendant: string
   content: string
 }
 
@@ -33,9 +37,9 @@ export function getAllBlogSlugs(): string[] {
     .map((f) => f.replace(/\.mdx?$/, ''))
 }
 
-export function getAllBlogPosts(): BlogPost[] {
+export function getAllBlogPosts(lang?: 'de' | 'en'): BlogPost[] {
   const slugs = getAllBlogSlugs()
-  const posts = slugs.map((slug) => getBlogPostBySlug(slug))
+  const posts = slugs.map((slug) => getBlogPostBySlug(slug)).filter((p) => !lang || p.lang === lang)
   return posts.sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   )
@@ -56,11 +60,13 @@ export function getBlogPostBySlug(slug: string): BlogPost {
     summary: data.summary || '',
     tags: data.tags || [],
     author: data.author || '',
+    lang: data.lang === 'en' ? 'en' : 'de',
+    pendant: data.pendant ? String(data.pendant) : '',
     content,
   }
 }
 
-export async function renderMarkdown(markdown: string): Promise<string> {
+export async function renderMarkdown(markdown: string, lang: 'de' | 'en' = 'de'): Promise<string> {
   const result = await unified()
     .use(remarkParse)
     .use(remarkGfm)
@@ -68,5 +74,12 @@ export async function renderMarkdown(markdown: string): Promise<string> {
     .use(rehypeStringify, { allowDangerousHtml: true })
     .process(markdown)
 
-  return String(result)
+  let html = String(result)
+  // W7: Tabellen scrollbar, Code-Blöcke mit Kopier-Knopf (Klick: components/CopyDelegate.tsx)
+  const label = lang === 'en' ? 'Copy' : 'Kopieren'
+  html = html.replace(/<table>/g, '<div class="table-wrap"><table>').replace(/<\/table>/g, '</table></div>')
+  html = html
+    .replace(/<pre>/g, `<div class="code-wrap"><button type="button" class="copy-btn" data-copy="1" aria-label="${label}">${label}</button><pre>`)
+    .replace(/<\/pre>/g, '</pre></div>')
+  return html
 }

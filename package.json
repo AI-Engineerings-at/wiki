@@ -5,9 +5,10 @@
   "description": "Agent Orchestration & Management Wiki — wiki.ai-engineering.at",
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/generate-markdown-for-agents.js && next build",
+    "build": "node scripts/build-index.js && node scripts/generate-markdown-for-agents.js && next build",
+    "build:index": "node scripts/build-index.js",
     "generate:md": "node scripts/generate-markdown-for-agents.js",
-    "check:links": "node scripts/check-internal-links.js",
+    "check:links": "node scripts/build-index.js && node scripts/check-internal-links.js",
     "start": "next start",
     "lint": "next lint",
     "test:e2e": "playwright test",

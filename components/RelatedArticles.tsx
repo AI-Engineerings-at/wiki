@@ -2,19 +2,33 @@
 
 import { WikiLink as Link } from './WikiLink'
 import { usePathname } from 'next/navigation'
-import { getRelatedArticles } from '../lib/articles'
+import { getRelatedArticles, getEnHref } from '../lib/articles'
+import { isEnglishPath, normalizePath, alternatePath } from '../lib/alternates'
+import { TSX_META } from '../lib/generated/index'
 
 export function RelatedArticles() {
-  const pathname = usePathname() || '/'
-  const related = getRelatedArticles(pathname)
+  const pathname = normalizePath(usePathname() || '/')
+  const isEn = isEnglishPath(pathname)
+  // Die Verwandtschafts-Tabelle ist nach DE-Pfaden geschlüsselt; auf EN-Seiten
+  // über den DE-Zwilling nachschlagen und nur Ziele mit EN-Seite zeigen.
+  const deHref = isEn ? alternatePath(pathname) : pathname
+  const related = deHref ? getRelatedArticles(deHref) : []
+  const items = isEn
+    ? related.flatMap((a) => {
+        const en = getEnHref(a.href)
+        if (!en) return []
+        const meta = TSX_META[en]
+        return [{ href: en, title: meta?.title || a.title, description: meta?.description || a.description, categoryLabel: a.categoryLabel }]
+      })
+    : related
 
-  if (related.length === 0) return null
+  if (items.length === 0) return null
 
   return (
     <section className="mt-12 pt-8 border-t border-slate-800">
-      <h2 className="text-lg font-bold text-white mb-4">Verwandte Artikel</h2>
+      <h2 className="text-lg font-bold text-white mb-4">{isEn ? 'Related articles' : 'Verwandte Artikel'}</h2>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {related.map((article) => (
+        {items.map((article) => (
           <Link
             key={article.href}
             href={article.href}

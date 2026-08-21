@@ -1,6 +1,8 @@
 import { WikiLink as Link } from '../../components/WikiLink'
 import Image from 'next/image'
-import { categories, getRecentArticles, getPopularArticles } from '../../lib/articles'
+import { categories, getPopularArticles } from '../../lib/articles'
+import { articleCount, recentArticles as recentFromIndex } from '../../lib/index'
+import { kopfzeile, getLernpfad } from '../../lib/lernpfad'
 import { SearchBar } from '../../components/SearchBar'
 import { alternatesFor } from '../../lib/alternates'
 
@@ -12,7 +14,10 @@ export const metadata = {
 }
 
 export default function Home() {
-  const recentArticles = getRecentArticles(5)
+  // Aus dem Gesamtindex (TSX + MDX), nicht aus der 63er-Registry — W6.
+  const recentArticles = recentFromIndex('de', 5)
+  const nArtikel = articleCount('de')
+  const pfad = getLernpfad()
   const popularArticles = getPopularArticles(5)
 
   return (
@@ -50,7 +55,7 @@ export default function Home() {
           {/* Quick Stats */}
           <div className="flex flex-wrap justify-center gap-6 md:gap-10 mt-10 text-sm">
             <div className="text-center">
-              <div className="text-2xl font-bold text-white">106+</div>
+              <div className="text-2xl font-bold text-white" data-hero-artikel={nArtikel}>{nArtikel}</div>
               <div className="text-slate-400">Artikel</div>
             </div>
             <div className="text-center">
@@ -75,11 +80,11 @@ export default function Home() {
           <div className="flex-1">
             <div className="text-xs font-bold text-[#31F1A8] mb-2">LERNPFAD</div>
             <h2 className="text-2xl font-bold text-white mb-2">
-              In 8 Schritten zum laufenden AI-System
+              In {pfad.einheiten.length} Einheiten vom ersten Satz über Sprachmodelle bis zum eigenen Stack
             </h2>
             <p className="text-slate-400 text-sm">
               Von &quot;Was ist KI?&quot; bis zu einem System das Emails beantwortet,
-              Berichte schreibt und deine Daten schuetzt. Strukturiert, Schritt fuer Schritt.
+              Berichte schreibt und deine Daten schützt. Strukturiert, Schritt für Schritt — {kopfzeile('de')}, am Ende der Hub.
             </p>
           </div>
           <Link
@@ -345,8 +350,8 @@ export default function Home() {
               EU AI Act — Art. 4 KI-Kompetenz gilt seit 02.02.2025
             </h2>
             <p className="text-slate-400 text-sm">
-              Die Pflicht zur KI-Kompetenz ist bereits in Kraft. Enforcement mit Strafen
-              startet ab August 2026. Unsere Compliance-Templates helfen dir bei der Dokumentation.
+              Die Pflicht zur KI-Kompetenz ist in Kraft; seit dem 2. August 2026 wird sie mit
+              Strafen durchgesetzt. Unsere Compliance-Templates helfen dir bei der Dokumentation.
             </p>
           </div>
           <div className="flex flex-col gap-3">

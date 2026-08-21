@@ -1,132 +1,622 @@
 # AI Engineering Wiki
-# Stand: 2026-08-21
+# Generated: 2026-08-21 — from the full index (scripts/build-index.js)
 
-> The leading German-language knowledge base for AI Engineering, Sovereign AI, and EU AI Act Compliance. Free, open, community-driven. Maintained by AI Engineering (Eisenstadt, AT) — die österreichische Werkstatt für Legal-Aligned AI Infrastructure für DACH-KMU.
+> German-language knowledge base for AI Engineering, Sovereign AI and EU AI Act compliance,
+> with an English section. Free and open. Maintained by AI Engineering (Eisenstadt, AT).
 
 ## About
-AI Engineering (ai-engineering.at) helps DACH SMEs deploy local AI systems that are GDPR-compliant, auditable, and production-ready. This wiki contains 100+ articles covering compliance, self-hosted AI infrastructure, tool guides, architecture patterns, and step-by-step tutorials.
+This wiki has 150 hand-written pages (DE + EN), 363 generated articles (March 2026, not editorially reviewed, labelled as such on every page; DE 181 / EN 182) and 29 blog posts. Counted at build time from app/ and content/.
 
-## EU AI Act & Compliance
-- [EU AI Act Guide](/compliance/eu-ai-act): Complete guide to EU AI Act requirements, timelines, and obligations
-- [EU AI Act Checklist](/compliance/eu-ai-act-checkliste): Actionable compliance checklist for businesses
-- [GDPR & AI Basics](/compliance/dsgvo-grundlagen): Data protection fundamentals for AI systems
-- [AI Competence (Art. 4)](/compliance/ki-kompetenz-art4): AI literacy requirements under Article 4
-- [Prohibited AI Practices](/compliance/verbotene-ai-praktiken): What the EU AI Act bans outright
-- [DPIA for AI](/compliance/dpia): Data Protection Impact Assessments for AI systems
-- [Chatbot Transparency](/compliance/chatbot-transparenzpflichten): Disclosure obligations for AI chatbots
-- [AI Agent Legal Framework](/compliance/ai-agent-legal-framework): Legal considerations for autonomous AI agents
-- [GDPR Compliance Check Tutorial](/md/en/tutorials/gdpr-compliance-check.md): Step-by-step GDPR compliance walkthrough
-- [EU AI Act (EN)](/md/en/compliance/eu-ai-act-guide.md): English version of the EU AI Act guide
-- [GDPR (EN)](/md/en/compliance/gdpr.md): English version of GDPR guide
-- [Risk Categories (EN)](/md/en/compliance/risk-categories.md): AI risk classification under EU AI Act
+Full text of the generated articles: https://wiki.ai-engineering.at/llms-full.txt · Machine-readable: /md/index.json · Search index: /search-index.json
 
-## Self-Hosted AI & Infrastructure
-- [Local vs Cloud AI](/grundlagen/lokal-vs-cloud): Why local AI beats cloud for privacy and cost
-- [AI Cost Comparison](/grundlagen/ai-kosten-vergleich): Real cost analysis of local vs cloud AI
-- [AI Stack Setup Tutorial](/md/en/tutorials/ai-stack-setup.md): Complete self-hosted AI stack deployment guide
-- [Docker Compose AI Stack](/md/en/tutorials/docker-compose-ai-stack.md): Docker-based AI infrastructure setup
-- [Proxmox Setup](/tools/proxmox-setup): Virtualization platform for AI workloads
-- [AI Gateway Pattern](/md/en/architecture/ai-gateway-pattern.md): API gateway pattern for AI services
-- [Inference Server](/md/en/architecture/inference-server.md): Running your own inference server
-- [Microservices for AI](/md/en/architecture/microservices-for-ai.md): Microservice patterns for AI systems
+## Deutsch — hand-written pages
+- [AI Engineering Wiki — Kostenloses Wissen über lokale KI, DSGVO und Automatisierung](//): Kostenloses Wissen über lokale KI, DSGVO-Compliance und Automatisierung. Für DACH-KMUs, die lokale AI-Systeme sauber einführen wollen.
+- [AGB](/agb/): Allgemeine Geschäftsbedingungen für den Kauf digitaler Produkte bei AI Engineering.
+- [Blog](/blog/): Praxis-Artikel zu lokalem AI-Stack, Automation, DSGVO-Compliance und Agent Orchestration.
+- [Compliance](/compliance/): Was du als Unternehmen tun musst wenn du KI einsetzt: DSGVO, EU AI Act, Pflichten und Checklisten — verständlich erklärt.
+- [Was passiert am 02.08.2026? EU AI Act Enforcement-Start](/compliance/ai-act-august-2026/): Seit dem 2. August 2026 gelten Marktaufsicht und Strafrahmen des EU AI Act. Was nach dem Digital Omnibus (Juni 2026) konkret gilt, was verschoben wurde und welche 6 Schritte KMUs jetzt gehen müssen.
+- [AI Agent Legal Framework — EU AI Act Compliance](/compliance/ai-agent-legal-framework/): Wie du AI-Agenten gesetzeskonform einsetzt: EU AI Act, DSGVO, Risikobewertung, Compliance-Dokumente und Hash Chain für Manipulationssicherheit.
+- [Chatbot Transparenzpflichten nach EU AI Act](/compliance/chatbot-transparenzpflichten/): Was du bei Chatbots und KI-generierten Inhalten beachten musst. Kennzeichnungspflichten, Offenlegung, Copyright - alles kompakt.
+- [Datenschutz Praxis](/compliance/datenschutz-praxis/): DSGVO in der Praxis umsetzen: technische und organisatorische Massnahmen (TOM), Zugriffskontrollen, Logging, Monitoring und Checklisten.
+- [Datenschutz-Folgenabschätzung (DPIA)](/compliance/dpia/): DPIA für KI-Systeme: Wann ist eine Datenschutz-Folgenabschätzung Pflicht, wie führt man sie durch, und was muss dokumentiert werden.
+- [DSGVO Grundlagen](/compliance/dsgvo-grundlagen/): DSGVO-Grundlagen für AI-Systeme: Pflichten, Rechtsgrundlagen, Dokumentation und Praxis-Hinweise. Kein Ersatz für Rechtsberatung.
+- [EDPS Guidelines — Was der EU-Datenschutzbeauftragte für KI vorgibt](/compliance/edps-guidelines/): Der European Data Protection Supervisor (EDPS) veröffentlicht verbindliche Guidelines für den KI-Einsatz in EU-Institutionen und sie sind De-facto-Maßstab auch für KMUs. Überblick, Praxis-Hinweise und Cross-Ref zu DSGVO und EU AI Act.
+- [EU AI Act](/compliance/eu-ai-act/): EU AI Act seit 1. August 2024 in Kraft. Art. 4 KI-Kompetenz gilt seit 02.02.2025, vollständige Anwendung seit 02.08.2026. Risikoklassen, Pflichten, Strafen.
+- [EU AI Act Compliance Checkliste](/compliance/eu-ai-act-checkliste/): Ihre 7-Schritte Checkliste zur EU AI Act Bereitschaft. Risikoklassen, Transparenzpflichten, Verbote - alles kompakt.
+- [KI-Kompetenz nach Art. 4 EU AI Act](/compliance/ki-kompetenz-art4/): Art. 4 EU AI Act: KI-Kompetenz Pflicht gilt seit 02.02.2025 für alle Unternehmen — auch nach dem Digital Omnibus 2026. Aufsicht durch nationale Marktaufsicht seit 02.08.2026. Praxis-Guide für DACH-KMUs.
+- [Gut vorbereitet](/compliance/self-assessment/): Euer Unternehmen ist auf einem guten Weg. Die wesentlichen Grundlagen für den EU AI Act sind vorhanden. Prüft regelmäßig, ob alle Maßnahmen aktuell bleiben.
+- [Verbotene AI-Praktiken nach EU AI Act](/compliance/verbotene-ai-praktiken/): Article 5 verbietet bestimmte KI-Praktiken. Social Scoring, Emotion Recognition, Biometrische Überwachung - was seit Feb 2025 verboten ist.
+- [VerifyWise — Open-Source-Tool für EU AI Act Compliance](/compliance/verifywise-integration/): VerifyWise ist ein Open-Source-Tool für AI-Governance, Risk und Compliance — speziell für EU AI Act und ISO 42001. Funktionen, Self-Hosting-Setup und Einordnung für DACH-KMUs.
+- [Datenschutzerklärung](/datenschutz/): Datenschutzerklärung und Informationen zum Umgang mit personenbezogenen Daten auf wiki.ai-engineering.at.
+- [AI Engineering Wiki — Kostenloses Wissen über lokale KI, DSGVO und Automatisierung](/de/): Kostenloses Wissen über lokale KI, DSGVO-Compliance und Automatisierung. Für DACH-KMUs, die lokale AI-Systeme sauber einführen wollen.
+- [Praxis-Downloads](/downloads/): Kostenlose Vorlagen für KI-Compliance, Dokumentation und Betrieb: Templates, Checklisten und Leitfäden.
+- [Grundlagen](/grundlagen/): Die Basis: Was ist KI, warum lokal statt Cloud, was kostet es wirklich — und wie baust du dein erstes System auf.
+- [30-Tage Local AI-Stack Quickstart](/grundlagen/30-tage-quickstart/): In 30 Tagen zum eigenen AI-Stack. Tag-für-Tag Anleitung: Docker, Ollama, n8n, Monitoring.
+- [Agent Rollen & Verantwortung](/grundlagen/agent-rollen/): Rollenmodell für Multi-Agent Systeme: Orchestrator, Worker, QA/Review und Infra. Klare Verantwortung, Boundaries und Eskalation in der Praxis.
+- [AI Agent Team aufbauen](/grundlagen/ai-agent-team/): Wie du ein AI-Agent-Team aufbaust: Agent-Typen, Rollen, Tools-Integration und Guardrails. Praxisnah, lokal und DSGVO-konform gedacht.
+- [AI Kosten Vergleich](/grundlagen/ai-kosten-vergleich/): Realistischer Kostenvergleich 2026: lokal vs Cloud vs hybrid. Setup, laufende Kosten, GPU/Hardware und typische Business-Workloads.
+- [AI im Unternehmen](/grundlagen/ki-unternehmen/): Warum Unternehmen lokale AI einsetzen: Datenschutz (DSGVO), Kostenkontrolle und technische Souveränität.
+- [Lokal vs Cloud: TCO Vergleich](/grundlagen/lokal-vs-cloud/): TCO-Vergleich für AI-Workloads: Cloud API vs lokaler AI-Stack (Ollama, n8n, Monitoring). Kosten, Risiken, DSGVO und Betrieb in der Praxis.
+- [Multi-Agent Systeme erklärt](/grundlagen/multi-agent-systeme/): Was ist ein Multi-Agent System (MAS)? Vorteile gegenüber einem einzelnen LLM, Rollen, Kommunikation und typische Architektur-Patterns aus der Praxis.
+- [Was ist Agent Orchestration?](/grundlagen/was-ist-agent-orchestration/): Agent Orchestration koordiniert mehrere spezialisierte AI-Agenten. Grundlagen, Rollen, Kommunikationsfluss und Vorteile von Multi-Agent Systemen.
+- [Was ist ein LLM? Large Language Models erklärt](/grundlagen/was-ist-ein-llm/): Was ist ein Large Language Model (LLM)? Wie funktionieren Transformer, Tokens und Inferenz? Modellgrößen, VRAM-Anforderungen und praktische Tipps.
+- [Impressum](/impressum/): Impressum und rechtliche Angaben gemäß § 5 ECG für AI Engineering.
+- [Lernpfad](/lernpfad/)
+- [KI in Österreich](/oesterreich/): Behörden, Förderungen, Community und Rechtslage: Alle relevanten österreichischen KI-Ressourcen auf einen Blick.
+- [AI Papers](/papers/): Die wichtigsten Papers zu LLMs, RAG, Agents und AI Safety — auf Deutsch zusammengefasst und verständlich erklärt.
+- [Attention Is All You Need — Transformer erklärt](/papers/attention-is-all-you-need/): Das Transformer-Paper von Vaswani et al. (2017) verständlich erklärt: Self-Attention, Multi-Head Attention und warum dieses Paper die gesamte AI-Landschaft verändert hat.
+- [Constitutional AI erklärt](/papers/constitutional-ai/): Das Constitutional AI Paper von Bai et al. (2022, Anthropic) verständlich erklärt: Wie man AI-Systeme durch Prinzipien statt durch menschliches Feedback aligned.
+- [Hierarchical Reasoning Model (2025) — Rekurrente AI ohne Chain-of-Thought](/papers/hierarchical-reasoning/): Das Hierarchical Reasoning Model (HRM) löst komplexe Aufgaben wie Sudoku, Labyrinth und ARC mit nur 27M Parametern und 1000 Trainingsbeispielen — ohne Chain-of-Thought.
+- [LoRA: Low-Rank Adaptation erklärt](/papers/lora-paper/): Das LoRA-Paper von Hu et al. (2021) verständlich erklärt: Parameter-effizientes Fine-Tuning großer Sprachmodelle ohne alle Gewichte neu zu trainieren.
+- [Retrieval-Augmented Generation (RAG) Paper erklärt](/papers/rag-paper/): Das RAG-Paper von Lewis et al. (2020) verständlich erklärt: Wie LLMs durch externe Wissensquellen besser und zuverlässiger werden.
+- [ReAct: Reasoning and Acting erklärt](/papers/react-paper/): Das ReAct-Paper von Yao et al. (2022) verständlich erklärt: Wie LLMs durch abwechselndes Denken und Handeln zu leistungsfähigen Agenten werden.
+- [Patterns](/patterns/): Erprobte Agent-Orchestration Patterns aus der Praxis: Memory Management, Task Delegation, Safety Hooks und Monitoring.
+- [Agent Orchestration Patterns](/patterns/agent-orchestration-patterns/): Übersicht über bewährte Agent-Orchestration Patterns: sequential, parallel, hierarchical, router und supervisor. Praktisch erklärt.
+- [Agent Team skalieren](/patterns/agent-skalierung/): Neue Agenten hinzufügen, Multi-Agent Workflows erstellen und ein Agent-Team skalieren: Schritt-für-Schritt-Anleitung mit Praxis-Patterns.
+- [AI Agent als digitaler Mitarbeiter — Patterns & Architektur](/patterns/ai-agent-digitaler-mitarbeiter/): Wie du einen AI Agent als digitalen Mitarbeiter aufsetzt: Sicherheitsarchitektur, Skill-System, Credential-Isolation und EU AI Act Kennzeichnung.
+- [Evals & Guardrails — LLM-Qualität messen und absichern](/patterns/evals-guardrails/): LLM Evaluations, Guardrails, Prompt Injection Protection, Hallucination Detection. Tools: promptfoo, Langfuse, RAGAS. Mit n8n Eval-Workflow Beispiel.
+- [Heartbeat & Monitoring Pattern](/patterns/heartbeat-monitoring/): Wie du weißt, ob Agenten laufen — Health Checks, Status-Updates, Alerting.
+- [Human-in-the-Loop — Mensch-KI Zusammenarbeit](/patterns/human-in-the-loop/): Approval Workflows, Escalation Patterns, Confidence Thresholds, Audit Trail. EU AI Act Art. 14 Human Oversight. Mit n8n Approval Workflow Beispiel.
+- [Memory Management Pattern](/patterns/memory-management/): Wie AI-Agenten persistentes Wissen speichern und abrufen — CLAUDE.md, Topic Files, Knowledge Graphs.
+- [Safety Hooks Pattern](/patterns/safety-hooks/): Guardrails, Output-Validierung und Memory-Capture als automatische Sicherheitsschicht.
+- [Self-Improving Agents — NemoClaw Pattern](/patterns/self-improving-agents/): Wie AI-Agenten aus Fehlern lernen: 3-Tier Memory, corrections.md, Pre-Action Gates, Self-Eskalation und Two-Tier Heartbeat.
+- [Task Delegation Pattern](/patterns/task-delegation/): Orchestrator verteilt Tasks an spezialisierte Agenten — Routing, Prioritäten, Deadlines.
+- [Security](/security/): Security für lokale AI-Infrastruktur: API-Keys, Firewall, Netzwerk-Segmentation und Backup-Strategien (3-2-1).
+- [API Keys sicher speichern](/security/api-keys-sicher/): Best Practices für Secrets: API-Keys nie committen, Env Vars, Vault/Secrets Manager, Rotation und Audit. Fokus: lokaler AI-Stack.
+- [Backup Strategie](/security/backup-strategie/): Backup-Strategie für deinen lokalen AI-Stack: 3-2-1 Regel, Restore-Tests, n8n/Ollama/Postgres sichern und Automatisierung in der Praxis.
+- [Firewall Setup](/security/firewall-setup/): Firewall-Setup für lokale AI-Infrastruktur: UFW, fail2ban, Netzwerk-Segmentation und Ports für Ollama, n8n, Grafana und Team-Chat.
+- [Self-Hosted Sicherheit: Das 6-Layer Modell](/security/self-hosted-sicherheit/): 6 Sicherheitsebenen für selbst gehostete AI-Infrastruktur: Netzwerk, SSH, Firewall, Container, Anwendung, Monitoring. Praxisnahe Anleitung.
+- [Verschlüsselung: At Rest, In Transit, In Use](/security/verschluesselung/): Verschlüsselung für Self-Hosted AI: Daten auf der Festplatte, im Netzwerk und während der Verarbeitung schützen. LUKS, TLS, Confidential Computing erklärt.
+- [Support](/support/): Troubleshooting und Hilfe für deinen lokalen AI-Stack: Ollama, n8n, Docker, Networking und typische Fehlerbilder.
+- [Troubleshooting](/support/troubleshooting/): Systematisches Troubleshooting für deinen lokalen AI-Stack: Logs, Netzwerk, Container, Ollama, n8n und typische Fehlerbilder in 5 Schritten.
+- [Tools & Infrastruktur](/tools/): Die Werkzeuge die du brauchst: KI installieren, automatisieren, überwachen. Schritt-für-Schritt Anleitungen.
+- [AI OS Setup Guide](/tools/ai-os-setup/): Claude Code als AI-Betriebssystem einrichten: Ordnerstruktur, Business-Setup-Wizard, Context-Dateien und erste Befehle in 15 Minuten.
+- [AI Stack Setup in 30 Minuten: Ollama + Open WebUI + Docker](/tools/ai-stack-setup/): Schritt-für-Schritt: Ollama installieren, LLM herunterladen, Open WebUI starten. In 30 Minuten läuft dein eigener AI-Stack lokal.
+- [LLM Runtimes](/tools/ai-tools-datenbank/): Lokale LLM-Ausführung und Inference-Engines für Self-Hosted AI.
+- [CLI Coding Agents im Vergleich — Claude Code, Mistral Vibe, Gemini CLI, Codex CLI](/tools/cli-coding-agents-vergleich/): Umfassender Vergleich von CLI Coding Agents: Claude Code, Mistral Vibe, Gemini CLI und OpenAI Codex CLI. Features, Preise, DSGVO-Tauglichkeit und Praxis-Tests.
+- [Docker Grundlagen: Container, Compose & Swarm](/tools/docker-grundlagen/): Docker für AI-Workloads verstehen: Container vs VMs, Docker Compose für lokale Stacks, Docker Swarm für Multi-Node Deployments. Praxisnah erklärt.
+- [Docker Compose vs Docker Swarm](/tools/docker-vs-swarm/): Vergleich Docker Compose vs Docker Swarm für AI-Workloads: Setup, Skalierung, Updates, Observability und was 2026 in Production wirklich zählt.
+- [Grafana Monitoring](/tools/grafana-monitoring/): Monitoring mit Prometheus + Grafana: Dashboards, Metriken, Alerting und Best Practices für Homelab und lokale AI-Infrastruktur.
+- [Mattermost Agent Kommunikation](/tools/mattermost-agent/): Mattermost als Kommunikationsbus für Multi-Agent Systeme: Bot-Setup, Webhooks, Polling, Nachrichtenformat und Audit-Trail in der Praxis.
+- [MCP Server](/tools/mcp-server/): Model Context Protocol (MCP): Verbinde Claude Desktop mit deiner Infrastruktur. Setup, Beispiel-Server und typische Queries für Homelab/AI-Stack.
+- [Model Selection Guide](/tools/model-selection/): Wähle das richtige AI-Modell für deinen Anwendungsfall — von Llama bis Mistral.
+- [n8n für Anfänger](/tools/n8n-fuer-anfaenger/): n8n Workflow-Automatisierung im lokalen AI-Stack: Installation, Nodes, Beispiele und Integration mit Ollama, Slack/Team-Chat und Stripe.
+- [n8n AI Workflow Bundle v3](/tools/n8n-workflow-bundle/): 14 produktionsreife n8n-Workflows mit Error Handling, Dual-LLM-Fallback und DSGVO-Compliance. Architektur, Kategorien und Best Practices.
+- [Ollama Tutorial](/tools/ollama-tutorial/): Ollama Tutorial: lokale LLMs installieren, Modelle auswählen, API nutzen und in deinen lokalen, DSGVO-konformen AI-Stack integrieren.
+- [Open Source Tools & Projekte](/tools/open-source-projekte/): Kuratierte Liste empfehlenswerter Open-Source-Tools für lokale AI: LLM Runtimes, Agent Frameworks, RAG, Monitoring, Automation und Security.
+- [Proxmox Setup](/tools/proxmox-setup/): Proxmox VE im Homelab: Installation, VMs/LXC, GPU-Passthrough für Ollama, Backups und CLI-Befehle. Basis für deinen lokalen AI-Stack.
+- [RAG Guide](/tools/rag-guide/): RAG (Retrieval Augmented Generation) in der Praxis: Embeddings, Vector DBs (ChromaDB/Qdrant), Hybrid Search und wie du dein eigenes Wissen ins LLM bringst.
+- [Vergleichbare Ressourcen \u2014 Wo du sonst noch lernen kannst](/tools/vergleich-alternativen/): Ehrlicher Vergleich: Welche externen Quellen in bestimmten Bereichen besser sind als unsere Wiki. EU-Kommission, WKO, n8n, Hugging Face, NIST, OECD und mehr.
 
-## AI Tools & Guides
-- [Ollama Tutorial](/tools/ollama-tutorial): Run LLMs locally with Ollama
-- [n8n for Beginners](/tools/n8n-fuer-anfaenger): AI workflow automation with n8n
-- [Model Selection Guide](/tools/model-selection): How to choose the right AI model
-- [RAG Guide](/tools/rag-guide): Retrieval-Augmented Generation explained
-- [MCP Servers](/tools/mcp-server): Model Context Protocol server setup
-- [Grafana Monitoring](/tools/grafana-monitoring): Monitor your AI infrastructure
-- [Docker vs Swarm](/tools/docker-vs-swarm): Container orchestration comparison
-- [Open WebUI Setup](/md/en/tutorials/open-webui-setup.md): Deploy your own ChatGPT-like interface
-- [Claude Code CLI](/md/en/tools/claude-code-cli.md): Using Claude Code as a development tool
-- [Claude Code Hooks](/md/en/tools/claude-code-hooks.md): Automation hooks for Claude Code
-- [GDPR Traffic Light](/md/en/tools/gdpr-traffic-light.md): Quick GDPR assessment tool for AI tools
+## Deutsch — AI-Tools (generated, 20)
+- [AI Chat Assistenten 2026 — ChatGPT vs Claude vs Gemini](/ai-tools/ai-chat-assistenten/): ChatGPT vs Claude vs Gemini vs Perplexity vs Grok. Pricing, Context Window, Fähigkeiten, Stärken & Schwächen. Which AI for What?
+- [AI Coding Tools Vergleich 2026](/ai-tools/ai-coding-tools/): Umfassender Vergleich von Claude Code, Cursor, Windsurf, GitHub Copilot und weiteren AI-Coding-Tools. Benchmarks, Pricing, Modellunterstützung und praktische Em
+- [AI Development Frameworks 2026 — LangChain vs LlamaIndex vs CrewAI](/ai-tools/ai-development-frameworks/): LangChain vs LlamaIndex vs CrewAI vs AutoGen vs Semantic Kernel vs Haystack. Language, Features, Learning Curve, Community.
+- [AI Image-Generierung 2026 — Vergleich & Benchmarks](/ai-tools/ai-image-generierung/): Midjourney vs DALL-E vs Stable Diffusion vs Flux. Qualität, Pricing, Speed, Text-Akzuratheit, Self-Hosted Optionen. Welches Tool für welchen Use-Case?
+- [AI Search Engines 2026 — Perplexity vs Google vs You.com](/ai-tools/ai-search-engines/): Perplexity vs Google AI Overviews vs You.com vs Phind. Pricing, Citation Quality, Speed, Use Cases.
+- [AI Text-to-Speech & Voice Cloning 2026](/ai-tools/ai-audio-speech/): ElevenLabs vs OpenAI TTS vs Bark vs Coqui vs Azure Speech. Pricing, Voice Cloning, Languages, Latency, Self-Hosted Optionen.
+- [AI Video-Generierung 2026 — Tools & Vergleich](/ai-tools/ai-video-tools/): Sora vs Runway vs Pika vs Kling vs Luma Dream Machine. Pricing, Video Length, Qualität, Character Consistency, Use-Cases.
+- [AI Workflow Automation 2026 — n8n vs Make vs Zapier](/ai-tools/ai-workflow-automation/): n8n vs Make vs Zapier vs ActivePieces vs Windmill. Pricing, Self-Hosted, AI Nodes, Komplexität, Integration Count.
+- [Dify — No-Code AI App Builder](/ai-tools/dify/): Dify ist ein Open-Source No-Code/Low-Code Platform zum schnellen Bauen von KI-Apps. Workflow-Editor, RAG-Integration, Agent-Modus, Self-Hosting, API-Publikation
+- [Flowise — Visueller LLM Flow Builder](/ai-tools/flowise/): Flowise ist ein visuelle Plattform zum Bauen von LLM-Flows ohne Code. Node-basiert, integriert mit Ollama, Vector Stores, Custom Tools, Self-Hosting.
+- [GPU Hardware für AI 2026 — RTX vs A100 vs H100 Guide](/ai-tools/gpu-hardware-guide/): RTX 4090 vs 5090 vs A100 vs H100 vs Cloud GPU. VRAM, Speed, Power, Price, Models that Fit. Consumer vs Enterprise.
+- [Hugging Face Hub — Modell-Discovery und Deployment](/ai-tools/hugging-face/): Hugging Face ist das zentrale Repository für Open-Source LLMs, Datasets und Spaces. Transformers-Library, Model Cards, gated models, CLI-Tools und praktische In
+- [Label Studio — Daten-Annotation Platform](/ai-tools/label-studio/): Label Studio ist eine Open-Source Annotation-Plattform für Text, Bilder, Audio und Video. ML-unterstützte Labeling, Active Learning, Self-Hosting, API.
+- [LiteLLM — Universeller LLM API Proxy](/ai-tools/litellm/): LiteLLM ist ein Unified Interface für 100+ LLM Provider. Routing, Fallbacks, Budget-Management, Caching, Self-Hosting.
+- [LLM Monitoring & Observability 2026 — LangSmith vs Langfuse](/ai-tools/ai-monitoring-tools/): LangSmith vs Langfuse vs Helicone vs Weights & Biases. Pricing, Self-Hosted, Features, Integration, Best for What.
+- [LM Studio — Desktop App für lokale LLMs](/ai-tools/lm-studio/): LM Studio ist ein Desktop-Anwendung (Windows, Mac, Linux) zur einfachen Verwaltung und Ausführung von lokalen LLMs. GGUF-Modelle laden, lokaler Server-Modus, GP
+- [MLflow — Experiment Tracking und Model Registry](/ai-tools/mlflow/): MLflow ist Open-Source ML Ops Platform für Experiment Tracking, Model Registry und Deployment. Tracking API, Model Serving, Registry, Self-Hosting.
+- [Open WebUI — Vollständige Dokumentation](/ai-tools/open-webui/): Open WebUI ist die am weitesten verbreitete Benutzeroberfläche für lokale LLMs. Docker-Setup, Ollama-Integration, RAG-Pipeline, Modellverwaltung, API, Custom To
+- [Open-Source LLMs 2026 — Vergleich & Benchmarks](/ai-tools/open-source-llms/): Llama 4 vs DeepSeek V3 vs Qwen 2.5 vs Mistral vs Gemma 2 vs Phi-4. Benchmarks, VRAM, License, Ollama Support, Local Deployment.
+- [Vector Database Vergleich 2026 — ChromaDB vs Pinecone vs Qdrant](/ai-tools/vektor-db-vergleich/): ChromaDB vs Pinecone vs Qdrant vs Weaviate vs Milvus vs pgvector. Pricing, Self-Hosted, Skalierbarkeit, RAG-Features.
 
-## Comparisons
-- [Claude vs ChatGPT](/md/en/comparisons/claude-vs-chatgpt.md): Feature comparison of major AI assistants
-- [Ollama vs Cloud LLMs](/md/en/comparisons/ollama-vs-cloud-llms.md): Local vs hosted LLM comparison
-- [n8n vs Zapier vs Make](/md/en/comparisons/n8n-vs-zapier-vs-make.md): Workflow automation platform comparison
-- [LangChain vs LlamaIndex](/md/en/comparisons/langchain-vs-llamaindex.md): RAG framework comparison
-- [Vector Databases](/md/en/comparisons/vector-databases.md): Comparing vector database options
-- [Agent Frameworks](/md/en/comparisons/agent-frameworks.md): AI agent framework comparison
-- [RAG vs Fine-Tuning](/md/en/comparisons/rag-vs-fine-tuning.md): When to use RAG vs fine-tuning
-- [Cursor vs Claude Code](/md/en/comparisons/cursor-vs-claude-code.md): AI coding assistant comparison
+## Deutsch — Architektur (generated, 6)
+- [AI Gateway Pattern: Intelligentes LLM-Routing](/architektur/ai-gateway-pattern/): API Gateway Design für LLMs: Load Balancing, Rate Limiting, Fallback Chains, Kostentracking auf Gateway-Ebene.
+- [AI Pipeline Design: ETL für LLM-Systeme](/architektur/ai-pipeline-design/): Data Ingestion, Preprocessing, Embedding, Indexing für RAG und Inference. Apache Airflow, Prefect, Dagster.
+- [Caching für AI: Embedding Cache, Semantic Cache, KV Cache](/architektur/caching-fuer-ai/): KV-Cache, Semantic Caching (GPTCache), Redis Embedding-Cache. Kostensparen und Latenz reduzieren.
+- [Inference-Server für LLMs: vLLM, TGI, Triton](/architektur/inference-server/): Text Generation Inference, vLLM, Triton für Production LLM Serving. Continuous Batching, PagedAttention, Speculative Decoding.
+- [Load Balancing für LLMs: Routing-Strategien](/architektur/load-balancing-llms/): Round-Robin vs. Token-Aware Routing, Multi-Model Deployment, A/B Testing, Failover Strategien.
+- [Microservices für AI: Skalierung von LLM-Systemen](/architektur/microservices-fuer-ai/): Microservice-Patterns für KI: Model Serving, API Gateways, Sidecar-Pattern. Praktische Docker-Compose und Kubernetes-Beispiele.
 
-## Architecture Patterns
-- [Agent Orchestration Patterns](/patterns/agent-orchestration-patterns): Design patterns for multi-agent systems
-- [Safety Hooks](/patterns/safety-hooks): Safety mechanisms for AI agents
-- [Memory Management](/patterns/memory-management): State and memory for AI agents
-- [Task Delegation](/patterns/task-delegation): Delegating work between AI agents
-- [Self-Improving Agents](/patterns/self-improving-agents): Agents that learn from feedback
-- [Heartbeat Monitoring](/patterns/heartbeat-monitoring): Health checking AI systems
+## Deutsch — Compliance (generated, 5)
+- [DSGVO und AI – Überschneidungen und praktische Compliance](/compliance/dsgvo/): Wie DSGVO und EU AI Act zusammenpassen. Datenschutz für KI-Training, automatisierte Entscheidungen, lokale Modelle, Cloud AI und Data Processing Agreements.
+- [EU AI Act – Vollständiger Guide für KMUs](/compliance/eu-ai-act-guide/): Was der EU AI Act ist, welche Fristen gelten, wer betroffen ist, und wie du dich vorbereiten kannst. Timeline, Rollen, Pflichten, Strafen.
+- [EU AI Act Compliance Checkliste für KMUs](/compliance/checkliste/): Schritt-für-Schritt Checkliste zur Vorbereitung auf den EU AI Act bis 02.08.2026. Inventar, Risikoklassifizierung, Dokumentation, Transparenz, Monitoring.
+- [Österreichische KI-Regulierung und AI Act Umsetzung](/compliance/oesterreich/): Österreich-spezifische AI-Act-Implementierung, Behörden (RTR, DSB), nationale Strategien, Fördermöglichkeiten, und Besonderheiten für österreichische KMUs.
+- [Risikoklassifizierung von KI-Systemen (EU AI Act)](/compliance/risikoklassen/): Die vier Risikostufen des EU AI Acts erklärt – unzulässig, hochrisiko, begrenzt, minimal. Mit praktischen Beispielen und Klassifizierungs-Entscheidungsbaum.
 
-## Tutorials
-- [Build a RAG Pipeline](/md/en/tutorials/build-rag-pipeline.md): Step-by-step RAG implementation
-- [Build an AI Agent](/md/en/tutorials/build-ai-agent.md): Create your first AI agent
-- [Local LLM Setup](/md/en/tutorials/local-llm-setup.md): Complete local LLM deployment
-- [Multi-Agent Setup](/md/en/tutorials/multi-agent-setup.md): Deploy a multi-agent system
-- [Fine-Tuning Guide](/md/en/tutorials/fine-tuning-guide.md): Custom model fine-tuning
-- [Whisper Transcription](/md/en/tutorials/whisper-transcription.md): Speech-to-text with Whisper
-- [Grafana AI Monitoring](/md/en/tutorials/grafana-ai-monitoring.md): Monitoring dashboards for AI
+## Deutsch — Ethik (generated, 4)
+- [Erklärbare KI (XAI): SHAP, LIME, Feature Importance](/ethik/erklaerbare-ai/): XAI Methods: SHAP, LIME, Attention Visualization, Feature Importance. Interpretability vs Accuracy Tradeoff. EU AI Act Article 13 Requirements.
+- [KI Bias: Arten, Messung, Debiasing](/ethik/ai-bias/): Typen von Bias: Selection, Confirmation, Automation, Representation. Fairness-Metriken messen, Debiasing-Techniken. Fairlearn, AIF360 Tools, praktische Beispiel
+- [KI Governance & Model Risk Management](/ethik/ai-governance/): AI governance frameworks, model risk management. Documentation requirements, audit trails, model cards. Internal AI policies, responsible AI guidelines.
+- [Umweltauswirkungen von KI](/ethik/umweltauswirkungen/): Carbon Footprint beim Training, Inference Energiekosten. Green AI Praktiken, effiziente Architekturen. Carbon-Tracking Tools (CodeCarbon, ML CO2 Impact).
 
-## AI Concepts
-- [What is an LLM](/grundlagen/was-ist-ein-llm): Large Language Models explained
-- [RAG Explained](/md/en/concepts/rag-explained.md): Retrieval-Augmented Generation deep dive
-- [Transformer Architecture](/md/en/concepts/transformer-architecture.md): The architecture behind modern AI
-- [LoRA Adapters](/md/en/concepts/lora-adapters.md): Efficient model adaptation
-- [Quantization](/md/en/concepts/quantization.md): Making models smaller and faster
-- [Agent Orchestration](/grundlagen/was-ist-agent-orchestration): Multi-agent system coordination
-- [Multi-Agent Systems](/grundlagen/multi-agent-systeme): Building teams of AI agents
+## Deutsch — Grundlagen (generated, 8)
+- [AI API Grundlagen](/grundlagen/api-grundlagen/): Wie AI APIs funktionieren. REST, Authentication, Rate Limits, Preismodelle. Anthropic, OpenAI, Google, Mistral APIs erklärt.
+- [AI Deployment — Modelle in Production](/grundlagen/ai-deployment/): Wie man AI Modelle deployt. Docker, vLLM, TGI, Ollama. Scaling, Batching, GPU Sharing. Monitoring und Cost Tracking.
+- [Docker für AI-Stacks](/grundlagen/docker-fuer-ai/): Container-Setup für reproducible AI Umgebungen. Docker Compose mit GPU-Support, Networking und Volume-Verwaltung praktisch erklärt.
+- [Embeddings erklärt](/grundlagen/embeddings-erklaert/): Was sind Embeddings? Wie funktionieren sie? text-embedding-3, nomic-embed, BGE. Praktische Anwendung für Similarity Search.
+- [Grafana Einführung](/grundlagen/grafana-einfuehrung/): Monitoring und Visualisierung mit Grafana. Von Installation bis Dashboards, Alerts und Datasources für AI-Infrastruktur.
+- [n8n Einführung](/grundlagen/n8n-einfuehrung/): Workflow-Automation mit n8n. Von Installation über Nodes bis zu AI-Integrationen. Praktisches Setup für Anfänger.
+- [Ollama Setup Guide](/grundlagen/ollama-setup/): Lokale LLMs mit Ollama. Installation, Model-Management, GPU-Setup und Integration mit Open WebUI, n8n und Python.
+- [Prompt Engineering Advanced](/grundlagen/prompt-engineering-advanced/): Über die Basics hinaus. System Prompts, Few-Shot, Chain-of-Thought, Tool Use, JSON Mode. Optimierung und Evaluation.
 
-## Security
-- [API Key Security](/security/api-keys-sicher): Securing API keys for AI services
-- [Self-Hosted Security](/security/self-hosted-sicherheit): Security for self-hosted AI
-- [Prompt Injection](/md/en/security/prompt-injection.md): Defending against prompt injection attacks
-- [LLM Red Teaming](/md/en/security/llm-red-teaming.md): Testing AI systems for vulnerabilities
+## Deutsch — Kategorien (generated, 11)
+- [AI Coding Tools: Claude Code, Cursor, GitHub Copilot & Co.](/kategorien/ai-coding/): Vergleich von Claude Code CLI, Cursor, Windsurf, GitHub Copilot. Pricing, Features, Code-Privacy.
+- [Bildgenerierung mit KI](/kategorien/image-generation/): Übersicht von selbstgehosteter bis Cloud-basierter Bildgenerierung: ComfyUI, Stable Diffusion, Flux, Midjourney
+- [Fine-Tuning und Training — Modell-Anpassung](/kategorien/fine-tuning-und-training/): Fine-Tuning vs Prompt vs RAG: LoRA, QLoRA, vollständiges Training, Tools, Kosten, Wann was nutzen?
+- [KI-Agenten — Agentenentwicklung](/kategorien/ai-agenten/): Übersicht KI-Agent-Frameworks: Single-Agent vs Multi-Agent, CrewAI, AutoGen, LangGraph, Architektur, Use Cases
+- [LLM-Modelle — Vollständige Übersicht 2026](/kategorien/llm-modelle/): Umfassender Vergleich von Cloud-Modellen (Claude, GPT, Gemini) und lokalen Open-Source-Modellen (Llama, Mistral, Qwen, DeepSeek) mit VRAM-Anforderungen, Benchma
+- [Monitoring: Grafana, Prometheus, Uptime Kuma & Alternativen](/kategorien/monitoring/): Übersicht von Monitoring-Tools für KI-Infrastruktur. Was du messen solltest, welche Tools geeignet sind.
+- [RAG und Retrieval — Knowledge Augmentation](/kategorien/rag-und-retrieval/): Retrieval-Augmented Generation: Architektur, Vector DBs, Chunking, LangChain vs LlamaIndex, Enterprise Patterns
+- [Self-Hosted AI Stack: Ollama, n8n, Open WebUI & Co.](/kategorien/self-hosted/): Vollständiger Self-Hosted Setup für lokale LLMs, Workflows und Knowledge Management. Hardware-Anforderungen, Komponenten, Deployment.
+- [Sprach- und Audio-KI](/kategorien/speech-und-audio/): TTS, STT, Voice Cloning, Music Generation: ElevenLabs, Whisper, Coqui TTS, Suno AI, Self-Hosted Optionen
+- [Video-Generierung mit KI](/kategorien/video-generation/): Text-to-Video 2026: Sora, Runway Gen-4.5, Kling, Pika—Capabilities, Limitations, Kosten, Vergleiche
+- [Workflow-Automation — Tools, Patterns, Self-Hosted 2026](/kategorien/workflow-automation/): Technischer Deep-Dive in Workflow-Automation mit Fokus auf n8n, Temporal, Apache Airflow, Error-Handling-Patterns, Webhook-Architekturen und AI-Integration für 
 
-## Research Papers
-- [Attention Is All You Need](/papers/attention-is-all-you-need): The Transformer paper explained
-- [RAG Paper](/papers/rag-paper): Original RAG research paper summary
-- [LoRA Paper](/papers/lora-paper): Low-Rank Adaptation paper summary
-- [ReAct Paper](/papers/react-paper): Reasoning and Acting in LLMs
-- [Constitutional AI](/papers/constitutional-ai): Anthropic's alignment approach
+## Deutsch — Konzepte (generated, 24)
+- [AI-Sicherheit und Alignment](/konzepte/ai-sicherheit/): RLHF, DPO, Constitutional AI — wie Modelle "sicher" gemacht werden, Jailbreaking, Prompt Injection, Verteidigungen, EU AI Act Connection
+- [Attention-Mechanismen](/konzepte/attention-mechanismen/): Self-Attention, Cross-Attention, Multi-Head, Flash Attention, Multi-Query, Grouped-Query, Sliding Window, Sparse Patterns — komplett erklärt
+- [Chain-of-Thought Prompting](/konzepte/chain-of-thought/): CoT erklärt — warum es funktioniert, Zero-shot CoT, Few-shot CoT, Self-Consistency, Tree-of-Thought, Extended Thinking, wann CoT overkill ist
+- [Diffusion-Modelle](/konzepte/diffusion-modelle/): Forward/Reverse Diffusion Process, Noise Schedules, DDPM, DDIM, Latent Diffusion, Classifier-Free Guidance — Theorie und Praxis
+- [Embedding-Modelle](/konzepte/embedding-modelle/): Wie Embeddings funktionieren, Training (Contrastive Learning), MTEB Benchmark, Vergleich — Sentence-Transformers, OpenAI, Nomic, BGE, E5
+- [Fine-Tuning](/konzepte/fine-tuning/): Von Full Fine-Tuning bis QLoRA — Methoden erklärt, wann Fine-Tuning sinnvoll ist, Hyperparameter, Kosten, und praktische Tools
+- [Function Calling](/konzepte/function-calling/): Wie Function Calling funktioniert, LLM Tool Use Protocol, OpenAI Format, Anthropic tool_use, Open-Source (Hermes, Gorilla) — JSON Schema, Parallel Calls
+- [Knowledge Distillation](/konzepte/knowledge-distillation/): Teacher-Student Paradigm, Soft Labels, Temperature Scaling, Distillation für LLMs — wann distillieren, Code-Beispiele
+- [Kontext-Fenster](/konzepte/kontext-fenster/): Was Kontext-Fenster sind, Vergleich aller Modelle 2026, Long-Context Strategien, Needle-in-Haystack Problem, effektiv vs. beworbene Länge
+- [LoRA und Adapter](/konzepte/lora-adapter/): Low-Rank Adaptation im Detail — Mathematik vereinfacht, Rang-Auswahl, QLoRA vs DoRA, Adapter mergen, praktische 30-Minuten Beispiele
+- [Mixture of Experts (MoE)](/konzepte/mixture-of-experts/): MoE-Architektur erklärt — was Experts sind, Routing-Mechanismen, sparsame Aktivierung, Modelle (Mixtral, DeepSeek), Speicher vs. Compute Tradeoffs
+- [Model Merging](/konzepte/model-merging/): SLERP, TIES, DARE, Linear Merge, mergekit Tool, Praktische Merge-Rezepte — wann Merging funktioniert
+- [Multimodale Modelle](/konzepte/multimodale-modelle/): Vision-Language Models, Audio Models, Video Understanding — Architektur, Vergleich (GPT-4V, Claude 3.5 Vision, Gemini, LLaVA), praktische Use-Cases
+- [Quantisierung](/konzepte/quantisierung/): Wie große Modelle kleiner werden — von FP32 bis INT4, Formate (GGUF, GPTQ, AWQ), praktische Qualitäts-Tradeoffs und quantisieren mit llama.cpp
+- [RAG erklärt](/konzepte/rag-erklaert/): Retrieval Augmented Generation — wie externe Daten mit LLMs kombiniert werden, praktische Architekturen, Embedding-Modelle, und Reranking-Strategien
+- [Reinforcement Learning](/konzepte/reinforcement-learning/): RL Basics (States, Actions, Rewards, Policies), PPO, DPO, RLHF Connection, Robotik & Games, LLM Alignment
+- [Reranking](/konzepte/reranking/): Cross-Encoder vs Bi-Encoder, Reranking Pipeline, Cohere Rerank, BGE-Reranker, ColBERT — RAG Integration
+- [Speculative Decoding](/konzepte/speculative-decoding/): Draft-then-Verify Approach, Acceptance Criteria, vLLM/llama.cpp Implementation, Medusa, Eagle, Lookahead Variants
+- [Structured Generation](/konzepte/structured-generation/): Constrained Decoding, JSON Mode, Grammar-Based Generation — Outlines, Guidance, Instructor, LMQL, Regex Constraints
+- [Token-Effizienz bei AI Agents](/konzepte/token-effizienz/): Tiefe Referenz zu Token-Optimierung. Token Bloat Problem, Prompt Caching, Context Window Management, Model Selection und konkrete Kostensparmaßnahmen.
+- [Tokenisierung](/konzepte/tokenisierung/): BPE, WordPiece, SentencePiece erklärt — wie Token-Counts funktionieren, Kontext-Fenster, Tokenizer-Unterschiede, Token-Kosten sparen
+- [Transformer-Architektur](/konzepte/transformer-architektur/): Wie Self-Attention funktioniert, warum Transformers RNNs ablösten, und die praktischen Parameter die Modelle definieren
+- [Vektordatenbanken](/konzepte/vektor-datenbanken/): Embeddings, Ähnlichkeitsmetriken, Vergleich (ChromaDB, Pinecone, Weaviate, Qdrant, Milvus, pgvector), Self-Hosted vs Cloud, HNSW und IVF Indexing
+- [Was ist ein Agent Harness?](/konzepte/agent-harness/): Konzeptionelle Tiefentaucherei in Agent Harnesses. Definition, Komponenten, Geschichte, Design Patterns und wie Claude Code als Harness funktioniert.
 
-## Blog (Latest)
-- [EU AI Act: 5 Obligations Already in Effect](/blog/2026-03-11-eu-ai-act-5-pflichten-die-jetzt-schon-gelten)
-- [DSGVO-Compliant AI Stack](/blog/2026-03-08-dsgvo-konformer-ai-stack)
-- [Agent Team Architecture](/blog/2026-03-09-agent-team-architecture)
-- [Ollama Self-Hosted Gotchas](/blog/2026-03-08-ollama-self-hosted-gotchas)
-- [Prompt Injection in Self-Hosted AI](/blog/2026-03-08-prompt-injection-self-hosted-ai)
-- [n8n AI Workflow Bundle v3](/blog/2026-03-22-n8n-ai-workflow-bundle-v3)
+## Deutsch — MLOps (generated, 6)
+- [Experiment Tracking — MLflow, W&B, Neptune](/mlops/experiment-tracking/): MLflow, Weights & Biases, Neptune, tracking runs, metrics, artifacts, Setup examples, comparison table, self-hosted options.
+- [MLOps — ci-cd-fuer-ml](/mlops/ci-cd-fuer-ml/): Complete reference guide for ci-cd-fuer-ml in production ML systems.
+- [MLOps — datenqualitaet](/mlops/datenqualitaet/): Complete reference guide for datenqualitaet in production ML systems.
+- [MLOps — feature-stores](/mlops/feature-stores/): Complete reference guide for feature-stores in production ML systems.
+- [MLOps — model-monitoring](/mlops/model-monitoring/): Complete reference guide for model-monitoring in production ML systems.
+- [MLOps — model-registry](/mlops/model-registry/): Complete reference guide for model-registry in production ML systems.
 
-## Clean Markdown for AI Agents
-All articles are available as clean Markdown (no HTML, no JSX) for token-efficient consumption:
-- Index: https://wiki.ai-engineering.at/md/index.json (all articles with metadata)
-- Format: https://wiki.ai-engineering.at/md/{lang}/{category}/{slug}.md
-- Example: https://wiki.ai-engineering.at/md/de/compliance/eu-ai-act-guide.md
-- Example: https://wiki.ai-engineering.at/md/en/tutorials/build-rag-pipeline.md
+## Deutsch — Papers (generated, 11)
+- [BERT — Bidirektionale Encoder-Transformers](/papers/bert-paper/): Masked Language Modeling, Next Sentence Prediction, bidirektionaler Kontext, das Fine-tuning Paradigma, Impact und Legacy (RoBERTa, ALBERT, DeBERTa).
+- [Chain-of-Thought — Schritt-für-Schritt Reasoning](/papers/chain-of-thought-paper/): Wei et al. 2022, Few-shot CoT prompting, Zero-shot CoT ("Let's think step by step"), Self-consistency, Tree of Thoughts extensions.
+- [Die GPT-Serie — Von GPT-1 bis GPT-4](/papers/gpt-serie/): Die Entwicklungsgeschichte von GPT-1 über GPT-2, GPT-3 bis zur aktuellen GPT-4. Architektur-Evolution, Scaling Laws, und warum die Serie den KI-Markt revolution
+- [DPO erklärt — Direct Preference Optimization](/papers/dpo-erklaert/): "Direct Preference Optimization" (Rafailov et al. 2023). DPO ist schneller und billiger als RLHF. Warum manche sagen es ersetzt RLHF, andere nicht.
+- [Flash Attention — Effiziente Transformer-Inferenz](/papers/flash-attention/): IO-aware attention, Tiling, Memory-Hierarchie. Flash Attention 1 vs. 2 vs. 3, Speed/Memory Improvements, praktische Auswirkungen auf Inferenz.
+- [LLaMA — Meta's Open-Source Sprachmodelle](/papers/llama-paper/): Von LLaMA 1 bis LLaMA 3. Training-Strategien, Architektur-Entscheidungen, RLHF in LLaMA 2, und warum Meta diese Modelle open-source stellte.
+- [Mixture of Experts erklärt](/papers/mixture-of-experts/): "Mixtral of Experts" (Mistral 2024) + MoE-Konzept. Sparse Activation, Routing, effiziente große Modelle. DeepSeek MoE und die Zukunft.
+- [RLHF erklärt — Training mit menschlichem Feedback](/papers/rlhf-erklaert/): "Training Language Models to Follow Instructions with Human Feedback" (InstructGPT-Paper). RLHF macht Modelle hilfreich und sicher. Wie Reward Models und PPO fu
+- [Scaling Laws erklärt — Compute-Optimal Training](/papers/scaling-laws/): "Scaling Laws for Neural Language Models" (Kaplan et al. 2020) + Chinchilla. Wie viele Parameter? Wie viel Daten? Die mathematischen Regeln hinter großen Modell
+- [Stable Diffusion — Latente Diffusions-Modelle](/papers/stable-diffusion/): Latent Diffusion Models Paper (Rombach et al.), VAE + U-Net + CLIP Architektur, Conditioning. SD 1.5 → SDXL → SD3 Evolution.
+- [Whisper — Multilingual Speech Recognition](/papers/whisper-paper/): Radford et al., weak supervision at scale, encoder-decoder transformer architecture, multilingual training, model sizes, accuracy vs speed tradeoffs.
 
-### Key DE Articles (Markdown)
-- [EU AI Act Guide](/md/de/compliance/eu-ai-act-guide.md): Complete EU AI Act guide for SMEs
-- [DSGVO & AI](/md/de/compliance/dsgvo.md): GDPR fundamentals for AI systems
-- [Ollama Setup](/md/de/grundlagen/ollama-setup.md): Local LLM setup with Ollama
-- [n8n Einführung](/md/de/grundlagen/n8n-einfuehrung.md): AI workflow automation with n8n
-- [Docker für AI](/md/de/grundlagen/docker-fuer-ai.md): Docker basics for AI workloads
-- [RAG Erklärt](/md/de/konzepte/rag-erklaert.md): Retrieval-Augmented Generation explained
-- [Agent Patterns](/md/de/patterns/agent-patterns.md): Design patterns for AI agents
-- [KI-Bildgenerierung Kosten](/md/de/vergleiche/ki-bildgenerierung-kosten.md): Local vs cloud image generation costs
+## Deutsch — Patterns (generated, 5)
+- [AI Agent Patterns — ReAct, Plan-and-Execute, Reflection, Multi-Agent](/patterns/agent-patterns/): Architektur-Muster für AI Agents. ReAct Loop, Plan-and-Execute, Reflection, Multi-Agent Orchestration, Komplexitäts-Tradeoffs
+- [Cost-Optimierung — AI API Kosten sparen](/patterns/cost-optimization/): Reduziere AI API Kosten um 70%+. Prompt Caching, Model Routing, Batch Processing, Context Window Optimization, Embedding Reuse
+- [Fortgeschrittene Prompting-Techniken](/patterns/prompting-techniken/): Professionelle Prompt-Strategien für Claude - Chain of Thought, Few-Shot Learning, XML-Struktur, Reverse Prompting, Extended Thinking
+- [Structured Output — JSON, Validation, Parsing](/patterns/structured-output/): Extrahiere strukturierte Daten von LLMs. JSON Mode, XML Parsing, Pydantic, Instructor, Schema Validation, Retry Strategies
+- [Tool Use Patterns — Function Calling für LLMs](/patterns/tool-use-patterns/): Wie LLMs Tools/Functions aufrufen. JSON Schema, Execution Loops, Best Practices, Parallelisierung, Claude vs OpenAI vs Gemini Vergleich
 
-### Key EN Articles (Markdown)
-- [EU AI Act Guide](/md/en/compliance/eu-ai-act-guide.md): English EU AI Act guide
-- [Build RAG Pipeline](/md/en/tutorials/build-rag-pipeline.md): Step-by-step RAG implementation
-- [Claude Code CLI](/md/en/tools/claude-code-cli.md): Using Claude Code as a dev tool
-- [Agent Frameworks](/md/en/comparisons/agent-frameworks.md): AI agent framework comparison
-- [Local LLM Setup](/md/en/tutorials/local-llm-setup.md): Complete local LLM deployment
-- [AI Stack Setup](/md/en/tutorials/ai-stack-setup.md): Self-hosted AI stack deployment
+## Deutsch — Sicherheit (generated, 6)
+- [AI Supply Chain Security](/sicherheit/supply-chain-security/): Model Supply Chain: Hugging Face Trust, Model Poisoning, Safetensors vs Pickle. Dependency Scanning für ML, SBOM für AI, Model Cards. Verifying Model Integrity,
+- [API Security für KI Systeme](/sicherheit/api-security-ai/): Securing AI API endpoints: Authentication, Rate Limiting, Token Management. API Key Rotation, OAuth für AI Services, Audit Logging. DDoS Protection für Inferenc
+- [Datenschutz & Datenhaltung für KI](/sicherheit/data-privacy-ai/): Datenhandhabung für KI: Anonymisierung, Differential Privacy, On-Premise vs Cloud, Datenresidenz, Verschlüsselung. DSGVO-Implikationen für Trainingsdaten, Recht
+- [LLM Red Teaming & Adversarial Testing](/sicherheit/llm-red-teaming/): Red Teaming Methodik für LLMs, automatisierte Red-Team-Tools, Garak, PyRIT, AI-Red-Team-Frameworks. Testing-Kategorien: Toxizität, Bias, Datenlecks, Jailbreaks.
+- [Output Filtering & Content Moderation für LLMs](/sicherheit/output-filtering/): Content Moderation für LLM-Outputs, Guardrails-Bibliotheken, NeMo Guardrails, Guardrails AI, LLM Guard. PII-Erkennung, Toxizität, Thema-Beschränkung.
+- [Prompt Injection & Jailbreaking Abwehr](/sicherheit/prompt-injection/): Direkte und indirekte Prompt Injection, Jailbreaking-Techniken, Defense-Strategien, Input-Sanitization, Output-Filtering, Instruction Hierarchy. Mit realen Beis
 
-## Contact
-- Website: https://www.ai-engineering.at
-- Wiki: https://wiki.ai-engineering.at
-- Email: info@ai-engineering.at
-- Location: Austria (DACH region)
+## Deutsch — Skills (generated, 2)
+- [Skills — AI Engineering Toolkit](/skills/index/): 49 Eigenbau-Skills fuer Claude Code — Infrastructure, Marketing, Organisation
+- [Skills erstellen](/skills/erstellen/): Wie du eigene Claude Code Skills erstellst — von der Idee bis zum Quality Gate.
+
+## Deutsch — Tools (generated, 41)
+- [Agent Harnesses für Claude Code — Enterprise Orchestration](/tools/claude-code-agent-harness/): Deep Reference zu Agent Harnesses. Everything Claude Code vs Framework vs Ruflo vs Composio. Vergleich, Architektur, Installation. Welcher Harness passt zu dein
+- [Agent Teams — Claude Code Referenz](/tools/claude-code-agent-teams/): Orchestriere mehrere Claude Code Sessions als koordiniertes Team — Agent Teams ermöglichen parallele Arbeit mit gemeinsamen Task-Listen und direkter Agent-Kommu
+- [Claude Code — Interaktiver Modus & Tastaturkürzel](/tools/claude-code-interaktiv/): Vollständige Referenz für Tastaturkürzel, Slash-Befehle, Vim-Modus, Multi-Line-Input, @File-Mentions, Task-Listen, Voice-Eingabe, Bash-Modus und weitere interak
+- [Claude Code — Modell Konfiguration Referenz](/tools/claude-code-modelle/): Vollständige Dokumentation der Modellauswahl, Aliases, Effort-Level, Extended Thinking, 1M-Context, Provider-Konfiguration und Cost-Optimierungsstrategien.
+- [Claude Code — Sandboxing Referenz](/tools/claude-code-sandbox/): Vollständige Dokumentation des nativen Sandboxing — Dateisystem-Isolation, Netzwerk-Beschränkung, Sicherheitsvorteile, Konfiguration und Best Practices zur sich
+- [Claude Code — Troubleshooting & Fehlerbehebung](/tools/claude-code-troubleshooting/): Umfassender Fehlerbehegungs-Guide für Installation, Authentifizierung, Netzwerk, Performance, MCP, Berechtigungen, Git-Integration und IDE-Probleme mit Lösungss
+- [Claude Code — Umgebungsvariablen Referenz](/tools/claude-code-umgebungsvariablen/): Vollständige Dokumentation aller Umgebungsvariablen, die Claude Code steuern — einschließlich API-Authentifizierung, Modellauswahl, Sandbox, Netzwerk und Provid
+- [Claude Code + n8n — Integration Guide](/tools/claude-code-n8n/): Praktischer Guide zur Integration von Claude Code und n8n — Architektur-Patterns, Webhook-Trigger, Workflow-Generation, Testing und DSGVO-Compliance für hybride
+- [Claude Code Berechtigungen — Vollständige Referenz](/tools/claude-code-berechtigungen/): Umfassende Referenz für das Berechtigungssystem von Claude Code, einschließlich Berechtigungsmodi, Regel-Syntax, Tool-spezifische Regeln, Vorrangigkeit und Mana
+- [Claude Code CLI](/tools/claude-code/): Komplette Anleitung zum Claude Code Command Line Interface - Installation, Konfiguration, Commands und IDE-Integration
+- [Claude Code CLI — Vollstaendige Referenz](/tools/claude-code-cli/): Exhaustive reference fuer die Claude Code Kommandozeile. Alle Flags, Kommandos, Keyboard Shortcuts, Environment Variables und Fehlerbehandlung — aus den offizie
+- [Claude Code Debugging & Troubleshooting](/tools/claude-code-debugging/): Umfassender Troubleshooting-Guide — Häufige Fehler, /doctor Command, Diagnostik-Tools, Performance-Optimierung, Plattform-spezifische Issues und wie man Bugs ef
+- [Claude Code Einstellungen — Vollständige Referenz](/tools/claude-code-einstellungen/): Umfassende Referenz für Claude Code settings.json mit allen Konfigurationsfeldern, Scopes, Sandbox-Optionen und globalen Konfigurationsoptionen.
+- [Claude Code für Teams — Shared Config & CI/CD](/tools/claude-code-teams/): Team-Setup für Claude Code — Shared vs. Personal Config, Permission Management, CI/CD Integration, Code Review Automation, Cost Tracking und Sicherheit für vert
+- [Claude Code GitHub Actions — CI/CD Integration](/tools/claude-code-github-actions/): Komplette Referenz für Claude Code in GitHub Actions. Automatisierte Code Reviews, PR-Beschreibungen, Issue-Triage, Test-Generierung, Security Scanning und Cost
+- [Claude Code Hooks — Vollständige Referenz](/tools/claude-code-hooks/): Erschöpfende Dokumentation aller Hook-Typen, Events, Matcher, Umgebungsvariablen, Exit-Codes und Konfigurationsoptionen
+- [Claude Code MCP — Vollständige Referenz](/tools/mcp-referenz/): Umfassende Referenz für Model Context Protocol in Claude Code, einschließlich Server-Management, Transport-Typen, Konfiguration, Umgebungsvariablen, OAuth und T
+- [Claude Code mit Amazon Bedrock](/tools/claude-code-bedrock/): Claude Code über Amazon Bedrock einrichten – Authentifizierung, AWS-Berechtigungen, Umgebungsvariablen, Modell-Pinning, und Enterprise-Deployment.
+- [Claude Code mit Google AI (Generative AI API)](/tools/claude-code-google-ai/): Konfiguration von Claude Code mit Google AI (Generative AI API) als Alternative zu Vertex AI – Umgebungsvariablen, API-Keys, und Unterschiede zu anderen Provide
+- [Claude Code mit Google Vertex AI](/tools/claude-code-vertex/): Claude Code über Google Vertex AI einrichten – GCP-Authentifizierung, Region-Konfiguration, Umgebungsvariablen, Modell-Pinning, und Best Practices für Enterpris
+- [Claude Code Plugin-System — Komplette Referenz](/tools/claude-code-plugin-system/): Exhaustive reference zum Claude Code Plugin-System. Plugin-Anatomie, Installation, Marketplace, Custom Plugins, Enterprise-Governance über LiteLLM und der gesam
+- [Claude Code Security — Hardening & Best Practices](/tools/claude-code-security/): Umfassende Security-Referenz für Claude Code. Permission Modes, Sandbox Konfiguration, Hooks, CLAUDE.md Sicherheit, Enterprise Compliance und häufige Fehler.
+- [Claude Code Skills — Vollständige Referenz](/tools/skills-und-plugins/): Umfassender Leitfaden zur Erstellung, Konfiguration und Verwaltung von Skills in Claude Code. Frontmatter, String-Substitutionen, Bundled Skills, Verzeichnisstr
+- [Claude Code Sub-Agents — Vollständige Referenz](/tools/claude-code-agent-sdk/): Umfassender Leitfaden zu Sub-Agents in Claude Code. Built-in Agents, Custom Agent-Erstellung, Frontmatter-Referenz, Tool-Kontrolle, MCP-Scoping, Agent-Invocatio
+- [Claude Code Workflows & Patterns — Praxis-Guide](/tools/claude-code-workflows/): Praktische tägliche Workflows mit Claude Code — Git Patterns, Code-Migration, Refactoring, Testing, Dokumentation, Debugging, Multi-File Operations mit konkrete
+- [Claude Cowork — Agent Mode](/tools/cowork/): Anleitung zu Claude Cowork - autonome Agent-Mode im Claude Desktop, Skills, Plugins und Task-Ausführung
+- [Claude Dispatch — Desktop-Automation von deinem Handy](/tools/dispatch/): Technischer Guide für Claude Dispatch (seit März 2026) — Remote Control von Agents auf deinem Desktop, Cross-Device Konversationen, Memory-System und praktische
+- [CLAUDE.md — Vollstaendige Referenz](/tools/claude-md-reference/): Persistent Memory für Claude Code: CLAUDE.md Dateien, Lade-Reihenfolge, Scope-Levels, Rules, Auto-Memory
+- [CLAUDE.md Masterclass — Projekt-Konfiguration](/tools/claude-md-guide/): Der komplette Guide zu CLAUDE.md — Inheritance Hierarchy, Rule-Verzeichnisse, Dynamic Content, Real-world Beispiele für verschiedene Projekt-Typen, Team-Workflo
+- [Community Guides für Claude Code — Das Beste Lernen](/tools/claude-code-community-guides/): Übersicht der besten Community-Learning-Ressourcen. Ultimate Guide vs Everything You Need vs Tips vs Cheat Sheet vs Best Practice. Welcher Guide für welches Lev
+- [Das Claude Code Ökosystem — Repos, Plugins, Skills, Harnesses](/tools/claude-code-oekosystem/): Umfassender Katalog des Claude Code Ökosystems mit echten GitHub URLs. Awesome Lists, Agent Harnesses, Hooks, Skills, Plugins, MCP Tools und Community Guides. A
+- [Die besten MCP Server — Kuratierte Übersicht 2026](/tools/awesome-mcp-servers/): Umfassende Referenz der wichtigsten MCP Server. Official Servers, GitHub, Slack, Google Drive, PostgreSQL, AWS, Cloud Services, Developer Tools. Wie man MCP Ser
+- [DSGVO-Ampel — Datenschutz-Rating für KI-Tools 2026](/tools/dsgvo-ampel/): Traffic-Light System (🟢🟡🔴) zur Bewertung von 20+ AI-Tools nach DSGVO-Konformität, Datenspeicherung, DPA-Verfügbarkeit und praktischen Use-Cases für deutsche 
+- [Git Integration — Claude Code Referenz](/tools/claude-code-git/): Vollstaendige Referenz zur Git-Integration in Claude Code — Commits, Pull Requests, Branch-Management, Merge Conflicts, Git Hooks, Co-Authored-By, Diff-Review, 
+- [Mattermost Integration fuer AI-Workflows](/tools/mattermost/): Self-hosted Chat-System als Agent-Kommunikations-Backbone. Webhooks, Bot-API, n8n Integration, MM-Polling Patterns.
+- [mcp2cli — MCP Server als CLI nutzen](/tools/mcp2cli/): Deep Dive in mcp2cli. Token-Effizient MCP Integration für Claude Code. Reduktion von 96-99% Tokens. Baking Configs, OAuth Support, Tool-Filterung. Installation,
+- [Model Context Protocol (MCP)](/tools/mcp/): Komplette Anleitung zum Model Context Protocol - Architektur, MCP-Server bauen, Registry, Integration in Claude Code und Claude Desktop
+- [Monitoring & Telemetry — Claude Code Referenz](/tools/claude-code-monitoring/): OpenTelemetry Integration fuer Claude Code — Track Usage, Costs, Tool Activity und Session Analytics. Metriken, Events, Dashboards und ROI-Measurement.
+- [Output Styles — Claude Code Referenz](/tools/claude-code-output-styles/): Passe Claude Code an fuer verschiedene Anwendungsfaelle — Output Styles veraendern das System Prompt um Claude als verschiedene Arten von Agenten zu nutzen.
+- [Plugins & Marketplaces — Claude Code Referenz](/tools/claude-code-plugins/): Vollstaendige Referenz zum Claude Code Plugin-System — Plugin-Struktur, Marketplaces, Instalation, Trust, Custom Plugins mit Skills, Agents, Hooks und MCP-Serve
+- [Sub-Agents in Claude Code](/tools/agents/): Spezialisierte AI-Agents mit eigenem Context, Tools und Berechtigungen. Von eingebauten Agents (Explore, Plan) bis zu Custom Agent Definitions.
+
+## Deutsch — Tutorials (generated, 18)
+- [AI API Integration — Anthropic, OpenAI, Google](/tutorials/ai-api-integration/): Integration verschiedener AI APIs in Python & TypeScript. Authentifizierung, Streaming, Tool Use, Error Handling, Rate Limiting, Kostenoptimierung
+- [AI Monitoring Dashboard in 15 Minuten](/tutorials/grafana-ai-monitoring/): Grafana + Prometheus für Ollama, Docker Container und Systemressourcen. Alerts einbauen.
+- [AI Stack in 30 Minuten aufsetzen](/tutorials/ai-stack-setup/): Docker Compose mit Ollama, Open WebUI und n8n zum Laufen bringen. Self-hosted, lokal, ohne Cloud.
+- [AI-Agent bauen — Tool Use, Speicher, Loops](/tutorials/ai-agent-bauen/): Schritt-für-Schritt: Baue einen Agent mit Claude API, Tool-Definitions, Execution Loop, Web Search, Dateizugriff und Conversation Memory
+- [Claude Code AI OS einrichten](/tutorials/claude-code-einrichten/): Installation, .claude/ Struktur, Projekt-Config, Skills, Hooks, MCP-Server, IDE-Integration.
+- [ComfyUI Workflows — Stable Diffusion & Flux](/tutorials/comfyui-workflows/): AI-Bild-Generierung mit ComfyUI. Installation, erste Workflows, Custom Nodes, Stable Diffusion vs Flux, praktische Beispiele
+- [Deine ersten 3 AI Workflows mit n8n](/tutorials/n8n-erste-workflows/): Webhook → AI → Response. RSS → Summary → Email. Form → Classification → Alert. Praktische n8n Workflows zum Kopieren.
+- [DSGVO Compliance Check für deinen AI Stack](/tutorials/dsgvo-compliance-check/): Art. 30 Verzeichnis, DSFA, technische Maßnahmen, AVV, Löschkonzept. Checklisten und Templates.
+- [Fine-Tuning mit Unsloth QLoRA — Praktischer Guide](/tutorials/fine-tuning-anleitung/): Schritt-für-Schritt QLoRA Fine-Tuning mit Unsloth für Llama 3, Dataset-Vorbereitung, Training, Evaluation, VRAM-Anforderungen, ROI-Berechnung
+- [Lokales LLM-Setup — Anfänger bis Experte](/tutorials/lokales-llm-setup/): Guide für Ollama, llama.cpp, LM Studio und vLLM. Modell-Auswahl nach VRAM, Performance-Tuning, Benchmarking
+- [Multi-Agent System aufbauen — Schritt für Schritt](/tutorials/multi-agent-aufbauen/): Manager + Worker + Specialist Agenten. Task Delegation via n8n. Monitoring mit Prometheus.
+- [RAG-Pipeline von Grund auf bauen](/tutorials/rag-pipeline-bauen/): Schritt-für-Schritt Anleitung zum Aufbau einer RAG-Pipeline mit Python, ChromaDB, Ollama und LangChain
+- [Tutorial — docker-compose-ai-stack](/tutorials/docker-compose-ai-stack/): Step-by-step guide for docker-compose-ai-stack.
+- [Tutorial — huggingface-modelle](/tutorials/huggingface-modelle/): Step-by-step guide for huggingface-modelle.
+- [Tutorial — open-webui-setup](/tutorials/open-webui-setup/): Step-by-step guide for open-webui-setup.
+- [Tutorial — pgvector-setup](/tutorials/pgvector-setup/): Step-by-step guide for pgvector-setup.
+- [Tutorial — reverse-proxy-ai](/tutorials/reverse-proxy-ai/): Step-by-step guide for reverse-proxy-ai.
+- [Tutorial — whisper-transkription](/tutorials/whisper-transkription/): Step-by-step guide for whisper-transkription.
+
+## Deutsch — Vergleiche (generated, 14)
+- [Agent Frameworks — Vergleich](/vergleiche/agent-frameworks/): CrewAI vs AutoGen vs LangGraph vs Semantic Kernel. Architektur-Muster, Multi-Agent-Support, Tool-Integration.
+- [Claude vs. ChatGPT — Technischer Vergleich März 2026](/vergleiche/claude-vs-chatgpt/): Vollständiger Vergleich von Claude und ChatGPT mit Fokus auf Modellarchitektur, Pricing, API-Unterschiede, Sicherheit und praktische Use-Cases für Entwickler un
+- [Cloud GPU Vergleich 2026 — Preise & Performance](/vergleiche/cloud-gpu-vergleich/): Cloud GPU Pricing: Lambda Labs, RunPod, Vast.ai, CoreWeave. Spot vs On-Demand, Inference vs Training, Kostenoptimierung
+- [Cursor vs Claude Code — IDE Comparison 2026](/vergleiche/cursor-vs-claude-code/): Head-to-head Vergleich: Cursor IDE vs Claude Code CLI, Features, Pricing, Agentic Coding, Wann welches nutzen
+- [Experiment Tracking Tools — Vergleich](/vergleiche/experiment-tracking/): MLflow vs Weights & Biases vs Neptune vs ClearML. Features, Pricing, Self-Hosted Optionen.
+- [KI-Bildgenerierung: Lokal vs. Cloud — Kosten, Geschwindigkeit, Datenschutz](/vergleiche/ki-bildgenerierung-kosten/): Echter Kostenvergleich: Lokale FLUX.2 Bildgenerierung auf RTX 3090 (0.84 Cent/Bild) vs. 9 Cloud-Anbieter. Mit Messdaten aus 500+ Bildern.
+- [LangChain vs LlamaIndex — Framework Vergleich](/vergleiche/langchain-vs-llamaindex/): LangChain + LangGraph vs LlamaIndex: Architektur, Use Cases, Learning Curve, Wann was nutzen
+- [Lokale LLM Interfaces — Vergleich](/vergleiche/local-llm-interfaces/): Open WebUI vs text-gen-webui vs LM Studio vs Jan.ai vs GPT4All. Features, Performance, UX, Ollama-Support.
+- [Lokale LLMs (Ollama) vs. Cloud LLMs — Kosten und Hardware-Guide 2026](/vergleiche/ollama-vs-cloud-llms/): Hardware-Anforderungen, Break-Even-Analyse, Modell-Qualität und praktischer Setup für Ollama und Cloud-Alternativen.
+- [n8n vs. Zapier vs. Make — Self-Hosted vs Cloud Workflow Automation 2026](/vergleiche/n8n-vs-zapier-vs-make/): Umfassender Vergleich der drei Workflow-Automationsplattformen mit Fokus auf Preismodelle, Features, Self-Hosting, DSGVO-Compliance, KI-Integration und echte Ko
+- [No-Code AI Builder — Vergleich](/vergleiche/nocode-ai-builder/): Flowise vs Langflow vs Dify vs n8n AI Nodes. Self-Hosted, Features, Komplexität, Use Cases.
+- [Quantisierungsformate — Technischer Vergleich](/vergleiche/quantisierungsformate/): GGUF vs GPTQ vs AWQ vs EXL2 vs BitsAndBytes. Qualität bei verschiedenen Bit-Tiefen, Speed, Kompatibilität, Tool-Support.
+- [RAG vs Fine-Tuning — Wann was nutzen](/vergleiche/rag-vs-fine-tuning/): Entscheidungsmatrix: RAG für volatile Knowledge, Fine-Tuning für stabile Behavior. Hybrid-Approaches, Kosten, Beispiele
+- [Vektor-Datenbanken Vergleich 2026](/vergleiche/vektor-datenbanken/): Weaviate vs Qdrant vs Milvus vs Chroma vs pgvector vs Pinecone. Performance-Benchmarks, Skalierung, Features, Self-Hosted vs Cloud.
+
+## Deutsch — Blog (21)
+- [n8n AI Workflow Bundle v3: 14 Enterprise-Workflows für lokale Automatisierung](/blog/2026-03-22-n8n-ai-workflow-bundle-v3/): 14 produktionsreife n8n-Workflows mit Error Handling, Dual-LLM-Fallback, DSGVO-Compliance und Monitoring. Was drin ist, warum v3 und für wen.
+- [TuneForge: Spezialisierte KI-Modelle lokal benchmarken und fine-tunen](/blog/tuneforge-self-finetune-stack/): TuneForge bringt benchmark-first Self-Finetuning, Docker-First-Betrieb und reproduzierbare Release-Bundles auf reale Hardware.
+- [Docker für AI: Warum Container deinen Stack production-ready machen](/blog/2026-03-12-docker-grundlagen-fuer-ai/): Ohne Docker läuft dein AI-Stack nur auf deinem Rechner. Mit Docker läuft er überall. Der Einstieg für AI-Entwickler.
+- [Karpathy's autoresearch: Autonome AI-Forschung auf deiner lokalen GPU](/blog/2026-03-12-karpathy-autoresearch-lokale-ai-forschung/): 26.000 GitHub Stars in 6 Tagen — was steckt hinter Andrej Karpathys neuestem Projekt? Und wie läuft es auf einer RTX 3090?
+- [Ollama installieren in 5 Minuten — Schritt für Schritt (Windows, Mac, Linux)](/blog/2026-03-12-ollama-installieren-schritt-fuer-schritt/): Von 0 zum laufenden lokalen LLM in 5 Minuten. Getestet auf Windows 11, macOS Sonoma und Ubuntu 24.04.
+- [Dein erster lokaler AI-Chatbot: Open WebUI in 10 Minuten einrichten](/blog/2026-03-12-open-webui-erster-chatbot/): Ollama läuft, aber du willst ein Browser-Interface. So richtest du Open WebUI ein — das ChatGPT-Interface für deinen lokalen Stack.
+- [Terminal-Grundlagen für AI-Entwickler — die 10 Befehle die du wirklich brauchst](/blog/2026-03-12-terminal-grundlagen-fuer-ai/): Kein Informatikstudium nötig. Diese 10 Terminal-Befehle reichen um deinen eigenen AI-Stack zu starten.
+- [Warum du kein ChatGPT im Unternehmen nutzen solltest — und was stattdessen](/blog/2026-03-12-warum-lokale-ki-statt-cloud/): DSGVO Art. 5, EU AI Act, Datentransfer in die USA: Die drei Gründe warum Self-Hosted AI für Unternehmen Pflicht ist.
+- [Was ist ein Large Language Model? Erklärt ohne Buzzwords](/blog/2026-03-12-was-ist-ein-llm/): LLM, GPT, Transformer — was steckt wirklich dahinter? Eine ehrliche Erklärung ohne Marketing-Sprache.
+- [EU AI Act: 5 Pflichten die JETZT SCHON gelten](/blog/2026-03-11-eu-ai-act-5-pflichten-die-jetzt-schon-gelten/): Der EU AI Act greift ab August 2026. Aber 5 Pflichten gelten bereits heute — wer sie ignoriert, riskiert Bußgelder bis zu 35 Mio. EUR. Hier ist die Checkliste.
+- [49 Custom Skills für Claude Code — So automatisieren wir alles](/blog/2026-03-09-49-custom-skills/): Wie wir 49 maßgeschneiderte Skills gebaut haben, die unsere AI-Agents steuern.
+- [Agent Team Architecture — Wie 11 AI-Agents zusammenarbeiten](/blog/2026-03-09-agent-team-architecture/): Multi-Agent Orchestration mit Claude Code — von der Theorie zur Praxis.
+- [Skill-Erstellung Best Practices — Der offizielle Anthropic Standard](/blog/2026-03-09-skill-creation-best-practices/): Wie du professionelle Claude Code Skills erstellst — mit offiziellem Anthropic Standard.
+- [So überwachen wir 31 Docker Services mit Grafana](/blog/2026-03-08-31-docker-services-monitoring/): Enterprise-Monitoring für 31 Docker Swarm Services auf 6 Nodes — komplett lokal mit Prometheus, Grafana, Alertmanager und Loki. Kein Byte verlässt unser Netzwer
+- [36 n8n Workflows automatisieren unseren Alltag](/blog/2026-03-08-36-n8n-workflows/): Von Stripe-Zahlungen bis RSS-Digest: 36 aktive n8n Workflows auf Docker Swarm, mit PostgreSQL-Backend und 3-Level Ollama Fallback. Alles lokal, DSGVO-konform.
+- [Von RSS bis Social Media: Unsere vollautomatische Content-Pipeline](/blog/2026-03-08-content-pipeline-rss-to-social/): RSS-Feeds rein, fertige Social-Media-Posts raus. Mit n8n, Ollama, ComfyUI und CDP — komplett lokal, kein API-Zugang nötig, DSGVO-konform.
+- [DSGVO-konformer AI-Stack: Kein Byte verlässt unser Netzwerk](/blog/2026-03-08-dsgvo-konformer-ai-stack/): LLM, Spracherkennung, Text-to-Speech, Bildgenerierung — alles lokal auf eigener Hardware. Warum das nicht nur für die DSGVO wichtig ist, sondern auch für den EU
+- [EU AI Act 2026: Was Unternehmen jetzt tun müssen](/blog/2026-03-08-eu-ai-act-was-unternehmen-tun-muessen/): Am 2. August 2026 greifen die ersten Pflichten des EU AI Act. Risikokategorien, Dokumentationspflichten, und was Unternehmen konkret tun müssen — mit 5-Punkte-C
+- [Self-Hosted Ollama: 7 Gotchas die jeder kennen muss](/blog/2026-03-08-ollama-self-hosted-gotchas/): Ollama lokal betreiben klingt einfach. Ist es auch — bis du auf OOM-Crashes, VRAM-Konflikte und stille Fehler stößt. Hier sind 7 Probleme und ihre Lösungen.
+- [Prompt Injection Protection: Was Self-Hosted AI Pipelines absichern muss](/blog/2026-03-08-prompt-injection-self-hosted-ai/): Externe Daten an LLMs weiterleiten ist gefährlich. RSS-Feeds, Emails und Webhooks können manipulierte Anweisungen enthalten. So schützt du deine lokale AI-Pipel
+- [Unsere Content-Pipeline: Von RSS bis Social Media](/blog/2026-03-07-content-pipeline-launch/): Wie wir mit n8n, Ollama und ComfyUI eine vollständig lokale Content-Pipeline aufgebaut haben — DSGVO-konform und ohne Cloud.
+
+## English — hand-written pages
+- [AI Engineering Wiki — Free Knowledge on Local AI, GDPR & Automation](/en/): Free knowledge on local AI, GDPR compliance and automation. For SMEs building self-hosted AI systems with proper documentation and audit trails.
+- [AI in Austria](/en/austria/): Authorities, funding, community and legal overview: All relevant Austrian AI resources at a glance.
+- [Blog](/en/blog/): Hands-on articles on the local AI stack, automation, GDPR compliance and agent orchestration.
+- [Compliance](/en/compliance/): GDPR and EU AI Act in practice: basics, transparency requirements, prohibited practices and readiness checklists for AI systems.
+- [AI Agent Legal Framework — EU AI Act Compliance](/en/compliance/ai-agent-legal-framework/): How to deploy AI agents legally: EU AI Act, GDPR, risk assessment, compliance documents and hash chain for tamper-proof documentation.
+- [Chatbot Transparency Obligations under EU AI Act](/en/compliance/chatbot-transparenzpflichten/): What you need to know about chatbots and AI-generated content. Labeling requirements, disclosure, copyright — all in one place.
+- [Privacy Practices](/en/compliance/datenschutz-praxis/): Practical implementation — TOM, DPA, documentation, data subject rights.
+- [Data Protection Impact Assessment (DPIA)](/en/compliance/dpia/): DPIA for AI systems: When is a Data Protection Impact Assessment required, how to conduct one, and what to document.
+- [GDPR Basics](/en/compliance/dsgvo-grundlagen/): What does GDPR mean for AI applications? Data protection, consent, retention.
+- [EU AI Act](/en/compliance/eu-ai-act/): Risk classes, prohibitions, transparency requirements for AI systems in the EU.
+- [EU AI Act Compliance Checklist](/en/compliance/eu-ai-act-checkliste/): Your 7-step guide to EU AI Act readiness. Risk classes, transparency requirements, prohibitions - everything compact.
+- [AI Literacy under Art. 4 EU AI Act](/en/compliance/ki-kompetenz-art4/): Art. 4 EU AI Act: AI literacy obligation applies since Feb 2, 2025. Enforcement from Aug 2026, penalties up to EUR 15M. Practical guide for SMEs.
+- [Well prepared](/en/compliance/self-assessment/): Your company is on the right track. The essential foundations for the EU AI Act are in place. Make sure to review all measures regularly to keep them current.
+- [Prohibited AI Practices under EU AI Act](/en/compliance/verbotene-ai-praktiken/): Article 5 prohibits certain AI practices. Social Scoring, Emotion Recognition, Biometric Surveillance - what has been forbidden since Feb 2025.
+- [Downloads](/en/downloads/): Free templates for AI compliance, documentation and operations: templates, checklists and guides.
+- [Basics](/en/grundlagen/): Getting started with Agent Orchestration, Multi-Agent Systems and a GDPR-compliant local AI stack: roles, costs, local vs cloud, quickstart.
+- [30-Day Local AI-Stack Quickstart](/en/grundlagen/30-tage-quickstart/): Build a local, GDPR-compliant AI stack in 30 days. Day-by-day guide: Docker, Ollama, n8n, monitoring.
+- [Agent Roles & Responsibilities](/en/grundlagen/agent-rollen/): Role model for Multi-Agent Systems: orchestrator, workers, QA/review and infra. Clear ownership, boundaries and escalation paths in practice.
+- [Build an AI Agent Team](/en/grundlagen/ai-agent-team/): How to build an AI agent team: agent types, roles, tool integration and guardrails. Designed for GDPR-compliant, self-hosted setups.
+- [AI Cost Comparison](/en/grundlagen/ai-kosten-vergleich/): Realistic 2026 cost comparison: local vs cloud vs hybrid AI. Setup, ongoing cost, GPU/hardware and typical business workloads.
+- [AI in the Enterprise](/en/grundlagen/ki-unternehmen/): Why companies use local AI: data privacy (GDPR), cost control, and operational sovereignty.
+- [Local vs Cloud: TCO Comparison](/en/grundlagen/lokal-vs-cloud/): TCO comparison for AI workloads: cloud APIs vs a local AI stack (Ollama, n8n, monitoring). Costs, risks, privacy and operations in practice.
+- [Multi-Agent Systems Explained](/en/grundlagen/multi-agent-systeme/): How multiple AI agents work together, how they communicate, and why it beats a single LLM.
+- [What is Agent Orchestration?](/en/grundlagen/was-ist-agent-orchestration/): Agent Orchestration coordinates multiple specialized AI agents. Roles, communication flow, and why it beats a single LLM.
+- [What is an LLM? Large Language Models Explained](/en/grundlagen/was-ist-ein-llm/): What is a Large Language Model (LLM)? How do Transformers, Tokens, and Inference work? Model sizes, VRAM requirements, and practical tips.
+- [Imprint](/en/imprint/): Legal notice and disclosure pursuant to § 5 ECG (Austrian E-Commerce Act) for AI Engineering.
+- [Learning Path](/en/learning-path/)
+- [AI Papers](/en/papers/): The most important papers on LLMs, RAG, Agents and AI Safety — summarized and explained in plain language.
+- [Attention Is All You Need — Transformer Explained](/en/papers/attention-is-all-you-need/): The Transformer paper by Vaswani et al. (2017) explained: Self-Attention, Multi-Head Attention and why this paper changed the entire AI landscape.
+- [Constitutional AI Explained](/en/papers/constitutional-ai/): The Constitutional AI paper by Bai et al. (2022, Anthropic) explained: How to align AI systems through principles instead of human feedback alone.
+- [Hierarchical Reasoning Model (2025) — Recurrent AI Without Chain-of-Thought](/en/papers/hierarchical-reasoning/): The Hierarchical Reasoning Model (HRM) solves complex tasks like Sudoku, maze pathfinding and ARC with just 27M parameters and 1000 training samples — without Chain-of-Thought.
+- [LoRA: Low-Rank Adaptation Explained](/en/papers/lora-paper/): The LoRA paper by Hu et al. (2021) explained: Parameter-efficient fine-tuning of large language models without retraining all weights.
+- [Retrieval-Augmented Generation (RAG) Paper Explained](/en/papers/rag-paper/): The RAG paper by Lewis et al. (2020) explained: How LLMs become better and more reliable through external knowledge sources.
+- [ReAct: Reasoning and Acting Explained](/en/papers/react-paper/): The ReAct paper by Yao et al. (2022) explained: How LLMs become capable agents by alternating between thinking and acting.
+- [Patterns](/en/patterns/): Proven Agent Orchestration patterns: memory management, task delegation, safety hooks and monitoring for Multi-Agent Systems.
+- [Agent Orchestration Patterns](/en/patterns/agent-orchestration-patterns/): Proven orchestration patterns for Multi-Agent Systems: sequential, parallel, hierarchical, router, and supervisor.
+- [Scaling Agent Teams](/en/patterns/agent-skalierung/): Add new agents, create multi-agent workflows, and scale an agent team: step-by-step guide with practical patterns.
+- [AI Agent as Digital Employee — Patterns & Architecture](/en/patterns/ai-agent-digital-employee/): How to onboard an AI agent as a digital employee: security architecture, skill system, credential isolation and EU AI Act compliance.
+- [Evals & Guardrails — Measuring and Securing LLM Quality](/en/patterns/evals-guardrails/): LLM Evaluations, Guardrails, Prompt Injection Protection, Hallucination Detection. Tools: promptfoo, Langfuse, RAGAS. With n8n eval workflow example.
+- [Heartbeat & Monitoring](/en/patterns/heartbeat-monitoring/): How to know if agents are running. Health checks, status updates, alerting.
+- [Human-in-the-Loop — Human-AI Collaboration](/en/patterns/human-in-the-loop/): Approval workflows, escalation patterns, confidence thresholds, audit trail. EU AI Act Art. 14 human oversight. With n8n approval workflow example.
+- [Memory Management Pattern](/en/patterns/memory-management/): How AI agents store and retrieve persistent knowledge. CLAUDE.md, Topic Files, Knowledge Graphs.
+- [Safety Hooks Pattern](/en/patterns/safety-hooks/): Guardrails, output validation, memory capture as automatic security layer.
+- [Self-Improving Agents — NemoClaw Pattern](/en/patterns/self-improving-agents/): How AI agents learn from mistakes: 3-tier memory, corrections.md, pre-action gates, self-escalation and two-tier heartbeat.
+- [Task Delegation Pattern](/en/patterns/task-delegation/): Orchestrator assigns tasks to specialized agents. Routing, priorities, deadlines.
+- [Privacy Policy](/en/privacy/): Privacy policy and information on the processing of personal data on wiki.ai-engineering.at.
+- [Security](/en/security/): Security for local AI infrastructure: API key handling, firewall setup, network segmentation and backup strategies.
+- [API Keys Secure Storage](/en/security/api-keys-sicher/): Vault, Environment Variables, Secrets Management for AI Stack.
+- [Backup Strategy](/en/security/backup-strategie/): 3-2-1 rule, automated backups for Ollama, n8n, PostgreSQL.
+- [Firewall Setup](/en/security/firewall-setup/): UFW, fail2ban, network segmentation for local AI infrastructure.
+- [Self-Hosted Security: The 6-Layer Model](/en/security/self-hosted-sicherheit/): 6 security layers for self-hosted AI infrastructure: network, SSH, firewall, containers, application, monitoring. Practical hands-on guide.
+- [Encryption: At Rest, In Transit, In Use](/en/security/verschluesselung/): Encryption for self-hosted AI: Protect data on disk, on the network, and during processing. LUKS, TLS, Confidential Computing explained.
+- [Support](/en/support/): Troubleshooting and help for your local AI stack: Ollama, n8n, Docker, networking and common failure modes.
+- [Troubleshooting](/en/support/troubleshooting/): Common problems with Ollama, n8n, Docker. Diagnosis and solutions.
+- [Terms & Conditions](/en/terms/): General Terms and Conditions for the purchase of digital products at AI Engineering.
+- [Tools](/en/tools/): Tools and infrastructure for your GDPR-compliant, 100% self-hosted AI stack: Docker, Ollama, n8n, Grafana, RAG, Proxmox and MCP.
+- [AI OS Setup Guide](/en/tools/ai-os-setup/): Set up Claude Code as an AI operating system: folder structure, business setup wizard, context files, and first commands in 15 minutes.
+- [AI Stack Setup in 30 Minutes: Ollama + Open WebUI + Docker](/en/tools/ai-stack-setup/): Step-by-step: Install Ollama, download an LLM, start Open WebUI. Your own AI stack running locally in 30 minutes.
+- [LLM Runtimes](/en/tools/ai-tools-database/): Local LLM execution and inference engines for self-hosted AI.
+- [CLI Coding Agents Compared — Claude Code, Mistral Vibe, Gemini CLI, Codex CLI](/en/tools/cli-coding-agents-comparison/): Comprehensive comparison of CLI Coding Agents: Claude Code, Mistral Vibe, Gemini CLI and OpenAI Codex CLI. Features, pricing, GDPR compliance and hands-on tests.
+- [Comparable Resources \u2014 Where Else You Can Learn](/en/tools/comparison-alternatives/): Honest comparison: Which external sources are better than our wiki in certain areas. EU Commission, WKO, n8n, Hugging Face, NIST, OECD and more.
+- [Docker Basics: Containers, Compose & Swarm](/en/tools/docker-grundlagen/): Understand Docker for AI workloads: Containers vs VMs, Docker Compose for local stacks, Docker Swarm for multi-node deployments. Hands-on guide.
+- [Docker vs Docker Swarm for AI](/en/tools/docker-vs-swarm/): Which is right for AI? Compose for development, Swarm for production.
+- [Grafana Monitoring](/en/tools/grafana-monitoring/): Monitoring with Prometheus + Grafana. Dashboards, alerts.
+- [Mattermost AI Agent](/en/tools/mattermost-agent/): Build an AI agent for Mattermost chat. Bot setup, prompts.
+- [MCP Server](/en/tools/mcp-server/): Model Context Protocol. Connect Claude to your infrastructure.
+- [Model Selection Guide](/en/tools/model-selection/): Choose the right AI model for your use case — from Llama to Mistral.
+- [n8n for Beginners](/en/tools/n8n-fuer-anfaenger/): Workflow automation with n8n. Getting started, nodes, triggers, integrations.
+- [n8n AI Workflow Bundle v3](/en/tools/n8n-workflow-bundle/): 14 production-ready n8n workflows with error handling, dual-LLM fallback and GDPR compliance. Architecture, categories and best practices.
+- [Ollama Tutorial](/en/tools/ollama-tutorial/): Run local LLMs with Ollama: install, pick models, use the API and integrate into a GDPR-compliant, 100% self-hosted AI stack.
+- [Open Source Tools & Projects](/en/tools/open-source-projects/): Curated list of the best open source tools for local AI: LLM runtimes, agent frameworks, RAG, monitoring, automation and security.
+- [Proxmox Setup](/en/tools/proxmox-setup/): Virtualization with Proxmox VE. VMs, containers, cluster.
+- [RAG Guide](/en/tools/rag-guide/): Retrieval-Augmented Generation with ChromaDB, Qdrant, Neo4j.
+
+## English — AI Tools (generated, 20)
+- [AI Chat Assistants 2026 — ChatGPT vs Claude vs Gemini](/en/ai-tools/ai-chat-assistants/): ChatGPT vs Claude vs Gemini vs Perplexity comparison. Pricing, context window, strengths, which one for what?
+- [AI Coding Tools Comparison 2026](/en/ai-tools/ai-coding-tools/): Claude Code vs Cursor vs Windsurf vs GitHub Copilot vs Cline. Real benchmarks, pricing, model support, IDE integration, practical recommendations.
+- [AI Development Frameworks 2026](/en/ai-tools/ai-development-frameworks/): LangChain vs LlamaIndex vs CrewAI vs AutoGen. Language, features, learning curve, community size.
+- [AI Image Generation 2026 Comparison](/en/ai-tools/ai-image-generation/): Midjourney vs DALL-E vs Stable Diffusion vs Flux. Quality, pricing, speed, text accuracy, self-hosted options.
+- [AI Search Engines 2026](/en/ai-tools/ai-search-engines/): Perplexity vs Google AI Overviews vs You.com. Pricing, citation quality, speed, use cases.
+- [AI Text-to-Speech 2026 Comparison](/en/ai-tools/ai-audio-speech/): ElevenLabs vs OpenAI TTS vs Bark. Voice cloning, pricing, languages, latency, self-hosted options.
+- [AI Video Generation 2026 Comparison](/en/ai-tools/ai-video-tools/): Sora vs Runway vs Pika vs Kling vs Luma Dream Machine. Pricing, quality, character consistency, duration, speed.
+- [Dify — No-Code AI App Builder](/en/ai-tools/dify/): Dify is an open-source no-code/low-code platform for rapidly building AI applications. Workflow editor, RAG integration, agent mode, self-hosting, API publicati
+- [Flowise — Visual LLM Flow Builder](/en/ai-tools/flowise/): Flowise is a visual no-code platform for building LLM flows. Node-based, integrates with Ollama, vector stores, custom tools, self-hosting.
+- [GPU Hardware for AI 2026 — Complete Buyer's Guide](/en/ai-tools/gpu-hardware-guide/): RTX 4090 vs 5090 vs A100 vs H100. VRAM, speed, power, price. Consumer vs enterprise. Cloud GPU costs.
+- [Hugging Face Hub — Model Discovery and Deployment](/en/ai-tools/hugging-face/): Hugging Face is the central repository for Open-Source LLMs, datasets, and Spaces. Transformers library, model cards, gated models, CLI tools, and production in
+- [Label Studio — Data Annotation Platform](/en/ai-tools/label-studio/): Label Studio is an open-source annotation platform for text, images, audio, and video. ML-assisted labeling, active learning, self-hosting, REST API.
+- [LiteLLM — Universal LLM API Proxy](/en/ai-tools/litellm/): LiteLLM is a unified interface for 100+ LLM providers. Routing, fallbacks, budget management, caching, self-hosting.
+- [LLM Monitoring & Observability 2026](/en/ai-tools/ai-monitoring-tools/): LangSmith vs Langfuse comparison. Pricing, self-hosted, features, integration.
+- [LM Studio — Desktop App for Local LLMs](/en/ai-tools/lm-studio/): LM Studio is a native desktop application (Windows, Mac, Linux) for managing and running local LLMs. GGUF model loading, local server mode, GPU optimization, co
+- [MLflow — Experiment Tracking and Model Registry](/en/ai-tools/mlflow/): MLflow is an open-source ML Ops platform for experiment tracking, model registry, and serving. Tracking API, model serving, registry, self-hosting.
+- [Open WebUI — Complete Reference Guide](/en/ai-tools/open-webui/): Open WebUI is the most widely-used web interface for local LLMs. Docker setup, Ollama integration, RAG pipeline, model management, REST API, custom tools, and e
+- [Open-Source LLMs 2026 — Benchmarks & Local Deployment](/en/ai-tools/open-source-llms/): Llama 4 vs DeepSeek V3 vs Qwen 2.5 vs Mistral. Real benchmarks, VRAM requirements, Ollama support, when to self-host vs cloud.
+- [Vector Database Comparison 2026](/en/ai-tools/vector-db-comparison/): Pinecone vs Qdrant vs ChromaDB vs Weaviate vs Milvus. Pricing, self-hosted options, RAG readiness, scale.
+- [Workflow Automation 2026 — n8n vs Make vs Zapier](/en/ai-tools/ai-workflow-automation/): n8n vs Make vs Zapier vs ActivePieces comparison. Pricing, self-hosted, AI nodes, integrations, scale economics.
+
+## English — Architecture (generated, 6)
+- [AI Gateway Pattern: Intelligent LLM Routing](/en/architecture/ai-gateway-pattern/): API Gateway design for LLMs: Load Balancing, Rate Limiting, Fallback Chains, Cost Tracking.
+- [AI Pipeline Design: ETL for LLM Systems](/en/architecture/ai-pipeline-design/): Data Ingestion, Preprocessing, Embedding, Indexing for RAG and Inference. Apache Airflow, Prefect, Dagster.
+- [Caching for AI: Embedding Cache, Semantic Cache, KV Cache](/en/architecture/caching-for-ai/): KV-Cache, Semantic Caching, Redis Embedding Cache. Save costs and reduce latency.
+- [Inference Server for LLMs: vLLM, TGI, Triton](/en/architecture/inference-server/): Text Generation Inference, vLLM, Triton for Production LLM Serving. Continuous Batching, PagedAttention, Speculative Decoding.
+- [Load Balancing for LLMs: Routing Strategies](/en/architecture/load-balancing-for-llms/): Round-Robin vs. Token-Aware Routing, Multi-Model Deployment, A/B Testing, Failover Strategies.
+- [Microservices for AI: Scaling LLM Systems](/en/architecture/microservices-for-ai/): Microservice patterns for AI: Model Serving, API Gateways, Sidecar patterns. Docker Compose and Kubernetes examples.
+
+## English — Categories (generated, 6)
+- [AI Agents — Agent Development](/en/categories/ai-agents/): Overview of AI agent frameworks: Single vs Multi-agent, CrewAI, AutoGen, LangGraph. Architecture, use cases, limitations, safety
+- [AI Image Generation](/en/categories/image-generation/): Overview of self-hosted and cloud image generation: ComfyUI, Stable Diffusion, Flux, Midjourney. History, architecture, legal considerations
+- [Fine-Tuning and Training — Model Adaptation](/en/categories/fine-tuning-and-training/): Fine-Tuning vs Prompt vs RAG: LoRA, QLoRA, full training, tools, costs, when to use what?
+- [RAG and Retrieval — Knowledge Augmentation](/en/categories/rag-and-retrieval/): Retrieval-Augmented Generation: Architecture, Vector DBs, chunking, LangChain vs LlamaIndex, enterprise patterns
+- [Speech and Audio AI](/en/categories/speech-and-audio/): TTS, STT, voice cloning, music generation: ElevenLabs, Whisper, Coqui TTS, Suno AI, self-hosted options
+- [Video Generation with AI](/en/categories/video-generation/): Text-to-video 2026: Sora, Runway Gen-4.5, Kling, Pika—capabilities, limitations, costs, comparisons
+
+## English — Comparisons (generated, 13)
+- [Agent Frameworks — Comparison](/en/comparisons/agent-frameworks/): CrewAI vs AutoGen vs LangGraph vs Semantic Kernel. Architecture, multi-agent support, tool integration.
+- [Claude vs ChatGPT — Technical Comparison March 2026](/en/comparisons/claude-vs-chatgpt/): Complete comparison of Claude and ChatGPT for developers and decision-makers covering architecture, pricing, APIs, code generation, and production recommendatio
+- [Cloud GPU Comparison 2026 — Prices & Performance](/en/comparisons/cloud-gpu-comparison/): Cloud GPU pricing: Lambda Labs, RunPod, Vast.ai, CoreWeave. Spot vs on-demand, inference vs training, cost optimization
+- [Cursor vs Claude Code — IDE Comparison 2026](/en/comparisons/cursor-vs-claude-code/): Head-to-head comparison: Cursor IDE vs Claude Code CLI, features, pricing, agentic coding, when to use which
+- [Experiment Tracking Tools — Comparison](/en/comparisons/experiment-tracking/): MLflow vs Weights & Biases vs Neptune vs ClearML. Features, pricing, self-hosted options.
+- [LangChain vs LlamaIndex — Framework Comparison](/en/comparisons/langchain-vs-llamaindex/): LangChain + LangGraph vs LlamaIndex: Architecture, use cases, learning curve, when to use which
+- [Local LLM Interfaces — Comparison](/en/comparisons/local-llm-interfaces/): Open WebUI vs text-gen-webui vs LM Studio vs Jan.ai vs GPT4All. Features, performance, UX, Ollama support.
+- [n8n vs Zapier vs Make — Workflow Automation Detailed Comparison 2026](/en/comparisons/n8n-vs-zapier-vs-make/): Production-grade comparison of self-hosted (n8n) vs cloud (Zapier, Make) with focus on pricing models, features, GDPR, AI integration, and real cost scenarios.
+- [No-Code AI Builders — Comparison](/en/comparisons/nocode-ai-builders/): Flowise vs Langflow vs Dify vs n8n AI Nodes. Visual editors, RAG, agents, self-hosting.
+- [Ollama vs Cloud LLMs — Local AI vs API Services](/en/comparisons/ollama-vs-cloud-llms/): Technical and practical comparison of local AI deployment with Ollama vs cloud-based LLM APIs
+- [Quantization Formats — Technical Comparison](/en/comparisons/quantization-formats/): GGUF vs GPTQ vs AWQ vs EXL2 vs BitsAndBytes. Quality at different bit-widths, speed, compatibility, tool support.
+- [RAG vs Fine-Tuning — When to Use What](/en/comparisons/rag-vs-fine-tuning/): Decision matrix: RAG for volatile knowledge, fine-tuning for stable behavior. Hybrid approaches, costs, examples
+- [Vector Database Comparison 2026](/en/comparisons/vector-databases/): Weaviate vs Qdrant vs Milvus vs Chroma vs pgvector vs Pinecone. Performance benchmarks, scaling, features, self-hosted vs cloud.
+
+## English — Compliance (generated, 5)
+- [Austria-Specific AI Regulations & Privacy](/en/compliance/austria/): Austrian law requirements for AI, data protection, and doing business in Austria and EU
+- [EU AI Act — Complete SMB Compliance Guide](/en/compliance/eu-ai-act-guide/): Step-by-step guide for small and medium businesses to understand and comply with the EU AI Act
+- [EU AI Act Compliance Checklist](/en/compliance/checklist/): Actionable compliance checklist for SMBs to prepare for August 2, 2026 enforcement
+- [EU AI Act Risk Categories — Classification Guide](/en/compliance/risk-categories/): Detailed breakdown of EU AI Act risk categories and how to classify your AI systems
+- [GDPR & AI — Data Protection in the Age of Automation](/en/compliance/gdpr/): How GDPR applies to AI systems, automated decision-making, and practical compliance strategies
+
+## English — Concepts (generated, 24)
+- [AI Safety and Alignment](/en/concepts/ai-safety/): RLHF, DPO, Constitutional AI — how models become "safe", jailbreaking, prompt injection, defenses, EU AI Act connection
+- [Attention Mechanisms](/en/concepts/attention-mechanisms/): Self-Attention, Cross-Attention, Multi-Head, Flash Attention, Multi-Query, Grouped-Query, Sliding Window, Sparse Patterns
+- [Chain-of-Thought Prompting](/en/concepts/chain-of-thought/): CoT explained — why it works, zero-shot CoT, few-shot CoT, self-consistency, tree-of-thought, extended thinking, when CoT is overkill
+- [Context Windows](/en/concepts/context-windows/): What context windows are, 2026 model comparison, long-context strategies, needle-in-haystack problem, effective vs advertised lengths
+- [Diffusion Models](/en/concepts/diffusion-models/): Forward/Reverse Diffusion Process, Noise Schedules, DDPM, DDIM, Latent Diffusion, Classifier-Free Guidance — Theory and Practice
+- [Embedding Models](/en/concepts/embedding-models/): How Embeddings Work, Training (Contrastive Learning), MTEB Benchmark, Comparison — Sentence-Transformers, OpenAI, Nomic, BGE, E5
+- [Fine-Tuning LLMs](/en/concepts/fine-tuning/): Full fine-tuning vs LoRA vs QLoRA — when to use each, dataset preparation, hyperparameters, costs, tools like Unsloth and Axolotl
+- [Function Calling](/en/concepts/function-calling/): How Function Calling Works, LLM Tool Use Protocol, OpenAI Format, Anthropic tool_use, Open-Source (Hermes, Gorilla) — JSON Schema, Parallel Calls
+- [Knowledge Distillation](/en/concepts/knowledge-distillation/): Teacher-Student Paradigm, Soft Labels, Temperature Scaling, Distillation for LLMs — When to Distill, Code Examples
+- [LoRA and Adapters](/en/concepts/lora-adapters/): Low-Rank Adaptation math simplified, rank selection, QLoRA vs DoRA, merging adapters, practical 30-minute training examples
+- [Mixture of Experts (MoE)](/en/concepts/mixture-of-experts/): MoE architecture — what experts are, routing mechanisms, sparse activation, models (Mixtral, DeepSeek), memory vs compute tradeoffs
+- [Model Merging](/en/concepts/model-merging/): SLERP, TIES, DARE, Linear Merge, mergekit Tool, Practical Merge Recipes — When Merging Works
+- [Multimodal Models](/en/concepts/multimodal-models/): Vision-Language Models, Audio, Video Understanding — architecture, comparison (GPT-4V, Claude 3.5 Vision, Gemini, LLaVA), practical use-cases
+- [Quantization](/en/concepts/quantization/): Compress large models — FP32 to INT4, formats (GGUF, GPTQ, AWQ), quality vs VRAM tradeoffs with real numbers, quantizing with llama.cpp
+- [RAG Explained](/en/concepts/rag-explained/): Retrieval Augmented Generation — retrieve relevant documents, augment prompts, generate answers. Embedding models, vector search, chunking, reranking strategies
+- [Reinforcement Learning](/en/concepts/reinforcement-learning/): RL Basics (States, Actions, Rewards, Policies), PPO, DPO, RLHF Connection, Robotics & Games, LLM Alignment
+- [Reranking](/en/concepts/reranking/): Cross-Encoder vs Bi-Encoder, Reranking Pipeline, Cohere Rerank, BGE-Reranker, ColBERT — RAG Integration
+- [Speculative Decoding](/en/concepts/speculative-decoding/): Draft-then-Verify Approach, Acceptance Criteria, vLLM/llama.cpp Implementation, Medusa, Eagle, Lookahead Variants
+- [Structured Generation](/en/concepts/structured-generation/): Constrained Decoding, JSON Mode, Grammar-Based Generation — Outlines, Guidance, Instructor, LMQL, Regex Constraints
+- [Token Efficiency in AI Agents](/en/concepts/token-efficiency/): Deep reference on token optimization. Token bloat problem, prompt caching, context window management, model selection, and concrete cost-saving strategies.
+- [Tokenization](/en/concepts/tokenization/): BPE, WordPiece, SentencePiece explained — token counting vs words, context windows, tokenizer differences, saving tokens with compression
+- [Transformer Architecture](/en/concepts/transformer-architecture/): Self-Attention mechanism step-by-step, encoder/decoder patterns, positional encoding, scaling laws, and practical parameters that define modern LLMs
+- [Vector Databases](/en/concepts/vector-databases/): Embeddings and similarity, comparison (ChromaDB, Pinecone, Weaviate, Qdrant, Milvus, pgvector), self-hosted vs cloud, HNSW and IVF indexing strategies
+- [What is an Agent Harness?](/en/concepts/agent-harness/): Conceptual deep dive into agent harnesses. Definition, components, history, design patterns, and how Claude Code functions as a harness.
+
+## English — Ethics (generated, 4)
+- [AI Bias: Types, Measurement, Debiasing](/en/ethics/ai-bias/): Types of bias: selection, confirmation, automation, representation. Measuring fairness metrics, debiasing techniques. Fairlearn, AIF360 tools, practical example
+- [AI Governance & Model Risk Management](/en/ethics/ai-governance/): AI governance frameworks, model risk management. Documentation requirements, audit trails, model cards. Internal AI policies, responsible AI guidelines.
+- [Environmental Impact of AI](/en/ethics/environmental-impact/): Carbon footprint of training, inference energy costs. Green AI practices, efficient architectures. Carbon tracking tools (CodeCarbon, ML CO2 Impact).
+- [Explainable AI (XAI): SHAP, LIME, Feature Importance](/en/ethics/explainable-ai/): XAI methods: SHAP, LIME, attention visualization, feature importance. Interpretability vs accuracy tradeoff. EU AI Act Article 13 requirements.
+
+## English — Basics (generated, 10)
+- [AI API Basics](/en/grundlagen/api-basics/): How AI APIs work. REST, authentication, rate limits, pricing models. Anthropic, OpenAI, Google, Mistral APIs explained.
+- [AI Deployment — Models in Production](/en/grundlagen/ai-deployment/): How to deploy AI models. Docker, vLLM, TGI, Ollama. Scaling, batching, GPU sharing. Monitoring and cost tracking.
+- [Docker for AI Stacks](/en/grundlagen/docker-for-ai/): Docker basics for AI projects: Docker Compose, GPU passthrough, networking, volumes, and troubleshooting
+- [Embeddings Explained](/en/grundlagen/embeddings-explained/): What are embeddings? How do they work? text-embedding-3, nomic-embed, BGE. Practical application for similarity search.
+- [Grafana Basics: Dashboards, Panels, and Alerts](/en/grundlagen/grafana-introduction/): Getting started with Grafana: connecting data sources, building dashboards, creating panels, setting up alerts
+- [Multi-Agent Systems — Architecture & Patterns](/en/grundlagen/multi-agent-systems/): Specialized agents collaborate: Manager/Worker (Hub & Spoke), Peer-to-Peer, Hierarchical. State management, conflict resolution, error handling, real-world patt
+- [n8n Introduction: Nodes, Triggers, and Expressions](/en/grundlagen/n8n-introduction/): Fundamentals of n8n workflow automation: what is a node, triggers, expressions with = prefix in 2.x, and AI integration
+- [Ollama Setup Guide](/en/grundlagen/ollama-setup/): Install and configure Ollama on Windows, macOS, and Linux; pull models, optimize performance, enable GPU
+- [Prompt Engineering Advanced](/en/grundlagen/prompt-engineering-advanced/): Beyond basics. System prompts, few-shot, chain-of-thought, tool use, JSON mode. Optimization and evaluation.
+- [What is Agent Orchestration?](/en/grundlagen/what-is-agent-orchestration/): Coordinating multiple AI agents for complex tasks. Orchestration vs choreography, tools, patterns, problems and solutions.
+
+## English — Categories (DE) (generated, 5)
+- [AI Coding Tools](/en/kategorien/ai-coding/): Comparison of Claude Code, GitHub Copilot, Cursor, Windsurf, Cody, and Aider for AI-assisted development
+- [LLM Models: Cloud vs Local](/en/kategorien/llm-models/): Comprehensive comparison of language models: cloud APIs (Claude, GPT, Gemini) vs self-hosted (Llama, Mistral, Qwen, Gemma)
+- [Monitoring AI Systems](/en/kategorien/monitoring/): Observability for AI stacks: metrics, logging, alerting with Grafana, Prometheus, Datadog, Uptime Kuma
+- [Self-Hosted AI Stack Components](/en/kategorien/self-hosted/): Full breakdown of self-hosted components: LLMs, UIs, workflows, monitoring, vector DBs with hardware recommendations by budget
+- [Workflow Automation Platforms](/en/kategorien/workflow-automation/): Comparison of n8n, Zapier, Make, Power Automate, and Activepieces for AI automation
+
+## English — MLOps (generated, 6)
+- [Experiment Tracking — MLflow, W&B, Neptune](/en/mlops/experiment-tracking/): MLflow, Weights & Biases, Neptune, tracking runs, metrics, artifacts, setup examples, comparison table, self-hosted options.
+- [MLOps — ci-cd-fuer-ml](/en/mlops/ci-cd-for-ml/): Complete reference guide for ci-cd-fuer-ml in production ML systems.
+- [MLOps — datenqualitaet](/en/mlops/datenqualitaet/): Complete reference guide for datenqualitaet in production ML systems.
+- [MLOps — feature-stores](/en/mlops/feature-stores/): Complete reference guide for feature-stores in production ML systems.
+- [MLOps — model-monitoring](/en/mlops/model-monitoring/): Complete reference guide for model-monitoring in production ML systems.
+- [MLOps — model-registry](/en/mlops/model-registry/): Complete reference guide for model-registry in production ML systems.
+
+## English — Papers (generated, 11)
+- [BERT — Bidirectional Encoder Transformers](/en/papers/bert-paper/): Masked Language Modeling, Next Sentence Prediction, bidirectional context, fine-tuning paradigm, impact and legacy (RoBERTa, ALBERT, DeBERTa).
+- [Chain-of-Thought — Step-by-Step Reasoning](/en/papers/chain-of-thought-paper/): Wei et al. 2022, Few-shot CoT prompting, Zero-shot CoT ("Let's think step by step"), Self-consistency, Tree of Thoughts extensions.
+- [DPO Explained — Direct Preference Optimization](/en/papers/dpo-explained/): "Direct Preference Optimization" (Rafailov et al. 2023). DPO is faster and cheaper than RLHF. Does it replace RLHF entirely?
+- [Flash Attention — Efficient Transformer Inference](/en/papers/flash-attention/): IO-aware attention, tiling, memory hierarchy. Flash Attention 1 vs. 2 vs. 3, speed/memory improvements, practical inference impacts.
+- [LLaMA — Meta's Open-Source Language Models](/en/papers/llama-paper/): LLaMA 1 through LLaMA 3. Training strategies, architecture decisions, RLHF in LLaMA 2, and why Meta open-sourced these models.
+- [Mixture of Experts Explained](/en/papers/mixture-of-experts/): "Mixtral of Experts" (Mistral 2024) + MoE concept. Sparse activation, routing, efficient large models. DeepSeek MoE and beyond.
+- [RLHF Explained — Training with Human Feedback](/en/papers/rlhf-explained/): "Training Language Models to Follow Instructions with Human Feedback" (InstructGPT). How RLHF makes models useful and safe. Reward models and PPO training.
+- [Scaling Laws Explained — Compute-Optimal Training](/en/papers/scaling-laws/): "Scaling Laws for Neural Language Models" (Kaplan et al. 2020) + Chinchilla. How many parameters? How much data? The math behind large models.
+- [Stable Diffusion — Latent Diffusion Models](/en/papers/stable-diffusion/): Latent Diffusion Models paper, VAE + U-Net + CLIP architecture, conditioning. SD 1.5 → SDXL → SD3 evolution.
+- [The GPT Series — From GPT-1 to GPT-4](/en/papers/gpt-series/): The evolution of GPT-1 through GPT-2, GPT-3, and GPT-4. Architecture evolution, scaling laws, and why this series revolutionized the AI market.
+- [Whisper — Multilingual Speech Recognition](/en/papers/whisper-paper/): Radford et al., weak supervision at scale, encoder-decoder transformer architecture, multilingual training, model sizes, accuracy vs speed tradeoffs.
+
+## English — Patterns (generated, 5)
+- [Advanced Prompting Techniques — Get Better Results From AI](/en/patterns/prompting-techniques/): Proven techniques to improve AI output quality, reliability, and specificity
+- [AI Agent Patterns — ReAct, Plan-and-Execute, Reflection, Multi-Agent](/en/patterns/agent-patterns/): Agent architecture patterns. ReAct loop, Plan-and-Execute, Reflection, Multi-Agent orchestration, complexity tradeoffs
+- [Cost Optimization — Save 70%+ on AI APIs](/en/patterns/cost-optimization/): Reduce AI API costs without losing quality. Prompt caching, model routing, batch processing, context optimization, embedding reuse
+- [Structured Output — JSON, Validation, Parsing](/en/patterns/structured-output/): Extract structured data from LLMs. JSON mode, XML parsing, Pydantic, Instructor, schema validation, retry strategies
+- [Tool Use Patterns — Function Calling for LLMs](/en/patterns/tool-use-patterns/): How LLMs call tools/functions. JSON schema, execution loops, best practices, parallelization. Claude vs OpenAI vs Gemini comparison.
+
+## English — Security (generated, 6)
+- [AI Supply Chain Security](/en/security/supply-chain-security/): Model supply chain: Hugging Face trust, model poisoning, safetensors vs pickle. Dependency scanning for ML, SBOM for AI, model cards. Verifying model integrity,
+- [API Security for AI Systems](/en/security/api-security-ai/): Securing AI API endpoints: authentication, rate limiting, token management. API key rotation, OAuth for AI services, audit logging. DDoS protection for inferenc
+- [Data Privacy & Data Handling for AI](/en/security/data-privacy-ai/): Data handling for AI: anonymization, differential privacy, on-premise vs cloud, data residency, encryption. GDPR implications for training data, right to deleti
+- [LLM Red Teaming & Adversarial Testing](/en/security/llm-red-teaming/): Red teaming methodology for LLMs, automated red team tools, Garak, PyRIT, AI red team frameworks. Testing categories: toxicity, bias, data leakage, jailbreaks.
+- [Output Filtering & Content Moderation for LLMs](/en/security/output-filtering/): Content moderation for LLM outputs, guardrails libraries, NeMo Guardrails, Guardrails AI, LLM Guard. PII detection, toxicity filtering, topic restriction.
+- [Prompt Injection & Jailbreaking Defense](/en/security/prompt-injection/): Direct and indirect prompt injection, jailbreaking techniques, defense strategies, input sanitization, output filtering, instruction hierarchy. With real exampl
+
+## English — Skills (generated, 2)
+- [Creating Skills](/en/skills/creating/): How to build your own Claude Code skills — from idea to quality gate.
+- [Skills — AI Engineering Toolkit](/en/skills/index/): 49 custom-built skills for Claude Code — Infrastructure, marketing, organization
+
+## English — Tools (generated, 41)
+- [Agent Harnesses for Claude Code — Enterprise Orchestration](/en/tools/claude-code-agent-harness/): Deep reference on Agent Harnesses. Everything Claude Code vs Framework vs Ruflo vs Composio. Comparison, architecture, installation. Which harness fits your use
+- [Agent Teams — Claude Code Reference](/en/tools/claude-code-agent-teams/): Orchestrate multiple Claude Code sessions as a coordinated team — Agent Teams enable parallel work with shared task lists and direct agent communication.
+- [Claude Code — Environment Variables Reference](/en/tools/claude-code-environment-variables/): Complete documentation of all environment variables supported by Claude Code, including API authentication, model selection, sandboxing, networking, and provide
+- [Claude Code — Interactive Mode & Keyboard Shortcuts](/en/tools/claude-code-interactive/): Complete reference for keyboard shortcuts, slash commands, Vim mode, multi-line input, @file mentions, task lists, voice input, bash mode, and all interactive f
+- [Claude Code — Model Configuration Reference](/en/tools/claude-code-models/): Complete documentation of model selection, aliases, effort levels, extended thinking, 1M context, provider configuration, and cost optimization strategies.
+- [Claude Code — Sandboxing Reference](/en/tools/claude-code-sandbox/): Complete documentation of native sandboxing for Claude Code — filesystem isolation, network restrictions, security benefits, configuration, and best practices f
+- [Claude Code — Troubleshooting Guide](/en/tools/claude-code-troubleshooting/): Comprehensive troubleshooting guide for installation, authentication, networking, performance, MCP, permissions, Git integration, and IDE issues with step-by-st
+- [Claude Code + n8n — Integration Guide](/en/tools/claude-code-n8n/): Building intelligent workflows with Claude Code and n8n. Covers architecture patterns, webhook triggers, workflow generation, optimization, automation pipelines
+- [Claude Code CLI — Complete Guide](/en/tools/claude-code/): Master the Claude Code CLI, skills system, and agent architecture for autonomous coding tasks
+- [Claude Code CLI — Complete Reference](/en/tools/claude-code-cli/): Exhaustive reference for the Claude Code command line interface. Every flag, command, option, keyboard shortcut, environment variable, and error handling — sour
+- [Claude Code Debugging & Troubleshooting](/en/tools/claude-code-debugging/): Diagnostic guide for Claude Code issues. Covers common errors with solutions, /doctor command, logging, performance optimization, platform-specific issues, and 
+- [Claude Code for Teams — Shared Config & CI/CD](/en/tools/claude-code-teams/): Team deployment of Claude Code. Covers shared configuration, permissions, GitHub Actions integration, headless/print modes, cost management, security, and onboa
+- [Claude Code GitHub Actions — CI/CD Integration](/en/tools/claude-code-github-actions/): Complete reference for Claude Code in GitHub Actions. Automated code reviews, PR descriptions, issue triage, test generation, security scanning, and cost manage
+- [Claude Code Hooks — Complete Reference](/en/tools/claude-code-hooks/): Exhaustive documentation of all hook types, events, matchers, environment variables, exit codes, and configuration options
+- [Claude Code MCP — Complete Reference](/en/tools/claude-code-mcp/): Comprehensive reference for Model Context Protocol in Claude Code, including server management, transport types, configuration, environment variables, OAuth, an
+- [Claude Code Permissions — Complete Reference](/en/tools/claude-code-permissions/): Exhaustive reference for Claude Code permissions system, including permission modes, rule syntax, tool-specific rules, precedence, and managed policies.
+- [Claude Code Plugin System — Complete Reference](/en/tools/claude-code-plugin-system/): Exhaustive reference to the Claude Code plugin system. Plugin anatomy, installation, marketplaces, custom plugins, enterprise governance via LiteLLM, and the en
+- [Claude Code Security — Hardening & Best Practices](/en/tools/claude-code-security/): Comprehensive security reference for Claude Code. Permission modes, sandbox configuration, hooks, CLAUDE.md security, enterprise compliance, and common pitfalls
+- [Claude Code Settings — Complete Reference](/en/tools/claude-code-settings/): Exhaustive reference for Claude Code settings.json including all configuration fields, scopes, sandbox options, and global configuration options.
+- [Claude Code Skills — Complete Reference](/en/tools/skills-and-plugins/): Comprehensive guide to creating, configuring, and managing skills in Claude Code. Frontmatter reference, string substitutions, bundled skills, directory structu
+- [Claude Code Sub-Agents — Complete Reference](/en/tools/claude-code-agent-sdk/): Comprehensive guide to Sub-Agents in Claude Code. Built-in agents, custom agent creation, frontmatter reference, tool control, MCP scoping, agent invocation, pe
+- [Claude Code with Amazon Bedrock](/en/tools/claude-code-bedrock/): Configure Claude Code to use Amazon Bedrock – AWS authentication, IAM permissions, environment variables, model pinning, and enterprise deployment guidance.
+- [Claude Code with Google AI (Generative AI API)](/en/tools/claude-code-google-ai/): Configure Claude Code with Google AI (Generative AI API) – API keys, authentication, environment variables, and comparison with Vertex AI for different use case
+- [Claude Code with Google Vertex AI](/en/tools/claude-code-vertex/): Configure Claude Code to use Google Vertex AI – GCP authentication, region configuration, environment variables, model pinning, and enterprise deployment best p
+- [Claude Code Workflows & Patterns — Practical Guide](/en/tools/claude-code-workflows/): Real-world patterns for using Claude Code in daily development. Covers git workflows, code migration, refactoring, testing, documentation, debugging, and multi-
+- [Claude Cowork — Agent Collaboration Mode](/en/tools/cowork/): Run persistent AI agents, orchestrate multi-agent teams, and build autonomous workflows with Cowork
+- [Claude Dispatch — Control Agents From Your Phone](/en/tools/dispatch/): Remote-control your desktop AI agents from your phone with Dispatch mode
+- [CLAUDE.md — Complete Reference](/en/tools/claude-md-reference/): Persistent Memory for Claude Code: CLAUDE.md files, load order, scope levels, rules, auto-memory system
+- [CLAUDE.md Masterclass — Project Configuration](/en/tools/claude-md-guide/): Deep guide to writing effective CLAUDE.md files for your project. Covers inheritance hierarchy, what to include, architecture documentation, team conventions, a
+- [Community Guides for Claude Code — The Best Learning](/en/tools/claude-code-community-guides/): Overview of the best community learning resources. Ultimate Guide vs Everything You Need vs Tips vs Cheat Sheet vs Best Practice. Which guide for which level. W
+- [GDPR Traffic Light Rating — AI Tool Safety Assessment](/en/tools/gdpr-traffic-light/): Quick-reference guide to GDPR compliance of popular AI tools using traffic light rating system
+- [Git Integration — Claude Code Reference](/en/tools/claude-code-git/): Complete reference for Git integration in Claude Code — commit workflows, pull requests, branch management, merge conflicts, git hooks, co-authored-by, diff rev
+- [Mattermost Integration for AI Workflows](/en/tools/mattermost/): Self-hosted chat system as agent communication backbone. Webhooks, bot API, n8n integration, MM-polling patterns for multi-agent coordination.
+- [mcp2cli — Using MCP Servers as CLI](/en/tools/mcp2cli/): Deep dive into mcp2cli. Token-efficient MCP integration for Claude Code. 96-99% token reduction. Baking configs, OAuth support, tool filtering. Installation, ex
+- [Model Context Protocol (MCP) — Connect AI to Your Tools](/en/tools/mcp/): Use Model Context Protocol to connect Claude to databases, APIs, local tools, and external services
+- [Monitoring & Telemetry — Claude Code Reference](/en/tools/claude-code-monitoring/): OpenTelemetry integration for Claude Code — Track usage, costs, tool activity, and session analytics. Metrics, events, dashboards, and ROI measurement.
+- [Output Styles — Claude Code Reference](/en/tools/claude-code-output-styles/): Customize Claude Code for different use cases — Output styles modify the system prompt to use Claude as different kinds of agents.
+- [Plugins & Marketplaces — Claude Code Reference](/en/tools/claude-code-plugins/): Complete reference for Claude Code plugin system — Plugin structure, marketplaces, installation, trust, and custom plugins with skills, agents, hooks, and MCP s
+- [Sub-Agents in Claude Code](/en/tools/agents/): Specialized AI agents with isolated context, tool control, and permissions. From built-in agents (Explore, Plan) to custom agent definitions with persistent mem
+- [The Best MCP Servers — Curated Overview 2026](/en/tools/awesome-mcp-servers/): Comprehensive reference of important MCP Servers. Official servers, GitHub, Slack, Google Drive, PostgreSQL, AWS, Cloud Services, Developer Tools. How to find, 
+- [The Claude Code Ecosystem — Repos, Plugins, Skills, Harnesses](/en/tools/claude-code-ecosystem/): Comprehensive catalog of the Claude Code ecosystem with real GitHub URLs. Awesome Lists, Agent Harnesses, Hooks, Skills, Plugins, MCP tools, and Community Guide
+
+## English — Tutorials (generated, 18)
+- [AI API Integration — Anthropic, OpenAI, Google](/en/tutorials/ai-api-integration/): Integrate AI APIs in Python & TypeScript. Authentication, streaming, tool use, error handling, rate limiting, cost optimization
+- [AI Monitoring Dashboard in 15 Minutes](/en/tutorials/grafana-ai-monitoring/): Set up Grafana and Prometheus to monitor Ollama, n8n, and Open WebUI performance
+- [Build a Multi-Agent System Step by Step](/en/tutorials/multi-agent-setup/): Architecture and implementation for coordinated AI agents: specialist roles, task delegation, communication patterns
+- [Build an AI Agent — Tool Use, Memory, Loops](/en/tutorials/build-ai-agent/): Step-by-step guide to building a production-ready AI agent with Claude API. Tool definitions, execution loops, conversation memory, error handling.
+- [Building a RAG Pipeline from Scratch](/en/tutorials/build-rag-pipeline/): Step-by-step guide to building a RAG (Retrieval Augmented Generation) pipeline with Python, ChromaDB, Ollama, and LangChain. Complete working examples included.
+- [ComfyUI Workflows — Stable Diffusion & Flux](/en/tutorials/comfyui-workflows/): AI image generation with ComfyUI. Installation, first workflows, custom nodes, Stable Diffusion vs Flux, practical examples
+- [Fine-Tuning with Unsloth QLoRA](/en/tutorials/fine-tuning-guide/): Step-by-step QLoRA fine-tuning with Unsloth for Llama 3. Dataset preparation, training, evaluation, VRAM requirements, ROI calculation
+- [GDPR Compliance Check for Your AI Stack](/en/tutorials/gdpr-compliance-check/): Practical GDPR checklist for self-hosted AI systems in Europe: data processing, retention, user rights, technical measures
+- [Local LLM Setup — Beginner to Expert](/en/tutorials/local-llm-setup/): Complete guide for Ollama, llama.cpp, LM Studio, and vLLM. Model selection by VRAM, performance tuning, benchmarking your setup
+- [Set Up Claude Code AI OS](/en/tutorials/claude-code-setup/): Install Claude Code CLI, configure .claude/ directory, create skills and MCP connections
+- [Set Up Your AI Stack in 30 Minutes](/en/tutorials/ai-stack-setup/): Complete guide to deploying a self-hosted AI stack with Docker Compose, including Ollama, Open WebUI, and n8n
+- [Tutorial — docker-compose-ai-stack](/en/tutorials/docker-compose-ai-stack/): Step-by-step guide for docker-compose-ai-stack.
+- [Tutorial — huggingface-models](/en/tutorials/huggingface-models/): Step-by-step guide for huggingface-models.
+- [Tutorial — open-webui-setup](/en/tutorials/open-webui-setup/): Step-by-step guide for open-webui-setup.
+- [Tutorial — pgvector-setup](/en/tutorials/pgvector-setup/): Step-by-step guide for pgvector-setup.
+- [Tutorial — reverse-proxy-ai](/en/tutorials/reverse-proxy-ai/): Step-by-step guide for reverse-proxy-ai.
+- [Tutorial — whisper-transcription](/en/tutorials/whisper-transcription/): Step-by-step guide for whisper-transcription.
+- [Your First 3 AI Workflows with n8n](/en/tutorials/n8n-first-workflows/): Step-by-step guides for webhook+Ollama, RSS feed summarization, and form-based classification workflows
+
+## English — Blog (8)
+- [Docker for AI: Why Containers Make Your Stack Production-Ready](/en/blog/2026-03-12-docker-basics-for-ai/): Without Docker, your AI stack only runs on your machine. With Docker, it runs everywhere. The entry point for AI developers.
+- [Install Ollama in 5 Minutes — Step by Step (Windows, Mac, Linux)](/en/blog/2026-03-12-install-ollama-step-by-step/): From zero to running local LLM in 5 minutes. Tested on Windows 11, macOS Sonoma and Ubuntu 24.04.
+- [Karpathy's autoresearch: Autonomous AI Research on Your Local GPU](/en/blog/2026-03-12-karpathy-autoresearch-local-ai-research/): 26,000 GitHub stars in 6 days — what Andrej Karpathy's new project actually does, and how to run it on an RTX 3090.
+- [Your First Local AI Chatbot: Set Up Open WebUI in 10 Minutes](/en/blog/2026-03-12-open-webui-first-chatbot/): Ollama is running, but you want a browser interface. Here's how to set up Open WebUI — the ChatGPT-like interface for your local stack.
+- [Terminal Basics for AI Developers — the 10 Commands You Actually Need](/en/blog/2026-03-12-terminal-basics-for-ai-developers/): No CS degree needed. These 10 terminal commands are all you need to start your own AI stack.
+- [What Is a Large Language Model? Explained Without Buzzwords](/en/blog/2026-03-12-what-is-a-large-language-model/): LLM, GPT, Transformer — what's actually going on inside? An honest explanation without marketing speak.
+- [Why You Shouldn't Use ChatGPT at Work — and What to Use Instead](/en/blog/2026-03-12-why-local-ai-instead-of-cloud/): GDPR Art. 5, EU AI Act, data transfer to the US: three reasons why self-hosted AI is mandatory for European companies.
+- [Skills Overview — AI Engineering Toolkit](/en/blog/skills-overview/): 49 custom-built Claude Code skills for infrastructure, marketing, and organization

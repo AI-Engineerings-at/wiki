@@ -25,6 +25,8 @@
  * prüft, dass beide Seiten jeder Zeile existieren.
  */
 
+import { EXTRA_PAIRS } from './generated/index'
+
 /** [DE-Pfad, EN-Pfad] — ohne abschließenden Schrägstrich. */
 export const languagePairs: ReadonlyArray<readonly [string, string]> = [
   ['/', '/en'],
@@ -103,8 +105,16 @@ export const languagePairs: ReadonlyArray<readonly [string, string]> = [
   ['/tools/vergleich-alternativen', '/en/tools/comparison-alternatives'],
 ]
 
-const deToEn = new Map(languagePairs.map(([de, en]) => [de, en]))
-const enToDe = new Map(languagePairs.map(([de, en]) => [en, de]))
+/**
+ * Alle Paare: TSX-Tabelle oben + EXTRA_PAIRS aus dem generierten Index
+ * (Blog-Posts mit `pendant`, MDX-Artikel mit gleichem Slug in der
+ * gespiegelten Kategorie, MDX-Kategorie-Seiten). scripts/build-index.js
+ * nimmt nur Paare auf, deren beide Seiten als Datei existieren.
+ */
+export const allLanguagePairs: ReadonlyArray<readonly [string, string]> = [...languagePairs, ...EXTRA_PAIRS]
+
+const deToEn = new Map(allLanguagePairs.map(([de, en]) => [de, en]))
+const enToDe = new Map(allLanguagePairs.map(([de, en]) => [en, de]))
 
 /**
  * Pfad ohne abschließenden Schrägstrich.
@@ -135,11 +145,15 @@ export function alternatePath(pathname: string): string | null {
 }
 
 /**
- * Ziel des Sprachumschalters. Ohne Pendant geht es auf die Startseite der
- * Zielsprache statt auf einen erfundenen Pfad.
+ * Ziel des Sprachumschalters — oder `null`, wenn es kein Pendant gibt.
+ *
+ * Bis 2026-08-21 ging es ohne Pendant auf die Startseite der Zielsprache;
+ * gemessen: 30 von 30 Blog-Seiten landeten auf /en/ (Joes Augen, Fund 15).
+ * Jetzt zeigt der Umschalter ohne Pendant nichts vor: der Knopf ist sichtbar
+ * deaktiviert mit dem Hinweis „nur auf Deutsch"/„only in English".
  */
-export function switchLanguageHref(pathname: string): string {
-  return alternatePath(pathname) ?? (isEnglishPath(pathname) ? '/' : '/en')
+export function switchLanguageHref(pathname: string): string | null {
+  return alternatePath(pathname)
 }
 
 /** Hat diese Seite ein Pendant in der anderen Sprache? */

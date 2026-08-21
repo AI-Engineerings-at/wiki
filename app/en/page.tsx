@@ -1,6 +1,8 @@
 import { WikiLink as Link } from '../../components/WikiLink'
 import Image from 'next/image'
-import { categories, getRecentArticlesEn, getPopularArticlesEn } from '../../lib/articles'
+import { categories, getPopularArticlesEn } from '../../lib/articles'
+import { articleCount, recentArticles as recentFromIndex } from '../../lib/index'
+import { kopfzeile } from '../../lib/lernpfad'
 import { alternatePath } from '../../lib/alternates'
 import { SearchBar } from '../../components/SearchBar'
 import { alternatesFor } from '../../lib/alternates'
@@ -13,7 +15,9 @@ export const metadata = {
 }
 
 export default function HomePage() {
-  const recentArticles = getRecentArticlesEn(5)
+  // From the full index (TSX + MDX), not the 63-entry registry — W6.
+  const recentArticles = recentFromIndex('en', 5).map((e) => ({ ...e, enHref: e.href }))
+  const nArticles = articleCount('en')
   const popularArticles = getPopularArticlesEn(5)
 
   return (
@@ -51,7 +55,7 @@ export default function HomePage() {
           {/* Quick Stats */}
           <div className="flex flex-wrap justify-center gap-6 md:gap-10 mt-10 text-sm">
             <div className="text-center">
-              <div className="text-2xl font-bold text-white">106+</div>
+              <div className="text-2xl font-bold text-white" data-hero-artikel={nArticles}>{nArticles}</div>
               <div className="text-slate-400">Articles</div>
             </div>
             <div className="text-center">
@@ -292,8 +296,8 @@ export default function HomePage() {
               EU AI Act — Art. 4 AI Literacy applies since 2 Feb 2025
             </h2>
             <p className="text-slate-400 text-sm">
-              The AI literacy obligation is already in force. Enforcement with penalties
-              starts from August 2026. Our compliance templates help you with documentation.
+              The AI literacy obligation is in force; since 2 August 2026 it is enforced
+              with penalties. Our compliance templates help you with documentation.
             </p>
           </div>
           <div className="flex flex-col gap-3">
@@ -319,8 +323,8 @@ export default function HomePage() {
           Want to learn step by step?
         </h2>
         <p className="text-slate-400 max-w-lg mx-auto mb-6">
-          The 30-day learning path takes you from your first local LLM
-          to a complete AI stack with monitoring and compliance.
+          The learning path takes you from your first sentence about language models
+          to your own stack — {kopfzeile('en')}, ending in the Hub.
         </p>
         <Link
           href="/en/learning-path"

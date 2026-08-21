@@ -234,7 +234,10 @@ function cleanMdxBody(body, relativePath) {
 function getWebPath(filePath) {
   const rel = path.relative(CONTENT_DIR, filePath);
   // Remove .mdx extension, normalize separators
-  return '/' + rel.replace(/\\/g, '/').replace(/\.mdx$/, '');
+  const p = '/' + rel.replace(/\\/g, '/').replace(/\.mdx$/, '');
+  // Seit E43 (2026-08-21) werden content/de/** unter /<kategorie>/<slug>
+  // geroutet (ohne /de-Praefix), content/en/** unter /en/<kategorie>/<slug>.
+  return p.startsWith('/de/') ? p.slice(3) : p;
 }
 
 /**
@@ -257,7 +260,13 @@ function getOutputPath(filePath) {
  * app/en/**-Route liegt. Ergebnis vorher: 20 von 20 Stichproben der
  * webUrl-Felder waren 404 (Stufe 1 §7).
  */
+const ROUTES_FILE = path.join(__dirname, '..', 'lib', 'generated', 'routes.json');
+const KNOWN_ROUTES = new Set(fs.existsSync(ROUTES_FILE) ? JSON.parse(fs.readFileSync(ROUTES_FILE, 'utf-8')) : []);
 function htmlRouteExists(webPath) {
+  // Seit E43: jede MDX-Datei hat eine Route (lib/generated/routes.json aus
+  // scripts/build-index.js), ausser bei Kollision mit einer TSX-Seite — dann
+  // existiert die TSX-Seite unter demselben Pfad, also ebenfalls eine Route.
+  if (KNOWN_ROUTES.has(webPath)) return true;
   const segments = webPath.split('/').filter(Boolean);
   return fs.existsSync(path.join(APP_DIR, ...segments, 'page.tsx'));
 }
