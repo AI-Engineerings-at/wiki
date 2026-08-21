@@ -405,6 +405,18 @@ def main(argv):
               f"Kopfzeile: {'ja' if 'data-lernpfad-kopfzeile' in c else 'NEIN'}")
         if n_e != soll_lp or not hub:
             verletzungen.append(f"Lernpfad {lp_rel}: {n_e} Einheiten, Hub {hub}")
+    # Einheit 18 zeigt auf den Hub: am Ziel messen, nicht nur im HTML suchen.
+    try:
+        import urllib.request
+        req = urllib.request.Request("https://hub.ai-engineering.at/", headers={"User-Agent": "wiki-render-gate"})
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            hub_code = resp.status
+        print(f"[15] Hub-Ziel https://hub.ai-engineering.at/ antwortet: HTTP {hub_code} / soll 200")
+        if hub_code != 200:
+            verletzungen.append(f"Hub-Ziel antwortet HTTP {hub_code}")
+    except Exception as exc:
+        print(f"[15] Hub-Ziel https://hub.ai-engineering.at/: UNVERIFIED ({exc}) — Netz vom Runner aus nicht erreichbar, kein Gate-Fehler")
+        funde.append(f"Hub-Ziel nicht messbar: {exc}")
     weiter = [f for f in pages if 'data-lernpfad-weiter="1"' in contents[f]]
     soll_weiter = STATS.get("lernpfad_weiter_soll", 33)
     print(f"[15] Artikel mit 'Weiter im Lernpfad'-Kasten: ist {len(weiter)} / soll {soll_weiter} "
