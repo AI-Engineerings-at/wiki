@@ -6,7 +6,18 @@ import { usePathname } from 'next/navigation'
 import { SearchBar } from './SearchBar'
 import { isEnglishPath, switchLanguageHref } from '../lib/alternates'
 
-const navDe = [
+// Zwei Listen, absichtlich getrennt.
+//
+// Joe, 2026-08-21: "wieso 2 Menues ... die Leiste oben ist schon sehr voll".
+// Gemessen waren es 13 Eintraege plus Suche im Kopf, 9 davon eine Zeile
+// tiefer in der Seitenleiste wiederholt. Vorher speiste EINE Liste beide
+// Menues — wer den Kopf kuerzte, kuerzte das Mobilmenue mit.
+//
+// Desktop: nur der Weg durch die Seite (Lernpfad, Blog, Hub). Die acht
+// Kategorien stehen dort in der Seitenleiste und werden nicht wiederholt.
+// Mobil: die Seitenleiste ist eingeklappt, also traegt das Menue die
+// Kategorien — sonst waeren sie unter xl gar nicht erreichbar.
+const navMobileDe = [
   { href: '/lernpfad', label: 'Lernpfad', icon: '🎯' },
   { href: '/grundlagen', label: 'Grundlagen', icon: '📖' },
   { href: '/tools', label: 'Tools', icon: '🛠️' },
@@ -20,7 +31,7 @@ const navDe = [
   { href: 'https://hub.ai-engineering.at', label: 'Hub', icon: '🔌' },
 ]
 
-const navEn = [
+const navMobileEn = [
   { href: '/en/learning-path', label: 'Learning Path', icon: '🎯' },
   { href: '/en/grundlagen', label: 'Basics', icon: '📖' },
   { href: '/en/tools', label: 'Tools', icon: '🛠️' },
@@ -30,6 +41,18 @@ const navEn = [
   { href: '/en/papers', label: 'Papers', icon: '📄' },
   { href: '/en/austria', label: 'Austria', icon: '🇦🇹' },
   { href: '/en/downloads', label: 'Downloads', icon: '📥' },
+  { href: '/blog', label: 'Blog', icon: '📝' },
+  { href: 'https://hub.ai-engineering.at/en', label: 'Hub', icon: '🔌' },
+]
+
+const navDesktopDe = [
+  { href: '/lernpfad', label: 'Lernpfad', icon: '🎯' },
+  { href: '/blog', label: 'Blog', icon: '📝' },
+  { href: 'https://hub.ai-engineering.at', label: 'Hub', icon: '🔌' },
+]
+
+const navDesktopEn = [
+  { href: '/en/learning-path', label: 'Learning Path', icon: '🎯' },
   { href: '/blog', label: 'Blog', icon: '📝' },
   { href: 'https://hub.ai-engineering.at/en', label: 'Hub', icon: '🔌' },
 ]
@@ -56,7 +79,8 @@ export function SiteHeader() {
     ? (rawPathname.startsWith('/en') ? '/en' : '/')
     : rawPathname
   const isEn = isEnglishPath(pathname)
-  const nav = isEn ? navEn : navDe
+  const nav = isEn ? navMobileEn : navMobileDe
+  const navDesktop = isEn ? navDesktopEn : navDesktopDe
   const homeHref = isEn ? '/en' : '/'
   const toggleHref = getToggleHref(pathname, isEn)
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -82,7 +106,7 @@ export function SiteHeader() {
 
         {/* Desktop Nav */}
         <nav className="hidden xl:flex items-center gap-5" aria-label={isEn ? 'Main navigation' : 'Hauptnavigation'}>
-          {nav.map((item) => {
+          {navDesktop.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
             return (
               <Link
@@ -110,12 +134,6 @@ export function SiteHeader() {
               EN
             </Link>
           </div>
-          <Link
-            href="https://www.ai-engineering.at"
-            className="bg-[#4262FF] hover:bg-[#3550DD] text-white font-bold py-2 px-5 rounded-full transition-all hover:scale-105 text-sm"
-          >
-            Shop
-          </Link>
         </nav>
 
         {/* Mobile: DE/EN + Hamburger */}
@@ -184,15 +202,6 @@ export function SiteHeader() {
                 </Link>
               )
             })}
-          </div>
-          <div className="px-4 pb-4">
-            <Link
-              href="https://www.ai-engineering.at"
-              onClick={() => setMobileOpen(false)}
-              className="block w-full text-center bg-[#4262FF] hover:bg-[#3550DD] text-white font-bold py-3 px-5 rounded-full transition-all text-sm"
-            >
-              Shop &rarr;
-            </Link>
           </div>
         </nav>
       )}
