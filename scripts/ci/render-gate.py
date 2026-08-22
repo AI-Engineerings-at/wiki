@@ -395,7 +395,15 @@ def main(argv):
     if os.path.isfile(si_path):
         si = json.load(open(si_path, encoding="utf-8"))
         entries = si.get("entries", [])
-        omni = [e["h"] for e in entries if "omnibus" in (e.get("w", "") + " " + e.get("d", "")).lower()]
+        # Nur ueber `w` (den Suchtext aus dem Seitenrumpf), NICHT ueber `d`.
+        # Bis 2026-08-22 stand hier `w + " " + d`: "Omnibus" steht bei
+        # /compliance/ki-kompetenz-art4 auch in der description, also war der Test
+        # auch bei leerem Suchtext gruen — er prueft eine TSX-Seite und haette
+        # genau die Funktion nicht bemerkt, fuer die er da ist. Im Rumpf steht das
+        # Wort an Position 23 der 300 Woerter, die wordList() aufnimmt
+        # (scripts/build-index.js:174), also traegt der Test ohne `d`.
+        omni = [e["h"] for e in entries if "omnibus" in e.get("w", "").lower()]
+        ohne_suchtext = [e["h"] for e in entries if not e.get("w")]
         en_n = sum(1 for e in entries if e.get("l") == "en")
         blog_n = sum(1 for e in entries if e.get("c") == "blog")
         # Soll aus stats.json statt fester Zahl. Bis 2026-08-22 stand hier ">= 540".
@@ -417,6 +425,11 @@ def main(argv):
               f"{'ja' if '/compliance/ki-kompetenz-art4' in omni else 'NEIN'}")
         print(f"[14] informativ, kein Gate — TSX-Seiten im Suchindex: {tsx_im_index} von {soll_tsx} "
               f"(Rest ohne <title> im metadata-Block); MDX+Blog als Untergrenze: {untergrenze}")
+        # Noch kein Gate: der Sollwert ist nicht gemessen. Sobald ein Lauf 0 zeigt,
+        # gehoert daraus eine Verletzung — eine Schwelle vor der Messung war schon
+        # einmal der Fehler (siehe die feste 540 darueber).
+        print(f"[14] informativ, kein Gate — Einträge ohne Suchtext (w leer): "
+              f"ist {len(ohne_suchtext)} von {len(entries)}")
         if soll_si is not None and len(entries) != soll_si:
             verletzungen.append(f"Suchindex: Export {len(entries)} != Generator {soll_si}")
         if len(entries) < untergrenze:
