@@ -8,7 +8,7 @@ export const metadata = {
     images: [{ url: '/images/hero-2026-08/de/compliance/ai-act-august-2026.webp', width: 1344, height: 768, type: 'image/webp' }],
   },
   alternates: alternatesFor('/compliance/ai-act-august-2026'),
-  title: 'Was passiert am 02.08.2026? EU AI Act Enforcement-Start',
+  title: 'EU AI Act seit 02.08.2026: was durchgesetzt wird',
   description:
     'Seit dem 2. August 2026 gelten Marktaufsicht und Strafrahmen des EU AI Act. Was nach dem Digital Omnibus (Juni 2026) konkret gilt, was verschoben wurde und welche 6 Schritte KMUs jetzt gehen müssen.',
 }
@@ -18,7 +18,7 @@ export default function AiActAugust2026Page() {
     <div className="space-y-8">
       <ArticleHero src="/images/hero-2026-08/de/compliance/ai-act-august-2026.webp" alt={'EU AI Act seit 02.08.2026: was durchgesetzt wird'} />
       <div>
-        <h1 className="text-3xl font-bold text-white">02.08.2026 — was seit dem Enforcement-Start des EU AI Act gilt</h1>
+        <h1 className="text-3xl font-bold text-white">EU AI Act seit 02.08.2026 — was durchgesetzt wird</h1>
         <p className="text-gray-400 mt-2">Compliance · 10 min · Stand: 21. August 2026</p>
       </div>
 
@@ -144,7 +144,7 @@ export default function AiActAugust2026Page() {
           </div>
         </div>
 
-        <h2 className="text-xl font-semibold text-white mt-8">6 Schritte für KMUs bis zum 02.08.2026</h2>
+        <h2 className="text-xl font-semibold text-white mt-8">6 Schritte für KMUs, die noch offen sind</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
           <ol className="text-gray-300 space-y-3">

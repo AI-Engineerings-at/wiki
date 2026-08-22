@@ -212,7 +212,7 @@ export default function WhatIsAnLLMPage() {
               </tr>
             </thead>
             <tbody className="text-gray-300">
-              <tr className="border-b border-gray-800"><td className="py-2">7-8B</td><td className="py-2">~5 GB</td><td className="py-2">~112 tok/s</td><td className="py-2">Good for simple tasks</td><td className="py-2">Llama 3.3 8B, Mistral 7B, Qwen 2.5 7B</td></tr>
+              <tr className="border-b border-gray-800"><td className="py-2">7-8B</td><td className="py-2">~5 GB</td><td className="py-2">~112 tok/s</td><td className="py-2">Good for simple tasks</td><td className="py-2">Llama 3.1 8B, Mistral 7B, Qwen 2.5 7B</td></tr>
               <tr className="border-b border-gray-800"><td className="py-2">13-14B</td><td className="py-2">~10 GB</td><td className="py-2">43-57 tok/s</td><td className="py-2">Solid all-rounders</td><td className="py-2">Qwen3 14B, DeepSeek R1 14B</td></tr>
               <tr className="border-b border-gray-800"><td className="py-2">24-32B</td><td className="py-2">~16-20 GB</td><td className="py-2">~20-30 tok/s</td><td className="py-2">Near cloud quality</td><td className="py-2">Mistral Small 3.1 24B, Qwen 2.5 32B</td></tr>
               <tr><td className="py-2">70B</td><td className="py-2">~40 GB</td><td className="py-2">Does NOT fit on 24 GB GPU</td><td className="py-2">Best local quality</td><td className="py-2">Llama 3.3 70B, Qwen 2.5 72B</td></tr>
@@ -276,7 +276,7 @@ export default function WhatIsAnLLMPage() {
               With Ollama, most models default to Q4_K_M quantization. You do not need
               to configure anything extra — just{" "}
               <code className="bg-white/10 px-1.5 py-0.5 rounded text-white/90">
-                ollama run llama3.3
+                ollama run llama3.1:8b
               </code>{" "}
               and go.
             </p>
@@ -417,7 +417,7 @@ export default function WhatIsAnLLMPage() {
                 <CodeBlock lang="en">
                 <pre className="bg-black/30 rounded-lg p-3 mt-2 overflow-x-auto">
                   <code className="text-sm text-green-400">
-                    ollama run llama3.3
+                    ollama run llama3.1:8b
                   </code>
                 </pre>
                 </CodeBlock>
@@ -449,7 +449,7 @@ export default function WhatIsAnLLMPage() {
             <li>More parameters = better quality, but more VRAM and slower. Q4_K_M quantization is the best trade-off.</li>
             <li>LLMs hallucinate. Always verify critical outputs. RAG significantly reduces the risk.</li>
             <li>Local LLMs on your own hardware (Ollama) are GDPR-compliant. RTX 3090 at 50% load: ~EUR 49/month electricity (AT: EUR 0.34/kWh).</li>
-            <li>To get started: install Ollama, run llama3.3, up and running in 5 minutes.</li>
+            <li>To get started: install Ollama, run llama3.1:8b, up and running in 5 minutes.</li>
           </ul>
         </div>
 

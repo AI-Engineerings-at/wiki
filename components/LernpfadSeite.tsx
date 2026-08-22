@@ -33,16 +33,18 @@ export function LernpfadSeite({ lang }: { lang: 'de' | 'en' }) {
         return (
           <section key={ab.id} className="mb-10" aria-labelledby={`abschnitt-${ab.id}`}>
             <h2 id={`abschnitt-${ab.id}`} className="text-xl font-bold text-white mb-4">
-              {en ? ab.titel_en : ab.titel_de}
+              {en ? ab.titel_en : ab.titel_de}{' '}
               <span className="ml-3 text-sm font-normal text-slate-500">
-                {units.length} {units.length === 1 ? t.unit : en ? 'units' : 'Einheiten'} · {minutes} {t.min}
+                {/* Als eine Zeichenkette, damit JSX die Leerzeichen nicht am Zeilenrand
+                    verschluckt: im Text stand "Grundlagen3Einheiten · 17min". */}
+                {`· ${units.length} ${units.length === 1 ? t.unit : en ? 'units' : 'Einheiten'} · ${minutes} ${t.min}`}
               </span>
             </h2>
             <ol className="space-y-3 list-none p-0">
               {units.map((e) => {
                 const r = routeFor(e, lang)
                 const entry = r.extern ? undefined : getEntryByHref(r.href)
-                const title = r.extern ? (en ? 'Continue in the Hub' : 'Weiter im Hub') : entry?.title || e.slug
+                const title = r.extern ? (en ? 'Continue in the Hub' : 'Weiter im Hub') : entry?.title || ''
                 const href = r.extern ? r.href : r.href + '/'
                 return (
                   <li key={e.slug} className="bg-slate-900 border border-slate-800 rounded-xl p-5" data-lernpfad-einheit={e.slug}>
@@ -55,7 +57,7 @@ export function LernpfadSeite({ lang }: { lang: 'de' | 'en' }) {
                           ) : (
                             <Link href={href} className="hover:text-blue-400">{title}</Link>
                           )}
-                          <span className="ml-2 text-xs font-normal text-slate-500">~{e.minuten} {t.min}{r.extern ? ` · ${t.ext}` : ''}{r.nurDe ? ` · ${t.onlyDe}` : ''}</span>
+                          <span className="ml-2 text-xs font-normal text-slate-500">{` · ~${e.minuten} ${t.min}${r.extern ? ` · ${t.ext}` : ''}${r.nurDe ? ` · ${t.onlyDe}` : ''}`}</span>
                         </h3>
                         <p className="mt-1 text-sm text-slate-300"><span className="text-slate-500">{t.goal}:</span> {en ? e.lernziel_en : e.lernziel_de}</p>
                         {(e.voraussetzungen.length > 0 || e.nachfolger.length > 0) && (

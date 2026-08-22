@@ -44,7 +44,7 @@ if (VRAM verfügbar?) then (< 8 GB)
   :Gemma 2 2B\\nPhi-3.5 Mini;
 elseif (8-16 GB) then
   :Medium Models\\n(7-14B Parameter);
-  :Llama 3.3 8B\\nQwen3 14B;
+  :Llama 3.1 8B\\nQwen3 14B;
 elseif (16-24 GB) then
   :Large Models\\n(24-34B Parameter);
   :Mistral Small 3.1 24B\\nQwen 2.5 32B;
@@ -86,7 +86,7 @@ stop
 
         <h3 className="text-lg font-semibold text-white mt-6">2. Medium Models (7-14B Parameter)</h3>
         <ul className="list-disc list-inside text-gray-300 space-y-1">
-          <li><strong>Beispiele:</strong> Llama 3.3 8B, Qwen3 14B, Gemma 2 9B</li>
+          <li><strong>Beispiele:</strong> Llama 3.1 8B, Qwen3 14B, Gemma 2 9B</li>
           <li><strong>Hardware:</strong> 16GB RAM, GPU empfohlen (8-16GB VRAM)</li>
           <li><strong>Speed:</strong> 43-112 tok/s auf RTX 3090</li>
           <li><strong>Use Cases:</strong> Chat, Zusammenfassungen, Code-Generation, Tool Calling</li>
@@ -135,7 +135,7 @@ stop
               <td className="py-2">Embeddings, Klassifikation</td>
             </tr>
             <tr className="border-b border-gray-800">
-              <td className="py-2">Llama 3.3 8B</td>
+              <td className="py-2">Llama 3.1 8B</td>
               <td className="py-2">8B</td>
               <td className="py-2">~5 GB</td>
               <td className="py-2">~112</td>
@@ -215,7 +215,7 @@ ollama run llama3.2 "Wie viel RAM hast du verwendet?"`}</code>
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# VRAM Verbrauch (ca., Q4 quantisiert)
 gemma2:2b           ~2GB VRAM   → 200+ tok/s
-llama3.3:8b         ~5GB VRAM   → ~112 tok/s
+llama3.1:8b         ~5GB VRAM   → ~112 tok/s
 qwen3:14b          ~10GB VRAM   → 43 tok/s
 mistral-small3.1:24b ~16GB VRAM  → ~30 tok/s
 qwen2.5:32b        ~20GB VRAM   → ~20 tok/s
@@ -225,14 +225,14 @@ llama3.3:70b       ~40GB VRAM   → PASST NICHT auf 24GB GPU!
 # 70B braucht 48 GB+ (2x RTX 3090 oder RTX 6000 Ada)
 
 # Mit quantized Modellen sparen
-ollama pull llama3.3:q4_K_M   # 4-bit Quantisierung, ~5GB
+ollama pull llama3.1:8b       # 8B-Modell, ~5GB
 ollama pull qwen3:14b         # 4-bit default, ~10GB`}</code>
         </pre>
         </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Entscheidungshilfe</h2>
         <ul className="list-disc list-inside text-gray-300 space-y-1">
-          <li><strong>Budget gespart?</strong> → Llama 3.3 8B oder Qwen 2.5 7B (~112 tok/s auf RTX 3090)</li>
+          <li><strong>Budget gespart?</strong> → Llama 3.1 8B oder Qwen 2.5 7B (~112 tok/s auf RTX 3090)</li>
           <li><strong>Maximale lokale Qualität?</strong> → Mistral Small 3.1 24B oder Qwen 2.5 32B (passt auf 24 GB)</li>
           <li><strong>Schnelle Embeddings?</strong> → mxbai-embed-large (1024 dim)</li>
           <li><strong>Deutsch?</strong> → Mistral Small 3.1 (übertrifft GPT-4o Mini) oder Qwen3 14B</li>

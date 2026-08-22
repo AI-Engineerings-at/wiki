@@ -115,7 +115,7 @@ einheiten:
     minuten: 9
     minuten_quelle: formel
     woerter: 1106
-    lernziel_de: Du weißt, was seit dem Enforcement-Start am 02.08.2026 tatsächlich durchgesetzt wird und was verschoben wurde.
+    lernziel_de: Du weißt, was seit dem 02.08.2026 tatsächlich durchgesetzt wird und was verschoben wurde.
     lernziel_en: You know what has actually been enforced since the 02.08.2026 start and what was postponed.
     voraussetzungen: [eu-ai-act, dsgvo-grundlagen]
     nachfolger: [eu-ai-act-checkliste]

@@ -249,7 +249,7 @@ export default function VerifyWisePage() {
         <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mt-8">
           <h3 className="font-semibold text-white mb-2">Weiterführend in unserem Wiki</h3>
           <ul className="text-gray-300 space-y-1">
-            <li>&#8226; <a href="/compliance/ai-act-august-2026" className="text-blue-400 hover:underline">Was passiert am 02.08.2026 — Enforcement-Start</a></li>
+            <li>&#8226; <a href="/compliance/ai-act-august-2026" className="text-blue-400 hover:underline">EU AI Act seit 02.08.2026: was durchgesetzt wird</a></li>
             <li>&#8226; <a href="/compliance/ki-kompetenz-art4" className="text-blue-400 hover:underline">KI-Kompetenz nach Art. 4 — Praxis-Guide</a></li>
             <li>&#8226; <a href="/compliance/eu-ai-act-checkliste" className="text-blue-400 hover:underline">EU AI Act Compliance Checkliste</a></li>
             <li>&#8226; <a href="/compliance/edps-guidelines" className="text-blue-400 hover:underline">EDPS Guidelines — EU-Datenschutzbeauftragter zu KI</a></li>

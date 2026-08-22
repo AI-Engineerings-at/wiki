@@ -142,11 +142,11 @@ ollama --version`}</code>
             <p className="text-white font-medium mb-3">Modell herunterladen und testen</p>
             <CodeBlock>
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
-              <code className="text-sm text-green-400">{`# Empfehlung für den Einstieg: Llama 3.3 (8B)
-ollama pull llama3.3
+              <code className="text-sm text-green-400">{`# Empfehlung für den Einstieg: Llama 3.1 (8B)
+ollama pull llama3.1:8b
 
 # Direkt testen
-ollama run llama3.3
+ollama run llama3.1:8b
 
 # Installierte Modelle anzeigen
 ollama list`}</code>
@@ -157,7 +157,7 @@ ollama list`}</code>
           <ComparisonTable
             headers={["Modell", "Größe", "VRAM", "Stärke", "Befehl"]}
             rows={[
-              ["Llama 3.3 (8B)", "4.7 GB", "~5 GB", "Schneller Allrounder", "ollama pull llama3.3"],
+              ["Llama 3.1 (8B)", "4.7 GB", "~5 GB", "Schneller Allrounder", "ollama pull llama3.1:8b"],
               ["Mistral Small 3.1 (24B)", "14 GB", "~16 GB", "Starkes Deutsch, übertrifft GPT-4o Mini", "ollama pull mistral-small3.1"],
               ["Qwen3 14B", "9 GB", "~10 GB", "Gutes Reasoning, 100+ Sprachen", "ollama pull qwen3:14b"],
               ["DeepSeek R1 14B", "9 GB", "~10 GB", "Starkes Chain-of-Thought Reasoning", "ollama pull deepseek-r1:14b"],
@@ -326,7 +326,7 @@ docker compose ps
               kannst sie aus jedem Programm, Script oder Workflow ansprechen:{" "}
               <code className="bg-white/10 px-1.5 py-0.5 rounded text-white/90">
                 curl http://localhost:11434/api/chat -d
-                &#123;&quot;model&quot;:&quot;llama3.3&quot;,&quot;messages&quot;:[&#123;&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;Hallo&quot;&#125;]&#125;
+                &#123;&quot;model&quot;:&quot;llama3.1:8b&quot;,&quot;messages&quot;:[&#123;&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;Hallo&quot;&#125;]&#125;
               </code>
               . Perfekt für Integration mit n8n, Python-Scripts oder eigene
               Tools.

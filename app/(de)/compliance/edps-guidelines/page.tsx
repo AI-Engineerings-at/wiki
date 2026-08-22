@@ -235,7 +235,7 @@ export default function EdpsGuidelinesPage() {
         <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mt-8">
           <h3 className="font-semibold text-white mb-2">Weiterführend in unserem Wiki</h3>
           <ul className="text-gray-300 space-y-1">
-            <li>&#8226; <a href="/compliance/ai-act-august-2026" className="text-blue-400 hover:underline">Was passiert am 02.08.2026 — Enforcement-Start</a></li>
+            <li>&#8226; <a href="/compliance/ai-act-august-2026" className="text-blue-400 hover:underline">EU AI Act seit 02.08.2026: was durchgesetzt wird</a></li>
             <li>&#8226; <a href="/compliance/dsgvo-grundlagen" className="text-blue-400 hover:underline">DSGVO Grundlagen für KI-Anwendungen</a></li>
             <li>&#8226; <a href="/compliance/dpia" className="text-blue-400 hover:underline">DPIA — Datenschutz-Folgenabschätzung Schritt für Schritt</a></li>
             <li>&#8226; <a href="/compliance/datenschutz-praxis" className="text-blue-400 hover:underline">Datenschutz Praxis — TOM, AVV, Dokumentation</a></li>

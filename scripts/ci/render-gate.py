@@ -32,7 +32,8 @@ lib/generated/stats.json + die TSX-Artikel aus scripts/bilder/tsx-artikel-2026-0
 ohne Redirect-Hinweis.
 
 Seit 2026-08-22 (W9) zusaetzlich [20] Kategorie-Karte = Seitenleiste (je Seite,
-je Slug) und [21] genau eine Lesezeit je Seite.
+je Slug), [21] genau eine Lesezeit je Seite und [22] eine Liste von Textmustern,
+die im Export nicht mehr vorkommen duerfen.
 
 Nur Standardbibliothek.
 """
@@ -648,6 +649,38 @@ def main(argv):
           f"soll {lz_seiten} von {lz_seiten} Seiten mit Lesezeit ({n_pages} Seiten gesamt)")
     if lz_uneinig:
         verletzungen.append(f"zwei Lesezeiten auf einer Seite: {lz_uneinig[:8]}")
+
+    # 22. Textmuster, die im Export nicht mehr vorkommen duerfen (W9 C) ------------
+    # Jede Zeile: (Muster, warum). Soll ist immer 0 ueber alle HTML-Dateien; die
+    # Fundstellen stehen im Log, damit man sie ohne zweiten Lauf sieht.
+    VERBOTENE_TEXTE = [
+        ("Was passiert am 02.08",
+         "A037: der 02.08.2026 liegt in der Vergangenheit, die Frageform kuendigt ihn an"),
+        ("Deadline 02.08",
+         "A037: kein Termin mehr, sondern geltendes Recht"),
+        ("Enforcement-Start",
+         "A037: im Titel/Linktext eine Ankuendigung; das Datum selbst darf bleiben"),
+        ("Weiterleitung...",
+         "Client-Weiterleitung mit HTTP 200 statt 301 (public/_redirects)"),
+        ("Redirecting...",
+         "dasselbe auf den EN-Routen"),
+        ("Weiterleitung: ",
+         "Titel einer Weiterleitungs-Attrappe"),
+        ("reference guide for",
+         "Slug als Titel/Summary auf den MLOps-Seiten"),
+        ("Llama 3.3 8B",
+         "Modell gibt es nicht: Llama 3.3 erschien nur als 70B"),
+    ]
+    text_treffer = []
+    for muster, grund in VERBOTENE_TEXTE:
+        seiten = [rel(f, out_dir) for f, c in contents.items() if muster in c]
+        n = sum(contents[os.path.join(out_dir, p_)].count(muster) for p_ in seiten)
+        print(f"[22] {muster!r}: ist {n} Treffer auf {len(seiten)} / soll 0 von {n_html} HTML "
+              f"({grund})")
+        if seiten:
+            text_treffer.append(f"{muster!r} auf {len(seiten)} Seiten, z. B. {seiten[:5]}")
+    if text_treffer:
+        verletzungen.append("verbotene Textmuster: " + "; ".join(text_treffer))
 
     # --- Bilanz ---------------------------------------------------------------
     print("== Bilanz ==")

@@ -278,7 +278,7 @@ llm --> out3
                 "~5 GB",
                 "~112 tok/s",
                 "Gut für einfache Tasks",
-                "Llama 3.3 8B, Mistral 7B, Qwen 2.5 7B",
+                "Llama 3.1 8B, Mistral 7B, Qwen 2.5 7B",
               ],
               [
                 "13-14B",
@@ -359,7 +359,7 @@ llm --> out3
               Bei Ollama sind die meisten Modelle standardmäßig in Q4_K_M
               quantisiert. Du musst nichts extra konfigurieren — einfach{" "}
               <code className="bg-white/10 px-1.5 py-0.5 rounded text-white/90">
-                ollama run llama3.3
+                ollama run llama3.1:8b
               </code>{" "}
               und los.
             </p>
@@ -489,7 +489,7 @@ llm --> out3
                 <CodeBlock>
                 <pre className="bg-black/30 rounded-lg p-3 mt-2 overflow-x-auto">
                   <code className="text-sm text-green-400">
-                    ollama run llama3.3
+                    ollama run llama3.1:8b
                   </code>
                 </pre>
                 </CodeBlock>
@@ -521,7 +521,7 @@ llm --> out3
             "Mehr Parameter = bessere Qualität, aber mehr VRAM und langsamer. Q4_K_M Quantisierung ist der beste Trade-off.",
             "LLMs halluzinieren. Kritische Ausgaben immer verifizieren, RAG reduziert das Risiko deutlich.",
             "Lokale LLMs auf eigener Hardware (Ollama) sind DSGVO-konform. RTX 3090 bei 50% Last: ca. EUR 49/Monat Strom (AT: EUR 0,34/kWh).",
-            "Für den Einstieg: Ollama installieren, llama3.3 starten, läuft in 5 Minuten.",
+            "Für den Einstieg: Ollama installieren, llama3.1:8b starten, läuft in 5 Minuten.",
           ]}
         />
 

@@ -21,6 +21,10 @@
  *   /compliance/verifywise-integration
  *   /de
  *
+ * 2026-08-22 (W9 C): /grundlagen/ollama-vs-cloud und /grundlagen/selfhosted-vs-cloud
+ * sind hier raus — die beiden Weiterleitungs-Attrappen wurden durch eine echte
+ * 301 in public/_redirects ersetzt und die Routen aus app/ entfernt.
+ *
  * Wer eine Route hinzufügt, ergänzt hier die Zeile. `npm run check:links`
  * prüft, dass beide Seiten jeder Zeile existieren.
  */
@@ -52,8 +56,6 @@ export const languagePairs: ReadonlyArray<readonly [string, string]> = [
   ['/grundlagen/ki-unternehmen', '/en/grundlagen/ki-unternehmen'],
   ['/grundlagen/lokal-vs-cloud', '/en/grundlagen/lokal-vs-cloud'],
   ['/grundlagen/multi-agent-systeme', '/en/grundlagen/multi-agent-systeme'],
-  ['/grundlagen/ollama-vs-cloud', '/en/grundlagen/ollama-vs-cloud'],
-  ['/grundlagen/selfhosted-vs-cloud', '/en/grundlagen/selfhosted-vs-cloud'],
   ['/grundlagen/was-ist-agent-orchestration', '/en/grundlagen/was-ist-agent-orchestration'],
   ['/grundlagen/was-ist-ein-llm', '/en/grundlagen/was-ist-ein-llm'],
   ['/impressum', '/en/imprint'],

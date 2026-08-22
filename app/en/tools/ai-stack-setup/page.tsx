@@ -137,11 +137,11 @@ ollama --version`}</code>
             <p className="text-white font-medium mb-3">Download and test a model</p>
             <CodeBlock lang="en">
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
-              <code className="text-sm text-green-400">{`# Recommended starter: Llama 3.3 (8B)
-ollama pull llama3.3
+              <code className="text-sm text-green-400">{`# Recommended starter: Llama 3.1 (8B)
+ollama pull llama3.1:8b
 
 # Test it directly
-ollama run llama3.3
+ollama run llama3.1:8b
 
 # Show installed models
 ollama list`}</code>
@@ -152,7 +152,7 @@ ollama list`}</code>
           <ComparisonTable
             headers={["Model", "Size", "VRAM", "Strength", "Command"]}
             rows={[
-              ["Llama 3.3 (8B)", "4.7 GB", "~5 GB", "Fast all-rounder", "ollama pull llama3.3"],
+              ["Llama 3.1 (8B)", "4.7 GB", "~5 GB", "Fast all-rounder", "ollama pull llama3.1:8b"],
               ["Mistral Small 3.1 (24B)", "14 GB", "~16 GB", "Strong German, beats GPT-4o Mini", "ollama pull mistral-small3.1"],
               ["Qwen3 14B", "9 GB", "~10 GB", "Good reasoning, 100+ languages", "ollama pull qwen3:14b"],
               ["DeepSeek R1 14B", "9 GB", "~10 GB", "Strong chain-of-thought reasoning", "ollama pull deepseek-r1:14b"],
@@ -320,7 +320,7 @@ docker compose ps
               any program, script, or workflow:{" "}
               <code className="bg-white/10 px-1.5 py-0.5 rounded text-white/90">
                 curl http://localhost:11434/api/chat -d
-                &#123;&quot;model&quot;:&quot;llama3.3&quot;,&quot;messages&quot;:[&#123;&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;Hello&quot;&#125;]&#125;
+                &#123;&quot;model&quot;:&quot;llama3.1:8b&quot;,&quot;messages&quot;:[&#123;&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;Hello&quot;&#125;]&#125;
               </code>
               . Perfect for integration with n8n, Python scripts, or custom
               tools.

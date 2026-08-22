@@ -119,7 +119,7 @@ function getResult(score: number) {
       recommendations: [
         "Regelmäßige Überprüfung des KI-Inventars einplanen",
         "Schulungsnachweise aktuell halten",
-        "Fristen im Kalender markieren: Art. 4 Deadline 02.08.2026",
+        "Fristen im Kalender markieren: Art. 4 gilt seit 02.02.2025, die Marktaufsicht seit 02.08.2026",
       ],
     }
   }
@@ -155,7 +155,7 @@ function getResult(score: number) {
       "Kurzfristig: KI-Beauftragten benennen",
       "Kurzfristig: Interne KI-Richtlinie erstellen",
       "Mittelfristig: Risikoeinstufung aller KI-Systeme",
-      "Mittelfristig: Schulungsplan für Art. 4 KI-Kompetenz (Deadline 02.08.2026)",
+      "Mittelfristig: Schulungsplan für Art. 4 KI-Kompetenz (Pflicht seit 02.02.2025)",
       "Mittelfristig: DPIA und Transparenzpflichten umsetzen",
     ],
   }

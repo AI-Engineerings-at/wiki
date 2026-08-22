@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import { einheitByPath, naechste, routeFor, getLernpfad } from '../lib/lernpfad'
+import { getEntryByHref } from '../lib/index'
 
 /**
  * „Weiter im Lernpfad: <nächste Einheit>" am Ende jedes Pfad-Artikels (W5).
@@ -27,6 +28,11 @@ export function LernpfadWeiter() {
       {next ? (
         (() => {
           const r = routeFor(next, lang)
+          // Der Knopf zeigte bisher den Slug ("→ ki-unternehmen"). Der Titel steht
+          // im Gesamtindex; fehlt er dort, bleibt der Zusatz weg statt Slug (NN3).
+          const ziel = r.extern
+            ? (en ? 'Continue in the Hub' : 'Weiter im Hub')
+            : getEntryByHref(r.href)?.title || ''
           const label = en ? `Next in the learning path: unit ${next.position}` : `Weiter im Lernpfad: Einheit ${next.position}`
           return (
             <p className="mt-4">
@@ -35,7 +41,7 @@ export function LernpfadWeiter() {
                 className="btn-primary inline-block"
                 {...(r.extern ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
               >
-                {label} → {next.slug}
+                {ziel ? `${label} → ${ziel}` : label}
               </a>
               {r.nurDe && <span className="ml-3 text-xs text-slate-500">{en ? 'only available in German' : 'nur auf Deutsch'}</span>}
             </p>

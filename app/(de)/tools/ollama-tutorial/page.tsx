@@ -103,8 +103,8 @@ registry --> storage : ollama pull
           <h3 className="font-semibold text-white mb-3">Unterstützte Modelle (Auswahl)</h3>
           <div className="grid md:grid-cols-2 gap-2 text-sm text-gray-300">
             <div>
-              <p className="text-white font-medium">Llama 3.3</p>
-              <p className="text-gray-500">8B, 70B — Text, Code, Tool Calling</p>
+              <p className="text-white font-medium">Llama 3.1 / 3.3</p>
+              <p className="text-gray-500">3.1 in 8B, 3.3 in 70B — Text, Code, Tool Calling</p>
             </div>
             <div>
               <p className="text-white font-medium">Mistral Small 3.2</p>
@@ -206,7 +206,7 @@ ollama show llama3.2`}</code>
                 <td className="py-2">Schnell, Einsteiger</td>
               </tr>
               <tr className="border-b border-gray-800">
-                <td className="py-2">llama3.3:8b</td>
+                <td className="py-2">llama3.1:8b</td>
                 <td className="py-2">4.7 GB</td>
                 <td className="py-2">~6 GB</td>
                 <td className="py-2">Allrounder, Tool Calling</td>
