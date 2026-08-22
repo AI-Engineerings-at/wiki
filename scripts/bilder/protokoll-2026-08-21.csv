@@ -1,4 +1,4 @@
-slug,lang,kategorie,prompt_hash,seed,dauer_s,bytes,status
+slug,lang,kategorie,prompt_hash,seed,dauer_s,bytes,status,grund
 ai-audio-speech,de,ai-tools,dc0dab8c93fc,45305444794433,118.8,37520,ok
 ai-chat-assistenten,de,ai-tools,9085168ff328,216345668836808,17.0,23040,ok
 ai-coding-tools,de,ai-tools,52e1dea65cc4,172150975932199,15.0,33560,ok
@@ -406,3 +406,5 @@ open-webui-setup,en,tutorials,,209731428942697,0,13142,kopie-von-de
 pgvector-setup,en,tutorials,,211231279959200,0,12102,kopie-von-de
 reverse-proxy-ai,en,tutorials,,96737895266372,0,12754,kopie-von-de
 whisper-transcription,en,tutorials,26f34c20dc7c,255056705052548,13.7,12252,ok
+agent-frameworks,de,vergleiche,3bf9434a4c29,220992465218688,12.7,10594,ok,neu: gesicht
+agent-frameworks,en,comparisons,,220992465218688,0,10594,kopie-von-de,neu: gesicht
