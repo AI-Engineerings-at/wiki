@@ -266,13 +266,19 @@ function main() {
     const segs = route.split('/').filter(Boolean)
     const lang = segs[0] === 'en' ? 'en' : 'de'
     const cat = lang === 'en' ? segs[1] || '' : segs[0] || ''
+    // `words` ist die Wortzahl (Lesezeit, wie bei MDX/Blog), `searchText` die
+    // Wortliste fuer den Suchindex. Bis 2026-08-22 trug `words` beides — die
+    // Liste als String in einem als `number` deklarierten Feld; die CI brach
+    // daran ab (`Type 'string' is not assignable to type 'number'`).
+    const tsxBody = tsxText(src)
     tsx.push({
       href: route,
       lang,
       category: cat,
       title: metaField(src, 'title'),
       description: metaField(src, 'description'),
-      words: wordList(tsxText(src)),
+      words: countWords(tsxBody),
+      searchText: wordList(tsxBody),
     })
   }
 
@@ -337,7 +343,8 @@ function main() {
     '',
     '/** Titel/Beschreibung/Wortzahl der TSX-Seiten aus deren metadata + Rumpf.',
     ' *  `words` traegt die Lesezeit (lib/lesezeit.ts) — vorher stand sie fuer TSX-Seiten',
-    ' *  auf 0 und die Brotkrumen-Zeile zaehlte stattdessen das DOM (zwei Zahlen je Seite). */',
+    ' *  auf 0 und die Brotkrumen-Zeile zaehlte stattdessen das DOM (zwei Zahlen je Seite).',
+    ' *  Der Suchtext liegt NICHT hier, sondern als `w` in public/search-index.json. */',
     `export const TSX_META: Record<string, { title: string; description: string; words: number }> = ${JSON.stringify(
       Object.fromEntries(tsx.map((t) => [t.href, { title: t.title, description: t.description, words: t.words }])))}`,
     '',
@@ -422,7 +429,7 @@ function main() {
   const search = []
   for (const t of tsx) {
     if (!t.title) continue
-    search.push({ t: t.title, d: t.description, h: t.href, l: t.lang, c: t.category, g: '', w: t.words })
+    search.push({ t: t.title, d: t.description, h: t.href, l: t.lang, c: t.category, g: '', w: t.searchText })
   }
   for (const e of mdx) {
     const body = fs.readFileSync(path.join(ROOT, e.file), 'utf-8')
