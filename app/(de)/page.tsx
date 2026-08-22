@@ -1,7 +1,7 @@
 import { WikiLink as Link } from '../../components/WikiLink'
 import Image from 'next/image'
 import { categories, getPopularArticles } from '../../lib/articles'
-import { articleCount, recentArticles as recentFromIndex } from '../../lib/index'
+import { articleCount, kategorieAnzahl, recentArticles as recentFromIndex } from '../../lib/index'
 import { kopfzeile, getLernpfad } from '../../lib/lernpfad'
 import { SearchBar } from '../../components/SearchBar'
 import { alternatesFor } from '../../lib/alternates'
@@ -135,11 +135,12 @@ export default function Home() {
           {categories.map((cat) => (
             <CategoryCard
               key={cat.slug}
+              slug={cat.slug}
               icon={cat.icon}
               title={cat.label}
               description={cat.description}
               href={cat.href}
-              count={cat.articles.length}
+              count={kategorieAnzahl('de', cat.slug)}
             />
           ))}
         </div>
@@ -396,12 +397,14 @@ export default function Home() {
 }
 
 function CategoryCard({
+  slug,
   icon,
   title,
   description,
   href,
   count,
 }: {
+  slug: string
   icon: string
   title: string
   description: string
@@ -420,7 +423,9 @@ function CategoryCard({
         </h3>
       </div>
       <p className="text-slate-400 text-sm">{description}</p>
-      <p className="text-xs text-slate-600 mt-3">{count} Artikel</p>
+      <p className="text-xs text-slate-600 mt-3" data-kategorie-karte={slug} data-anzahl={count}>
+        {count} Artikel
+      </p>
     </Link>
   )
 }

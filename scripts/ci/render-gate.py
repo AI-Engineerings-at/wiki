@@ -32,6 +32,9 @@ zeigt auf genau dieses WebP (W9 Block A). Nenner: MDX-Artikelseiten laut
 lib/generated/stats.json + die TSX-Artikelseiten aus
 scripts/bilder/tsx-artikel-2026-08-22.csv ohne Redirect-Hinweis.
 
+Seit 2026-08-22 (W9) zusaetzlich [20] Kategorie-Karte = Seitenleiste (je Seite,
+je Slug) und [21] genau eine Lesezeit je Seite.
+
 Nur Standardbibliothek.
 """
 
@@ -631,6 +634,64 @@ def main(argv):
           f"ohne Datei unter {out_dir}/: {len(thumb_fehlt)} / soll 0")
     if thumb_fehlt:
         verletzungen.append(f"Thumbnail-Datei fehlt im Export: {sorted(thumb_fehlt)[:8]}")
+
+    # 20. Eine Quelle fuer Zahlen (W6): Kategorie-Karte = Seitenleiste --------------
+    # Beide Zahlen kommen seit 2026-08-22 aus lib/index.ts kategorieAnzahl(); dieses
+    # Tor misst, dass sie im gebauten HTML wirklich gleich sind — je Seite, je Slug.
+    KARTE_RE = re.compile(r'<[^>]*\sdata-kategorie-karte="([^"]+)"[^>]*>')
+    LEISTE_RE = re.compile(r'<[^>]*\sdata-sidebar-kategorie="([^"]+)"[^>]*>')
+    ANZAHL_RE = re.compile(r'\sdata-anzahl="(\d+)"')
+    karten_seiten = 0
+    karten_paare = 0
+    karten_abweichung = []
+    karten_ohne_leiste = []
+    for f in pages:
+        c = contents[f]
+        karten = {}
+        for m in KARTE_RE.finditer(c):
+            a = ANZAHL_RE.search(m.group(0))
+            if a:
+                karten[m.group(1)] = int(a.group(1))
+        if not karten:
+            continue
+        karten_seiten += 1
+        leiste = {}
+        for m in LEISTE_RE.finditer(c):
+            a = ANZAHL_RE.search(m.group(0))
+            if a:
+                leiste[m.group(1)] = int(a.group(1))
+        for slug, n in sorted(karten.items()):
+            if slug not in leiste:
+                karten_ohne_leiste.append(f"{rel(f, out_dir)}:{slug}")
+                continue
+            karten_paare += 1
+            if leiste[slug] != n:
+                karten_abweichung.append(f"{rel(f, out_dir)}:{slug} Karte {n} != Leiste {leiste[slug]}")
+    print(f"[20] Kategorie-Karte = Seitenleiste: ist {karten_paare - len(karten_abweichung)} / "
+          f"soll {karten_paare} von {karten_paare} Paaren auf {karten_seiten} Seiten mit Karten; "
+          f"Karten ohne Leisten-Eintrag: {len(karten_ohne_leiste)} / soll 0")
+    if karten_seiten == 0:
+        verletzungen.append("keine Seite mit data-kategorie-karte — Messpunkt fehlt, [20] nicht erhoben")
+    if karten_abweichung:
+        verletzungen.append(f"Karte != Seitenleiste: {karten_abweichung}")
+    if karten_ohne_leiste:
+        verletzungen.append(f"Kategorie-Karte ohne Leisten-Eintrag: {karten_ohne_leiste}")
+
+    # 21. Lesezeit: eine Funktion, ein Wert je Seite (W6) ---------------------------
+    LESEZEIT_RE = re.compile(r'\sdata-lesezeit="(\d+)"')
+    lz_seiten = 0
+    lz_uneinig = []
+    for f in pages:
+        werte = set(LESEZEIT_RE.findall(contents[f]))
+        if not werte:
+            continue
+        lz_seiten += 1
+        if len(werte) > 1:
+            lz_uneinig.append(f"{rel(f, out_dir)}: {sorted(werte)}")
+    print(f"[21] Lesezeit je Seite eindeutig (data-lesezeit): ist {lz_seiten - len(lz_uneinig)} / "
+          f"soll {lz_seiten} von {lz_seiten} Seiten mit Lesezeit ({n_pages} Seiten gesamt)")
+    if lz_uneinig:
+        verletzungen.append(f"zwei Lesezeiten auf einer Seite: {lz_uneinig[:8]}")
 
     # --- Bilanz ---------------------------------------------------------------
     print("== Bilanz ==")

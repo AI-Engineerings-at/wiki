@@ -1,7 +1,7 @@
 import { WikiLink as Link } from '../../components/WikiLink'
 import Image from 'next/image'
 import { categories, getPopularArticlesEn } from '../../lib/articles'
-import { articleCount, recentArticles as recentFromIndex } from '../../lib/index'
+import { articleCount, kategorieAnzahl, recentArticles as recentFromIndex } from '../../lib/index'
 import { kopfzeile } from '../../lib/lernpfad'
 import { alternatePath } from '../../lib/alternates'
 import { SearchBar } from '../../components/SearchBar'
@@ -113,11 +113,12 @@ export default function HomePage() {
           {categories.map((cat) => (
             <CategoryCard
               key={cat.slug}
+              slug={enSlug(cat.href, cat.slug)}
               icon={cat.icon}
               title={categoryLabelsEN[cat.slug] || cat.label}
               description={categoryDescriptionsEN[cat.slug] || cat.description}
               href={alternatePath(cat.href) ?? cat.href}
-              count={cat.articles.length}
+              count={kategorieAnzahl('en', enSlug(cat.href, cat.slug))}
             />
           ))}
         </div>
@@ -364,13 +365,22 @@ const categoryDescriptionsEN: Record<string, string> = {
   papers: 'Transformer, RAG, LoRA, ReAct, Constitutional AI',
 }
 
+/** EN-Kategorie-Slug aus der Paartabelle: /oesterreich -> /en/austria -> 'austria'. */
+function enSlug(deHref: string, fallback: string): string {
+  const en = alternatePath(deHref)
+  const segs = (en ?? '').split('/').filter(Boolean)
+  return segs[1] || fallback
+}
+
 function CategoryCard({
+  slug,
   icon,
   title,
   description,
   href,
   count,
 }: {
+  slug: string
   icon: string
   title: string
   description: string
@@ -389,7 +399,9 @@ function CategoryCard({
         </h3>
       </div>
       <p className="text-slate-400 text-sm">{description}</p>
-      <p className="text-xs text-slate-600 mt-3">{count} articles</p>
+      <p className="text-xs text-slate-600 mt-3" data-kategorie-karte={slug} data-anzahl={count}>
+        {count} articles
+      </p>
     </Link>
   )
 }

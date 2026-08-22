@@ -1,6 +1,7 @@
 import { ArticleHero } from './ArticleHero'
 import { WikiLink as Link } from './WikiLink'
 import type { MdxArticle } from '../lib/content'
+import { lesezeitMinuten } from '../lib/lesezeit'
 
 /**
  * Seitenkopf + Rumpf eines MDX-Artikels (E43).
@@ -17,7 +18,7 @@ export function MdxArticleView({ article, html }: { article: MdxArticle; html: s
   const klasse = en
     ? `Generated · as of ${stand} · not editorially reviewed`
     : `Generiert · Stand ${stand} · redaktionell nicht geprüft`
-  const minutes = Math.max(1, Math.ceil((article.words / 200) * 1.5))
+  const minutes = lesezeitMinuten(article.words)
   const heroSrc = article.image || ''
 
   return (
@@ -26,7 +27,7 @@ export function MdxArticleView({ article, html }: { article: MdxArticle; html: s
         <div className="text-xs text-slate-500 mb-2">
           <Link href={catHref} className="hover:text-blue-400">{article.categoryLabel}</Link>
           {article.date && <span> · {article.date}</span>}
-          <span> · ~{minutes} min</span>
+          {minutes > 0 && <span data-lesezeit={minutes}> · ~{minutes} min</span>}
         </div>
         <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight tracking-tight">{article.title}</h1>
         {article.description && (

@@ -29,7 +29,7 @@ function fromRegistry(a: Article): IndexEntry {
     date: a.date,
     source: 'tsx',
     tags: [],
-    words: 0,
+    words: TSX_META[a.href]?.words ?? 0,
     image: a.image || a.thumbnail || '',
     file: '',
   }
@@ -44,6 +44,7 @@ function enTwin(a: Article, enLabel: string): IndexEntry | null {
     ...fromRegistry(a),
     title: meta?.title || a.title,
     description: meta?.description || a.description,
+    words: meta?.words ?? 0,
     href: enHref,
     lang: 'en',
     categoryLabel: enLabel,
@@ -97,6 +98,19 @@ export function recentArticles(lang: 'de' | 'en', count = 5): IndexEntry[] {
 export function getEntryByHref(href: string): IndexEntry | undefined {
   const h = href.length > 1 && href.endsWith('/') ? href.slice(0, -1) : href
   return getIndex().find((e) => e.href === h)
+}
+
+/**
+ * Zahl der Artikel einer Kategorie — dieselbe Quelle wie die Seitenleiste (W6).
+ *
+ * Bis 2026-08-22 zaehlten die Kategorie-Karten der Startseite `cat.articles.length`
+ * aus der 63er-Registry (lib/articles.ts), die Seitenleiste daneben den Gesamtindex:
+ * 5 von 8 Karten wichen ab (Karte "Grundlagen 10" neben Leiste "18").
+ * Beide rechnen jetzt hier.
+ */
+export function kategorieAnzahl(lang: 'de' | 'en', slug: string): number {
+  const c = getSidebar(lang).find((x) => x.slug === slug)
+  return c ? c.articles.length : 0
 }
 
 export type SidebarCategory = {

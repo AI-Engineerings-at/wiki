@@ -1,27 +1,21 @@
-'use client'
+import { lesezeitMinuten } from '../lib/lesezeit'
 
-import { useEffect, useState } from 'react'
-import { usePathname } from 'next/navigation'
-
-export function ReadingTime() {
-  const [minutes, setMinutes] = useState<number | null>(null)
-  const pathname = usePathname()
-
-  useEffect(() => {
-    // Count words in the main article content
-    const main = document.querySelector('main')
-    if (!main) return
-    const text = main.textContent || ''
-    const words = text.trim().split(/\s+/).length
-    const readTime = Math.max(1, Math.round(words / 200)) // 200 words per minute
-    setMinutes(readTime)
-  }, [pathname])
-
-  if (minutes === null) return null
+/**
+ * Lesezeit in der Brotkrumen-Zeile.
+ *
+ * Bis 2026-08-22 zaehlte diese Komponente nach der Hydration selbst die Woerter
+ * im DOM (`document.querySelector('main').textContent`) und teilte durch 200 —
+ * eine zweite Formel neben der in components/MdxArticleView.tsx. Auf derselben
+ * Seite standen dadurch zwei Zahlen. Jetzt kommt die Wortzahl aus dem Index und
+ * die Formel aus lib/lesezeit.ts; ohne bekannte Wortzahl wird nichts angezeigt.
+ */
+export function ReadingTime({ words }: { words: number }) {
+  const minuten = lesezeitMinuten(words)
+  if (minuten === 0) return null
 
   return (
-    <span className="text-xs text-slate-500">
-      ~{minutes} min
+    <span className="text-xs text-slate-500" data-lesezeit={minuten}>
+      ~{minuten} min
     </span>
   )
 }

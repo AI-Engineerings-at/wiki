@@ -5,6 +5,7 @@ import {
   getBlogPostBySlug,
   renderMarkdown,
 } from '../lib/blog'
+import { lesezeitMinuten } from '../lib/lesezeit'
 
 
 // Duplicated from app/blog/page.tsx so hero images work on detail pages
@@ -50,8 +51,7 @@ const tagColors: Record<string, string> = {
 }
 
 function estimateReadingTime(content: string): number {
-  const words = content.trim().split(/\s+/).length
-  return Math.max(1, Math.round(words / 200))
+  return lesezeitMinuten(content.trim().split(/\s+/).length)
 }
 
 function getRelatedPosts(currentSlug: string, currentTags: string[], lang: 'de' | 'en', limit = 3) {
@@ -174,7 +174,7 @@ export async function BlogPostPage({ slug, lang }: { slug: string; lang: 'de' | 
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            {readingTime} {en ? 'min read' : 'Min. Lesezeit'}
+            <span data-lesezeit={readingTime}>{readingTime} {en ? 'min read' : 'Min. Lesezeit'}</span>
           </span>
         </div>
 

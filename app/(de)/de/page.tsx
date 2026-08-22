@@ -1,5 +1,6 @@
 import { WikiLink as Link } from '../../../components/WikiLink'
 import { categories, getRecentArticles, getPopularArticles } from '../../../lib/articles'
+import { kategorieAnzahl } from '../../../lib/index'
 import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata = {
@@ -57,7 +58,9 @@ export default function DeHomePage() {
                 </h3>
               </div>
               <p className="text-slate-400 text-sm">{cat.description}</p>
-              <p className="text-xs text-slate-600 mt-3">{cat.articles.length} Artikel</p>
+              <p className="text-xs text-slate-600 mt-3" data-kategorie-karte={cat.slug} data-anzahl={kategorieAnzahl('de', cat.slug)}>
+                {kategorieAnzahl('de', cat.slug)} Artikel
+              </p>
             </Link>
           ))}
         </div>

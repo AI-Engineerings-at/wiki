@@ -59,7 +59,7 @@ export function Sidebar() {
                 <span>
                   {cat.icon} {cat.label}
                 </span>
-                <span className="text-xs text-slate-500">{cat.articles.length}</span>
+                <span className="text-xs text-slate-500" data-sidebar-kategorie={cat.slug} data-anzahl={cat.articles.length}>{cat.articles.length}</span>
               </button>
 
               {isOpen && (

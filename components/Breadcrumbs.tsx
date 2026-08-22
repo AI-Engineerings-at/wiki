@@ -21,21 +21,20 @@ export function Breadcrumbs() {
   const prefix = isEn ? '/en' : ''
   const catSlug = rest[0]
   const category = getSidebar(lang).find((c) => c.slug === catSlug)
+  const entry = getEntryByHref(pathname)
 
   if (category && category.href) {
     crumbs.push({ label: category.label, href: category.href })
-    if (rest.length > 1) {
-      const entry = getEntryByHref(pathname)
-      if (entry) crumbs.push({ label: entry.title, href: pathname })
+    if (rest.length > 1 && entry) {
+      crumbs.push({ label: entry.title, href: pathname })
     }
   } else {
     const labelMap: Record<string, string> = isEn
       ? { blog: 'Blog', 'learning-path': 'Learning Path', support: 'Support', imprint: 'Imprint', privacy: 'Privacy', terms: 'Terms', austria: 'Austria', downloads: 'Downloads' }
       : { blog: 'Blog', lernpfad: 'Lernpfad', support: 'Support', impressum: 'Impressum', datenschutz: 'Datenschutz', agb: 'AGB', de: 'Start' }
     crumbs.push({ label: labelMap[catSlug] || catSlug, href: `${prefix}/${catSlug}` })
-    if (rest.length > 1) {
-      const entry = getEntryByHref(pathname)
-      if (entry) crumbs.push({ label: entry.title, href: pathname })
+    if (rest.length > 1 && entry) {
+      crumbs.push({ label: entry.title, href: pathname })
     }
   }
 
@@ -58,7 +57,7 @@ export function Breadcrumbs() {
           )
         })}
       </ol>
-      <ReadingTime />
+      <ReadingTime words={entry?.words ?? 0} />
     </nav>
   )
 }

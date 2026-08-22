@@ -335,9 +335,11 @@ function main() {
     '',
     `export const BLOG_ENTRIES: IndexEntry[] = ${JSON.stringify(blog.map(strip))}`,
     '',
-    '/** Titel/Beschreibung der TSX-Seiten aus deren metadata (EN-Sidebar, Suche). */',
-    `export const TSX_META: Record<string, { title: string; description: string }> = ${JSON.stringify(
-      Object.fromEntries(tsx.map((t) => [t.href, { title: t.title, description: t.description }])))}`,
+    '/** Titel/Beschreibung/Wortzahl der TSX-Seiten aus deren metadata + Rumpf.',
+    ' *  `words` traegt die Lesezeit (lib/lesezeit.ts) — vorher stand sie fuer TSX-Seiten',
+    ' *  auf 0 und die Brotkrumen-Zeile zaehlte stattdessen das DOM (zwei Zahlen je Seite). */',
+    `export const TSX_META: Record<string, { title: string; description: string; words: number }> = ${JSON.stringify(
+      Object.fromEntries(tsx.map((t) => [t.href, { title: t.title, description: t.description, words: t.words }])))}`,
     '',
     `export const MDX_COLLISIONS: string[] = ${JSON.stringify(collisions)}`,
     '',
