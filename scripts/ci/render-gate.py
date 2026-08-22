@@ -670,6 +670,16 @@ def main(argv):
          "Slug als Titel/Summary auf den MLOps-Seiten"),
         ("Llama 3.3 8B",
          "Modell gibt es nicht: Llama 3.3 erschien nur als 70B"),
+        ("TBD",
+         "Platzhalter statt Aussage (NN3): entweder der Wert oder der Satz, dass er fehlt"),
+        ("Stand unbekannt",
+         "Wissensklassen-Kopf ohne Datum — `date:` im Frontmatter fehlt"),
+        ("as of unknown",
+         "dasselbe auf den EN-Seiten"),
+        ("https://example.com",
+         "Beispiel-Adresse in einer ausgelieferten Seite (NN3)"),
+        ("https://github.com/example",
+         "dasselbe fuer das Beispiel-Repository"),
     ]
     text_treffer = []
     for muster, grund in VERBOTENE_TEXTE:
