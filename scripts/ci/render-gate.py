@@ -398,11 +398,29 @@ def main(argv):
         omni = [e["h"] for e in entries if "omnibus" in (e.get("w", "") + " " + e.get("d", "")).lower()]
         en_n = sum(1 for e in entries if e.get("l") == "en")
         blog_n = sum(1 for e in entries if e.get("c") == "blog")
-        print(f"[14] search-index.json: ist {len(entries)} Einträge / soll >= 540 (EN {en_n}, Blog {blog_n}); "
+        # Soll aus stats.json statt fester Zahl. Bis 2026-08-22 stand hier ">= 540".
+        # Nach a62f7f2 (12 Attrappen-Seiten unter tutorials/ entfernt, NN3) und dem
+        # Wegfall von 4 titellosen Redirect-TSX-Seiten waere das Gate rot geworden,
+        # obwohl beide Loeschungen gewollt waren — eine Schwelle, die beim Aufraeumen
+        # ausschlaegt, misst die falsche Sache. Zwei ableitbare Pruefungen ersetzen sie:
+        #   (a) Export == Generator (stats.search_entries = search.length)
+        #   (b) MDX + Blog gehen bedingungslos in den Index; TSX nur mit <title>
+        #       (scripts/build-index.js: `if (!t.title) continue`) — deshalb ist die
+        #       TSX-Abdeckung eine Zahl mit Nenner, kein Gate.
+        soll_si = STATS.get("search_entries")
+        untergrenze = STATS.get("mdx", 0) + STATS.get("blog", 0)
+        tsx_im_index = len(entries) - untergrenze
+        soll_tsx = STATS.get("tsx", 0)
+        print(f"[14] search-index.json: ist {len(entries)} Einträge / soll {soll_si if soll_si is not None else '— (stats.json fehlt)'} "
+              f"laut stats.search_entries (EN {en_n}, Blog {blog_n}); "
               f"'omnibus' findet {len(omni)} Einträge, darunter /compliance/ki-kompetenz-art4: "
               f"{'ja' if '/compliance/ki-kompetenz-art4' in omni else 'NEIN'}")
-        if len(entries) < 540:
-            verletzungen.append(f"Suchindex {len(entries)} < 540")
+        print(f"[14] informativ, kein Gate — TSX-Seiten im Suchindex: {tsx_im_index} von {soll_tsx} "
+              f"(Rest ohne <title> im metadata-Block); MDX+Blog als Untergrenze: {untergrenze}")
+        if soll_si is not None and len(entries) != soll_si:
+            verletzungen.append(f"Suchindex: Export {len(entries)} != Generator {soll_si}")
+        if len(entries) < untergrenze:
+            verletzungen.append(f"Suchindex {len(entries)} < MDX+Blog {untergrenze}")
         if "/compliance/ki-kompetenz-art4" not in omni:
             verletzungen.append("Suchindex: 'omnibus' findet /compliance/ki-kompetenz-art4 nicht")
     else:
