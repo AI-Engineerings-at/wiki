@@ -2,8 +2,13 @@ import { CodeBlock } from '../../../../components/CodeBlock'
 import { CaseStudyBox } from '../../../../components/CaseStudyBox'
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/de/patterns/agent-orchestration-patterns.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/patterns/agent-orchestration-patterns'),
   title: 'Agent Orchestration Patterns',
   description:
@@ -13,6 +18,7 @@ export const metadata = {
 export default function AgentOrchestrationPatterns() {
   return (
     <div className="space-y-6">
+      <ArticleHero src="/images/hero-2026-08/de/patterns/agent-orchestration-patterns.webp" alt={'Agent Orchestration Patterns'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Agent Orchestration Patterns</h1>
         <p className="text-gray-400 mt-2">Patterns · 8 min</p>

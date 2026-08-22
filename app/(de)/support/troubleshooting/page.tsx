@@ -1,8 +1,13 @@
 import { CodeBlock } from '../../../../components/CodeBlock'
 import Callout from "../../../../components/Callout"
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/de/support/troubleshooting.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/support/troubleshooting'),
   title: 'Troubleshooting',
   description:
@@ -12,6 +17,7 @@ export const metadata = {
 export default function Troubleshooting() {
   return (
     <div className="space-y-6">
+      <ArticleHero src="/images/hero-2026-08/de/support/troubleshooting.webp" alt={'Troubleshooting'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Troubleshooting Leitfaden</h1>
         <p className="text-gray-400 mt-2">Support · 6 min</p>

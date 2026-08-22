@@ -1,7 +1,12 @@
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/en/grundlagen/ki-unternehmen.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/en/grundlagen/ki-unternehmen'),
   title: 'AI in the Enterprise',
   description: 'Why companies use local AI: data privacy (GDPR), cost control, and operational sovereignty.',
@@ -10,6 +15,7 @@ export const metadata: Metadata = {
 export default function KIUnternehmenPage() {
   return (
     <div className="space-y-8">
+      <ArticleHero src="/images/hero-2026-08/en/grundlagen/ki-unternehmen.webp" alt={'AI in the Enterprise'} />
       <div>
         <h1 className="text-3xl font-bold text-white">AI in the Enterprise</h1>
         <p className="text-slate-400 mt-2">Basics · 5 min</p>

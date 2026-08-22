@@ -2,8 +2,13 @@ import Callout from "../../../../components/Callout"
 import ComparisonTable from "../../../../components/ComparisonTable"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/de/grundlagen/ai-kosten-vergleich.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/grundlagen/ai-kosten-vergleich'),
   title: 'AI Kosten Vergleich',
   description:
@@ -13,6 +18,7 @@ export const metadata = {
 export default function AiKostenVergleich() {
   return (
     <div className="space-y-6">
+      <ArticleHero src="/images/hero-2026-08/de/grundlagen/ai-kosten-vergleich.webp" alt={'AI Kosten Vergleich'} />
       <div>
         <h1 className="text-3xl font-bold text-white">AI-Kosten: Lokal vs Cloud vs Hybrid</h1>
         <p className="text-gray-400 mt-2">Grundlagen · 6 min</p>

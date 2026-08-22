@@ -3,8 +3,13 @@ import { CaseStudyBox } from '../../../../components/CaseStudyBox'
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/de/tools/ollama-tutorial.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/tools/ollama-tutorial'),
   title: 'Ollama Tutorial',
   description:
@@ -14,6 +19,7 @@ export const metadata = {
 export default function OllamaTutorial() {
   return (
     <div className="space-y-6">
+      <ArticleHero src="/images/hero-2026-08/de/tools/ollama-tutorial.webp" alt={'Ollama Tutorial'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Ollama: Lokale LLMs einfach gemacht</h1>
         <p className="text-gray-400 mt-2">Tools · 8 min</p>

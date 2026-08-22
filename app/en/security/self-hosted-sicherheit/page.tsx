@@ -7,8 +7,13 @@ import ComparisonTable from "../../../../components/ComparisonTable"
 
 import { RelatedArticles } from "../../../../components/RelatedArticles"
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/en/security/self-hosted-sicherheit.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/en/security/self-hosted-sicherheit'),
   title: "Self-Hosted Security: The 6-Layer Model",
   description:
@@ -18,6 +23,7 @@ export const metadata: Metadata = {
 export default function SelfHostedSecurityPage() {
   return (
     <div className="space-y-6">
+      <ArticleHero src="/images/hero-2026-08/en/security/self-hosted-sicherheit.webp" alt={'Self-Hosted Security: The 6-Layer Model'} />
       {/* Hero Section */}
       <div className="border-b border-white/10 pb-6">
         <p className="text-sm text-blue-400 font-medium mb-2">Security</p>

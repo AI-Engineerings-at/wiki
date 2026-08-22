@@ -1,6 +1,11 @@
 import { CodeBlock } from '../../../../components/CodeBlock'
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 export const metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/en/grundlagen/lokal-vs-cloud.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/en/grundlagen/lokal-vs-cloud'),
   title: 'Local vs Cloud: TCO Comparison',
   description:
@@ -10,6 +15,7 @@ export const metadata = {
 export default function LokalVsCloud() {
   return (
     <div className="space-y-6">
+      <ArticleHero src="/images/hero-2026-08/en/grundlagen/lokal-vs-cloud.webp" alt={'Local vs Cloud: TCO Comparison'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Local AI vs Cloud: The TCO Comparison</h1>
         <p className="text-gray-400 mt-2">Basics · 8 min</p>

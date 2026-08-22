@@ -1,8 +1,13 @@
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/de/tools/n8n-workflow-bundle.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/tools/n8n-workflow-bundle'),
   title: 'n8n AI Workflow Bundle v3',
   description:
@@ -12,6 +17,7 @@ export const metadata = {
 export default function N8nWorkflowBundle() {
   return (
     <div className="space-y-6">
+      <ArticleHero src="/images/hero-2026-08/de/tools/n8n-workflow-bundle.webp" alt={'n8n AI Workflow Bundle v3'} />
       <div className="border-b border-white/10 pb-6">
         <p className="text-sm text-blue-400 font-medium mb-2">Tools</p>
         <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight">

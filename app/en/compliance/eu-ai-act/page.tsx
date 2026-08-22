@@ -1,7 +1,12 @@
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/en/compliance/eu-ai-act.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/en/compliance/eu-ai-act'),
   title: 'EU AI Act',
   description: 'Risk classes, prohibitions, transparency requirements for AI systems in the EU.',
@@ -10,6 +15,7 @@ export const metadata: Metadata = {
 export default function EUAIActPage() {
   return (
     <div className="space-y-8">
+      <ArticleHero src="/images/hero-2026-08/en/compliance/eu-ai-act.webp" alt={'EU AI Act'} />
       <div>
         <h1 className="text-3xl font-bold text-white">EU AI Act</h1>
         <p className="text-slate-400 mt-2">Compliance · 6 min</p>

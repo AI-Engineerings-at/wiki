@@ -1,8 +1,13 @@
 import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/en/support/troubleshooting.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/en/support/troubleshooting'),
   title: 'Troubleshooting',
   description: 'Common problems with Ollama, n8n, Docker. Diagnosis and solutions.',
@@ -11,6 +16,7 @@ export const metadata: Metadata = {
 export default function TroubleshootingPage() {
   return (
     <div className="space-y-8">
+      <ArticleHero src="/images/hero-2026-08/en/support/troubleshooting.webp" alt={'Troubleshooting'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Troubleshooting Guide</h1>
         <p className="text-slate-400 mt-2">Support · 5 min</p>

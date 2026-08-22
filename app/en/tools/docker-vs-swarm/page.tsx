@@ -1,7 +1,12 @@
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/en/tools/docker-vs-swarm.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/en/tools/docker-vs-swarm'),
   title: 'Docker vs Docker Swarm for AI',
   description: 'Which is right for AI? Compose for development, Swarm for production.',
@@ -10,6 +15,7 @@ export const metadata: Metadata = {
 export default function DockerVsSwarmPage() {
   return (
     <div className="space-y-8">
+      <ArticleHero src="/images/hero-2026-08/en/tools/docker-vs-swarm.webp" alt={'Docker vs Docker Swarm for AI'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Docker Compose vs Docker Swarm</h1>
         <p className="text-slate-400 mt-2">Tools · 6 min</p>

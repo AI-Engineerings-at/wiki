@@ -3,8 +3,13 @@ import { Metadata } from 'next'
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/de/grundlagen/30-tage-quickstart.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/grundlagen/30-tage-quickstart'),
   title: '30-Tage Local AI-Stack Quickstart',
   description: 'In 30 Tagen zum eigenen AI-Stack. Tag-für-Tag Anleitung: Docker, Ollama, n8n, Monitoring.',
@@ -13,6 +18,7 @@ export const metadata: Metadata = {
 export default function Quickstart30TagePage() {
   return (
     <div className="space-y-8">
+      <ArticleHero src="/images/hero-2026-08/de/grundlagen/30-tage-quickstart.webp" alt={'30-Tage Local AI-Stack Quickstart'} />
       <div>
         <h1 className="text-3xl font-bold text-white">30-Tage Local AI-Stack Quickstart</h1>
         <p className="text-slate-400 mt-2">Grundlagen · 8 min</p>

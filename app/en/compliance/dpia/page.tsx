@@ -1,5 +1,10 @@
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 export const metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/en/compliance/dpia.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/en/compliance/dpia'),
   title: 'Data Protection Impact Assessment (DPIA)',
   description:
@@ -9,6 +14,7 @@ export const metadata = {
 export default function DPIAPage() {
   return (
     <div className="space-y-8">
+      <ArticleHero src="/images/hero-2026-08/en/compliance/dpia.webp" alt={'Data Protection Impact Assessment (DPIA)'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Data Protection Impact Assessment (DPIA)</h1>
         <p className="text-gray-400 mt-2">Compliance · 8 min · Updated: March 2026</p>

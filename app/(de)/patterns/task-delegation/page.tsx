@@ -2,8 +2,13 @@ import { CodeBlock } from '../../../../components/CodeBlock'
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/de/patterns/task-delegation.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/patterns/task-delegation'),
   title: 'Task Delegation Pattern',
   description: 'Orchestrator verteilt Tasks an spezialisierte Agenten — Routing, Prioritäten, Deadlines.',
@@ -12,6 +17,7 @@ export const metadata = {
 export default function TaskDelegationPage() {
   return (
     <div className="space-y-8">
+      <ArticleHero src="/images/hero-2026-08/de/patterns/task-delegation.webp" alt={'Task Delegation Pattern'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Task Delegation Pattern</h1>
         <p className="text-gray-400 mt-2">

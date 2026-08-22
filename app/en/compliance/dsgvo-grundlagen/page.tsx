@@ -1,7 +1,12 @@
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/en/compliance/dsgvo-grundlagen.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/en/compliance/dsgvo-grundlagen'),
   title: 'GDPR Basics',
   description: 'What does GDPR mean for AI applications? Data protection, consent, retention.',
@@ -10,6 +15,7 @@ export const metadata: Metadata = {
 export default function DSGVOGrundlagenPage() {
   return (
     <div className="space-y-8">
+      <ArticleHero src="/images/hero-2026-08/en/compliance/dsgvo-grundlagen.webp" alt={'GDPR Basics'} />
       <div>
         <h1 className="text-3xl font-bold text-white">GDPR Basics</h1>
         <p className="text-slate-400 mt-2">Compliance · 6 min</p>

@@ -26,10 +26,11 @@ Tabellen-Wrapper, Titel, tote interne Links im Export. Soll-Zahlen aus
 lib/generated/stats.json (scripts/build-index.js).
 
 Seit 2026-08-22 (W8b) [19]: Hero-Bilder. Jede Artikelseite traegt genau ein
-<img data-hero="1"> (components/ArticleHero.tsx), und jede Bilddatei, auf die
-ein solches img zeigt, liegt wirklich unter out/. Nenner: MDX-Artikelseiten laut
-lib/generated/stats.json + die TSX-Artikel aus scripts/bilder/tsx-artikel-2026-08-21.csv
-ohne Redirect-Hinweis.
+<img data-hero="1"> (components/ArticleHero.tsx), jede Bilddatei, auf die ein
+solches img zeigt, liegt wirklich unter out/, und `og:image` derselben Seite
+zeigt auf genau dieses WebP (W9 Block A). Nenner: MDX-Artikelseiten laut
+lib/generated/stats.json + die TSX-Artikelseiten aus
+scripts/bilder/tsx-artikel-2026-08-22.csv ohne Redirect-Hinweis.
 
 Nur Standardbibliothek.
 """
@@ -52,8 +53,11 @@ SOLL_LANG_DE = 108
 # Fehlt die Datei, gilt der Stand vor E43 (182) als Soll.
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 STATS_FILE = os.path.join(REPO, "lib", "generated", "stats.json")
-# Jobliste der TSX-Artikel aus E44/B1 — Nenner fuer Pruefung [19] (Hero-Bilder).
-TSX_JOBS = os.path.join(REPO, "scripts", "bilder", "tsx-artikel-2026-08-21.csv")
+# Nenner fuer Pruefung [19] (Hero-Bilder): voller Bestand der TSX-Artikelseiten,
+# erhoben von scripts/bilder/tsx-inventar.py aus dem app/-Baum (W9 Block A 1).
+# Die 14er-Jobliste aus E44/B1 (tsx-artikel-2026-08-21.csv) bleibt als Beleg liegen,
+# ist aber nicht mehr der Nenner: sie kannte nur die damals bildlosen DE-Seiten.
+TSX_JOBS = os.path.join(REPO, "scripts", "bilder", "tsx-artikel-2026-08-22.csv")
 STATS = json.load(open(STATS_FILE, encoding="utf-8")) if os.path.isfile(STATS_FILE) else {}
 SOLL_SITEMAP_LOC = STATS.get("routes_total", 182)
 SOLL_LLMS_ZIELE = 82
@@ -522,16 +526,16 @@ def main(argv):
     if mdx_ohne:
         verletzungen.append(f"MDX-Artikelseiten ohne Hero-Bild: {len(mdx_ohne)}, z. B. {mdx_ohne[:6]}")
 
-    # 19b: TSX-Artikel aus der E44-Jobliste (ohne Redirect-Seiten)
+    # 19b: TSX-Artikelseiten (voller Nenner aus tsx-artikel-2026-08-22.csv, ohne Redirect-Stubs)
     tsx_soll = []
     tsx_redirect = []
     if os.path.isfile(TSX_JOBS):
         with open(TSX_JOBS, newline="", encoding="utf-8") as fh:
             for r in csv.DictReader(fh):
                 if r.get("hinweis", "").startswith("REDIRECT"):
-                    tsx_redirect.append(f"{r['kategorie']}/{r['slug']}")
+                    tsx_redirect.append(r["route"])
                     continue
-                tsx_soll.append(os.path.join(r["kategorie"], r["slug"], "index.html"))
+                tsx_soll.append(os.path.join(*r["route"].strip("/").split("/"), "index.html"))
         tsx_ohne = []
         tsx_fehlt = []
         for relp in tsx_soll:
@@ -540,16 +544,19 @@ def main(argv):
                 tsx_fehlt.append(relp)
             elif not hero_re.search(contents[f]):
                 tsx_ohne.append(relp)
+        n_tsx_de = sum(1 for p in tsx_soll if not p.startswith("en" + os.sep))
         print(f"[19] TSX-Artikelseiten mit Hero: ist {len(tsx_soll) - len(tsx_ohne) - len(tsx_fehlt)} / "
-              f"soll {len(tsx_soll)} von {len(tsx_soll)} laut scripts/bilder/tsx-artikel-2026-08-21.csv "
-              f"(+{len(tsx_redirect)} Redirect-Seiten ohne Motiv, ausgenommen: {tsx_redirect})")
+              f"soll {len(tsx_soll)} von {len(tsx_soll)} laut scripts/bilder/tsx-artikel-2026-08-22.csv "
+              f"(de {n_tsx_de}, en {len(tsx_soll) - n_tsx_de}; "
+              f"+{len(tsx_redirect)} Redirect-Stubs ohne Motiv, ausgenommen: {tsx_redirect})")
         if tsx_ohne:
             verletzungen.append(f"TSX-Artikelseiten ohne Hero-Bild: {tsx_ohne}")
         if tsx_fehlt:
             verletzungen.append(f"TSX-Artikelseiten aus der Jobliste nicht im Export: {tsx_fehlt}")
     else:
         print(f"[19] {TSX_JOBS} fehlt — TSX-Teil UNVERIFIED")
-        funde.append("tsx-artikel-2026-08-21.csv fehlt: TSX-Hero-Nenner nicht pruefbar")
+        funde.append("tsx-artikel-2026-08-22.csv fehlt: TSX-Hero-Nenner nicht pruefbar")
+        tsx_soll = []
 
     # 19c: jede Hero-Datei existiert wirklich unter out/
     n_hero_img = 0
@@ -573,6 +580,43 @@ def main(argv):
     if hero_fehlt:
         verletzungen.append("Hero-Bilddatei fehlt im Export: "
                             + str({k: v[:2] for k, v in list(hero_fehlt.items())[:10]}))
+
+    # 19e: og:image je Artikelseite = das Hero-WebP derselben Seite (W9 Block A 4).
+    # Nenner: MDX-Artikelseiten ([13]) + TSX-Artikelseiten ohne Redirect ([19b]).
+    og_re = re.compile(r'<meta[^>]*property="og:image"[^>]*content="([^"]+)"')
+    og_re2 = re.compile(r'<meta[^>]*content="([^"]+)"[^>]*property="og:image"')
+    artikel = [rel(f, out_dir) for f in wk] + list(tsx_soll)
+    artikel = sorted(set(artikel))
+    og_abweichung = []
+    og_generisch = []
+    og_fehlt = []
+    for relp in artikel:
+        f = os.path.join(out_dir, relp)
+        c = contents.get(f)
+        if c is None:
+            continue
+        m = hero_re.search(c)
+        hero_src = src_re.search(m.group(0)).group(1) if m and src_re.search(m.group(0)) else ""
+        mo = og_re.search(c) or og_re2.search(c)
+        if not mo:
+            og_fehlt.append(relp)
+            continue
+        og = mo.group(1)
+        if og.endswith("/images/og-image.png") or og.endswith("/og-image.png"):
+            og_generisch.append(relp)
+        elif hero_src and not og.endswith(hero_src):
+            og_abweichung.append(f"{relp}: og={og} hero={hero_src}")
+    print(f"[19] og:image = Hero-WebP auf Artikelseiten: ist "
+          f"{len(artikel) - len(og_abweichung) - len(og_generisch) - len(og_fehlt)} / soll {len(artikel)} "
+          f"von {len(artikel)} Artikelseiten (MDX {len(wk)} + TSX {len(tsx_soll)}); "
+          f"generisches og-image.png: {len(og_generisch)} / soll 0; ohne og:image: {len(og_fehlt)} / soll 0")
+    if og_abweichung:
+        verletzungen.append(f"og:image != Hero: {og_abweichung[:8]}")
+    if og_generisch:
+        verletzungen.append(f"og:image generisch (og-image.png) auf Artikelseiten: "
+                            f"{len(og_generisch)}, z. B. {og_generisch[:8]}")
+    if og_fehlt:
+        verletzungen.append(f"og:image fehlt auf Artikelseiten: {len(og_fehlt)}, z. B. {og_fehlt[:8]}")
 
     # 19d: informativ — Kategorie-Thumbnails (components/CategoryList.tsx)
     n_thumb = sum(contents[f].count('data-thumb="1"') for f in pages)

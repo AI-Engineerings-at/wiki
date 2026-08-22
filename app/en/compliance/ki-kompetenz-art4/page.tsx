@@ -1,5 +1,10 @@
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 export const metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/en/compliance/ki-kompetenz-art4.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/en/compliance/ki-kompetenz-art4'),
   title: 'AI Literacy under Art. 4 EU AI Act',
   description:
@@ -9,6 +14,7 @@ export const metadata = {
 export default function AILiteracyArt4Page() {
   return (
     <div className="space-y-8">
+      <ArticleHero src="/images/hero-2026-08/en/compliance/ki-kompetenz-art4.webp" alt={'AI Literacy under Art. 4 EU AI Act'} />
       <div>
         <h1 className="text-3xl font-bold text-white">AI Literacy under Art. 4 EU AI Act</h1>
         <p className="text-gray-400 mt-2">Compliance · 12 min · Updated: March 2026</p>

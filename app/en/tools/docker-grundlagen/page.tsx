@@ -7,8 +7,13 @@ import ComparisonTable from "../../../../components/ComparisonTable"
 
 import { RelatedArticles } from "../../../../components/RelatedArticles"
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/en/tools/docker-grundlagen.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/en/tools/docker-grundlagen'),
   title: "Docker Basics: Containers, Compose & Swarm",
   description:
@@ -18,6 +23,7 @@ export const metadata: Metadata = {
 export default function DockerBasicsPage() {
   return (
     <div className="space-y-6">
+      <ArticleHero src="/images/hero-2026-08/en/tools/docker-grundlagen.webp" alt={'Docker Basics: Containers, Compose & Swarm'} />
       {/* Hero Section */}
       <div className="border-b border-white/10 pb-6">
         <p className="text-sm text-blue-400 font-medium mb-2">Tools</p>

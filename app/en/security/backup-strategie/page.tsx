@@ -1,8 +1,13 @@
 import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/en/security/backup-strategie.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/en/security/backup-strategie'),
   title: 'Backup Strategy',
   description: '3-2-1 rule, automated backups for Ollama, n8n, PostgreSQL.',
@@ -11,6 +16,7 @@ export const metadata: Metadata = {
 export default function BackupStrategiePage() {
   return (
     <div className="space-y-8">
+      <ArticleHero src="/images/hero-2026-08/en/security/backup-strategie.webp" alt={'Backup Strategy'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Backup Strategy</h1>
         <p className="text-slate-400 mt-2">Security · 5 min</p>

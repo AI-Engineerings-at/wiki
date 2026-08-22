@@ -1,8 +1,13 @@
 import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/en/grundlagen/was-ist-agent-orchestration.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/en/grundlagen/was-ist-agent-orchestration'),
   title: 'What is Agent Orchestration?',
   description: 'Agent Orchestration coordinates multiple specialized AI agents. Roles, communication flow, and why it beats a single LLM.',
@@ -11,6 +16,7 @@ export const metadata: Metadata = {
 export default function WasIstAgentOrchestrationPage() {
   return (
     <div className="space-y-6">
+      <ArticleHero src="/images/hero-2026-08/en/grundlagen/was-ist-agent-orchestration.webp" alt={'What is Agent Orchestration?'} />
       <div>
         <h1 className="text-3xl font-bold text-white">What is Agent Orchestration?</h1>
         <p className="text-gray-400 mt-2">Basics · 5 min</p>

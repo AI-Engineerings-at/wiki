@@ -55,6 +55,9 @@ OUT_ROOT = os.path.join(REPO, "public", "images", "hero-2026-08")
 PROTOKOLL = os.path.join(HERE, "protokoll-2026-08-21.csv")
 INVENTAR = os.path.expanduser("~/ai-kurse/doc/WIKI-INVENTAR-2026-08-21.csv")
 TSX = os.path.join(HERE, "tsx-artikel-2026-08-21.csv")
+# W9 Block A: voller Nenner der TSX-Artikelseiten (scripts/bilder/tsx-inventar.py).
+# Andere Spalten als die 14er-Jobliste von E44: route, de_pendant, hat_webp, hat_png.
+TSX9 = os.path.join(HERE, "tsx-artikel-2026-08-22.csv")
 
 STYLE = (
     "Abstract technical hero illustration, deep dark navy background almost black, "
@@ -258,6 +261,35 @@ def load_jobs():
     return jobs
 
 
+def load_tsx_jobs():
+    """Jobliste W9 Block A: alle TSX-Artikelseiten aus tsx-artikel-2026-08-22.csv.
+
+    EN-Zeilen bekommen KEIN eigenes Motiv, sondern eine echte Kopie der Datei
+    ihres DE-Pendants (Spalte `de_pendant`, aus lib/alternates.ts) — die Zuordnung
+    laeuft ueber die Route, nicht ueber den Slug: /en/tools/ai-tools-database
+    gehoert zu /tools/ai-tools-datenbank.
+    """
+    jobs = []
+    with open(TSX9, newline="", encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            jobs.append(dict(lang=r["lang"], kategorie=r["kategorie"], slug=r["slug"],
+                             titel=r["titel"], beschreibung=r["beschreibung"],
+                             quelle="tsx", hinweis=r["hinweis"], route=r["route"],
+                             de_pendant=r["de_pendant"]))
+    by_route = {j["route"]: j for j in jobs}
+    for j in jobs:
+        j["twin"] = by_route.get(j["de_pendant"]) if j["lang"] == "en" else None
+        j["twin_text"] = None
+    # EN-Text als Prompt-Quelle fuer das DE-Motiv (flux versteht Englisch besser)
+    for j in jobs:
+        if j["lang"] == "de":
+            en = next((e for e in jobs if e["de_pendant"] == j["route"]), None)
+            if en and en["titel"]:
+                j["twin_text"] = en
+    jobs.sort(key=lambda j: (j["lang"] != "de", j["kategorie"], j["slug"]))
+    return jobs
+
+
 def target_path(j):
     return os.path.join(OUT_ROOT, j["lang"], j["kategorie"], f"{j['slug']}.webp")
 
@@ -320,9 +352,11 @@ def main():
     ap.add_argument("--only", default="", help="nur diesen Slug")
     ap.add_argument("--plan", action="store_true", help="nur zaehlen, nichts erzeugen")
     ap.add_argument("--no-guard", action="store_true")
+    ap.add_argument("--tsx-only", action="store_true",
+                    help="nur die TSX-Artikel aus tsx-artikel-2026-08-22.csv (W9 Block A)")
     a = ap.parse_args()
 
-    jobs = load_jobs()
+    jobs = load_tsx_jobs() if a.tsx_only else load_jobs()
     n_de = sum(1 for j in jobs if j["lang"] == "de")
     n_en = sum(1 for j in jobs if j["lang"] == "en")
     n_copy = sum(1 for j in jobs if j["twin"])

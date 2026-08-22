@@ -1,6 +1,11 @@
 import { CodeBlock } from '../../../../components/CodeBlock'
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 export const metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/en/tools/model-selection.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/en/tools/model-selection'),
   title: 'Model Selection Guide',
   description: 'Choose the right AI model for your use case — from Llama to Mistral.',
@@ -9,6 +14,7 @@ export const metadata = {
 export default function ModelSelectionPage() {
   return (
     <div className="space-y-8">
+      <ArticleHero src="/images/hero-2026-08/en/tools/model-selection.webp" alt={'Model Selection Guide'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Model Selection Guide</h1>
         <p className="text-gray-400 mt-2">

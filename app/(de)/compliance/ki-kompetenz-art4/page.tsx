@@ -1,7 +1,12 @@
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 
 export const metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/de/compliance/ki-kompetenz-art4.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/compliance/ki-kompetenz-art4'),
   title: 'KI-Kompetenz nach Art. 4 EU AI Act',
   description:
@@ -11,6 +16,7 @@ export const metadata = {
 export default function KIKompetenzArt4Page() {
   return (
     <div className="space-y-8">
+      <ArticleHero src="/images/hero-2026-08/de/compliance/ki-kompetenz-art4.webp" alt={'KI-Kompetenz nach Art. 4 EU AI Act'} />
       <div>
         <h1 className="text-3xl font-bold text-white">KI-Kompetenz nach Art. 4 EU AI Act</h1>
         <p className="text-gray-400 mt-2">Compliance · 12 min · Stand: 21. August 2026</p>

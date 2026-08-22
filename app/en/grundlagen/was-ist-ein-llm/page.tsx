@@ -1,6 +1,11 @@
 import { CodeBlock } from '../../../../components/CodeBlock'
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 export const metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/en/grundlagen/was-ist-ein-llm.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/en/grundlagen/was-ist-ein-llm'),
   title: 'What is an LLM? Large Language Models Explained',
   description:
@@ -10,6 +15,7 @@ export const metadata = {
 export default function WhatIsAnLLMPage() {
   return (
     <div className="space-y-6">
+      <ArticleHero src="/images/hero-2026-08/en/grundlagen/was-ist-ein-llm.webp" alt={'What is an LLM? Large Language Models Explained'} />
       {/* Hero Section */}
       <div className="border-b border-white/10 pb-6">
         <p className="text-sm text-blue-400 font-medium mb-2">Basics</p>

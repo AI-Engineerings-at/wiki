@@ -1,8 +1,13 @@
 import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/en/grundlagen/multi-agent-systeme.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/en/grundlagen/multi-agent-systeme'),
   title: 'Multi-Agent Systems Explained',
   description: 'How multiple AI agents work together, how they communicate, and why it beats a single LLM.',
@@ -11,6 +16,7 @@ export const metadata: Metadata = {
 export default function MultiAgentSystemePage() {
   return (
     <div className="space-y-8">
+      <ArticleHero src="/images/hero-2026-08/en/grundlagen/multi-agent-systeme.webp" alt={'Multi-Agent Systems Explained'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Multi-Agent Systems Explained</h1>
         <p className="text-slate-400 mt-2">Basics · 6 min</p>

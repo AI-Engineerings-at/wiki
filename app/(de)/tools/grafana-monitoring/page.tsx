@@ -3,8 +3,13 @@ import { CaseStudyBox } from '../../../../components/CaseStudyBox'
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/de/tools/grafana-monitoring.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/tools/grafana-monitoring'),
   title: 'Grafana Monitoring',
   description:
@@ -14,6 +19,7 @@ export const metadata = {
 export default function GrafanaMonitoring() {
   return (
     <div className="space-y-6">
+      <ArticleHero src="/images/hero-2026-08/de/tools/grafana-monitoring.webp" alt={'Grafana Monitoring'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Grafana: Monitoring für Homelab</h1>
         <p className="text-gray-400 mt-2">Tools · 7 min</p>

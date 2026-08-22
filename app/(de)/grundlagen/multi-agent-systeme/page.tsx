@@ -2,8 +2,13 @@ import { CodeBlock } from '../../../../components/CodeBlock'
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/de/grundlagen/multi-agent-systeme.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/grundlagen/multi-agent-systeme'),
   title: 'Multi-Agent Systeme erklärt',
   description:
@@ -13,6 +18,7 @@ export const metadata = {
 export default function MultiAgentSysteme() {
   return (
     <div className="space-y-6">
+      <ArticleHero src="/images/hero-2026-08/de/grundlagen/multi-agent-systeme.webp" alt={'Multi-Agent Systeme erklärt'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Multi-Agent Systeme erklärt</h1>
         <p className="text-gray-400 mt-2">Grundlagen · 7 min</p>

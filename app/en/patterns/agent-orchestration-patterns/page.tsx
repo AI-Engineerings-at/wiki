@@ -1,8 +1,13 @@
 import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/en/patterns/agent-orchestration-patterns.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/en/patterns/agent-orchestration-patterns'),
   title: 'Agent Orchestration Patterns',
   description: 'Proven orchestration patterns for Multi-Agent Systems: sequential, parallel, hierarchical, router, and supervisor.',
@@ -11,6 +16,7 @@ export const metadata: Metadata = {
 export default function AgentOrchestrationPatternsPage() {
   return (
     <div className="space-y-8">
+      <ArticleHero src="/images/hero-2026-08/en/patterns/agent-orchestration-patterns.webp" alt={'Agent Orchestration Patterns'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Agent Orchestration Patterns</h1>
         <p className="text-slate-400 mt-2">Patterns · 5 min</p>

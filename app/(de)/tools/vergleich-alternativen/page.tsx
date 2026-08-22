@@ -1,6 +1,7 @@
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 const entscheidungsbaumDiagram = `@startuml
 skinparam backgroundColor transparent
@@ -30,6 +31,10 @@ governance -down-> governance_quellen
 @enduml`
 
 export const metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/de/tools/vergleich-alternativen.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/tools/vergleich-alternativen'),
   title: 'Vergleichbare Ressourcen \u2014 Wo du sonst noch lernen kannst',
   description:
@@ -41,6 +46,7 @@ const NIST_URL = 'https://www.nist.gov/itl/ai-risk-management-framework'
 export default function VergleichAlternativenPage() {
   return (
     <div className="space-y-6">
+      <ArticleHero src="/images/hero-2026-08/de/tools/vergleich-alternativen.webp" alt={'Vergleichbare Ressourcen — Wo du sonst noch lernen kannst'} />
       <div className="border-b border-white/10 pb-6">
         <p className="text-sm text-blue-400 font-medium mb-2">Tools</p>
         <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight">

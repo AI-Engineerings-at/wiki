@@ -1,8 +1,13 @@
 import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/en/tools/mattermost-agent.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/en/tools/mattermost-agent'),
   title: 'Mattermost AI Agent',
   description: 'Build an AI agent for Mattermost chat. Bot setup, prompts.',
@@ -11,6 +16,7 @@ export const metadata: Metadata = {
 export default function MattermostAgentPage() {
   return (
     <div className="space-y-8">
+      <ArticleHero src="/images/hero-2026-08/en/tools/mattermost-agent.webp" alt={'Mattermost AI Agent'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Mattermost AI Agent</h1>
         <p className="text-slate-400 mt-2">Tools · 6 min</p>

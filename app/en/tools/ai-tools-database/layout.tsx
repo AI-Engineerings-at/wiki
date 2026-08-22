@@ -7,6 +7,10 @@ import { alternatesFor } from '../../../../lib/alternates'
  * und hreflang (W7: 12 von 182 Seiten ohne eigenen Titel, Joes Augen Fund 22).
  */
 export const metadata: Metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/en/tools/ai-tools-database.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   title: 'AI Tools Database',
   description: 'Curated collection of tools for local AI infrastructure: LLM runtimes, chat interfaces, RAG, agents, monitoring and more.',
   alternates: alternatesFor('/en/tools/ai-tools-database'),

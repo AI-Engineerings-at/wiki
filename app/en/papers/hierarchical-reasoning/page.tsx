@@ -2,8 +2,13 @@ import { Metadata } from "next"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { RelatedArticles } from "../../../../components/RelatedArticles"
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/en/papers/hierarchical-reasoning.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/en/papers/hierarchical-reasoning'),
   title: "Hierarchical Reasoning Model (2025) — Recurrent AI Without Chain-of-Thought",
   description:
@@ -13,6 +18,7 @@ export const metadata: Metadata = {
 export default function HierarchicalReasoningPageEN() {
   return (
     <div className="space-y-6">
+      <ArticleHero src="/images/hero-2026-08/en/papers/hierarchical-reasoning.webp" alt={'Hierarchical Reasoning Model (2025) — Recurrent AI Without Chain-of-Thought'} />
       {/* Hero Section */}
       <div className="border-b border-white/10 pb-6">
         <p className="text-sm text-blue-400 font-medium mb-2">Papers</p>

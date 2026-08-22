@@ -2,9 +2,14 @@ import { CodeBlock } from '../../../../components/CodeBlock'
 // PlantUML via Kroki ersetzt Mermaid — Infografik-PNGs sind besser
 import Callout from "../../../../components/Callout"
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 // PlantUMLDiagram entfernt — externer Kroki-Fetch crashte die Seite (E-fix 2026-03-27)
 
 export const metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/de/compliance/eu-ai-act.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/compliance/eu-ai-act'),
   title: 'EU AI Act',
   description:
@@ -14,6 +19,7 @@ export const metadata = {
 export default function EuAiActLeitfaden() {
   return (
     <div className="space-y-6">
+      <ArticleHero src="/images/hero-2026-08/de/compliance/eu-ai-act.webp" alt={'EU AI Act'} />
       <div>
         <h1 className="text-3xl font-bold text-white">EU AI Act: Was du wissen musst</h1>
         <p className="text-gray-400 mt-2">Compliance · 10 min</p>

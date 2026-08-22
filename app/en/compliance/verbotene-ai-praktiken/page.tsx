@@ -1,7 +1,12 @@
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/en/compliance/verbotene-ai-praktiken.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/en/compliance/verbotene-ai-praktiken'),
   title: 'Prohibited AI Practices under EU AI Act',
   description: 'Article 5 prohibits certain AI practices. Social Scoring, Emotion Recognition, Biometric Surveillance - what has been forbidden since Feb 2025.',
@@ -10,6 +15,7 @@ export const metadata: Metadata = {
 export default function VerboteneAIPraktikenPage() {
   return (
     <div className="space-y-8">
+      <ArticleHero src="/images/hero-2026-08/en/compliance/verbotene-ai-praktiken.webp" alt={'Prohibited AI Practices under EU AI Act'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Prohibited AI Practices</h1>
         <p className="text-slate-400 mt-2">Compliance · 4 min · Updated: Feb 2026</p>

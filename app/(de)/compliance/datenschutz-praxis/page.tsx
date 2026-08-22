@@ -2,8 +2,13 @@ import { CodeBlock } from '../../../../components/CodeBlock'
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/de/compliance/datenschutz-praxis.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/compliance/datenschutz-praxis'),
   title: 'Datenschutz Praxis',
   description:
@@ -36,6 +41,7 @@ audit -up-> erhebung : Kontinuierliche\\nVerbesserung
 export default function DatenschutzPraxis() {
   return (
     <div className="space-y-6">
+      <ArticleHero src="/images/hero-2026-08/de/compliance/datenschutz-praxis.webp" alt={'Datenschutz Praxis'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Datenschutz in der Praxis</h1>
         <p className="text-gray-400 mt-2">Compliance · 6 min</p>

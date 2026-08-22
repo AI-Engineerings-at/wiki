@@ -1,8 +1,13 @@
 import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/en/compliance/chatbot-transparenzpflichten.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/en/compliance/chatbot-transparenzpflichten'),
   title: 'Chatbot Transparency Obligations under EU AI Act',
   description: 'What you need to know about chatbots and AI-generated content. Labeling requirements, disclosure, copyright — all in one place.',
@@ -11,6 +16,7 @@ export const metadata: Metadata = {
 export default function ChatbotTransparencyPage() {
   return (
     <div className="space-y-8">
+      <ArticleHero src="/images/hero-2026-08/en/compliance/chatbot-transparenzpflichten.webp" alt={'Chatbot Transparency Obligations under EU AI Act'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Chatbot Transparency Obligations</h1>
         <p className="text-slate-400 mt-2">Compliance · 4 min · Updated: Feb 2026</p>

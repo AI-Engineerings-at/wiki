@@ -1,8 +1,13 @@
 import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/en/patterns/heartbeat-monitoring.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/en/patterns/heartbeat-monitoring'),
   title: 'Heartbeat & Monitoring',
   description: 'How to know if agents are running. Health checks, status updates, alerting.',
@@ -11,6 +16,7 @@ export const metadata: Metadata = {
 export default function HeartbeatMonitoringPage() {
   return (
     <div className="space-y-8">
+      <ArticleHero src="/images/hero-2026-08/en/patterns/heartbeat-monitoring.webp" alt={'Heartbeat & Monitoring'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Heartbeat & Monitoring</h1>
         <p className="text-slate-400 mt-2">Patterns · 5 min</p>

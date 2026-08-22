@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 type Tool = {
   name: string
@@ -276,6 +277,7 @@ export default function AIToolsDatabasePage() {
 
   return (
     <div className="space-y-8">
+      <ArticleHero src="/images/hero-2026-08/en/tools/ai-tools-database.webp" alt={'AI Tools Database'} />
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-white">
