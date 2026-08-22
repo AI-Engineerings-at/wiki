@@ -1,0 +1,45 @@
+# Dependabot v2 — weekly automated dependency PRs.
+# Scope: npm (Node deps via package.json) + github-actions.
+# Limit: 5 open PRs per ecosystem to avoid review storms.
+
+version: 2
+
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/Vienna"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "javascript"
+    groups:
+      production-deps:
+        applies-to: version-updates
+        dependency-type: production
+        update-types: [minor, patch]
+      dev-deps:
+        applies-to: version-updates
+        dependency-type: development
+        update-types: [minor, patch]
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "06:00"
+      timezone: "Europe/Vienna"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "ci"
+    commit-message:
+      prefix: "chore(ci)"
+      include: "scope"
