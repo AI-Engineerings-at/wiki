@@ -1,15 +1,10 @@
 import type { Metadata } from 'next'
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata: Metadata = {
-  title: 'Terms & Conditions | AI Engineering Wiki',
+  alternates: alternatesFor('/en/terms'),
+  title: 'Terms & Conditions',
   description: 'General Terms and Conditions for the purchase of digital products at AI Engineering.',
-  alternates: {
-    canonical: 'https://wiki.ai-engineering.at/en/terms',
-    languages: {
-      'de-AT': 'https://wiki.ai-engineering.at/agb',
-      'en': 'https://wiki.ai-engineering.at/en/terms',
-    },
-  },
 }
 
 export default function TermsPage() {

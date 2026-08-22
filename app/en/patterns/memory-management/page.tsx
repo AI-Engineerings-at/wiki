@@ -1,7 +1,10 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
-  title: 'Memory Management Pattern | AI Engineering Wiki',
+  alternates: alternatesFor('/en/patterns/memory-management'),
+  title: 'Memory Management Pattern',
   description: 'How AI agents store and retrieve persistent knowledge. CLAUDE.md, Topic Files, Knowledge Graphs.',
 }
 
@@ -14,12 +17,18 @@ export default function MemoryManagementPage() {
       </div>
 
       <div className="prose prose-invert max-w-none">
+        <figure className="my-8">
+          <img src="/images/diagrams/patterns-memory-3tier.png" alt="The Problem — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">The Problem</h2>
         <p className="text-slate-300">
           Every API call is an empty session. Your agent doesnt know what happened yesterday. 
           Memory Management solves this through structured persistence.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/patterns-memory-flow.png" alt="The Three-Tier Memory System in Practice — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">The Three-Tier Memory System in Practice</h2>
         <p className="text-slate-300">
           A productive memory system solves the forgetting problem with three tiers that work
@@ -69,6 +78,7 @@ export default function MemoryManagementPage() {
           The simplest method: A Markdown file in the project root containing all important info.
           Loaded automatically on every run.
         </p>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`# Project Context
 - Stack: Ollama + n8n + PostgreSQL
@@ -79,6 +89,7 @@ export default function MemoryManagementPage() {
 - Docker Compose for Deployment
 - PostgreSQL for data`}</code>
         </pre>
+        </CodeBlock>
 
         <h3 className="text-lg font-semibold text-white mt-6">2. Topic Files</h3>
         <p className="text-slate-300">
@@ -94,6 +105,7 @@ export default function MemoryManagementPage() {
         </p>
 
         <h2 className="text-xl font-semibold text-white mt-8">When to Use What?</h2>
+        <div className="table-wrap">
         <table className="w-full text-left">
           <thead>
             <tr className="border-b border-slate-700">
@@ -124,6 +136,7 @@ export default function MemoryManagementPage() {
             </tr>
           </tbody>
         </table>
+        </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Practice Tip</h2>
         <p className="text-slate-300">

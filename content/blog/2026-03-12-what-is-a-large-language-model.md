@@ -1,4 +1,6 @@
 ---
+lang: "en"
+pendant: "2026-03-12-was-ist-ein-llm"
 title: "What Is a Large Language Model? Explained Without Buzzwords"
 date: "2026-03-12"
 description: "LLM, GPT, Transformer — what's actually going on inside? An honest explanation without marketing speak."
@@ -140,7 +142,7 @@ Ollama handles the download, quantisation, and GPU management. You need:
 
 If you don't have a dedicated GPU: Ollama can also run models on CPU. A 3B model on a modern laptop (M1/M2 Mac or current Intel/AMD) responds in roughly 2-5 seconds per paragraph. Not fast, but sufficient for many tasks.
 
-More details in [Step 3: Install Ollama](/blog/2026-03-12-install-ollama-step-by-step) of this series.
+More details in [Step 3: Install Ollama](/en/blog/2026-03-12-install-ollama-step-by-step) of this series.
 
 ## What This Means for You
 
@@ -152,4 +154,4 @@ The important part: you don't need OpenAI for this. Models like Qwen, Llama, or 
 
 **Now you know what an LLM is. The next step: why you should run it locally — and what that means for GDPR and the EU AI Act.**
 
-→ **[Step 1: Why You Shouldn't Use ChatGPT at Work](/blog/2026-03-12-why-local-ai-instead-of-cloud)**
+→ **[Step 1: Why You Shouldn't Use ChatGPT at Work](/en/blog/2026-03-12-why-local-ai-instead-of-cloud)**

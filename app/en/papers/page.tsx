@@ -1,5 +1,8 @@
+import { MdxCategoryAppendix } from '../../../components/MdxCategoryAppendix'
+import { alternatesFor } from '../../../lib/alternates'
 export const metadata = {
-  title: 'AI Papers | AI Engineering Wiki',
+  alternates: alternatesFor('/en/papers'),
+  title: 'AI Papers',
   description:
     'The most important papers on LLMs, RAG, Agents and AI Safety — summarized and explained in plain language.',
   openGraph: {
@@ -73,6 +76,8 @@ export default function PapersPage() {
           </a>
         ))}
       </div>
+
+      <MdxCategoryAppendix category="papers" lang="en" />
     </div>
   )
 }

@@ -1,11 +1,14 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from "next"
 import Callout from "../../../../components/Callout"
 import KeyTakeaway from "../../../../components/KeyTakeaway"
 import ComparisonTable from "../../../../components/ComparisonTable"
 import { RelatedArticles } from "../../../../components/RelatedArticles"
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
-  title: "AI Agent Legal Framework — EU AI Act Compliance | AI Engineering Wiki",
+  alternates: alternatesFor('/en/compliance/ai-agent-legal-framework'),
+  title: "AI Agent Legal Framework — EU AI Act Compliance",
   description:
     "How to deploy AI agents legally: EU AI Act, GDPR, risk assessment, compliance documents and hash chain for tamper-proof documentation.",
 }
@@ -195,6 +198,7 @@ export default function AIAgentLegalFrameworkENPage() {
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
             <p className="text-white font-medium mb-3">Hash chain principle:</p>
+            <CodeBlock lang="en">
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`Document v1  →  SHA-256: a1b2c3...  (previous: null)
 Document v2  →  SHA-256: d4e5f6...  (previous: a1b2c3...)
@@ -205,6 +209,7 @@ Tamper with v1?
 → previous_hash of v2 no longer matches
 → Chain is broken = tampering detected`}</code>
             </pre>
+            </CodeBlock>
           </div>
 
           <Callout type="info" title="Not Blockchain, Not eIDAS">

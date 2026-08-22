@@ -1,4 +1,5 @@
 ---
+pendant: "2026-03-12-docker-basics-for-ai"
 title: "Docker für AI: Warum Container deinen Stack production-ready machen"
 date: "2026-03-12"
 description: "Ohne Docker läuft dein AI-Stack nur auf deinem Rechner. Mit Docker läuft er überall. Der Einstieg für AI-Entwickler."
@@ -126,7 +127,7 @@ Docker gibt dir Reproduzierbarkeit und Portabilität. Was fehlt noch für echte 
 
 Das ist der Bereich, in dem Docker Swarm oder Kubernetes ins Spiel kommen. Wie 11 AI-Agents auf diesem Fundament zusammenarbeiten — und was eine solche Architektur in der Praxis bedeutet — beschreiben wir ausführlich in: [Agent Team Architecture: Wie wir 11 AI-Agents orchestrieren →](/blog/2026-03-09-agent-team-architecture)
 
-Alle Details zum Aufbau des kompletten Stacks — von Ollama bis Docker Swarm, von Monitoring bis DSGVO-Konformität — gibt es in 70 Seiten kompakt: [Der Lokale AI-Stack Playbook für EUR 49](https://www.ai-engineering.at/products)
+Alle Details zum Aufbau des kompletten Stacks — von Ollama bis Docker Swarm, von Monitoring bis DSGVO-Konformität — stehen auf 70 Seiten im Playbook „Der Lokale AI-Stack“. Stand 21. August 2026: dieses Produkt wird nicht mehr verkauft; die Inhalte dieses Playbooks wandern überarbeitet in den Hub (hub.ai-engineering.at) — ohne Termin. [Weiter im Lernpfad](/lernpfad/)
 
 ---
 

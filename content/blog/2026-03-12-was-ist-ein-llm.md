@@ -1,4 +1,5 @@
 ---
+pendant: "2026-03-12-what-is-a-large-language-model"
 title: "Was ist ein Large Language Model? Erklärt ohne Buzzwords"
 date: "2026-03-12"
 description: "LLM, GPT, Transformer — was steckt wirklich dahinter? Eine ehrliche Erklärung ohne Marketing-Sprache."

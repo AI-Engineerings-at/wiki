@@ -1,5 +1,8 @@
+import { MdxCategoryAppendix } from '../../../components/MdxCategoryAppendix'
+import { alternatesFor } from '../../../lib/alternates'
 export const metadata = {
-  title: 'Tools | AI Engineering Wiki',
+  alternates: alternatesFor('/en/tools'),
+  title: 'Tools',
   description:
     'Tools and infrastructure for your GDPR-compliant, 100% self-hosted AI stack: Docker, Ollama, n8n, Grafana, RAG, Proxmox and MCP.',
   openGraph: {
@@ -30,7 +33,7 @@ export default function ToolsPage() {
     {
       title: 'n8n for Beginners',
       description: 'Workflow automation with n8n. Nodes, triggers, integrations.',
-      href: '/en/tools/n8n-für-anfaenger',
+      href: '/en/tools/n8n-fuer-anfaenger',
       date: '2026-03-01',
     },
     {
@@ -97,6 +100,8 @@ export default function ToolsPage() {
           </a>
         ))}
       </div>
+
+      <MdxCategoryAppendix category="tools" lang="en" />
     </div>
   )
 }

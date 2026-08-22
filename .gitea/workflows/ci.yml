@@ -1,0 +1,63 @@
+# CI-Gate für wiki.ai-engineering.at auf dem Gitea-Runner (aie-ci-runner,
+# Host-Modus ohne Docker-Daemon, maxParallel=1, Platte ~2,2 GB frei).
+#
+# Was hier geprüft wird, war bis 2026-08-21 nur in einem Abnahme-Protokoll
+# belegt (Lauf 3, fix/paritaet-2a@444255d): 0 Fehlerseiten, 44 Diagramm-
+# Seiten, 182 Seiten in der Sitemap, 82/82 llms.txt-Ziele. Dieses Gate
+# misst dieselben Zahlen am gebauten Export (out/) bei jedem Push — die
+# Abnahme lebt damit in der Kette, nicht im Protokoll.
+#
+# Kein Deploy: der Deploy nach Cloudflare Pages hängt an
+# .github/workflows/deploy.yml (GitHub, nur main). Hier wird nur gemessen.
+
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  gate:
+    name: install · build · linkcheck · render-gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Quellcode holen
+        uses: actions/checkout@v4
+
+      - name: Node einrichten (.nvmrc)
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Abhängigkeiten installieren
+        run: npm ci
+
+      # `npm run build` = scripts/build-index.js (lib/generated/*, public/llms.txt,
+      # public/search-index.json) + scripts/generate-markdown-for-agents.js (public/md,
+      # llms-full.txt, agents.json) + `next build` mit output: 'export' -> out/
+      - name: Build (statischer Export nach out/)
+        run: npm run build
+
+      - name: Linkcheck (interne Links im Quelltext)
+        run: npm run check:links
+
+      # Render-Gate: prüft alle out/**/*.html, schreibt je Prüfung ist/soll
+      # mit Nenner ins Log, Exit 1 bei jeder Verletzung. Nur Standardbibliothek.
+      # Seit 2026-08-21 (gesamt/wiki) zusätzlich: Favicon-Pixelprobe, theme-color,
+      # ASCII-Umlaute, EN-Shell, MDX-Seitenzahl, Suchindex, Lernpfad, Kopier-
+      # Knöpfe, Tabellen-Wrapper, Titel, tote interne Links im Export.
+      - name: Render-Gate (out/)
+        run: python3 scripts/ci/render-gate.py out/
+
+      # Runner-Platte 2,2 GB: Build-Artefakte (out ~544 MB, node_modules
+      # ~355 MB, .next) nach jedem Lauf entfernen — auch bei Rot.
+      - name: Aufräumen (Runner-Platte)
+        if: always()
+        run: |
+          rm -rf out node_modules .next public/md public/llms-full.txt public/llms.txt public/search-index.json lib/generated
+          df -h . | tail -1

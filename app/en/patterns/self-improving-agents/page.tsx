@@ -1,11 +1,14 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from "next"
 import Callout from "../../../../components/Callout"
 import KeyTakeaway from "../../../../components/KeyTakeaway"
 import ComparisonTable from "../../../../components/ComparisonTable"
 import { RelatedArticles } from "../../../../components/RelatedArticles"
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
-  title: "Self-Improving Agents — NemoClaw Pattern | AI Engineering Wiki",
+  alternates: alternatesFor('/en/patterns/self-improving-agents'),
+  title: "Self-Improving Agents — NemoClaw Pattern",
   description:
     "How AI agents learn from mistakes: 3-tier memory, corrections.md, pre-action gates, self-escalation and two-tier heartbeat.",
 }
@@ -43,6 +46,9 @@ export default function SelfImprovingAgentsENPage() {
 
         {/* Section 1 */}
         <section className="mt-10">
+          <figure className="my-8">
+            <img src="/images/generated/hero-self-improving.png" alt="Illustration — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+          </figure>
           <h2 className="text-2xl font-bold text-white mb-4">
             The Problem: Static Memory
           </h2>
@@ -147,6 +153,7 @@ export default function SelfImprovingAgentsENPage() {
           </p>
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
+            <CodeBlock lang="en">
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`| DATE       | CONTEXT      | CORRECTION          | LESSON                        | USED |
 |------------|-------------|---------------------|-------------------------------|------|
@@ -154,6 +161,7 @@ export default function SelfImprovingAgentsENPage() {
 | 2026-03-20 | Credentials | Printed to stdout   | NEVER print, use as variable  | 5x   |
 | 2026-03-21 | API Call    | Didn't read docs    | Read docs BEFORE API call     | 1x   |`}</code>
             </pre>
+            </CodeBlock>
           </div>
 
           <p className="text-white/70 leading-relaxed mt-4">
@@ -176,6 +184,7 @@ export default function SelfImprovingAgentsENPage() {
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
             <p className="text-white font-medium mb-3">Typical pre-action gates:</p>
+            <CodeBlock lang="en">
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`BEFORE credential access → How? (Vault, not stdout)
 BEFORE browser action   → Existing session? MCP open?
@@ -183,6 +192,7 @@ BEFORE remote access    → Available locally? Local data first
 BEFORE data usage       → Real? No mock data?
 BEFORE API call         → Read the API docs?`}</code>
             </pre>
+            </CodeBlock>
           </div>
 
           <ComparisonTable
@@ -263,6 +273,7 @@ BEFORE API call         → Read the API docs?`}</code>
           </h2>
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
+            <CodeBlock lang="en">
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`Agent receives task
   │
@@ -285,6 +296,7 @@ BEFORE API call         → Read the API docs?`}</code>
               ├── 30 days unused → WARM demotion
               └── 90 days unused → COLD demotion`}</code>
             </pre>
+            </CodeBlock>
           </div>
         </section>
 

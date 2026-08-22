@@ -1,7 +1,9 @@
 import { Metadata } from 'next'
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
-  title: 'EU AI Act Compliance Checklist | AI Engineering Wiki',
+  alternates: alternatesFor('/en/compliance/eu-ai-act-checkliste'),
+  title: 'EU AI Act Compliance Checklist',
   description: 'Your 7-step guide to EU AI Act readiness. Risk classes, transparency requirements, prohibitions - everything compact.',
 }
 
@@ -23,6 +25,7 @@ export default function EUAIActChecklistePage() {
         </div>
 
         <h2>Timeline: What When</h2>
+        <div className="table-wrap">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700">
@@ -49,7 +52,11 @@ export default function EUAIActChecklistePage() {
             </tr>
           </tbody>
         </table>
+        </div>
 
+        <figure className="my-8">
+          <img src="/images/infographics/eu-ai-act-7-schritte-checkliste.png" alt="7 Steps to Compliance — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2>7 Steps to Compliance</h2>
 
         <h3>1. Create AI System Inventory</h3>
@@ -61,6 +68,7 @@ export default function EUAIActChecklistePage() {
         </ul>
 
         <h3>2. Conduct Risk Classification</h3>
+        <div className="table-wrap">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700">
@@ -92,6 +100,7 @@ export default function EUAIActChecklistePage() {
             </tr>
           </tbody>
         </table>
+        </div>
 
         <h3>3. Check Prohibitions (Article 5)</h3>
         <p className="text-slate-300">
@@ -122,6 +131,9 @@ export default function EUAIActChecklistePage() {
           <li>Establish basic understanding in the company</li>
         </ul>
 
+        <figure className="my-8">
+          <img src="/images/infographics/eu-ai-act-risikoklassen-entscheidungsbaum.png" alt="Sources — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2>Sources</h2>
         <ul>
           <li><a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689" target="_blank" className="text-blue-400 hover:underline">EU AI Act Original Text (EUR-Lex)</a></li>

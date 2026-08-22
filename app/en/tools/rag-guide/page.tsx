@@ -1,7 +1,10 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
-  title: 'RAG Guide | AI Engineering Wiki',
+  alternates: alternatesFor('/en/tools/rag-guide'),
+  title: 'RAG Guide',
   description: 'Retrieval-Augmented Generation with ChromaDB, Qdrant, Neo4j.',
 }
 
@@ -19,7 +22,11 @@ export default function RAGGuidePage() {
           The AI can answer questions about your data - without training.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/generated/hero-rag-pipeline-v2.png" alt="How RAG Works — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">How RAG Works</h2>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`1. User asks question
 2. Question → Embedding Model
@@ -28,7 +35,11 @@ export default function RAGGuidePage() {
 5. Documents + Question → LLM
 6. LLM generates answer`}</code>
         </pre>
+        </CodeBlock>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/tools-rag-pipeline.png" alt="Components — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">Components</h2>
         <ul className="list-disc list-inside text-slate-300 space-y-1">
           <li><strong>Document Loader:</strong> PDF, Markdown, HTML, Text</li>
@@ -39,6 +50,7 @@ export default function RAGGuidePage() {
         </ul>
 
         <h2 className="text-xl font-semibold text-white mt-8">Popular Tools</h2>
+        <div className="table-wrap">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700">
@@ -70,8 +82,10 @@ export default function RAGGuidePage() {
             </tr>
           </tbody>
         </table>
+        </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Basic RAG Pipeline</h2>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`# 1. Load and split documents
 from langchain_community.document_loaders import TextLoader
@@ -98,6 +112,7 @@ from langchain_community.chat_models import ChatOllama
 llm = ChatOllama(model="llama3:8b")
 result = llm.invoke(f"Answer based on: {docs}")`}</code>
         </pre>
+        </CodeBlock>
       </div>
     </div>
   )

@@ -1,5 +1,8 @@
+import { MdxCategoryAppendix } from '../../../components/MdxCategoryAppendix'
+import { alternatesFor } from '../../../lib/alternates'
 export const metadata = {
-  title: 'Compliance | AI Engineering Wiki',
+  alternates: alternatesFor('/en/compliance'),
+  title: 'Compliance',
   description:
     'GDPR and EU AI Act in practice: basics, transparency requirements, prohibited practices and readiness checklists for AI systems.',
   openGraph: {
@@ -91,6 +94,8 @@ export default function CompliancePage() {
           </a>
         ))}
       </div>
+
+      <MdxCategoryAppendix category="compliance" lang="en" />
     </div>
   )
 }

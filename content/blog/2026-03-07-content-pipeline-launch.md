@@ -49,4 +49,4 @@ Der Social Poster ist ein Node.js-Service, der über das Chrome DevTools Protoco
 
 Die gesamte Kette — vom RSS-Feed bis zum veröffentlichten Social-Media-Post — läuft ohne manuellen Eingriff. Fehler werden über Grafana-Alerts gemeldet. Die durchschnittliche Verarbeitungszeit pro Artikel liegt bei 4-6 Minuten, davon ca. 90 Sekunden für die Bildgenerierung.
 
-Mehr Details in unserem [n8n Workflow Bundle](/tools/n8n).
+Mehr Details in unserem [n8n Workflow Bundle](/tools/n8n-workflow-bundle).

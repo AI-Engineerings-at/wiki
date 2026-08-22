@@ -1,7 +1,10 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
-  title: 'Heartbeat & Monitoring | AI Engineering Wiki',
+  alternates: alternatesFor('/en/patterns/heartbeat-monitoring'),
+  title: 'Heartbeat & Monitoring',
   description: 'How to know if agents are running. Health checks, status updates, alerting.',
 }
 
@@ -25,6 +28,7 @@ export default function HeartbeatMonitoringPage() {
           A regular signal that tells the system: "I'm still alive".
         </p>
 
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`// Heartbeat Loop (pseudocode)
 every 60 seconds:
@@ -39,6 +43,7 @@ every 60 seconds:
   if status != 'healthy':
     alert.oncall('Agent unhealthy', status)`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Metrics to Capture</h2>
 
@@ -60,6 +65,7 @@ every 60 seconds:
         </ul>
 
         <h2 className="text-xl font-semibold text-white mt-8">Alerting Rules</h2>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`# Prometheus Alert Rules
 groups:
@@ -81,6 +87,7 @@ groups:
     annotations:
       summary: "High token usage detected"`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Tools</h2>
         <ul className="list-disc list-inside text-slate-300 space-y-1">

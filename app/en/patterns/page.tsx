@@ -1,5 +1,8 @@
+import { MdxCategoryAppendix } from '../../../components/MdxCategoryAppendix'
+import { alternatesFor } from '../../../lib/alternates'
 export const metadata = {
-  title: 'Patterns | AI Engineering Wiki',
+  alternates: alternatesFor('/en/patterns'),
+  title: 'Patterns',
   description:
     'Proven Agent Orchestration patterns: memory management, task delegation, safety hooks and monitoring for Multi-Agent Systems.',
   openGraph: {
@@ -73,6 +76,8 @@ export default function PatternsPage() {
           </a>
         ))}
       </div>
+
+      <MdxCategoryAppendix category="patterns" lang="en" />
     </div>
   )
 }

@@ -1,5 +1,7 @@
+import { alternatesFor } from '../../../../lib/alternates'
 export const metadata = {
-  title: 'AI Literacy under Art. 4 EU AI Act | AI Engineering Wiki',
+  alternates: alternatesFor('/en/compliance/ki-kompetenz-art4'),
+  title: 'AI Literacy under Art. 4 EU AI Act',
   description:
     'Art. 4 EU AI Act: AI literacy obligation applies since Feb 2, 2025. Enforcement from Aug 2026, penalties up to EUR 15M. Practical guide for SMEs.',
 }
@@ -37,6 +39,7 @@ export default function AILiteracyArt4Page() {
         <h2 className="text-xl font-semibold text-white mt-8">Who is affected?</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -68,6 +71,7 @@ export default function AILiteracyArt4Page() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <p className="text-gray-300 mt-4">
@@ -76,6 +80,9 @@ export default function AILiteracyArt4Page() {
           The same applies to all companies in the EU/EEA.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/infographics/ki-kompetenz-betroffen-matrix.png" alt="What must be trained? — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">What must be trained?</h2>
 
         <div className="space-y-4 mt-4">
@@ -119,9 +126,16 @@ export default function AILiteracyArt4Page() {
           </div>
         </div>
 
+        <figure className="my-8">
+          <img src="/images/infographics/art4-timeline.png" alt="Penalties — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
+        <figure className="my-8">
+          <img src="/images/infographics/ki-kompetenz-schulungsplan.png" alt="Penalties — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">Penalties</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -144,6 +158,7 @@ export default function AILiteracyArt4Page() {
               </tr>
             </tbody>
           </table>
+          </div>
           <p className="text-gray-500 text-xs mt-2">
             For SMEs and startups, proportionate caps apply — whichever amount is lower.
           </p>

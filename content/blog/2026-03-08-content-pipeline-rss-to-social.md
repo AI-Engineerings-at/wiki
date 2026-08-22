@@ -86,4 +86,4 @@ Zum Vergleich: Ein Tool wie Buffer oder Hootsuite kostet ab 15 EUR/Monat. Dazu O
 
 ## Zum Mitnehmen
 
-Die Architektur hinter dieser Pipeline — inklusive n8n Workflow-Templates, Ollama-Prompts, und CDP-Setup-Anleitung — haben wir im [AI Agent Blueprint](https://www.ai-engineering.at/products) dokumentiert. EUR 19, 11 Dateien, sofort einsetzbar für die eigene Content-Pipeline.
+Die Architektur hinter dieser Pipeline — inklusive n8n Workflow-Templates, Ollama-Prompts und CDP-Setup-Anleitung — haben wir im AI Agent Blueprint dokumentiert, 11 Dateien. Stand 21. August 2026: dieses Produkt wird nicht mehr verkauft; die Inhalte dieses Blueprints wandern überarbeitet in den Hub (hub.ai-engineering.at) — ohne Termin. [Weiter im Lernpfad](/lernpfad/)

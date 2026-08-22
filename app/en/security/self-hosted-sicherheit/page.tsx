@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from "next"
 import Image from "next/image"
 import Callout from "../../../../components/Callout"
@@ -5,9 +6,11 @@ import KeyTakeaway from "../../../../components/KeyTakeaway"
 import ComparisonTable from "../../../../components/ComparisonTable"
 
 import { RelatedArticles } from "../../../../components/RelatedArticles"
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
-  title: "Self-Hosted Security: The 6-Layer Model | AI Engineering Wiki",
+  alternates: alternatesFor('/en/security/self-hosted-sicherheit'),
+  title: "Self-Hosted Security: The 6-Layer Model",
   description:
     "6 security layers for self-hosted AI infrastructure: network, SSH, firewall, containers, application, monitoring. Practical hands-on guide.",
 }
@@ -93,6 +96,7 @@ export default function SelfHostedSecurityPage() {
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
             <p className="text-white font-medium mb-3">UFW Basic Configuration</p>
+            <CodeBlock lang="en">
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`# Block everything (Default Deny)
 sudo ufw default deny incoming
@@ -108,6 +112,7 @@ sudo ufw allow 443/tcp
 sudo ufw enable
 sudo ufw status verbose`}</code>
             </pre>
+            </CodeBlock>
           </div>
 
           <Callout type="warning" title="Do NOT expose ports publicly">
@@ -132,6 +137,7 @@ sudo ufw status verbose`}</code>
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
             <p className="text-white font-medium mb-3">Hardening SSH (/etc/ssh/sshd_config)</p>
+            <CodeBlock lang="en">
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`# Disable password login
 PasswordAuthentication no
@@ -148,10 +154,12 @@ ClientAliveCountMax 0
 
 # Restart: sudo systemctl restart sshd`}</code>
             </pre>
+            </CodeBlock>
           </div>
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
             <p className="text-white font-medium mb-3">Install fail2ban</p>
+            <CodeBlock lang="en">
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`# Installation
 sudo apt install fail2ban
@@ -171,6 +179,7 @@ sudo systemctl start fail2ban
 # Check status
 sudo fail2ban-client status sshd`}</code>
             </pre>
+            </CodeBlock>
           </div>
 
           <Callout type="info" title="Generate SSH Keys">

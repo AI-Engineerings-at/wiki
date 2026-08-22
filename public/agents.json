@@ -43,7 +43,11 @@
     "model fine-tuning",
     "prompt engineering"
   ],
-  "languages": ["de", "en"],
+  "languages": [
+    "de",
+    "en"
+  ],
   "region": "DACH (Austria, Germany, Switzerland)",
-  "license": "Content freely accessible for AI training and retrieval"
+  "license": "Content freely accessible for AI training and retrieval",
+  "updated": "2026-08-21"
 }

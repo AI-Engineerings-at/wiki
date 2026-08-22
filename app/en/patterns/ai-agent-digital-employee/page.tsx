@@ -1,11 +1,14 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from "next"
 import Callout from "../../../../components/Callout"
 import KeyTakeaway from "../../../../components/KeyTakeaway"
 import ComparisonTable from "../../../../components/ComparisonTable"
 import { RelatedArticles } from "../../../../components/RelatedArticles"
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
-  title: "AI Agent as Digital Employee — Patterns & Architecture | AI Engineering Wiki",
+  alternates: alternatesFor('/en/patterns/ai-agent-digital-employee'),
+  title: "AI Agent as Digital Employee — Patterns & Architecture",
   description:
     "How to onboard an AI agent as a digital employee: security architecture, skill system, credential isolation and EU AI Act compliance.",
 }
@@ -92,6 +95,7 @@ export default function AIAgentDigitalEmployeePage() {
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
             <p className="text-white font-medium mb-3">Typical vault structure per agent:</p>
+            <CodeBlock lang="en">
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`agent-vault/
   llm.env        # LLM provider API keys
@@ -99,6 +103,7 @@ export default function AIAgentDigitalEmployeePage() {
   erp.env        # ERP system access (own user!)
   identity.env   # Agent name, email, token`}</code>
             </pre>
+            </CodeBlock>
           </div>
 
           <Callout type="warning" title="Shared Credentials Are a Security Risk">
@@ -123,6 +128,7 @@ export default function AIAgentDigitalEmployeePage() {
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
             <p className="text-white font-medium mb-3">Example network policy (YAML):</p>
+            <CodeBlock lang="en">
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`allowed:
   - host: "api.llm-provider.com"     # LLM inference
@@ -134,6 +140,7 @@ export default function AIAgentDigitalEmployeePage() {
 blocked:
   - host: "*"                        # Everything else`}</code>
             </pre>
+            </CodeBlock>
           </div>
 
           <Callout type="tip" title="Bind Gateway to Localhost">

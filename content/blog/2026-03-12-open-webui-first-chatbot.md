@@ -1,4 +1,6 @@
 ---
+lang: "en"
+pendant: "2026-03-12-open-webui-erster-chatbot"
 title: "Your First Local AI Chatbot: Set Up Open WebUI in 10 Minutes"
 date: "2026-03-12"
 description: "Ollama is running, but you want a browser interface. Here's how to set up Open WebUI — the ChatGPT-like interface for your local stack."
@@ -67,7 +69,7 @@ After logging in, you see a dropdown in the top left with all models Ollama know
 
 If the dropdown is empty: Ollama needs to be running and reachable. Check with `ollama list` in the terminal to see if models are available. If not: `ollama pull llama3.2` or `ollama pull qwen2.5:7b` — both solid entry-level models.
 
-We covered a comparison of different models and what they are good at in [Step 3 of this series](/blog/2026-03-12-install-ollama-step-by-step).
+We covered a comparison of different models and what they are good at in [Step 3 of this series](/en/blog/2026-03-12-install-ollama-step-by-step).
 
 ## Why This Is GDPR-Compliant
 
@@ -135,4 +137,4 @@ A fully functional, local chat interface. Multi-model. Persistent history. No cl
 
 ---
 
-Interface running? Next, learn how Docker makes your stack production-ready — [Step 5: Docker Basics for AI →](/blog/2026-03-12-docker-basics-for-ai)
+Interface running? Next, learn how Docker makes your stack production-ready — [Step 5: Docker Basics for AI →](/en/blog/2026-03-12-docker-basics-for-ai)

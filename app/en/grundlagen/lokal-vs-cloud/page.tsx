@@ -1,5 +1,8 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
+import { alternatesFor } from '../../../../lib/alternates'
 export const metadata = {
-  title: 'Local vs Cloud: TCO Comparison | AI Engineering Wiki',
+  alternates: alternatesFor('/en/grundlagen/lokal-vs-cloud'),
+  title: 'Local vs Cloud: TCO Comparison',
   description:
     'TCO comparison for AI workloads: cloud APIs vs a local AI stack (Ollama, n8n, monitoring). Costs, risks, privacy and operations in practice.',
 }
@@ -45,6 +48,12 @@ export default function LokalVsCloud() {
           </div>
         </div>
 
+        <figure className="my-8">
+          <img src="/images/infographics/lokal-vs-cloud-vergleich.png" alt="Cost Comparison (per month) — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
+        <figure className="my-8">
+          <img src="/images/infographics/lokal-vs-cloud-tco-vergleich.png" alt="Cost Comparison (per month) — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">Cost Comparison (per month)</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4 overflow-x-auto">
@@ -133,6 +142,7 @@ export default function LokalVsCloud() {
         <h2 className="text-xl font-semibold text-white mt-8">When Cloud is Cheaper</h2>
         
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -163,6 +173,7 @@ export default function LokalVsCloud() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Break-Even Analysis</h2>
@@ -172,6 +183,7 @@ export default function LokalVsCloud() {
         </p>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <CodeBlock lang="en">
           <pre className="text-gray-300">
 {`Assumptions:
 - RTX 3090 used: €600 (amortized over 24 months = €25/month)
@@ -184,11 +196,13 @@ Break-even with cloud (estimated €200/month):
 → After 12 months: €2,400 (cloud) vs €900 (local) = €1,500 saved
 → After 24 months: €4,800 (cloud) vs €1,800 (local) = €3,000 saved`}
           </pre>
+          </CodeBlock>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Hardware Recommendations</h2>
         
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -225,6 +239,7 @@ Break-even with cloud (estimated €200/month):
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Our Recommendation</h2>

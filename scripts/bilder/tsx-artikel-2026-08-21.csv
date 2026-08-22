@@ -1,0 +1,15 @@
+sprache,kategorie,slug,titel,beschreibung,hinweis
+de,compliance,ai-act-august-2026,Was passiert am 02.08.2026? EU AI Act Enforcement-Start,"Seit dem 2. August 2026 gelten Marktaufsicht und Strafrahmen des EU AI Act. Was nach dem Digital Omnibus konkret gilt, was verschoben wurde und welche 6 Schritte KMUs jetzt gehen müssen.",
+de,compliance,ai-agent-legal-framework,AI Agent Legal Framework — EU AI Act Compliance,"Wie du AI-Agenten gesetzeskonform einsetzt: EU AI Act, DSGVO, Risikobewertung, Dokumentation.",
+de,compliance,edps-guidelines,EDPS Guidelines — Was der EU-Datenschutzbeauftragte für KI verlangt,"Der European Data Protection Supervisor veröffentlicht verbindliche Leitlinien für generative KI in EU-Institutionen.",
+de,compliance,self-assessment,EU AI Act Readiness Check,"10 Fragen zur Selbsteinschätzung: Wie gut ist dein Unternehmen auf den EU AI Act vorbereitet?",Titel aus h1 der Seite (Route-Titel war ein Ergebnis-Zustand)
+de,compliance,verifywise-integration,VerifyWise — Open-Source-Tool für EU AI Act Compliance,"VerifyWise ist ein Open-Source-Tool für AI-Governance, Risk und Compliance.",
+de,grundlagen,ollama-vs-cloud,,,REDIRECT: router.replace('/grundlagen/lokal-vs-cloud') — kein Motiv
+de,grundlagen,selfhosted-vs-cloud,,,REDIRECT: router.replace('/grundlagen/lokal-vs-cloud') — kein Motiv
+de,patterns,agent-skalierung,Agent Team skalieren,"Neue Agenten hinzufügen, Multi-Agent Workflows erstellen und ein Agent-Team skalieren.",
+de,patterns,ai-agent-digitaler-mitarbeiter,AI Agent als digitaler Mitarbeiter — Patterns & Architektur,"Wie du einen AI Agent als digitalen Mitarbeiter aufsetzt: Sicherheitsarchitektur, Rollen, Werkzeuge.",
+de,tools,ai-os-setup,AI OS Setup Guide,"Claude Code als AI-Betriebssystem einrichten: Ordnerstruktur, Business-Kontext, Workflows.",
+de,tools,ai-tools-datenbank,AI Tools Datenbank,"Kuratierte Sammlung von Tools für lokale AI-Infrastruktur: LLM Runtimes, Vektor-Datenbanken, Orchestrierung.",Titel aus h1 der Seite
+de,tools,mattermost-agent,Mattermost Agent Kommunikation,"Mattermost als Kommunikationsbus für Multi-Agent Systeme: Bot-Setup, Webhooks, Kanäle.",
+de,tools,open-source-projekte,Open Source Tools & Projekte,"Kuratierte Liste empfehlenswerter Open-Source-Tools für lokale AI: LLM, RAG, Agenten, Infrastruktur.",
+de,tools,proxmox-setup,Proxmox Setup,"Proxmox VE im Homelab: Installation, VMs/LXC, GPU-Passthrough für Ollama, Backups und CLI-Befehle.",

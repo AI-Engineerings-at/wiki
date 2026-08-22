@@ -1,5 +1,8 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
+import { alternatesFor } from '../../../../lib/alternates'
 export const metadata = {
-  title: 'Model Selection Guide | AI Engineering Wiki',
+  alternates: alternatesFor('/en/tools/model-selection'),
+  title: 'Model Selection Guide',
   description: 'Choose the right AI model for your use case — from Llama to Mistral.',
 }
 
@@ -37,7 +40,7 @@ export default function ModelSelectionPage() {
 
         <h3 className="text-lg font-semibold text-white mt-6">2. Medium Models (7-14B Parameters)</h3>
         <ul className="list-disc list-inside text-gray-300 space-y-1">
-          <li><strong>Examples:</strong> Llama 3.3 8B, Qwen3 14B, Gemma 2 9B</li>
+          <li><strong>Examples:</strong> Llama 3.1 8B, Qwen3 14B, Gemma 2 9B</li>
           <li><strong>Hardware:</strong> 16GB RAM, GPU recommended (8-16GB VRAM)</li>
           <li><strong>Speed:</strong> 43-112 tok/s on RTX 3090</li>
           <li><strong>Use Cases:</strong> Chat, summarization, code generation, tool calling</li>
@@ -66,6 +69,7 @@ export default function ModelSelectionPage() {
         </figure>
 
         <h2 className="text-xl font-semibold text-white mt-8">Comparison Table (as of March 2026)</h2>
+        <div className="table-wrap">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-gray-700">
@@ -85,7 +89,7 @@ export default function ModelSelectionPage() {
               <td className="py-2">Embeddings, classification</td>
             </tr>
             <tr className="border-b border-gray-800">
-              <td className="py-2">Llama 3.3 8B</td>
+              <td className="py-2">Llama 3.1 8B</td>
               <td className="py-2">8B</td>
               <td className="py-2">~5 GB</td>
               <td className="py-2">~112</td>
@@ -121,6 +125,7 @@ export default function ModelSelectionPage() {
             </tr>
           </tbody>
         </table>
+        </div>
 
         <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mt-4">
           <p className="text-blue-300 text-sm">
@@ -141,6 +146,7 @@ export default function ModelSelectionPage() {
           Here is what you need to run the models locally:
         </p>
 
+        <CodeBlock lang="en">
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Load and test Ollama models
 ollama pull llama3.2
@@ -154,14 +160,16 @@ ollama run llama3.2 "Hello, who are you?"
 # Hardware check
 ollama run llama3.2 "How much RAM did you use?"`}</code>
         </pre>
+        </CodeBlock>
 
         <p className="text-gray-300 mt-3">
           Typical RAM usage with Ollama:
         </p>
+        <CodeBlock lang="en">
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# VRAM usage (approx., Q4 quantized)
 gemma2:2b           ~2GB VRAM   → 200+ tok/s
-llama3.3:8b         ~5GB VRAM   → ~112 tok/s
+llama3.1:8b         ~5GB VRAM   → ~112 tok/s
 qwen3:14b          ~10GB VRAM   → 43 tok/s
 mistral-small3.1:24b ~16GB VRAM  → ~30 tok/s
 qwen2.5:32b        ~20GB VRAM   → ~20 tok/s
@@ -171,13 +179,14 @@ llama3.3:70b       ~40GB VRAM   → DOES NOT FIT on 24GB GPU!
 # 70B needs 48 GB+ (2x RTX 3090 or RTX 6000 Ada)
 
 # Save with quantized models
-ollama pull llama3.3:q4_K_M   # 4-bit quantization, ~5GB
+ollama pull llama3.1:8b       # 8B model, ~5GB
 ollama pull qwen3:14b         # 4-bit default, ~10GB`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Decision Guide</h2>
         <ul className="list-disc list-inside text-gray-300 space-y-1">
-          <li><strong>Budget-friendly?</strong> Llama 3.3 8B or Qwen 2.5 7B (~112 tok/s on RTX 3090)</li>
+          <li><strong>Budget-friendly?</strong> Llama 3.1 8B or Qwen 2.5 7B (~112 tok/s on RTX 3090)</li>
           <li><strong>Maximum local quality?</strong> Mistral Small 3.1 24B or Qwen 2.5 32B (fits on 24 GB)</li>
           <li><strong>Fast embeddings?</strong> mxbai-embed-large (1024 dim)</li>
           <li><strong>German language?</strong> Mistral Small 3.1 (outperforms GPT-4o Mini) or Qwen3 14B</li>
@@ -187,6 +196,7 @@ ollama pull qwen3:14b         # 4-bit default, ~10GB`}</code>
 
         <h2 className="text-xl font-semibold text-white mt-8">Our Stack</h2>
 
+        <CodeBlock lang="en">
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# We use (as of March 2026):
 # - mistral-small3.2:24b on RTX 3090 (.90) for chat/code (strong in German)
@@ -211,6 +221,7 @@ services:
 OLLAMA_HOST=0.0.0.0:11434
 OLLAMA_MODELS=/root/.ollama/models`}</code>
         </pre>
+        </CodeBlock>
 
         <section className="mt-16 pt-8 border-t border-white/10">
           <h2 className="text-xl font-bold text-white mb-4">Sources</h2>

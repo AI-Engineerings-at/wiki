@@ -1,5 +1,7 @@
+import { alternatesFor } from '../../../../lib/alternates'
 export const metadata = {
-  title: 'AI Cost Comparison | AI Engineering Wiki',
+  alternates: alternatesFor('/en/grundlagen/ai-kosten-vergleich'),
+  title: 'AI Cost Comparison',
   description:
     'Realistic 2026 cost comparison: local vs cloud vs hybrid AI. Setup, ongoing cost, GPU/hardware and typical business workloads.',
 }
@@ -17,9 +19,13 @@ export default function AiKostenVergleich() {
           What does AI cost in 2026? Here's a practical comparison of local models, cloud APIs, and hybrid setups.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/infographics/ai-kosten-vergleich-balken.png" alt="Cost Overview 2026 — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">Cost Overview 2026</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -51,6 +57,7 @@ export default function AiKostenVergleich() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Break-Even</h2>
@@ -58,6 +65,9 @@ export default function AiKostenVergleich() {
           Local often becomes cheaper at around 100,000 tokens/month compared to cloud (depends on model and prompt length).
         </p>
 
+        <figure className="my-8">
+          <img src="/images/infographics/ai-kosten-break-even.png" alt="Sources — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">Sources</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">

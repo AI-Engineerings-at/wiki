@@ -1,0 +1,15 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "aie-wiki",
+  "description": "Wiki-Betrieb der AI Engineering — Inhaltsstrecken, Bildgenerierung, Qualitaets- und Rechtspruefungen fuer wiki.ai-engineering.at.",
+  "owner": { "name": "AI Engineering", "email": "austria.jf@protonmail.com" },
+  "plugins": [
+    {
+      "name": "wiki-ops",
+      "description": "Wiki Operations — Content Feeds, Image Generation, Quality Audits, Legal Checks fuer wiki.ai-engineering.at.",
+      "author": { "name": "AI Engineering" },
+      "category": "content",
+      "source": "./"
+    }
+  ]
+}

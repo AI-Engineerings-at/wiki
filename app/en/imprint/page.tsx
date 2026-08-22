@@ -1,15 +1,10 @@
 import type { Metadata } from 'next'
+import { alternatesFor } from '../../../lib/alternates'
 
 export const metadata: Metadata = {
-  title: 'Imprint | AI Engineering Wiki',
+  alternates: alternatesFor('/en/imprint'),
+  title: 'Imprint',
   description: 'Legal notice and disclosure pursuant to § 5 ECG (Austrian E-Commerce Act) for AI Engineering.',
-  alternates: {
-    canonical: 'https://wiki.ai-engineering.at/en/imprint',
-    languages: {
-      'de-AT': 'https://wiki.ai-engineering.at/impressum',
-      'en': 'https://wiki.ai-engineering.at/en/imprint',
-    },
-  },
 }
 
 export default function ImprintPage() {

@@ -1,3 +1,4 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from "next"
 import Image from "next/image"
 import Callout from "../../../../components/Callout"
@@ -5,9 +6,11 @@ import KeyTakeaway from "../../../../components/KeyTakeaway"
 import ComparisonTable from "../../../../components/ComparisonTable"
 
 import { RelatedArticles } from "../../../../components/RelatedArticles"
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
-  title: "Encryption: At Rest, In Transit, In Use | AI Engineering Wiki",
+  alternates: alternatesFor('/en/security/verschluesselung'),
+  title: "Encryption: At Rest, In Transit, In Use",
   description:
     "Encryption for self-hosted AI: Protect data on disk, on the network, and during processing. LUKS, TLS, Confidential Computing explained.",
 }
@@ -97,6 +100,7 @@ export default function EncryptionPage() {
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
             <p className="text-white font-medium mb-3">Encrypt an existing partition</p>
+            <CodeBlock lang="en">
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`# CAUTION: Create backup FIRST!
 
@@ -112,6 +116,7 @@ sudo mkfs.ext4 /dev/mapper/encrypted-data
 # Mount
 sudo mount /dev/mapper/encrypted-data /mnt/secure-data`}</code>
             </pre>
+            </CodeBlock>
           </div>
 
           <Callout type="warning" title="Performance Impact">

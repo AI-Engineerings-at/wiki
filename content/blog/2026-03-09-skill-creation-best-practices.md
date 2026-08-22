@@ -242,4 +242,4 @@ Vor dem Einsatz muss jeder Skill bestehen:
 
 ## Zum Mitnehmen
 
-Das [Claude Code AI OS Template](https://www.ai-engineering.at/products) für EUR 249 enthält unsere komplette Skill-Library mit 49 Skills, Agent-Definitionen und die Quality Gate Pipeline.
+Das Claude Code AI OS Template enthält unsere komplette Skill-Library mit 49 Skills, Agent-Definitionen und die Quality Gate Pipeline. Stand 21. August 2026: dieses Produkt wird nicht mehr verkauft; die Inhalte dieses Templates wandern überarbeitet in den Hub (hub.ai-engineering.at) — ohne Termin. [Weiter im Lernpfad](/lernpfad/)

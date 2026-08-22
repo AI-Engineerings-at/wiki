@@ -1,5 +1,7 @@
+import { alternatesFor } from '../../../lib/alternates'
 export const metadata = {
-  title: 'AI in Austria | AI Engineering Wiki',
+  alternates: alternatesFor('/en/austria'),
+  title: 'AI in Austria',
   description:
     'Authorities, funding, community and legal overview: All relevant Austrian AI resources at a glance.',
 }
@@ -18,6 +20,9 @@ export default function AustriaPage() {
 
       {/* Authorities & Regulation */}
       <section className="space-y-4">
+        <figure className="my-8">
+          <img src="/images/generated/hero-oesterreich-ki.png" alt="Illustration — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white border-b border-slate-800 pb-2">
           Authorities &amp; Regulation
         </h2>

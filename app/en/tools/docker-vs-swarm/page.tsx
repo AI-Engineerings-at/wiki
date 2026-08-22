@@ -1,7 +1,9 @@
 import { Metadata } from 'next'
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
-  title: 'Docker vs Docker Swarm for AI | AI Engineering Wiki',
+  alternates: alternatesFor('/en/tools/docker-vs-swarm'),
+  title: 'Docker vs Docker Swarm for AI',
   description: 'Which is right for AI? Compose for development, Swarm for production.',
 }
 
@@ -19,6 +21,9 @@ export default function DockerVsSwarmPage() {
           Docker Compose or Docker Swarm? The answer determines how your stack scales.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/generated/hero-docker-container.png" alt="Docker Compose in 60 Seconds — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">Docker Compose in 60 Seconds</h2>
         <p className="text-slate-300">
           Docker Compose is the best friend of every developer. You write a 
@@ -36,6 +41,9 @@ export default function DockerVsSwarmPage() {
           <li>GPU-intensive workloads (Ollama with A100 or 3090)</li>
         </ul>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/tools-docker-architektur.png" alt="Docker Swarm in 60 Seconds — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">Docker Swarm in 60 Seconds</h2>
         <p className="text-slate-300">
           Docker Swarm is Dockers built-in orchestration platform. You cluster 3+ machines, 
@@ -44,6 +52,7 @@ export default function DockerVsSwarmPage() {
         </p>
 
         <h2 className="text-xl font-semibold text-white mt-8">The Direct Comparison</h2>
+        <div className="table-wrap">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700">
@@ -85,6 +94,7 @@ export default function DockerVsSwarmPage() {
             </tr>
           </tbody>
         </table>
+        </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">When to Use What?</h2>
         <div className="grid md:grid-cols-2 gap-4 mt-4">

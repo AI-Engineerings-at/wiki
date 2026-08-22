@@ -1,7 +1,9 @@
 import { Metadata } from 'next'
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
-  title: 'GDPR Basics | AI Engineering Wiki',
+  alternates: alternatesFor('/en/compliance/dsgvo-grundlagen'),
+  title: 'GDPR Basics',
   description: 'What does GDPR mean for AI applications? Data protection, consent, retention.',
 }
 
@@ -19,6 +21,9 @@ export default function DSGVOGrundlagenPage() {
           processing personal data of EU citizens - regardless of where the company is located.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/generated/hero-dsgvo-compliance.png" alt="Key Principles — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2>Key Principles</h2>
         <ul className="list-disc list-inside text-slate-300 space-y-1">
           <li><strong>Lawfulness:</strong> You need a legal basis for processing</li>
@@ -29,7 +34,11 @@ export default function DSGVOGrundlagenPage() {
           <li><strong>Integrity & confidentiality:</strong> Secure processing</li>
         </ul>
 
+        <figure className="my-8">
+          <img src="/images/infographics/dsgvo-6-grundsaetze.png" alt="Legal Bases (Art. 6) — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2>Legal Bases (Art. 6)</h2>
+        <div className="table-wrap">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700">
@@ -56,7 +65,14 @@ export default function DSGVOGrundlagenPage() {
             </tr>
           </tbody>
         </table>
+        </div>
 
+        <figure className="my-8">
+          <img src="/images/infographics/dsgvo-checkliste.png" alt="Rights of Data Subjects (Art. 15-22) — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
+        <figure className="my-8">
+          <img src="/images/infographics/dsgvo-rechtsgrundlagen.png" alt="Rights of Data Subjects (Art. 15-22) — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2>Rights of Data Subjects (Art. 15-22)</h2>
         <ul className="list-disc list-inside text-slate-300 space-y-2">
           <li><strong>Right of access (Art. 15)</strong> — What data is processed?</li>
@@ -67,6 +83,9 @@ export default function DSGVOGrundlagenPage() {
           <li><strong>Right to object (Art. 21)</strong> — Object to certain processing</li>
         </ul>
 
+        <figure className="my-8">
+          <img src="/images/infographics/dsgvo-betroffenenrechte.png" alt="Local AI = GDPR Advantage — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2>Local AI = GDPR Advantage</h2>
         <div className="bg-green-900/20 border border-green-700 rounded-lg p-4 mt-4">
           <ul className="text-green-300 space-y-2">

@@ -1,0 +1,48 @@
+# Ungenutzte Bilddateien im Wiki — Stand 2026-08-22 (Brief W8b Schritt 4, A120)
+#
+# Erhebung: git ls-files public/images/thumbnails -> 65 Dateien (38 PNG, 21 SVG, 6 .gitkeep).
+# Vor diesem Lauf verwies KEINE Code-Stelle auf public/images/thumbnails/generated/
+# (grep -rn 'thumbnails/generated' ueber alle .ts/.tsx/.js/.mdx/.json ausserhalb node_modules -> 0 Treffer).
+# Nichts geloescht — Loeschung ist ein eigener Vorgang (TASK-2026-00372).
+#
+# verdrahtet in lib/articles.ts (Dateiname == Slug einer Registry-Route): 16 von 38
+VERDRAHTET  generated/30-tage-quickstart.png  ->  /grundlagen/30-tage-quickstart
+VERDRAHTET  generated/ai-agent-team.png  ->  /grundlagen/ai-agent-team
+VERDRAHTET  generated/constitutional-ai.png  ->  /papers/constitutional-ai
+VERDRAHTET  generated/datenschutz-praxis.png  ->  /compliance/datenschutz-praxis
+VERDRAHTET  generated/dpia.png  ->  /compliance/dpia
+VERDRAHTET  generated/dsgvo-grundlagen.png  ->  /compliance/dsgvo-grundlagen
+VERDRAHTET  generated/eu-ai-act.png  ->  /compliance/eu-ai-act
+VERDRAHTET  generated/evals-guardrails.png  ->  /patterns/evals-guardrails
+VERDRAHTET  generated/firewall-setup.png  ->  /security/firewall-setup
+VERDRAHTET  generated/human-in-the-loop.png  ->  /patterns/human-in-the-loop
+VERDRAHTET  generated/ki-kompetenz-art4.png  ->  /compliance/ki-kompetenz-art4
+VERDRAHTET  generated/safety-hooks.png  ->  /patterns/safety-hooks
+VERDRAHTET  generated/selfhosted-vs-cloud.png  ->  /grundlagen/selfhosted-vs-cloud
+VERDRAHTET  generated/task-delegation.png  ->  /patterns/task-delegation
+VERDRAHTET  generated/verbotene-ai-praktiken.png  ->  /compliance/verbotene-ai-praktiken
+VERDRAHTET  generated/was-ist-ein-llm.png  ->  /grundlagen/was-ist-ein-llm
+#
+# weiterhin ungenutzt: 22 von 38
+UNGENUTZT   generated/ai-act-checkliste.png  —  kein Registry-Slug gleichen Namens
+UNGENUTZT   generated/ai-im-unternehmen.png  —  kein Registry-Slug gleichen Namens
+UNGENUTZT   generated/ai-in-austria.png  —  kein Registry-Slug gleichen Namens
+UNGENUTZT   generated/api-key-security.png  —  kein Registry-Slug gleichen Namens
+UNGENUTZT   generated/attention-2017.png  —  kein Registry-Slug gleichen Namens
+UNGENUTZT   generated/backup-strategy.png  —  kein Registry-Slug gleichen Namens
+UNGENUTZT   generated/chatbot-transparenz.png  —  kein Registry-Slug gleichen Namens
+UNGENUTZT   generated/digital-employee.png  —  kein Registry-Slug gleichen Namens
+UNGENUTZT   generated/downloads.png  —  mehrdeutig: ['/downloads', '/downloads']
+UNGENUTZT   generated/encryption.png  —  kein Registry-Slug gleichen Namens
+UNGENUTZT   generated/hrm-2025.png  —  kein Registry-Slug gleichen Namens
+UNGENUTZT   generated/legal-framework.png  —  kein Registry-Slug gleichen Namens
+UNGENUTZT   generated/lora-2021.png  —  kein Registry-Slug gleichen Namens
+UNGENUTZT   generated/memory-pattern.png  —  kein Registry-Slug gleichen Namens
+UNGENUTZT   generated/monitoring-pattern.png  —  kein Registry-Slug gleichen Namens
+UNGENUTZT   generated/orchestration-patterns.png  —  kein Registry-Slug gleichen Namens
+UNGENUTZT   generated/rag-2020.png  —  kein Registry-Slug gleichen Namens
+UNGENUTZT   generated/react-2022.png  —  kein Registry-Slug gleichen Namens
+UNGENUTZT   generated/readiness-check.png  —  kein Registry-Slug gleichen Namens
+UNGENUTZT   generated/scaling-agents.png  —  kein Registry-Slug gleichen Namens
+UNGENUTZT   generated/self-improving.png  —  kein Registry-Slug gleichen Namens
+UNGENUTZT   generated/selfhosted-security.png  —  kein Registry-Slug gleichen Namens

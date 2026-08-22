@@ -1,4 +1,5 @@
 ---
+pendant: "2026-03-12-terminal-basics-for-ai-developers"
 title: "Terminal-Grundlagen für AI-Entwickler — die 10 Befehle die du wirklich brauchst"
 date: "2026-03-12"
 description: "Kein Informatikstudium nötig. Diese 10 Terminal-Befehle reichen um deinen eigenen AI-Stack zu starten."
@@ -12,7 +13,7 @@ seriesStep: 2
 # Terminal-Grundlagen für AI-Entwickler — die 10 Befehle die du wirklich brauchst
 
 <figure style="margin: 2rem 0;">
-  <img src="/images/generated/hero-ai-terminal.png" alt="Terminal und Kommandozeile fuer KI-Entwicklung" style="border-radius: 12px; width: 100%;" />
+  <img src="/images/generated/hero-ai-terminal.png" alt="Terminal und Kommandozeile für KI-Entwicklung" style="border-radius: 12px; width: 100%;" />
 </figure>
 
 | Kategorie | Befehle | Einsatzgebiet |
@@ -125,4 +126,4 @@ Terminal läuft? Dann kommt der eigentliche Schritt: Ollama installieren und das
 
 **Weiter zu Stufe 3: [Ollama installieren in 5 Minuten →](/blog/2026-03-12-ollama-installieren-schritt-fuer-schritt)**
 
-Oder direkt zum kompletten Setup-Guide: Das **[Local AI Playbook P1](https://www.ai-engineering.at/products/playbook-p1)** (EUR 49) nimmt dich von Terminal bis zu einem produktionsfähigen Stack mit Browser-Interface, API-Zugang und fertig konfigurierten Docker-Containern.
+Oder direkt zum kompletten Setup-Guide: Das **Local AI Playbook P1** nimmt dich vom Terminal bis zu einem produktionsfähigen Stack mit Browser-Interface, API-Zugang und fertig konfigurierten Docker-Containern. Stand 21. August 2026: dieses Produkt wird nicht mehr verkauft; die Inhalte dieses Playbooks wandern überarbeitet in den Hub (hub.ai-engineering.at) — ohne Termin. [Weiter im Lernpfad](/lernpfad/)

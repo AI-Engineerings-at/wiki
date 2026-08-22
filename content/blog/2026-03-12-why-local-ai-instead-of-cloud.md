@@ -1,4 +1,6 @@
 ---
+lang: "en"
+pendant: "2026-03-12-warum-lokale-ki-statt-cloud"
 title: "Why You Shouldn't Use ChatGPT at Work — and What to Use Instead"
 date: "2026-03-12"
 description: "GDPR Art. 5, EU AI Act, data transfer to the US: three reasons why self-hosted AI is mandatory for European companies."
@@ -155,8 +157,8 @@ The trade-off: slightly less top-end model quality vs. full data control, no ong
 
 **The compliance arguments are clear. The next step: install Ollama in 5 minutes and run your first local model.**
 
-→ **[Step 2: Terminal Basics for AI Developers](/blog/2026-03-12-terminal-basics-for-ai-developers)**
+→ **[Step 2: Terminal Basics for AI Developers](/en/blog/2026-03-12-terminal-basics-for-ai-developers)**
 
 ---
 
-If you need GDPR documentation for your AI deployment: the [DSGVO Compliance Bundle](/products) includes a processing register, DPIA template, DPA template, and an AI-specific checklist for the EU AI Act — €79, ready to use immediately.
+If you need GDPR documentation for your AI deployment: the DSGVO Compliance Bundle includes a processing register, DPIA template, DPA template, and an AI-specific checklist for the EU AI Act. The contents of this bundle are being reworked and will appear, tested, in the Hub. [Continue the learning path](/en/learning-path/)

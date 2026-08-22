@@ -1,0 +1,11 @@
+# Echte 301 statt einer Client-Weiterleitung mit HTTP 200 (W9 Block C).
+# Cloudflare Pages liest diese Datei aus out/; public/ wird nach out/ kopiert.
+# Die Zielrouten existieren, die Quellrouten wurden aus app/ entfernt.
+/grundlagen/ollama-vs-cloud/ /grundlagen/lokal-vs-cloud/ 301
+/grundlagen/ollama-vs-cloud /grundlagen/lokal-vs-cloud/ 301
+/grundlagen/selfhosted-vs-cloud/ /grundlagen/lokal-vs-cloud/ 301
+/grundlagen/selfhosted-vs-cloud /grundlagen/lokal-vs-cloud/ 301
+/en/grundlagen/ollama-vs-cloud/ /en/grundlagen/lokal-vs-cloud/ 301
+/en/grundlagen/ollama-vs-cloud /en/grundlagen/lokal-vs-cloud/ 301
+/en/grundlagen/selfhosted-vs-cloud/ /en/grundlagen/lokal-vs-cloud/ 301
+/en/grundlagen/selfhosted-vs-cloud /en/grundlagen/lokal-vs-cloud/ 301

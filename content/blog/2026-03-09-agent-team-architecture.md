@@ -208,4 +208,4 @@ Wenn der CEO "STOP" sagt, halten alle Agents an. Sofort. Kein "nur noch kurz fer
 
 ## Zum Mitnehmen
 
-Das [AI Agent Team Blueprint](https://www.ai-engineering.at/products) für EUR 19 enthält alle 11 Agent-Definitionen mit Rollen, Permissions, Delegation-Matrix und Anti-Loop Konfiguration.
+Das AI Agent Team Blueprint enthält alle 11 Agent-Definitionen mit Rollen, Permissions, Delegation-Matrix und Anti-Loop-Konfiguration. Stand 21. August 2026: dieses Produkt wird nicht mehr verkauft; die Inhalte dieses Blueprints wandern überarbeitet in den Hub (hub.ai-engineering.at) — ohne Termin. [Weiter im Lernpfad](/lernpfad/)

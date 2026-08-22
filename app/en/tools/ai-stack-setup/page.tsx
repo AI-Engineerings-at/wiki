@@ -1,12 +1,15 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from "next"
 import Image from "next/image"
 import Callout from "../../../../components/Callout"
 import KeyTakeaway from "../../../../components/KeyTakeaway"
 import ComparisonTable from "../../../../components/ComparisonTable"
 import { RelatedArticles } from "../../../../components/RelatedArticles"
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
-  title: "AI Stack Setup in 30 Minutes: Ollama + Open WebUI + Docker | AI Engineering Wiki",
+  alternates: alternatesFor('/en/tools/ai-stack-setup'),
+  title: "AI Stack Setup in 30 Minutes: Ollama + Open WebUI + Docker",
   description:
     "Step-by-step: Install Ollama, download an LLM, start Open WebUI. Your own AI stack running locally in 30 minutes.",
 }
@@ -88,6 +91,7 @@ export default function AiStackSetupPage() {
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
             <p className="text-white font-medium mb-3">Linux / macOS</p>
+            <CodeBlock lang="en">
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`# One-command installation
 curl -fsSL https://ollama.com/install.sh | sh
@@ -95,15 +99,18 @@ curl -fsSL https://ollama.com/install.sh | sh
 # Verify it works
 ollama --version`}</code>
             </pre>
+            </CodeBlock>
           </div>
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
             <p className="text-white font-medium mb-3">Windows</p>
+            <CodeBlock lang="en">
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`# Download from https://ollama.com/download
 # Run installer
 # Ollama runs as background service`}</code>
             </pre>
+            </CodeBlock>
           </div>
         </section>
 
@@ -128,22 +135,24 @@ ollama --version`}</code>
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
             <p className="text-white font-medium mb-3">Download and test a model</p>
+            <CodeBlock lang="en">
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
-              <code className="text-sm text-green-400">{`# Recommended starter: Llama 3.3 (8B)
-ollama pull llama3.3
+              <code className="text-sm text-green-400">{`# Recommended starter: Llama 3.1 (8B)
+ollama pull llama3.1:8b
 
 # Test it directly
-ollama run llama3.3
+ollama run llama3.1:8b
 
 # Show installed models
 ollama list`}</code>
             </pre>
+            </CodeBlock>
           </div>
 
           <ComparisonTable
             headers={["Model", "Size", "VRAM", "Strength", "Command"]}
             rows={[
-              ["Llama 3.3 (8B)", "4.7 GB", "~5 GB", "Fast all-rounder", "ollama pull llama3.3"],
+              ["Llama 3.1 (8B)", "4.7 GB", "~5 GB", "Fast all-rounder", "ollama pull llama3.1:8b"],
               ["Mistral Small 3.1 (24B)", "14 GB", "~16 GB", "Strong German, beats GPT-4o Mini", "ollama pull mistral-small3.1"],
               ["Qwen3 14B", "9 GB", "~10 GB", "Good reasoning, 100+ languages", "ollama pull qwen3:14b"],
               ["DeepSeek R1 14B", "9 GB", "~10 GB", "Strong chain-of-thought reasoning", "ollama pull deepseek-r1:14b"],
@@ -189,6 +198,7 @@ ollama list`}</code>
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
             <p className="text-white font-medium mb-3">Docker Compose (recommended)</p>
+            <CodeBlock lang="en">
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`# Create docker-compose.yml
 cat > docker-compose.yml << 'EOF'
@@ -214,6 +224,7 @@ docker compose up -d
 
 # Open browser: http://localhost:3000`}</code>
             </pre>
+            </CodeBlock>
           </div>
 
           <Callout type="info" title="Linux: host-gateway">
@@ -282,6 +293,7 @@ docker compose up -d
           </p>
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-6">
+            <CodeBlock lang="en">
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`# Ollama API reachable?
 curl http://localhost:11434/api/tags
@@ -299,6 +311,7 @@ nvidia-smi
 docker compose ps
 # open-webui should show "Up"`}</code>
             </pre>
+            </CodeBlock>
           </div>
 
           <Callout type="tip" title="Ollama REST API">
@@ -307,7 +320,7 @@ docker compose ps
               any program, script, or workflow:{" "}
               <code className="bg-white/10 px-1.5 py-0.5 rounded text-white/90">
                 curl http://localhost:11434/api/chat -d
-                &#123;&quot;model&quot;:&quot;llama3.3&quot;,&quot;messages&quot;:[&#123;&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;Hello&quot;&#125;]&#125;
+                &#123;&quot;model&quot;:&quot;llama3.1:8b&quot;,&quot;messages&quot;:[&#123;&quot;role&quot;:&quot;user&quot;,&quot;content&quot;:&quot;Hello&quot;&#125;]&#125;
               </code>
               . Perfect for integration with n8n, Python scripts, or custom
               tools.
@@ -326,7 +339,7 @@ docker compose ps
             rows={[
               ["Learn Docker basics", "Understand what happens under the hood", "/en/tools/docker-grundlagen"],
               ["Test multiple models", "Different strengths for different tasks", "/en/tools/model-selection"],
-              ["Build n8n workflows", "Integrate LLM into automated processes", "/en/tools/n8n-für-anfaenger"],
+              ["Build n8n workflows", "Integrate LLM into automated processes", "/en/tools/n8n-fuer-anfaenger"],
               ["Set up monitoring", "Monitor GPU utilization and container health", "/en/tools/grafana-monitoring"],
               ["Check security", "Local does not automatically mean secure", "/en/security/self-hosted-sicherheit"],
             ]}

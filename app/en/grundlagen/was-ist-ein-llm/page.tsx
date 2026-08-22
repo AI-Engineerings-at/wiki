@@ -1,5 +1,8 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
+import { alternatesFor } from '../../../../lib/alternates'
 export const metadata = {
-  title: 'What is an LLM? Large Language Models Explained | AI Engineering Wiki',
+  alternates: alternatesFor('/en/grundlagen/was-ist-ein-llm'),
+  title: 'What is an LLM? Large Language Models Explained',
   description:
     'What is a Large Language Model (LLM)? How do Transformers, Tokens, and Inference work? Model sizes, VRAM requirements, and practical tips.',
 }
@@ -38,6 +41,9 @@ export default function WhatIsAnLLMPage() {
 
         {/* Section 1 */}
         <section className="mt-10">
+          <figure className="my-8">
+            <img src="/images/generated/hero-was-ist-llm.png" alt="Illustration — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+          </figure>
           <h2 className="text-2xl font-bold text-white mb-4">
             What exactly is an LLM?
           </h2>
@@ -127,6 +133,7 @@ export default function WhatIsAnLLMPage() {
             most likely.
           </p>
 
+          <div className="table-wrap">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-gray-700">
@@ -144,6 +151,7 @@ export default function WhatIsAnLLMPage() {
               <tr><td className="py-2">Cost</td><td className="py-2">Free (with ads)</td><td className="py-2">API costs or local hardware</td></tr>
             </tbody>
           </table>
+          </div>
         </section>
 
         {/* Section 5: Hallucinations */}
@@ -192,6 +200,7 @@ export default function WhatIsAnLLMPage() {
             responses. The art lies in finding the right trade-off.
           </p>
 
+          <div className="table-wrap">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-gray-700">
@@ -203,12 +212,13 @@ export default function WhatIsAnLLMPage() {
               </tr>
             </thead>
             <tbody className="text-gray-300">
-              <tr className="border-b border-gray-800"><td className="py-2">7-8B</td><td className="py-2">~5 GB</td><td className="py-2">~112 tok/s</td><td className="py-2">Good for simple tasks</td><td className="py-2">Llama 3.3 8B, Mistral 7B, Qwen 2.5 7B</td></tr>
+              <tr className="border-b border-gray-800"><td className="py-2">7-8B</td><td className="py-2">~5 GB</td><td className="py-2">~112 tok/s</td><td className="py-2">Good for simple tasks</td><td className="py-2">Llama 3.1 8B, Mistral 7B, Qwen 2.5 7B</td></tr>
               <tr className="border-b border-gray-800"><td className="py-2">13-14B</td><td className="py-2">~10 GB</td><td className="py-2">43-57 tok/s</td><td className="py-2">Solid all-rounders</td><td className="py-2">Qwen3 14B, DeepSeek R1 14B</td></tr>
               <tr className="border-b border-gray-800"><td className="py-2">24-32B</td><td className="py-2">~16-20 GB</td><td className="py-2">~20-30 tok/s</td><td className="py-2">Near cloud quality</td><td className="py-2">Mistral Small 3.1 24B, Qwen 2.5 32B</td></tr>
               <tr><td className="py-2">70B</td><td className="py-2">~40 GB</td><td className="py-2">Does NOT fit on 24 GB GPU</td><td className="py-2">Best local quality</td><td className="py-2">Llama 3.3 70B, Qwen 2.5 72B</td></tr>
             </tbody>
           </table>
+          </div>
 
           <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-5 my-6">
             <h3 className="text-lg font-bold text-white mt-0 mb-2">70B Needs More Than 24 GB VRAM</h3>
@@ -242,6 +252,7 @@ export default function WhatIsAnLLMPage() {
             quality loss.
           </p>
 
+          <div className="table-wrap">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-gray-700">
@@ -258,13 +269,14 @@ export default function WhatIsAnLLMPage() {
               <tr><td className="py-2">Q3_K_M</td><td className="py-2">~20%</td><td className="py-2">~85%</td><td className="py-2">Only when VRAM is extremely tight</td></tr>
             </tbody>
           </table>
+          </div>
 
           <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-5 my-6">
             <p className="text-white/70 mb-0">
               With Ollama, most models default to Q4_K_M quantization. You do not need
               to configure anything extra — just{" "}
               <code className="bg-white/10 px-1.5 py-0.5 rounded text-white/90">
-                ollama run llama3.3
+                ollama run llama3.1:8b
               </code>{" "}
               and go.
             </p>
@@ -281,6 +293,7 @@ export default function WhatIsAnLLMPage() {
             their place.
           </p>
 
+          <div className="table-wrap">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-gray-700">
@@ -298,6 +311,7 @@ export default function WhatIsAnLLMPage() {
               <tr><td className="py-2">Maintenance</td><td className="py-2">None</td><td className="py-2">Updates, monitoring (~1h/month)</td></tr>
             </tbody>
           </table>
+          </div>
 
           <h3 className="text-xl font-bold text-white mt-8 mb-4">
             Honest Benchmark: Cloud vs. Local
@@ -307,6 +321,7 @@ export default function WhatIsAnLLMPage() {
             honest comparison numbers (as of March 2026):
           </p>
 
+          <div className="table-wrap">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-gray-700">
@@ -323,6 +338,7 @@ export default function WhatIsAnLLMPage() {
               <tr><td className="py-2">MATH (Mathematics)</td><td className="py-2">--</td><td className="py-2">77%</td><td className="py-2">Vellum</td></tr>
             </tbody>
           </table>
+          </div>
 
           <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-5 my-6">
             <h3 className="text-lg font-bold text-white mt-0 mb-2">Reading Benchmarks Correctly</h3>
@@ -398,11 +414,13 @@ export default function WhatIsAnLLMPage() {
               </span>
               <div>
                 <p className="text-white font-medium">Start a model</p>
+                <CodeBlock lang="en">
                 <pre className="bg-black/30 rounded-lg p-3 mt-2 overflow-x-auto">
                   <code className="text-sm text-green-400">
-                    ollama run llama3.3
+                    ollama run llama3.1:8b
                   </code>
                 </pre>
+                </CodeBlock>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -431,7 +449,7 @@ export default function WhatIsAnLLMPage() {
             <li>More parameters = better quality, but more VRAM and slower. Q4_K_M quantization is the best trade-off.</li>
             <li>LLMs hallucinate. Always verify critical outputs. RAG significantly reduces the risk.</li>
             <li>Local LLMs on your own hardware (Ollama) are GDPR-compliant. RTX 3090 at 50% load: ~EUR 49/month electricity (AT: EUR 0.34/kWh).</li>
-            <li>To get started: install Ollama, run llama3.3, up and running in 5 minutes.</li>
+            <li>To get started: install Ollama, run llama3.1:8b, up and running in 5 minutes.</li>
           </ul>
         </div>
 

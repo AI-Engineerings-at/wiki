@@ -25,8 +25,12 @@ const path = require('path');
 
 const CONTENT_DIR = path.join(__dirname, '..', 'content');
 const OUTPUT_DIR = path.join(__dirname, '..', 'public', 'md');
+const PUBLIC_DIR = path.join(__dirname, '..', 'public');
+const APP_DIR = path.join(__dirname, '..', 'app');
 const BASE_URL = 'https://wiki.ai-engineering.at';
 const INDEX_FILE = path.join(OUTPUT_DIR, 'index.json');
+const LLMS_FULL_FILE = path.join(PUBLIC_DIR, 'llms-full.txt');
+const AGENTS_FILE = path.join(PUBLIC_DIR, 'agents.json');
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -230,7 +234,10 @@ function cleanMdxBody(body, relativePath) {
 function getWebPath(filePath) {
   const rel = path.relative(CONTENT_DIR, filePath);
   // Remove .mdx extension, normalize separators
-  return '/' + rel.replace(/\\/g, '/').replace(/\.mdx$/, '');
+  const p = '/' + rel.replace(/\\/g, '/').replace(/\.mdx$/, '');
+  // Seit E43 (2026-08-21) werden content/de/** unter /<kategorie>/<slug>
+  // geroutet (ohne /de-Praefix), content/en/** unter /en/<kategorie>/<slug>.
+  return p.startsWith('/de/') ? p.slice(3) : p;
 }
 
 /**
@@ -240,6 +247,28 @@ function getWebPath(filePath) {
 function getOutputPath(filePath) {
   const rel = path.relative(CONTENT_DIR, filePath);
   return path.join(OUTPUT_DIR, rel.replace(/\.mdx$/, '.md'));
+}
+
+/**
+ * Gibt es zu diesem Webpfad ueberhaupt eine HTML-Route?
+ *
+ * Warum die Pruefung noetig ist: getWebPath bildet den Pfad 1:1 aus dem
+ * content/-Baum. Das MDX-Korpus und der app/-Routenbaum sind aber zwei
+ * getrennte Korpora ohne Kopplung. Fuer content/de/** gibt es keine
+ * einzige /de/**-Seite (app/de/ enthaelt nur layout.tsx und page.tsx);
+ * fuer content/en/** nur dort, wo zufaellig eine gleichnamige
+ * app/en/**-Route liegt. Ergebnis vorher: 20 von 20 Stichproben der
+ * webUrl-Felder waren 404 (Stufe 1 §7).
+ */
+const ROUTES_FILE = path.join(__dirname, '..', 'lib', 'generated', 'routes.json');
+const KNOWN_ROUTES = new Set(fs.existsSync(ROUTES_FILE) ? JSON.parse(fs.readFileSync(ROUTES_FILE, 'utf-8')) : []);
+function htmlRouteExists(webPath) {
+  // Seit E43: jede MDX-Datei hat eine Route (lib/generated/routes.json aus
+  // scripts/build-index.js), ausser bei Kollision mit einer TSX-Seite — dann
+  // existiert die TSX-Seite unter demselben Pfad, also ebenfalls eine Route.
+  if (KNOWN_ROUTES.has(webPath)) return true;
+  const segments = webPath.split('/').filter(Boolean);
+  return fs.existsSync(path.join(APP_DIR, ...segments, 'page.tsx'));
 }
 
 // ---------------------------------------------------------------------------
@@ -267,8 +296,10 @@ function main() {
 
   // 3. Process each file
   const index = [];
+  const fullTexts = [];
   let successCount = 0;
   let errorCount = 0;
+  let webUrlCount = 0;
 
   for (const filePath of mdxFiles) {
     try {
@@ -278,9 +309,12 @@ function main() {
       const relativePath = path.relative(CONTENT_DIR, filePath);
       const cleanBody = cleanMdxBody(body, relativePath);
 
-      // Add source URL to frontmatter
       const webPath = getWebPath(filePath);
-      frontmatter.source = `${BASE_URL}${webPath}`;
+      const mdPath = `/md/${relativePath.replace(/\\/g, '/').replace(/\.mdx$/, '.md')}`;
+
+      // source zeigt auf die Datei, die es gibt (Markdown), nicht auf eine
+      // HTML-Seite, die fuer die meisten MDX nie gebaut wird.
+      frontmatter.source = `${BASE_URL}${mdPath}`;
 
       // Build output
       const header = serializeFrontmatter(frontmatter);
@@ -292,16 +326,24 @@ function main() {
       fs.mkdirSync(outputDir, { recursive: true });
       fs.writeFileSync(outputPath, output, 'utf-8');
 
-      // Add to index
-      index.push({
-        title: frontmatter.title || path.basename(filePath, '.mdx'),
-        path: `/md/${relativePath.replace(/\\/g, '/').replace(/\.mdx$/, '.md')}`,
-        webUrl: `${BASE_URL}${webPath}`,
+      const title = frontmatter.title || path.basename(filePath, '.mdx');
+
+      // Add to index — webUrl NUR, wenn die HTML-Route existiert.
+      const entry = {
+        title,
+        path: mdPath,
         summary: frontmatter.summary || frontmatter.description || '',
         date: frontmatter.date || '',
         tags: Array.isArray(frontmatter.tags) ? frontmatter.tags : [],
         lang: relativePath.startsWith('de') ? 'de' : relativePath.startsWith('en') ? 'en' : '',
-      });
+      };
+      if (htmlRouteExists(webPath)) {
+        entry.webUrl = `${BASE_URL}${webPath}`;
+        webUrlCount++;
+      }
+      index.push(entry);
+
+      fullTexts.push(`# ${title}\n\nSource: ${BASE_URL}${mdPath}\n\n${cleanBody.trim()}\n`);
 
       successCount++;
     } catch (err) {
@@ -324,18 +366,55 @@ function main() {
     generated: new Date().toISOString(),
     baseUrl: BASE_URL,
     totalArticles: index.length,
+    articlesWithWebUrl: webUrlCount,
     description: 'Clean Markdown versions of all AI Engineering Wiki articles, optimized for AI agent consumption. ~80% fewer tokens than HTML.',
     articles: index,
   };
   fs.writeFileSync(INDEX_FILE, JSON.stringify(indexOutput, null, 2), 'utf-8');
 
-  // 6. Report
+  // 6. llms-full.txt — ein Volltext fuer Agenten, die nicht 379 Dateien
+  //    einzeln holen wollen. Vorher: /llms-full.txt -> 404, obwohl
+  //    /llms.txt (Index) 200 lieferte.
+  const generatedAt = new Date().toISOString();
+  const fullHeader = [
+    '# AI Engineering Wiki — Volltext / full text',
+    '',
+    `Generated: ${generatedAt}`,
+    `Articles: ${fullTexts.length}`,
+    `Index: ${BASE_URL}/llms.txt`,
+    `Machine-readable index: ${BASE_URL}/md/index.json`,
+    '',
+    'Alle Artikel als Klartext, hintereinander. Jeder Abschnitt beginnt mit',
+    'einer H1-Ueberschrift und der Quell-URL der Einzeldatei.',
+    '',
+    '---',
+    '',
+  ].join('\n');
+  fs.writeFileSync(LLMS_FULL_FILE, fullHeader + fullTexts.join('\n---\n\n'), 'utf-8');
+
+  // 7. agents.json — Datum im Build setzen, damit es nicht driftet wie
+  //    llms.txt und robots.txt (beide tragen unveraendert "Stand: 2026-05-07").
+  let agentsUpdated = false;
+  if (fs.existsSync(AGENTS_FILE)) {
+    const agents = JSON.parse(fs.readFileSync(AGENTS_FILE, 'utf-8'));
+    const today = generatedAt.slice(0, 10);
+    if (agents.updated !== today) {
+      agents.updated = today;
+      fs.writeFileSync(AGENTS_FILE, JSON.stringify(agents, null, 2) + '\n', 'utf-8');
+      agentsUpdated = true;
+    }
+  }
+
+  // 8. Report
   console.log(`\nProcessed: ${successCount} files`);
   if (errorCount > 0) {
     console.log(`Errors:    ${errorCount} files`);
   }
+  console.log(`webUrl:    ${webUrlCount} von ${index.length} Eintraegen (nur mit HTML-Route)`);
   console.log(`Output:    ${OUTPUT_DIR}`);
   console.log(`Index:     ${INDEX_FILE}`);
+  console.log(`Full text: ${LLMS_FULL_FILE} (${fullTexts.length} Artikel)`);
+  console.log(`agents.json updated: ${agentsUpdated ? 'ja' : 'unveraendert'}`);
   console.log(`\nDone.`);
 }
 

@@ -1,7 +1,10 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
-  title: 'Multi-Agent Systems Explained | AI Engineering Wiki',
+  alternates: alternatesFor('/en/grundlagen/multi-agent-systeme'),
+  title: 'Multi-Agent Systems Explained',
   description: 'How multiple AI agents work together, how they communicate, and why it beats a single LLM.',
 }
 
@@ -19,6 +22,9 @@ export default function MultiAgentSystemePage() {
           Instead of one all-powerful AI, you have specialized agents that communicate and collaborate.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/single-vs-multi-agent.png" alt="Why Multiple Agents? — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2>Why Multiple Agents?</h2>
         <ul className="list-disc list-inside text-slate-300 space-y-1">
           <li><strong>Specialization:</strong> Each agent can be optimized for a specific task</li>
@@ -27,6 +33,9 @@ export default function MultiAgentSystemePage() {
           <li><strong>Cost efficiency:</strong> Use simple agents for simple tasks</li>
         </ul>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/multi-agent-architektur-muster.png" alt="Agent Types — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2>Agent Types</h2>
 
         <h3>1. Research Agent</h3>
@@ -45,6 +54,7 @@ export default function MultiAgentSystemePage() {
         <p className="text-slate-300">Runs tests, reports bugs, validates outputs.</p>
 
         <h2>Communication Patterns</h2>
+        <div className="table-wrap">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700">
@@ -71,8 +81,10 @@ export default function MultiAgentSystemePage() {
             </tr>
           </tbody>
         </table>
+        </div>
 
         <h2>Real-World Example</h2>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`User: "Write a web app"
   |
@@ -88,6 +100,7 @@ export default function MultiAgentSystemePage() {
   v
 Final Web App`}</code>
         </pre>
+        </CodeBlock>
       </div>
     </div>
   )

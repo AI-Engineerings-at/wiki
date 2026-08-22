@@ -1,7 +1,10 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
-  title: 'Safety Hooks Pattern | AI Engineering Wiki',
+  alternates: alternatesFor('/en/patterns/safety-hooks'),
+  title: 'Safety Hooks Pattern',
   description: 'Guardrails, output validation, memory capture as automatic security layer.',
 }
 
@@ -20,11 +23,15 @@ export default function SafetyHooksPage() {
           data leaks, or unintended actions happen.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/patterns-safety-hooks.png" alt="Solution: Safety Hooks — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2>Solution: Safety Hooks</h2>
         <p className="text-slate-300">
           Hooks are automatic checks that run on every call.
         </p>
 
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`User Input
      |
@@ -47,6 +54,7 @@ export default function SafetyHooksPage() {
      v
 User Response`}</code>
         </pre>
+        </CodeBlock>
 
         <h2>Types of Hooks</h2>
 
@@ -72,6 +80,7 @@ User Response`}</code>
         </ul>
 
         <h2>Implementation in n8n</h2>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`// n8n Function Node - Input Hook
 const forbidden = ['hack', 'exploit', 'bypass'];
@@ -85,6 +94,7 @@ for (const word of forbidden) {
 
 return $input.item;`}</code>
         </pre>
+        </CodeBlock>
 
         <h2>Best Practices</h2>
         <ul className="list-disc list-inside text-slate-300 space-y-1">

@@ -31,4 +31,45 @@ test.describe('Wiki SEO', () => {
     const content = await page.content()
     expect(content).toContain('<url>')
   })
+
+  test('sitemap covers every route and every blog post', async ({ page }) => {
+    // Nenner aus dem Dateibaum, nicht aus einer gepflegten Zahl: die alte
+    // public/sitemap.xml trug 107 <loc> und liess 76 von 154 App-Routen aus.
+    const fs = require('fs') as typeof import('fs')
+    const path = require('path') as typeof import('path')
+
+    const appDir = path.join(process.cwd(), 'app')
+    const routes: string[] = []
+    const walk = (dir: string) => {
+      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        const full = path.join(dir, entry.name)
+        if (entry.isDirectory()) walk(full)
+        else if (entry.name === 'page.tsx') {
+          const rel = path.relative(appDir, path.dirname(full))
+          // Route-Gruppen wie (de) sind Ordner, aber keine URL-Segmente.
+          const segs = rel.split(path.sep).filter((s) => s && !/^\(.*\)$/.test(s))
+          const route = segs.length === 0 ? '/' : '/' + segs.join('/')
+          if (!route.includes('[')) routes.push(route)
+        }
+      }
+    }
+    walk(appDir)
+
+    const blogSlugs = fs
+      .readdirSync(path.join(process.cwd(), 'content', 'blog'))
+      .filter((f) => f.endsWith('.md') || f.endsWith('.mdx'))
+      .map((f) => '/blog/' + f.replace(/\.mdx?$/, ''))
+
+    const expected = [...routes, ...blogSlugs]
+
+    await page.goto('/sitemap.xml')
+    const xml = await page.content()
+    const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1])
+
+    const missing = expected.filter(
+      (r) => !locs.some((loc) => new URL(loc).pathname.replace(/\/$/, '') === (r === '/' ? '' : r))
+    )
+    expect(missing, `${missing.length} von ${expected.length} Routen fehlen in der Sitemap`).toEqual([])
+    expect(locs.length).toBe(expected.length)
+  })
 })

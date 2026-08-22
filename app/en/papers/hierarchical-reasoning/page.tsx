@@ -1,9 +1,11 @@
 import { Metadata } from "next"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { RelatedArticles } from "../../../../components/RelatedArticles"
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
-  title: "Hierarchical Reasoning Model (2025) — Recurrent AI Without Chain-of-Thought | AI Engineering Wiki",
+  alternates: alternatesFor('/en/papers/hierarchical-reasoning'),
+  title: "Hierarchical Reasoning Model (2025) — Recurrent AI Without Chain-of-Thought",
   description:
     "The Hierarchical Reasoning Model (HRM) solves complex tasks like Sudoku, maze pathfinding and ARC with just 27M parameters and 1000 training samples — without Chain-of-Thought.",
 }

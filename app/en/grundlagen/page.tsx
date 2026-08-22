@@ -1,5 +1,8 @@
+import { MdxCategoryAppendix } from '../../../components/MdxCategoryAppendix'
+import { alternatesFor } from '../../../lib/alternates'
 export const metadata = {
-  title: 'Basics | AI Engineering Wiki',
+  alternates: alternatesFor('/en/grundlagen'),
+  title: 'Basics',
   description:
     'Getting started with Agent Orchestration, Multi-Agent Systems and a GDPR-compliant local AI stack: roles, costs, local vs cloud, quickstart.',
   openGraph: {
@@ -34,21 +37,9 @@ export default function BasicsPage() {
       date: '2026-03-01',
     },
     {
-      title: 'Ollama vs Cloud LLM',
-      description: 'When local, when cloud? Quality, costs, data privacy.',
-      href: '/en/grundlagen/ollama-vs-cloud',
-      date: '2026-03-01',
-    },
-    {
       title: 'Building an AI Agent Team',
       description: 'Types of agents, team structure, tools integration.',
       href: '/en/grundlagen/ai-agent-team',
-      date: '2026-03-01',
-    },
-    {
-      title: 'Self-hosted vs Cloud Services',
-      description: 'Which services to self-host, and which to run in the cloud.',
-      href: '/en/grundlagen/selfhosted-vs-cloud',
       date: '2026-03-01',
     },
     {
@@ -97,6 +88,8 @@ export default function BasicsPage() {
           </a>
         ))}
       </div>
+
+      <MdxCategoryAppendix category="grundlagen" lang="en" />
     </div>
   )
 }

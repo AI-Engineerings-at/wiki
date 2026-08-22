@@ -1,5 +1,8 @@
+import { MdxCategoryAppendix } from '../../../components/MdxCategoryAppendix'
+import { alternatesFor } from '../../../lib/alternates'
 export const metadata = {
-  title: 'Security | AI Engineering Wiki',
+  alternates: alternatesFor('/en/security'),
+  title: 'Security',
   description:
     'Security for local AI infrastructure: API key handling, firewall setup, network segmentation and backup strategies.',
   openGraph: {
@@ -61,6 +64,8 @@ export default function SecurityPage() {
           </a>
         ))}
       </div>
+
+      <MdxCategoryAppendix category="security" lang="en" />
     </div>
   )
 }

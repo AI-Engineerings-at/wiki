@@ -1,12 +1,15 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from "next"
 import Callout from "../../../../components/Callout"
 import KeyTakeaway from "../../../../components/KeyTakeaway"
 import ComparisonTable from "../../../../components/ComparisonTable"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { RelatedArticles } from "../../../../components/RelatedArticles"
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
-  title: "Evals & Guardrails — Measuring and Securing LLM Quality | AI Engineering Wiki",
+  alternates: alternatesFor('/en/patterns/evals-guardrails'),
+  title: "Evals & Guardrails — Measuring and Securing LLM Quality",
   description:
     "LLM Evaluations, Guardrails, Prompt Injection Protection, Hallucination Detection. Tools: promptfoo, Langfuse, RAGAS. With n8n eval workflow example.",
 }
@@ -130,6 +133,7 @@ export default function EvalsGuardrailsENPage() {
             Countermeasures
           </h3>
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-4">
+            <CodeBlock lang="en">
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`1. Input Sanitization
    → Filter known injection patterns
@@ -147,6 +151,7 @@ export default function EvalsGuardrailsENPage() {
    → LLM has no direct access to tools
    → Every tool use goes through an approval layer`}</code>
             </pre>
+            </CodeBlock>
           </div>
         </section>
 
@@ -238,6 +243,7 @@ export default function EvalsGuardrailsENPage() {
           </p>
 
           <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 my-4">
+            <CodeBlock lang="en">
             <pre className="bg-black/30 rounded-lg p-4 overflow-x-auto">
               <code className="text-sm text-green-400">{`n8n Eval Workflow (Trigger: after every RAG response)
 
@@ -260,6 +266,7 @@ export default function EvalsGuardrailsENPage() {
    → If score < 0.7: Alert to Team-Chat
    → If PII detected: Block response`}</code>
             </pre>
+            </CodeBlock>
           </div>
 
           <Callout type="warning" title="LLM-as-Judge Is Not Perfect">

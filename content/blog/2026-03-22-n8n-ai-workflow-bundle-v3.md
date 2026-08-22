@@ -8,6 +8,8 @@ author: "AI Engineering"
 
 # n8n AI Workflow Bundle v3: 14 Enterprise-Workflows für lokale Automatisierung
 
+> **Stand 21.08.2026:** Stand 21. August 2026: dieses Bundle wird nicht mehr verkauft; die Inhalte wandern überarbeitet in den Hub (hub.ai-engineering.at) — ohne Termin.
+
 Das n8n AI Workflow Bundle ist eine Sammlung von 14 produktionsreifen n8n-Workflows. Jeder Workflow ist als JSON-Datei exportiert, direkt importierbar in jede n8n-Instanz ab Version 2.x. Kein SaaS, keine Cloud-Abhängigkeit, keine monatlichen Kosten nach dem Kauf.
 
 ## Was ist das n8n AI Workflow Bundle?
@@ -71,7 +73,7 @@ v3 nutzt eine einheitliche Architektur für alle 14 Workflows:
 
 **DSGVO-sensitive Unternehmen**: Alle Workflows verarbeiten Daten lokal. E-Mail-Inhalte, Kundendaten aus Stripe, Lead-Informationen — alles bleibt in deinem Netzwerk. Der Cloud-LLM-Fallback ist optional und kann komplett deaktiviert werden.
 
-**Nicht geeignet für**: Teams ohne n8n-Erfahrung. Das Bundle setzt voraus, dass du weißt, was Nodes, Workflows, Credentials und Expressions in n8n sind. Wenn du n8n noch nie benutzt hast, starte mit dem [n8n Anfänger-Guide](/tools/n8n-für-anfaenger) im Wiki.
+**Nicht geeignet für**: Teams ohne n8n-Erfahrung. Das Bundle setzt voraus, dass du weißt, was Nodes, Workflows, Credentials und Expressions in n8n sind. Wenn du n8n noch nie benutzt hast, starte mit dem [n8n Anfänger-Guide](/tools/n8n-fuer-anfaenger) im Wiki.
 
 ## Setup: Wie importieren?
 

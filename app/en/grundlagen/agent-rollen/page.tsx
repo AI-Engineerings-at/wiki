@@ -1,5 +1,8 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
+import { alternatesFor } from '../../../../lib/alternates'
 export const metadata = {
-  title: 'Agent Roles & Responsibilities | AI Engineering Wiki',
+  alternates: alternatesFor('/en/grundlagen/agent-rollen'),
+  title: 'Agent Roles & Responsibilities',
   description:
     'Role model for Multi-Agent Systems: orchestrator, workers, QA/review and infra. Clear ownership, boundaries and escalation paths in practice.',
 }
@@ -18,6 +21,9 @@ export default function AgentRollen() {
           where its boundaries are, and who to escalate to when things go wrong — just like a human team.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/agent-rollen-pyramide.png" alt="The Minimum Viable Team — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">The Minimum Viable Team</h2>
         <p className="text-gray-300">
           For most use cases, you need at least these three roles:
@@ -58,6 +64,9 @@ export default function AgentRollen() {
           </div>
         </div>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/agent-rollen-minimum-viable-team.png" alt="Why Agents Need Tool Restrictions — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">Why Agents Need Tool Restrictions</h2>
         <p className="text-gray-300">
           Why not just give every agent access to every tool? The answer is security. You would not
@@ -89,6 +98,7 @@ export default function AgentRollen() {
         </p>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -125,11 +135,13 @@ export default function AgentRollen() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Our Team as Reference</h2>
         
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -166,6 +178,7 @@ export default function AgentRollen() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Responsibility Chains (RACI)</h2>
@@ -174,6 +187,7 @@ export default function AgentRollen() {
         </p>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -205,6 +219,7 @@ export default function AgentRollen() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <h2 className="text-xl font-semibold text-white mt-8">Agent Collaboration and Handoffs</h2>
@@ -240,6 +255,7 @@ export default function AgentRollen() {
         </p>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <CodeBlock lang="en">
           <pre className="text-sm text-gray-300">
 {`1. Worker detects problem → tries fix (2 attempts)
    ↓
@@ -253,6 +269,7 @@ export default function AgentRollen() {
    ↓
 5. CEO decides → continue / discard / get external help`}
           </pre>
+          </CodeBlock>
         </div>
 
         <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mt-8">

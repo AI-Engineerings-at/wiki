@@ -1,5 +1,8 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
+import { alternatesFor } from '../../../../lib/alternates'
 export const metadata = {
-  title: 'Ollama Tutorial | AI Engineering Wiki',
+  alternates: alternatesFor('/en/tools/ollama-tutorial'),
+  title: 'Ollama Tutorial',
   description:
     'Run local LLMs with Ollama: install, pick models, use the API and integrate into a GDPR-compliant, 100% self-hosted AI stack.',
 }
@@ -19,6 +22,15 @@ export default function OllamaTutorial() {
           on your hardware.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/generated/hero-ollama-local-ai.png" alt="What is Ollama? — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
+        <figure className="my-8">
+          <img src="/images/infographics/ollama-stack.png" alt="What is Ollama? — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
+        <figure className="my-8">
+          <img src="/images/diagrams/tools-ollama-architektur.png" alt="What is Ollama? — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">What is Ollama?</h2>
         <p className="text-gray-300">
           Ollama is a CLI tool to run LLMs locally. Supports 132+ models 
@@ -59,16 +71,21 @@ export default function OllamaTutorial() {
         <h2 className="text-xl font-semibold text-white mt-8">Installation</h2>
 
         <h3 className="text-lg font-medium text-white mt-4">macOS</h3>
+        <CodeBlock lang="en">
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">brew install ollama</code>
         </pre>
+        </CodeBlock>
 
         <h3 className="text-lg font-medium text-white mt-4">Linux/WSL2</h3>
+        <CodeBlock lang="en">
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">curl -fsSL https://ollama.com/install.sh | sh</code>
         </pre>
+        </CodeBlock>
 
         <h3 className="text-lg font-medium text-white mt-4">Docker (our recommendation)</h3>
+        <CodeBlock lang="en">
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`docker run -d \\
   --name ollama \\
@@ -76,7 +93,11 @@ export default function OllamaTutorial() {
   -p 11434:11434 \\
   ollama/ollama:latest`}</code>
         </pre>
+        </CodeBlock>
 
+        <figure className="my-8">
+          <img src="/images/screenshots/ollama-install.png" alt="Download Models — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">Download Models</h2>
 
         <p className="text-gray-300">
@@ -84,6 +105,7 @@ export default function OllamaTutorial() {
           preload models explicitly:
         </p>
 
+        <CodeBlock lang="en">
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Download model
 ollama pull llama3.2
@@ -94,9 +116,11 @@ ollama list
 # Show model info
 ollama show llama3.2`}</code>
         </pre>
+        </CodeBlock>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
           <h3 className="font-semibold text-white mb-3">Recommended Starter Models</h3>
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -139,19 +163,26 @@ ollama show llama3.2`}</code>
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
+        <figure className="my-8">
+          <img src="/images/screenshots/ollama-pull.png" alt="Using Ollama — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">Using Ollama</h2>
 
         <h3 className="text-lg font-medium text-white mt-4">Interactive Chat</h3>
+        <CodeBlock lang="en">
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">ollama run llama3.2</code>
         </pre>
+        </CodeBlock>
 
         <h3 className="text-lg font-medium text-white mt-4">REST API</h3>
         <p className="text-gray-300 mt-2">
           Ollama provides a REST API on port 11434:
         </p>
+        <CodeBlock lang="en">
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Chat
 curl -X POST http://localhost:11434/api/chat \\
@@ -169,7 +200,14 @@ curl -X POST http://localhost:11434/api/generate \\
     "prompt": "What is Docker?"
   }'`}</code>
         </pre>
+        </CodeBlock>
 
+        <figure className="my-8">
+          <img src="/images/screenshots/ollama-run.png" alt="GPU Configuration — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
+        <figure className="my-8">
+          <img src="/images/screenshots/ollama-api.png" alt="GPU Configuration — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">GPU Configuration</h2>
 
         <p className="text-gray-300">
@@ -177,6 +215,7 @@ curl -X POST http://localhost:11434/api/generate \\
           needs to be passed through:
         </p>
 
+        <CodeBlock lang="en">
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# NVIDIA GPU
 docker run -d --gpus all \\
@@ -199,6 +238,7 @@ services:
           devices:
             - capabilities: [gpu]`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Our Docker Swarm Setup</h2>
 
@@ -206,6 +246,7 @@ services:
           In our 3-node Swarm, Ollama runs on the GPU node (docker-swarm3):
         </p>
 
+        <CodeBlock lang="en">
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`services:
   ollama:
@@ -225,6 +266,7 @@ services:
     networks:
       - ai-network`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Web Interface: Open WebUI</h2>
 
@@ -232,6 +274,7 @@ services:
           For a ChatGPT-like interface, we use Open WebUI:
         </p>
 
+        <CodeBlock lang="en">
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-gray-300">{`services:
   open-webui:
@@ -247,6 +290,7 @@ services:
     networks:
       - ai-network`}</code>
         </pre>
+        </CodeBlock>
 
         <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mt-8">
           <h3 className="font-semibold text-white mb-2">Next Steps</h3>

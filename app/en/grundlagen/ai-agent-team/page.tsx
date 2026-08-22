@@ -1,5 +1,8 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
+import { alternatesFor } from '../../../../lib/alternates'
 export const metadata = {
-  title: 'Build an AI Agent Team | AI Engineering Wiki',
+  alternates: alternatesFor('/en/grundlagen/ai-agent-team'),
+  title: 'Build an AI Agent Team',
   description:
     'How to build an AI agent team: agent types, roles, tool integration and guardrails. Designed for GDPR-compliant, self-hosted setups.',
 }
@@ -17,6 +20,9 @@ export default function AiAgentTeam() {
           One AI agent isn't enough. You need a team — specialized agents that work together.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/ai-agent-typen-uebersicht.png" alt="What is an AI Agent? — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">What is an AI Agent?</h2>
 
         <p className="text-gray-300 mt-2">
@@ -61,6 +67,7 @@ export default function AiAgentTeam() {
         <h2 className="text-xl font-semibold text-white mt-8">Types of Agents</h2>
 
         <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 mt-4">
+          <div className="table-wrap">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-700">
@@ -87,10 +94,15 @@ export default function AiAgentTeam() {
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/ai-agent-team-architektur.png" alt="Team Structure — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">Team Structure</h2>
 
+        <CodeBlock lang="en">
         <pre className="bg-gray-900 border border-gray-700 rounded-lg p-3 mt-4 overflow-x-auto">
           <code className="text-sm text-gray-300">{`# Our Team
 Manager (Planner)
@@ -99,6 +111,7 @@ Manager (Planner)
   → Researcher (research)
   → Deployer (ship it)`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Key Components</h2>
 

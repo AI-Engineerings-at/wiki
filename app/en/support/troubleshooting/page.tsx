@@ -1,7 +1,10 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
-  title: 'Troubleshooting | AI Engineering Wiki',
+  alternates: alternatesFor('/en/support/troubleshooting'),
+  title: 'Troubleshooting',
   description: 'Common problems with Ollama, n8n, Docker. Diagnosis and solutions.',
 }
 
@@ -21,6 +24,7 @@ export default function TroubleshootingPage() {
         <h2 className="text-xl font-semibold text-white mt-8">Ollama Issues</h2>
         
         <h3 className="text-lg font-semibold text-white mt-6">Out of Memory</h3>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`# Check memory
 free -h
@@ -31,8 +35,10 @@ docker ps --format '{{.Names}}' | xargs -r docker kill
 # Use smaller model
 ollama run llama3:8b  # instead of 70b`}</code>
         </pre>
+        </CodeBlock>
 
         <h3 className="text-lg font-semibold text-white mt-6">Model not found</h3>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`# List available models
 ollama list
@@ -40,10 +46,12 @@ ollama list
 # Pull a model
 ollama pull mistral`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Docker Issues</h2>
         
         <h3 className="text-lg font-semibold text-white mt-6">Container won't start</h3>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`# Check logs
 docker logs container_name
@@ -54,8 +62,10 @@ docker ps -a
 # Restart
 docker restart container_name`}</code>
         </pre>
+        </CodeBlock>
 
         <h3 className="text-lg font-semibold text-white mt-6">Port already in use</h3>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`# Find what's using the port
 sudo lsof -i :5678
@@ -64,6 +74,7 @@ sudo lsof -i :5678
 ports:
   - "5679:5678"`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">n8n Issues</h2>
         
@@ -85,6 +96,7 @@ ports:
         <h2 className="text-xl font-semibold text-white mt-8">Network Issues</h2>
         
         <h3 className="text-lg font-semibold text-white mt-6">Container can't reach internet</h3>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`# Test from inside container
 docker exec container_name ping google.com
@@ -95,8 +107,10 @@ docker exec container_name cat /etc/resolv.conf
 # Restart Docker
 sudo systemctl restart docker`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Debug Commands</h2>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">{`# All containers status
 docker ps -a
@@ -110,6 +124,7 @@ docker logs -f container_name
 # Enter container
 docker exec -it container_name /bin/bash`}</code>
         </pre>
+        </CodeBlock>
       </div>
     </div>
   )

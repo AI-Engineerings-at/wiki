@@ -4,8 +4,20 @@ import { useState } from 'react'
 import { WikiLink as Link } from './WikiLink'
 import { usePathname } from 'next/navigation'
 import { SearchBar } from './SearchBar'
+import { isEnglishPath, switchLanguageHref } from '../lib/alternates'
 
-const navDe = [
+// Zwei Listen, absichtlich getrennt.
+//
+// Joe, 2026-08-21: "wieso 2 Menüs ... die Leiste oben ist schon sehr voll".
+// Gemessen waren es 13 Einträge plus Suche im Kopf, 9 davon eine Zeile
+// tiefer in der Seitenleiste wiederholt. Vorher speiste EINE Liste beide
+// Menüs — wer den Kopf kürzte, kürzte das Mobilmenü mit.
+//
+// Desktop: nur der Weg durch die Seite (Lernpfad, Blog, Hub). Die acht
+// Kategorien stehen dort in der Seitenleiste und werden nicht wiederholt.
+// Mobil: die Seitenleiste ist eingeklappt, also trägt das Menü die
+// Kategorien — sonst wären sie unter xl gar nicht erreichbar.
+const navMobileDe = [
   { href: '/lernpfad', label: 'Lernpfad', icon: '🎯' },
   { href: '/grundlagen', label: 'Grundlagen', icon: '📖' },
   { href: '/tools', label: 'Tools', icon: '🛠️' },
@@ -19,7 +31,7 @@ const navDe = [
   { href: 'https://hub.ai-engineering.at', label: 'Hub', icon: '🔌' },
 ]
 
-const navEn = [
+const navMobileEn = [
   { href: '/en/learning-path', label: 'Learning Path', icon: '🎯' },
   { href: '/en/grundlagen', label: 'Basics', icon: '📖' },
   { href: '/en/tools', label: 'Tools', icon: '🛠️' },
@@ -29,40 +41,55 @@ const navEn = [
   { href: '/en/papers', label: 'Papers', icon: '📄' },
   { href: '/en/austria', label: 'Austria', icon: '🇦🇹' },
   { href: '/en/downloads', label: 'Downloads', icon: '📥' },
-  { href: '/blog', label: 'Blog', icon: '📝' },
+  { href: '/en/blog', label: 'Blog', icon: '📝' },
   { href: 'https://hub.ai-engineering.at/en', label: 'Hub', icon: '🔌' },
 ]
 
-// DE→EN path mappings for routes that differ between languages
-const deToEn: Record<string, string> = {
-  '/lernpfad': '/en/learning-path',
-  '/oesterreich': '/en/austria',
-  '/tools/open-source-projekte': '/en/tools/open-source-projects',
-  '/tools/ai-tools-datenbank': '/en/tools/ai-tools-database',
-  '/tools/vergleich-alternativen': '/en/tools/comparison-alternatives',
-  '/tools/cli-coding-agents-vergleich': '/en/tools/cli-coding-agents-comparison',
-  '/tools/n8n-workflow-bundle': '/en/tools/n8n-workflow-bundle',
-  '/patterns/ai-agent-digitaler-mitarbeiter': '/en/patterns/ai-agent-digital-employee',
-  '/patterns/agent-skalierung': '/en/patterns/agent-skalierung',
-}
-const enToDe: Record<string, string> = Object.fromEntries(
-  Object.entries(deToEn).map(([de, en]) => [en, de])
-)
+const navDesktopDe = [
+  { href: '/lernpfad', label: 'Lernpfad', icon: '🎯' },
+  { href: '/blog', label: 'Blog', icon: '📝' },
+  { href: 'https://hub.ai-engineering.at', label: 'Hub', icon: '🔌' },
+]
 
-function getToggleHref(pathname: string, isEn: boolean): string {
+const navDesktopEn = [
+  { href: '/en/learning-path', label: 'Learning Path', icon: '🎯' },
+  { href: '/en/blog', label: 'Blog', icon: '📝' },
+  { href: 'https://hub.ai-engineering.at/en', label: 'Hub', icon: '🔌' },
+]
+
+function getToggleHref(pathname: string, isEn: boolean): string | null {
   // Handle _not-found pages — redirect to home instead of broken paths
   if (pathname.includes('_not-found') || pathname.includes('/_not-found')) {
     return isEn ? '/' : '/en'
   }
-  if (isEn) {
-    // Check mapping first
-    if (enToDe[pathname]) return enToDe[pathname]
-    const dePath = pathname.replace(/^\/en\/?/, '/')
-    return dePath === '' ? '/' : dePath
-  }
-  // Check mapping first
-  if (deToEn[pathname]) return deToEn[pathname]
-  return pathname === '/' ? '/en' : `/en${pathname}`
+  // Paartabelle statt Pfad-Umschreiben: der Umschalter zeigt nur auf Seiten,
+  // die es gibt — sonst `null`, und der Knopf ist sichtbar deaktiviert
+  // (vorher: Sprung auf die Startseite, 30 von 30 Blog-Seiten, Fund 15).
+  // Die alte Tabelle stand hier lokal, war richtig befüllt und wurde nie
+  // getroffen — sie führte Pfade ohne Schrägstrich, `usePathname()` liefert
+  // bei `trailingSlash: true` aber `/en/austria/`.
+  return switchLanguageHref(pathname)
+}
+
+/** DE/EN-Umschalter: aktive Sprache markiert, fehlendes Pendant sichtbar deaktiviert. */
+function LangToggle({ pathname, isEn, toggleHref, size }: { pathname: string; isEn: boolean; toggleHref: string | null; size: 'sm' | 'xs' }) {
+  const pad = size === 'sm' ? 'px-3 py-1' : 'px-2 py-0.5'
+  const active = 'bg-[#4262FF]/20 text-blue-400'
+  const idle = 'text-slate-400 hover:text-white hover:bg-slate-800'
+  const off = 'text-slate-600 cursor-not-allowed'
+  const missingTitle = isEn ? 'Only available in English' : 'Nur auf Deutsch verfügbar'
+  const renderOther = (label: string) =>
+    toggleHref ? (
+      <Link href={toggleHref} className={`${pad} transition-all ${idle}`}>{label}</Link>
+    ) : (
+      <span className={`${pad} ${off}`} title={missingTitle} aria-disabled="true" data-lang-missing="1">{label}</span>
+    )
+  return (
+    <div className={`flex items-center border border-slate-700 rounded-full overflow-hidden font-medium ${size === 'sm' ? 'text-sm' : 'text-xs'}`}>
+      {isEn ? renderOther('DE') : <Link href={pathname} className={`${pad} ${active}`} aria-current="true">DE</Link>}
+      {isEn ? <Link href={pathname} className={`${pad} ${active}`} aria-current="true">EN</Link> : renderOther('EN')}
+    </div>
+  )
 }
 
 export function SiteHeader() {
@@ -71,8 +98,9 @@ export function SiteHeader() {
   const pathname = rawPathname.includes('_not-found')
     ? (rawPathname.startsWith('/en') ? '/en' : '/')
     : rawPathname
-  const isEn = pathname === '/en' || pathname.startsWith('/en/')
-  const nav = isEn ? navEn : navDe
+  const isEn = isEnglishPath(pathname)
+  const nav = isEn ? navMobileEn : navMobileDe
+  const navDesktop = isEn ? navDesktopEn : navDesktopDe
   const homeHref = isEn ? '/en' : '/'
   const toggleHref = getToggleHref(pathname, isEn)
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -98,7 +126,7 @@ export function SiteHeader() {
 
         {/* Desktop Nav */}
         <nav className="hidden xl:flex items-center gap-5" aria-label={isEn ? 'Main navigation' : 'Hauptnavigation'}>
-          {nav.map((item) => {
+          {navDesktop.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
             return (
               <Link
@@ -112,49 +140,17 @@ export function SiteHeader() {
               </Link>
             )
           })}
-          <div className="flex items-center border border-slate-700 rounded-full overflow-hidden text-sm font-medium">
-            <Link
-              href={isEn ? toggleHref : pathname}
-              className={`px-3 py-1 transition-all ${!isEn ? 'bg-[#4262FF]/20 text-blue-400' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}
-            >
-              DE
-            </Link>
-            <Link
-              href={isEn ? pathname : toggleHref}
-              className={`px-3 py-1 transition-all ${isEn ? 'bg-[#4262FF]/20 text-blue-400' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}
-            >
-              EN
-            </Link>
-          </div>
-          <Link
-            href="https://www.ai-engineering.at"
-            className="bg-[#4262FF] hover:bg-[#3550DD] text-white font-bold py-2 px-5 rounded-full transition-all hover:scale-105 text-sm"
-          >
-            Shop
-          </Link>
+          <LangToggle pathname={pathname} isEn={isEn} toggleHref={toggleHref} size="sm" />
         </nav>
 
         {/* Mobile: DE/EN + Hamburger */}
         <div className="flex xl:hidden items-center gap-3">
-          <div className="flex items-center border border-slate-700 rounded-full overflow-hidden text-xs font-medium">
-            <Link
-              href={isEn ? toggleHref : pathname}
-              className={`px-2 py-0.5 ${!isEn ? 'bg-[#4262FF]/20 text-blue-400' : 'text-slate-400'}`}
-            >
-              DE
-            </Link>
-            <Link
-              href={isEn ? pathname : toggleHref}
-              className={`px-2 py-0.5 ${isEn ? 'bg-[#4262FF]/20 text-blue-400' : 'text-slate-400'}`}
-            >
-              EN
-            </Link>
-          </div>
+          <LangToggle pathname={pathname} isEn={isEn} toggleHref={toggleHref} size="xs" />
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             onTouchEnd={(e) => { e.preventDefault(); setMobileOpen(!mobileOpen); }}
             className="p-3 min-w-[48px] min-h-[48px] flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer"
-            aria-label={mobileOpen ? 'Menü schließen' : 'Menü öffnen'}
+            aria-label={mobileOpen ? (isEn ? 'Close menu' : 'Menü schließen') : (isEn ? 'Open menu' : 'Menü öffnen')}
             type="button"
           >
             {mobileOpen ? (
@@ -179,7 +175,7 @@ export function SiteHeader() {
       {mobileOpen && (
         <nav
           className="xl:hidden border-t border-slate-800 bg-slate-950/95 backdrop-blur-sm"
-          aria-label="Mobile Navigation"
+          aria-label={isEn ? 'Mobile navigation' : 'Mobile Navigation'}
         >
           <div className="max-w-7xl mx-auto px-4 py-4 grid grid-cols-2 gap-1">
             {nav.map((item) => {
@@ -200,15 +196,6 @@ export function SiteHeader() {
                 </Link>
               )
             })}
-          </div>
-          <div className="px-4 pb-4">
-            <Link
-              href="https://www.ai-engineering.at"
-              onClick={() => setMobileOpen(false)}
-              className="block w-full text-center bg-[#4262FF] hover:bg-[#3550DD] text-white font-bold py-3 px-5 rounded-full transition-all text-sm"
-            >
-              Shop &rarr;
-            </Link>
           </div>
         </nav>
       )}

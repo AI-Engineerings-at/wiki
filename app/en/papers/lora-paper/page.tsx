@@ -1,9 +1,11 @@
 import { Metadata } from "next"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { RelatedArticles } from "../../../../components/RelatedArticles"
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
-  title: "LoRA: Low-Rank Adaptation Explained | AI Engineering Wiki",
+  alternates: alternatesFor('/en/papers/lora-paper'),
+  title: "LoRA: Low-Rank Adaptation Explained",
   description:
     "The LoRA paper by Hu et al. (2021) explained: Parameter-efficient fine-tuning of large language models without retraining all weights.",
 }

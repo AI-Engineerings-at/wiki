@@ -1,4 +1,6 @@
 ---
+lang: "en"
+pendant: "2026-03-12-ollama-installieren-schritt-fuer-schritt"
 title: "Install Ollama in 5 Minutes — Step by Step (Windows, Mac, Linux)"
 date: "2026-03-12"
 description: "From zero to running local LLM in 5 minutes. Tested on Windows 11, macOS Sonoma and Ubuntu 24.04."
@@ -124,7 +126,7 @@ Ollama is running. The API responds. That's the foundation. What's still missing
 
 **Continue to Step 4: Set Up a Browser Interface with Open WebUI →**
 
-Or go straight to the complete setup — the **[Local AI Playbook P1](https://www.ai-engineering.at/products/playbook-p1)** (EUR 49) includes pre-configured Docker Compose files for Ollama + Open WebUI + monitoring, detailed instructions for all operating systems, and the complete stack we run in production ourselves.
+Or go straight to the complete setup — the **Local AI Playbook P1** includes pre-configured Docker Compose files for Ollama + Open WebUI + monitoring, detailed instructions for all operating systems, and the complete stack we run in production ourselves. The contents of this playbook are being reworked and will appear, tested, in the Hub. [Continue the learning path](/en/learning-path/)
 
 ---
 

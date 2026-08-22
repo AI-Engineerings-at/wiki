@@ -1,17 +1,24 @@
 import { WikiLink as Link } from '../../components/WikiLink'
 import Image from 'next/image'
-import { categories, getRecentArticles, getPopularArticles, getEnHref } from '../../lib/articles'
+import { categories, getPopularArticlesEn } from '../../lib/articles'
+import { articleCount, kategorieAnzahl, recentArticles as recentFromIndex } from '../../lib/index'
+import { kopfzeile } from '../../lib/lernpfad'
+import { alternatePath } from '../../lib/alternates'
 import { SearchBar } from '../../components/SearchBar'
+import { alternatesFor } from '../../lib/alternates'
 
 export const metadata = {
+  alternates: alternatesFor('/en'),
   title: 'AI Engineering Wiki — Free Knowledge on Local AI, GDPR & Automation',
   description:
     'Free knowledge on local AI, GDPR compliance and automation. For SMEs building self-hosted AI systems with proper documentation and audit trails.',
 }
 
 export default function HomePage() {
-  const recentArticles = getRecentArticles(5)
-  const popularArticles = getPopularArticles(5)
+  // From the full index (TSX + MDX), not the 63-entry registry — W6.
+  const recentArticles = recentFromIndex('en', 5).map((e) => ({ ...e, enHref: e.href }))
+  const nArticles = articleCount('en')
+  const popularArticles = getPopularArticlesEn(5)
 
   return (
     <div className="space-y-16">
@@ -48,7 +55,7 @@ export default function HomePage() {
           {/* Quick Stats */}
           <div className="flex flex-wrap justify-center gap-6 md:gap-10 mt-10 text-sm">
             <div className="text-center">
-              <div className="text-2xl font-bold text-white">106+</div>
+              <div className="text-2xl font-bold text-white" data-hero-artikel={nArticles}>{nArticles}</div>
               <div className="text-slate-400">Articles</div>
             </div>
             <div className="text-center">
@@ -106,11 +113,12 @@ export default function HomePage() {
           {categories.map((cat) => (
             <CategoryCard
               key={cat.slug}
+              slug={enSlug(cat.href, cat.slug)}
               icon={cat.icon}
               title={categoryLabelsEN[cat.slug] || cat.label}
               description={categoryDescriptionsEN[cat.slug] || cat.description}
-              href={`/en${cat.href}`}
-              count={cat.articles.length}
+              href={alternatePath(cat.href) ?? cat.href}
+              count={kategorieAnzahl('en', enSlug(cat.href, cat.slug))}
             />
           ))}
         </div>
@@ -178,7 +186,7 @@ export default function HomePage() {
             {recentArticles.map((article) => (
               <Link
                 key={article.href}
-                href={getEnHref(article.href)}
+                href={article.enHref}
                 className="block p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-blue-500/50 transition-colors group"
               >
                 <div className="flex items-start justify-between">
@@ -201,7 +209,7 @@ export default function HomePage() {
             {popularArticles.map((article) => (
               <Link
                 key={article.href}
-                href={getEnHref(article.href)}
+                href={article.enHref}
                 className="block p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-blue-500/50 transition-colors group"
               >
                 <div className="flex items-start justify-between">
@@ -289,8 +297,8 @@ export default function HomePage() {
               EU AI Act — Art. 4 AI Literacy applies since 2 Feb 2025
             </h2>
             <p className="text-slate-400 text-sm">
-              The AI literacy obligation is already in force. Enforcement with penalties
-              starts from August 2026. Our compliance templates help you with documentation.
+              The AI literacy obligation is in force; since 2 August 2026 it is enforced
+              with penalties. Our compliance templates help you with documentation.
             </p>
           </div>
           <div className="flex flex-col gap-3">
@@ -316,8 +324,8 @@ export default function HomePage() {
           Want to learn step by step?
         </h2>
         <p className="text-slate-400 max-w-lg mx-auto mb-6">
-          The 30-day learning path takes you from your first local LLM
-          to a complete AI stack with monitoring and compliance.
+          The learning path takes you from your first sentence about language models
+          to your own stack — {kopfzeile('en')}, ending in the Hub.
         </p>
         <Link
           href="/en/learning-path"
@@ -357,13 +365,22 @@ const categoryDescriptionsEN: Record<string, string> = {
   papers: 'Transformer, RAG, LoRA, ReAct, Constitutional AI',
 }
 
+/** EN-Kategorie-Slug aus der Paartabelle: /oesterreich -> /en/austria -> 'austria'. */
+function enSlug(deHref: string, fallback: string): string {
+  const en = alternatePath(deHref)
+  const segs = (en ?? '').split('/').filter(Boolean)
+  return segs[1] || fallback
+}
+
 function CategoryCard({
+  slug,
   icon,
   title,
   description,
   href,
   count,
 }: {
+  slug: string
   icon: string
   title: string
   description: string
@@ -382,7 +399,9 @@ function CategoryCard({
         </h3>
       </div>
       <p className="text-slate-400 text-sm">{description}</p>
-      <p className="text-xs text-slate-600 mt-3">{count} articles</p>
+      <p className="text-xs text-slate-600 mt-3" data-kategorie-karte={slug} data-anzahl={count}>
+        {count} articles
+      </p>
     </Link>
   )
 }

@@ -1,5 +1,7 @@
+import { alternatesFor } from '../../../lib/alternates'
 export const metadata = {
-  title: 'Downloads | AI Engineering Wiki',
+  alternates: alternatesFor('/en/downloads'),
+  title: 'Downloads',
   description:
     'Free templates for AI compliance, documentation and operations: templates, checklists and guides.',
 }
@@ -85,6 +87,9 @@ export default function DownloadsPage() {
           >
             <div className="flex items-start justify-between">
               <div>
+                <figure className="my-8">
+                  <img src="/images/generated/hero-flux-ai-engineering-1.png" alt="Illustration — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+                </figure>
                 <h2 className="text-lg font-semibold text-white group-hover:text-blue-400 transition-colors">
                   {item.title}
                 </h2>

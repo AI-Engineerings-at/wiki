@@ -1,7 +1,10 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
-  title: 'Agent Orchestration Patterns | AI Engineering Wiki',
+  alternates: alternatesFor('/en/patterns/agent-orchestration-patterns'),
+  title: 'Agent Orchestration Patterns',
   description: 'Proven orchestration patterns for Multi-Agent Systems: sequential, parallel, hierarchical, router, and supervisor.',
 }
 
@@ -18,29 +21,48 @@ export default function AgentOrchestrationPatternsPage() {
           How do you coordinate multiple AI agents? There are proven patterns for that.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/generated/hero-agent-orchestration.png" alt="1. Sequential Pattern — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
+        <figure className="my-8">
+          <img src="/images/diagrams/agent-orchestration-diagram.png" alt="1. Sequential Pattern — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
+        <figure className="my-8">
+          <img src="/images/diagrams/patterns-orchestration-overview.png" alt="1. Sequential Pattern — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">1. Sequential Pattern</h2>
         <p className="text-slate-300">
           Agent A → Agent B → Agent C. Each waits for the previous.
         </p>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">Research → Summary → Translation</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">2. Parallel Pattern</h2>
         <p className="text-slate-300">
           Several agents work simultaneously on different tasks.
         </p>
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 overflow-x-auto">
           <code className="text-sm text-slate-300">Research A → \
 Research B → \
 Research C → Aggregate</code>
         </pre>
+        </CodeBlock>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/patterns-orchestration-hierarchical.png" alt="3. Hierarchical Pattern — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">3. Hierarchical Pattern</h2>
         <p className="text-slate-300">
           Manager coordinates sub-managers who coordinate workers.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/patterns-orchestration-router.png" alt="4. Hub & Spoke — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">4. Hub & Spoke</h2>
         <p className="text-slate-300">
           Central hub connects to all agents, routes requests.
@@ -51,7 +73,11 @@ Research C → Aggregate</code>
           Data flows through agents like a pipeline. Each transforms the data.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/diagrams/tools-dispatch-routing.png" alt="When to Use What — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">When to Use What</h2>
+        <div className="table-wrap">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700">
@@ -82,6 +108,7 @@ Research C → Aggregate</code>
             </tr>
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   )

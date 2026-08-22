@@ -1,7 +1,9 @@
 import { Metadata } from 'next'
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
-  title: 'EU AI Act | AI Engineering Wiki',
+  alternates: alternatesFor('/en/compliance/eu-ai-act'),
+  title: 'EU AI Act',
   description: 'Risk classes, prohibitions, transparency requirements for AI systems in the EU.',
 }
 
@@ -36,7 +38,11 @@ export default function EUAIActPage() {
           </div>
         </div>
 
+        <figure className="my-8">
+          <img src="/images/generated/hero-eu-ai-act.png" alt="Risk Classes — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2>Risk Classes</h2>
+        <div className="table-wrap">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700">
@@ -68,8 +74,16 @@ export default function EUAIActPage() {
             </tr>
           </tbody>
         </table>
+        </div>
 
+        <figure className="my-8">
+          <img src="/images/infographics/eu-ai-act-risiko-pyramide.png" alt="Typical Business AI Scenarios — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
+        <figure className="my-8">
+          <img src="/images/infographics/eu-ai-act-risikoklassen-entscheidungsbaum.png" alt="Typical Business AI Scenarios — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2>Typical Business AI Scenarios</h2>
+        <div className="table-wrap">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700">
@@ -101,6 +115,7 @@ export default function EUAIActPage() {
             </tr>
           </tbody>
         </table>
+        </div>
 
         <h2>High-Risk Requirements Detail</h2>
         <ul className="list-disc list-inside text-slate-300 space-y-2">

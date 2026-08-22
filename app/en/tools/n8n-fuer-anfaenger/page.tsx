@@ -1,7 +1,10 @@
+import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
+import { alternatesFor } from '../../../../lib/alternates'
 
 export const metadata: Metadata = {
-  title: 'n8n for Beginners | AI Engineering Wiki',
+  alternates: alternatesFor('/en/tools/n8n-fuer-anfaenger'),
+  title: 'n8n for Beginners',
   description: 'Workflow automation with n8n. Getting started, nodes, triggers, integrations.',
 }
 
@@ -19,6 +22,12 @@ export default function N8nAnfänger() {
           It connects apps, services and APIs — without programming.
         </p>
 
+        <figure className="my-8">
+          <img src="/images/generated/hero-n8n-automation-v2.png" alt="Why n8n? — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
+        <figure className="my-8">
+          <img src="/images/diagrams/tools-n8n-architektur.png" alt="Why n8n? — illustration from the German article" className="rounded-xl border border-white/10 w-full" loading="lazy" />
+        </figure>
         <h2 className="text-xl font-semibold text-white mt-8">Why n8n?</h2>
 
         <div className="grid md:grid-cols-2 gap-4 mt-4">
@@ -43,6 +52,7 @@ export default function N8nAnfänger() {
 
         <h2 className="text-xl font-semibold text-white mt-8">Installation</h2>
 
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-slate-300">{`services:
   n8n:
@@ -52,6 +62,7 @@ export default function N8nAnfänger() {
     volumes:
       - n8n_data:/home/node/.n8n`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Basic Concepts</h2>
 
@@ -74,6 +85,7 @@ export default function N8nAnfänger() {
 
         <h2 className="text-xl font-semibold text-white mt-8">Practical Examples</h2>
 
+        <CodeBlock lang="en">
         <pre className="bg-slate-900 border border-slate-700 rounded-lg p-3 mt-2 overflow-x-auto">
           <code className="text-sm text-slate-300">{`# Stripe Payment → E-Mail
 Webhook (Stripe) → IF (success) → Email Send
@@ -84,6 +96,7 @@ RSS Read (daily) → Slack → Email Send
 # Form → AI → Save
 Webhook → Ollama → Notion → Slack`}</code>
         </pre>
+        </CodeBlock>
 
         <h2 className="text-xl font-semibold text-white mt-8">Best Practices</h2>
 
