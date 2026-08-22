@@ -1,7 +1,12 @@
 import Callout from "../../../../components/Callout"
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/de/compliance/verifywise-integration.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/compliance/verifywise-integration'),
   title: 'VerifyWise — Open-Source-Tool für EU AI Act Compliance',
   description:
@@ -11,6 +16,7 @@ export const metadata = {
 export default function VerifyWisePage() {
   return (
     <div className="space-y-8">
+      <ArticleHero src="/images/hero-2026-08/de/compliance/verifywise-integration.webp" alt={'VerifyWise — Open-Source AI-Governance'} />
       <div>
         <h1 className="text-3xl font-bold text-white">VerifyWise — Open-Source AI-Governance für EU AI Act</h1>
         <p className="text-gray-400 mt-2">Compliance · 9 min · Stand: Mai 2026</p>

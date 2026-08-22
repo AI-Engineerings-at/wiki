@@ -30,7 +30,7 @@ function fromRegistry(a: Article): IndexEntry {
     source: 'tsx',
     tags: [],
     words: 0,
-    image: a.thumbnail || '',
+    image: a.image || a.thumbnail || '',
     file: '',
   }
 }

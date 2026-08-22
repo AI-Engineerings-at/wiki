@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import Callout from "../../../../components/Callout"
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 type Tool = {
   name: string
@@ -277,6 +278,7 @@ export default function AIToolsDatenbankPage() {
 
   return (
     <div className="space-y-8">
+      <ArticleHero src="/images/hero-2026-08/de/tools/ai-tools-datenbank.webp" alt={'AI Tools Datenbank'} />
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-white">

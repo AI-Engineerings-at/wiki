@@ -1,7 +1,12 @@
 import Callout from "../../../../components/Callout"
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/de/compliance/ai-act-august-2026.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/compliance/ai-act-august-2026'),
   title: 'Was passiert am 02.08.2026? EU AI Act Enforcement-Start',
   description:
@@ -11,6 +16,7 @@ export const metadata = {
 export default function AiActAugust2026Page() {
   return (
     <div className="space-y-8">
+      <ArticleHero src="/images/hero-2026-08/de/compliance/ai-act-august-2026.webp" alt={'EU AI Act seit 02.08.2026: was durchgesetzt wird'} />
       <div>
         <h1 className="text-3xl font-bold text-white">02.08.2026 — was seit dem Enforcement-Start des EU AI Act gilt</h1>
         <p className="text-gray-400 mt-2">Compliance · 10 min · Stand: 21. August 2026</p>

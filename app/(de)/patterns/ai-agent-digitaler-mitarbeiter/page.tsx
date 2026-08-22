@@ -5,8 +5,13 @@ import KeyTakeaway from "../../../../components/KeyTakeaway"
 import ComparisonTable from "../../../../components/ComparisonTable"
 import { RelatedArticles } from "../../../../components/RelatedArticles"
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/de/patterns/ai-agent-digitaler-mitarbeiter.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/patterns/ai-agent-digitaler-mitarbeiter'),
   title: "AI Agent als digitaler Mitarbeiter — Patterns & Architektur",
   description:
@@ -16,6 +21,7 @@ export const metadata: Metadata = {
 export default function AIAgentDigitalerMitarbeiterPage() {
   return (
     <div className="space-y-6">
+      <ArticleHero src="/images/hero-2026-08/de/patterns/ai-agent-digitaler-mitarbeiter.webp" alt={'AI Agent als digitaler Mitarbeiter'} />
       {/* Hero Section */}
       <div className="border-b border-white/10 pb-6">
         <p className="text-sm text-blue-400 font-medium mb-2">Patterns</p>

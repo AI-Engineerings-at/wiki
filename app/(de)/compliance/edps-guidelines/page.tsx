@@ -1,7 +1,12 @@
 import Callout from "../../../../components/Callout"
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/de/compliance/edps-guidelines.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/compliance/edps-guidelines'),
   title: 'EDPS Guidelines — Was der EU-Datenschutzbeauftragte für KI vorgibt',
   description:
@@ -11,6 +16,7 @@ export const metadata = {
 export default function EdpsGuidelinesPage() {
   return (
     <div className="space-y-8">
+      <ArticleHero src="/images/hero-2026-08/de/compliance/edps-guidelines.webp" alt={'EDPS Guidelines für KI'} />
       <div>
         <h1 className="text-3xl font-bold text-white">EDPS Guidelines — der EU-Datenschutzbeauftragte zu KI</h1>
         <p className="text-gray-400 mt-2">Compliance · 8 min · Stand: Mai 2026</p>

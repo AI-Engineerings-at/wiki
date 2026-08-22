@@ -34,7 +34,9 @@ export function generateMetadata({ params }: Props): Metadata {
       title: a.title,
       description: a.description,
       type: 'article',
-      ...(a.image ? { images: [{ url: a.image }] } : {}),
+      // Hero-Motiv als OG-Bild (E44/W8b). Keine OG-Route im Repo (find app -name
+      // 'opengraph-image*' -> 0 Treffer), also kein Format-Filter: WebP ist erlaubt.
+      ...(a.image ? { images: [{ url: a.image, width: 1344, height: 768, type: 'image/webp' }] } : {}),
     },
   }
 }

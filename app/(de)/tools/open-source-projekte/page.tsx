@@ -1,7 +1,12 @@
 import Callout from "../../../../components/Callout"
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/de/tools/open-source-projekte.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/tools/open-source-projekte'),
   title: 'Open Source Tools & Projekte',
   description:
@@ -571,6 +576,7 @@ function TagBadge({ tag }: { tag: string }) {
 export default function OpenSourceProjektePage() {
   return (
     <div className="space-y-12">
+      <ArticleHero src="/images/hero-2026-08/de/tools/open-source-projekte.webp" alt={'Open Source Tools & Projekte'} />
       <div>
         <h1 className="text-3xl font-bold text-white">
           Open Source Tools &amp; Projekte

@@ -1,3 +1,4 @@
+import { ArticleHero } from './ArticleHero'
 import { WikiLink as Link } from './WikiLink'
 import type { MdxArticle } from '../lib/content'
 
@@ -46,12 +47,7 @@ export function MdxArticleView({ article, html }: { article: MdxArticle; html: s
         )}
       </header>
 
-      {heroSrc && (
-        <figure className="mb-8">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={heroSrc} alt={article.title} className="w-full rounded-2xl border border-slate-800" loading="lazy" />
-        </figure>
-      )}
+      {heroSrc && <ArticleHero src={heroSrc} alt={article.title} />}
 
       {/* Inhalt aus content/<lang>/<kategorie>/<slug>.mdx — Repo-Inhalt, kein Nutzer-Input;
           rohes HTML aus dem Markdown wird beim Rendern verworfen (lib/content.ts). */}

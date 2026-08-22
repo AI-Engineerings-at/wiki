@@ -1,7 +1,12 @@
 import Callout from "../../../../components/Callout"
 import { alternatesFor } from '../../../../lib/alternates'
+import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata = {
+  openGraph: {
+    type: 'article',
+    images: [{ url: '/images/hero-2026-08/de/patterns/agent-skalierung.webp', width: 1344, height: 768, type: 'image/webp' }],
+  },
   alternates: alternatesFor('/patterns/agent-skalierung'),
   title: 'Agent Team skalieren',
   description:
@@ -11,6 +16,7 @@ export const metadata = {
 export default function AgentSkalierung() {
   return (
     <div className="space-y-6">
+      <ArticleHero src="/images/hero-2026-08/de/patterns/agent-skalierung.webp" alt={'Agent Team skalieren'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Agent Team skalieren und anpassen</h1>
         <p className="text-gray-400 mt-2">Patterns · 9 min</p>
