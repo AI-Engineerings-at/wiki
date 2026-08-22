@@ -79,6 +79,13 @@ def main():
         seen.add(r["kategorie"])
         L.append(f"- `{r['lang']}/{r['kategorie']}/{r['slug']}.webp` — seed {r['seed']}, {int(r['bytes']) // 1024} KB, {r['dauer_s']} s")
     L.append("")
+    nachtrag = [r for r in last.values() if (r.get("grund") or "").strip()]
+    if nachtrag:
+        L.append("## Nachtraeglich neu erzeugt (Spalte `grund` im Protokoll)\n")
+        for r in sorted(nachtrag, key=lambda r: (r["lang"], r["kategorie"], r["slug"])):
+            L.append(f"- `{r['lang']}/{r['kategorie']}/{r['slug']}.webp` — seed {r['seed']}, "
+                     f"{int(r['bytes']) // 1024} KB, Grund: {r['grund']}")
+        L.append("")
     L.append("## Erzeugung\n")
     L.append("ComfyUI `10.40.10.90:8188` (v0.18.1, RTX 3090) · `flux1-schnell-fp8.safetensors` über `CheckpointLoaderSimple` · "
              "`EmptySD3LatentImage` 1344×768 · KSampler 4 Schritte, cfg 1.0, euler/simple · Seed = sha256(slug)[:12] · "
