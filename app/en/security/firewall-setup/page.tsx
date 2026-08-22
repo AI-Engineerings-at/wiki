@@ -1,13 +1,8 @@
 import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
-import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
-  openGraph: {
-    type: 'article',
-    images: [{ url: '/images/hero-2026-08/en/security/firewall-setup.webp', width: 1344, height: 768, type: 'image/webp' }],
-  },
   alternates: alternatesFor('/en/security/firewall-setup'),
   title: 'Firewall Setup',
   description: 'UFW, fail2ban, network segmentation for local AI infrastructure.',
@@ -16,7 +11,6 @@ export const metadata: Metadata = {
 export default function FirewallSetupPage() {
   return (
     <div className="space-y-8">
-      <ArticleHero src="/images/hero-2026-08/en/security/firewall-setup.webp" alt={'Firewall Setup'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Firewall Setup</h1>
         <p className="text-slate-400 mt-2">Security · 5 min</p>

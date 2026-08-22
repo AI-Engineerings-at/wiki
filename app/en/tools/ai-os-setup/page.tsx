@@ -1,10 +1,5 @@
 import { alternatesFor } from '../../../../lib/alternates'
-import { ArticleHero } from '../../../../components/ArticleHero'
 export const metadata = {
-  openGraph: {
-    type: 'article',
-    images: [{ url: '/images/hero-2026-08/en/tools/ai-os-setup.webp', width: 1344, height: 768, type: 'image/webp' }],
-  },
   alternates: alternatesFor('/en/tools/ai-os-setup'),
   title: 'AI OS Setup Guide',
   description:
@@ -14,7 +9,6 @@ export const metadata = {
 export default function AiOsSetup() {
   return (
     <div className="space-y-6">
-      <ArticleHero src="/images/hero-2026-08/en/tools/ai-os-setup.webp" alt={'AI OS Setup Guide'} />
       <div>
         <h1 className="text-3xl font-bold text-white">AI OS Setup Guide</h1>
         <p className="text-gray-400 mt-2">Tools · 8 min</p>

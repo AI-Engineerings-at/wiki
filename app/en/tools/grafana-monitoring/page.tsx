@@ -1,13 +1,8 @@
 import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
-import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
-  openGraph: {
-    type: 'article',
-    images: [{ url: '/images/hero-2026-08/en/tools/grafana-monitoring.webp', width: 1344, height: 768, type: 'image/webp' }],
-  },
   alternates: alternatesFor('/en/tools/grafana-monitoring'),
   title: 'Grafana Monitoring',
   description: 'Monitoring with Prometheus + Grafana. Dashboards, alerts.',
@@ -16,7 +11,6 @@ export const metadata: Metadata = {
 export default function GrafanaMonitoringPage() {
   return (
     <div className="space-y-8">
-      <ArticleHero src="/images/hero-2026-08/en/tools/grafana-monitoring.webp" alt={'Grafana Monitoring'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Grafana: Monitoring for Homelab</h1>
         <p className="text-slate-400 mt-2">Tools · 7 min</p>

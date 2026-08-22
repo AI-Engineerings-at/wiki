@@ -2,13 +2,8 @@ import { CodeBlock } from '../../../../components/CodeBlock'
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { alternatesFor } from '../../../../lib/alternates'
-import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata = {
-  openGraph: {
-    type: 'article',
-    images: [{ url: '/images/hero-2026-08/de/security/backup-strategie.webp', width: 1344, height: 768, type: 'image/webp' }],
-  },
   alternates: alternatesFor('/security/backup-strategie'),
   title: 'Backup Strategie',
   description:
@@ -18,7 +13,6 @@ export const metadata = {
 export default function BackupStrategie() {
   return (
     <div className="space-y-6">
-      <ArticleHero src="/images/hero-2026-08/de/security/backup-strategie.webp" alt={'Backup Strategie'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Backup Strategie für Homelab</h1>
         <p className="text-gray-400 mt-2">Security · 5 min</p>

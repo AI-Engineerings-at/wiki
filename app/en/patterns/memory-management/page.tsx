@@ -1,13 +1,8 @@
 import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
-import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
-  openGraph: {
-    type: 'article',
-    images: [{ url: '/images/hero-2026-08/en/patterns/memory-management.webp', width: 1344, height: 768, type: 'image/webp' }],
-  },
   alternates: alternatesFor('/en/patterns/memory-management'),
   title: 'Memory Management Pattern',
   description: 'How AI agents store and retrieve persistent knowledge. CLAUDE.md, Topic Files, Knowledge Graphs.',
@@ -16,7 +11,6 @@ export const metadata: Metadata = {
 export default function MemoryManagementPage() {
   return (
     <div className="space-y-8">
-      <ArticleHero src="/images/hero-2026-08/en/patterns/memory-management.webp" alt={'Memory Management Pattern'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Memory Management Pattern</h1>
         <p className="text-slate-400 mt-2">Patterns · 5 min</p>

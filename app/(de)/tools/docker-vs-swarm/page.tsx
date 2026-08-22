@@ -2,13 +2,8 @@ import { CaseStudyBox } from '../../../../components/CaseStudyBox'
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { alternatesFor } from '../../../../lib/alternates'
-import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata = {
-  openGraph: {
-    type: 'article',
-    images: [{ url: '/images/hero-2026-08/de/tools/docker-vs-swarm.webp', width: 1344, height: 768, type: 'image/webp' }],
-  },
   alternates: alternatesFor('/tools/docker-vs-swarm'),
   title: 'Docker Compose vs Docker Swarm',
   description:
@@ -18,7 +13,6 @@ export const metadata = {
 export default function DockerVsSwarm() {
   return (
     <div className="space-y-6">
-      <ArticleHero src="/images/hero-2026-08/de/tools/docker-vs-swarm.webp" alt={'Docker Compose vs Docker Swarm'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Docker Compose vs Docker Swarm: Welches für AI?</h1>
         <p className="text-gray-400 mt-2">Tools · 6 min</p>

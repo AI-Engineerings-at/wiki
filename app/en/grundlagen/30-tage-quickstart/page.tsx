@@ -1,12 +1,7 @@
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
-import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
-  openGraph: {
-    type: 'article',
-    images: [{ url: '/images/hero-2026-08/en/grundlagen/30-tage-quickstart.webp', width: 1344, height: 768, type: 'image/webp' }],
-  },
   alternates: alternatesFor('/en/grundlagen/30-tage-quickstart'),
   title: '30-Day Local AI-Stack Quickstart',
   description: 'Build a local, GDPR-compliant AI stack in 30 days. Day-by-day guide: Docker, Ollama, n8n, monitoring.',
@@ -15,7 +10,6 @@ export const metadata: Metadata = {
 export default function Quickstart30TagePage() {
   return (
     <div className="space-y-8">
-      <ArticleHero src="/images/hero-2026-08/en/grundlagen/30-tage-quickstart.webp" alt={'30-Day Local AI-Stack Quickstart'} />
       <div>
         <h1 className="text-3xl font-bold text-white">30-Day Local AI-Stack Quickstart</h1>
         <p className="text-slate-400 mt-2">Basics · 8 min</p>

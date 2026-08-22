@@ -1,13 +1,8 @@
 import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
-import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
-  openGraph: {
-    type: 'article',
-    images: [{ url: '/images/hero-2026-08/de/compliance/verbotene-ai-praktiken.webp', width: 1344, height: 768, type: 'image/webp' }],
-  },
   alternates: alternatesFor('/compliance/verbotene-ai-praktiken'),
   title: 'Verbotene AI-Praktiken nach EU AI Act',
   description: 'Article 5 verbietet bestimmte KI-Praktiken. Social Scoring, Emotion Recognition, Biometrische Überwachung - was seit Feb 2025 verboten ist.',
@@ -16,7 +11,6 @@ export const metadata: Metadata = {
 export default function VerboteneAIPraktikenPage() {
   return (
     <div className="space-y-8">
-      <ArticleHero src="/images/hero-2026-08/de/compliance/verbotene-ai-praktiken.webp" alt={'Verbotene AI-Praktiken nach EU AI Act'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Verbotene AI-Praktiken</h1>
         <p className="text-slate-400 mt-2">Compliance · 4 min · Stand: Feb 2026</p>

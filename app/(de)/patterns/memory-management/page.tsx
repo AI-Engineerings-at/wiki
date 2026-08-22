@@ -3,13 +3,8 @@ import { Metadata } from 'next'
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { alternatesFor } from '../../../../lib/alternates'
-import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
-  openGraph: {
-    type: 'article',
-    images: [{ url: '/images/hero-2026-08/de/patterns/memory-management.webp', width: 1344, height: 768, type: 'image/webp' }],
-  },
   alternates: alternatesFor('/patterns/memory-management'),
   title: 'Memory Management Pattern',
   description: 'Wie AI-Agenten persistentes Wissen speichern und abrufen — CLAUDE.md, Topic Files, Knowledge Graphs.',
@@ -18,7 +13,6 @@ export const metadata: Metadata = {
 export default function MemoryManagementPage() {
   return (
     <div className="space-y-8">
-      <ArticleHero src="/images/hero-2026-08/de/patterns/memory-management.webp" alt={'Memory Management Pattern'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Memory Management Pattern</h1>
         <p className="text-gray-400 mt-2">

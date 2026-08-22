@@ -6,13 +6,8 @@ import ComparisonTable from "../../../../components/ComparisonTable"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { RelatedArticles } from "../../../../components/RelatedArticles"
 import { alternatesFor } from '../../../../lib/alternates'
-import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
-  openGraph: {
-    type: 'article',
-    images: [{ url: '/images/hero-2026-08/de/patterns/evals-guardrails.webp', width: 1344, height: 768, type: 'image/webp' }],
-  },
   alternates: alternatesFor('/patterns/evals-guardrails'),
   title: "Evals & Guardrails — LLM-Qualität messen und absichern",
   description:
@@ -22,7 +17,6 @@ export const metadata: Metadata = {
 export default function EvalsGuardrailsPage() {
   return (
     <div className="space-y-6">
-      <ArticleHero src="/images/hero-2026-08/de/patterns/evals-guardrails.webp" alt={'Evals & Guardrails — LLM-Qualität messen und absichern'} />
       {/* Hero Section */}
       <div className="border-b border-white/10 pb-6">
         <p className="text-sm text-blue-400 font-medium mb-2">Patterns</p>

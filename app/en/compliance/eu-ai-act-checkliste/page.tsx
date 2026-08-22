@@ -1,12 +1,7 @@
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
-import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
-  openGraph: {
-    type: 'article',
-    images: [{ url: '/images/hero-2026-08/en/compliance/eu-ai-act-checkliste.webp', width: 1344, height: 768, type: 'image/webp' }],
-  },
   alternates: alternatesFor('/en/compliance/eu-ai-act-checkliste'),
   title: 'EU AI Act Compliance Checklist',
   description: 'Your 7-step guide to EU AI Act readiness. Risk classes, transparency requirements, prohibitions - everything compact.',
@@ -15,7 +10,6 @@ export const metadata: Metadata = {
 export default function EUAIActChecklistePage() {
   return (
     <div className="space-y-8">
-      <ArticleHero src="/images/hero-2026-08/en/compliance/eu-ai-act-checkliste.webp" alt={'EU AI Act Compliance Checklist'} />
       <div>
         <h1 className="text-3xl font-bold text-white">EU AI Act Compliance Checklist</h1>
         <p className="text-slate-400 mt-2">Compliance · 6 min · Updated: March 2026</p>

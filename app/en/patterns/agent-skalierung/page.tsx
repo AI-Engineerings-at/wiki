@@ -1,10 +1,5 @@
 import { alternatesFor } from '../../../../lib/alternates'
-import { ArticleHero } from '../../../../components/ArticleHero'
 export const metadata = {
-  openGraph: {
-    type: 'article',
-    images: [{ url: '/images/hero-2026-08/en/patterns/agent-skalierung.webp', width: 1344, height: 768, type: 'image/webp' }],
-  },
   alternates: alternatesFor('/en/patterns/agent-skalierung'),
   title: 'Scaling Agent Teams',
   description:
@@ -14,7 +9,6 @@ export const metadata = {
 export default function AgentScaling() {
   return (
     <div className="space-y-6">
-      <ArticleHero src="/images/hero-2026-08/en/patterns/agent-skalierung.webp" alt={'Scaling Agent Teams'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Scaling and Customizing Agent Teams</h1>
         <p className="text-gray-400 mt-2">Patterns · 9 min</p>

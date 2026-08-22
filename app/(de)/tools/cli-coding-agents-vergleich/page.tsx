@@ -1,7 +1,6 @@
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { alternatesFor } from '../../../../lib/alternates'
-import { ArticleHero } from '../../../../components/ArticleHero'
 
 const vergleichDiagram = `@startuml
 skinparam backgroundColor transparent
@@ -60,10 +59,6 @@ end note
 @enduml`
 
 export const metadata = {
-  openGraph: {
-    type: 'article',
-    images: [{ url: '/images/hero-2026-08/de/tools/cli-coding-agents-vergleich.webp', width: 1344, height: 768, type: 'image/webp' }],
-  },
   alternates: alternatesFor('/tools/cli-coding-agents-vergleich'),
   title: 'CLI Coding Agents im Vergleich — Claude Code, Mistral Vibe, Gemini CLI, Codex CLI',
   description:
@@ -73,7 +68,6 @@ export const metadata = {
 export default function CLICodingAgentsVergleichPage() {
   return (
     <div className="space-y-6">
-      <ArticleHero src="/images/hero-2026-08/de/tools/cli-coding-agents-vergleich.webp" alt={'CLI Coding Agents im Vergleich — Claude Code, Mistral Vibe, Gemini CLI, Codex CLI'} />
       <div className="border-b border-white/10 pb-6">
         <p className="text-sm text-blue-400 font-medium mb-2">Tools</p>
         <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight">

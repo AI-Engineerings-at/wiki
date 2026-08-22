@@ -1,12 +1,7 @@
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
-import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
-  openGraph: {
-    type: 'article',
-    images: [{ url: '/images/hero-2026-08/en/compliance/datenschutz-praxis.webp', width: 1344, height: 768, type: 'image/webp' }],
-  },
   alternates: alternatesFor('/en/compliance/datenschutz-praxis'),
   title: 'Privacy Practices',
   description: 'Practical implementation — TOM, DPA, documentation, data subject rights.',
@@ -15,7 +10,6 @@ export const metadata: Metadata = {
 export default function DatenschutzPraxisPage() {
   return (
     <div className="space-y-8">
-      <ArticleHero src="/images/hero-2026-08/en/compliance/datenschutz-praxis.webp" alt={'Privacy Practices'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Privacy Practices</h1>
         <p className="text-slate-400 mt-2">Compliance · 5 min</p>

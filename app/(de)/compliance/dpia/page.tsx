@@ -1,13 +1,8 @@
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { alternatesFor } from '../../../../lib/alternates'
-import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata = {
-  openGraph: {
-    type: 'article',
-    images: [{ url: '/images/hero-2026-08/de/compliance/dpia.webp', width: 1344, height: 768, type: 'image/webp' }],
-  },
   alternates: alternatesFor('/compliance/dpia'),
   title: 'Datenschutz-Folgenabschätzung (DPIA)',
   description:
@@ -42,7 +37,6 @@ review -up-> beschreibung : Bei Änderungen\\naktualisieren
 export default function DPIAPage() {
   return (
     <div className="space-y-8">
-      <ArticleHero src="/images/hero-2026-08/de/compliance/dpia.webp" alt={'Datenschutz-Folgenabschätzung (DPIA)'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Datenschutz-Folgenabschätzung (DPIA)</h1>
         <p className="text-gray-400 mt-2">Compliance · 8 min · Stand: März 2026</p>

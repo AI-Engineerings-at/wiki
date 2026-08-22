@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { ArticleHero } from '../../../../components/ArticleHero'
 
 type Answer = "yes" | "partially" | "no" | null
 
@@ -181,7 +180,6 @@ export default function SelfAssessmentPageEN() {
 
   return (
     <div className="space-y-8 max-w-3xl">
-      <ArticleHero src="/images/hero-2026-08/en/compliance/self-assessment.webp" alt={'EU AI Act Readiness Check'} />
       <div>
         <h1 className="text-3xl font-bold text-white">
           EU AI Act Readiness Check

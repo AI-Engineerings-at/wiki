@@ -1,13 +1,8 @@
 import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
-import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
-  openGraph: {
-    type: 'article',
-    images: [{ url: '/images/hero-2026-08/en/tools/n8n-fuer-anfaenger.webp', width: 1344, height: 768, type: 'image/webp' }],
-  },
   alternates: alternatesFor('/en/tools/n8n-fuer-anfaenger'),
   title: 'n8n for Beginners',
   description: 'Workflow automation with n8n. Getting started, nodes, triggers, integrations.',
@@ -16,7 +11,6 @@ export const metadata: Metadata = {
 export default function N8nAnfänger() {
   return (
     <div className="space-y-6">
-      <ArticleHero src="/images/hero-2026-08/en/tools/n8n-fuer-anfaenger.webp" alt={'n8n for Beginners'} />
       <div>
         <h1 className="text-3xl font-bold text-white">n8n: Workflow Automation</h1>
         <p className="text-slate-400 mt-2">Tools · 8 min</p>

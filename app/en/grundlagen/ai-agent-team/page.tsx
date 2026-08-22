@@ -1,11 +1,6 @@
 import { CodeBlock } from '../../../../components/CodeBlock'
 import { alternatesFor } from '../../../../lib/alternates'
-import { ArticleHero } from '../../../../components/ArticleHero'
 export const metadata = {
-  openGraph: {
-    type: 'article',
-    images: [{ url: '/images/hero-2026-08/en/grundlagen/ai-agent-team.webp', width: 1344, height: 768, type: 'image/webp' }],
-  },
   alternates: alternatesFor('/en/grundlagen/ai-agent-team'),
   title: 'Build an AI Agent Team',
   description:
@@ -15,7 +10,6 @@ export const metadata = {
 export default function AiAgentTeam() {
   return (
     <div className="space-y-6">
-      <ArticleHero src="/images/hero-2026-08/en/grundlagen/ai-agent-team.webp" alt={'Build an AI Agent Team'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Building an AI Agent Team</h1>
         <p className="text-gray-400 mt-2">Basics · 6 min</p>

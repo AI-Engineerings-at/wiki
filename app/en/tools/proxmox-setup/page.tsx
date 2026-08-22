@@ -1,13 +1,8 @@
 import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
-import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
-  openGraph: {
-    type: 'article',
-    images: [{ url: '/images/hero-2026-08/en/tools/proxmox-setup.webp', width: 1344, height: 768, type: 'image/webp' }],
-  },
   alternates: alternatesFor('/en/tools/proxmox-setup'),
   title: 'Proxmox Setup',
   description: 'Virtualization with Proxmox VE. VMs, containers, cluster.',
@@ -16,7 +11,6 @@ export const metadata: Metadata = {
 export default function ProxmoxSetupPage() {
   return (
     <div className="space-y-8">
-      <ArticleHero src="/images/hero-2026-08/en/tools/proxmox-setup.webp" alt={'Proxmox Setup'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Proxmox Setup</h1>
         <p className="text-slate-400 mt-2">Tools · 6 min</p>

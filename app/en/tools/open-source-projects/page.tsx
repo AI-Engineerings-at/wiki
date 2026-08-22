@@ -1,10 +1,5 @@
 import { alternatesFor } from '../../../../lib/alternates'
-import { ArticleHero } from '../../../../components/ArticleHero'
 export const metadata = {
-  openGraph: {
-    type: 'article',
-    images: [{ url: '/images/hero-2026-08/en/tools/open-source-projects.webp', width: 1344, height: 768, type: 'image/webp' }],
-  },
   alternates: alternatesFor('/en/tools/open-source-projects'),
   title: 'Open Source Tools & Projects',
   description:
@@ -560,7 +555,6 @@ function TagBadge({ tag }: { tag: string }) {
 export default function OpenSourceProjectsPage() {
   return (
     <div className="space-y-12">
-      <ArticleHero src="/images/hero-2026-08/en/tools/open-source-projects.webp" alt={'Open Source Tools & Projects'} />
       <div>
         <h1 className="text-3xl font-bold text-white">
           Open Source Tools &amp; Projects

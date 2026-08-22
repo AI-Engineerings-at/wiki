@@ -1,13 +1,8 @@
 import { CodeBlock } from '../../../../components/CodeBlock'
 import { Metadata } from 'next'
 import { alternatesFor } from '../../../../lib/alternates'
-import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata: Metadata = {
-  openGraph: {
-    type: 'article',
-    images: [{ url: '/images/hero-2026-08/en/tools/rag-guide.webp', width: 1344, height: 768, type: 'image/webp' }],
-  },
   alternates: alternatesFor('/en/tools/rag-guide'),
   title: 'RAG Guide',
   description: 'Retrieval-Augmented Generation with ChromaDB, Qdrant, Neo4j.',
@@ -16,7 +11,6 @@ export const metadata: Metadata = {
 export default function RAGGuidePage() {
   return (
     <div className="space-y-8">
-      <ArticleHero src="/images/hero-2026-08/en/tools/rag-guide.webp" alt={'RAG Guide'} />
       <div>
         <h1 className="text-3xl font-bold text-white">RAG Guide</h1>
         <p className="text-slate-400 mt-2">Tools · 8 min</p>

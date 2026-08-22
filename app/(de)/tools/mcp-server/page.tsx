@@ -2,13 +2,8 @@ import { CodeBlock } from '../../../../components/CodeBlock'
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { alternatesFor } from '../../../../lib/alternates'
-import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata = {
-  openGraph: {
-    type: 'article',
-    images: [{ url: '/images/hero-2026-08/de/tools/mcp-server.webp', width: 1344, height: 768, type: 'image/webp' }],
-  },
   alternates: alternatesFor('/tools/mcp-server'),
   title: 'MCP Server',
   description:
@@ -18,7 +13,6 @@ export const metadata = {
 export default function McpServer() {
   return (
     <div className="space-y-6">
-      <ArticleHero src="/images/hero-2026-08/de/tools/mcp-server.webp" alt={'MCP Server'} />
       <div>
         <h1 className="text-3xl font-bold text-white">MCP Server für Claude Desktop</h1>
         <p className="text-gray-400 mt-2">Tools · 5 min</p>

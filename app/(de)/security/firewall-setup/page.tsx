@@ -2,13 +2,8 @@ import { CodeBlock } from '../../../../components/CodeBlock'
 import Callout from "../../../../components/Callout"
 import PlantUMLDiagram from "../../../../components/PlantUMLDynamic"
 import { alternatesFor } from '../../../../lib/alternates'
-import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata = {
-  openGraph: {
-    type: 'article',
-    images: [{ url: '/images/hero-2026-08/de/security/firewall-setup.webp', width: 1344, height: 768, type: 'image/webp' }],
-  },
   alternates: alternatesFor('/security/firewall-setup'),
   title: 'Firewall Setup',
   description:
@@ -18,7 +13,6 @@ export const metadata = {
 export default function FirewallSetup() {
   return (
     <div className="space-y-6">
-      <ArticleHero src="/images/hero-2026-08/de/security/firewall-setup.webp" alt={'Firewall Setup'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Firewall & Netzwerksegmentierung</h1>
         <p className="text-gray-400 mt-2">Security · 6 min</p>

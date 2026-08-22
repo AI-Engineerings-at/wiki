@@ -1,13 +1,8 @@
 import { CodeBlock } from '../../../../components/CodeBlock'
 import Callout from "../../../../components/Callout"
 import { alternatesFor } from '../../../../lib/alternates'
-import { ArticleHero } from '../../../../components/ArticleHero'
 
 export const metadata = {
-  openGraph: {
-    type: 'article',
-    images: [{ url: '/images/hero-2026-08/de/grundlagen/was-ist-agent-orchestration.webp', width: 1344, height: 768, type: 'image/webp' }],
-  },
   alternates: alternatesFor('/grundlagen/was-ist-agent-orchestration'),
   title: 'Was ist Agent Orchestration?',
   description:
@@ -17,7 +12,6 @@ export const metadata = {
 export default function WasIstAgentOrchestration() {
   return (
     <div className="space-y-6">
-      <ArticleHero src="/images/hero-2026-08/de/grundlagen/was-ist-agent-orchestration.webp" alt={'Was ist Agent Orchestration?'} />
       <div>
         <h1 className="text-3xl font-bold text-white">Was ist Agent Orchestration?</h1>
         <p className="text-gray-400 mt-2">Grundlagen · 5 min</p>

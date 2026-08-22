@@ -1,10 +1,5 @@
 import { alternatesFor } from '../../../../lib/alternates'
-import { ArticleHero } from '../../../../components/ArticleHero'
 export const metadata = {
-  openGraph: {
-    type: 'article',
-    images: [{ url: '/images/hero-2026-08/en/tools/comparison-alternatives.webp', width: 1344, height: 768, type: 'image/webp' }],
-  },
   alternates: alternatesFor('/en/tools/comparison-alternatives'),
   title: 'Comparable Resources \u2014 Where Else You Can Learn',
   description:
@@ -16,7 +11,6 @@ const NIST_URL = 'https://www.nist.gov/itl/ai-risk-management-framework'
 export default function ComparisonAlternativesPage() {
   return (
     <div className="space-y-6">
-      <ArticleHero src="/images/hero-2026-08/en/tools/comparison-alternatives.webp" alt={'Comparable Resources — Where Else You Can Learn'} />
       <div className="border-b border-white/10 pb-6">
         <p className="text-sm text-blue-400 font-medium mb-2">Tools</p>
         <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight">
