@@ -25,9 +25,16 @@ ASCII-Umlaute, EN-Shell, MDX-Seitenzahl, Suchindex, Lernpfad, Kopier-Knöpfe,
 Tabellen-Wrapper, Titel, tote interne Links im Export. Soll-Zahlen aus
 lib/generated/stats.json (scripts/build-index.js).
 
+Seit 2026-08-22 (W8b) [19]: Hero-Bilder. Jede Artikelseite traegt genau ein
+<img data-hero="1"> (components/ArticleHero.tsx), und jede Bilddatei, auf die
+ein solches img zeigt, liegt wirklich unter out/. Nenner: MDX-Artikelseiten laut
+lib/generated/stats.json + die TSX-Artikel aus scripts/bilder/tsx-artikel-2026-08-21.csv
+ohne Redirect-Hinweis.
+
 Nur Standardbibliothek.
 """
 
+import csv
 import json
 import os
 import re
@@ -43,7 +50,10 @@ SOLL_LANG_DE = 108
 # Seit E43 (2026-08-21) kommt die Seitenzahl aus lib/generated/stats.json
 # (scripts/build-index.js): TSX + MDX + Blog + MDX-Kategorien = routes_total.
 # Fehlt die Datei, gilt der Stand vor E43 (182) als Soll.
-STATS_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "lib", "generated", "stats.json")
+REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+STATS_FILE = os.path.join(REPO, "lib", "generated", "stats.json")
+# Jobliste der TSX-Artikel aus E44/B1 — Nenner fuer Pruefung [19] (Hero-Bilder).
+TSX_JOBS = os.path.join(REPO, "scripts", "bilder", "tsx-artikel-2026-08-21.csv")
 STATS = json.load(open(STATS_FILE, encoding="utf-8")) if os.path.isfile(STATS_FILE) else {}
 SOLL_SITEMAP_LOC = STATS.get("routes_total", 182)
 SOLL_LLMS_ZIELE = 82
@@ -492,6 +502,91 @@ def main(argv):
           f"{n_missing} von {n_pages}")
     n_hreflang = sum(1 for f in pages if 'hreflang="en"' in contents[f])
     print(f"[18] informativ — Seiten mit hreflang: {n_hreflang} von {n_pages}")
+
+    # 19. Hero-Bilder (W8b, E44) -----------------------------------------------------
+    hero_re = re.compile(r'<img[^>]*\sdata-hero="1"[^>]*>')
+    src_re = re.compile(r'\ssrc="([^"]+)"')
+    heroes = {f: hero_re.findall(contents[f]) for f in pages}
+    n_hero_pages = sum(1 for f in pages if heroes[f])
+    mehrfach = [f"{rel(f, out_dir)}: {len(heroes[f])}" for f in pages if len(heroes[f]) > 1]
+    print(f"[19] Seiten mit Hero-Bild (<img data-hero=\"1\">): ist {n_hero_pages} von {n_pages} Seiten")
+    print(f"[19] Seiten mit MEHR als einem Hero-Bild: ist {len(mehrfach)} / soll 0 von {n_pages} Seiten")
+    if mehrfach:
+        verletzungen.append(f"mehr als ein Hero-Bild: {mehrfach[:8]}")
+
+    # 19a: MDX-Artikelseiten (Marker aus [13]) — jede genau eines
+    mdx_ohne = [rel(f, out_dir) for f in wk if not heroes[f]]
+    print(f"[19] MDX-Artikelseiten mit Hero: ist {len(wk) - len(mdx_ohne)} / soll {len(wk)} "
+          f"von {len(wk)} Seiten mit Wissensklassen-Kopf "
+          f"(Soll laut stats.json: {soll_mdx if soll_mdx is not None else '—'})")
+    if mdx_ohne:
+        verletzungen.append(f"MDX-Artikelseiten ohne Hero-Bild: {len(mdx_ohne)}, z. B. {mdx_ohne[:6]}")
+
+    # 19b: TSX-Artikel aus der E44-Jobliste (ohne Redirect-Seiten)
+    tsx_soll = []
+    tsx_redirect = []
+    if os.path.isfile(TSX_JOBS):
+        with open(TSX_JOBS, newline="", encoding="utf-8") as fh:
+            for r in csv.DictReader(fh):
+                if r.get("hinweis", "").startswith("REDIRECT"):
+                    tsx_redirect.append(f"{r['kategorie']}/{r['slug']}")
+                    continue
+                tsx_soll.append(os.path.join(r["kategorie"], r["slug"], "index.html"))
+        tsx_ohne = []
+        tsx_fehlt = []
+        for relp in tsx_soll:
+            f = os.path.join(out_dir, relp)
+            if f not in contents:
+                tsx_fehlt.append(relp)
+            elif not hero_re.search(contents[f]):
+                tsx_ohne.append(relp)
+        print(f"[19] TSX-Artikelseiten mit Hero: ist {len(tsx_soll) - len(tsx_ohne) - len(tsx_fehlt)} / "
+              f"soll {len(tsx_soll)} von {len(tsx_soll)} laut scripts/bilder/tsx-artikel-2026-08-21.csv "
+              f"(+{len(tsx_redirect)} Redirect-Seiten ohne Motiv, ausgenommen: {tsx_redirect})")
+        if tsx_ohne:
+            verletzungen.append(f"TSX-Artikelseiten ohne Hero-Bild: {tsx_ohne}")
+        if tsx_fehlt:
+            verletzungen.append(f"TSX-Artikelseiten aus der Jobliste nicht im Export: {tsx_fehlt}")
+    else:
+        print(f"[19] {TSX_JOBS} fehlt — TSX-Teil UNVERIFIED")
+        funde.append("tsx-artikel-2026-08-21.csv fehlt: TSX-Hero-Nenner nicht pruefbar")
+
+    # 19c: jede Hero-Datei existiert wirklich unter out/
+    n_hero_img = 0
+    hero_fehlt = {}
+    for f in pages:
+        for tag in heroes[f]:
+            n_hero_img += 1
+            m = src_re.search(tag)
+            if not m:
+                hero_fehlt.setdefault("<img ohne src>", []).append(rel(f, out_dir))
+                continue
+            src = m.group(1)
+            if src.startswith("http"):
+                hero_fehlt.setdefault(src, []).append(rel(f, out_dir))
+                continue
+            if not os.path.isfile(os.path.join(out_dir, src.lstrip("/"))):
+                hero_fehlt.setdefault(src, []).append(rel(f, out_dir))
+    print(f"[19] Hero-Bilder mit existierender Datei unter {out_dir}/: "
+          f"ist {n_hero_img - sum(len(v) for v in hero_fehlt.values())} / soll {n_hero_img} "
+          f"von {n_hero_img} Hero-<img> ueber {n_hero_pages} Seiten")
+    if hero_fehlt:
+        verletzungen.append("Hero-Bilddatei fehlt im Export: "
+                            + str({k: v[:2] for k, v in list(hero_fehlt.items())[:10]}))
+
+    # 19d: informativ — Kategorie-Thumbnails (components/CategoryList.tsx)
+    n_thumb = sum(contents[f].count('data-thumb="1"') for f in pages)
+    thumb_re = re.compile(r'<img[^>]*\sdata-thumb="1"[^>]*>')
+    thumb_fehlt = set()
+    for f in pages:
+        for tag in thumb_re.findall(contents[f]):
+            m = src_re.search(tag)
+            if m and not os.path.isfile(os.path.join(out_dir, m.group(1).lstrip("/"))):
+                thumb_fehlt.add(m.group(1))
+    print(f"[19] Kategorie-Thumbnails (data-thumb): {n_thumb} ueber {n_pages} Seiten; "
+          f"ohne Datei unter {out_dir}/: {len(thumb_fehlt)} / soll 0")
+    if thumb_fehlt:
+        verletzungen.append(f"Thumbnail-Datei fehlt im Export: {sorted(thumb_fehlt)[:8]}")
 
     # --- Bilanz ---------------------------------------------------------------
     print("== Bilanz ==")
