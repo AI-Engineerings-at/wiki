@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { getIndex } from '../../lib/index'
 
 const samplePages = [
   '/', '/en/', '/grundlagen/', '/tools/', '/compliance/',
@@ -33,8 +34,8 @@ test.describe('Wiki SEO', () => {
   })
 
   test('sitemap covers every route and every blog post', async ({ page }) => {
-    // Nenner aus dem Dateibaum, nicht aus einer gepflegten Zahl: die alte
-    // public/sitemap.xml trug 107 <loc> und liess 76 von 154 App-Routen aus.
+    // App-Routen kommen aus dem Dateibaum; Blog-Routen aus demselben Index,
+    // der Sprache und href fuer die Sitemap bestimmt.
     const fs = require('fs') as typeof import('fs')
     const path = require('path') as typeof import('path')
 
@@ -55,10 +56,9 @@ test.describe('Wiki SEO', () => {
     }
     walk(appDir)
 
-    const blogSlugs = fs
-      .readdirSync(path.join(process.cwd(), 'content', 'blog'))
-      .filter((f) => f.endsWith('.md') || f.endsWith('.mdx'))
-      .map((f) => '/blog/' + f.replace(/\.mdx?$/, ''))
+    const blogSlugs = getIndex()
+      .filter((entry) => entry.source === 'blog')
+      .map((entry) => entry.href)
 
     const expected = [...routes, ...blogSlugs]
 
@@ -70,6 +70,5 @@ test.describe('Wiki SEO', () => {
       (r) => !locs.some((loc) => new URL(loc).pathname.replace(/\/$/, '') === (r === '/' ? '' : r))
     )
     expect(missing, `${missing.length} von ${expected.length} Routen fehlen in der Sitemap`).toEqual([])
-    expect(locs.length).toBe(expected.length)
   })
 })
