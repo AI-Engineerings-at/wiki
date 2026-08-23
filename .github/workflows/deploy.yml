@@ -33,13 +33,27 @@ jobs:
       - name: Install Playwright
         run: npx playwright install chromium --with-deps
 
-      - name: Install serve
-        run: npm install -g serve
+      - name: Install wrangler
+        # `serve` wertet public/_redirects NICHT aus — das ist eine
+        # Cloudflare-Pages-Datei. Gegen `serve` liefert /grundlagen/ollama-vs-cloud/
+        # HTTP 200 mit der Quellseite, gegen `wrangler pages dev` 301 auf das Ziel
+        # (gemessen 2026-08-23 an einer Attrappe mit absichtlich vorhandener
+        # Quelldatei, beide Server, Negativkontrolle 404 auf beiden Seiten).
+        # Cloudflares eigener Parser statt einer Nachbildung: sonst prueft die CI
+        # unsere Auslegung der Regeln, nicht die produktiv geltende.
+        run: npm install --no-save wrangler
 
       - name: Run E2E tests against local build
         run: |
-          serve out -l 3939 &
-          sleep 2
+          CI=1 WRANGLER_SEND_METRICS=false \
+            npx wrangler pages dev out --ip 127.0.0.1 --port 3939 > /tmp/wrangler.log 2>&1 &
+          # Bereitschaft abwarten, nicht raten: `sleep 2` war eine Wette auf die
+          # Startzeit. Bricht nach 60 s ab und zeigt das Log, statt still zu haengen.
+          for i in $(seq 1 60); do
+            grep -q "Ready on" /tmp/wrangler.log && break
+            sleep 1
+          done
+          grep -q "Ready on" /tmp/wrangler.log || { echo "wrangler nicht bereit:"; cat /tmp/wrangler.log; exit 1; }
           npx playwright test --reporter=list
         env:
           WIKI_URL: http://localhost:3939
