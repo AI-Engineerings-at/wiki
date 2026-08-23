@@ -3,8 +3,8 @@ import { test, expect } from '@playwright/test'
 const deRoutes = [
   '/',
   '/grundlagen/', '/grundlagen/was-ist-agent-orchestration/', '/grundlagen/multi-agent-systeme/',
-  '/grundlagen/agent-rollen/', '/grundlagen/lokal-vs-cloud/', '/grundlagen/ollama-vs-cloud/',
-  '/grundlagen/ai-agent-team/', '/grundlagen/selfhosted-vs-cloud/', '/grundlagen/30-tage-quickstart/',
+  '/grundlagen/agent-rollen/', '/grundlagen/lokal-vs-cloud/',
+  '/grundlagen/ai-agent-team/', '/grundlagen/30-tage-quickstart/',
   '/grundlagen/ki-unternehmen/', '/grundlagen/was-ist-ein-llm/',
   '/compliance/', '/compliance/dsgvo-grundlagen/', '/compliance/eu-ai-act/',
   '/compliance/ki-kompetenz-art4/', '/compliance/eu-ai-act-checkliste/',
@@ -33,8 +33,8 @@ const deRoutes = [
 const enRoutes = [
   '/en/',
   '/en/grundlagen/', '/en/grundlagen/was-ist-agent-orchestration/', '/en/grundlagen/multi-agent-systeme/',
-  '/en/grundlagen/agent-rollen/', '/en/grundlagen/lokal-vs-cloud/', '/en/grundlagen/ollama-vs-cloud/',
-  '/en/grundlagen/ai-agent-team/', '/en/grundlagen/selfhosted-vs-cloud/', '/en/grundlagen/30-tage-quickstart/',
+  '/en/grundlagen/agent-rollen/', '/en/grundlagen/lokal-vs-cloud/',
+  '/en/grundlagen/ai-agent-team/', '/en/grundlagen/30-tage-quickstart/',
   '/en/grundlagen/ki-unternehmen/', '/en/grundlagen/was-ist-ein-llm/',
   '/en/compliance/', '/en/compliance/dsgvo-grundlagen/', '/en/compliance/eu-ai-act/',
   '/en/compliance/ki-kompetenz-art4/', '/en/compliance/eu-ai-act-checkliste/',
@@ -62,6 +62,23 @@ const enRoutes = [
 
 const allRoutes = [...deRoutes, ...enRoutes]
 
+/**
+ * Vier Routen wurden aus `app/` entfernt und durch echte 301 in
+ * `public/_redirects` ersetzt (W9 Block C). Sie werden hier NICHT gestrichen,
+ * sondern umsortiert: sie behaupten ab jetzt eine Weiterleitung statt einer 200.
+ * Nenner bleibt damit unveraendert.
+ *
+ * `page.goto` folgt Weiterleitungen — damit waere `status() === 200` am Ziel
+ * gruen, ohne je eine 301 gesehen zu haben. Deshalb `maxRedirects: 0` und die
+ * Zusicherung auf Statuscode UND Ziel.
+ */
+const redirectRoutes: ReadonlyArray<readonly [string, string]> = [
+  ['/grundlagen/ollama-vs-cloud/', '/grundlagen/lokal-vs-cloud/'],
+  ['/grundlagen/selfhosted-vs-cloud/', '/grundlagen/lokal-vs-cloud/'],
+  ['/en/grundlagen/ollama-vs-cloud/', '/en/grundlagen/lokal-vs-cloud/'],
+  ['/en/grundlagen/selfhosted-vs-cloud/', '/en/grundlagen/lokal-vs-cloud/'],
+]
+
 test.describe('Wiki Pages — HTTP Status & Content', () => {
   for (const route of allRoutes) {
     test(`${route} returns 200 with h1`, async ({ page }) => {
@@ -69,6 +86,23 @@ test.describe('Wiki Pages — HTTP Status & Content', () => {
       expect(response?.status(), `${route} returned ${response?.status()}`).toBe(200)
       const h1 = page.locator('h1').first()
       await expect(h1).toBeVisible({ timeout: 5000 })
+    })
+  }
+})
+
+test.describe('Weiterleitungen — 301 statt Client-Redirect (W9)', () => {
+  for (const [von, nach] of redirectRoutes) {
+    test(`${von} leitet mit 301 auf ${nach}`, async ({ request, baseURL }) => {
+      const res = await request.get(von, { maxRedirects: 0 })
+      expect(res.status(), `${von} lieferte ${res.status()} statt 301`).toBe(301)
+      const ort = res.headers()['location'] ?? ''
+      const pfad = ort.startsWith('http') ? new URL(ort).pathname : ort
+      expect(pfad, `${von} zeigt auf ${ort}`).toBe(nach)
+    })
+
+    test(`${nach} (Ziel von ${von}) liefert 200`, async ({ page }) => {
+      const res = await page.goto(nach, { waitUntil: 'domcontentloaded' })
+      expect(res?.status(), `${nach} lieferte ${res?.status()}`).toBe(200)
     })
   }
 })
